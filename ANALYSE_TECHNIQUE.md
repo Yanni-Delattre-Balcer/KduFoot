@@ -15,6 +15,7 @@
 
 1. [Présentation Générale du Projet](#1-présentation-générale-du-projet)
 2. [Mapping des Fonctionnalités vers la Nouvelle Architecture](#2-mapping-des-fonctionnalités-vers-la-nouvelle-architecture)
+  2.1. [Politique de versioning de l'API](#211-politique-de-versioning-de-lapi)
 3. [Structure des Composants React](#3-structure-des-composants-react)
 4. [Schéma de Base de Données D1](#4-schéma-de-base-de-données-d1)
 5. [Types TypeScript](#5-types-typescript)
@@ -259,15 +260,15 @@ kdufoot/                                    # Root monorepo
 
 | Route Actuelle (Flask) | Nouvelle Route (Worker) | Fichier | Méthode | Permission |
 |-------------------------|------------------------|---------|---------|------------|
-| `/api/register` | `/api/auth/register` | `routes/auth.ts` | POST | - |
-| `/api/login` | `/api/auth/login` | `routes/auth.ts` | POST | - |
-| `/api/auth/me` | `/api/auth/me` | `routes/auth.ts` | GET | `read:api` |
-| `/add_video` | `/api/videos/analyze` | `routes/videos.ts` | POST | `videos:analyze` |
-| `/adapt_session_granular` | `/api/sessions/adapt` | `routes/sessions.ts` | POST | `sessions:adapt` |
-| `/api/v2/siret-lookup` | `/api/clubs/lookup` | `routes/siret.ts` | GET | - |
-| `/api/clubs/search` | `/api/clubs/search` | `routes/siret.ts` | GET | - |
-| `/create-checkout-session` | `/api/payments/checkout` | `routes/payments.ts` | POST | `read:api` |
-| **NEW**  `/api/__auth0/token` | `routes/system/index.ts` | POST | `admin:auth0` |
+| `/api/register` | `/api/v1/auth/register` | `routes/auth.ts` | POST | - |
+| `/api/login` | `/api/v1/auth/login` | `routes/auth.ts` | POST | - |
+| `/api/auth/me` | `/api/v1/auth/me` | `routes/auth.ts` | GET | `read:api` |
+| `/add_video` | `/api/v1/videos/analyze` | `routes/videos.ts` | POST | `videos:analyze` |
+| `/adapt_session_granular` | `/api/v1/sessions/adapt` | `routes/sessions.ts` | POST | `sessions:adapt` |
+| `/api/v2/siret-lookup` | `/api/v1/clubs/lookup` | `routes/siret.ts` | GET | - |
+| `/api/clubs/search` | `/api/v1/clubs/search` | `routes/siret.ts` | GET | - |
+| `/create-checkout-session` | `/api/v1/payments/checkout` | `routes/payments.ts` | POST | `read:api` |
+| **NEW** | `/api/v1/__auth0/token` | `routes/system/index.ts` | POST | `admin:auth0` |
 
 #### Exemple d'implémentation : `routes/videos.ts`
 
@@ -279,8 +280,8 @@ import { checkPermission } from '../middleware/permissions.middleware';
 import type { Env } from '../types/env';
 
 export function setupVideoRoutes(router: Router, env: Env) {
-  // POST /api/videos/analyze - Analyse vidéo courte
-  router.post('/api/videos/analyze', async (request, params) => {
+  // POST /api/v1/videos/analyze - Analyse vidéo courte
+  router.post('/api/v1/videos/analyze', async (request, params) => {
     const permissionCheck = await checkPermission(
       request, 
       env, 
@@ -309,8 +310,8 @@ export function setupVideoRoutes(router: Router, env: Env) {
     });
   });
 
-  // POST /api/videos/analyze/long - Analyse vidéo longue (>5min)
-  router.post('/api/videos/analyze/long', async (request, params) => {
+  // POST /api/v1/videos/analyze/long - Analyse vidéo longue (>5min)
+  router.post('/api/v1/videos/analyze/long', async (request, params) => {
     const permissionCheck = await checkPermission(
       request,
       env,
@@ -329,6 +330,19 @@ export function setupVideoRoutes(router: Router, env: Env) {
     return Response.json({ success: true });
   });
 }
+
+---
+
+### 2.1.1 Politique de versioning de l'API
+
+Toutes les routes publiques exposées par les Cloudflare Workers doivent être préfixées par `/api/v1/` pour la première version stable. Pour tout changement compatible, ajouter uniquement de nouvelles routes ; pour tout changement incompatible (breaking change), augmenter la version majeure (ex. `/api/v2/`) et documenter la migration dans le changelog.
+
+Bonnes pratiques recommandées :
+- Documenter les changements breaking et planifier une période de dépréciation avant suppression.
+- Faire pointer `API_BASE_URL` côté client vers l'URL incluant la version (ex. `http://localhost:8787/api/v1`).
+- Évaluer des redirections ou des wrappers pour assurer une transition douce lorsque nécessaire.
+
+---
 ```
 
 ### 2.2 Configuration Auth0 pour KduFoot
@@ -350,7 +364,7 @@ AUTH0_MANAGEMENT_API_CLIENT_SECRET=your-management-api-client-secret
 ADMIN_AUTH0_PERMISSION=admin:auth0
 
 # API
-API_BASE_URL=http://localhost:8787/api
+API_BASE_URL=http://localhost:8787/api/v1
 CORS_ORIGIN=http://localhost:5173
 
 # Permissions
@@ -691,19 +705,19 @@ export const useExerciseService = () => {
 
   return {
     async getAll(): Promise<Exercise[]> {
-      return await getJson(`${import.meta.env.API_BASE_URL}/api/exercises`);
+      return await getJson(`${import.meta.env.API_BASE_URL}/exercises`);
     },
 
     async getById(id: string): Promise<Exercise> {
-      return await getJson(`${import.meta.env.API_BASE_URL}/api/exercises/${id}`);
+      return await getJson(`${import.meta.env.API_BASE_URL}/exercises/${id}`);
     },
 
     async create(dto: CreateExerciseDto): Promise<Exercise> {
-      return await postJson(`${import.meta.env.API_BASE_URL}/api/exercises`, dto);
+      return await postJson(`${import.meta.env.API_BASE_URL}/exercises`, dto);
     },
 
     async analyzeVideo(url: string): Promise<Exercise[]> {
-      const response = await postJson(`${import.meta.env.API_BASE_URL}/api/videos/analyze`, { url });
+      const response = await postJson(`${import.meta.env.API_BASE_URL}/videos/analyze`, { url });
       return response.exercises;
     },
 
@@ -1819,7 +1833,7 @@ function extractUserIdFromToken(token: string): string {
 // apps/cloudflare-worker/src/routes/videos.ts
 
 export function setupVideoRoutes(router: Router, env: Env) {
-  router.post('/api/videos/analyze', async (request, params) => {
+  router.post('/api/v1/videos/analyze', async (request, params) => {
     const permissionCheck = await checkPermission(
       request, 
       env, 
@@ -3378,7 +3392,7 @@ Example JSDoc for an API route:
 ```ts
 /**
  * @openapi
- * /api/videos/analyze:
+ * /api/v1/videos/analyze:
  *   post:
  *     summary: Analyze a short video and return detected exercises
  *     tags:
@@ -3409,7 +3423,7 @@ Example JSDoc for an API route:
  *                   items:
  *                     $ref: '#/components/schemas/Exercise'
  */
-router.post('/api/videos/analyze', async (request) => { /* handler */ });
+router.post('/api/v1/videos/analyze', async (request) => { /* handler */ });
 ```
 
 Components / Schemas example (centralized):
@@ -3800,7 +3814,7 @@ AUTH0_MANAGEMENT_API_CLIENT_SECRET=<votre_m2m_secret>
 ADMIN_AUTH0_PERMISSION=admin:auth0
 
 # API Configuration
-API_BASE_URL=http://localhost:8787/api
+API_BASE_URL=http://localhost:8787/api/v1
 CORS_ORIGIN=http://localhost:5173
 
 # Permissions
