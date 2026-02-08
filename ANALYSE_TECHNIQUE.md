@@ -1,7 +1,9 @@
 # ANALYSE TECHNIQUE - KDUFOOT
 ## Reverse Engineering & Plan de Migration vers Template SCTG Development de Ronan Le Meillat
 
-**Version:** 2.1  
+**Version:** 2.2
+**Auteur:** Ronan Le Meillat
+**Licence:** Creative Commons Attribution-ShareAlike 4.0 (CC BY-SA 4.0)  
 **Date:** 08 février 2026  
 **Template de base:** [vite-react-heroui-auth0-template](https://github.com/sctg-development/vite-react-heroui-auth0-template)  
 **Référence:** [feedback-flow](https://github.com/sctg-development/feedback-flow) pour la gestion Auth0  
@@ -28,6 +30,8 @@
 15. [Gestion Graphique des Permissions Auth0](#15-gestion-graphique-des-permissions-auth0)
 16. [Standards de Codage & Bonnes Pratiques](#16-standards-de-codage--bonnes-pratiques)
 17. [Respect des Licences & Copyright](#17-respect-des-licences--copyright)
+18. [Plan d'Actions Détaillé pour IA de Codage](#18-plan-dactions-détaillé-pour-ia-de-codage)
+19. [Conclusion](#19-conclusion)
 
 ---
 
@@ -3512,14 +3516,1544 @@ Components / Schemas example (centralized):
 
 ---
 
-## 12. CONCLUSION
+## 18. PLAN D'ACTIONS DÉTAILLÉ POUR IA DE CODAGE
 
-Ce document fournit un **plan complet et actionnable** pour migrer KduFoot vers une architecture moderne basée sur le template SCTG. L'approche par phases permet de :
+> **Section spéciale pour assistants IA de codage**  
+> Ce plan décompose la migration en tâches atomiques et séquentielles, avec des instructions explicites, des vérifications systématiques et des exemples de code complets.
 
-1. ✅ **Réduire les coûts** de >90% (100-500€ → 10-30€/mois)
-2. ✅ **Améliorer la maintenabilité** (code TypeScript type-safe)
-3. ✅ **Scaler facilement** (serverless, edge computing)
-4. ✅ **Offrir une meilleure UX** (React 19, HeroUI)
-5. ✅ **Garantir la sécurité** (Auth0, JWT, permissions)
-6. ✅ **Faciliter l'internationalisation** (i18next avec 6 langues)
+### 18.1 Méthodologie pour l'IA
+
+#### Principes de travail
+
+1. **Exécution séquentielle stricte:** Ne jamais passer à l'étape N+1 avant validation complète de l'étape N
+2. **Vérification systématique:** Chaque étape doit se terminer par une validation technique
+3. **Isolation des modifications:** Une étape = un domaine fonctionnel = un commit
+4. **Documentation inline:** Chaque fonction/composant créé doit avoir sa JSDoc complète
+5. **Tests en continu:** Lancer `yarn dev:env` après chaque groupe de modifications
+6. **Rollback immédiat:** Si une étape échoue, revenir à l'état précédent avant de continuer
+
+#### Format des instructions
+
+Chaque tâche suit ce template:
+
+```
+TÂCHE-XXX: [Titre court]
+
+OBJECTIF: Description claire du résultat attendu
+
+PRÉREQUIS:
+- Étapes précédentes complétées
+- Fichiers/dépendances nécessaires
+
+FICHIERS CONCERNÉS:
+- Liste exhaustive des fichiers à créer/modifier
+
+INSTRUCTIONS:
+1. Instruction précise avec commande/code
+2. Vérification intermédiaire
+3. ...
+
+VALIDATION:
+- Critères de succès mesurables
+- Commandes de test
+
+CODE ATTENDU:
+[Exemple complet si pertinent]
+```
+
+---
+
+### 18.2 Phase 0: Préparation de l'Environnement
+
+#### TÂCHE-001: Cloner et Initialiser le Projet
+
+**OBJECTIF:** Obtenir une copie locale fonctionnelle du template
+
+**PRÉREQUIS:**
+- Git installé
+- Node.js >= 20.x
+- Yarn 4 (via Corepack)
+
+**INSTRUCTIONS:**
+
+1. Cloner le template dans un nouveau répertoire:
+```bash
+git clone https://github.com/sctg-development/vite-react-heroui-auth0-template.git kdufoot
+cd kdufoot
+```
+
+2. Supprimer l'historique Git existant et réinitialiser:
+```bash
+rm -rf .git
+git init
+git add .
+git commit -m "chore: initial commit from template"
+```
+
+3. Activer Corepack et configurer Yarn 4:
+```bash
+corepack enable
+yarn set version 4.12.0
+```
+
+4. Installer les dépendances:
+```bash
+yarn install
+```
+
+**VALIDATION:**
+- ✅ Le répertoire `kdufoot/` existe
+- ✅ `yarn --version` retourne `4.12.x`
+- ✅ `node_modules/` est présent
+- ✅ Aucune erreur d'installation
+
+**VÉRIFICATION:**
+```bash
+yarn --version
+ls -la | grep node_modules
+```
+
+---
+
+#### TÂCHE-002: Renommer le Projet
+
+**OBJECTIF:** Adapter les métadonnées du projet pour KduFoot
+
+**PRÉREQUIS:** TÂCHE-001 complétée
+
+**FICHIERS CONCERNÉS:**
+- `package.json` (root)
+- `apps/client/package.json`
+- `apps/cloudflare-worker/package.json`
+- `apps/cloudflare-worker/wrangler.jsonc`
+
+**INSTRUCTIONS:**
+
+1. Modifier `package.json` (root):
+```json
+{
+  "name": "kdufoot",
+  "description": "KduFoot - Plateforme d'analyse vidéo pour entraîneurs de football",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aeltorio/KduFoot.git"
+  }
+}
+```
+
+2. Modifier `apps/client/package.json`:
+```json
+{
+  "name": "@kdufoot/client",
+  "description": "KduFoot Web Client"
+}
+```
+
+3. Modifier `apps/cloudflare-worker/package.json`:
+```json
+{
+  "name": "@kdufoot/api",
+  "description": "KduFoot API (Cloudflare Workers)"
+}
+```
+
+4. Modifier `apps/cloudflare-worker/wrangler.jsonc`:
+```jsonc
+{
+  "name": "kdufoot-api",
+  "compatibility_date": "2024-01-01"
+}
+```
+
+**VALIDATION:**
+- ✅ Tous les fichiers modifiés
+- ✅ Pas d'erreur de syntaxe JSON
+- ✅ `yarn install` s'exécute sans erreur
+
+**VÉRIFICATION:**
+```bash
+grep -r "vite-react-heroui" package.json
+# Ne doit rien retourner
+```
+
+---
+
+#### TÂCHE-003: Configurer Auth0
+
+**OBJECTIF:** Créer les applications Auth0 nécessaires
+
+**PRÉREQUIS:**
+- Compte Auth0 créé
+- Tenant configuré (ex: `kdufoot.eu.auth0.com`)
+
+**INSTRUCTIONS:**
+
+1. **Créer l'Application KduFoot (SPA):**
+   - Aller dans Auth0 Dashboard → Applications → Create Application
+   - Nom: `KduFoot`
+   - Type: `Single Page Application`
+   - Allowed Callback URLs: `http://localhost:5173`
+   - Allowed Logout URLs: `http://localhost:5173`
+   - Allowed Web Origins: `http://localhost:5173`
+   - Noter: `Client ID`
+
+2. **Créer l'API KduFoot:**
+   - Auth0 Dashboard → Applications → APIs → Create API
+   - Nom: `KduFoot API`
+   - Identifier (Audience): `https://api.kdufoot.com`
+   - Signing Algorithm: `RS256`
+   - Enable RBAC: `true`
+   - Add Permissions in the Access Token: `true`
+
+3. **Ajouter les permissions à l'API:**
+   Dans l'onglet Permissions de l'API, ajouter:
+   ```
+   read:api             Lecture générale des données
+   write:api            Écriture générale des données
+   exercises:read       Lire ses propres exercices
+   exercises:create     Créer des exercices
+   exercises:update     Modifier ses exercices
+   exercises:delete     Supprimer ses exercices
+   exercises:share      Partager publiquement
+   videos:analyze       Analyser vidéos courtes
+   videos:analyze:long  Analyser vidéos longues
+   sessions:create      Créer des séances
+   sessions:adapt       Adapter avec IA
+   matches:create       Créer annonces
+   matches:contact      Contacter pour match
+   export:pdf           Exporter en PDF
+   admin:users          Gérer utilisateurs
+   admin:auth0          Gérer permissions Auth0
+   ```
+
+4. **Créer l'Application Management API (M2M):**
+   - Applications → Create Application
+   - Nom: `KduFoot Management API`
+   - Type: `Machine to Machine`
+   - API: `Auth0 Management API`
+   - Permissions:
+     - `read:users`
+     - `update:users`
+     - `read:users_app_metadata`
+     - `update:users_app_metadata`
+     - `read:user_permissions`
+     - `create:user_permissions`
+     - `update:user_permissions`
+     - `delete:user_permissions`
+   - Noter: `Client ID`, `Client Secret`
+
+5. **Créer le rôle "Free User":**
+   - User Management → Roles → Create Role
+   - Nom: `Free User`
+   - Description: `Default role for free tier users`
+   - Permissions:
+     - `read:api`
+     - `write:api`
+     - `exercises:read`
+     - `exercises:create`
+     - `exercises:update`
+     - `exercises:delete`
+     - `videos:analyze`
+     - `sessions:create`
+     - `matches:create`
+     - `matches:contact`
+   - Noter: `Role ID`
+
+**VALIDATION:**
+- ✅ Application SPA créée
+- ✅ API créée avec 15+ permissions
+- ✅ Application M2M créée avec permissions Management API
+- ✅ Rôle "Free User" créé
+- ✅ Tous les IDs/secrets notés
+
+---
+
+#### TÂCHE-004: Configurer les Variables d'Environnement
+
+**OBJECTIF:** Créer le fichier `.env` avec toutes les variables nécessaires
+
+**PRÉREQUIS:** TÂCHE-003 complétée
+
+**FICHIERS CONCERNÉS:**
+- `.env` (root, à créer)
+
+**INSTRUCTIONS:**
+
+1. Copier `.env.example` vers `.env`:
+```bash
+cp .env.example .env
+```
+
+2. Remplir `.env` avec les valeurs Auth0:
+```env
+# Authentication
+AUTHENTICATION_PROVIDER_TYPE=auth0
+AUTH0_CLIENT_ID=<votre_client_id_spa>
+AUTH0_CLIENT_SECRET=<secret_optionnel>
+AUTH0_DOMAIN=kdufoot.eu.auth0.com
+AUTH0_SCOPE="openid profile email read:api write:api"
+AUTH0_AUDIENCE=https://api.kdufoot.com
+
+# Auth0 Management API
+AUTH0_MANAGEMENT_API_CLIENT_ID=<votre_m2m_client_id>
+AUTH0_MANAGEMENT_API_CLIENT_SECRET=<votre_m2m_secret>
+ADMIN_AUTH0_PERMISSION=admin:auth0
+
+# API Configuration
+API_BASE_URL=http://localhost:8787/api
+CORS_ORIGIN=http://localhost:5173
+
+# Permissions
+READ_PERMISSION=read:api
+WRITE_PERMISSION=write:api
+ADMIN_PERMISSION=admin:api
+
+# Google Gemini (à remplir plus tard)
+GOOGLE_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-3-flash
+
+# Cloudflare (à remplir après création ressources)
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_DATABASE_ID=
+```
+
+3. Ajouter `.env` au `.gitignore` (déjà fait normalement):
+```bash
+echo ".env" >> .gitignore
+```
+
+**VALIDATION:**
+- ✅ Fichier `.env` créé
+- ✅ Toutes les variables Auth0 renseignées
+- ✅ `.env` dans `.gitignore`
+
+**VÉRIFICATION:**
+```bash
+cat .env | grep AUTH0_CLIENT_ID
+git status | grep .env
+# .env ne doit pas apparaître dans les fichiers tracked
+```
+
+---
+
+#### TÂCHE-005: Configurer Cloudflare D1
+
+**OBJECTIF:** Créer la base de données D1 pour KduFoot
+
+**PRÉREQUIS:**
+- Compte Cloudflare créé
+- `wrangler` CLI installé (`yarn global add wrangler` ou via npx)
+- Authentification Cloudflare (`wrangler login`)
+
+**INSTRUCTIONS:**
+
+1. Se placer dans le répertoire worker:
+```bash
+cd apps/cloudflare-worker
+```
+
+2. Créer la base de données D1:
+```bash
+wrangler d1 create kdufoot-db
+```
+
+3. Noter l'output qui contient:
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "kdufoot-db"
+database_id = "<VOTRE_DATABASE_ID>"
+```
+
+4. Mettre à jour `wrangler.jsonc`:
+```jsonc
+{
+  "name": "kdufoot-api",
+  "compatibility_date": "2024-01-01",
+  "main": "src/index.ts",
+
+  "vars": {
+    "ENVIRONMENT": "development",
+    "CORS_ORIGIN": "http://localhost:5173",
+    "AUTH0_DOMAIN": "kdufoot.eu.auth0.com",
+    "AUTH0_AUDIENCE": "https://api.kdufoot.com",
+    "ADMIN_AUTH0_PERMISSION": "admin:auth0"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kdufoot-db",
+      "database_id": "<VOTRE_DATABASE_ID>"
+    }
+  ]
+}
+```
+
+5. Mettre à jour le fichier `.env` (root):
+```env
+CLOUDFLARE_DATABASE_ID=<VOTRE_DATABASE_ID>
+```
+
+**VALIDATION:**
+- ✅ Commande `wrangler d1 create` réussie
+- ✅ `database_id` récupéré et ajouté à `wrangler.jsonc`
+- ✅ `.env` mis à jour
+
+**VÉRIFICATION:**
+```bash
+wrangler d1 list
+# Doit afficher kdufoot-db
+```
+
+---
+
+#### TÂCHE-006: Créer les Buckets R2
+
+**OBJECTIF:** Créer les buckets R2 pour stocker vidéos et thumbnails
+
+**PRÉREQUIS:** TÂCHE-005 complétée
+
+**INSTRUCTIONS:**
+
+1. Créer le bucket vidéos:
+```bash
+wrangler r2 bucket create kdufoot-videos
+```
+
+2. Créer le bucket thumbnails:
+```bash
+wrangler r2 bucket create kdufoot-thumbnails
+```
+
+3. Mettre à jour `wrangler.jsonc`:
+```jsonc
+{
+  // ... configuration existante ...
+
+  "r2_buckets": [
+    {
+      "binding": "VIDEOS_BUCKET",
+      "bucket_name": "kdufoot-videos"
+    },
+    {
+      "binding": "THUMBNAILS_BUCKET",
+      "bucket_name": "kdufoot-thumbnails"
+    }
+  ]
+}
+```
+
+**VALIDATION:**
+- ✅ Deux buckets créés
+- ✅ `wrangler.jsonc` mis à jour
+
+**VÉRIFICATION:**
+```bash
+wrangler r2 bucket list
+# Doit afficher kdufoot-videos et kdufoot-thumbnails
+```
+
+---
+
+#### TÂCHE-007: Créer le Namespace KV
+
+**OBJECTIF:** Créer le namespace KV pour le cache
+
+**PRÉREQUIS:** TÂCHE-006 complétée
+
+**INSTRUCTIONS:**
+
+1. Créer le namespace KV:
+```bash
+wrangler kv:namespace create KV_CACHE
+```
+
+2. Noter l'output:
+```toml
+{ binding = "KV_CACHE", id = "<VOTRE_KV_ID>" }
+```
+
+3. Créer le namespace de preview:
+```bash
+wrangler kv:namespace create KV_CACHE --preview
+```
+
+4. Mettre à jour `wrangler.jsonc`:
+```jsonc
+{
+  // ... configuration existante ...
+
+  "kv_namespaces": [
+    {
+      "binding": "KV_CACHE",
+      "id": "<VOTRE_KV_ID>",
+      "preview_id": "<VOTRE_PREVIEW_KV_ID>"
+    }
+  ]
+}
+```
+
+**VALIDATION:**
+- ✅ Namespace KV créé
+- ✅ Preview namespace créé
+- ✅ `wrangler.jsonc` mis à jour
+
+**VÉRIFICATION:**
+```bash
+wrangler kv:namespace list
+```
+
+---
+
+#### TÂCHE-008: Créer les Migrations D1
+
+**OBJECTIF:** Créer les fichiers de migration SQL
+
+**PRÉREQUIS:** TÂCHE-005 complétée
+
+**FICHIERS CONCERNÉS:**
+- `apps/cloudflare-worker/migrations/0001_initial.sql` (à créer)
+- `apps/cloudflare-worker/migrations/0002_add_clubs.sql` (à créer)
+- `apps/cloudflare-worker/migrations/0003_add_exercises.sql` (à créer)
+- `apps/cloudflare-worker/migrations/0004_add_matches.sql` (à créer)
+- `apps/cloudflare-worker/migrations/0005_add_sessions.sql` (à créer)
+
+**INSTRUCTIONS:**
+
+1. Créer le répertoire migrations:
+```bash
+mkdir -p apps/cloudflare-worker/migrations
+```
+
+2. Créer `0001_initial.sql`:
+```sql
+-- apps/cloudflare-worker/migrations/0001_initial.sql
+-- Table users (synchronized with Auth0)
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
+  auth0_sub TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  firstname TEXT NOT NULL,
+  lastname TEXT NOT NULL,
+  club_id TEXT,
+  siret TEXT,
+  location TEXT,
+  phone TEXT,
+  license_id TEXT,
+  category TEXT,
+  level TEXT,
+  stadium_address TEXT,
+  latitude REAL,
+  longitude REAL,
+  subscription TEXT DEFAULT 'Free' CHECK(subscription IN ('Free', 'Pro', 'Ultime')),
+  created_at INTEGER DEFAULT (unixepoch()),
+  updated_at INTEGER DEFAULT (unixepoch())
+);
+
+CREATE INDEX idx_users_auth0_sub ON users(auth0_sub);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_subscription ON users(subscription);
+```
+
+3. Créer `0002_add_clubs.sql`:
+```sql
+-- apps/cloudflare-worker/migrations/0002_add_clubs.sql
+-- Table clubs (SIRENE API cache)
+CREATE TABLE clubs (
+  id TEXT PRIMARY KEY,
+  siret TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  city TEXT NOT NULL,
+  address TEXT,
+  zip TEXT,
+  logo_url TEXT,
+  latitude REAL,
+  longitude REAL,
+  cached_at INTEGER DEFAULT (unixepoch()),
+  expires_at INTEGER
+);
+
+CREATE INDEX idx_clubs_siret ON clubs(siret);
+CREATE INDEX idx_clubs_city ON clubs(city);
+CREATE INDEX idx_clubs_name ON clubs(name);
+```
+
+4. Créer `0003_add_exercises.sql`:
+```sql
+-- apps/cloudflare-worker/migrations/0003_add_exercises.sql
+-- Table exercises
+CREATE TABLE exercises (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  synopsis TEXT,
+  svg_schema TEXT,
+  themes TEXT,
+  nb_joueurs TEXT,
+  dimensions TEXT,
+  materiel TEXT,
+  category TEXT,
+  level TEXT,
+  duration TEXT,
+  video_url TEXT,
+  thumbnail_url TEXT,
+  video_start_seconds INTEGER,
+  created_at INTEGER DEFAULT (unixepoch()),
+  updated_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_exercises_user_id ON exercises(user_id);
+CREATE INDEX idx_exercises_category ON exercises(category);
+CREATE INDEX idx_exercises_level ON exercises(level);
+CREATE INDEX idx_exercises_created_at ON exercises(created_at DESC);
+
+-- Table favorites
+CREATE TABLE favorites (
+  user_id TEXT NOT NULL,
+  exercise_id TEXT NOT NULL,
+  created_at INTEGER DEFAULT (unixepoch()),
+  PRIMARY KEY (user_id, exercise_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_favorites_user_id ON favorites(user_id);
+```
+
+5. Créer `0004_add_matches.sql`:
+```sql
+-- apps/cloudflare-worker/migrations/0004_add_matches.sql
+-- Table matches
+CREATE TABLE matches (
+  id TEXT PRIMARY KEY,
+  owner_id TEXT NOT NULL,
+  club_id TEXT NOT NULL,
+  category TEXT NOT NULL,
+  format TEXT NOT NULL CHECK(format IN ('11v11', '8v8', '5v5', 'Futsal')),
+  match_date TEXT NOT NULL,
+  match_time TEXT NOT NULL,
+  venue TEXT NOT NULL CHECK(venue IN ('Domicile', 'Extérieur', 'Neutre')),
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  notes TEXT,
+  status TEXT DEFAULT 'active' CHECK(status IN ('active', 'found', 'expired')),
+  created_at INTEGER DEFAULT (unixepoch()),
+  updated_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (club_id) REFERENCES clubs(id)
+);
+
+CREATE INDEX idx_matches_owner_id ON matches(owner_id);
+CREATE INDEX idx_matches_status ON matches(status);
+CREATE INDEX idx_matches_match_date ON matches(match_date);
+CREATE INDEX idx_matches_category ON matches(category);
+
+-- Table match_contacts
+CREATE TABLE match_contacts (
+  match_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  message TEXT,
+  contacted_at INTEGER DEFAULT (unixepoch()),
+  PRIMARY KEY (match_id, user_id),
+  FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_match_contacts_match_id ON match_contacts(match_id);
+```
+
+6. Créer `0005_add_sessions.sql`:
+```sql
+-- apps/cloudflare-worker/migrations/0005_add_sessions.sql
+-- Table training_sessions
+CREATE TABLE training_sessions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT,
+  category TEXT,
+  level TEXT,
+  total_duration INTEGER,
+  constraints TEXT,
+  status TEXT DEFAULT 'draft' CHECK(status IN ('draft', 'scheduled', 'completed')),
+  scheduled_date TEXT,
+  created_at INTEGER DEFAULT (unixepoch()),
+  updated_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_sessions_user_id ON training_sessions(user_id);
+CREATE INDEX idx_sessions_status ON training_sessions(status);
+CREATE INDEX idx_sessions_scheduled_date ON training_sessions(scheduled_date);
+
+-- Table session_exercises (junction table)
+CREATE TABLE session_exercises (
+  session_id TEXT NOT NULL,
+  exercise_id TEXT NOT NULL,
+  order_index INTEGER NOT NULL,
+  duration INTEGER,
+  players INTEGER,
+  adapted_data TEXT,
+  created_at INTEGER DEFAULT (unixepoch()),
+  PRIMARY KEY (session_id, exercise_id),
+  FOREIGN KEY (session_id) REFERENCES training_sessions(id) ON DELETE CASCADE,
+  FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_session_exercises_session_id ON session_exercises(session_id);
+
+-- Table history
+CREATE TABLE history (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  session_id TEXT,
+  completed_at INTEGER NOT NULL,
+  duration_seconds INTEGER,
+  notes TEXT,
+  created_at INTEGER DEFAULT (unixepoch()),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (session_id) REFERENCES training_sessions(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_history_user_id ON history(user_id);
+CREATE INDEX idx_history_completed_at ON history(completed_at DESC);
+```
+
+7. Appliquer les migrations en local:
+```bash
+cd apps/cloudflare-worker
+wrangler d1 migrations apply kdufoot-db --local
+```
+
+**VALIDATION:**
+- ✅ 5 fichiers de migration créés
+- ✅ Migrations appliquées sans erreur
+- ✅ Base D1 locale fonctionnelle
+
+**VÉRIFICATION:**
+```bash
+wrangler d1 migrations list kdufoot-db --local
+# Doit afficher les 5 migrations appliquées
+```
+
+---
+
+#### TÂCHE-009: Tester le Setup Initial
+
+**OBJECTIF:** Vérifier que l'environnement de développement fonctionne
+
+**PRÉREQUIS:** Toutes les tâches 001-008 complétées
+
+**INSTRUCTIONS:**
+
+1. Retourner à la racine du projet:
+```bash
+cd ../..
+```
+
+2. Lancer l'environnement de développement:
+```bash
+yarn dev:env
+```
+
+3. Vérifier les outputs:
+   - Le client React doit démarrer sur `http://localhost:5173`
+   - Le worker doit démarrer sur `http://localhost:8787`
+   - Aucune erreur dans les logs
+
+4. Tester l'authentification:
+   - Ouvrir `http://localhost:5173`
+   - Cliquer sur "Se connecter"
+   - Vérifier la redirection Auth0
+   - Se connecter avec un compte test
+   - Vérifier le retour sur l'application
+
+**VALIDATION:**
+- ✅ `yarn dev:env` démarre sans erreur
+- ✅ Client accessible sur port 5173
+- ✅ Worker accessible sur port 8787
+- ✅ Auth0 login fonctionnel
+- ✅ Token JWT récupéré
+
+**VÉRIFICATION:**
+```bash
+curl http://localhost:8787/api/health
+# Doit retourner un status OK
+```
+
+---
+
+### 18.3 Phase 1: Types TypeScript & Configuration
+
+#### TÂCHE-010: Créer les Types Exercise
+
+**OBJECTIF:** Définir les types TypeScript pour les exercices
+
+**PRÉREQUIS:** TÂCHE-009 complétée
+
+**FICHIERS CONCERNÉS:**
+- `apps/client/src/types/exercise.types.ts` (à créer)
+
+**INSTRUCTIONS:**
+
+1. Créer le répertoire types:
+```bash
+mkdir -p apps/client/src/types
+```
+
+2. Créer `exercise.types.ts` avec le contenu complet (voir section 5 du document ANALYSE_TECHNIQUE.md)
+
+**CODE COMPLET:**
+```typescript
+// apps/client/src/types/exercise.types.ts
+
+/**
+ * Exercise theme categories
+ * Based on UEFA Pro coaching methodology
+ */
+export type Theme = 
+  | 'TECHNIQUE' 
+  | 'PHYSIQUE' 
+  | 'TACTIQUE' 
+  | 'FINITION' 
+  | 'TRANSITION';
+
+/**
+ * Age categories for football training
+ */
+export type Category = 
+  | 'U7' 
+  | 'U9' 
+  | 'U11' 
+  | 'U13' 
+  | 'U15' 
+  | 'U17' 
+  | 'U19' 
+  | 'Séniors' 
+  | 'Vétérans';
+
+/**
+ * Skill levels for exercises
+ */
+export type Level = 
+  | 'Débutant' 
+  | 'Ligue' 
+  | 'Régional' 
+  | 'National' 
+  | 'Pro';
+
+/**
+ * Complete exercise data model
+ * Synchronized with D1 database schema
+ */
+export interface Exercise {
+  id: string;
+  user_id: string;
+  title: string;
+  synopsis: string;
+  svg_schema: string;
+  themes: Theme[];
+  nb_joueurs: string;
+  dimensions: string;
+  materiel: string;
+  category: Category;
+  level: Level;
+  duration: string;
+  video_url?: string;
+  thumbnail_url?: string;
+  video_start_seconds?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateExerciseDto {
+  title: string;
+  synopsis: string;
+  svg_schema: string;
+  themes: Theme[];
+  nb_joueurs: string;
+  dimensions: string;
+  materiel: string;
+  category: Category;
+  level: Level;
+  duration: string;
+  video_url?: string;
+  video_start_seconds?: number;
+}
+
+export interface AdaptationConstraints {
+  players: number;
+  duration?: number;
+  space?: string;
+  category?: Category;
+  level?: Level;
+  equipment?: string;
+}
+
+export interface ExerciseFilters {
+  themes?: Theme[];
+  category?: Category;
+  level?: Level;
+  minPlayers?: number;
+  maxPlayers?: number;
+  search?: string;
+}
+```
+
+**VALIDATION:**
+- ✅ Fichier créé
+- ✅ Aucune erreur TypeScript (`yarn type-check` dans apps/client)
+- ✅ Tous les types exportés
+
+**VÉRIFICATION:**
+```bash
+cd apps/client
+yarn type-check
+```
+
+---
+
+#### TÂCHE-011: Créer les Types Match
+
+**OBJECTIF:** Définir les types TypeScript pour les matchs amicaux
+
+**PRÉREQUIS:** TÂCHE-010 complétée
+
+**FICHIERS CONCERNÉS:**
+- `apps/client/src/types/match.types.ts` (à créer)
+
+**CODE COMPLET:**
+```typescript
+// apps/client/src/types/match.types.ts
+
+import type { Category } from './exercise.types';
+
+export type Format = '11v11' | '8v8' | '5v5' | 'Futsal';
+export type Venue = 'Domicile' | 'Extérieur' | 'Neutre';
+export type MatchStatus = 'active' | 'found' | 'expired';
+
+export interface Club {
+  id: string;
+  siret: string;
+  name: string;
+  city: string;
+  address?: string;
+  zip?: string;
+  logo_url?: string;
+  latitude?: number;
+  longitude?: number;
+  cached_at?: string;
+  expires_at?: string;
+}
+
+export interface MatchContact {
+  user_id: string;
+  message: string;
+  contacted_at: string;
+}
+
+export interface Match {
+  id: string;
+  owner_id: string;
+  club_id: string;
+  club: Club;
+  category: Category;
+  format: Format;
+  match_date: string;
+  match_time: string;
+  venue: Venue;
+  email: string;
+  phone: string;
+  notes?: string;
+  status: MatchStatus;
+  contacts: MatchContact[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateMatchDto {
+  siret: string;
+  category: Category;
+  format: Format;
+  match_date: string;
+  match_time: string;
+  venue: Venue;
+  email: string;
+  phone: string;
+  notes?: string;
+}
+
+export interface MatchFilters {
+  category?: Category;
+  format?: Format;
+  dateFrom?: string;
+  dateTo?: string;
+  city?: string;
+  maxDistance?: number;
+  status?: MatchStatus;
+}
+
+export interface SiretLookupResult {
+  siret: string;
+  name: string;
+  address: string;
+  city: string;
+  zip: string;
+  isFootballClub: boolean;
+  latitude?: number;
+  longitude?: number;
+}
+```
+
+**VALIDATION:**
+- ✅ Fichier créé
+- ✅ Import de `Category` depuis `exercise.types.ts` fonctionne
+- ✅ Aucune erreur TypeScript
+
+---
+
+#### TÂCHE-012: Créer les Types Session
+
+**OBJECTIF:** Définir les types TypeScript pour les séances d'entraînement
+
+**PRÉREQUIS:** TÂCHE-011 complétée
+
+**FICHIERS CONCERNÉS:**
+- `apps/client/src/types/session.types.ts` (à créer)
+
+**CODE COMPLET:**
+```typescript
+// apps/client/src/types/session.types.ts
+
+import type { Exercise, Category, Level } from './exercise.types';
+
+export type SessionStatus = 'draft' | 'scheduled' | 'completed';
+
+export interface SessionExercise {
+  exercise_id: string;
+  exercise: Exercise;
+  order_index: number;
+  duration: number;
+  players: number;
+  adapted_data?: Partial<Exercise>;
+}
+
+export interface SessionConstraints {
+  players: number;
+  duration: number;
+  space?: string;
+  category?: Category;
+  level?: Level;
+  equipment?: string;
+}
+
+export interface TrainingSession {
+  id: string;
+  user_id: string;
+  name?: string;
+  category?: Category;
+  level?: Level;
+  total_duration?: number;
+  constraints?: SessionConstraints;
+  status: SessionStatus;
+  scheduled_date?: string;
+  exercises: SessionExercise[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSessionDto {
+  name?: string;
+  category?: Category;
+  level?: Level;
+  total_duration?: number;
+  scheduled_date?: string;
+  exercise_ids: string[];
+}
+
+export interface HistoryEntry {
+  id: string;
+  user_id: string;
+  session_id?: string;
+  session?: TrainingSession;
+  completed_at: string;
+  duration_seconds: number;
+  notes?: string;
+  created_at: string;
+}
+```
+
+**VALIDATION:**
+- ✅ Fichier créé avec imports corrects
+- ✅ Aucune erreur TypeScript
+
+---
+
+#### TÂCHE-013: Créer les Types Auth0
+
+**OBJECTIF:** Définir les types pour l'intégration Auth0 Management API
+
+**PRÉREQUIS:** TÂCHE-012 complétée
+
+**FICHIERS CONCERNÉS:**
+- `apps/client/src/types/auth0.types.ts` (à créer)
+
+**CODE COMPLET:**
+```typescript
+// apps/client/src/types/auth0.types.ts
+
+export interface Auth0Identity {
+  connection: string;
+  provider: string;
+  user_id: string;
+  isSocial: boolean;
+}
+
+export interface Auth0User {
+  user_id: string;
+  email: string;
+  name?: string;
+  nickname?: string;
+  picture?: string;
+  identities?: Auth0Identity[];
+  app_metadata?: Record<string, any>;
+  user_metadata?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  last_login?: string;
+  logins_count?: number;
+}
+
+export interface Auth0Permission {
+  permission_name: string;
+  resource_server_identifier: string;
+  resource_server_name?: string;
+  description?: string;
+}
+
+export interface Auth0ManagementTokenResponse {
+  access_token: string;
+  token_type?: string;
+  expires_in?: number;
+  from_cache?: boolean;
+}
+
+export interface Auth0PermissionsUpdate {
+  userId: string;
+  permissions: {
+    add?: string[];
+    remove?: string[];
+  };
+}
+```
+
+**VALIDATION:**
+- ✅ Fichier créé
+- ✅ Aucune erreur TypeScript
+
+---
+
+#### TÂCHE-014: Créer l'Index des Types
+
+**OBJECTIF:** Centraliser les exports de types
+
+**PRÉREQUIS:** TÂCHE-013 complétée
+
+**FICHIERS CONCERNÉS:**
+- `apps/client/src/types/index.ts` (à créer)
+
+**CODE COMPLET:**
+```typescript
+// apps/client/src/types/index.ts
+
+export * from './exercise.types';
+export * from './match.types';
+export * from './session.types';
+export * from './auth0.types';
+```
+
+**VALIDATION:**
+- ✅ Fichier créé
+- ✅ Aucune erreur TypeScript
+- ✅ Imports fonctionnels depuis `@/types`
+
+---
+
+#### TÂCHE-015: Mettre à Jour la Configuration Site
+
+**OBJECTIF:** Adapter `site.ts` pour KduFoot
+
+**PRÉREQUIS:** TÂCHE-014 complétée
+
+**FICHIERS CONCERNÉS:**
+- `apps/client/src/config/site.ts`
+
+**CODE COMPLET:**
+```typescript
+// apps/client/src/config/site.ts
+
+export type SiteConfig = typeof siteConfig;
+
+export const siteConfig = {
+  name: "KduFoot",
+  description: "Plateforme d'analyse vidéo et de gestion d'entraînements pour coachs de football",
+  navItems: [
+    {
+      label: "home",
+      href: "/",
+    },
+    {
+      label: "library",
+      href: "/library",
+      protected: true,
+    },
+    {
+      label: "favorites",
+      href: "/favorites",
+      protected: true,
+    },
+    {
+      label: "matches",
+      href: "/matches",
+      protected: true,
+    },
+    {
+      label: "training",
+      href: "/training",
+      protected: true,
+    },
+    {
+      label: "history",
+      href: "/history",
+      protected: true,
+    },
+    {
+      label: "pricing",
+      href: "/pricing",
+    },
+    {
+      label: "about",
+      href: "/about",
+    },
+  ],
+  navMenuItems: [
+    {
+      label: "home",
+      href: "/",
+    },
+    {
+      label: "library",
+      href: "/library",
+    },
+    {
+      label: "favorites",
+      href: "/favorites",
+    },
+    {
+      label: "matches",
+      href: "/matches",
+    },
+    {
+      label: "training",
+      href: "/training",
+    },
+    {
+      label: "history",
+      href: "/history",
+    },
+    {
+      label: "pricing",
+      href: "/pricing",
+    },
+    {
+      label: "about",
+      href: "/about",
+    },
+    {
+      label: "logout",
+      href: "/logout",
+    },
+  ],
+  links: {
+    github: "https://github.com/aeltorio/KduFoot",
+    docs: "https://github.com/aeltorio/KduFoot/wiki",
+  },
+};
+```
+
+**VALIDATION:**
+- ✅ Fichier modifié
+- ✅ Navigation adaptée à KduFoot
+- ✅ Aucune erreur TypeScript
+
+---
+
+#### TÂCHE-016: Créer la Matrice de Permissions
+
+**OBJECTIF:** Définir la configuration des permissions par abonnement
+
+**PRÉREQUIS:** TÂCHE-015 complétée
+
+**FICHIERS CONCERNÉS:**
+- `apps/client/src/config/permissions-matrix.ts` (à créer)
+
+**CODE COMPLET:**
+```typescript
+// apps/client/src/config/permissions-matrix.ts
+
+export enum Permission {
+  READ_API = 'read:api',
+  WRITE_API = 'write:api',
+  EXERCISES_READ = 'exercises:read',
+  EXERCISES_READ_ALL = 'exercises:read:all',
+  EXERCISES_CREATE = 'exercises:create',
+  EXERCISES_UPDATE = 'exercises:update',
+  EXERCISES_DELETE = 'exercises:delete',
+  EXERCISES_SHARE = 'exercises:share',
+  VIDEOS_ANALYZE = 'videos:analyze',
+  VIDEOS_ANALYZE_LONG = 'videos:analyze:long',
+  VIDEOS_ANALYZE_BATCH = 'videos:analyze:batch',
+  VIDEOS_PRIORITY = 'videos:priority',
+  SESSIONS_CREATE = 'sessions:create',
+  SESSIONS_ADAPT = 'sessions:adapt',
+  SESSIONS_TEMPLATE = 'sessions:template',
+  SESSIONS_SHARE = 'sessions:share',
+  MATCHES_CREATE = 'matches:create',
+  MATCHES_PREMIUM = 'matches:premium',
+  MATCHES_CONTACT = 'matches:contact',
+  EXPORT_PDF = 'export:pdf',
+  EXPORT_VIDEO = 'export:video',
+  SHARE_LIBRARY = 'share:library',
+  ADMIN_USERS = 'admin:users',
+  ADMIN_EXERCISES = 'admin:exercises',
+  ADMIN_MATCHES = 'admin:matches',
+  ADMIN_ANALYTICS = 'admin:analytics',
+  ADMIN_BILLING = 'admin:billing',
+  ADMIN_AUTH0 = 'admin:auth0',
+  COACH_CERTIFIED = 'coach:certified',
+}
+
+export type Subscription = 'Free' | 'Pro' | 'Ultime';
+
+export const PERMISSIONS_MATRIX: Record<Subscription, Permission[]> = {
+  Free: [
+    Permission.READ_API,
+    Permission.WRITE_API,
+    Permission.EXERCISES_READ,
+    Permission.EXERCISES_CREATE,
+    Permission.EXERCISES_UPDATE,
+    Permission.EXERCISES_DELETE,
+    Permission.VIDEOS_ANALYZE,
+    Permission.SESSIONS_CREATE,
+    Permission.SESSIONS_ADAPT,
+    Permission.MATCHES_CREATE,
+    Permission.MATCHES_CONTACT,
+  ],
+
+  Pro: [
+    Permission.READ_API,
+    Permission.WRITE_API,
+    Permission.EXERCISES_READ,
+    Permission.EXERCISES_READ_ALL,
+    Permission.EXERCISES_CREATE,
+    Permission.EXERCISES_UPDATE,
+    Permission.EXERCISES_DELETE,
+    Permission.EXERCISES_SHARE,
+    Permission.VIDEOS_ANALYZE,
+    Permission.VIDEOS_ANALYZE_LONG,
+    Permission.SESSIONS_CREATE,
+    Permission.SESSIONS_ADAPT,
+    Permission.SESSIONS_TEMPLATE,
+    Permission.SESSIONS_SHARE,
+    Permission.MATCHES_CREATE,
+    Permission.MATCHES_PREMIUM,
+    Permission.MATCHES_CONTACT,
+    Permission.EXPORT_PDF,
+    Permission.SHARE_LIBRARY,
+  ],
+
+  Ultime: [
+    Permission.READ_API,
+    Permission.WRITE_API,
+    Permission.EXERCISES_READ,
+    Permission.EXERCISES_READ_ALL,
+    Permission.EXERCISES_CREATE,
+    Permission.EXERCISES_UPDATE,
+    Permission.EXERCISES_DELETE,
+    Permission.EXERCISES_SHARE,
+    Permission.VIDEOS_ANALYZE,
+    Permission.VIDEOS_ANALYZE_LONG,
+    Permission.VIDEOS_ANALYZE_BATCH,
+    Permission.VIDEOS_PRIORITY,
+    Permission.SESSIONS_CREATE,
+    Permission.SESSIONS_ADAPT,
+    Permission.SESSIONS_TEMPLATE,
+    Permission.SESSIONS_SHARE,
+    Permission.MATCHES_CREATE,
+    Permission.MATCHES_PREMIUM,
+    Permission.MATCHES_CONTACT,
+    Permission.EXPORT_PDF,
+    Permission.EXPORT_VIDEO,
+    Permission.SHARE_LIBRARY,
+  ],
+};
+
+export interface QuotaConfig {
+  limit: number;
+  period: 'daily' | 'monthly';
+}
+
+export const QUOTA_CONFIG: Partial<Record<Permission, QuotaConfig>> = {
+  [Permission.VIDEOS_ANALYZE]: {
+    limit: 3,
+    period: 'daily',
+  },
+  [Permission.VIDEOS_ANALYZE_LONG]: {
+    limit: 10,
+    period: 'daily',
+  },
+  [Permission.SESSIONS_ADAPT]: {
+    limit: 3,
+    period: 'monthly',
+  },
+  [Permission.MATCHES_CREATE]: {
+    limit: 2,
+    period: 'monthly',
+  },
+};
+```
+
+**VALIDATION:**
+- ✅ Fichier créé
+- ✅ Enum `Permission` complet (27 permissions)
+- ✅ Matrice par abonnement définie
+- ✅ Configuration des quotas définie
+- ✅ Aucune erreur TypeScript
+
+---
+
+### 18.4 Instructions de Commit pour Phase 1
+
+**Après TÂCHE-016, créer un commit:**
+
+```bash
+cd apps/client
+yarn type-check
+cd ../..
+
+git add .
+git commit -m "feat(types): add complete TypeScript type system for KduFoot
+
+- Created exercise.types.ts with Exercise, Theme, Category, Level types
+- Created match.types.ts with Match, Club, Format, Venue types
+- Created session.types.ts with TrainingSession, SessionExercise types
+- Created auth0.types.ts for Auth0 Management API integration
+- Updated site.ts configuration for KduFoot navigation
+- Created permissions-matrix.ts with 27 permissions and quota config
+
+All types are documented with JSDoc comments and validated with 
+TypeScript compiler. No type errors.
+
+Refs: TÂCHE-010 through TÂCHE-016"
+```
+
+---
+
+### 18.5 Phase 2: Backend Cloudflare Worker (Aperçu)
+
+Les prochaines tâches couvriront:
+
+#### TÂCHE-017: Créer les Types Worker
+- `apps/cloudflare-worker/src/types/permissions.ts`
+- `apps/cloudflare-worker/src/types/env.d.ts`
+
+#### TÂCHE-018: Créer le Middleware d'Authentification
+- `apps/cloudflare-worker/src/middleware/auth.middleware.ts`
+
+#### TÂCHE-019: Créer le Middleware de Permissions
+- `apps/cloudflare-worker/src/middleware/permissions.middleware.ts`
+
+#### TÂCHE-020: Créer les Routes Videos
+- `apps/cloudflare-worker/src/routes/videos.ts`
+
+#### TÂCHE-021: Créer les Routes Exercises
+- `apps/cloudflare-worker/src/routes/exercises.ts`
+
+... et ainsi de suite pour toutes les fonctionnalités.
+
+---
+
+### 18.6 Points de Contrôle Critiques
+
+À chaque fin de phase, l'IA doit:
+
+1. **Exécuter les vérifications:**
+```bash
+yarn type-check
+yarn lint
+yarn build
+yarn dev:env
+```
+
+2. **Tester manuellement** les fonctionnalités implémentées
+
+3. **Documenter** les problèmes rencontrés
+
+4. **Créer un commit** avec un message détaillé (Conventional Commits)
+
+5. **Mettre à jour** ANALYSE_TECHNIQUE.md si nécessaire
+
+---
+
+### 18.7 Développement Itératif pour l'IA
+
+**RÈGLES D'OR:**
+
+1. ⛔ **NE JAMAIS** créer de code sans JSDoc complète
+2. ⛔ **NE JAMAIS** passer à la tâche suivante sans validation
+3. ⛔ **NE JAMAIS** ignorer les erreurs TypeScript/ESLint
+4. ✅ **TOUJOURS** tester après chaque modification
+5. ✅ **TOUJOURS** créer des commits atomiques
+6. ✅ **TOUJOURS** suivre les conventions de nommage
+7. ✅ **TOUJOURS** documenter en anglais (code/comments)
+8. ✅ **TOUJOURS** utiliser les types stricts TypeScript
+
+**En cas d'erreur:**
+1. Arrêter immédiatement
+2. Lire le message d'erreur complet
+3. Revenir à l'état fonctionnel précédent (`git reset` si nécessaire)
+4. Analyser la cause
+5. Corriger puis re-tester
+6. Ne continuer qu'après validation complète
+
+
+## 19. CONCLUSION
+
+Résumé : Ce document définit une feuille de route claire et pragmatique pour migrer KduFoot vers une architecture moderne (Turborepo, Cloudflare Workers, Auth0). L'approche par phases minimise les risques techniques tout en permettant des livraisons itératives et mesurables.
+
+Bénéfices clés :
+- ✅ Réduction des coûts d'infrastructure (objectif : < 30€/mois en charge nominale pour l'étape de démarrage)
+- ✅ Meilleure maintenabilité et sécurité (TypeScript strict, Auth0, tests)
+- ✅ Scalabilité et performance (edge + R2 + D1)
+- ✅ Expérience utilisateur améliorée et internationalisation prête à l'emploi
+
+Priorités immédiates (Phase 1 - 2 semaines) :
+1. Initialiser le monorepo (Turborepo) + config CI/CD (lint, type-check, tests)
+2. Déployer un environnement de dev Workers (wrangler + secrets) et config R2/D1
+3. Intégrer Auth0 minimal (login + check-token) et matrix permissions de base
+4. Ajouter monitoring basique (logs, Sentry) et job `license-check`
+
+Critères d'acceptation / KPI (pour chaque phase) :
+- Tests unitaires et lint verts sur CI
+- Endpoints API couverts par des tests d'intégration
+- Migration de données testée sur staging avec rollback
+- Latence p95 API < 300ms sur charges nominales
+- Coût mensuel estimé validé par simulation (R2/D1/Workers)
+
+Risques principaux & mitigations :
+- Migration des données : faire des scripts idempotents + tests de non-régression
+- Permissions/Auth0 : phase pilote avec roles limités puis extension
+- Coûts imprévus : surveiller usage, définir quotas et alertes
+
 
