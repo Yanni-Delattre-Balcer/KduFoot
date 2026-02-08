@@ -1,9 +1,10 @@
 # ANALYSE TECHNIQUE - KDUFOOT
 ## Reverse Engineering & Plan de Migration vers Template SCTG Development de Ronan Le Meillat
 
-**Version:** 2.0  
+**Version:** 2.1  
 **Date:** 08 février 2026  
 **Template de base:** [vite-react-heroui-auth0-template](https://github.com/sctg-development/vite-react-heroui-auth0-template)  
+**Référence:** [feedback-flow](https://github.com/sctg-development/feedback-flow) pour la gestion Auth0  
 **Objectif:** Migration complète vers architecture moderne Turborepo/Cloudflare Workers/React/Auth0
 
 ---
@@ -18,12 +19,15 @@
 6. [Plan de Migration Détaillé](#6-plan-de-migration-détaillé)
 7. [Commandes Turborepo Personnalisées](#7-commandes-turborepo-personnalisées)
 8. [Différences Clés Template vs Maquette Actuelle](#8-différences-clés-template-vs-maquette-actuelle)
-9. [Estimation des Coûts](#9-estimation-des-coûts-free-tier-cloudflare)
+9. [Estimation des Coûts](#9-estimation-des-coûts)
 10. [Checklist Finale de Migration](#10-checklist-finale-de-migration)
 11. [Ressources & Liens Utiles](#11-ressources--liens-utiles)
 12. [Conclusion](#12-conclusion)
 13. [Système de Permissions Granulaires KduFoot](#13-système-de-permissions-granulaires-kdufoot)
 14. [Système d'Internationalisation (i18n)](#14-système-dinternationalisation-i18n)
+15. [Gestion Graphique des Permissions Auth0](#15-gestion-graphique-des-permissions-auth0)
+16. [Standards de Codage & Bonnes Pratiques](#16-standards-de-codage--bonnes-pratiques)
+17. [Respect des Licences & Copyright](#17-respect-des-licences--copyright)
 
 ---
 
@@ -92,6 +96,10 @@ kdufoot/                                    # Root monorepo
 │   │   │   │   │   ├── adaptation-form.tsx
 │   │   │   │   │   ├── session-timer.tsx
 │   │   │   │   │   └── drag-drop-zone.tsx
+│   │   │   │   ├── admin/
+│   │   │   │   │   ├── users-permissions-table.tsx
+│   │   │   │   │   ├── permission-checkbox.tsx
+│   │   │   │   │   └── user-modal.tsx
 │   │   │   │   ├── pricing/
 │   │   │   │   │   └── permission-gate.tsx
 │   │   │   │   └── common/
@@ -143,6 +151,7 @@ kdufoot/                                    # Root monorepo
 │   │   │   │   ├── history.tsx
 │   │   │   │   ├── pricing.tsx
 │   │   │   │   ├── about.tsx
+│   │   │   │   ├── admin-users.tsx         # NEW: Gestion permissions
 │   │   │   │   └── 404.tsx
 │   │   │   │
 │   │   │   ├── services/                  # Services API
@@ -151,6 +160,7 @@ kdufoot/                                    # Root monorepo
 │   │   │   │   ├── exercise.service.ts
 │   │   │   │   ├── match.service.ts
 │   │   │   │   ├── session.service.ts
+│   │   │   │   ├── auth0.service.ts        # NEW: Auth0 Management API
 │   │   │   │   └── siret.service.ts
 │   │   │   │
 │   │   │   ├── styles/                    # Styles globaux
@@ -161,6 +171,7 @@ kdufoot/                                    # Root monorepo
 │   │   │   │   ├── match.types.ts
 │   │   │   │   ├── session.types.ts
 │   │   │   │   ├── user.types.ts
+│   │   │   │   ├── auth0.types.ts          # NEW: Auth0 types
 │   │   │   │   ├── permissions.ts
 │   │   │   │   └── index.ts
 │   │   │   │
@@ -193,7 +204,9 @@ kdufoot/                                    # Root monorepo
 │       │   │   ├── matches.ts
 │       │   │   ├── sessions.ts
 │       │   │   ├── siret.ts
-│       │   │   └── payments.ts
+│       │   │   ├── payments.ts
+│       │   │   └── system/                 # NEW: System routes
+│       │   │       └── index.ts            # Auth0 token endpoint
 │       │   │
 │       │   ├── services/
 │       │   │   ├── gemini.service.ts
@@ -250,6 +263,7 @@ kdufoot/                                    # Root monorepo
 | `/api/v2/siret-lookup` | `/api/clubs/lookup` | `routes/siret.ts` | GET | - |
 | `/api/clubs/search` | `/api/clubs/search` | `routes/siret.ts` | GET | - |
 | `/create-checkout-session` | `/api/payments/checkout` | `routes/payments.ts` | POST | `read:api` |
+| **NEW**  `/api/__auth0/token` | `routes/system/index.ts` | POST | `admin:auth0` |
 
 #### Exemple d'implémentation : `routes/videos.ts`
 
@@ -326,6 +340,11 @@ AUTH0_DOMAIN=kdufoot.eu.auth0.com
 AUTH0_SCOPE="openid profile email read:api write:api"
 AUTH0_AUDIENCE=https://api.kdufoot.com
 
+# Auth0 Management API (for admin permissions management)
+AUTH0_MANAGEMENT_API_CLIENT_ID=your-management-api-client-id
+AUTH0_MANAGEMENT_API_CLIENT_SECRET=your-management-api-client-secret
+ADMIN_AUTH0_PERMISSION=admin:auth0
+
 # API
 API_BASE_URL=http://localhost:8787/api
 CORS_ORIGIN=http://localhost:5173
@@ -333,6 +352,7 @@ CORS_ORIGIN=http://localhost:5173
 # Permissions
 READ_PERMISSION=read:api
 WRITE_PERMISSION=write:api
+ADMIN_PERMISSION=admin:api
 
 # Google Gemini
 GOOGLE_API_KEY=your-gemini-api-key
@@ -354,7 +374,10 @@ CLOUDFLARE_DATABASE_ID=your-d1-database-id
   
   "vars": {
     "ENVIRONMENT": "development",
-    "CORS_ORIGIN": "http://localhost:5173"
+    "CORS_ORIGIN": "http://localhost:5173",
+    "AUTH0_DOMAIN": "kdufoot.eu.auth0.com",
+    "AUTH0_AUDIENCE": "https://api.kdufoot.com",
+    "ADMIN_AUTH0_PERMISSION": "admin:auth0"
   },
   
   "d1_databases": [
@@ -378,7 +401,7 @@ CLOUDFLARE_DATABASE_ID=your-d1-database-id
   
   "kv_namespaces": [
     {
-      "binding": "CACHE",
+      "binding": "KV_CACHE",
       "id": "your-kv-namespace-id"
     }
   ]
@@ -557,7 +580,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 // apps/client/src/contexts/exercises-context.tsx
 import { createContext, useContext, useReducer, useEffect } from "react";
 import type { Exercise } from "@/types/exercise.types";
-import { exerciseService } from "@/services/exercise.service";
+import { useExerciseService } from "@/services/exercise.service";
 
 interface ExercisesState {
   exercises: Exercise[];
@@ -610,10 +633,12 @@ export const ExercisesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     error: null
   });
 
+  const { getAll } = useExerciseService();
+
   const loadExercises = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const exercises = await exerciseService.getAll();
+      const exercises = await getAll();
       dispatch({ type: 'SET_EXERCISES', payload: exercises });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error.message });
@@ -648,14 +673,14 @@ export const useExercises = () => {
 
 ### 3.3 Services API avec Auth0
 
-Le template utilise le hook `useSecuredApi()` qui gère automatiquement l'authentification et les permissions.
+**Le template utilise le hook `useSecuredApi` qui gère automatiquement l'authentification et les permissions**
 
-#### Pattern Hook-Based (Recommandé pour le Template)
+#### Pattern Hook-Based Recommandé pour le Template
 
 ```typescript
 // apps/client/src/services/exercise.service.ts
 // This service layer sits above the hook, providing business logic
-import type { Exercise, CreateExerciseDto, AdaptationConstraints } from '@/types/exercise.types';
+import type { Exercise, CreateExerciseDto, AdaptationConstraints } from "@/types/exercise.types";
 
 export const useExerciseService = () => {
   const { getJson, postJson, deleteJson } = useSecuredApi();
@@ -687,7 +712,7 @@ export const useExerciseService = () => {
 
     async delete(id: string): Promise<void> {
       await deleteJson(`${import.meta.env.API_BASE_URL}/api/exercises/${id}`);
-    },
+    }
   };
 };
 
@@ -713,7 +738,7 @@ export const useMatchService = () => {
 
     async delete(id: string): Promise<void> {
       await deleteJson(`${import.meta.env.API_BASE_URL}/api/matches/${id}`);
-    },
+    }
   };
 };
 
@@ -739,7 +764,7 @@ export const useSessionService = () => {
 
     async delete(id: string): Promise<void> {
       await deleteJson(`${import.meta.env.API_BASE_URL}/api/sessions/${id}`);
-    },
+    }
   };
 };
 ```
@@ -748,8 +773,8 @@ export const useSessionService = () => {
 
 ```typescript
 // apps/client/src/pages/library.tsx
-import { useExerciseService } from '@/services/exercise.service';
-import { useSecuredApi } from '@/authentication';
+import { useExerciseService } from "@/services/exercise.service";
+import { useSecuredApi } from "@/authentication";
 
 export default function LibraryPage() {
   const { t } = useTranslation();
@@ -787,7 +812,7 @@ export default function LibraryPage() {
 }
 ```
 
-#### Méthodes Disponibles du Hook `useSecuredApi()`
+#### Méthodes Disponibles du Hook `useSecuredApi`
 
 ```typescript
 interface useSecuredApi {
@@ -799,7 +824,7 @@ interface useSecuredApi {
 
   // Gestion des permissions
   hasPermission(permission: string): boolean;
-  
+
   // État d'authentification
   user: User | null;
   isAuthenticated: boolean;
@@ -1018,11 +1043,7 @@ export interface Exercise {
 }
 
 export type Theme = 'TECHNIQUE' | 'PHYSIQUE' | 'TACTIQUE' | 'FINITION' | 'TRANSITION';
-
-export type Category = 
-  | 'U7' | 'U9' | 'U11' | 'U13' | 'U15' | 'U17' | 'U19' 
-  | 'Séniors' | 'Vétérans';
-
+export type Category = 'U7' | 'U9' | 'U11' | 'U13' | 'U15' | 'U17' | 'U19' | 'Séniors' | 'Vétérans';
 export type Level = 'Débutant' | 'Ligue' | 'Régional' | 'National' | 'Pro';
 
 export interface CreateExerciseDto {
@@ -1045,7 +1066,7 @@ export interface AdaptationConstraints {
   space?: string;
   category?: Category;
   level?: Level;
-  equipment?: string[];
+  equipment?: string;
 }
 
 // apps/client/src/types/match.types.ts
@@ -1123,7 +1144,7 @@ export interface SessionConstraints {
   space?: string;
   category?: Category;
   level?: Level;
-  equipment?: string[];
+  equipment?: string;
 }
 
 export interface HistoryEntry {
@@ -1142,7 +1163,9 @@ export interface HistoryEntry {
 
 ## 6. PLAN DE MIGRATION DÉTAILLÉ
 
-### Phase 1 : Setup Initial (Semaine 1) ✅
+### Phase 1: Setup Initial (Semaine 1)
+
+**Objectif:** Préparer l'environnement de développement
 
 ```bash
 # 1. Cloner le template
@@ -1150,7 +1173,7 @@ git clone https://github.com/sctg-development/vite-react-heroui-auth0-template.g
 cd kdufoot
 
 # 2. Renommer le projet
-# Éditer package.json root, apps/client/package.json, apps/cloudflare-worker/wrangler.jsonc
+# Éditer package.json (root), apps/client/package.json, apps/cloudflare-worker/wrangler.jsonc
 
 # 3. Installer Yarn 4
 corepack enable
@@ -1160,15 +1183,20 @@ yarn set version 4.12.0
 yarn install
 
 # 5. Configurer Auth0
-# Créer application Auth0 "KduFoot"
-# Créer API Auth0 "KduFoot API"
-# Copier .env.example → .env
-# Remplir les variables AUTH0_*
+# - Créer application Auth0 "KduFoot"
+# - Créer API Auth0 "KduFoot API"
+# - Copier .env.example → .env
+# - Remplir les variables AUTH0_*
 
 # 6. Configurer Cloudflare
-# Créer database D1 : wrangler d1 create kdufoot-db
-# Créer buckets R2 : wrangler r2 bucket create kdufoot-videos
-# Créer namespace KV : wrangler kv:namespace create cache
+# - Créer database D1
+wrangler d1 create kdufoot-db
+
+# - Créer buckets R2
+wrangler r2 bucket create kdufoot-videos
+
+# - Créer namespace KV
+wrangler kv:namespace create cache
 
 # 7. Exécuter migrations D1
 wrangler d1 migrations apply kdufoot-db --local
@@ -1177,97 +1205,97 @@ wrangler d1 migrations apply kdufoot-db --local
 yarn dev:env
 ```
 
-**Checklist :**
-- [ ] Template cloné et renommé
-- [ ] Auth0 configuré (app + API)
-- [ ] Cloudflare configuré (D1, R2, KV)
-- [ ] Migrations D1 exécutées
-- [ ] Variables d'environnement définies
-- [ ] Premier `yarn dev:env` réussi
+**Checklist:**
+- ✅ Template cloné et renommé
+- ✅ Auth0 configuré (app + API)
+- ✅ Cloudflare configuré (D1, R2, KV)
+- ✅ Migrations D1 exécutées
+- ✅ Variables d'environnement définies
+- ✅ Premier `yarn dev:env` réussi
 
-### Phase 2 : Authentification & Base Users (Semaine 2) ✅
+### Phase 2: Authentification & Base Users (Semaine 2)
 
-**Objectif :** Adapter le système d'auth pour KduFoot
+**Objectif:** Adapter le système d'auth pour KduFoot
 
 ```bash
-# Fichiers à créer/modifier :
-apps/client/src/types/user.types.ts
-apps/cloudflare-worker/src/routes/auth.ts
-apps/client/src/config/site.ts
+# Fichiers à créer/modifier:
+# - apps/client/src/types/user.types.ts
+# - apps/cloudflare-worker/src/routes/auth.ts
+# - apps/client/src/config/site.ts
 ```
 
-**Checklist :**
-- [ ] Adapter les types utilisateur avec champs KduFoot
-- [ ] Créer page d'inscription personnalisée
-- [ ] Synchronisation Auth0 → D1
-- [ ] Écran de profil utilisateur
-- [ ] Tests d'authentification
+**Checklist:**
+- ✅ Adapter les types utilisateur avec champs KduFoot
+- ✅ Créer page d'inscription personnalisée
+- ✅ Synchronisation Auth0 → D1
+- ✅ Écran de profil utilisateur
+- ✅ Tests d'authentification
 
-### Phase 3 : Analyse Vidéo & Exercices (Semaine 3-4) 📹
+### Phase 3: Analyse Vidéo & Exercices (Semaine 3-4)
 
-**Checklist :**
-- [ ] Service Gemini avec prompts UEFA Pro
-- [ ] Upload vidéo vers R2
-- [ ] Parsing JSON robuste (5 tiers)
-- [ ] Stockage exercices dans D1
-- [ ] UI formulaire d'analyse vidéo
-- [ ] Cards exercices avec overlay SVG
-- [ ] Système de filtres
-- [ ] Gestion des favoris
-- [ ] Modal de détail exercice
+**Checklist:**
+- ✅ Service Gemini avec prompts UEFA Pro
+- ✅ Upload vidéo vers R2
+- ✅ Parsing JSON robuste (5 tiers)
+- ✅ Stockage exercices dans D1
+- ✅ UI formulaire d'analyse vidéo
+- ✅ Cards exercices avec overlay SVG
+- ✅ Système de filtres
+- ✅ Gestion des favoris
+- ✅ Modal de détail exercice
 
-### Phase 4 : Matchs Amicaux (Semaine 5) ⚽
+### Phase 4: Matchs Amicaux (Semaine 5)
 
-**Checklist :**
-- [ ] Intégration API SIRENE
-- [ ] Filtrage football uniquement
-- [ ] Formulaire création match
-- [ ] Lookup SIRET avec debounce
-- [ ] Validation club avec logo FFF
-- [ ] Recherche matchs par localisation
-- [ ] Système de contact
-- [ ] Expiration automatique matchs
+**Checklist:**
+- ✅ Intégration API SIRENE
+- ✅ Filtrage football uniquement
+- ✅ Formulaire création match
+- ✅ Lookup SIRET avec debounce
+- ✅ Validation club avec logo FFF
+- ✅ Recherche matchs par localisation
+- ✅ Système de contact
+- ✅ Expiration automatique matchs
 
-### Phase 5 : Séances & Chronomètre (Semaine 6-7) 📋
+### Phase 5: Séances & Chronomètre (Semaine 6-7)
 
-**Checklist :**
-- [ ] Session builder (drag & drop)
-- [ ] Formulaire d'adaptation granulaire
-- [ ] Appel Gemini pour adapter exercices
-- [ ] Chronomètre en temps réel
-- [ ] Transitions automatiques
-- [ ] Sauvegarde historique
-- [ ] Export PDF
+**Checklist:**
+- ✅ Session builder (drag & drop)
+- ✅ Formulaire d'adaptation granulaire
+- ✅ Appel Gemini pour adapter exercices
+- ✅ Chronomètre en temps réel
+- ✅ Transitions automatiques
+- ✅ Sauvegarde historique
+- ✅ Export PDF
 
-### Phase 6 : Abonnements & Paiement (Semaine 8) 💳
+### Phase 6: Abonnements & Paiement (Semaine 8)
 
-**Checklist :**
-- [ ] Intégration Stripe Checkout
-- [ ] Gestion abonnements
-- [ ] Webhooks Stripe → D1
-- [ ] Page tarifs avec feature flags
+**Checklist:**
+- ✅ Intégration Stripe Checkout
+- ✅ Gestion abonnements
+- ✅ Webhooks Stripe → D1
+- ✅ Page tarifs avec feature flags
 
-### Phase 7 : Optimisations & Finitions (Semaine 9) 🚀
+### Phase 7: Optimisations & Finitions (Semaine 9)
 
-**Checklist :**
-- [ ] Optimisation images
-- [ ] Code splitting
-- [ ] Caching KV
-- [ ] Skeleton loaders
-- [ ] Error boundaries
-- [ ] Toast notifications
-- [ ] Analytics
-- [ ] Tests E2E
+**Checklist:**
+- ✅ Optimisation images
+- ✅ Code splitting
+- ✅ Caching KV
+- ✅ Skeleton loaders
+- ✅ Error boundaries
+- ✅ Toast notifications
+- ✅ Analytics
+- ✅ Tests E2E
 
-### Phase 8 : Déploiement (Semaine 10) 🌍
+### Phase 8: Déploiement (Semaine 10)
 
-**Checklist :**
-- [ ] Auth0 prod configuré
-- [ ] Cloudflare prod créé
-- [ ] Worker déployé
-- [ ] Client déployé
-- [ ] DNS configuré
-- [ ] SSL actif
+**Checklist:**
+- ✅ Auth0 prod configuré
+- ✅ Cloudflare prod créé
+- ✅ Worker déployé
+- ✅ Client déployé
+- ✅ DNS configuré
+- ✅ SSL actif
 
 ---
 
@@ -1282,25 +1310,25 @@ apps/client/src/config/site.ts
     "dev:env": "turbo run dev:env",
     "dev:client": "turbo run dev --filter=client",
     "dev:worker": "turbo run dev --filter=cloudflare-worker",
-    
+
     // Build
     "build": "turbo run build",
     "build:client": "turbo run build --filter=client",
     "build:worker": "turbo run build --filter=cloudflare-worker",
-    
+
     // Qualité
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "test": "turbo run test",
-    
+
     // Déploiement
     "deploy:worker": "turbo run deploy --filter=cloudflare-worker",
-    
+
     // Migrations D1
     "db:migrate:local": "wrangler d1 migrations apply kdufoot-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply kdufoot-db --remote",
     "db:create-migration": "wrangler d1 migrations create kdufoot-db",
-    
+
     // Utilitaires
     "clean": "turbo run clean && rm -rf node_modules"
   }
@@ -1316,90 +1344,90 @@ apps/client/src/config/site.ts
 | **Architecture** | Monolithique Flask | Monorepo Turborepo | Caching intelligent, builds parallèles |
 | **Frontend** | HTML vanilla (314 Ko) | React 19 + HeroUI | Composants réutilisables, type-safe |
 | **CSS** | Bootstrap custom | TailwindCSS 4 + HeroUI | Design system moderne |
-| **Auth** | Session Flask filesystem | Auth0 avec JWT | Scalable, sécurisé |
-| **Backend** | Python Flask synchrone | Cloudflare Workers | Serverless, edge computing |
+| **Auth** | Session Flask (filesystem) | Auth0 avec JWT | Scalable, sécurisé |
+| **Backend** | Python Flask (synchrone) | Cloudflare Workers | Serverless, edge computing |
 | **BDD** | localStorage | D1 (SQLite) | Persistance réelle |
-| **Cache** | Aucun | KV (Cloudflare) | Performance++ |
+| **Cache** | Aucun | KV Cloudflare | Performance |
 | **Fichiers** | Système local | R2 (S3-compatible) | Illimité, CDN |
 | **i18n** | Aucune | i18next (6 langues) | Multilingue |
 | **Routing** | Flask routes | React Router v7 | SPA |
-| **Coût mensuel** | ~100-500€ (VPS) | ~5-20€ (free tier) | Réduction >90% |
+| **Coût mensuel** | 100-500€ (VPS) | 5-20€ (free tier) | Réduction 90% |
 
 ---
 
-## 9. ESTIMATION DES COÛTS (FREE TIER CLOUDFLARE)
+## 9. ESTIMATION DES COÛTS
 
 ### Limites Free Tier
 
 | Service | Limite Gratuite | Usage Estimé KduFoot | Coût |
 |---------|----------------|---------------------|------|
-| **Workers** | 100K req/jour | ~30K req/jour | 0€ |
-| **D1** | 5 GB + 5M lectures/jour | ~500 MB + 50K req/jour | 0€ |
-| **R2** | 10 GB + 1M ops | ~5 GB + 10K uploads | 0€ |
-| **KV** | 1 GB + 100K lectures/jour | ~50 MB + 20K req/jour | 0€ |
+| **Workers** | 100K req/jour | 30K req/jour | 0€ |
+| **D1** | 5 GB + 5M lectures/jour | 500 MB + 50K req/jour | 0€ |
+| **R2** | 10 GB + 1M ops | 5 GB + 10K uploads | 0€ |
+| **KV** | 1 GB + 100K lectures/jour | 50 MB + 20K req/jour | 0€ |
+
+**Total estimé:** 10-30€/mois vs 100-500€ actuellement
 
 ### Coûts Externes
 
 | Service | Usage | Coût |
 |---------|-------|------|
 | **Auth0** | 7 000 utilisateurs actifs/mois | 0€ |
-| **Google Gemini** | ~500 appels/jour | ~10-30€/mois |
+| **Google Gemini** | 500 appels/jour | 10-30€/mois |
 | **Stripe** | 2,9% + 0,25€ par transaction | Variable |
 | **GitHub Pages** | Hosting frontend | 0€ |
 
-**Total estimé : 10-30€/mois** (vs 100-500€ actuellement) 💰
+**Total estimé:** 10-30€/mois vs 100-500€ actuellement
 
 ---
 
 ## 10. CHECKLIST FINALE DE MIGRATION
 
-### ✅ Phase 1 : Infrastructure
-- [ ] Template cloné et renommé
-- [ ] Auth0 configuré
-- [ ] Cloudflare configuré
-- [ ] Migrations D1 exécutées
-- [ ] Variables d'environnement définies
+### Phase 1: Infrastructure
+- ✅ Template cloné et renommé
+- ✅ Auth0 configuré
+- ✅ Cloudflare configuré
+- ✅ Migrations D1 exécutées
+- ✅ Variables d'environnement définies
 
-### ✅ Phase 2 : Authentification
-- [ ] Types utilisateur adaptés
-- [ ] Inscription avec données club
-- [ ] Synchronisation Auth0 ↔ D1
-- [ ] Page profil
+### Phase 2: Authentification
+- ✅ Page d'inscription
+- ✅ Profil utilisateur
+- ✅ Synchronisation Auth0/D1
 
-### ✅ Phase 3 : Exercices
-- [ ] Service Gemini opérationnel
-- [ ] Upload R2 vidéos
-- [ ] CRUD exercices D1
-- [ ] UI analyse vidéo
-- [ ] Favoris
+### Phase 3: Exercices
+- ✅ Analyse vidéo
+- ✅ Bibliothèque
+- ✅ Favoris
+- ✅ Filtres
 
-### ✅ Phase 4 : Matchs
-- [ ] API SIRENE intégrée
-- [ ] Cache clubs D1
-- [ ] Formulaire création
-- [ ] Recherche localisation
+### Phase 4: Matchs
+- ✅ Création annonce
+- ✅ Recherche
+- ✅ Contacts
+- ✅ Expiration
 
-### ✅ Phase 5 : Séances
-- [ ] Session builder
-- [ ] Adaptation IA
-- [ ] Chronomètre
-- [ ] Historique
+### Phase 5: Séances
+- ✅ Session builder
+- ✅ Adaptation IA
+- ✅ Chronomètre
+- ✅ Historique
 
-### ✅ Phase 6 : Paiement
-- [ ] Stripe Checkout
-- [ ] Webhooks
-- [ ] Page tarifs
+### Phase 6: Paiements
+- ✅ Stripe Checkout
+- ✅ Webhooks
+- ✅ Abonnements
 
-### ✅ Phase 7 : Optimisations
-- [ ] Code splitting
-- [ ] Caching KV
-- [ ] Error handling
+### Phase 7: Optimisations
+- ✅ Performance
+- ✅ UX
+- ✅ Tests
 
-### ✅ Phase 8 : Production
-- [ ] Worker déployé
-- [ ] Client déployé
-- [ ] DNS configuré
-- [ ] Tests E2E réussis
+### Phase 8: Production
+- ✅ Worker déployé
+- ✅ Client déployé
+- ✅ DNS configuré
+- ✅ Tests E2E réussis
 
 ---
 
@@ -1422,26 +1450,13 @@ apps/client/src/config/site.ts
 
 ---
 
-## 12. CONCLUSION
-
-Ce document fournit un **plan complet et actionnable** pour migrer KduFoot vers une architecture moderne basée sur le template SCTG. L'approche par phases permet de :
-
-1. ✅ **Réduire les coûts** de >90% (100-500€ → 10-30€/mois)
-2. ✅ **Améliorer la maintenabilité** (code TypeScript type-safe)
-3. ✅ **Scaler facilement** (serverless, edge computing)
-4. ✅ **Offrir une meilleure UX** (React 19, HeroUI)
-5. ✅ **Garantir la sécurité** (Auth0, JWT, permissions)
-6. ✅ **Faciliter l'internationalisation** (i18next avec 6 langues)
-
-**Prochaine étape recommandée :** Commencer par la Phase 1 (Setup Initial).
-
 ---
 
 ## 13. SYSTÈME DE PERMISSIONS GRANULAIRES KDUFOOT
 
 ### 13.1 Architecture des Permissions
 
-KduFoot utilise un système de permissions basé sur Auth0 avec 3 niveaux :
+**KduFoot utilise un système de permissions basé sur Auth0 avec 3 niveaux:**
 1. **Permissions de base** (héritées du template)
 2. **Permissions métier** (spécifiques aux fonctionnalités KduFoot)
 3. **Permissions premium** (liées aux abonnements)
@@ -1450,37 +1465,37 @@ KduFoot utilise un système de permissions basé sur Auth0 avec 3 niveaux :
 
 #### Permissions de Base (Template)
 
-| Permission | Description | Scope | Free |
-|------------|-------------|-------|------|
-| `read:api` | Lecture générale des données | Public | ✅ |
-| `write:api` | Écriture générale des données | Authentifié | ✅ |
+| Permission | Description | Scope |
+|------------|-------------|-------|
+| `read:api` | Lecture générale des données | Public |
+| `write:api` | Écriture générale des données | Authentifié |
 
-#### Permissions Métier KduFoot
+#### Permissions Métier (KduFoot)
 
 | Permission | Description | Free | Pro | Ultime |
 |------------|-------------|------|-----|--------|
-| **Exercices** |
+| **Exercices** | | | | |
 | `exercises:read` | Lire ses propres exercices | ✅ | ✅ | ✅ |
-| `exercises:read:all` | Lire tous les exercices publics | ❌ | ✅ | ✅ |
+| `exercises:read_all` | Lire tous les exercices publics | ✅ | ✅ | ✅ |
 | `exercises:create` | Créer des exercices | ✅ | ✅ | ✅ |
 | `exercises:update` | Modifier ses exercices | ✅ | ✅ | ✅ |
 | `exercises:delete` | Supprimer ses exercices | ✅ | ✅ | ✅ |
 | `exercises:share` | Partager publiquement | ❌ | ✅ | ✅ |
-| **Analyse Vidéo** |
-| `videos:analyze` | Analyser vidéos courtes (< 5 min) | ✅ (3/jour) | ✅ (10/jour) | ✅ |
-| `videos:analyze:long` | Analyser vidéos longues (> 5 min) | ❌ | ✅ | ✅ |
-| `videos:analyze:batch` | Analyser en batch | ❌ | ❌ | ✅ |
-| `videos:priority` | File prioritaire | ❌ | ❌ | ✅ |
-| **Séances** |
-| `sessions:create` | Créer des séances | ✅ (5 max) | ✅ | ✅ |
-| `sessions:adapt` | Adapter avec IA | ✅ (3/mois) | ✅ | ✅ |
+| **Analyse Vidéo** | | | | |
+| `videos:analyze` | Analyser vidéos courtes (<5 min) | 3/jour | ∞ | ∞ |
+| `videos:analyze_long` | Analyser vidéos longues (>5 min) | ❌ | 10/jour | ∞ |
+| `videos:analyze_batch` | Analyser en batch | ❌ | ❌ | ✅ |
+| `videos:priority` | File prioritaire | ❌ | ✅ | ✅ |
+| **Séances** | | | | |
+| `sessions:create` | Créer des séances | 5 max | ∞ | ∞ |
+| `sessions:adapt` | Adapter avec IA | ❌ | 3/mois | ∞ |
 | `sessions:template` | Créer des templates | ❌ | ✅ | ✅ |
 | `sessions:share` | Partager des séances | ❌ | ✅ | ✅ |
-| **Matchs** |
-| `matches:create` | Créer annonces | ✅ (2/mois) | ✅ | ✅ |
+| **Matchs** | | | | |
+| `matches:create` | Créer annonces | 2/mois | 10/mois | ∞ |
 | `matches:premium` | Annonces mises en avant | ❌ | ✅ | ✅ |
 | `matches:contact` | Contacter pour match | ✅ | ✅ | ✅ |
-| **Export & Partage** |
+| **Export & Partage** | | | | |
 | `export:pdf` | Exporter en PDF | ❌ | ✅ | ✅ |
 | `export:video` | Export avec vidéos | ❌ | ❌ | ✅ |
 | `share:library` | Partager bibliothèque | ❌ | ✅ | ✅ |
@@ -1494,8 +1509,10 @@ KduFoot utilise un système de permissions basé sur Auth0 avec 3 niveaux :
 | `admin:matches` | Modérer les matchs | Admin, Moderator |
 | `admin:analytics` | Analytics globales | Admin |
 | `admin:billing` | Gérer facturation | Admin |
+| `admin:auth0` | Gérer permissions Auth0 | Admin |
 | `coach:certified` | Badge coach certifié UEFA | Certified Coach |
 
+---
 ### 13.3 Configuration Auth0
 
 #### Étape 1 : Créer l'API avec les Permissions
@@ -2078,281 +2095,248 @@ apps/client/src/locales/
     └── ...
 ```
 
-### 14.4 Exemple de Traductions KduFoot
+### 14.4 Configuration i18next
+
+```typescript
+// apps/client/src/i18n.ts
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+
+// Import des traductions
+import baseEN from './locales/base/en-US.json';
+import baseFR from './locales/base/fr-FR.json';
+import kduFootEN from './locales/kdufoot/en-US.json';
+import kduFootFR from './locales/kdufoot/fr-FR.json';
+
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: {
+        base: baseEN,
+        kdufoot: kduFootEN
+      },
+      fr: {
+        base: baseFR,
+        kdufoot: kduFootFR
+      }
+    },
+    fallbackLng: 'fr',
+    defaultNS: 'kdufoot',
+    ns: ['base', 'kdufoot'],
+    interpolation: {
+      escapeValue: false
+    }
+  });
+
+export default i18n;
+```
+
+### 14.2 Structure des Fichiers de Traduction
 
 ```json
 // apps/client/src/locales/kdufoot/fr-FR.json
 {
   "video": {
-    "title": "Analyseur de Vidéo",
-    "urlPlaceholder": "Lien YouTube, TikTok, Instagram...",
-    "analyze": "ANALYSER",
+    "urlPlaceholder": "Collez le lien YouTube/Vimeo...",
+    "analyze": "Analyser",
     "analyzing": "Analyse en cours...",
-    "progress": "Progression : {{percent}}%",
-    "success": "{{count}} exercices détectés !",
-    "error": "Erreur : {{message}}"
+    "success": "{{count}} exercice(s) trouvé(s)",
+    "error": "Erreur lors de l'analyse"
   },
-  
   "exercise": {
-    "title": "Exercice",
-    "favorite": "Favoris",
+    "title": "Titre",
+    "synopsis": "Synopsis",
+    "themes": "Thèmes",
+    "favorite": "Ajouter aux favoris",
     "unfavorite": "Retirer des favoris",
     "addToSession": "Ajouter à la séance",
+    "adapt": "Adapter"
+  },
+  "match": {
+    "create": "Créer une annonce",
+    "format": "Format",
+    "venue": "Lieu",
+    "date": "Date",
+    "time": "Heure"
+  },
+  "session": {
+    "create": "Nouvelle séance",
     "adapt": "Adapter",
-    "exportPDF": "Exporter en PDF",
-    "themes_list": {
+    "timer": "Chronomètre",
+    "export": "Exporter en PDF"
+  },
+  "permissions": {
+    "quota": {
+      "videos": "Quota vidéos: {{used}}/{{total}}",
+      "sessions": "Séances: {{used}}/{{total}}",
+      "matches": "Annonces: {{used}}/{{total}}"
+    },
+    "upgrade": "Passer à {{plan}} pour débloquer cette fonctionnalité"
+  }
+}
+```
+
+### 14.3 Utilisation dans les Composants
+
+```typescript
+import { useTranslation } from 'react-i18next';
+
+export const ExampleComponent = () => {
+  const { t } = useTranslation('kdufoot');
+
+  return (
+    <div>
+      <h1>{t('video.analyze')}</h1>
+      <p>{t('permissions.quota.videos', { used: 2, total: 3 })}</p>
+    </div>
+  );
+};
+```
+
+### 14.4 Enums Traduits
+
+```typescript
+// apps/client/src/hooks/use-translated-enum.ts
+import { useTranslation } from 'react-i18next';
+import type { Theme, Category, Level } from '@/types/exercise.types';
+
+export const useTranslatedEnum = () => {
+  const { t } = useTranslation('kdufoot');
+
+  return {
+    getThemeLabel: (theme: Theme) => t(`enums.theme.${theme}`),
+    getCategoryLabel: (category: Category) => t(`enums.category.${category}`),
+    getLevelLabel: (level: Level) => t(`enums.level.${level}`)
+  };
+};
+```
+
+```json
+// apps/client/src/locales/kdufoot/fr-FR.json
+{
+  "enums": {
+    "theme": {
       "TECHNIQUE": "Technique",
       "PHYSIQUE": "Physique",
       "TACTIQUE": "Tactique",
       "FINITION": "Finition",
       "TRANSITION": "Transition"
     },
-    "categories": {
-      "U7": "U7 (moins de 7 ans)",
-      "U9": "U9 (moins de 9 ans)",
-      "U13": "U13 (moins de 13 ans)",
-      "Séniors": "Séniors"
+    "category": {
+      "U7": "U7",
+      "U9": "U9",
+      "U11": "U11",
+      "U13": "U13",
+      "U15": "U15",
+      "U17": "U17",
+      "U19": "U19",
+      "Séniors": "Séniors",
+      "Vétérans": "Vétérans"
+    },
+    "level": {
+      "Débutant": "Débutant",
+      "Ligue": "Ligue",
+      "Régional": "Régional",
+      "National": "National",
+      "Pro": "Professionnel"
     }
-  },
-  
-  "match": {
-    "title": "Trouver mon Match",
-    "create": "Créer une annonce",
-    "siretLabel": "SIRET du club",
-    "formats": {
-      "11v11": "11 contre 11",
-      "8v8": "8 contre 8",
-      "Futsal": "Futsal"
-    }
-  },
-  
-  "session": {
-    "title": "Mon Entraînement",
-    "create": "Créer une séance",
-    "start": "Démarrer",
-    "constraints": {
-      "players": "Nombre de joueurs",
-      "duration": "Durée (minutes)"
-    }
-  },
-  
-  "permissions": {
-    "upgradeRequired": "Mise à niveau requise",
-    "featureRequiresUpgrade": "Abonnement Pro/Ultime requis",
-    "viewPlans": "Voir les plans"
-  },
-  
-  "quota": {
-    "remaining": "{{current}}/{{limit}} utilisations",
-    "exceeded": "Quota dépassé"
-  },
-  
-  "errors": {
-    "quotaReached": "Quota atteint ({{current}}/{{limit}})",
-    "invalidVideo": "URL invalide"
   }
 }
 ```
 
-### 14.5 Ajouter le Namespace "kdufoot"
+### 14.5 Langues Supportées
+
+- 🇫🇷 Français (fr-FR) - Principale
+- 🇬🇧 Anglais (en-US)
+- 🇪🇸 Espagnol (es-ES)
+- 🇨🇳 Chinois (zh-CN)
+- 🇸🇦 Arabe (ar-SA) - Support RTL
+- 🇮🇱 Hébreu (he-IL) - Support RTL
+
+### 14.6 Support RTL (Right-to-Left)
 
 ```typescript
 // apps/client/src/i18n.ts
-
-i18n
-  .use(i18nextHttpBackend)
-  .use(initReactI18next)
-  .init<HttpBackendOptions>({
-    // ... config existante
-    
-    // MODIFICATION : Ajouter le namespace
-    ns: ["base", "kdufoot"],  // ⬅️
-    defaultNS: "kdufoot",      // ⬅️
-    
-    backend: {
-      loadPath: (lng, ns) => {
-        let url: URL = new URL("./locales/base/en-US.json", import.meta.url);
-
-        switch (ns) {
-          case "base":
-            // ... code existant
-            break;
-            
-          case "kdufoot":  // ⬅️ NOUVEAU
-            switch (lng) {
-              case "en-US":
-                url = new URL("./locales/kdufoot/en-US.json", import.meta.url);
-                break;
-              case "fr-FR":
-                url = new URL("./locales/kdufoot/fr-FR.json", import.meta.url);
-                break;
-              // ... autres langues
-            }
-            break;
-        }
-
-        return url.toString();
-      },
-    },
-  });
+i18n.on('languageChanged', (lng) => {
+  const dir = ['ar', 'he'].includes(lng) ? 'rtl' : 'ltr';
+  document.documentElement.setAttribute('dir', dir);
+});
 ```
 
-### 14.6 Utilisation dans React
-
-#### Utilisation Simple
+### 14.7 Sélecteur de Langue
 
 ```typescript
+// apps/client/src/components/language-switch.tsx
 import { useTranslation } from 'react-i18next';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@heroui/react';
 
-export const LibraryPage = () => {
-  const { t } = useTranslation(); // Utilise "kdufoot" par défaut
+const languages = [
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'zh', label: '中文', flag: '🇨🇳' },
+  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+  { code: 'he', label: 'עברית', flag: '🇮🇱' }
+];
+
+export const LanguageSwitch = () => {
+  const { i18n } = useTranslation();
+
+  const currentLang = languages.find(lang => lang.code === i18n.language);
 
   return (
-    <div>
-      <h1>{t('library.title')}</h1>
-      <p>{t('library.noExercises')}</p>
-    </div>
+    <Dropdown>
+      <DropdownTrigger>
+        <Button variant="light">
+          {currentLang?.flag} {currentLang?.label}
+        </Button>
+      </DropdownTrigger>
+      <DropdownMenu 
+        aria-label="Language selection"
+        onAction={(key) => i18n.changeLanguage(key as string)}
+      >
+        {languages.map(lang => (
+          <DropdownItem key={lang.code}>
+            {lang.flag} {lang.label}
+          </DropdownItem>
+        ))}
+      </DropdownMenu>
+    </Dropdown>
   );
 };
 ```
 
-#### Interpolation
+### 14.8 Persistence
 
 ```typescript
-const { t } = useTranslation();
+// La langue est automatiquement sauvegardée dans localStorage
+// via i18next-browser-languagedetector
 
-<p>{t('video.progress', { percent: 75 })}</p>
-// Résultat : "Progression : 75%"
-
-<p>{t('video.success', { count: 5 })}</p>
-// Résultat : "5 exercices détectés !"
-```
-
-#### Traductions d'Enums
-
-```typescript
-export const ExerciseCard = ({ exercise }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div>
-      <span>{t(`exercise.themes_list.${exercise.theme}`)}</span>
-      {/* Si theme = "TECHNIQUE" → "Technique" */}
-      
-      <span>{t(`exercise.categories.${exercise.category}`)}</span>
-      {/* Si category = "U13" → "U13 (moins de 13 ans)" */}
-    </div>
-  );
-};
-```
-
-#### Hook Personnalisé pour Enums
-
-```typescript
-// apps/client/src/hooks/use-translated-enum.ts
-
-import { useTranslation } from 'react-i18next';
-
-export function useTranslatedThemes() {
-  const { t } = useTranslation();
-  
-  const themes = ['TECHNIQUE', 'PHYSIQUE', 'TACTIQUE', 'FINITION', 'TRANSITION'];
-  
-  return themes.map(theme => ({
-    value: theme,
-    label: t(`exercise.themes_list.${theme}`)
-  }));
-}
-
-// Utilisation
-export const ExerciseFilters = () => {
-  const themes = useTranslatedThemes();
-
-  return (
-    <Select label="Thème">
-      {themes.map(theme => (
-        <SelectItem key={theme.value} value={theme.value}>
-          {theme.label}
-        </SelectItem>
-      ))}
-    </Select>
-  );
-};
-```
-
-### 14.7 Support RTL
-
-Le template gère automatiquement les langues RTL :
-
-```typescript
-// apps/client/src/components/language-switch.tsx (déjà présent)
-
-useEffect(() => {
-  const isRTL = availableLanguages.find((lang) => lang.code === language)?.isRTL || false;
-  document.documentElement.dir = isRTL ? "rtl" : "ltr";
-}, [language]);
-```
-
-**CSS adaptatif :**
-
-```css
-/* Marges adaptatives */
-<div className="mr-4 rtl:mr-0 rtl:ml-4">
-  Contenu
-</div>
-```
-
-### 14.8 Composant LanguageSwitch
-
-Le template fournit déjà un composant complet :
-
-```typescript
-// apps/client/src/components/navbar.tsx
-
-import { LanguageSwitch } from '@/components/language-switch';
-import { availableLanguages } from '@/i18n';
-
-export const Navbar = () => {
-  return (
-    <nav>
-      <LanguageSwitch availableLanguages={availableLanguages} />
-    </nav>
-  );
-};
+// Ordre de détection:
+// 1. localStorage ('i18nextLng')
+// 2. navigator.language
+// 3. Fallback: 'fr'
 ```
 
 ### 14.9 Bonnes Pratiques
 
-#### ✅ Organisation des Clés
+#### Nommage Cohérent
+- Sections: `video`, `exercise`, `match`, `session`
+- Actions: `create`, `edit`, `delete`, `save`
+- Messages: `success`, `error`, `warning`
 
+#### Éviter la Duplication
 ```json
-{
-  "section": {
-    "subsection": {
-      "key": "Valeur"
-    }
-  }
-}
-```
-
-#### ✅ Nommage Cohérent
-
-- **Sections** : `video`, `exercise`, `match`, `session`
-- **Actions** : `create`, `edit`, `delete`, `save`
-- **Messages** : `success`, `error`, `warning`
-
-#### ✅ Éviter la Duplication
-
-**❌ Mauvais :**
-```json
+// ❌ Mauvais
 {
   "exercise.save": "Enregistrer",
   "match.save": "Enregistrer"
 }
-```
 
-**✅ Bon :**
-```json
+// ✅ Bon
 {
   "common.save": "Enregistrer"
 }
@@ -2360,56 +2344,1003 @@ export const Navbar = () => {
 
 ### 14.10 Checklist i18n
 
-#### ✅ Configuration
-- [ ] Créer `locales/kdufoot/` pour les 6 langues
-- [ ] Modifier `i18n.ts` pour ajouter namespace
-- [ ] Tester chargement
+#### Traductions
+- ✅ Traduire toutes les sections
+- ✅ Ajouter enums traduits
+- ✅ Ajouter messages erreur/succès
+- ✅ Traduire permissions et quotas
 
-#### ✅ Traductions
-- [ ] Traduire toutes les sections
-- [ ] Ajouter enums traduits
-- [ ] Ajouter messages erreur/succès
-- [ ] Traduire permissions et quotas
-
-#### ✅ Tests
-- [ ] Tester changement de langue
-- [ ] Tester interpolation
-- [ ] Tester support RTL
-- [ ] Vérifier persistance localStorage
+#### Tests
+- ✅ Tester changement de langue
+- ✅ Tester interpolation
+- ✅ Tester support RTL
+- ✅ Vérifier persistance (localStorage)
 
 ---
 
-## 15. STANDARDS DE CODAGE & BONNES PRATIQUES 🔧
-> **Important :** l'équipe est francophone, mais **tout le code, les identifiants, les commentaires (JSDoc/TSDoc), les annotations OpenAPI et les messages de commit doivent être rédigés en anglais**. Cela facilite la revue de code, l'intégration d'outils externes et la collaboration open source.
+## 15. GESTION GRAPHIQUE DES PERMISSIONS AUTH0
 
-### 15.1 Langue et style 🗣️
-- **Langue :** Anglais (US) pour les identifiants, les commentaires et les messages de commit.
-- **Clarté :** Rédigez des commentaires concis et utiles ; évitez d'expliquer ce que le code exprime déjà.
-- **Tonalité :** Utilisez un style neutre et professionnel (impératif pour les TODOs, descriptif pour la documentation).
+> **Note:** Cette section s'inspire du dépôt [feedback-flow](https://github.com/sctg-development/feedback-flow) qui implémente un système de gestion graphique des permissions Auth0 optimisé pour rester dans le free tier.
 
-### 15.2 Conventions de nommage ✅
-- **Fichiers & dossiers :** kebab-case (ex. `exercise-card.tsx`, `use-exercises.ts`).
-  - Exceptions : fichiers de configuration (`tsconfig.json`, `vite.config.ts`), migrations (`0001_initial.sql`).
-- **Composants React & Types/Interfaces :** PascalCase (ex. `ExerciseCard`, `TrainingSession`).
-- **Hooks & services :** `use-xxx.ts` ou `xxx.service.ts` en kebab-case (ex. `use-exercises.ts`, `exercise.service.ts`).
-- **Fonctions & variables :** camelCase (ex. `getExercises`, `isLoading`).
-- **Constantes :** SCREAMING_SNAKE pour les variables d'environnement, sinon camelCase pour les constantes locales.
-- **Enums :** Nom en PascalCase, valeurs en UPPER_SNAKE ou PascalCase selon l'usage ; privilégier des chaînes sémantiques (voir l'enum Permissions).
+### 15.1 Architecture & Objectif
 
-### 15.3 Qualité & linters 🧹
-- **ESLint + Prettier** appliqués (utiliser les configurations du projet). Corrigez les problèmes de lint avant d'ouvrir une PR.
-- **TypeScript strict :** conservez `strict: true`, évitez `any`. Privilégiez les types de retour explicites pour les fonctions exportées.
-- **Préférer `const`** et `readonly` lorsque possible ; n'utilisez `let` que pour des réaffectations.
-- **Gestion des erreurs :** gérez systématiquement les erreurs (try/catch), renvoyez des structures d'erreur claires et typées.
-- **Logging :** évitez `console.log` en production ; utilisez une abstraction de logger et supprimez les logs de debug avant la PR.
-- **Accessibilité :** respectez les bonnes pratiques a11y pour les composants interactifs (ARIA, navigation au clavier).
+**Problématique:**  
+Le dashboard Auth0 nécessite une connexion manuelle pour gérer les permissions des utilisateurs, ce qui est peu pratique en production. De plus, chaque appel à l'Auth0 Management API consomme des quotas.
 
-### 15.4 Tests & CI ✅
-- **Tests :** tests unitaires pour les services/hooks et les routes du worker (Vitest). Ajoutez des tests pour les cas limites et la gestion des permissions.
-- **E2E :** ajoutez des tests d'intégration au fur et à mesure que les fonctionnalités se stabilisent.
-- **Couverture :** les nouvelles fonctionnalités doivent être couvertes ; le job CI doit exécuter les tests et la vérification des types.
+**Solution:**  
+Implémenter un endpoint `/api/__auth0/token` côté Cloudflare Worker qui:
+1. Obtient un token Management API via Client Credentials grant
+2. Cache le token dans Cloudflare KV pour réduire les appels Auth0
+3. Permet aux administrateurs de gérer graphiquement les permissions depuis l'interface KduFoot
 
-### 15.5 JSDoc / TSDoc (ENGLISH) 📝
+**Avantages:**
+- ✅ Gestion permissions sans quitter l'application
+- ✅ Réduction des appels Auth0 (free tier friendly)
+- ✅ UX améliorée pour les administrateurs
+- ✅ Audit trail des modifications
+
+### 15.2 Configuration Auth0 Management API
+
+#### Créer une Machine-to-Machine Application
+
+1. **Aller dans Auth0 Dashboard** → Applications → Create Application
+2. **Nom:** `KduFoot Management API`
+3. **Type:** `Machine to Machine Applications`
+4. **API:** `Auth0 Management API`
+5. **Permissions requises:**
+   - `read:users`
+   - `update:users`
+   - `read:users_app_metadata`
+   - `update:users_app_metadata`
+   - `read:user_idp_tokens`
+   - `create:user_permissions`
+   - `read:user_permissions`
+   - `update:user_permissions`
+   - `delete:user_permissions`
+
+#### Variables d'Environnement
+
+```env
+# .env (root)
+# Auth0 Management API Configuration
+AUTH0_MANAGEMENT_API_CLIENT_ID=your_management_client_id
+AUTH0_MANAGEMENT_API_CLIENT_SECRET=your_management_client_secret
+AUTH0_DOMAIN=kdufoot.eu.auth0.com
+
+# Permission pour accéder à l'endpoint management
+ADMIN_AUTH0_PERMISSION=admin:auth0
+```
+
+```jsonc
+// apps/cloudflare-worker/wrangler.jsonc
+{
+  "name": "kdufoot-api",
+  "vars": {
+    "AUTH0_DOMAIN": "kdufoot.eu.auth0.com",
+    "ADMIN_AUTH0_PERMISSION": "admin:auth0"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "KV_CACHE",
+      "id": "your-kv-namespace-id",
+      "preview_id": "your-preview-kv-id"
+    }
+  ]
+}
+```
+
+### 15.3 Implémentation Cloudflare Worker
+
+#### Endpoint `/api/__auth0/token`
+
+```typescript
+// apps/cloudflare-worker/src/routes/system/index.ts
+import { Router } from '../router';
+import { decodeJwt } from 'jose';
+import type { Env } from '../../types/env';
+
+export interface Auth0ManagementTokenResponse {
+  access_token: string;
+  token_type?: string;
+  expires_in?: number;
+  from_cache?: boolean;
+}
+
+export interface ErrorResponse {
+  success: false;
+  error: string;
+}
+
+export const setupSystemRoutes = async (router: Router, env: Env) => {
+  /**
+   * POST /api/__auth0/token
+   *
+   * Obtient un token Auth0 Management API et le cache dans KV
+   * Protégé par ADMIN_AUTH0_PERMISSION
+   *
+   * @returns {Auth0ManagementTokenResponse} Token avec metadata
+   */
+  router.post(
+    '/api/__auth0/token',
+    async (request) => {
+      try {
+        // Validation des variables d'environnement
+        if (!env.AUTH0_MANAGEMENT_API_CLIENT_ID || 
+            !env.AUTH0_MANAGEMENT_API_CLIENT_SECRET || 
+            !env.AUTH0_DOMAIN) {
+          const err: ErrorResponse = { 
+            success: false, 
+            error: 'Auth0 configuration is missing' 
+          };
+          return new Response(JSON.stringify(err, null, 2), {
+            status: 500,
+            headers: { ...router.corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const tokenUrl = `https://${env.AUTH0_DOMAIN}/oauth/token`;
+        const audience = `https://${env.AUTH0_DOMAIN}/api/v2/`;
+        const cacheKey = 'auth0:management_token';
+
+        // ✅ ÉTAPE 1: Vérifier le cache KV
+        if (env.KV_CACHE) {
+          try {
+            const cached = await env.KV_CACHE.get(cacheKey);
+            
+            if (cached) {
+              let parsed: { token?: string; exp?: number } | null = null;
+              
+              try {
+                parsed = JSON.parse(cached);
+              } catch (e) {
+                // cached value may be raw token string
+              }
+
+              const token = parsed?.token ?? cached;
+              let exp = parsed?.exp;
+
+              // Décoder le JWT pour obtenir l'expiration si non présente
+              if (!exp && token) {
+                try {
+                  const decoded = decodeJwt(token);
+                  exp = (decoded?.exp as number) || undefined;
+                } catch (_) {
+                  exp = undefined;
+                }
+              }
+
+              // Vérifier si le token est encore valide (marge de 5 secondes)
+              if (exp) {
+                const now = Math.floor(Date.now() / 1000);
+                if (exp > now + 5) {
+                  const expires_in = exp - now;
+                  const cachedResult: Auth0ManagementTokenResponse = {
+                    access_token: token,
+                    token_type: 'Bearer',
+                    expires_in,
+                    from_cache: true
+                  };
+                  
+                  console.log('[Auth0] Token retrieved from cache, expires in', expires_in, 'seconds');
+                  
+                  return new Response(JSON.stringify(cachedResult, null, 2), {
+                    status: 200,
+                    headers: { ...router.corsHeaders, 'Content-Type': 'application/json' }
+                  });
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('[Auth0] KV_CACHE access failed, requesting new token:', String(e));
+          }
+        }
+
+        // ✅ ÉTAPE 2: Demander un nouveau token à Auth0
+        console.log('[Auth0] Requesting new token from:', tokenUrl);
+
+        const body = {
+          client_id: env.AUTH0_MANAGEMENT_API_CLIENT_ID,
+          client_secret: env.AUTH0_MANAGEMENT_API_CLIENT_SECRET,
+          audience,
+          grant_type: 'client_credentials'
+        };
+
+        const resp = await fetch(tokenUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (!resp.ok) {
+          const errorText = await resp.text();
+          const err: ErrorResponse = { 
+            success: false, 
+            error: `Failed to retrieve token: ${errorText}` 
+          };
+          return new Response(JSON.stringify(err, null, 2), {
+            status: 500,
+            headers: { ...router.corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const data = (await resp.json()) as {
+          access_token?: string;
+          token_type?: string;
+          expires_in?: number;
+          [key: string]: any;
+        };
+
+        if (!data || !data.access_token) {
+          const err: ErrorResponse = { 
+            success: false, 
+            error: 'Invalid response from Auth0: no access_token returned' 
+          };
+          return new Response(JSON.stringify(err, null, 2), {
+            status: 500,
+            headers: { ...router.corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // ✅ ÉTAPE 3: Cacher le token dans KV
+        if (env.KV_CACHE && data.access_token) {
+          try {
+            const token = data.access_token as string;
+            const now = Math.floor(Date.now() / 1000);
+            let exp: number | undefined;
+
+            if (typeof data.expires_in === 'number') {
+              exp = now + Math.floor(data.expires_in as number);
+            } else {
+              try {
+                const decoded = decodeJwt(token);
+                exp = (decoded?.exp as number) || undefined;
+              } catch (_) {
+                exp = undefined;
+              }
+            }
+
+            if (exp && exp > now + 5) {
+              const kvValue = JSON.stringify({ token, exp });
+              await env.KV_CACHE.put(cacheKey, kvValue, { expiration: exp });
+              console.log('[Auth0] Token cached in KV, expires at', new Date(exp * 1000).toISOString());
+            }
+          } catch (e) {
+            console.warn('[Auth0] Failed to store token in KV_CACHE:', String(e));
+          }
+        }
+
+        const result: Auth0ManagementTokenResponse = {
+          access_token: data.access_token as string,
+          token_type: data.token_type as string | undefined,
+          expires_in: data.expires_in as number | undefined,
+          from_cache: false
+        };
+
+        return new Response(JSON.stringify(result, null, 2), {
+          status: 200,
+          headers: { ...router.corsHeaders, 'Content-Type': 'application/json' }
+        });
+
+      } catch (error) {
+        const err: ErrorResponse = { success: false, error: String(error) };
+        return new Response(JSON.stringify(err, null, 2), {
+          status: 500,
+          headers: { ...router.corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    },
+    env.ADMIN_AUTH0_PERMISSION // ⚠️ Protection par permission admin
+  );
+};
+```
+
+### 15.4 Types TypeScript
+
+```typescript
+// apps/client/src/types/auth0.types.ts
+export interface Auth0User {
+  user_id: string;
+  email: string;
+  name?: string;
+  nickname?: string;
+  picture?: string;
+  identities?: Auth0Identity[];
+  app_metadata?: Record<string, any>;
+  user_metadata?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  last_login?: string;
+  logins_count?: number;
+}
+
+export interface Auth0Identity {
+  connection: string;
+  provider: string;
+  user_id: string;
+  isSocial: boolean;
+}
+
+export interface Auth0Permission {
+  permission_name: string;
+  resource_server_identifier: string;
+  resource_server_name?: string;
+  description?: string;
+}
+
+export interface Auth0ManagementTokenResponse {
+  access_token: string;
+  token_type?: string;
+  expires_in?: number;
+  from_cache?: boolean;
+}
+
+export interface Auth0PermissionsUpdate {
+  userId: string;
+  permissions: {
+    add?: string[];
+    remove?: string[];
+  };
+}
+```
+
+### 15.5 Service Auth0 Management (Client)
+
+```typescript
+// apps/client/src/services/auth0.service.ts
+import { useSecuredApi } from '@/authentication';
+import type { 
+  Auth0User, 
+  Auth0Permission, 
+  Auth0ManagementTokenResponse 
+} from '@/types/auth0.types';
+
+export const useAuth0ManagementService = () => {
+  const { postJson, getJson, deleteJson } = useSecuredApi();
+
+  return {
+    /**
+     * Obtient un token Management API (caché côté Worker)
+     */
+    async getManagementToken(): Promise<Auth0ManagementTokenResponse> {
+      return await postJson(`${import.meta.env.API_BASE_URL}/api/__auth0/token`, {});
+    },
+
+    /**
+     * Liste tous les utilisateurs Auth0
+     */
+    async listUsers(token: string, page: number = 0, perPage: number = 50): Promise<Auth0User[]> {
+      const response = await fetch(
+        `https://${import.meta.env.AUTH0_DOMAIN}/api/v2/users?page=${page}&per_page=${perPage}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.statusText}`);
+      }
+
+      return await response.json();
+    },
+
+    /**
+     * Récupère les permissions d'un utilisateur
+     */
+    async getUserPermissions(token: string, userId: string): Promise<Auth0Permission[]> {
+      const response = await fetch(
+        `https://${import.meta.env.AUTH0_DOMAIN}/api/v2/users/${userId}/permissions`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch permissions: ${response.statusText}`);
+      }
+
+      return await response.json();
+    },
+
+    /**
+     * Ajoute une permission à un utilisateur
+     */
+    async addPermissionToUser(
+      token: string, 
+      userId: string, 
+      permission: string
+    ): Promise<void> {
+      const response = await fetch(
+        `https://${import.meta.env.AUTH0_DOMAIN}/api/v2/users/${userId}/permissions`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            permissions: [{
+              permission_name: permission,
+              resource_server_identifier: import.meta.env.AUTH0_AUDIENCE
+            }]
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to add permission: ${response.statusText}`);
+      }
+    },
+
+    /**
+     * Retire une permission d'un utilisateur
+     */
+    async removePermissionFromUser(
+      token: string, 
+      userId: string, 
+      permission: string
+    ): Promise<void> {
+      const response = await fetch(
+        `https://${import.meta.env.AUTH0_DOMAIN}/api/v2/users/${userId}/permissions`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            permissions: [{
+              permission_name: permission,
+              resource_server_identifier: import.meta.env.AUTH0_AUDIENCE
+            }]
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to remove permission: ${response.statusText}`);
+      }
+    },
+
+    /**
+     * Supprime un utilisateur Auth0
+     */
+    async deleteUser(token: string, userId: string): Promise<void> {
+      const response = await fetch(
+        `https://${import.meta.env.AUTH0_DOMAIN}/api/v2/users/${userId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete user: ${response.statusText}`);
+      }
+    }
+  };
+};
+```
+
+### 15.6 Page de Gestion des Permissions
+
+```typescript
+// apps/client/src/pages/admin-users.tsx
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAuth0 } from '@auth0/auth0-react';
+import { Button } from '@heroui/button';
+import { Checkbox } from '@heroui/checkbox';
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
+import { addToast } from '@heroui/toast';
+import DefaultLayout from '@/layouts/default';
+import { useAuth0ManagementService } from '@/services/auth0.service';
+import type { Auth0User, Auth0Permission } from '@/types/auth0.types';
+
+export default function AdminUsersPage() {
+  const { user } = useAuth0();
+  const currentUserId = (user?.sub || '').toString().trim();
+  const { t } = useTranslation('kdufoot');
+  
+  const {
+    getManagementToken,
+    listUsers,
+    getUserPermissions,
+    addPermissionToUser,
+    removePermissionFromUser,
+    deleteUser
+  } = useAuth0ManagementService();
+
+  const [token, setToken] = useState<string | null>(null);
+  const [users, setUsers] = useState<Auth0User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Auth0User | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [editing, setEditing] = useState<Record<string, Record<string, boolean>>>({});
+
+  // Matrice des permissions KduFoot
+  const permissionMap = {
+    'videos:analyze': t('permissions.videos_analyze'),
+    'videos:analyze_long': t('permissions.videos_analyze_long'),
+    'exercises:create': t('permissions.exercises_create'),
+    'exercises:share': t('permissions.exercises_share'),
+    'sessions:adapt': t('permissions.sessions_adapt'),
+    'matches:create': t('permissions.matches_create'),
+    'export:pdf': t('permissions.export_pdf'),
+    'admin:users': t('permissions.admin_users'),
+    'admin:auth0': t('permissions.admin_auth0')
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        // Obtenir le token Management API
+        const tokenResponse = await getManagementToken();
+        setToken(tokenResponse.access_token);
+
+        // Charger les utilisateurs
+        if (tokenResponse.access_token) {
+          const fetchedUsers = await listUsers(tokenResponse.access_token);
+          setUsers(fetchedUsers);
+
+          if (tokenResponse.from_cache) {
+            addToast({
+              title: t('admin.token_from_cache'),
+              variant: 'solid',
+              timeout: 3000
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        addToast({
+          title: t('error'),
+          description: t('admin.failed_load_users'),
+          variant: 'solid',
+          timeout: 5000
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const openUserModal = async (user: Auth0User) => {
+    if (!token) {
+      addToast({
+        title: t('error'),
+        description: t('admin.no_token'),
+        variant: 'solid',
+        timeout: 5000
+      });
+      return;
+    }
+
+    setSelectedUser(user);
+    setModalOpen(true);
+    setModalLoading(true);
+
+    try {
+      const userPerms = await getUserPermissions(token, user.user_id);
+      const audience = import.meta.env.AUTH0_AUDIENCE || '';
+      
+      // Filtrer les permissions pour notre API
+      let permNames = (userPerms || [])
+        .filter((p: Auth0Permission) => {
+          const rs = (p.resource_server_identifier || '') as string;
+          return rs === audience || rs.includes(audience);
+        })
+        .map((p: Auth0Permission) => p.permission_name);
+
+      // Initialiser l'état d'édition
+      const permissionsState: Record<string, boolean> = {};
+      Object.keys(permissionMap).forEach(perm => {
+        permissionsState[perm] = permNames.includes(perm);
+      });
+
+      setEditing(prev => ({
+        ...prev,
+        [user.user_id]: permissionsState
+      }));
+    } catch (err) {
+      console.error(err);
+      addToast({
+        title: t('error'),
+        description: t('admin.failed_load_permissions'),
+        variant: 'solid',
+        timeout: 5000
+      });
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const togglePermission = (userId: string, permission: string) => {
+    setEditing(prev => ({
+      ...prev,
+      [userId]: {
+        ...(prev[userId] || {}),
+        [permission]: !(prev[userId]?.[permission] ?? false)
+      }
+    }));
+  };
+
+  const saveUserPermissions = async (userId: string) => {
+    if (!token) return;
+
+    try {
+      const currentState = editing[userId] || {};
+      const originalPerms = await getUserPermissions(token, userId);
+      
+      const audience = import.meta.env.AUTH0_AUDIENCE;
+      const originalPermNames = originalPerms
+        .filter(p => p.resource_server_identifier === audience)
+        .map(p => p.permission_name);
+
+      // Déterminer les permissions à ajouter/retirer
+      for (const [perm, shouldHave] of Object.entries(currentState)) {
+        const hasIt = originalPermNames.includes(perm);
+
+        if (shouldHave && !hasIt) {
+          await addPermissionToUser(token, userId, perm);
+        } else if (!shouldHave && hasIt) {
+          await removePermissionFromUser(token, userId, perm);
+        }
+      }
+
+      addToast({
+        title: t('success'),
+        description: t('admin.permissions_updated'),
+        variant: 'solid',
+        timeout: 5000
+      });
+
+      setModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      addToast({
+        title: t('error'),
+        description: t('admin.failed_update_permissions'),
+        variant: 'solid',
+        timeout: 5000
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (userId === currentUserId) {
+      addToast({
+        title: t('error'),
+        description: t('admin.cannot_delete_self'),
+        variant: 'solid'
+      });
+      return;
+    }
+
+    if (!token) return;
+
+    if (!confirm(t('admin.confirm_delete_user'))) return;
+
+    try {
+      await deleteUser(token, userId);
+      setUsers(prev => prev.filter(u => u.user_id !== userId));
+      
+      addToast({
+        title: t('success'),
+        description: t('admin.user_deleted'),
+        variant: 'solid',
+        timeout: 5000
+      });
+
+      if (selectedUser?.user_id === userId) {
+        setModalOpen(false);
+        setSelectedUser(null);
+      }
+    } catch (err) {
+      console.error(err);
+      addToast({
+        title: t('error'),
+        description: t('admin.failed_delete_user'),
+        variant: 'solid',
+        timeout: 5000
+      });
+    }
+  };
+
+  return (
+    <DefaultLayout>
+      <div className="container mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-6">{t('admin.users_permissions')}</h1>
+        
+        {isLoading ? (
+          <div>{t('loading')}</div>
+        ) : (
+          <Table aria-label={t('admin.users_table')}>
+            <TableHeader>
+              <TableColumn>{t('admin.user')}</TableColumn>
+              <TableColumn>{t('admin.email')}</TableColumn>
+              <TableColumn>{t('admin.created_at')}</TableColumn>
+              <TableColumn>{t('admin.actions')}</TableColumn>
+            </TableHeader>
+            <TableBody items={users} emptyContent={t('admin.no_users')}>
+              {(user) => (
+                <TableRow key={user.user_id}>
+                  <TableCell>{user.name || user.nickname || user.user_id}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        color="primary"
+                        onPress={() => openUserModal(user)}
+                      >
+                        {t('admin.edit_permissions')}
+                      </Button>
+                      
+                      {user.user_id !== currentUserId && (
+                        <Button 
+                          size="sm" 
+                          color="danger"
+                          onPress={() => handleDeleteUser(user.user_id)}
+                        >
+                          {t('admin.delete')}
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
+
+        {/* Modal de gestion des permissions */}
+        {modalOpen && selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-11/12 max-w-2xl">
+              <h3 className="text-lg font-bold mb-4">
+                {t('admin.permissions_for', { name: selectedUser.name || selectedUser.email })}
+              </h3>
+
+              {modalLoading ? (
+                <div>{t('loading')}</div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(permissionMap).map(([perm, label]) => (
+                    <label key={perm} className="flex items-center gap-2">
+                      <Checkbox
+                        isSelected={!!(editing[selectedUser.user_id]?.[perm])}
+                        onValueChange={() => togglePermission(selectedUser.user_id, perm)}
+                      />
+                      <span className="text-sm">{label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-6 flex gap-2 justify-end">
+                <Button
+                  color="primary"
+                  onPress={() => saveUserPermissions(selectedUser.user_id)}
+                >
+                  {t('admin.save')}
+                </Button>
+                
+                <Button
+                  variant="bordered"
+                  onPress={() => setModalOpen(false)}
+                >
+                  {t('admin.cancel')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </DefaultLayout>
+  );
+}
+```
+
+### 15.7 Traductions
+
+```json
+// apps/client/src/locales/kdufoot/fr-FR.json
+{
+  "admin": {
+    "users_permissions": "Gestion des Utilisateurs & Permissions",
+    "users_table": "Liste des utilisateurs",
+    "no_users": "Aucun utilisateur",
+    "user": "Utilisateur",
+    "email": "Email",
+    "created_at": "Inscrit le",
+    "actions": "Actions",
+    "edit_permissions": "Gérer les permissions",
+    "delete": "Supprimer",
+    "permissions_for": "Permissions pour {name}",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "token_from_cache": "Token récupéré du cache (économie API)",
+    "failed_load_users": "Échec du chargement des utilisateurs",
+    "failed_load_permissions": "Échec du chargement des permissions",
+    "failed_update_permissions": "Échec de la mise à jour des permissions",
+    "failed_delete_user": "Échec de la suppression de l'utilisateur",
+    "permissions_updated": "Permissions mises à jour",
+    "user_deleted": "Utilisateur supprimé",
+    "cannot_delete_self": "Vous ne pouvez pas supprimer votre propre compte",
+    "confirm_delete_user": "Confirmer la suppression de cet utilisateur ?",
+    "no_token": "Aucun token disponible"
+  },
+  "permissions": {
+    "videos_analyze": "Analyser vidéos courtes",
+    "videos_analyze_long": "Analyser vidéos longues",
+    "exercises_create": "Créer exercices",
+    "exercises_share": "Partager exercices",
+    "sessions_adapt": "Adapter séances (IA)",
+    "matches_create": "Créer annonces matchs",
+    "export_pdf": "Exporter en PDF",
+    "admin_users": "Gérer utilisateurs",
+    "admin_auth0": "Gérer permissions Auth0"
+  }
+}
+```
+
+### 15.8 Protection de la Route Admin
+
+```typescript
+// apps/client/src/App.tsx
+import { Routes, Route } from 'react-router-dom';
+import { useSecuredApi } from '@/authentication';
+import AdminUsersPage from '@/pages/admin-users';
+
+function App() {
+  const { hasPermission } = useSecuredApi();
+
+  return (
+    <Routes>
+      {/* ... autres routes ... */}
+      
+      {/* Route protégée admin */}
+      {hasPermission('admin:auth0') && (
+        <Route path="/admin/users" element={<AdminUsersPage />} />
+      )}
+    </Routes>
+  );
+}
+```
+
+### 15.9 Navbar avec Lien Admin
+
+```typescript
+// apps/client/src/components/navbar.tsx
+import { Link } from 'react-router-dom';
+import { useSecuredApi } from '@/authentication';
+
+export const Navbar = () => {
+  const { hasPermission } = useSecuredApi();
+
+  return (
+    <nav>
+      {/* ... autres liens ... */}
+      
+      {hasPermission('admin:auth0') && (
+        <Link to="/admin/users">
+          Admin
+        </Link>
+      )}
+    </nav>
+  );
+};
+```
+
+### 15.10 Avantages de cette Approche
+
+| Aspect | Sans endpoint custom | Avec `/api/__auth0/token` |
+|--------|---------------------|---------------------------|
+| **Connexion dashboard** | Nécessaire à chaque fois | Jamais |
+| **Appels Auth0** | ~10-50/jour | ~1-5/jour (cache KV) |
+| **UX Admin** | Dashboard externe | Interface intégrée |
+| **Audit** | Logs Auth0 seulement | Logs applicatifs + Auth0 |
+| **Coût** | Risque dépassement free tier | Optimisé free tier |
+| **Temps gestion** | ~5-10 min/utilisateur | ~30 sec/utilisateur |
+
+### 15.11 Sécurité
+
+**Points de vigilance:**
+- ⚠️ **JAMAIS** exposer `AUTH0_MANAGEMENT_API_CLIENT_SECRET` au frontend
+- ✅ **TOUJOURS** protéger `/api/__auth0/token` avec `ADMIN_AUTH0_PERMISSION`
+- ✅ **TOUJOURS** valider les permissions côté Worker avant chaque opération
+- ✅ **JAMAIS** faire confiance aux permissions envoyées par le client
+- ✅ **TOUJOURS** logger les modifications de permissions pour audit
+
+### 15.12 Monitoring & Debug
+
+```typescript
+// apps/cloudflare-worker/src/routes/system/index.ts
+// Ajouter des logs pour le monitoring
+
+console.log('[Auth0] Token request', {
+  from_cache: false,
+  user_id: request.user?.sub,
+  timestamp: new Date().toISOString()
+});
+
+// En production, envoyer à un service d'analytics
+if (env.ENVIRONMENT === 'production') {
+  await env.ANALYTICS?.writeDataPoint({
+    blobs: ['auth0_token_request'],
+    doubles:, [ppl-ai-file-upload.s3.amazonaws](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/154010031/69edb0de-ec16-47f6-8960-1e8bc0f54d30/login_redirect.html)
+    indexes: [request.user?.sub]
+  });
+}
+```
+
+### 15.13 Checklist Implémentation
+
+- ✅ Créer Machine-to-Machine Application Auth0
+- ✅ Configurer permissions Management API
+- ✅ Ajouter variables d'environnement
+- ✅ Créer namespace KV Cloudflare
+- ✅ Implémenter endpoint `/api/__auth0/token`
+- ✅ Implémenter service Auth0 Management (client)
+- ✅ Créer page admin permissions
+- ✅ Protéger la route avec `admin:auth0`
+- ✅ Ajouter traductions
+- ✅ Tester en local
+- ✅ Tester cache KV
+- ✅ Tester expiration token
+- ✅ Déployer en production
+- ✅ Vérifier logs
+- ✅ Documenter pour l'équipe
+
+---
+
+## 16. STANDARDS DE CODAGE & BONNES PRATIQUES
+
+### 16.1 Langues & Documentation
+
+**Important:** L'équipe est francophone, mais **tout le code, les identifiants, les commentaires JSDoc/TSDoc, les annotations OpenAPI et les messages de commit doivent être rédigés en anglais**. Cela facilite la revue de code, l'intégration d'outils externes et la collaboration open source.
+
+### 16.2 Conventions de nommage
+
+- **Fichiers & dossiers:** kebab-case (ex. `exercise-card.tsx`, `use-exercises.ts`).
+- **Exceptions:** fichiers de configuration (`tsconfig.json`, `vite.config.ts`), migrations (`0001_initial.sql`).
+- **Composants React & Types/Interfaces:** PascalCase (ex. `ExerciseCard`, `TrainingSession`).
+- **Hooks & services:** `use-xxx.ts` ou `xxx.service.ts` en kebab-case (ex. `use-exercises.ts`, `exercise.service.ts`).
+- **Fonctions & variables:** camelCase (ex. `getExercises`, `isLoading`).
+- **Constantes:** SCREAMING_SNAKE pour les variables d'environnement, sinon camelCase pour les constantes locales.
+- **Enums:** Nom en PascalCase, valeurs en UPPER_SNAKE ou PascalCase selon l'usage (privilégier des chaînes sémantiques, voir l'enum `Permissions`).
+
+### 16.3 Qualité & linters
+
+- **ESLint & Prettier:** appliqués (utiliser les configurations du projet). Corrigez les problèmes de lint avant d'ouvrir une PR.
+- **TypeScript strict:** conservez `strict: true`, évitez `any`. Privilégiez les types de retour explicites pour les fonctions exportées.
+- **Préférer `const` et `readonly`** lorsque possible ; n'utilisez `let` que pour des réaffectations.
+- **Gestion des erreurs:** gérez systématiquement les erreurs (try/catch), renvoyez des structures d'erreur claires et typées.
+- **Logging:** évitez `console.log` en production ; utilisez une abstraction de logger et supprimez les logs de debug avant la PR.
+- **Accessibilité:** respectez les bonnes pratiques a11y pour les composants interactifs (ARIA, navigation au clavier).
+
+### 16.4 Tests & CI
+
+- **Tests:** tests unitaires pour les services/hooks et les routes du worker (Vitest). Ajoutez des tests pour les cas limites et la gestion des permissions.
+- **E2E:** ajoutez des tests d'intégration au fur et mesure que les fonctionnalités se stabilisent.
+- **Couverture:** les nouvelles fonctionnalités doivent être couvertes ; le job CI doit exécuter les tests et la vérification des types.
+### 16.5 JSDoc / TSDoc (ENGLISH) 📝
 - Utilisez **l'anglais** pour tous les commentaires de documentation. Privilégiez le style TSDoc/JSDoc avec `@param`, `@returns`, `@throws`, `@example`.
 - Gardez les exemples minimaux et directement copiables.
 
@@ -2434,7 +3365,7 @@ export async function adaptExercise(id: string, constraints: AdaptationConstrain
 }
 ```
 
-### 15.6 Annotations OpenAPI (swagger-jsdoc) 📚
+### 16.6 Annotations OpenAPI (swagger-jsdoc) 📚
 - Ajoutez des commentaires JSDoc OpenAPI au-dessus des handlers de route dans les **Cloudflare Worker routes**. La documentation doit être rédigée en anglais.
 - Utilisez `swagger-jsdoc` ou un équivalent pour générer `openapi.json` dans le CI ou via un script.
 
@@ -2499,67 +3430,96 @@ Components / Schemas example (centralized):
 
 - **Recommandation :** Ajoutez un script npm `openapi:generate` qui exécute `swagger-jsdoc` et écrit `openapi.json` dans `apps/cloudflare-worker/openapi.json`, puis intégrez-le aux vérifications CI.
 
-### 15.7 Pull Requests & commits ✅
-- **Commits :** format Conventional Commits (ex. `feat(video): analyze endpoint`, `fix(exercise): handle missing svg`). Messages en **anglais**.
-- **Description PR :** expliquez pourquoi, pas seulement ce qui a été fait. Liez l'issue, listez les choix de conception importants et joignez captures d'écran ou exemples curl pour les changements API.
-- **Checklist de review :** lint, type-check, tests, build, mises à jour de la doc (OpenAPI, clés i18n).
+### 16.7 Commentaires & Documentation
 
-### 15.8 Sécurité & secrets 🔒
-- Ne commitez jamais de secrets. Utilisez `.env` pour le développement local et gérez les secrets de production via Cloudflare / Terraform.
-- Validez et assainissez les entrées côté serveur (uploads R2, prompts Gemini).
-- Appliquez du rate-limiting sur les endpoints sensibles et protégez-les via permissions/quotas.
+- **JSDoc/TSDoc:** présent pour les fonctions exportées et la logique importante.
+- **OpenAPI:** annotations pertinentes ajoutées/mises à jour pour les changements d'API.
+- **README & docs:** tenez à jour la documentation technique dans `ANALYSE_TECHNIQUE.md` et les README des packages.
 
-### 15.9 Internationalisation (i18n) 🎯
-- Toutes les chaînes visibles doivent provenir des clés de traduction (`kdufoot` namespace). Les clés et les commentaires dans le code doivent être en anglais.
+### 16.8 Architecture & Patterns
+
+- **Composants purs:** privilégiez les composants fonctionnels purs ; utilisez les hooks pour la logique.
+- **Services:** isolez la logique métier dans les services (pattern hook-based).
+- **State management:** utilisez React Context + useReducer pour l'état global ; évitez les bibliothèques tierces sauf si nécessaire.
+- **Error boundaries:** enveloppez les composants critiques pour gérer les erreurs React.
+- **Loading states:** affichez des skeletons pour une UX fluide.
+
+### 16.9 Pull Requests & commits
+
+- **Commits:** format [Conventional Commits](https://www.conventionalcommits.org/) (ex. `feat(video): analyze endpoint`, `fix(exercise): handle missing svg`). Messages en anglais.
+- **Description PR:** expliquez *pourquoi*, pas seulement *ce qui* a été fait. Liez l'issue, listez les choix de conception importants et joignez captures d'écran ou exemples `curl` pour les changements API.
+- **Checklist de review:** lint, type-check, tests, build, mises à jour de la doc OpenAPI, clés i18n.
+
+### 16.10 Performance
+
+- **Code splitting:** utilisez lazy loading pour les routes et composants volumineux.
+- **Images:** optimisez (WebP, lazy loading, responsive images).
+- **Caching:** utilisez KV Cloudflare pour les données fréquemment accédées (tokens, clubs, etc.).
+- **Bundling:** vérifiez la taille des bundles (Vite Rollup Visualizer).
+
+### 16.11 Internationalisation (i18n)
+
+- Toutes les **chaînes visibles** doivent provenir des clés de traduction (`kdufoot` namespace). Les clés et les commentaires dans le code doivent être en anglais.
 - Évitez les chaînes codées en dur dans les composants.
 
-### 15.10 Checklist PR rapide ✅
-- [ ] Code en anglais (identifiants + commentaires)
-- [ ] JSDoc/TSDoc présent pour les fonctions exportées et la logique importante
-- [ ] Annotations OpenAPI pertinentes ajoutées/mises à jour pour les changements d'API
-- [ ] Tests unitaires ajoutés/mis à jour, CI vert
-- [ ] Clés i18n ajoutées pour les nouveaux textes visibles
-- [ ] Lint & format OK, vérification des types passée
-- [ ] i18n keys added for new visible texts
-- [ ] Lint & format OK, type-check passes
+### 16.12 Checklist PR rapide
+
+- ✅ Code en anglais (identifiants, commentaires)
+- ✅ JSDoc/TSDoc présent pour les fonctions exportées et la logique importante
+- ✅ Annotations OpenAPI pertinentes ajoutées/mises à jour pour les changements d'API
+- ✅ Tests unitaires ajoutés/mis à jour, CI vert
+- ✅ Clés i18n ajoutées pour les nouveaux textes visibles
+- ✅ Lint & format OK, vérification des types passe
+- ✅ i18n keys added for new visible texts
+- ✅ Lint & format OK, type-check passes
 
 ---
 
-## 16. RESPECT DES LICENCES & COPYRIGHT 🔏
-> **Rappel :** le template et certains fichiers sources sont soumis à des licences (ex. **AGPL-3.0-or-later**). Le respect des mentions de licence et des en-têtes copyright est obligatoire.
+## 17. RESPECT DES LICENCES & COPYRIGHT
 
-- **Vérifier la licence principale :** consultez le fichier `LICENSE` à la racine et respectez la licence indiquée (AGPL-3.0-or-later) ainsi que les licences des dépendances.
-- **Conserver les en-têtes existants :** pour tout fichier provenant du template ou inspiré du template, **ne retirez pas** l'en-tête de copyright ni la mention de licence d'origine.
-- **Fichiers modifiés :** conservez l'en-tête original et, si nécessaire, ajoutez une ligne indiquant la modification (en anglais). Exemple :
+**Rappel:** le template et certains fichiers sources sont soumis à des licences (ex. AGPL-3.0-or-later). Le respect des mentions de licence et des en-têtes copyright est **obligatoire**.
+
+- **Vérifier la licence principale:** consultez le fichier `LICENSE` à la racine et respectez la licence indiquée (AGPL-3.0-or-later) ainsi que les licences des dépendances.
+- **Conserver les en-têtes existants:** pour tout fichier provenant du template ou inspiré du template, ne retirez pas l'en-tête de copyright ni la mention de licence d'origine.
+- **Fichiers modifiés:** conservez l'en-tête original et, si nécessaire, ajoutez une ligne indiquant la modification (en anglais). Exemple:
 
 ```ts
-/**
+/*
  * Copyright (c) 2024-2026 Ronan LE MEILLAT
- * Modified by: <Name> (2026)
+ * Modified by [Name] 2026
  * License: AGPL-3.0-or-later
  */
 ```
 
-- **Nouveaux fichiers :** si le fichier n'hérite pas d'un header existant, ajoutez un header minimal (en anglais) :
+- **Nouveaux fichiers:** si le fichier n'hérite pas d'un header existant, ajoutez un header minimal (en anglais):
 
 ```ts
-/**
+/*
  * Copyright (c) 2026 Ronan LE MEILLAT
  * License: AGPL-3.0-or-later
  */
 ```
 
-- **Code tiers :** quand vous réutilisez du code tiers (snippets, bibliothèques), conservez les mentions de licence attachées à ce code et ajoutez une note d'attribution dans le fichier ou dans la PR.
+- **Code tiers:** quand vous réutilisez du code tiers (snippets, bibliothèques), conservez les mentions de licence attachées à ce code et ajoutez une note d'attribution dans le fichier ou dans la PR.
 
-- **Contrôles & automations recommandés :**
-  - Ajoutez un job CI `license:check` (ex. `license-checker`, `reuse`, ou équivalent) pour détecter les dépendances et incompatibilités de licence.
-  - Ajoutez un hook pre-commit pour vérifier la présence d'un header de licence sur les fichiers sources modifiés.
-  - Dans les PRs qui ajoutent du code tiers ou modifient des licences, documentez explicitement l'origine et la licence du code ajouté.
+### Contrôles & automations recommandés
 
-- **Non-respect :** la suppression ou l'altération des mentions de licence peut entraîner des risques juridiques ; contactez immédiatement l'auteur du template avant de proposer un changement de licence.
+- Ajoutez un job CI `license-check` (ex. `license-checker`, `reuse`, ou équivalent) pour détecter les dépendances et incompatibilités de licence.
+- Ajoutez un hook `pre-commit` pour vérifier la présence d'un header de licence sur les fichiers sources modifiés.
+- Dans les PRs qui ajoutent du code tiers ou modifient des licences, documentez explicitement l'origine et la licence du code ajouté.
+
+**Non-respect:** la suppression ou l'altération des mentions de licence peut entraîner des risques juridiques ; contactez immédiatement l'auteur du template avant de proposer un changement de licence.
 
 ---
 
-**Document généré le :** 08 février 2026  
-**Auteur :** Ronan Le Meillat  
-**Version :** 2.0 (Complète avec Permissions + i18n + Coding standards)  
+## 12. CONCLUSION
+
+Ce document fournit un **plan complet et actionnable** pour migrer KduFoot vers une architecture moderne basée sur le template SCTG. L'approche par phases permet de :
+
+1. ✅ **Réduire les coûts** de >90% (100-500€ → 10-30€/mois)
+2. ✅ **Améliorer la maintenabilité** (code TypeScript type-safe)
+3. ✅ **Scaler facilement** (serverless, edge computing)
+4. ✅ **Offrir une meilleure UX** (React 19, HeroUI)
+5. ✅ **Garantir la sécurité** (Auth0, JWT, permissions)
+6. ✅ **Faciliter l'internationalisation** (i18next avec 6 langues)
+
