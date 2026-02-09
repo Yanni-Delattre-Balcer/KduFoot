@@ -1,0 +1,89 @@
+{
+    "site": {
+        "description": "Video analysis and training management platform for football."
+    },
+    "nav": {
+        "home": "Home",
+        "exercises": "Exercises",
+        "favorites": "Favorites",
+        "sessions": "Sessions",
+        "matches": "Matches",
+        "pricing": "Pricing",
+        "profile": "Profile",
+        "admin": "Administration"
+    },
+    "video": {
+        "urlPlaceholder": "Paste YouTube/Vimeo link...",
+        "analyze": "Analyze",
+        "analyzing": "Analyzing...",
+        "success": "{{count}} exercise(s) found",
+        "error": "Error during analysis"
+    },
+    "exercise": {
+        "title": "Title",
+        "synopsis": "Synopsis",
+        "themes": "Themes",
+        "favorite": "Add to favorites",
+        "unfavorite": "Remove from favorites",
+        "addToSession": "Add to session",
+        "adapt": "Adapt",
+        "exportPDF": "Export to PDF"
+    },
+    "match": {
+        "create": "Create ad",
+        "format": "Format",
+        "venue": "Venue",
+        "date": "Date",
+        "time": "Time"
+    },
+    "session": {
+        "create": "New session",
+        "adapt": "Adapt",
+        "timer": "Timer",
+        "export": "Export to PDF"
+    },
+    "permissions": {
+        "quota": {
+            "videos": "Video quota: {{used}}/{{total}}",
+            "sessions": "Sessions: {{used}}/{{total}}",
+            "matches": "Ads: {{used}}/{{total}}"
+        },
+        "upgradeRequired": "Upgrade Required",
+        "featureRequiresUpgrade": "This feature requires a higher subscription plan.",
+        "viewPlans": "View Plans",
+        "upgrade": "Upgrade to {{plan}} to unlock this feature"
+    },
+    "badges": {
+        "certifiedCoach": "Certified Coach"
+    },
+    "enums": {
+        "theme": {
+            "TECHNIQUE": "Technique",
+            "PHYSIQUE": "Physical",
+            "TACTIQUE": "Tactical",
+            "FINITION": "Finishing",
+            "TRANSITION": "Transition",
+            "DEFENSE_COLLECTIVE": "Collective Defense",
+            "ATTAQUE_RAPIDE": "Fast Attack",
+            "COUPS_DE_PIED_ARRETES": "Set Pieces"
+        },
+        "category": {
+            "U7": "U7",
+            "U9": "U9",
+            "U11": "U11",
+            "U13": "U13",
+            "U15": "U15",
+            "U17": "U17",
+            "U19": "U19",
+            "Séniors": "Seniors",
+            "Vétérans": "Veterans"
+        },
+        "level": {
+            "Débutant": "Beginner",
+            "Ligue": "League",
+            "Régional": "Regional",
+            "National": "National",
+            "Pro": "Professional"
+        }
+    }
+}

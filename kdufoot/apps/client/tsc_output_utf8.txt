@@ -1,0 +1,2 @@
+﻿src/components/navbar.tsx(141,38): error TS2339: Property 'sponsor' does not exist on type '{ github: string; twitter: string; docs: string; discord: string; }'.
+src/i18n.ts(8,30): error TS2307: Cannot find module 'i18next-browser-languagedetector' or its corresponding type declarations.
