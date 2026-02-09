@@ -1,0 +1,35 @@
+{
+	"name": "kdufoot-api",
+	"compatibility_date": "2024-01-01",
+	"main": "src/index.ts",
+	"vars": {
+		"ENVIRONMENT": "development",
+		"CORS_ORIGIN": "http://localhost:5175",
+		"AUTH0_DOMAIN": "dev-vagn7ta27qabl45d.us.auth0.com",
+		"AUTH0_AUDIENCE": "https://api.kdufoot.com",
+		"ADMIN_AUTH0_PERMISSION": "admin:auth0"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "kdufoot-db",
+			"database_id": "your-database-id"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "VIDEOS_BUCKET",
+			"bucket_name": "kdufoot-videos"
+		},
+		{
+			"binding": "THUMBNAILS_BUCKET",
+			"bucket_name": "kdufoot-thumbnails"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "KV_CACHE",
+			"id": "your-kv-namespace-id"
+		}
+	]
+}
