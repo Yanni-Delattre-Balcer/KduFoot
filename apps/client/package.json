@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:env": "bash -c 'set -a && source ../../.env && set +a && vite'",
+    "dev:env": "dotenv -e ../../.env -- vite",
     "build": "npm run clean && tsc && vite build",
-    "build:env": "bash -c 'npm run clean && set -a && source ../../.env && set +a && tsc && vite build \"$@\"' --",
+    "build:env": "npm run clean && tsc && dotenv -e ../../.env -- vite build",
     "lint": "eslint ./src/**/**/*.{ts,tsx} --fix",
     "type-check": "tsc --noEmit",
     "preview:env": "bash ./scripts/preview-ensure.sh",

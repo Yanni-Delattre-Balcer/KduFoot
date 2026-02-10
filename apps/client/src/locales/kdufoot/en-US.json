@@ -12,6 +12,20 @@
         "profile": "Profile",
         "admin": "Administration"
     },
+    "homePage": {
+        "title": {
+            "prefix": "Professional",
+            "highlight": "Video",
+            "suffix": "Football Analysis"
+        },
+        "buttons": {
+            "exercises": "Discover Exercises",
+            "sessions": "Plan a Session"
+        },
+        "description": "Turn your YouTube or Vimeo videos into real training sessions. Our artificial intelligence detects themes, age categories, and generates detailed synopses for your players."
+    },
+    "log-out-someone": "Log out {{name}}",
+    "log-in": "Log in",
     "video": {
         "urlPlaceholder": "Paste YouTube/Vimeo link...",
         "analyze": "Analyze",

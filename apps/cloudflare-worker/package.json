@@ -6,15 +6,17 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "dev:env": "bash -c 'cp ../../.env .dev.vars && wrangler dev'",
-    "preview:env": "bash -c 'cp ../../.env .dev.vars && wrangler dev --port 8787'",
+    "dev:env": "shx cp ../../.env .dev.vars && wrangler dev",
+    "preview:env": "shx cp ../../.env .dev.vars && wrangler dev --port 8787",
     "start": "wrangler dev",
     "build": "echo 'Cloudflare Worker does not require build step'",
     "test": "vitest",
     "type-check": "tsc --noEmit",
     "lint": "eslint ./src/**/*.{ts,tsx} --fix",
     "clean": "rimraf .wrangler .dev.vars .turbo",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "d1:create": "wrangler d1 migrations apply kdufoot-db --local",
+    "d1:reset": "rimraf .wrangler/state/v3/d1 && wrangler d1 migrations apply kdufoot-db --local"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.12.10",

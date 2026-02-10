@@ -94,7 +94,7 @@ export const Navbar = () => {
                 color="foreground"
                 href={item.href}
               >
-                {t(item.label)}
+                {item.label}
               </LinkUniversal>
             </NavbarItem>
           ))}
@@ -164,7 +164,7 @@ export const Navbar = () => {
                 href={item.href}
                 size="lg"
               >
-                {t(item.label)}
+                {item.label}
               </LinkUniversal>
             </NavbarMenuItem>
           ))}
