@@ -1,0 +1,38 @@
+﻿node.exe : npm warn config ignoring 
+workspace config at C:\Users\yanni\Developm
+ent\projet_philippe\apps\client/.npmrc
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" 
+"C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified 
+   : (npm warn config...s\client/.npmrc:S  
+  tring) [], RemoteException
+    + FullyQualifiedErrorId : NativeComman 
+   dError
+ 
+
+> @kdufoot/client@0.0.0 build
+> npm run clean && tsc && vite build
+
+npm warn config ignoring workspace config 
+at C:\Users\yanni\Development\projet_philip
+pe\apps\client/.npmrc
+
+> @kdufoot/client@0.0.0 clean
+> rimraf dist .turbo node_modules/.vite node_modules/.cache
+
+src/pages/training/index.tsx(10,32): error TS6133: 'isSessionActive' is declared but its value is never read.
+npm error Lifecycle script `build` failed 
+with error:
+npm error code 2
+npm error path C:\Users\yanni\Development\p
+rojet_philippe\apps\client
+npm error workspace @kdufoot/client@0.0.0
+npm error location C:\Users\yanni\Developme
+nt\projet_philippe\apps\client
+npm error command failed
+npm error command 
+C:\Windows\system32\cmd.exe /d /s /c npm 
+run clean && tsc && vite build

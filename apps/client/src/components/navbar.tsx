@@ -16,8 +16,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Kbd } from "@heroui/kbd";
-import { Input } from "@heroui/input";
 import { LinkUniversal } from "./link-universal";
 import {
   Navbar as HeroUINavbar,
@@ -30,48 +28,21 @@ import {
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 import { clsx } from "@heroui/shared-utils";
-import { useTranslation } from "react-i18next";
+
 
 import { I18nIcon, LanguageSwitch } from "./language-switch";
 
 import { LoginLogoutButton, LoginLogoutLink } from "@/authentication";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import {
-  TwitterIcon,
-  GithubIcon,
-  DiscordIcon,
-  SearchIcon,
-} from "@/components/icons";
+
 import { Logo } from "@/components/icons";
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
-  const { t } = useTranslation(["kdufoot", "base"]);
-  const searchInput = (
-    <Input
-      aria-label={t("search")}
-      classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
-      }}
-      endContent={
-        // @ts-ignore
-        <Kbd className="hidden lg:inline-block" keys={["command"] as any}>
-          K
-        </Kbd>
-      }
-      labelPlacement="outside"
-      placeholder={`${t("search")}…`}
-      startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-    />
-  );
-
+  console.log("Navbar rendering");
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
+    <HeroUINavbar maxWidth="full" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand className="gap-3 max-w-fit">
           <LinkUniversal
@@ -83,7 +54,10 @@ export const Navbar = () => {
             <p className="font-bold text-inherit">KduFoot</p>
           </LinkUniversal>
         </NavbarBrand>
-        <div className="hidden lg:flex gap-4 justify-start ml-2">
+      </NavbarContent>
+
+      <NavbarContent className="hidden lg:flex absolute left-1/2 -translate-x-1/2" justify="center">
+        <div className="flex gap-4 justify-center">
           {siteConfig().navItems.map((item) => (
             <NavbarItem key={item.href}>
               <LinkUniversal
@@ -105,47 +79,27 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <NavbarItem className="hidden sm:flex gap-2">
-          <LinkUniversal
-            isExternal
-            isInternet
-            href={siteConfig().links.twitter}
-            title={t("twitter")}
-          >
-            <TwitterIcon className="text-default-500" />
-          </LinkUniversal>
-          <LinkUniversal
-            isExternal
-            isInternet
-            href={siteConfig().links.discord}
-            title={t("discord")}
-          >
-            <DiscordIcon className="text-default-500" />
-          </LinkUniversal>
-          <LinkUniversal isExternal isInternet href={siteConfig().links.github} title={t("github")}>
-            <GithubIcon className="text-default-500" />
-          </LinkUniversal>
-          <ThemeSwitch />
-          <LanguageSwitch
-            availableLanguages={availableLanguages}
-            icon={I18nIcon}
-          />
+        <NavbarItem className="hidden sm:flex items-center gap-4">
+          <div className="flex items-center gap-0">
+            <ThemeSwitch />
+            <LanguageSwitch
+              availableLanguages={availableLanguages}
+              icon={I18nIcon}
+            />
+          </div>
           <LoginLogoutButton />
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+
 
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <LinkUniversal isExternal isInternet href={siteConfig().links.github}>
-          <GithubIcon className="text-default-500" />
-        </LinkUniversal>
         <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>
 
       <NavbarMenu>
-        {searchInput}
+
         <LanguageSwitch
           availableLanguages={availableLanguages}
           icon={I18nIcon}
