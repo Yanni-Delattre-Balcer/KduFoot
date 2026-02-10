@@ -18,7 +18,7 @@
 import { Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { SiteLoading } from "./components/site-loading";
-import { AuthenticationGuard, useAuth } from "./authentication";
+import { AuthenticationGuard, useAuth, UserSync } from "./authentication";
 import { PageNotFound } from "./pages/404";
 
 import IndexPage from "@/pages/index";
@@ -35,6 +35,7 @@ import SessionEditPage from "@/pages/sessions/edit";
 import MatchDetailsPage from "@/pages/matches/details";
 import MatchEditPage from "@/pages/matches/edit";
 import MatchesPage from "@/pages/matches";
+import FavoritesPage from "@/pages/favorites";
 
 function App() {
   const { isLoading } = useAuth();
@@ -45,6 +46,7 @@ function App() {
 
   return (
     <Suspense fallback={<SiteLoading />}>
+      <UserSync />
       <Routes>
         <Route element={<IndexPage />} path="/" />
         <Route
@@ -64,6 +66,10 @@ function App() {
         <Route
           element={<AuthenticationGuard component={ExercisesPage} />}
           path="/exercises"
+        />
+        <Route
+          element={<AuthenticationGuard component={FavoritesPage} />}
+          path="/favorites"
         />
         <Route
           element={<AuthenticationGuard component={ExerciseEditPage} />}

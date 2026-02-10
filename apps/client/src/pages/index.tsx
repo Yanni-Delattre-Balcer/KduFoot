@@ -30,10 +30,10 @@ export default function IndexPage() {
     <DefaultLayout>
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
         <div className="inline-block max-w-lg text-center justify-center">
-          <span className={title()}>Analyses&nbsp;</span>
-          <span className={title({ color: "violet" })}>Vidéo&nbsp;</span>
+          <span className={title()}>{t("homePage.title.prefix")}&nbsp;</span>
+          <span className={title({ color: "violet" })}>{t("homePage.title.highlight")}&nbsp;</span>
           <br />
-          <span className={title()}>Football Professionnelles</span>
+          <span className={title()}>{t("homePage.title.suffix")}</span>
           <div className={subtitle({ class: "mt-4" })}>
             {t("site.description")}
           </div>
@@ -49,7 +49,7 @@ export default function IndexPage() {
             })}
             href="/exercises"
           >
-            Découvrir les Exercices
+            {t("homePage.buttons.exercises")}
           </Link>
           <Link
             className={buttonStyles({
@@ -59,17 +59,12 @@ export default function IndexPage() {
             })}
             href="/sessions"
           >
-            Planifier une Séance
+            {t("homePage.buttons.sessions")}
           </Link>
         </div>
 
         <div className="mt-12 text-center text-default-500 max-w-2xl px-4">
-          <p>
-            Transformez vos vidéos YouTube ou Vimeo en véritables séances
-            d'entraînement. Notre intelligence artificielle détecte les thèmes,
-            les catégories d'âge et génère des synopsis détaillés pour vos
-            joueurs.
-          </p>
+          <p>{t("homePage.description")}</p>
         </div>
       </section>
     </DefaultLayout>

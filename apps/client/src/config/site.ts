@@ -4,68 +4,69 @@
  */
 
 export type SiteConfig = typeof siteConfig;
+import i18next from "../i18n";
 
 export const siteConfig = () => ({
   name: "KduFoot",
   needCookieConsent: true,
-  description: "site.description",
+  description: i18next.t("site.description"),
   navItems: [
     {
-      label: "nav.home",
+      label: i18next.t("nav.home"),
       href: "/",
     },
     {
-      label: "nav.exercises",
+      label: i18next.t("nav.exercises"),
       href: "/exercises",
     },
     {
-      label: "nav.favorites",
+      label: i18next.t("nav.favorites"),
       href: "/favorites",
     },
     {
-      label: "nav.sessions",
+      label: i18next.t("nav.sessions"),
       href: "/sessions",
     },
     {
-      label: "nav.matches",
+      label: i18next.t("nav.matches"),
       href: "/matches",
     },
     {
-      label: "nav.pricing",
+      label: i18next.t("nav.pricing"),
       href: "/pricing",
     },
   ],
   navMenuItems: [
     {
-      label: "nav.home",
+      label: i18next.t("nav.home"),
       href: "/",
     },
     {
-      label: "nav.exercises",
+      label: i18next.t("nav.exercises"),
       href: "/exercises",
     },
     {
-      label: "nav.favorites",
+      label: i18next.t("nav.favorites"),
       href: "/favorites",
     },
     {
-      label: "nav.sessions",
+      label: i18next.t("nav.sessions"),
       href: "/sessions",
     },
     {
-      label: "nav.matches",
+      label: i18next.t("nav.matches"),
       href: "/matches",
     },
     {
-      label: "nav.pricing",
+      label: i18next.t("nav.pricing"),
       href: "/pricing",
     },
     {
-      label: "nav.profile",
+      label: i18next.t("nav.profile"),
       href: "/profile",
     },
     {
-      label: "nav.admin",
+      label: i18next.t("nav.admin"),
       href: "/admin",
     },
   ],

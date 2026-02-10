@@ -12,6 +12,20 @@
         "profile": "Profil",
         "admin": "Administration"
     },
+    "homePage": {
+        "title": {
+            "prefix": "Analyses",
+            "highlight": "Vidéo",
+            "suffix": "Football Professionnelles"
+        },
+        "buttons": {
+            "exercises": "Découvrir les Exercices",
+            "sessions": "Planifier une Séance"
+        },
+        "description": "Transformez vos vidéos YouTube ou Vimeo en véritables séances d'entraînement. Notre intelligence artificielle détecte les thèmes, les catégories d'âge et génère des synopsis détaillés pour vos joueurs."
+    },
+    "log-out-someone": "Déconnexion {{name}}",
+    "log-in": "Connexion",
     "video": {
         "urlPlaceholder": "Collez le lien YouTube/Vimeo...",
         "analyze": "Analyser",
