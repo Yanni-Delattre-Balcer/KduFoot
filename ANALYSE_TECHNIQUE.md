@@ -15,7 +15,6 @@
 
 1. [Présentation Générale du Projet](#1-présentation-générale-du-projet)
 2. [Mapping des Fonctionnalités vers la Nouvelle Architecture](#2-mapping-des-fonctionnalités-vers-la-nouvelle-architecture)
-  2.1. [Politique de versioning de l'API](#211-politique-de-versioning-de-lapi)
 3. [Structure des Composants React](#3-structure-des-composants-react)
 4. [Schéma de Base de Données D1](#4-schéma-de-base-de-données-d1)
 5. [Types TypeScript](#5-types-typescript)
@@ -330,7 +329,7 @@ export function setupVideoRoutes(router: Router, env: Env) {
     return Response.json({ success: true });
   });
 }
-
+```
 ---
 
 ### 2.1.1 Politique de versioning de l'API
@@ -343,7 +342,7 @@ Bonnes pratiques recommandées :
 - Évaluer des redirections ou des wrappers pour assurer une transition douce lorsque nécessaire.
 
 ---
-```
+
 
 ### 2.2 Configuration Auth0 pour KduFoot
 
