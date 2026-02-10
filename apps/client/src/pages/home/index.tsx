@@ -20,8 +20,8 @@ import { Link } from "@heroui/link";
 import { button as buttonStyles } from "@heroui/theme";
 import { useTranslation } from "react-i18next";
 
-import { title, subtitle } from "../components/primitives";
-import DefaultLayout from "../layouts/default";
+import { title, subtitle } from "../../components/primitives";
+import DefaultLayout from "../../layouts/default";
 
 export default function IndexPage() {
   const { t } = useTranslation(["kdufoot", "base"]);

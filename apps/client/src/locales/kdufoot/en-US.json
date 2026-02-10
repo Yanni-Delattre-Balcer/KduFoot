@@ -4,10 +4,10 @@
     },
     "nav": {
         "home": "Home",
-        "exercises": "Exercises",
-        "favorites": "Favorites",
-        "sessions": "Sessions",
-        "matches": "Matches",
+        "exercises": "Video Analysis",
+        "favorites": "Favorite Exercises",
+        "sessions": "Training / Match Summary",
+        "matches": "Find / Create Match",
         "pricing": "Pricing",
         "profile": "Profile",
         "admin": "Administration"
@@ -19,20 +19,23 @@
             "suffix": "Football Analysis"
         },
         "buttons": {
-            "exercises": "Discover Exercises",
-            "sessions": "Plan a Session"
+            "exercises": "View my video analyses",
+            "sessions": "View my matches"
         },
         "description": "Turn your YouTube or Vimeo videos into real training sessions. Our artificial intelligence detects themes, age categories, and generates detailed synopses for your players."
     },
     "log-out-someone": "Log out {{name}}",
     "log-in": "Log in",
     "video": {
-        "urlPlaceholder": "Paste YouTube/Vimeo link...",
-        "analyze": "Analyze",
+        "urlPlaceholder": "Paste your YouTube, TikTok, Insta video link, etc.",
+        "analyze": "Analyze Video",
         "analyzing": "Analyzing...",
         "success": "{{count}} exercise(s) found",
         "error": "Error during analysis"
     },
+    "myExercises": "My Exercises",
+    "mySessions": "My Sessions",
+    "myMatches": "My Matches",
     "exercise": {
         "title": "Title",
         "synopsis": "Synopsis",
@@ -55,6 +58,10 @@
         "adapt": "Adapt",
         "timer": "Timer",
         "export": "Export to PDF"
+    },
+    "sessions": {
+        "title": "Training / Match Summary",
+        "create": "Plan Session"
     },
     "permissions": {
         "quota": {

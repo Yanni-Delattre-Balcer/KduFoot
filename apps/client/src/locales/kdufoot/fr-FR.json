@@ -4,10 +4,11 @@
     },
     "nav": {
         "home": "Accueil",
-        "exercises": "Exercices",
-        "favorites": "Favoris",
-        "sessions": "Séances",
-        "matches": "Matchs",
+        "exercises": "Analyse Vidéo",
+        "training": "Mon Entraînement",
+        "favorites": "Exercices favoris",
+        "sessions": "Résumé Entraînement / Match",
+        "matches": "Trouver / créer un match",
         "pricing": "Tarifs",
         "profile": "Profil",
         "admin": "Administration"
@@ -19,20 +20,23 @@
             "suffix": "Football Professionnelles"
         },
         "buttons": {
-            "exercises": "Découvrir les Exercices",
-            "sessions": "Planifier une Séance"
+            "exercises": "Voir mes analyses vidéo",
+            "sessions": "Voir mes matchs"
         },
         "description": "Transformez vos vidéos YouTube ou Vimeo en véritables séances d'entraînement. Notre intelligence artificielle détecte les thèmes, les catégories d'âge et génère des synopsis détaillés pour vos joueurs."
     },
     "log-out-someone": "Déconnexion {{name}}",
     "log-in": "Connexion",
     "video": {
-        "urlPlaceholder": "Collez le lien YouTube/Vimeo...",
-        "analyze": "Analyser",
+        "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
+        "analyze": "Analyser la vidéo",
         "analyzing": "Analyse en cours...",
         "success": "{{count}} exercice(s) trouvé(s)",
         "error": "Erreur lors de l'analyse"
     },
+    "myExercises": "Mes exercices",
+    "mySessions": "Mes Séances",
+    "myMatches": "Mes Matchs",
     "exercise": {
         "title": "Titre",
         "synopsis": "Synopsis",
@@ -44,7 +48,8 @@
         "exportPDF": "Exporter en PDF"
     },
     "match": {
-        "create": "Créer une annonce",
+        "create": "Créer un match",
+        "find": "Trouver un match",
         "format": "Format",
         "venue": "Lieu",
         "date": "Date",
@@ -55,6 +60,10 @@
         "adapt": "Adapter",
         "timer": "Chronomètre",
         "export": "Exporter en PDF"
+    },
+    "sessions": {
+        "title": "Résumé Entraînement / Match",
+        "create": "Planifier une séance"
     },
     "permissions": {
         "quota": {
