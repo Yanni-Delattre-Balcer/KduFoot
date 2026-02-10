@@ -1,0 +1,89 @@
+{
+    "site": {
+        "description": "Plateforme d'analyse vidéo et de gestion d'entraînement pour le football."
+    },
+    "nav": {
+        "home": "Accueil",
+        "exercises": "Exercices",
+        "favorites": "Favoris",
+        "sessions": "Séances",
+        "matches": "Matchs",
+        "pricing": "Tarifs",
+        "profile": "Profil",
+        "admin": "Administration"
+    },
+    "video": {
+        "urlPlaceholder": "Collez le lien YouTube/Vimeo...",
+        "analyze": "Analyser",
+        "analyzing": "Analyse en cours...",
+        "success": "{{count}} exercice(s) trouvé(s)",
+        "error": "Erreur lors de l'analyse"
+    },
+    "exercise": {
+        "title": "Titre",
+        "synopsis": "Synopsis",
+        "themes": "Thèmes",
+        "favorite": "Ajouter aux favoris",
+        "unfavorite": "Retirer des favoris",
+        "addToSession": "Ajouter à la séance",
+        "adapt": "Adapter",
+        "exportPDF": "Exporter en PDF"
+    },
+    "match": {
+        "create": "Créer une annonce",
+        "format": "Format",
+        "venue": "Lieu",
+        "date": "Date",
+        "time": "Heure"
+    },
+    "session": {
+        "create": "Nouvelle séance",
+        "adapt": "Adapter",
+        "timer": "Chronomètre",
+        "export": "Exporter en PDF"
+    },
+    "permissions": {
+        "quota": {
+            "videos": "Quota vidéos: {{used}}/{{total}}",
+            "sessions": "Séances: {{used}}/{{total}}",
+            "matches": "Annonces: {{used}}/{{total}}"
+        },
+        "upgradeRequired": "Mise à niveau requise",
+        "featureRequiresUpgrade": "Cette fonctionnalité nécessite un abonnement supérieur.",
+        "viewPlans": "Voir les offres",
+        "upgrade": "Passer à {{plan}} pour débloquer cette fonctionnalité"
+    },
+    "badges": {
+        "certifiedCoach": "Coach Certifié"
+    },
+    "enums": {
+        "theme": {
+            "TECHNIQUE": "Technique",
+            "PHYSIQUE": "Physique",
+            "TACTIQUE": "Tactique",
+            "FINITION": "Finition",
+            "TRANSITION": "Transition",
+            "DEFENSE_COLLECTIVE": "Défense Collective",
+            "ATTAQUE_RAPIDE": "Attaque Rapide",
+            "COUPS_DE_PIED_ARRETES": "Coups de Pied Arrêtés"
+        },
+        "category": {
+            "U7": "U7",
+            "U9": "U9",
+            "U11": "U11",
+            "U13": "U13",
+            "U15": "U15",
+            "U17": "U17",
+            "U19": "U19",
+            "Séniors": "Séniors",
+            "Vétérans": "Vétérans"
+        },
+        "level": {
+            "Débutant": "Débutant",
+            "Ligue": "Ligue",
+            "Régional": "Régional",
+            "National": "National",
+            "Pro": "Professionnel"
+        }
+    }
+}
