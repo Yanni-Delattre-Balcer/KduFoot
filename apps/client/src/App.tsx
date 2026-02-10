@@ -23,7 +23,7 @@ import { PageNotFound } from "./pages/404";
 
 import IndexPage from "@/pages/index";
 import ApiPage from "@/pages/api";
-import PricingPage from "@/pages/pricing";
+import PricingPage from "@/pages/pricing/index";
 import BlogPage from "@/pages/blog";
 import AboutPage from "@/pages/about";
 import ExercisesPage from "@/pages/exercises";
@@ -36,6 +36,8 @@ import MatchDetailsPage from "@/pages/matches/details";
 import MatchEditPage from "@/pages/matches/edit";
 import MatchesPage from "@/pages/matches";
 import FavoritesPage from "@/pages/favorites";
+import TrainingPage from "@/pages/training";
+import { TrainingProvider } from "@/contexts/training-context";
 
 function App() {
   const { isLoading } = useAuth();
@@ -46,76 +48,82 @@ function App() {
 
   return (
     <Suspense fallback={<SiteLoading />}>
-      <UserSync />
-      <Routes>
-        <Route element={<IndexPage />} path="/" />
-        <Route
-          element={<AuthenticationGuard component={ApiPage} />}
-          path="/api"
-        />
-        <Route
-          element={<AuthenticationGuard component={PricingPage} />}
-          path="/pricing"
-        />
-        <Route
-          element={<AuthenticationGuard component={BlogPage} />}
-          path="/blog"
-        />
-        <Route element={<AboutPage />} path="/about" />
-        <Route element={<PageNotFound />} path="*" />
-        <Route
-          element={<AuthenticationGuard component={ExercisesPage} />}
-          path="/exercises"
-        />
-        <Route
-          element={<AuthenticationGuard component={FavoritesPage} />}
-          path="/favorites"
-        />
-        <Route
-          element={<AuthenticationGuard component={ExerciseEditPage} />}
-          path="/exercises/new"
-        />
-        <Route
-          element={<AuthenticationGuard component={ExerciseEditPage} />}
-          path="/exercises/:id/edit"
-        />
-        <Route
-          element={<AuthenticationGuard component={ExerciseDetailsPage} />}
-          path="/exercises/:id"
-        />
-        <Route
-          element={<AuthenticationGuard component={SessionPlannerPage} />}
-          path="/sessions"
-        />
-        <Route
-          element={<AuthenticationGuard component={SessionEditPage} />}
-          path="/sessions/new"
-        />
-        <Route
-          element={<AuthenticationGuard component={SessionEditPage} />}
-          path="/sessions/:id/edit"
-        />
-        <Route
-          element={<AuthenticationGuard component={SessionDetailsPage} />}
-          path="/sessions/:id"
-        />
-        <Route
-          element={<AuthenticationGuard component={MatchesPage} />}
-          path="/matches"
-        />
-        <Route
-          element={<AuthenticationGuard component={MatchEditPage} />}
-          path="/matches/new"
-        />
-        <Route
-          element={<AuthenticationGuard component={MatchEditPage} />}
-          path="/matches/:id/edit"
-        />
-        <Route
-          element={<AuthenticationGuard component={MatchDetailsPage} />}
-          path="/matches/:id"
-        />
-      </Routes>
+      <TrainingProvider>
+        <UserSync />
+        <Routes>
+          <Route element={<IndexPage />} path="/" />
+          <Route
+            element={<AuthenticationGuard component={ApiPage} />}
+            path="/api"
+          />
+          <Route
+            element={<AuthenticationGuard component={PricingPage} />}
+            path="/pricing"
+          />
+          <Route
+            element={<AuthenticationGuard component={BlogPage} />}
+            path="/blog"
+          />
+          <Route element={<AboutPage />} path="/about" />
+          <Route element={<PageNotFound />} path="*" />
+          <Route
+            element={<AuthenticationGuard component={ExercisesPage} />}
+            path="/exercises"
+          />
+          <Route
+            element={<AuthenticationGuard component={FavoritesPage} />}
+            path="/favorites"
+          />
+          <Route
+            element={<AuthenticationGuard component={TrainingPage} />}
+            path="/training"
+          />
+          <Route
+            element={<AuthenticationGuard component={ExerciseEditPage} />}
+            path="/exercises/new"
+          />
+          <Route
+            element={<AuthenticationGuard component={ExerciseEditPage} />}
+            path="/exercises/:id/edit"
+          />
+          <Route
+            element={<AuthenticationGuard component={ExerciseDetailsPage} />}
+            path="/exercises/:id"
+          />
+          <Route
+            element={<AuthenticationGuard component={SessionPlannerPage} />}
+            path="/sessions"
+          />
+          <Route
+            element={<AuthenticationGuard component={SessionEditPage} />}
+            path="/sessions/new"
+          />
+          <Route
+            element={<AuthenticationGuard component={SessionEditPage} />}
+            path="/sessions/:id/edit"
+          />
+          <Route
+            element={<AuthenticationGuard component={SessionDetailsPage} />}
+            path="/sessions/:id"
+          />
+          <Route
+            element={<AuthenticationGuard component={MatchesPage} />}
+            path="/matches"
+          />
+          <Route
+            element={<AuthenticationGuard component={MatchEditPage} />}
+            path="/matches/new"
+          />
+          <Route
+            element={<AuthenticationGuard component={MatchEditPage} />}
+            path="/matches/:id/edit"
+          />
+          <Route
+            element={<AuthenticationGuard component={MatchDetailsPage} />}
+            path="/matches/:id"
+          />
+        </Routes>
+      </TrainingProvider>
     </Suspense>
   );
 }

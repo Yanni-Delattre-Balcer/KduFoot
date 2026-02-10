@@ -20,6 +20,10 @@ export const siteConfig = () => ({
       href: "/exercises",
     },
     {
+      label: i18next.t("nav.training"),
+      href: "/training",
+    },
+    {
       label: i18next.t("nav.favorites"),
       href: "/favorites",
     },
@@ -44,6 +48,10 @@ export const siteConfig = () => ({
     {
       label: i18next.t("nav.exercises"),
       href: "/exercises",
+    },
+    {
+      label: i18next.t("nav.training"),
+      href: "/training",
     },
     {
       label: i18next.t("nav.favorites"),
