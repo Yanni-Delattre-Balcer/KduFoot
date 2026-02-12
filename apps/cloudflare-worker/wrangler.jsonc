@@ -7,7 +7,9 @@
 		"CORS_ORIGIN": "http://localhost:5175",
 		"AUTH0_DOMAIN": "dev-vagn7ta27qabl45d.us.auth0.com",
 		"AUTH0_AUDIENCE": "https://api.kdufoot.com",
-		"ADMIN_AUTH0_PERMISSION": "admin:auth0"
+		"ADMIN_AUTH0_PERMISSION": "admin:auth0",
+		"SIRET_API_URL": "https://recherche-entreprises.api.gouv.fr/search",
+		"GOOGLE_MAPS_API_KEY": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
 	},
 	"d1_databases": [
 		{

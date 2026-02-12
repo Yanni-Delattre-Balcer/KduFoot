@@ -34,7 +34,7 @@ import { I18nIcon, LanguageSwitch } from "./language-switch";
 
 import { LoginLogoutButton, LoginLogoutLink } from "@/authentication";
 import { siteConfig } from "@/config/site";
-import { ThemeSwitch } from "@/components/theme-switch";
+
 
 import { Logo } from "@/components/icons";
 import { availableLanguages } from "@/i18n";
@@ -51,27 +51,38 @@ export const Navbar = () => {
             href="/"
           >
             <Logo />
-            <p className="font-bold text-inherit">KduFoot</p>
+            <p className="font-bold text-inherit bg-[linear-gradient(to_right,#3b82f6,#22c55e,#ec4899,#ef4444,#f97316,#eab308)] bg-clip-text text-transparent">KduFoot</p>
           </LinkUniversal>
         </NavbarBrand>
       </NavbarContent>
 
       <NavbarContent className="hidden lg:flex absolute left-1/2 -translate-x-1/2" justify="center">
         <div className="flex gap-4 justify-center">
-          {siteConfig().navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <LinkUniversal
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </LinkUniversal>
-            </NavbarItem>
-          ))}
+          {siteConfig().navItems.map((item) => {
+            let colorClass = "data-[active=true]:text-primary data-[active=true]:font-medium text-foreground";
+            if (item.href === '/') colorClass = "bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent font-bold";
+            else if (item.href === '/exercises') colorClass = "bg-gradient-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent font-bold";
+            else if (item.href === '/training') colorClass = "bg-gradient-to-r from-[#17c964] to-[#12a150] bg-clip-text text-transparent font-bold";
+            else if (item.href === '/favorites') colorClass = "bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent font-bold";
+            else if (item.href === '/sessions') colorClass = "bg-gradient-to-r from-red-500 to-rose-600 bg-clip-text text-transparent font-bold";
+            else if (item.href === '/matches') colorClass = "bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent font-bold";
+            else if (item.href === '/pricing') colorClass = "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text text-transparent font-bold";
+
+            return (
+              <NavbarItem key={item.href}>
+                <LinkUniversal
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    colorClass
+                  )}
+                  color="foreground"
+                  href={item.href}
+                >
+                  {item.label}
+                </LinkUniversal>
+              </NavbarItem>
+            );
+          })}
         </div>
       </NavbarContent>
 
@@ -81,7 +92,6 @@ export const Navbar = () => {
       >
         <NavbarItem className="hidden sm:flex items-center gap-4">
           <div className="flex items-center gap-0">
-            <ThemeSwitch />
             <LanguageSwitch
               availableLanguages={availableLanguages}
               icon={I18nIcon}
@@ -94,7 +104,6 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>
 

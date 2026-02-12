@@ -156,7 +156,7 @@ export const LanguageSwitch: FC<LanguageSwitchProps> = ({
         <Dropdown>
           <DropdownTrigger>
             <Button aria-label={t("language")} variant="light">
-              <Icon className="text-default-500" size={24} />
+              <Icon className="text-blue-600" size={24} />
             </Button>
           </DropdownTrigger>
           <DropdownMenu aria-label={t("language")}>

@@ -18,18 +18,29 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         }
 
         const url = new URL(request.url);
-        const filters = {
+        const radiusParam = url.searchParams.get('radius_km');
+        const userLatParam = url.searchParams.get('user_lat');
+        const userLngParam = url.searchParams.get('user_lng');
+
+        const filters: any = {
             category: url.searchParams.get('category') || undefined,
+            level: url.searchParams.get('level') || undefined,
             format: url.searchParams.get('format') || undefined,
             venue: url.searchParams.get('venue') || undefined,
+            pitch_type: url.searchParams.get('pitch_type') || undefined,
             status: url.searchParams.get('status') || undefined,
             date: url.searchParams.get('date') || undefined,
+            location_city: url.searchParams.get('location_city') || undefined,
+            location_zip: url.searchParams.get('location_zip') || undefined,
             ownerId: url.searchParams.get('ownerId') || undefined,
-            limit: parseInt(url.searchParams.get('limit') || '20'),
+            limit: parseInt(url.searchParams.get('limit') || '50'),
             offset: parseInt(url.searchParams.get('offset') || '0'),
+            radius_km: radiusParam ? parseFloat(radiusParam) : undefined,
+            user_lat: userLatParam ? parseFloat(userLatParam) : undefined,
+            user_lng: userLngParam ? parseFloat(userLngParam) : undefined,
         };
 
-        const result = await matchService.search(filters);
+        const result = await matchService.search(filters, env.GOOGLE_MAPS_API_KEY);
         return Response.json({ success: true, ...result });
     });
 

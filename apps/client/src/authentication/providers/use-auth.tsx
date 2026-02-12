@@ -63,7 +63,10 @@ export const useAuth = (): AuthProvider => {
  * Function to get the user's name with fallback options
  */
 export const getNameWithFallback = (user: AuthUser | null): string => {
-  return user?.nickname || user?.name || user?.sub || "";
+  if (user?.given_name && user?.family_name) {
+    return `${user.given_name} ${user.family_name}`;
+  }
+  return user?.name || user?.nickname || user?.sub || "";
 };
 
 /**

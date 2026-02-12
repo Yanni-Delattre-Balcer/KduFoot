@@ -4,10 +4,11 @@ import { Button } from '@heroui/button';
 import { Input, Textarea } from '@heroui/input';
 import { Select, SelectItem } from "@heroui/select";
 import { Card, CardBody, CardHeader } from '@heroui/card';
-import { CreateMatchDto, Match } from '@/types/match.types';
+import { CreateMatchDto, Match, PitchType, Level } from '@/types/match.types';
 import { Category } from '@/types/exercise.types';
-import ClubSearch from '@/components/club-search';
 import { useMatches } from '@/hooks/use-matches';
+import { useUser } from '@/hooks/use-user';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface MatchFormProps {
     initialData?: Match;
@@ -15,14 +16,44 @@ interface MatchFormProps {
     onCancel?: () => void;
 }
 
+const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Indoor'];
+
 export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFormProps) {
     const { t } = useTranslation();
     const { createMatch, updateMatch } = useMatches();
+    const { user, linkClub, unlinkClub } = useUser();
+    const { user: auth0User } = useAuth0();
     const [isSaving, setIsSaving] = useState(false);
+    const [siret, setSiret] = useState('');
+    const [isLinking, setIsLinking] = useState(false);
+
+    const handleLinkClub = async () => {
+        const cleanSiret = siret.replace(/\s/g, '').trim();
+        if (!cleanSiret || cleanSiret.length !== 14) {
+            alert('Le SIRET doit contenir exactement 14 chiffres.');
+            return;
+        }
+        const confirmed = confirm(
+            '⚠️ ATTENTION : Cette action est IRRÉVERSIBLE.\n\n' +
+            'Votre compte sera définitivement lié à ce club.\n' +
+            'Pour toute modification ultérieure, vous devrez contacter le support avec une preuve à l\'appui.\n\n' +
+            'Voulez-vous continuer ?'
+        );
+        if (!confirmed) return;
+        setIsLinking(true);
+        try {
+            await linkClub(cleanSiret);
+        } catch (error: any) {
+            alert(error.message || 'Erreur lors de la liaison du club. Vérifiez le SIRET.');
+        } finally {
+            setIsLinking(false);
+        }
+    };
 
     // Initialize form data
     const [formData, setFormData] = useState<Partial<CreateMatchDto>>({
         category: Category.SENIORS,
+        level: Level.DEPARTEMENTAL_1,
         format: '11v11',
         venue: 'Domicile',
         match_date: new Date().toISOString().split('T')[0],
@@ -30,24 +61,50 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         email: '',
         phone: '',
         notes: '',
-        club_id: ''
+        club_id: '',
+        location_address: '',
+        location_city: '',
+        location_zip: '',
+        pitch_type: undefined
     });
+
+    // Separate state for Gender (client-side only, appended to notes on submit)
+    const [gender, setGender] = useState<string>('Masculin');
 
     useEffect(() => {
         if (initialData) {
+            // Extract Gender from notes if present
+            const genderMatch = initialData.notes?.match(/Genre: (.*)(\n|$)/);
+            const extractedGender = genderMatch ? genderMatch[1] : 'Masculin';
+            const cleanNotes = initialData.notes?.replace(/Genre: .*(\n|$)/, '').trim() || '';
+
+            setGender(extractedGender);
             setFormData({
                 category: initialData.category,
+                level: initialData.level,
                 format: initialData.format,
                 venue: initialData.venue,
                 match_date: initialData.match_date,
                 match_time: initialData.match_time,
                 email: initialData.email,
                 phone: initialData.phone,
-                notes: initialData.notes,
-                club_id: initialData.club_id
+                notes: cleanNotes,
+                club_id: initialData.club_id,
+                location_address: initialData.location_address || '',
+                location_city: initialData.location_city || '',
+                location_zip: initialData.location_zip || '',
+                pitch_type: initialData.pitch_type
             });
+        } else if (user?.club) {
+            setFormData(prev => ({
+                ...prev,
+                club_id: user.club!.id,
+                location_address: user.club!.address || '',
+                location_city: user.club!.city || '',
+                location_zip: user.club!.zip || ''
+            }));
         }
-    }, [initialData]);
+    }, [initialData, user]);
 
     const handleChange = (field: keyof CreateMatchDto, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -55,12 +112,31 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user?.club_id) {
+            alert('Vous devez d\'abord lier votre club via le numéro SIRET avant de créer un match.');
+            return;
+        }
+
+        // Enforcement: Mandatory profile picture
+        const isDefaultAvatar = auth0User?.picture?.includes('gravatar.com') ||
+            auth0User?.picture?.includes('default') ||
+            !auth0User?.picture;
+
+        if (isDefaultAvatar) {
+            alert('⚠️ PHOTO DE PROFIL OBLIGATOIRE\n\nVous devez ajouter une photo de vous (votre tête) dans "Mon compte" avant de pouvoir créer un match.\n\nCeci est nécessaire pour prouver votre identité le jour de la rencontre.');
+            return;
+        }
         setIsSaving(true);
         try {
+            const payload = {
+                ...formData,
+                notes: `Genre: ${gender}\n${formData.notes || ''}`.trim()
+            };
+
             if (initialData?.id) {
-                await updateMatch(initialData.id, formData as any);
+                await updateMatch(initialData.id, payload as any);
             } else {
-                await createMatch(formData as any);
+                await createMatch(payload as any);
             }
             if (onSuccess) onSuccess();
         } catch (error) {
@@ -71,66 +147,272 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         }
     };
 
+    const calculateProgress = () => {
+        const fields = [
+            formData.category,
+            formData.level,
+            formData.format,
+            gender,
+            formData.match_date,
+            formData.match_time,
+            formData.venue,
+            formData.pitch_type,
+            formData.email,
+            formData.phone,
+            user?.club_id
+        ];
+        const filled = fields.filter(f => f && f !== '').length;
+        return Math.round((filled / fields.length) * 100);
+    };
+
+    const progress = calculateProgress();
+
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-appearance-in">
-            <Card>
-                <CardHeader className="font-bold bg-default-50">Informations du Match</CardHeader>
-                <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="shadow-medium">
+                <CardHeader className="flex gap-3 bg-gradient-to-r from-default-100 to-default-50 px-6 py-4">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                            <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <div className="flex flex-col">
+                        <p className="text-md font-bold text-default-700">Informations du Match</p>
+                        <p className="text-small text-default-500">Détails de la rencontre</p>
+                    </div>
+                </CardHeader>
+                <CardBody className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
                     <Select
                         label="Catégorie"
-                        placeholder="Choisir une catégorie"
+                        placeholder="Choisir"
                         selectedKeys={formData.category ? [formData.category] : []}
                         onChange={(e) => handleChange('category', e.target.value)}
                         isRequired
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
+                                <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                            </svg>
+                        }
                     >
                         {Object.values(Category).map((cat) => (
                             <SelectItem key={cat}>{cat}</SelectItem>
                         ))}
                     </Select>
                     <Select
+                        label="Niveau"
+                        placeholder="Choisir"
+                        selectedKeys={formData.level ? [formData.level] : []}
+                        onChange={(e) => handleChange('level', e.target.value)}
+                        isRequired
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
+                                <path fillRule="evenodd" d="M11.484 2.17a.75.75 0 011.032 0 11.209 11.209 0 007.877 3.08.75.75 0 01.75.75V12a11.386 11.386 0 01-3.587 8.35c-2.433 2.193-5.338 3.4-8.556 3.401-3.218.001-6.123-1.208-8.556-3.401A11.389 11.389 0 011.5 12V6a.75.75 0 01.75-.75 11.21 11.21 0 007.877-3.08zM12 4.296a12.71 12.71 0 01-6.643 2.056l-.357.043V12c0 2.215.72 4.297 1.956 6.012C8.21 19.78 9.976 20.914 12 20.916c2.024-.002 3.79-1.136 5.044-2.904A9.889 9.889 0 0019 12V6.395a12.72 12.72 0 01-7 2.099z" clipRule="evenodd" />
+                            </svg>
+                        }
+                    >
+                        {Object.values(Level).map((cat) => (
+                            <SelectItem key={cat}>{cat}</SelectItem>
+                        ))}
+                    </Select>
+                    <Select
                         label="Format"
-                        placeholder="Choisir un format"
+                        placeholder="Choisir"
                         selectedKeys={formData.format ? [formData.format] : []}
                         onChange={(e) => handleChange('format', e.target.value)}
                         isRequired
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
+                                <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.365-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
+                            </svg>
+                        }
                     >
                         <SelectItem key="11v11">11 vs 11</SelectItem>
                         <SelectItem key="8v8">8 vs 8</SelectItem>
                         <SelectItem key="5v5">5 vs 5</SelectItem>
                         <SelectItem key="Futsal">Futsal</SelectItem>
                     </Select>
+                    <Select
+                        label="Genre"
+                        placeholder="Choisir"
+                        selectedKeys={[gender]}
+                        onChange={(e) => setGender(e.target.value)}
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
+                                <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                            </svg>
+                        }
+                    >
+                        <SelectItem key="Masculin">Masculin</SelectItem>
+                        <SelectItem key="Féminin">Féminin</SelectItem>
+                        <SelectItem key="Mixte">Mixte</SelectItem>
+                    </Select>
 
                     <Input
                         type="date"
-                        label="Date du match"
+                        label="Date"
                         value={formData.match_date}
                         onValueChange={(v) => handleChange('match_date', v)}
                         isRequired
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
+                                <path d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" />
+                                <path fillRule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clipRule="evenodd" />
+                            </svg>
+                        }
                     />
                     <Input
                         type="time"
-                        label="Heure du match"
+                        label="Heure"
                         value={formData.match_time}
                         onValueChange={(v) => handleChange('match_time', v)}
                         isRequired
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
+                                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
+                            </svg>
+                        }
                     />
-
                     <Select
                         label="Lieu"
-                        placeholder="Choisir un lieu"
+                        placeholder="Choisir"
                         selectedKeys={formData.venue ? [formData.venue] : []}
                         onChange={(e) => handleChange('venue', e.target.value)}
                         isRequired
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
+                                <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                            </svg>
+                        }
                     >
                         <SelectItem key="Domicile">Domicile</SelectItem>
                         <SelectItem key="Extérieur">Extérieur</SelectItem>
                         <SelectItem key="Neutre">Terrain Neutre</SelectItem>
                     </Select>
 
-                    <ClubSearch
-                        onSelect={(club) => handleChange('club_id', club?.id || '')}
-                        initialInputValue={initialData?.club?.name || ''}
-                    />
+                    <Select
+                        label="Type terrain"
+                        placeholder="Choisir"
+                        selectedKeys={formData.pitch_type ? [formData.pitch_type] : []}
+                        onChange={(e) => handleChange('pitch_type', e.target.value)}
+                        startContent={
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
+                                <path fillRule="evenodd" d="M.75 9.75a3 3 0 0 1 3-3h16.5a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H3.75a3 3 0 0 1-3-3v-9Zm3-1.5a1.5 1.5 0 0 0-1.5 1.5v9a1.5 1.5 0 0 0 1.5 1.5h16.5a1.5 1.5 0 0 0 1.5-1.5v-9a1.5 1.5 0 0 0-1.5-1.5H3.75Z" clipRule="evenodd" />
+                                <path fillRule="evenodd" d="M3.75 12a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H4.5a.75.75 0 0 1-.75-.75V12Zm3.75 0a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H8.25a.75.75 0 0 1-.75-.75V12Zm3.75 0a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H12a.75.75 0 0 1-.75-.75V12Zm3.75 0a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H15.75a.75.75 0 0 1-.75-.75V12Zm3.75 0a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H19.5a.75.75 0 0 1-.75-.75V12Z" clipRule="evenodd" />
+                            </svg>
+                        }
+                    >
+                        {PITCH_TYPES.map((type) => (
+                            <SelectItem key={type}>{type}</SelectItem>
+                        ))}
+                    </Select>
+
+                    {/* Club Linking Section */}
+                    <div className="md:col-span-2">
+                        {!user?.club_id ? (
+                            <div className="p-6 bg-warning-50 border border-warning-200 rounded-xl flex flex-col items-center text-center gap-6">
+                                <div className="flex flex-col items-center gap-3 max-w-2xl">
+                                    <div className="p-3 bg-warning-100 rounded-full text-warning-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-warning-900 text-xl">Lier votre club (Action irréversible)</h4>
+                                        <div className="text-base text-warning-800 mt-2 space-y-1">
+                                            <p><span className="font-bold">Attention :</span> Le numéro SIRET ne peut être renseigné qu'une seule fois.</p>
+                                            <p>Dès validation, l'adresse, le code postal et la ville seront <span className="font-bold">automatiquement remplis</span>.</p>
+                                            <p>Le club sera définitivement associé à votre compte.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-3 items-center w-full justify-center">
+                                    <Input
+                                        label="Numéro SIRET"
+                                        placeholder="14 chiffres"
+                                        value={siret}
+                                        onValueChange={setSiret}
+                                        className="max-w-xs"
+                                        classNames={{
+                                            inputWrapper: "bg-white"
+                                        }}
+                                    />
+                                    <Button color="warning" variant="solid" onPress={handleLinkClub} isLoading={isLinking} className="font-bold text-warning-900 h-14">
+                                        Valider et Lier le club
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-warning-700 font-medium">
+                                    En cas de changement de club ultérieur, contactez le support avec justificatifs.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="p-3 bg-success-50 border border-success-200 rounded-xl flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-success-600"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
+                                    <span className="font-semibold text-success-700">Club lié : {user.club?.name || 'Club associé'}</span>
+                                </div>
+                                {auth0User?.email === 'yannidelattrebalcer.artois@gmail.com' && (
+                                    <Button size="sm" color="danger" variant="flat" onPress={async () => {
+                                        try {
+                                            await unlinkClub();
+                                        } catch (e: any) {
+                                            alert(e.message);
+                                        }
+                                    }}>Détacher (Admin)</Button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-0 self-start">
+                        <Input
+                            label="Adresse du stade"
+                            placeholder="Rempli automatiquement via le SIRET"
+                            value={formData.location_address || ''}
+                            className="md:col-span-2"
+                            isDisabled
+                            classNames={{
+                                inputWrapper: "!bg-default-200/70 text-default-500",
+                                label: "text-default-500"
+                            }}
+                        />
+                        <Input
+                            label="Code Postal"
+                            placeholder="Rempli automatiquement"
+                            value={formData.location_zip || ''}
+                            isDisabled
+                            classNames={{
+                                inputWrapper: "!bg-default-200/70 text-default-500",
+                                label: "text-default-500"
+                            }}
+                        />
+                        <Input
+                            label="Ville"
+                            placeholder="Rempli automatiquement"
+                            value={formData.location_city || ''}
+                            isDisabled
+                            classNames={{
+                                inputWrapper: "!bg-default-200/70 text-default-500",
+                                label: "text-default-500"
+                            }}
+                        />
+
+                        {/* Progress Bar centered in the empty space */}
+                        <div className="md:col-span-2 flex flex-col justify-center min-h-[120px] space-y-3">
+                            <p className="text-sm font-bold text-white uppercase tracking-tight text-center">
+                                Préparation de l'annonce du match : {progress}%
+                            </p>
+                            <div className="w-full h-4 bg-default-100 rounded-full overflow-hidden p-[1px] border border-white/10 ring-1 ring-white/5 shadow-inner">
+                                <div
+                                    className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(0,255,163,0.4)]"
+                                    style={{
+                                        width: `${progress}%`,
+                                        background: 'linear-gradient(90deg, #006fee 0%, #00d2ff 25%, #00ffa3 50%, #adff2f 75%, #ccff00 100%)',
+                                        backgroundSize: '200% 100%'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </CardBody>
             </Card>
 
@@ -154,7 +436,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     <Textarea
                         label="Notes / Instructions"
                         placeholder="Informations complémentaires..."
-                        value={formData.notes}
+                        value={formData.notes || ''}
                         onValueChange={(v) => handleChange('notes', v)}
                         minRows={3}
                         className="md:col-span-2"
@@ -168,7 +450,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         Annuler
                     </Button>
                 )}
-                <Button type="submit" color="primary" isLoading={isSaving}>
+                <Button type="submit" color="primary" isLoading={isSaving} isDisabled={!user?.club_id}>
                     {initialData ? 'Mettre à jour' : 'Créer le match'}
                 </Button>
             </div>
