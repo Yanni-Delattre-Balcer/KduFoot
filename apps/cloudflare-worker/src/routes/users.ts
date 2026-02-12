@@ -77,7 +77,13 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: 'User not found in D1. Call sync first.' }, { status: 404 });
         }
 
-        return Response.json({ success: true, user });
+        // Join club data if user has a club
+        let club = null;
+        if (user.club_id) {
+            club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
+        }
+
+        return Response.json({ success: true, user: { ...user, club } });
     });
 
     // Update current user profile
@@ -106,6 +112,128 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         try {
             const updated = await userService.updateUser(user.id, body);
             return Response.json({ success: true, user: updated });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 500 });
+        }
+    });
+
+    // Link club to user via SIRET (IRREVERSIBLE)
+    router.post('/api/users/link-club', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401 });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const sub = payload.sub;
+
+        const user = await userService.getUserByAuth0Sub(sub);
+        if (!user) {
+            return Response.json({ success: false, error: 'User not found' }, { status: 404 });
+        }
+
+        // Check if user already has a club (irreversible)
+        if (user.club_id) {
+            return Response.json({ success: false, error: 'Votre compte est déjà lié à un club. Cette action est irréversible.' }, { status: 400 });
+        }
+
+        const body: { siret: string } = await request.json();
+        if (!body.siret || body.siret.length !== 14) {
+            return Response.json({ success: false, error: 'SIRET invalide. Il doit contenir 14 chiffres.' }, { status: 400 });
+        }
+
+        try {
+            // Fetch club info from Government API
+            const apiUrl = `${env.SIRET_API_URL}?q=${body.siret}&page=1&per_page=1`;
+            const apiRes = await fetch(apiUrl);
+            if (!apiRes.ok) {
+                return Response.json({ success: false, error: 'Erreur lors de la recherche de l\'entreprise.' }, { status: 502 });
+            }
+
+            const apiData: any = await apiRes.json();
+            if (!apiData.results || apiData.results.length === 0) {
+                return Response.json({ success: false, error: 'Aucune entreprise trouvée pour ce SIRET.' }, { status: 404 });
+            }
+
+            const entreprise = apiData.results[0];
+            const siege = entreprise.siege || {};
+
+            const clubName = entreprise.nom_complet || entreprise.nom_raison_sociale || 'Club inconnu';
+            const clubAddress = siege.adresse || '';
+            const clubCity = siege.libelle_commune || siege.commune || '';
+            const clubZip = siege.code_postal || '';
+            const lat = siege.latitude ? parseFloat(siege.latitude) : null;
+            const lon = siege.longitude ? parseFloat(siege.longitude) : null;
+
+            // Upsert club in DB
+            const { v4: uuidv4 } = await import('uuid');
+            const existingClub = await env.DB.prepare('SELECT * FROM clubs WHERE siret = ?').bind(body.siret).first();
+
+            let clubId: string;
+            if (existingClub) {
+                clubId = (existingClub as any).id;
+                await env.DB.prepare(
+                    'UPDATE clubs SET name = ?, city = ?, address = ?, zip = ?, latitude = ?, longitude = ?, cached_at = unixepoch() WHERE id = ?'
+                ).bind(clubName, clubCity, clubAddress, clubZip, lat, lon, clubId).run();
+            } else {
+                clubId = uuidv4();
+                await env.DB.prepare(
+                    'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+                ).bind(clubId, body.siret, clubName, clubCity, clubAddress, clubZip, lat, lon).run();
+            }
+
+            // Link user to club
+            const updatedUser = await userService.updateUser(user.id, {
+                club_id: clubId,
+                siret: body.siret,
+                location: clubCity,
+                stadium_address: clubAddress,
+            });
+
+            // Return user with club info
+            return Response.json({
+                success: true,
+                user: {
+                    ...updatedUser,
+                    club: { id: clubId, siret: body.siret, name: clubName, city: clubCity, address: clubAddress, zip: clubZip, latitude: lat, longitude: lon }
+                }
+            });
+        } catch (e: any) {
+            console.error('Link Club Error:', e);
+            return Response.json({ success: false, error: e.message }, { status: 500 });
+        }
+    });
+
+    // Admin-only: Unlink club (for testing — restricted to admin email)
+    router.post('/api/users/unlink-club', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401 });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const sub = payload.sub;
+
+        const user = await userService.getUserByAuth0Sub(sub);
+        if (!user) {
+            return Response.json({ success: false, error: 'User not found' }, { status: 404 });
+        }
+
+        // Only allow admin email
+        if (user.email !== 'yannidelattrebalcer.artois@gmail.com') {
+            return Response.json({ success: false, error: 'Seul l\'administrateur peut effectuer cette action.' }, { status: 403 });
+        }
+
+        try {
+            await env.DB.prepare(
+                'UPDATE users SET club_id = NULL, siret = NULL, location = NULL, stadium_address = NULL WHERE id = ?'
+            ).bind(user.id).run();
+
+            return Response.json({ success: true, message: 'Club détaché avec succès.' });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500 });
         }

@@ -16,6 +16,7 @@ import {
   getNameWithFallback,
   withAuthentication,
 } from "./providers/use-auth";
+import { AccountModal } from "./account-modal";
 
 /**
  * Renders the user's profile name with a tooltip showing their username.
@@ -72,12 +73,12 @@ export const LoginButton: FC<{ text?: string }> = ({ text }) => {
 export const LoginLink: FC<{
   text?: string;
   color?:
-    | "primary"
-    | "foreground"
-    | "secondary"
-    | "success"
-    | "warning"
-    | "danger";
+  | "primary"
+  | "foreground"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "danger";
 }> = ({ text, color }) => {
   const { isAuthenticated, login } = useAuth();
   const { t } = useTranslation();
@@ -125,12 +126,9 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
   text,
 }) => {
   const { isAuthenticated, logout, user } = useAuth();
-  const { t } = useTranslation();
 
   if (!text) {
-    text = t("log-out-someone", {
-      name: getNameWithFallback(user),
-    });
+    text = "Se déconnecter";
   }
 
   return (
@@ -140,7 +138,8 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
         delay={750}
       >
         <Button
-          className="text-sm font-normal text-default-600 bg-default-100"
+          className="text-sm font-bold text-white bg-red-600 hover:bg-red-700 shadow-md transform hover:scale-105 transition-all"
+          color="danger"
           type="button"
           onPress={() => {
             logout({
@@ -165,12 +164,12 @@ interface LogoutLinkProps extends LogoutButtonProps {
    * Button color
    */
   color?:
-    | "primary"
-    | "foreground"
-    | "secondary"
-    | "success"
-    | "warning"
-    | "danger";
+  | "primary"
+  | "foreground"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "danger";
 }
 
 /**
@@ -223,15 +222,26 @@ export const LogoutLink: FC<LogoutLinkProps> = ({
  */
 export const LoginLogoutButton: FC<LogoutButtonProps> = ({
   showButtonIfNotAuthenticated = false,
-  text,
 }) => {
   const { isAuthenticated } = useAuth();
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   return isAuthenticated ? (
-    <LogoutButton
-      showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
-      text={text}
-    />
+    <div className="flex items-center gap-2">
+      <Button
+        onPress={() => setIsAccountOpen(true)}
+        variant="flat"
+        color="default"
+        className="font-semibold text-default-700 bg-default-100/50 hover:bg-default-200/50"
+      >
+        Mon compte
+      </Button>
+      <LogoutButton
+        showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
+        text="Se déconnecter"
+      />
+      <AccountModal isOpen={isAccountOpen} onOpenChange={setIsAccountOpen} />
+    </div>
   ) : (
     <LoginButton />
   );
