@@ -7,7 +7,7 @@
         "exercises": "Video Analysis",
         "favorites": "Favorite Exercises",
         "sessions": "Training / Match Summary",
-        "matches": "Find / Create Match",
+        "matches": "Find a Match",
         "pricing": "Pricing",
         "profile": "Profile",
         "admin": "Administration"
@@ -35,7 +35,7 @@
     },
     "myExercises": "My Exercises",
     "mySessions": "My Sessions",
-    "myMatches": "My Matches",
+    "myMatches": "My Friendly Matches",
     "exercise": {
         "title": "Title",
         "synopsis": "Synopsis",
@@ -47,7 +47,7 @@
         "exportPDF": "Export to PDF"
     },
     "match": {
-        "create": "Create ad",
+        "create": "Create a friendly match",
         "format": "Format",
         "venue": "Venue",
         "date": "Date",

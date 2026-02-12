@@ -21,7 +21,7 @@ const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilis�
 export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFormProps) {
     const { t } = useTranslation();
     const { createMatch, updateMatch } = useMatches();
-    const { user, linkClub, unlinkClub } = useUser();
+    const { user, linkClub, unlinkClub, updateUser } = useUser();
     const { user: auth0User } = useAuth0();
     const [isSaving, setIsSaving] = useState(false);
     const [siret, setSiret] = useState('');
@@ -95,13 +95,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                 location_zip: initialData.location_zip || '',
                 pitch_type: initialData.pitch_type
             });
-        } else if (user?.club) {
+        } else if (user) {
             setFormData(prev => ({
                 ...prev,
-                club_id: user.club!.id,
-                location_address: user.club!.address || '',
-                location_city: user.club!.city || '',
-                location_zip: user.club!.zip || ''
+                club_id: user.club?.id || prev.club_id,
+                location_address: user.club?.address || prev.location_address || '',
+                location_city: user.club?.city || prev.location_city || '',
+                location_zip: user.club?.zip || prev.location_zip || '',
+                email: user.email || prev.email || '',
+                phone: user.phone || prev.phone || ''
             }));
         }
     }, [initialData, user]);
@@ -117,17 +119,31 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
             return;
         }
 
-        // Enforcement: Mandatory profile picture
+        // Enforcement: Mandatory profile picture (REMOVED as requested)
+        /*
         const isDefaultAvatar = auth0User?.picture?.includes('gravatar.com') ||
             auth0User?.picture?.includes('default') ||
             !auth0User?.picture;
 
         if (isDefaultAvatar) {
-            alert('⚠️ PHOTO DE PROFIL OBLIGATOIRE\n\nVous devez ajouter une photo de vous (votre tête) dans "Mon compte" avant de pouvoir créer un match.\n\nCeci est nécessaire pour prouver votre identité le jour de la rencontre.');
+            alert('⚠️ PHOTO DE PROFIL OBLIGATOIRE\n\nVous devez ajouter une photo de vous....');
+            return;
+        }
+        */
+
+        // NEW ENFORCEMENT: Contact Info
+        if (!formData.email || !formData.phone) {
+            alert('⚠️ CONTACT OBLIGATOIRE\n\nL\'email et le téléphone sont indispensables pour que les joueurs puissent vous contacter.');
             return;
         }
         setIsSaving(true);
         try {
+            // Sync phone to profile if missing or different
+            if (user && formData.phone && user.phone !== formData.phone) {
+                // Background update, don't await to block UI but catch errors
+                updateUser({ phone: formData.phone }).catch(e => console.error("Auto-sync phone error:", e));
+            }
+
             const payload = {
                 ...formData,
                 notes: `Genre: ${gender}\n${formData.notes || ''}`.trim()

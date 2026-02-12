@@ -46,6 +46,14 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
         }}
         clientId={import.meta.env.AUTH0_CLIENT_ID}
         domain={import.meta.env.AUTH0_DOMAIN}
+        onRedirectCallback={(appState) => {
+          // Redirect to the intended page or current path
+          window.history.replaceState(
+            {},
+            document.title,
+            appState?.returnTo || window.location.pathname
+          );
+        }}
       >
         <AuthProviderWrapper providerType={providerType}>
           {children}
