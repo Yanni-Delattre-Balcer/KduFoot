@@ -1,6 +1,6 @@
 {
     "site": {
-        "description": "Plateforme d'analyse vidéo et de gestion d'entraînement pour le football."
+        "description": "Kdufoot réunit deux outils essentiels pour les éducateurs de football : l'analyse vidéo pilotée par IA et la recherche de matchs amicaux entre clubs."
     },
     "nav": {
         "home": "Accueil",
@@ -8,22 +8,22 @@
         "training": "Mon Entraînement",
         "favorites": "Favoris",
         "sessions": "Résumé Entraînement / Match",
-        "matches": "Trouver / créer un match",
+        "matches": "Trouver un match",
         "pricing": "Tarifs",
         "profile": "Profil",
         "admin": "Administration"
     },
     "homePage": {
         "title": {
-            "prefix": "Analyses",
-            "highlight": "Vidéo",
-            "suffix": "Football Professionnelles"
+            "prefix": "Votre assistant",
+            "highlight": "intelligent",
+            "suffix": "pour le football amateur"
         },
         "buttons": {
-            "exercises": "Voir mes analyses vidéo",
-            "sessions": "Voir mes matchs"
+            "exercises": "Analyser une vidéo",
+            "sessions": "Trouver un match amical"
         },
-        "description": "Transformez vos vidéos YouTube ou Vimeo en véritables séances d'entraînement. Notre intelligence artificielle détecte les thèmes, les catégories d'âge et génère des synopsis détaillés pour vos joueurs."
+        "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics."
     },
     "log-out-someone": "Déconnexion {{name}}",
     "log-in": "Connexion",
@@ -36,7 +36,7 @@
     },
     "myExercises": "Mes exercices",
     "mySessions": "Mes Séances",
-    "myMatches": "Mes Matchs",
+    "myMatches": "Mes Matchs Amicaux",
     "exercise": {
         "title": "Titre",
         "synopsis": "Synopsis",
@@ -48,8 +48,8 @@
         "exportPDF": "Exporter en PDF"
     },
     "match": {
-        "create": "Créer un match",
-        "find": "Trouver un match",
+        "create": "Créer un match amical",
+        "find": "Trouver un match amical",
         "format": "Format",
         "venue": "Lieu",
         "date": "Date",
@@ -108,5 +108,9 @@
             "National": "National",
             "Pro": "Professionnel"
         }
+    },
+    "error": {
+        "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
+        "loading_matches": "Erreur lors du chargement des matchs amicaux"
     }
 }

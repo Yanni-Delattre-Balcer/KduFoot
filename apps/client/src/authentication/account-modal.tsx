@@ -56,9 +56,8 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions());
 
             if (detections.length === 0) {
-                alert("❌ AUCUN VISAGE DÉTECTÉ\n\nLa photo doit contenir un visage humain bien visible. Veuillez choisir une autre photo.");
-                if (fileInputRef.current) fileInputRef.current.value = "";
-                return;
+                // Optional: Just log or show a non-blocking toast
+                console.warn("Aucun visage détecté, mais l'upload continue (optionnel).");
             }
 
             const reader = new FileReader();
@@ -68,7 +67,12 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             reader.readAsDataURL(file);
         } catch (error) {
             console.error("Face detection error:", error);
-            alert("Erreur lors de l'analyse de l'image. Assurez-vous d'utiliser une photo valide.");
+            // Allow proceeding even if detection fails
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file!);
         } finally {
             setIsAnalyzing(false);
         }
@@ -155,14 +159,6 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                             {dbUser?.subscription ? `Abonnement ${dbUser.subscription}` : 'Compte Gratuit'}
                                         </Chip>
                                     </div>
-                                </div>
-
-                                {/* Mandatory Notice */}
-                                <div className="w-full p-3 bg-danger-50 border border-danger-100 rounded-xl text-center">
-                                    <p className="text-danger-700 text-xs font-bold uppercase tracking-wider mb-1">⚠️ Action Obligatoire</p>
-                                    <p className="text-danger-600 text-sm">
-                                        Une photo de profil réelle est **obligatoire** pour valider votre identité d'entraîneur lors des matchs.
-                                    </p>
                                 </div>
 
                                 <div className="w-full space-y-4">

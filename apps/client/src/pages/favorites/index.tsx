@@ -11,6 +11,7 @@ import { Match } from "@/types/match.types";
 import { Spinner } from "@heroui/spinner";
 import { useNavigate, Link } from "react-router-dom";
 import { Chip } from "@heroui/chip";
+import FootballClock from '../../components/football-clock';
 
 export default function FavoritesPage() {
     const { t } = useTranslation();
@@ -42,8 +43,18 @@ export default function FavoritesPage() {
             <section className="flex flex-col gap-6 w-full px-4">
 
                 {/* Hero - Mes Favoris */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-500/10 via-rose-500/5 to-pink-500/10 border border-pink-500/20">
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-pink-500/5 via-transparent to-transparent"></div>
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-600/15 via-rose-500/10 to-purple-500/10 border border-pink-500/20">
+                    {/* Grass stripes - standard green */}
+                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
+                    {/* Field center line + circle */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
+
+                    {/* Football clock - top right */}
+                    <div className="hidden md:block absolute top-4 right-4 z-10">
+                        <FootballClock size={140} showSeconds={false} />
+                    </div>
+
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
                         <div className="flex items-center gap-3">
                             <div className="p-3 rounded-2xl bg-pink-500/10">
@@ -56,7 +67,9 @@ export default function FavoritesPage() {
                             </h1>
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
-                            Retrouvez tous vos exercices et matchs favoris pour un accès rapide.
+                            {view === 'exercises'
+                                ? 'Retrouvez ici tous les exercices que vous avez enregistrés en favoris pour y accéder en un clic.'
+                                : 'Consultez les matchs amicaux qui ont retenu votre attention et gardez un œil sur les opportunités.'}
                         </p>
 
                         <div className="flex gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
@@ -180,7 +193,7 @@ export default function FavoritesPage() {
                                             <p className="text-md text-orange-900/70 dark:text-orange-200/70 mt-1">Vos matchs likés apparaîtront ici.</p>
                                         </div>
                                         <Button as={Link} to="/matches" color="warning" variant="flat" className="mt-2 bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 font-bold shadow-sm">
-                                            Trouver un match
+                                            Trouver un match amical
                                         </Button>
                                     </CardBody>
                                 </Card>
