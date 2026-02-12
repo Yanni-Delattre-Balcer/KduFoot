@@ -50,7 +50,7 @@ export class ClubService {
             per_page: '20'
         });
 
-        const response = await fetch(`https://recherche-entreprises.api.gouv.fr/search?${params}`);
+        const response = await fetch(`${this.env.SIRET_API_URL}?${params}`);
 
         if (!response.ok) {
             throw new Error(`API Error: ${response.statusText}`);

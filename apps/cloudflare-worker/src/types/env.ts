@@ -30,4 +30,10 @@ export interface Env {
     // App specific
     AUTHENTICATION_PROVIDER_TYPE: string;
     DEX_JWKS_ENDPOINT: string;
+
+    // API Gouvernementale (SIRET)
+    SIRET_API_URL: string;
+
+    // Google Maps (Distance Matrix)
+    GOOGLE_MAPS_API_KEY: string;
 }

@@ -28,11 +28,10 @@ const ThemeProps = {
 
 type Theme = typeof ThemeProps.light | typeof ThemeProps.dark;
 
-export const useTheme = (defaultTheme?: Theme) => {
+export const useTheme = () => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const storedTheme = localStorage.getItem(ThemeProps.key) as Theme | null;
-
-    return storedTheme || (defaultTheme ?? ThemeProps.light);
+    // Force Dark Mode always
+    return ThemeProps.dark;
   });
 
   const isDark = useMemo(() => {
@@ -53,15 +52,14 @@ export const useTheme = (defaultTheme?: Theme) => {
     setTheme(theme);
   };
 
-  const setLightTheme = () => _setTheme(ThemeProps.light);
+  const setLightTheme = () => _setTheme(ThemeProps.dark); // Force dark
 
   const setDarkTheme = () => _setTheme(ThemeProps.dark);
 
-  const toggleTheme = () =>
-    theme === ThemeProps.dark ? setLightTheme() : setDarkTheme();
+  const toggleTheme = () => setDarkTheme();
 
   useEffect(() => {
-    _setTheme(theme);
+    _setTheme(ThemeProps.dark);
   });
 
   return { theme, isDark, isLight, setLightTheme, setDarkTheme, toggleTheme };

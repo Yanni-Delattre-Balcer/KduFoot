@@ -1,4 +1,3 @@
-
 export interface User {
     id: string;
     auth0_sub: string;
@@ -7,7 +6,7 @@ export interface User {
     lastname: string;
     club_id?: string | null;
     siret?: string | null;
-    location?: string | null;
+    location?: string | null; // This is actually the user's city
     phone?: string | null;
     license_id?: string | null;
     category?: string | null;
@@ -19,29 +18,21 @@ export interface User {
     subscription: 'Free' | 'Pro' | 'Ultime';
     created_at: number;
     updated_at: number;
+    club?: Club; // Computed/Joined field if needed
 }
 
-export interface CreateUserDto {
-    auth0_sub: string;
-    email: string;
-    firstname: string;
-    lastname: string;
-    picture?: string;
-}
-
-export interface UpdateUserDto {
-    firstname?: string;
-    lastname?: string;
-    club_id?: string;
-    siret?: string;
-    location?: string;
-    phone?: string;
-    license_id?: string;
-    category?: string;
-    level?: string;
-    stadium_address?: string;
+export interface Club {
+    id: string;
+    siret: string;
+    name: string;
+    city: string;
+    address?: string;
+    zip?: string;
+    logo_url?: string;
     latitude?: number;
     longitude?: number;
-    picture?: string;
-    subscription?: 'Free' | 'Pro' | 'Ultime';
+}
+
+export interface LinkClubDto {
+    siret: string;
 }

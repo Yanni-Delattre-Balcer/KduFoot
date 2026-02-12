@@ -16,132 +16,118 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type React from "react";
-
 import { Link } from "@heroui/link";
 import { Trans, useTranslation } from "react-i18next";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useEffect, useState } from "react";
 import {
   Dropdown,
-  DropdownItem,
-  DropdownMenu,
   DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@heroui/dropdown";
+import { Button } from "@heroui/button";
 import { Snippet } from "@heroui/snippet";
-import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect, useState, useRef } from "react";
-import { JWTPayload, jwtVerify } from "jose";
-
+import { jwtVerify, JWTPayload } from "jose";
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
 
 export default function DefaultLayout({
   children,
+  maxWidth = "max-w-7xl",
 }: {
   children: React.ReactNode;
+  maxWidth?: string;
 }) {
-  const { t } = useTranslation();
-  const { isAuthenticated, user, getAccessTokenSilently } = useAuth0();
+  useTranslation();
+  const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [decodedToken, setDecodedToken] = useState<JWTPayload | null>(null);
-
-  const decodedTokenCacheRef = useRef<Map<string, JWTPayload>>(new Map());
+  const [tokenPayload, setTokenPayload] = useState<JWTPayload | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-
-    let isMounted = true;
-
-    const loadToken = async () => {
-      try {
-        const token = await getAccessTokenSilently();
-
-        if (!isMounted) return;
-
-        setAccessToken(token);
-
-        if (decodedTokenCacheRef.current.has(token)) {
-          setDecodedToken(decodedTokenCacheRef.current.get(token) || null);
-
-          return;
-        }
-
-        const JWKS = await getLocalJwkSet(import.meta.env.AUTH0_DOMAIN);
-
-        const verified = await jwtVerify(token, JWKS, {
-          issuer: `https://${import.meta.env.AUTH0_DOMAIN}/`,
-          audience: import.meta.env.AUTH0_AUDIENCE,
+    if (isAuthenticated) {
+      getAccessTokenSilently()
+        .then(async (token) => {
+          setAccessToken(token);
+          const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+          const JWKS = await getLocalJwkSet(domain);
+          const { payload } = await jwtVerify(token, JWKS, {
+            issuer: `https://${domain}/`,
+            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+          });
+          setTokenPayload(payload);
+        })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error("Failed to get or verify access token", err);
         });
-
-        const payload = verified.payload as JWTPayload;
-
-        decodedTokenCacheRef.current.set(token, payload);
-
-        if (isMounted) setDecodedToken(payload);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to decode access token:", err);
-      }
-    };
-
-    loadToken();
-
-    return () => {
-      isMounted = false;
-    };
+    } else {
+      setAccessToken(null);
+      setTokenPayload(null);
+    }
   }, [isAuthenticated, getAccessTokenSilently]);
 
   return (
     <div className="relative flex flex-col h-screen">
       <Navbar />
-      <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">
+      <main className={`container mx-auto ${maxWidth} px-6 flex-grow pt-16`}>
         {children}
       </main>
       <footer className="w-full flex items-center justify-center py-3">
+        {isAuthenticated && user && (
+          <div className="fixed bottom-4 right-4 z-50">
+            <Dropdown placement="top-end">
+              <DropdownTrigger>
+                <Button variant="flat" size="sm" className="bg-background/60 backdrop-blur-md border border-default-200 shadow-lg px-4">
+                  Utilisateur : {user.name}
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Token Details" className="w-[340px]">
+                <DropdownItem key="user-info" isReadOnly className="opacity-100 cursor-default">
+                  <div className="flex flex-col gap-1 p-2">
+                    <p className="font-bold text-primary">Connected as</p>
+                    <p className="text-sm font-semibold">{user.email}</p>
+                    <p className="text-xs text-default-500 font-mono mt-1 break-all">ID: {user.sub}</p>
+                  </div>
+                </DropdownItem>
+                <DropdownItem key="token-status" isReadOnly className="opacity-100 cursor-default border-t border-default-100">
+                  <div className="flex flex-col gap-1 p-2">
+                    <p className="font-bold text-success">Token Status</p>
+                    {tokenPayload?.exp ? (
+                      <div className="flex justify-between items-center text-xs">
+                        <span>Expires in:</span>
+                        <span className="font-mono text-warning">
+                          {Math.max(0, Math.floor(tokenPayload.exp - Date.now() / 1000))}s
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-danger">No expiry found</p>
+                    )}
+                  </div>
+                </DropdownItem>
+                <DropdownItem key="copy-token" variant="flat">
+                  <div className="flex flex-col gap-2 p-1">
+                    <p className="text-xs font-bold text-default-400">Access Token (Bearer)</p>
+                    <Snippet variant="bordered" size="sm" symbol="" className="w-full">
+                      {accessToken || "Loading..."}
+                    </Snippet>
+                  </div>
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        )}
         <Link
           isExternal
           className="flex items-center gap-1 text-current"
-          href="https://heroui.com"
-          title={t("heroui-com-homepage")}
+          href="https://heroui.com/"
+          title="heroui.com homepage"
         >
           <span className="text-default-600">
-            <Trans ns="base">powered-by</Trans>
+            <Trans i18nKey="powered-by">Powered by</Trans>
           </span>
-          <p className="text-primary">HeroUI</p>
+          <p className="text-primary font-bold">HeroUI</p>
         </Link>
-        &nbsp;
-        <Dropdown>
-          <DropdownTrigger>
-            {isAuthenticated ? (
-              <span>
-                {t("user")}: &nbsp;{user?.name}
-              </span>
-            ) : (
-              <></>
-            )}
-          </DropdownTrigger>
-          <DropdownMenu className="max-w-5xl">
-            <DropdownItem key="user-logged" textValue="user-logged">
-              <span className="text-default-600">{t("token")}:</span>
-              <br />
-              <Snippet className="max-w-4xl" symbol="" title="api-response">
-                <div className="max-w-2xs sm:max-w-sm md:max-w-md lg:max-w-3xl  whitespace-break-spaces  text-wrap break-words">
-                  {accessToken}
-                </div>
-              </Snippet>
-              <br />
-              <span className="text-default-600">
-                {t("expiration")}:{" "}
-                {new Date((decodedToken?.exp || 0) * 1000).toLocaleString()}
-              </span>
-              <br />
-              <span className="text-default-600">
-                {t("permissions")}:{" "}
-                {((decodedToken?.permissions as string[]) || []).join(", ") ||
-                  t("no-permissions")}
-              </span>
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
       </footer>
     </div>
   );

@@ -27,11 +27,14 @@ export default function IndexPage() {
   const { t } = useTranslation(["kdufoot", "base"]);
 
   return (
-    <DefaultLayout>
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div className="inline-block max-w-lg text-center justify-center">
+    <DefaultLayout maxWidth="max-w-full">
+      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10 relative overflow-hidden">
+        {/* Background Gradient */}
+
+
+        <div className="inline-block max-w-4xl text-center justify-center relative z-10">
           <span className={title()}>{t("homePage.title.prefix")}&nbsp;</span>
-          <span className={title({ color: "violet" })}>{t("homePage.title.highlight")}&nbsp;</span>
+          <span className={`${title()} bg-[linear-gradient(to_right,#3b82f6,#22c55e,#ec4899,#ef4444,#f97316,#eab308)] bg-clip-text text-transparent`}>{t("homePage.title.highlight")}&nbsp;</span>
           <br />
           <span className={title()}>{t("homePage.title.suffix")}</span>
           <div className={subtitle({ class: "mt-4" })}>
@@ -41,29 +44,28 @@ export default function IndexPage() {
 
         <div className="flex gap-4 mt-4">
           <Link
-            className={buttonStyles({
-              color: "primary",
+            className={`${buttonStyles({
               radius: "full",
               variant: "shadow",
               size: "lg",
-            })}
+            })} bg-gradient-to-r from-blue-600 to-violet-600 text-white border-none`}
             href="/exercises"
           >
             {t("homePage.buttons.exercises")}
           </Link>
           <Link
-            className={buttonStyles({
-              variant: "bordered",
+            className={`${buttonStyles({
               radius: "full",
+              variant: "shadow",
               size: "lg",
-            })}
+            })} bg-gradient-to-r from-orange-500 to-amber-500 text-white border-none`}
             href="/matches"
           >
             {t("homePage.buttons.sessions")}
           </Link>
         </div>
 
-        <div className="mt-12 text-center text-default-500 max-w-2xl px-4">
+        <div className="mt-12 text-center text-default-500 max-w-5xl px-4">
           <p>{t("homePage.description")}</p>
         </div>
       </section>
