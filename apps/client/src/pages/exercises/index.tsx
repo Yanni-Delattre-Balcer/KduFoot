@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { Image } from "@heroui/image";
 import { Chip } from "@heroui/chip";
 import { useTraining } from '../../contexts/training-context';
+import FootballClock from '../../components/football-clock';
 
 export default function ExercisesPage() {
     const { t } = useTranslation();
@@ -29,8 +30,18 @@ export default function ExercisesPage() {
             <section className="flex flex-col gap-10 w-full px-4">
 
                 {/* Hero - Analyse ta vidéo */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/10 via-violet-600/5 to-blue-600/10 border border-blue-600/20">
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/5 via-transparent to-transparent"></div>
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/15 via-violet-500/10 to-fuchsia-500/10 border border-blue-600/20">
+                    {/* Grass stripes - standard green */}
+                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
+                    {/* Field center line + circle */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
+
+                    {/* Football clock - top right */}
+                    <div className="hidden md:block absolute top-4 right-4 z-10">
+                        <FootballClock size={140} showSeconds={false} />
+                    </div>
+
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6">
                         <div className="flex items-center gap-3">
                             <div className="p-3 rounded-2xl bg-blue-600/10">
