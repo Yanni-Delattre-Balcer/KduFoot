@@ -108,8 +108,39 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         }
     }, [initialData, user]);
 
+    const formatPhoneNumber = (value: string) => {
+        // Build formatted value
+        let raw = value.replace(/\D/g, '');
+
+        // Ensure it starts with 33 if not empty
+        if (raw.length > 0 && !raw.startsWith('33')) {
+            if (raw.startsWith('0')) raw = '33' + raw.substring(1);
+            else raw = '33' + raw;
+        }
+
+        // Limit length (33 + 9 digits = 11 digits max for +33 X XX XX XX XX)
+        if (raw.length > 11) raw = raw.substring(0, 11);
+
+        // Format
+        let formatted = '';
+        if (raw.length > 0) formatted += '+';
+        if (raw.length > 0) formatted += raw.substring(0, 2); // 33
+        if (raw.length > 2) formatted += ' ' + raw.substring(2, 3); // 6 or 7
+        if (raw.length > 3) formatted += ' ' + raw.substring(3, 5); // 12
+        if (raw.length > 5) formatted += ' ' + raw.substring(5, 7); // 34
+        if (raw.length > 7) formatted += ' ' + raw.substring(7, 9); // 56
+        if (raw.length > 9) formatted += ' ' + raw.substring(9, 11); // 78
+
+        return formatted;
+    };
+
     const handleChange = (field: keyof CreateMatchDto, value: any) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        if (field === 'phone') {
+            const formatted = formatPhoneNumber(value);
+            setFormData(prev => ({ ...prev, [field]: formatted }));
+        } else {
+            setFormData(prev => ({ ...prev, [field]: value }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -131,9 +162,27 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         }
         */
 
-        // NEW ENFORCEMENT: Contact Info
         if (!formData.email || !formData.phone) {
             alert('⚠️ CONTACT OBLIGATOIRE\n\nL\'email et le téléphone sont indispensables pour que les joueurs puissent vous contacter.');
+            return;
+        }
+
+        // SECURITY: Date Validation
+        const now = new Date();
+        const selectedDate = new Date(formData.match_date!);
+        const [hours, minutes] = (formData.match_time || '00:00').split(':').map(Number);
+        selectedDate.setHours(hours, minutes);
+
+        if (selectedDate < now) {
+            alert('⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un match dans le passé.');
+            return;
+        }
+
+        // Prevent far future dates (e.g. > 2 years) to avoid spam/mistakes
+        const twoYearsFromNow = new Date();
+        twoYearsFromNow.setFullYear(now.getFullYear() + 2);
+        if (selectedDate > twoYearsFromNow) {
+            alert('⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée.');
             return;
         }
         setIsSaving(true);
@@ -157,7 +206,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
             if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Failed to save match", error);
-            alert(t('error.save_failed', 'Erreur lors de la sauvegarde'));
+            alert((error as any).message || t('error.save_failed', 'Erreur lors de la sauvegarde'));
         } finally {
             setIsSaving(false);
         }

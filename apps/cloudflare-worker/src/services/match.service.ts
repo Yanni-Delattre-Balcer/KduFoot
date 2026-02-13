@@ -46,8 +46,10 @@ export class MatchService {
         setClauses.push(`updated_at = ?`);
         values.push(Math.floor(Date.now() / 1000));
 
-        const query = `UPDATE matches SET ${setClauses.join(', ')} WHERE id = ? RETURNING *`;
-        return await this.db.prepare(query).bind(...values, id).first<Match>();
+        const query = `UPDATE matches SET ${setClauses.join(', ')} WHERE id = ?`;
+        await this.db.prepare(query).bind(...values, id).run();
+
+        return await this.getById(id); // Return full object with club info
     }
 
     async delete(id: string, userId: string): Promise<boolean> {
@@ -60,7 +62,62 @@ export class MatchService {
     }
 
     async getById(id: string): Promise<Match | null> {
-        return await this.db.prepare('SELECT * FROM matches WHERE id = ?').bind(id).first<Match>();
+        const result = await this.db.prepare(`
+            SELECT m.*, 
+                   c.name as club_name, c.city as club_city, c.zip as club_zip, c.logo_url as club_logo_url,
+                   c.address as club_address, c.latitude as club_latitude, c.longitude as club_longitude
+            FROM matches m 
+            LEFT JOIN clubs c ON m.club_id = c.id 
+            WHERE m.id = ?
+        `).bind(id).first<any>();
+
+        if (!result) return null;
+
+        // Fetch contacts for this match with club info
+        const { results: contacts } = await this.db.prepare(`
+            SELECT mc.*, u.id as user_id, c.id as club_id, c.name as club_name
+            FROM match_contacts mc
+            LEFT JOIN users u ON mc.user_id = u.id
+            LEFT JOIN clubs c ON u.club_id = c.id
+            WHERE mc.match_id = ?
+            ORDER BY mc.contacted_at DESC
+        `).bind(id).all<any>();
+
+        const match = this.mapRowToMatch(result);
+        match.contacts = contacts.map(c => ({
+            user_id: c.user_id,
+            club_id: c.club_id,
+            club_name: c.club_name,
+            message: c.message,
+            contacted_at: new Date(c.contacted_at * 1000).toISOString()
+        }));
+
+        return match;
+    }
+
+    /**
+     * Helper to map flat DB row to nested Match object
+     */
+    private mapRowToMatch(row: any): Match {
+        const {
+            club_name, club_city, club_zip, club_logo_url, club_address, club_latitude, club_longitude,
+            ...matchData
+        } = row;
+
+        return {
+            ...matchData,
+            club: {
+                id: matchData.club_id,
+                name: club_name,
+                city: club_city,
+                zip: club_zip,
+                address: club_address,
+                logo_url: club_logo_url,
+                latitude: club_latitude,
+                longitude: club_longitude,
+                siret: '' // Not selected usually, but required by type?
+            }
+        } as Match;
     }
 
     /**
@@ -116,13 +173,13 @@ export class MatchService {
     async search(filters: MatchFilters, googleMapsApiKey?: string): Promise<{ matches: any[], total: number }> {
         const wantDistance = filters.radius_km && filters.user_lat != null && filters.user_lng != null;
 
-        // JOIN with clubs to get coordinates when distance filtering is needed
-        let selectClause = 'm.*';
-        let fromClause = 'matches m';
-        if (wantDistance) {
-            selectClause = 'm.*, c.latitude AS club_lat, c.longitude AS club_lng, c.name AS club_name';
-            fromClause = 'matches m LEFT JOIN clubs c ON m.club_id = c.id';
-        }
+        // Always join clubs now to get names
+        const selectClause = `
+            m.*, 
+            c.name as club_name, c.city as club_city, c.zip as club_zip, c.logo_url as club_logo_url,
+            c.address as club_address, c.latitude as club_latitude, c.longitude as club_longitude
+        `;
+        const fromClause = 'matches m LEFT JOIN clubs c ON m.club_id = c.id';
 
         let query = `SELECT ${selectClause} FROM ${fromClause} WHERE 1=1`;
         const params: any[] = [];
@@ -211,16 +268,19 @@ export class MatchService {
 
         const { results } = await this.db.prepare(query).bind(...params).all<any>();
 
-        // If no distance filtering, return as-is
-        if (!wantDistance || !results.length) {
-            return { matches: results, total: results.length };
+        // Map results to objects
+        let mappedResults = results.map(row => this.mapRowToMatch(row));
+
+        // If no distance filtering, return mapped
+        if (!wantDistance || !mappedResults.length) {
+            return { matches: mappedResults, total: results.length };
         }
 
         // Build destinations array for matches that have coordinates
         const matchesWithCoords: { index: number; lat: number; lng: number }[] = [];
-        results.forEach((m: any, idx: number) => {
-            if (m.club_lat != null && m.club_lng != null) {
-                matchesWithCoords.push({ index: idx, lat: m.club_lat, lng: m.club_lng });
+        mappedResults.forEach((m, idx) => {
+            if (m.club?.latitude != null && m.club?.longitude != null) {
+                matchesWithCoords.push({ index: idx, lat: m.club.latitude, lng: m.club.longitude });
             }
         });
 
@@ -234,28 +294,23 @@ export class MatchService {
 
         // Filter by actual road distance and add distance field
         const radiusMeters = filters.radius_km! * 1000;
-        const filtered: any[] = [];
+        const filtered: Match[] = [];
         matchesWithCoords.forEach((mc, destIdx) => {
             const distMeters = distanceMap.get(destIdx);
+            const match = mappedResults[mc.index];
+
             if (distMeters !== undefined && distMeters <= radiusMeters) {
-                const match = { ...results[mc.index] };
                 match.distance_km = Math.round(distMeters / 100) / 10; // e.g. 12.3 km
-                // Clean up internal fields
-                delete match.club_lat;
-                delete match.club_lng;
                 filtered.push(match);
-            } else if (distMeters === undefined) {
+            } else if (distMeters === undefined && match.club?.latitude != null && match.club?.longitude != null) {
                 // Fallback to Haversine if Google API didn't return a result
                 const haversineDist = this.haversineKm(
                     filters.user_lat!, filters.user_lng!,
-                    results[mc.index].club_lat, results[mc.index].club_lng
+                    match.club.latitude, match.club.longitude
                 );
                 if (haversineDist <= filters.radius_km!) {
-                    const match = { ...results[mc.index] };
                     match.distance_km = Math.round(haversineDist * 10) / 10;
                     match.distance_approximate = true;
-                    delete match.club_lat;
-                    delete match.club_lng;
                     filtered.push(match);
                 }
             }
@@ -271,7 +326,7 @@ export class MatchService {
         // Check if match exists and is active
         const match = await this.getById(matchId);
         if (!match || match.status !== 'active') throw new Error('Match not available');
-        if (match.owner_id === userId) throw new Error('Cannot contact own match');
+        // if (match.owner_id === userId) throw new Error('Cannot contact own match');
 
         // Check if already contacted
         // Primary key (match_id, user_id)
