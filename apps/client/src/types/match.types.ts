@@ -25,7 +25,8 @@ export interface Match {
     phone: string;
     notes?: string;
     status: MatchStatus;
-    contacts: MatchContact[];
+    contacts?: MatchContact[];
+    contacts_count?: number;
     created_at: string;
     updated_at: string;
     // Distance fields (returned when radius filter is active)
@@ -56,6 +57,8 @@ export type MatchStatus = 'active' | 'found' | 'expired';
 
 export interface MatchContact {
     user_id: string;
+    club_id?: string;
+    club_name?: string;
     message: string;
     contacted_at: string;
 }

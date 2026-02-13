@@ -52,7 +52,7 @@ export default function FavoritesPage() {
 
                     {/* Football clock - top right */}
                     <div className="hidden md:block absolute top-4 right-4 z-10">
-                        <FootballClock size={140} showSeconds={false} />
+                        <FootballClock size={140} />
                     </div>
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">

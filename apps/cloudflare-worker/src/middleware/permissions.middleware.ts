@@ -41,7 +41,7 @@ async function checkQuota(
         [Permission.VIDEOS_ANALYZE]: { limit: 3, period: 'daily' },
         [Permission.VIDEOS_ANALYZE_LONG]: { limit: 10, period: 'daily' },
         [Permission.SESSIONS_ADAPT]: { limit: 3, period: 'monthly' },
-        [Permission.MATCHES_CREATE]: { limit: 2, period: 'monthly' },
+        [Permission.MATCHES_CREATE]: { limit: 50, period: 'monthly' },
     };
 
     const config = quotaConfig[permission];
