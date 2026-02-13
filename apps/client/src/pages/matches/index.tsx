@@ -119,7 +119,7 @@ export default function MatchesPage() {
 
                     {/* Football clock - top right */}
                     <div className="hidden md:block absolute top-4 right-4 z-10">
-                        <FootballClock size={140} showSeconds={false} />
+                        <FootballClock size={140} />
                     </div>
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
@@ -462,45 +462,52 @@ export default function MatchesPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {filteredMatches.map((match) => (
-                                    <Card key={match.id} className="group hover:shadow-lg hover:shadow-orange-500/10 transition-all bg-[#232120] border border-orange-500/20 hover:border-orange-500/40">
-                                        <CardHeader className="pb-1 pt-4 px-4 flex-col items-start gap-1">
-                                            <div className="flex justify-between w-full">
-                                                <div className="flex gap-1.5 align-center">
-                                                    <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-orange-100 text-orange-700">{match.category}</Chip>
-                                                    {match.level && <Chip size="sm" variant="flat" color="secondary" className="font-semibold">{match.level}</Chip>}
-                                                    <Chip size="sm" variant="flat">{match.format}</Chip>
+                                    <Card key={match.id} className={`group hover:shadow-lg transition-all border border-orange-500/20 hover:border-orange-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-orange-500 shadow-orange-500/20' : ''}`}>
+                                        <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
+                                            {user?.id === match.owner_id && (
+                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                                                        <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                                                    </svg>
+                                                    Ma création
                                                 </div>
-                                                <div className="flex gap-1">
-                                                    <Chip size="sm" variant="dot" color={match.venue === 'Domicile' ? 'success' : match.venue === 'Extérieur' ? 'danger' : 'default'}>{match.venue}</Chip>
-                                                    {match.distance_km != null && (
-                                                        <Chip size="sm" variant="flat" color="primary">
-                                                            {match.distance_approximate ? '~' : ''}{match.distance_km} km
-                                                        </Chip>
-                                                    )}
-                                                </div>
+                                            )}
+                                            <div className="flex flex-col w-full">
+                                                <h4 className="font-bold text-xl text-default-900 group-hover:text-orange-500 transition-colors uppercase tracking-tight truncate w-full">
+                                                    {match.club?.name || 'Club Inconnu'}
+                                                </h4>
+                                                <p className="text-small text-default-500 font-medium">{match.location_city || match.club?.city} ({match.location_zip || match.club?.zip})</p>
                                             </div>
-                                            <h4 className="font-bold text-large mt-1 group-hover:text-orange-600 transition-colors">vs {match.club?.name || 'Adversaire'}</h4>
                                         </CardHeader>
-                                        <CardBody className="py-2 px-4">
-                                            <div className="flex items-center gap-2 text-sm text-default-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                                </svg>
-                                                {new Date(match.match_date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} à {match.match_time}
+                                        <CardBody className="py-2 px-4 gap-3">
+                                            {/* Date & Time Row - Simplified */}
+                                            <div className="flex items-center gap-4 text-sm text-default-600 bg-default-50 p-2 rounded-lg justify-center">
+                                                <div className="flex items-center gap-1.5">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                                    </svg>
+                                                    <span className="font-semibold capitalize">{new Date(match.match_date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                                                </div>
+                                                <div className="w-[1px] h-4 bg-default-300"></div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                    </svg>
+                                                    <span className="font-semibold">{match.match_time}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : match.status === 'found' ? 'primary' : 'default'}>
-                                                    {match.status === 'active' ? '🟢 Actif' : match.status === 'found' ? '✅ Trouvé' : match.status}
-                                                </Chip>
-                                                {match.pitch_type && (
-                                                    <Chip size="sm" variant="bordered" color="secondary">{match.pitch_type}</Chip>
-                                                )}
-                                            </div>
-                                            {match.notes && <p className="text-sm text-default-400 italic truncate mt-2">{match.notes}</p>}
+
+                                            {match.distance_km != null && (
+                                                <div className="flex justify-center">
+                                                    <Chip size="sm" variant="flat" color="primary" className="h-5 text-[10px]">
+                                                        {match.distance_approximate ? '~' : ''}{match.distance_km} km
+                                                    </Chip>
+                                                </div>
+                                            )}
                                         </CardBody>
                                         <CardFooter className="px-4 pb-4">
-                                            <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="flat" color="warning" className="font-semibold w-full bg-orange-100 text-orange-700">
-                                                {t('details', 'Voir détails')}
+                                            <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="warning" className="font-bold w-full bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md shadow-orange-500/20">
+                                                {t('details', 'Voir détails & Contacter')}
                                             </Button>
                                         </CardFooter>
                                     </Card>

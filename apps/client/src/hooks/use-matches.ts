@@ -75,11 +75,36 @@ export function useMatch(id: string | null) {
         return response.json();
     };
 
-    const { data, error, isLoading } = useSWR(id ? `/api/matches/${id}` : null, fetcher);
+    const { data, error, isLoading, mutate } = useSWR(id ? `/api/matches/${id}` : null, fetcher);
+
+    const updateMatch = useCallback(async (dto: UpdateMatchDto) => {
+        if (!id) return;
+        const token = await getAccessTokenSilently();
+        await matchService.update(id, dto, token);
+        mutate();
+    }, [id, getAccessTokenSilently, mutate]);
+
+    const deleteMatch = useCallback(async () => {
+        if (!id) return;
+        const token = await getAccessTokenSilently();
+        await matchService.delete(id, token);
+        // No mutate needed mostly as we navigate away, but for correctness:
+        mutate(null, false);
+    }, [id, getAccessTokenSilently, mutate]);
+
+    const contactMatch = useCallback(async (dto: ContactMatchDto) => {
+        if (!id) return;
+        const token = await getAccessTokenSilently();
+        await matchService.contact(id, dto, token);
+        mutate(); // Re-fetch to see the new contact in the list
+    }, [id, getAccessTokenSilently, mutate]);
 
     return {
         match: data?.match as Match,
         isLoading,
         isError: error,
+        updateMatch,
+        deleteMatch,
+        contactMatch
     };
 }

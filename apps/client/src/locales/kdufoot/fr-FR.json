@@ -7,7 +7,7 @@
         "exercises": "Analyse Vidéo",
         "training": "Mon Entraînement",
         "favorites": "Favoris",
-        "sessions": "Résumé Entraînement / Match",
+        "sessions": "Historique Entraînement / Match",
         "matches": "Trouver un match",
         "pricing": "Tarifs",
         "profile": "Profil",
@@ -62,7 +62,7 @@
         "export": "Exporter en PDF"
     },
     "sessions": {
-        "title": "Résumé Entraînement / Match",
+        "title": "Historique Entraînement / Match",
         "create": "Planifier une séance"
     },
     "permissions": {
