@@ -30,21 +30,16 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
     const handleLinkClub = async () => {
         const cleanSiret = siret.replace(/\s/g, '').trim();
         if (!cleanSiret || cleanSiret.length !== 14) {
-            alert('Le SIRET doit contenir exactement 14 chiffres.');
+            alert(t('matchForm.alerts.siret_length'));
             return;
         }
-        const confirmed = confirm(
-            '⚠️ ATTENTION : Cette action est IRRÉVERSIBLE.\n\n' +
-            'Votre compte sera définitivement lié à ce club.\n' +
-            'Pour toute modification ultérieure, vous devrez contacter le support avec une preuve à l\'appui.\n\n' +
-            'Voulez-vous continuer ?'
-        );
+        const confirmed = confirm(t('matchForm.alerts.link_confirm'));
         if (!confirmed) return;
         setIsLinking(true);
         try {
             await linkClub(cleanSiret);
         } catch (error: any) {
-            alert(error.message || 'Erreur lors de la liaison du club. Vérifiez le SIRET.');
+            alert(error.message || t('matchForm.alerts.link_error'));
         } finally {
             setIsLinking(false);
         }
@@ -146,7 +141,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user?.club_id) {
-            alert('Vous devez d\'abord lier votre club via le numéro SIRET avant de créer un match.');
+            alert(t('matchForm.alerts.must_link'));
             return;
         }
 
@@ -163,7 +158,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         */
 
         if (!formData.email || !formData.phone) {
-            alert('⚠️ CONTACT OBLIGATOIRE\n\nL\'email et le téléphone sont indispensables pour que les joueurs puissent vous contacter.');
+            alert(t('matchForm.alerts.contact_required'));
             return;
         }
 
@@ -174,7 +169,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         selectedDate.setHours(hours, minutes);
 
         if (selectedDate < now) {
-            alert('⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un match dans le passé.');
+            alert(t('matchForm.alerts.date_past'));
             return;
         }
 
@@ -182,7 +177,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         const twoYearsFromNow = new Date();
         twoYearsFromNow.setFullYear(now.getFullYear() + 2);
         if (selectedDate > twoYearsFromNow) {
-            alert('⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée.');
+            alert(t('matchForm.alerts.date_far'));
             return;
         }
         setIsSaving(true);
@@ -242,14 +237,14 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         </svg>
                     </div>
                     <div className="flex flex-col">
-                        <p className="text-md font-bold text-default-700">Informations du Match</p>
-                        <p className="text-small text-default-500">Détails de la rencontre</p>
+                        <p className="text-md font-bold text-default-700">{t('matchForm.title')}</p>
+                        <p className="text-small text-default-500">{t('matchForm.subtitle')}</p>
                     </div>
                 </CardHeader>
                 <CardBody className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
                     <Select
-                        label="Catégorie"
-                        placeholder="Choisir"
+                        label={t('matchForm.labels.category')}
+                        placeholder={t('matchForm.labels.choose')}
                         selectedKeys={formData.category ? [formData.category] : []}
                         onChange={(e) => handleChange('category', e.target.value)}
                         isRequired
@@ -260,12 +255,12 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         }
                     >
                         {Object.values(Category).map((cat) => (
-                            <SelectItem key={cat}>{cat}</SelectItem>
+                            <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                         ))}
                     </Select>
                     <Select
-                        label="Niveau"
-                        placeholder="Choisir"
+                        label={t('matchForm.labels.level')}
+                        placeholder={t('matchForm.labels.choose')}
                         selectedKeys={formData.level ? [formData.level] : []}
                         onChange={(e) => handleChange('level', e.target.value)}
                         isRequired
@@ -276,12 +271,12 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         }
                     >
                         {Object.values(Level).map((cat) => (
-                            <SelectItem key={cat}>{cat}</SelectItem>
+                            <SelectItem key={cat}>{t(`enums.level.${cat}`)}</SelectItem>
                         ))}
                     </Select>
                     <Select
-                        label="Format"
-                        placeholder="Choisir"
+                        label={t('matchForm.labels.format')}
+                        placeholder={t('matchForm.labels.choose')}
                         selectedKeys={formData.format ? [formData.format] : []}
                         onChange={(e) => handleChange('format', e.target.value)}
                         isRequired
@@ -297,8 +292,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         <SelectItem key="Futsal">Futsal</SelectItem>
                     </Select>
                     <Select
-                        label="Genre"
-                        placeholder="Choisir"
+                        label={t('matchForm.labels.gender')}
+                        placeholder={t('matchForm.labels.choose')}
                         selectedKeys={[gender]}
                         onChange={(e) => setGender(e.target.value)}
                         startContent={
@@ -307,14 +302,14 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             </svg>
                         }
                     >
-                        <SelectItem key="Masculin">Masculin</SelectItem>
-                        <SelectItem key="Féminin">Féminin</SelectItem>
-                        <SelectItem key="Mixte">Mixte</SelectItem>
+                        <SelectItem key="Masculin">{t('enums.gender.Masculin')}</SelectItem>
+                        <SelectItem key="Féminin">{t('enums.gender.Féminin')}</SelectItem>
+                        <SelectItem key="Mixte">{t('enums.gender.Mixte')}</SelectItem>
                     </Select>
 
                     <Input
                         type="date"
-                        label="Date"
+                        label={t('matchForm.labels.date')}
                         value={formData.match_date}
                         onValueChange={(v) => handleChange('match_date', v)}
                         isRequired
@@ -327,7 +322,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     />
                     <Input
                         type="time"
-                        label="Heure"
+                        label={t('matchForm.labels.time')}
                         value={formData.match_time}
                         onValueChange={(v) => handleChange('match_time', v)}
                         isRequired
@@ -338,8 +333,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         }
                     />
                     <Select
-                        label="Lieu"
-                        placeholder="Choisir"
+                        label={t('matchForm.labels.venue')}
+                        placeholder={t('matchForm.labels.choose')}
                         selectedKeys={formData.venue ? [formData.venue] : []}
                         onChange={(e) => handleChange('venue', e.target.value)}
                         isRequired
@@ -349,14 +344,14 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             </svg>
                         }
                     >
-                        <SelectItem key="Domicile">Domicile</SelectItem>
-                        <SelectItem key="Extérieur">Extérieur</SelectItem>
-                        <SelectItem key="Neutre">Terrain Neutre</SelectItem>
+                        <SelectItem key="Domicile">{t('enums.venue.Domicile')}</SelectItem>
+                        <SelectItem key="Extérieur">{t('enums.venue.Extérieur')}</SelectItem>
+                        <SelectItem key="Neutre">{t('enums.venue.Neutre')}</SelectItem>
                     </Select>
 
                     <Select
-                        label="Type terrain"
-                        placeholder="Choisir"
+                        label={t('matchForm.labels.pitch_type')}
+                        placeholder={t('matchForm.labels.choose')}
                         selectedKeys={formData.pitch_type ? [formData.pitch_type] : []}
                         onChange={(e) => handleChange('pitch_type', e.target.value)}
                         startContent={
@@ -367,7 +362,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         }
                     >
                         {PITCH_TYPES.map((type) => (
-                            <SelectItem key={type}>{type}</SelectItem>
+                            <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
                         ))}
                     </Select>
 
@@ -382,17 +377,17 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                         </svg>
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-warning-900 text-xl">Lier votre club (Action irréversible)</h4>
+                                        <h4 className="font-bold text-warning-900 text-xl">{t('matchForm.link_club.title')}</h4>
                                         <div className="text-base text-warning-800 mt-2 space-y-1">
-                                            <p><span className="font-bold">Attention :</span> Le numéro SIRET ne peut être renseigné qu'une seule fois.</p>
-                                            <p>Dès validation, l'adresse, le code postal et la ville seront <span className="font-bold">automatiquement remplis</span>.</p>
-                                            <p>Le club sera définitivement associé à votre compte.</p>
+                                            <p><span className="font-bold">Attention :</span> {t('matchForm.link_club.warning_siret')}</p>
+                                            <p>{t('matchForm.link_club.warning_auto')}</p>
+                                            <p>{t('matchForm.link_club.warning_final')}</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-3 items-center w-full justify-center">
                                     <Input
-                                        label="Numéro SIRET"
+                                        label={t('matchForm.labels.siret')}
                                         placeholder="14 chiffres"
                                         value={siret}
                                         onValueChange={setSiret}
@@ -402,18 +397,18 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                         }}
                                     />
                                     <Button color="warning" variant="solid" onPress={handleLinkClub} isLoading={isLinking} className="font-bold text-warning-900 h-14">
-                                        Valider et Lier le club
+                                        {t('matchForm.link_club.validate')}
                                     </Button>
                                 </div>
                                 <p className="text-xs text-warning-700 font-medium">
-                                    En cas de changement de club ultérieur, contactez le support avec justificatifs.
+                                    {t('matchForm.link_club.support')}
                                 </p>
                             </div>
                         ) : (
                             <div className="p-3 bg-success-50 border border-success-200 rounded-xl flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-success-600"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
-                                    <span className="font-semibold text-success-700">Club lié : {user.club?.name || 'Club associé'}</span>
+                                    <span className="font-semibold text-success-700">{t('matchForm.link_club.linked')} : {user.club?.name || t('matchesPage.unknown_club')}</span>
                                 </div>
                                 {auth0User?.email === 'yannidelattrebalcer.artois@gmail.com' && (
                                     <Button size="sm" color="danger" variant="flat" onPress={async () => {
@@ -422,7 +417,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                         } catch (e: any) {
                                             alert(e.message);
                                         }
-                                    }}>Détacher (Admin)</Button>
+                                    }}>{t('matchForm.buttons.unlink')}</Button>
                                 )}
                             </div>
                         )}
@@ -430,8 +425,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
                     <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-0 self-start">
                         <Input
-                            label="Adresse du stade"
-                            placeholder="Rempli automatiquement via le SIRET"
+                            label={t('matchForm.labels.address')}
+                            placeholder={t('matchForm.labels.auto_siret')}
                             value={formData.location_address || ''}
                             className="md:col-span-2"
                             isDisabled
@@ -441,8 +436,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             }}
                         />
                         <Input
-                            label="Code Postal"
-                            placeholder="Rempli automatiquement"
+                            label={t('matchForm.labels.zip')}
+                            placeholder={t('matchForm.labels.auto')}
                             value={formData.location_zip || ''}
                             isDisabled
                             classNames={{
@@ -451,8 +446,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             }}
                         />
                         <Input
-                            label="Ville"
-                            placeholder="Rempli automatiquement"
+                            label={t('matchForm.labels.city')}
+                            placeholder={t('matchForm.labels.auto')}
                             value={formData.location_city || ''}
                             isDisabled
                             classNames={{
@@ -464,7 +459,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         {/* Progress Bar centered in the empty space */}
                         <div className="md:col-span-2 flex flex-col justify-center min-h-[120px] space-y-3">
                             <p className="text-sm font-bold text-white uppercase tracking-tight text-center">
-                                Préparation de l'annonce du match : {progress}%
+                                {t('matchForm.progress')}: {progress}%
                             </p>
                             <div className="w-full h-4 bg-default-100 rounded-full overflow-hidden p-[1px] border border-white/10 ring-1 ring-white/5 shadow-inner">
                                 <div
@@ -482,25 +477,25 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
             </Card>
 
             <Card>
-                <CardHeader className="font-bold bg-default-50">Contact & Notes</CardHeader>
+                <CardHeader className="font-bold bg-default-50">{t('matchForm.contact_title')}</CardHeader>
                 <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
-                        label="Email de contact"
+                        label={t('matchForm.labels.email')}
                         type="email"
                         value={formData.email}
                         onValueChange={(v) => handleChange('email', v)}
                         isRequired
                     />
                     <Input
-                        label="Téléphone"
+                        label={t('matchForm.labels.phone')}
                         type="tel"
                         value={formData.phone}
                         onValueChange={(v) => handleChange('phone', v)}
                         isRequired
                     />
                     <Textarea
-                        label="Notes / Instructions"
-                        placeholder="Informations complémentaires..."
+                        label={t('matchForm.labels.notes')}
+                        placeholder={t('matchForm.labels.more_info')}
                         value={formData.notes || ''}
                         onValueChange={(v) => handleChange('notes', v)}
                         minRows={3}
@@ -512,11 +507,11 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
             <div className="flex justify-end gap-2 mt-4">
                 {onCancel && (
                     <Button type="button" variant="light" onClick={onCancel}>
-                        Annuler
+                        {t('matchForm.buttons.cancel')}
                     </Button>
                 )}
                 <Button type="submit" color="primary" isLoading={isSaving} isDisabled={!user?.club_id}>
-                    {initialData ? 'Mettre à jour' : 'Créer le match'}
+                    {initialData ? t('matchForm.buttons.update') : t('matchForm.buttons.create')}
                 </Button>
             </div>
         </form>

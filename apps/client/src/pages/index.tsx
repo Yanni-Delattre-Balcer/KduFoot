@@ -6,7 +6,7 @@
 import { Link } from "@heroui/link";
 import { button as buttonStyles } from "@heroui/theme";
 import { Card, CardBody } from "@heroui/card";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 
 import DefaultLayout from "../layouts/default";
 import FootballClock from "../components/football-clock";
@@ -34,10 +34,10 @@ export default function IndexPage() {
               <h1 className="text-3xl lg:text-4xl font-bold">
                 <span className="bg-[linear-gradient(to_right,#3b82f6,#22c55e,#ec4899,#ef4444,#f97316,#eab308)] bg-clip-text text-transparent">Kdufoot</span>
                 <span className="text-default-400 font-normal mx-2">›</span>
-                <span className="text-foreground text-2xl lg:text-3xl">Football Intelligent</span>
+                <span className="text-foreground text-2xl lg:text-3xl">{t("homePage.title.highlight")}</span>
               </h1>
               <p className="text-default-500 text-base">
-                Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.
+                {t("homePage.description")}
               </p>
               <div className="flex gap-3 mt-1">
                 <Link
@@ -71,20 +71,31 @@ export default function IndexPage() {
         </div>
 
         {/* À propos - full width */}
+        {/* À propos - full width */}
         <Card className="border border-default-200 overflow-hidden w-full">
           <CardBody className="p-5 flex flex-col gap-2">
-            <h2 className="text-lg font-bold text-foreground">👋 À propos</h2>
+            <h2 className="text-lg font-bold text-foreground">{t("homePage.about.title")}</h2>
             <p className="text-base text-default-500 leading-relaxed">
-              <strong className="text-foreground">Yanni</strong>, étudiant en cybersécurité, cursus Réseaux & Télécommunications à Béthune.
-              J'ai créé Kdufoot pour aider les éducateurs de football à <strong className="text-foreground">gagner du temps</strong>.
+              <Trans
+                i18nKey="kdufoot:homePage.about.intro"
+                components={[
+                  <strong className="text-foreground" key="0" />,
+                  <a href="https://iut-bethune.univ-artois.fr/type-de-formation/reseaux-et-telecommunications/" target="_blank" rel="noopener noreferrer" className="text-foreground underline inline-flex items-center gap-1" key="1">text <svg aria-hidden="true" fill="none" focusable="false" height="1em" role="presentation" viewBox="0 0 24 24" width="1em" className="text-small"><path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg></a>,
+                  <strong className="text-foreground" key="2" />
+                ]}
+              />
             </p>
             <p className="text-base text-default-500 leading-relaxed">
-              🎬 <strong className="text-primary">Analyse vidéo par IA</strong> — Collez un lien, obtenez des exercices prêts à l'emploi.
-              <br />
-              ⚽ <strong className="text-orange-500">Matchs amicaux</strong> — Trouvez un adversaire autour de chez vous en quelques clics.
+              <Trans
+                i18nKey="kdufoot:homePage.about.features"
+                components={[
+                  <strong className="text-primary" key="0" />,
+                  <strong className="text-orange-500" key="1" />
+                ]}
+              />
             </p>
             <p className="text-sm text-default-400 italic">
-              Moins de recherche, plus de terrain.
+              {t("homePage.about.footer")}
             </p>
           </CardBody>
         </Card>
@@ -99,8 +110,8 @@ export default function IndexPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
               </div>
-              <h3 className="text-base font-bold">🎬 Analyse Vidéo par IA</h3>
-              <p className="text-xs text-default-500">Collez un lien vidéo et notre IA génère des exercices détaillés avec synopsis, thèmes et catégorie d'âge.</p>
+              <h3 className="text-base font-bold">{t("homePage.cards.video.title")}</h3>
+              <p className="text-xs text-default-500">{t("homePage.cards.video.description")}</p>
             </CardBody>
           </Card>
 
@@ -112,8 +123,8 @@ export default function IndexPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                 </svg>
               </div>
-              <h3 className="text-base font-bold">⚽ Matchs Amicaux</h3>
-              <p className="text-xs text-default-500">Publiez ou recherchez des matchs amicaux. Filtrez par catégorie, niveau, distance et format.</p>
+              <h3 className="text-base font-bold">{t("homePage.cards.match.title")}</h3>
+              <p className="text-xs text-default-500">{t("homePage.cards.match.description")}</p>
             </CardBody>
           </Card>
         </div>

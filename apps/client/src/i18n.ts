@@ -46,14 +46,11 @@ export interface AvailableLanguage {
 }
 
 export const availableLanguages: AvailableLanguage[] = [
-  { code: "en-US", nativeName: "English", isRTL: false, isDefault: true },
-  { code: "fr-FR", nativeName: "Français", isRTL: false },
-  { code: "es-ES", nativeName: "Español", isRTL: false },
-  { code: "zh-CN", nativeName: "中文", isRTL: false },
-  { code: "ar-SA", nativeName: "العربية", isRTL: true },
-  { code: "he-IL", nativeName: "עברית", isRTL: true },
+  { code: "fr-FR", nativeName: "Français", isRTL: false, isDefault: true },
+  { code: "en-US", nativeName: "English", isRTL: false },
 ];
 
+// fallbackLng is already set to "fr-FR" in line 57, ensuring consistency.
 const fallbackLng = "fr-FR";
 
 i18n
@@ -90,20 +87,8 @@ i18n
               case "fr-FR":
                 url = new URL("./locales/base/fr-FR.json", import.meta.url);
                 break;
-              case "es-ES":
-                url = new URL("./locales/base/es-ES.json", import.meta.url);
-                break;
-              case "zh-CN":
-                url = new URL("./locales/base/zh-CN.json", import.meta.url);
-                break;
-              case "ar-SA":
-                url = new URL("./locales/base/ar-SA.json", import.meta.url);
-                break;
-              case "he-IL":
-                url = new URL("./locales/base/he-IL.json", import.meta.url);
-                break;
               default:
-                url = new URL("./locales/base/en-US.json", import.meta.url);
+                url = new URL("./locales/base/fr-FR.json", import.meta.url);
             }
             break;
           case "kdufoot":

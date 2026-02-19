@@ -41,12 +41,12 @@ export default function TrainingPage() {
                         </div>
                         {selectedExercises.length > 0 && (
                             <p className="text-default-500 text-lg max-w-lg">
-                                {selectedExercises.length} exercice{selectedExercises.length > 1 ? 's' : ''} sélectionné{selectedExercises.length > 1 ? 's' : ''} · Durée estimée : ~{selectedExercises.length * 15} min
+                                {t('training.hero_stats', { count: selectedExercises.length, duration: selectedExercises.length * 15 })}
                             </p>
                         )}
                         {selectedExercises.length === 0 && (
                             <p className="text-default-500 text-lg max-w-lg">
-                                Créez votre séance d'entraînement personnalisée en ajoutant des exercices depuis la bibliothèque.
+                                {t('training.hero_create')}
                             </p>
                         )}
                     </div>
@@ -62,10 +62,10 @@ export default function TrainingPage() {
                             </div>
                             <div>
                                 <p className="text-xl font-semibold text-default-700">
-                                    {t('training.empty', "Pas d'entraînement en cours")}
+                                    {t('training.empty')}
                                 </p>
                                 <p className="text-default-400 mt-2 max-w-md">
-                                    Sélectionnez des exercices depuis la bibliothèque pour construire votre séance d'entraînement.
+                                    {t('training.description')}
                                 </p>
                             </div>
                             <Button
@@ -81,7 +81,7 @@ export default function TrainingPage() {
                                     </svg>
                                 }
                             >
-                                {t('training.go_exercises', 'Découvrir les exercices')}
+                                {t('training.go_exercises')}
                             </Button>
                         </CardBody>
                     </Card>
@@ -118,11 +118,10 @@ export default function TrainingPage() {
 
                         <div className="flex justify-between items-center mt-4 p-4 rounded-2xl bg-[#202221] border border-green-500/20">
                             <div>
-                                <p className="font-bold text-lg">{selectedExercises.length} exercice{selectedExercises.length > 1 ? 's' : ''}</p>
-                                <p className="text-sm text-default-500">Durée estimée : ~{selectedExercises.length * 15} min</p>
+                                <p className="font-bold text-lg">{t('training.hero_stats', { count: selectedExercises.length, duration: selectedExercises.length * 15 })}</p>
                             </div>
                             <Button as={Link} to="/exercises" variant="flat" color="primary" size="sm">
-                                + Ajouter des exercices
+                                {t('training.add_exercises')}
                             </Button>
                         </div>
                     </div>

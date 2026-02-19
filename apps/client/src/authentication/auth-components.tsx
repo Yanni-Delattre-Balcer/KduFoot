@@ -126,9 +126,10 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
   text,
 }) => {
   const { isAuthenticated, logout, user } = useAuth();
+  const { t } = useTranslation();
 
   if (!text) {
-    text = "Se déconnecter";
+    text = t("auth.logout");
   }
 
   return (
@@ -224,6 +225,7 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
   showButtonIfNotAuthenticated = false,
 }) => {
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   return isAuthenticated ? (
@@ -234,11 +236,11 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
         color="default"
         className="font-semibold text-default-700 bg-default-100/50 hover:bg-default-200/50"
       >
-        Mon compte
+        {t("auth.account")}
       </Button>
       <LogoutButton
         showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
-        text="Se déconnecter"
+        text={t("auth.logout")}
       />
       <AccountModal isOpen={isAccountOpen} onOpenChange={setIsAccountOpen} />
     </div>

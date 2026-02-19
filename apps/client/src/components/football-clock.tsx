@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface FootballClockProps {
     size?: number;
@@ -45,8 +46,13 @@ export default function FootballClock({ size = 160, showSeconds = true, classNam
         { x: 20, y: 33 },  // top-left
     ];
 
-    // 24h digital time
-    const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    // Digital time - Localized
+    const { i18n } = useTranslation();
+    const timeStr = time.toLocaleTimeString(i18n.language || 'fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: i18n.language?.startsWith('en') ? true : false
+    });
 
     return (
         <div className={`inline-flex flex-col items-center ${className}`}>

@@ -5,12 +5,22 @@
     "nav": {
         "home": "Home",
         "exercises": "Video Analysis",
+        "training": "My Training",
         "favorites": "Favorite Exercises",
         "sessions": "Training / Match Summary",
         "matches": "Find a Match",
         "pricing": "Pricing",
         "profile": "Profile",
-        "admin": "Administration"
+        "admin": "Administration",
+        "userPrefix": "User :"
+    },
+    "auth": {
+        "logout": "Log out",
+        "account": "My Account",
+        "login": "Log in"
+    },
+    "brand": {
+        "slogan": "Smart Football"
     },
     "homePage": {
         "title": {
@@ -22,16 +32,62 @@
             "exercises": "View my video analyses",
             "sessions": "View my matches"
         },
-        "description": "Turn your YouTube or Vimeo videos into real training sessions. Our artificial intelligence detects themes, age categories, and generates detailed synopses for your players."
+        "description": "Turn your YouTube or Vimeo videos into real training sessions. Our artificial intelligence detects themes, age categories, and generates detailed synopses for your players.",
+        "about": {
+            "title": "👋 About",
+            "intro": "<0>Yanni</0>, cybersecurity student, majoring in <1>Networks & Telecommunications in Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
+            "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use exercises.<br/>⚽ <1>Friendly Matches</1> — Find an opponent near you in just a few clicks.",
+            "footer": "Less searching, more field time."
+        },
+        "cards": {
+            "video": {
+                "title": "🎬 AI Video Analysis",
+                "description": "Paste a video link and our AI generates detailed exercises with synopsis, themes, and age categories."
+            },
+            "match": {
+                "title": "⚽ Friendly Matches",
+                "description": "Post or search for friendly matches. Filter by category, level, distance, and format."
+            }
+        }
     },
     "log-out-someone": "Log out {{name}}",
     "log-in": "Log in",
     "video": {
         "urlPlaceholder": "Paste your YouTube, TikTok, Insta video link, etc.",
         "analyze": "Analyze Video",
+        "analyzeTitle": "Analyze your video",
+        "analyzeSubtitle": "Paste your YouTube video link to get a detailed analysis of your exercises.",
         "analyzing": "Analyzing...",
         "success": "{{count}} exercise(s) found",
         "error": "Error during analysis"
+    },
+    "exercises": {
+        "emptyTitle": "No exercises yet",
+        "emptySubtitle": "Analyze a video to generate your first exercises!",
+        "noImage": "No image",
+        "selected": "exercise(s)"
+    },
+    "training": {
+        "go": "My Training",
+        "empty": "No training in progress",
+        "description": "Select exercises from the library to build your training session.",
+        "go_exercises": "Discover exercises",
+        "hero_stats": "{{count}} exercise(s) selected · Estimated duration: ~{{duration}} min",
+        "hero_create": "Create your custom training session by adding exercises from the library.",
+        "add_exercises": "+ Add exercises"
+    },
+    "favorites": {
+        "title": "My Favorites",
+        "description_exercises": "Find here all the exercises you have saved as favorites for one-click access.",
+        "description_matches": "Check out the friendly matches that caught your eye and keep an eye on opportunities.",
+        "tab_exercises": "Exercises",
+        "tab_matches": "Matches",
+        "empty_exercises": "No favorite exercises",
+        "empty_exercises_desc": "Add exercises to your favorites to find them here.",
+        "empty_matches": "No favorite matches",
+        "empty_matches_desc": "Your liked matches will appear here.",
+        "discover_exercises": "Discover exercises",
+        "find_matches": "Find a friendly match"
     },
     "myExercises": "My Exercises",
     "mySessions": "My Sessions",
@@ -48,10 +104,14 @@
     },
     "match": {
         "create": "Create a friendly match",
+        "find": "Find a friendly match",
         "format": "Format",
         "venue": "Venue",
         "date": "Date",
-        "time": "Time"
+        "time": "Time",
+        "filters": {
+            "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
+        }
     },
     "session": {
         "create": "New session",
@@ -61,7 +121,14 @@
     },
     "sessions": {
         "title": "Training / Match Summary",
-        "create": "Plan Session"
+        "create": "Plan Session",
+        "description_sessions": "Organize and plan your training sessions to best prepare your players.",
+        "description_matches": "Track your scheduled friendly matches and keep control of your sports calendar.",
+        "empty_sessions": "No scheduled sessions",
+        "empty_matches": "No friendly matches",
+        "not_scheduled": "Not scheduled",
+        "opponent_default": "Opponent",
+        "status": "Status"
     },
     "permissions": {
         "quota": {
@@ -105,6 +172,158 @@
             "Régional": "Regional",
             "National": "National",
             "Pro": "Professional"
+        },
+        "venue": {
+            "Domicile": "Home",
+            "Extérieur": "Away",
+            "Neutre": "Neutral"
+        },
+        "pitch": {
+            "Herbe": "Grass",
+            "Synthétique": "Artificial",
+            "Hybride": "Hybrid",
+            "Stabilisé": "Stabilized",
+            "Indoor": "Indoor"
+        },
+        "gender": {
+            "Masculin": "Male",
+            "Féminin": "Female",
+            "Mixte": "Mixed"
+        }
+    },
+    "matchesPage": {
+        "description_find": "Browse available friendly matches near you. Use filters to refine your search and find the perfect opponent.",
+        "description_create": "Post your friendly match announcement by filling in as many details as possible to attract the right clubs.",
+        "filters": {
+            "title": "Filters",
+            "active": "active",
+            "clear": "Clear filters",
+            "category": "Category",
+            "level": "Level",
+            "format": "Format",
+            "gender": "Gender",
+            "pitch_type": "Pitch Type",
+            "date": "Date",
+            "venue": "Venue",
+            "city": "City",
+            "zip": "Zip Code",
+            "radius": "Radius (km)",
+            "all": "All"
+        },
+        "view": {
+            "list": "List",
+            "calendar": "Calendar"
+        },
+        "my_creation": "My creation",
+        "unknown_club": "Unknown Club",
+        "found": "friendly match(es) found",
+        "empty_title": "No friendly matches found",
+        "empty_desc": "Try modifying your filters or create a new friendly match."
+    },
+    "matchForm": {
+        "title": "Match Information",
+        "subtitle": "Match Details",
+        "contact_title": "Contact & Notes",
+        "labels": {
+            "category": "Category",
+            "level": "Level",
+            "format": "Format",
+            "gender": "Gender",
+            "date": "Date",
+            "time": "Time",
+            "venue": "Venue",
+            "pitch_type": "Pitch Type",
+            "siret": "SIRET Number",
+            "address": "Stadium Address",
+            "zip": "Zip Code",
+            "city": "City",
+            "email": "Contact Email",
+            "phone": "Phone",
+            "notes": "Notes / Instructions",
+            "choose": "Choose",
+            "auto_siret": "Automatically filled via SIRET",
+            "auto": "Automatically filled",
+            "more_info": "Additional information..."
+        },
+        "link_club": {
+            "title": "Link your club (Irreversible Action)",
+            "warning_siret": "Warning: The SIRET number can only be entered once.",
+            "warning_auto": "Upon validation, the address, zip code, and city will be automatically filled.",
+            "warning_final": "The club will be permanently associated with your account.",
+            "validate": "Validate and Link Club",
+            "support": "In case of subsequent club change, contact support with proof.",
+            "linked": "Linked Club"
+        },
+        "progress": "Match Announcement Preparation",
+        "buttons": {
+            "cancel": "Cancel",
+            "create": "Create Match",
+            "update": "Update",
+            "unlink": "Unlink (Admin)"
+        },
+        "alerts": {
+            "siret_length": "The SIRET must contain exactly 14 digits.",
+            "link_confirm": "⚠️ WARNING: This action is IRREVERSIBLE.\n\nYour account will be permanently linked to this club.\nFor any subsequent changes, you will need to contact support with proof.\n\nDo you want to continue?",
+            "link_error": "Error linking the club. Check the SIRET.",
+            "must_link": "You must first link your club via the SIRET number before creating a match.",
+            "contact_required": "⚠️ CONTACT REQUIRED\n\nEmail and phone are essential for players to contact you.",
+            "date_past": "⚠️ INVALID DATE\n\nYou cannot create a match in the past.",
+            "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future."
+        }
+    },
+    "error": {
+        "loading_sessions": "Error loading training sessions",
+        "loading_matches": "Error loading friendly matches"
+    },
+    "pricing": {
+        "hero": {
+            "title": "Plans & Pricing",
+            "subtitle": "Flexible solutions for every stage of your season."
+        },
+        "period": " / month",
+        "one_time": "One-time payment",
+        "plans": {
+            "discovery": {
+                "name": "Discovery",
+                "cta": "Try for 1€",
+                "features": {
+                    "0": "1 hour of video analysis",
+                    "1": "Full access to AI tools",
+                    "2": "One-time offer (1 per account)",
+                    "3": "No commitment"
+                }
+            },
+            "starter": {
+                "name": "Rising Star",
+                "cta": "Choose Rising Star",
+                "features": {
+                    "0": "10 hours of video analysis",
+                    "1": "Full access to AI tools",
+                    "2": "Basic PDF exports",
+                    "3": "Standard support"
+                }
+            },
+            "pro": {
+                "name": "Pro",
+                "cta": "Choose Pro",
+                "popular": "Popular",
+                "features": {
+                    "0": "20 hours of video analysis",
+                    "1": "Superior AI (Faster)",
+                    "2": "Full PDF exports",
+                    "3": "Priority support"
+                }
+            },
+            "elite": {
+                "name": "Elite",
+                "cta": "Become Elite",
+                "features": {
+                    "0": "30 hours of video analysis",
+                    "1": "Max AI (Top priority)",
+                    "2": "PDF Exports & Editing",
+                    "3": "Dedicated 24/7 support"
+                }
+            }
         }
     }
 }

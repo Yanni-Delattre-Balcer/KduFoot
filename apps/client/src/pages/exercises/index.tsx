@@ -50,11 +50,11 @@ export default function ExercisesPage() {
                                 </svg>
                             </div>
                             <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-violet-600">
-                                Analyse ta vidéo
+                                {t('video.analyzeTitle')}
                             </h1>
                         </div>
                         <p className="text-default-500 text-center max-w-lg">
-                            Colle le lien de ta vidéo YouTube pour obtenir une analyse détaillée de tes exercices.
+                            {t('video.analyzeSubtitle')}
                         </p>
                         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-3 items-center">
                             <Input
@@ -144,10 +144,10 @@ export default function ExercisesPage() {
                                     </svg>
                                 </div>
                                 <p className="text-lg text-default-500">
-                                    Aucun exercice pour le moment
+                                    {t('exercises.emptyTitle')}
                                 </p>
                                 <p className="text-sm text-default-400">
-                                    Analysez une vidéo pour générer vos premiers exercices !
+                                    {t('exercises.emptySubtitle')}
                                 </p>
                             </CardBody>
                         </Card>
@@ -177,7 +177,7 @@ export default function ExercisesPage() {
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-10 h-10 text-default-200">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
                                                 </svg>
-                                                <span className="text-default-300 text-xs">Pas d'image</span>
+                                                <span className="text-default-300 text-xs">{t('exercises.noImage')}</span>
                                             </div>
                                         )}
                                     </div>
@@ -222,7 +222,7 @@ export default function ExercisesPage() {
                             </div>
                         </div>
                         <Button as={Link} to="/training" color="primary" size="lg" className="font-bold shadow-lg shadow-primary/30">
-                            {t('training.go', "Mon Entraînement")}
+                            {t('training.go')}
                         </Button>
                     </div>
                 </div>
