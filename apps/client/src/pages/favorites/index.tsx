@@ -14,7 +14,7 @@ import { Chip } from "@heroui/chip";
 import FootballClock from '../../components/football-clock';
 
 export default function FavoritesPage() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { favorites } = useFavorites();
     const { exercises, isLoading: loadingEx } = useExercises();
     const { matches, isLoading: loadingMatches } = useMatches();
@@ -63,13 +63,13 @@ export default function FavoritesPage() {
                                 </svg>
                             </div>
                             <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-rose-500">
-                                {t("nav.favorites", "Mes Favoris")}
+                                {t("nav.favorites")}
                             </h1>
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
                             {view === 'exercises'
-                                ? 'Retrouvez ici tous les exercices que vous avez enregistrés en favoris pour y accéder en un clic.'
-                                : 'Consultez les matchs amicaux qui ont retenu votre attention et gardez un œil sur les opportunités.'}
+                                ? t('favorites.description_exercises')
+                                : t('favorites.description_matches')}
                         </p>
 
                         <div className="flex gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
@@ -85,7 +85,7 @@ export default function FavoritesPage() {
                                     </svg>
                                 }
                             >
-                                Exercices
+                                {t('favorites.tab_exercises')}
                             </Button>
                             <Button
                                 color={view === 'matches' ? "warning" : "default"}
@@ -99,7 +99,7 @@ export default function FavoritesPage() {
                                     </svg>
                                 }
                             >
-                                Matchs
+                                {t('favorites.tab_matches')}
                             </Button>
                         </div>
                     </div>
@@ -143,11 +143,11 @@ export default function FavoritesPage() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-lg font-bold text-green-900/90 dark:text-green-100">Aucun exercice favori</p>
-                                            <p className="text-md text-green-900/70 dark:text-green-200/70 mt-1">Ajoutez des exercices à vos favoris pour les retrouver ici.</p>
+                                            <p className="text-lg font-bold text-green-900/90 dark:text-green-100">{t('favorites.empty_exercises')}</p>
+                                            <p className="text-md text-green-900/70 dark:text-green-200/70 mt-1">{t('favorites.empty_exercises_desc')}</p>
                                         </div>
                                         <Button as={Link} to="/exercises" color="success" variant="flat" className="mt-2 text-green-700 bg-green-100 dark:bg-green-500/20 dark:text-green-300 font-bold shadow-sm">
-                                            Découvrir les exercices
+                                            {t('favorites.discover_exercises')}
                                         </Button>
                                     </CardBody>
                                 </Card>
@@ -166,14 +166,14 @@ export default function FavoritesPage() {
                                             <CardBody>
                                                 <div className="flex justify-between items-start mb-2">
                                                     <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">{match.category}</Chip>
-                                                    <Chip size="sm" variant="flat" color={match.venue === 'Domicile' ? 'success' : 'danger'}>{match.venue}</Chip>
+                                                    <Chip size="sm" variant="flat" color={match.venue === 'Domicile' ? 'success' : 'danger'}>{t(`enums.venue.${match.venue}`)}</Chip>
                                                 </div>
                                                 <p className="font-bold text-lg text-default-900 group-hover:text-orange-600 transition-colors">vs {match.club.name}</p>
                                                 <div className="flex items-center gap-2 mt-2 text-sm text-default-600 font-medium">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                                                     </svg>
-                                                    {new Date(match.match_date).toLocaleDateString()}
+                                                    {new Date(match.match_date).toLocaleDateString(i18n.language)}
                                                 </div>
                                                 {match.level && <Chip size="sm" variant="flat" color="secondary" className="mt-3">{match.level}</Chip>}
                                             </CardBody>
@@ -189,11 +189,11 @@ export default function FavoritesPage() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-lg font-bold text-orange-900/90 dark:text-orange-100">Aucun match favori</p>
-                                            <p className="text-md text-orange-900/70 dark:text-orange-200/70 mt-1">Vos matchs likés apparaîtront ici.</p>
+                                            <p className="text-lg font-bold text-orange-900/90 dark:text-orange-100">{t('favorites.empty_matches')}</p>
+                                            <p className="text-md text-orange-900/70 dark:text-orange-200/70 mt-1">{t('favorites.empty_matches_desc')}</p>
                                         </div>
                                         <Button as={Link} to="/matches" color="warning" variant="flat" className="mt-2 bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 font-bold shadow-sm">
-                                            Trouver un match amical
+                                            {t('favorites.find_matches')}
                                         </Button>
                                     </CardBody>
                                 </Card>
@@ -202,6 +202,6 @@ export default function FavoritesPage() {
                     )}
                 </div>
             </section>
-        </DefaultLayout>
+        </DefaultLayout >
     );
 }

@@ -240,6 +240,26 @@ export class MatchService {
             params.push(filters.to);
         }
 
+        // Auto-hide past matches by default (unless specifically requested or date-filtered)
+        // User request: "le jour à l'heure du match l'annonce se supprime automatiquement"
+        const hasDateFilters = filters.date || filters.from || filters.to;
+        if (!hasDateFilters && !filters.include_past) {
+            // Logic: Match Date > Today OR (Match Date = Today AND Match Time >= Now)
+            // Note: D1 DATE('now') is UTC. We need to be careful with timezones.
+            // Ideally we passed client timezone, but for now we'll use a safe buffer or just strict comparison against UTC.
+            // Given the user wants "cleanup", it's better to hide slightly later than slightly earlier.
+            // If we use UTC, and user is in France (UTC+1/+2), 
+            // 20:00 User Time = 19:00 UTC. 
+            // If Current is 19:30 UTC (20:30 User), Match is passed.
+            // 19:00 >= 19:30 is False. Hidden. Correct.
+            // If Current is 18:30 UTC (19:30 User), Match is future.
+            // 19:00 >= 18:30 is True. Shown. Correct.
+            // So comparing User Entered Time (e.g. 20:00) with UTC Time (e.g. 19:00) 
+            // Means matches stay visible for (Offset) hours longer. 
+            // This is acceptable/safe.
+            query += ` AND (m.match_date > DATE('now') OR (m.match_date = DATE('now') AND m.match_time >= TIME('now')))`;
+        }
+
         // Haversine bounding box pre-filter (30% wider than requested radius to account for road vs straight-line)
         if (wantDistance) {
             const expandedRadius = filters.radius_km! * 1.4; // roads are ~30-40% longer than straight-line

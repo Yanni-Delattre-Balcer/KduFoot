@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { Chip } from "@heroui/chip";
 
 export default function SessionPlannerPage() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [view, setView] = useState<'sessions' | 'matches'>('sessions');
     const { sessions, isError: isErrorSessions } = useSessions({ status: 'scheduled' });
     const { matches, isError: isErrorMatches } = useMatches();
@@ -46,8 +46,8 @@ export default function SessionPlannerPage() {
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
                             {view === 'sessions'
-                                ? 'Organisez et planifiez vos séances d\'entraînement pour préparer au mieux vos joueurs.'
-                                : 'Suivez vos matchs amicaux programmés et gardez le contrôle sur votre calendrier sportif.'}
+                                ? t('sessions.description_sessions')
+                                : t('sessions.description_matches')}
                         </p>
 
                         <div className="flex gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
@@ -97,9 +97,9 @@ export default function SessionPlannerPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                             </svg>
                                         </div>
-                                        <p className="text-lg font-bold text-green-900/80 dark:text-green-100">Aucune séance planifiée</p>
+                                        <p className="text-lg font-bold text-green-900/80 dark:text-green-100">{t('sessions.empty_sessions')}</p>
                                         <Button as={Link} to="/training" color="success" variant="flat" className="mt-2 text-green-600 bg-green-100 dark:bg-green-500/20 dark:text-green-300 font-bold">
-                                            Planifier une séance
+                                            {t('sessions.create')}
                                         </Button>
                                     </CardBody>
                                 </Card>
@@ -122,7 +122,7 @@ export default function SessionPlannerPage() {
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                                                 </svg>
-                                                {session.scheduled_date ? new Date(session.scheduled_date).toLocaleDateString() : 'Non planifiée'}
+                                                {session.scheduled_date ? new Date(session.scheduled_date).toLocaleDateString(i18n.language) : t('sessions.not_scheduled')}
                                             </div>
                                             <div className="flex gap-3 text-sm text-default-600">
                                                 <div className="flex items-center gap-1">
@@ -162,9 +162,9 @@ export default function SessionPlannerPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m11.372-5.362c.962-.203 1.934-.377 2.916-.52M19.5 4.5c.125.163.233.332.322.508M19.5 4.5v.243a12.98 12.98 0 0 1-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35" />
                                             </svg>
                                         </div>
-                                        <p className="text-lg font-semibold text-orange-900/80 dark:text-orange-100">Aucun match amical</p>
+                                        <p className="text-lg font-semibold text-orange-900/80 dark:text-orange-100">{t('sessions.empty_matches')}</p>
                                         <Button as={Link} to="/matches" color="warning" variant="flat" className="bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 font-bold">
-                                            Trouver un match amical
+                                            {t('match.find')}
                                         </Button>
                                     </CardBody>
                                 </Card>
@@ -176,19 +176,19 @@ export default function SessionPlannerPage() {
                                         <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
                                             <div className="flex justify-between w-full">
                                                 <p className="text-tiny uppercase font-bold text-red-600">{match.category} - {match.format}</p>
-                                                <Chip size="sm" variant="flat" className="bg-red-50 text-red-800 dark:bg-red-500/10 dark:text-red-300">{match.venue}</Chip>
+                                                <Chip size="sm" variant="flat" className="bg-red-50 text-red-800 dark:bg-red-500/10 dark:text-red-300">{t(`enums.venue.${match.venue}`)}</Chip>
                                             </div>
-                                            <h4 className="font-bold text-large mt-1 group-hover:text-red-600 transition-colors">vs {match.club?.name || 'Adversaire'}</h4>
+                                            <h4 className="font-bold text-large mt-1 group-hover:text-red-600 transition-colors">vs {match.club?.name || t('sessions.opponent_default')}</h4>
                                             <small className="text-default-500 flex items-center gap-1 mt-1">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                                                 </svg>
-                                                {match.match_date ? new Date(match.match_date).toLocaleDateString() : ''} {match.match_time}
+                                                {match.match_date ? new Date(match.match_date).toLocaleDateString(i18n.language) : ''} {match.match_time}
                                             </small>
                                         </CardHeader>
                                         <CardBody className="overflow-visible py-2">
                                             <p className="text-sm text-default-600">
-                                                {t('status')}: {match.status}
+                                                {t('sessions.status')}: {match.status}
                                             </p>
                                             {match.notes && <p className="text-sm text-default-500 italic truncate">{match.notes}</p>}
                                         </CardBody>
@@ -204,7 +204,7 @@ export default function SessionPlannerPage() {
                     )}
 
                 </div>
-            </section>
-        </DefaultLayout>
+            </section >
+        </DefaultLayout >
     );
 }

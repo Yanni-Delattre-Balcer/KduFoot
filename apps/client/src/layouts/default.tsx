@@ -39,7 +39,7 @@ export default function DefaultLayout({
   children: React.ReactNode;
   maxWidth?: string;
 }) {
-  useTranslation();
+  const { t } = useTranslation();
   const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [tokenPayload, setTokenPayload] = useState<JWTPayload | null>(null);
@@ -79,7 +79,7 @@ export default function DefaultLayout({
             <Dropdown placement="top-end">
               <DropdownTrigger>
                 <Button variant="flat" size="sm" className="bg-background/60 backdrop-blur-md border border-default-200 shadow-lg px-4">
-                  Utilisateur : {user.name}
+                  {t("nav.userPrefix")} {user.name}
                 </Button>
               </DropdownTrigger>
               <DropdownMenu aria-label="Token Details" className="w-[340px]">

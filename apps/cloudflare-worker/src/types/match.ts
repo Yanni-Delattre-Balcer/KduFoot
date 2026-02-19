@@ -87,6 +87,7 @@ export interface MatchFilters {
     user_lat?: number;
     user_lng?: number;
     notes?: string;
+    include_past?: boolean;
 }
 
 export interface ContactMatchDto {

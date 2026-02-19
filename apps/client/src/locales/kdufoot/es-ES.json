@@ -1,0 +1,185 @@
+{
+    "site": {
+        "description": "Kdufoot reúne dos herramientas esenciales para educadores de fútbol: análisis de video impulsado por IA y búsqueda de partidos amistosos entre clubes."
+    },
+    "nav": {
+        "home": "Inicio",
+        "exercises": "Análisis de Video",
+        "training": "Mi Entrenamiento",
+        "favorites": "Favoritos",
+        "sessions": "Historial de Entrenamiento / Partido",
+        "matches": "Encontrar un partido",
+        "pricing": "Precios",
+        "profile": "Perfil",
+        "admin": "Administración",
+        "userPrefix": "Usuario :"
+    },
+    "auth": {
+        "logout": "Desconectar",
+        "account": "Mi cuenta",
+        "login": "Conexión"
+    },
+    "brand": {
+        "slogan": "Fútbol Inteligente"
+    },
+    "homePage": {
+        "title": {
+            "prefix": "Tu asistente",
+            "highlight": "inteligente",
+            "suffix": "para el fútbol amateur"
+        },
+        "buttons": {
+            "exercises": "Analizar un video",
+            "sessions": "Encontrar un partido amistoso"
+        },
+        "description": "Kdufoot te ofrece dos herramientas diseñadas para simplificar tu día a día como educador. Pega un enlace de video y nuestra IA genera ejercicios detallados adaptados a tu categoría. Publica o busca partidos amistosos cerca de ti en pocos clics.",
+        "about": {
+            "title": "👋 Acerca de",
+            "intro": "<0>Yanni</0>, estudiante de ciberseguridad, especialidad <1>Redes y Telecomunicaciones en Béthune</1>. Creé Kdufoot para ayudar a los entrenadores de fútbol a <2>ahorrar tiempo</2>.",
+            "features": "🎬 <0>Análisis de video por IA</0> — Pega un enlace, obtén ejercicios listos para usar.<br/>⚽ <1>Partidos amistosos</1> — Encuentra un oponente cerca de ti en pocos clics.",
+            "footer": "Menos búsqueda, más tiempo en el campo."
+        },
+        "cards": {
+            "video": {
+                "title": "🎬 Análisis de Video por IA",
+                "description": "Pega un enlace de video y nuestra IA genera ejercicios detallados con sinopsis, temas y categorías de edad."
+            },
+            "match": {
+                "title": "⚽ Partidos Amistosos",
+                "description": "Publica o busca partidos amistosos. Filtra por categoría, nivel, distancia y formato."
+            }
+        }
+    },
+    "log-out-someone": "Desconexión {{name}}",
+    "log-in": "Conexión",
+    "video": {
+        "urlPlaceholder": "Pega el enlace de tu video de YouTube, TikTok, Insta, etc.",
+        "analyze": "Analizar video",
+        "analyzing": "Análisis en curso...",
+        "success": "{{count}} ejercicio(s) encontrado(s)",
+        "error": "Error durante el análisis"
+    },
+    "myExercises": "Mis ejercicios",
+    "mySessions": "Mis Sesiones",
+    "myMatches": "Mis Partidos Amistosos",
+    "exercise": {
+        "title": "Título",
+        "synopsis": "Sinopsis",
+        "themes": "Temas",
+        "favorite": "Añadir a favoritos",
+        "unfavorite": "Quitar de favoritos",
+        "addToSession": "Añadir a la sesión",
+        "adapt": "Adaptar",
+        "exportPDF": "Exportar a PDF"
+    },
+    "match": {
+        "create": "Crear un partido amistoso",
+        "find": "Encontrar un partido amistos",
+        "format": "Formato",
+        "venue": "Lugar",
+        "date": "Fecha",
+        "time": "Hora",
+        "filters": {
+            "explanation": "Ningún filtro es obligatorio. Por ejemplo, puedes dejar la ciudad en blanco para ver los partidos de toda la región, o especificar tus criterios (categoría, nivel...) para refinar tu búsqueda según tus necesidades."
+        }
+    },
+    "session": {
+        "create": "Nueva sesión",
+        "adapt": "Adaptar",
+        "timer": "Cronómetro",
+        "export": "Exportar a PDF"
+    },
+    "sessions": {
+        "title": "Historial de Entrenamiento / Partido",
+        "create": "Planificar una sesión"
+    },
+    "permissions": {
+        "quota": {
+            "videos": "Cuota de videos: {{used}}/{{total}}",
+            "sessions": "Sesiones: {{used}}/{{total}}",
+            "matches": "Anuncios: {{used}}/{{total}}"
+        },
+        "upgradeRequired": "Actualización requerida",
+        "featureRequiresUpgrade": "Esta función requiere una suscripción superior.",
+        "viewPlans": "Ver planes",
+        "upgrade": "Pásate a {{plan}} para desbloquear esta función"
+    },
+    "badges": {
+        "certifiedCoach": "Entrenador Certificado"
+    },
+    "enums": {
+        "theme": {
+            "TECHNIQUE": "Técnica",
+            "PHYSIQUE": "Físico",
+            "TACTIQUE": "Táctica",
+            "FINITION": "Finalización",
+            "TRANSITION": "Transición",
+            "DEFENSE_COLLECTIVE": "Defensa Colectiva",
+            "ATTAQUE_RAPIDE": "Ataque Rápido",
+            "COUPS_DE_PIED_ARRETES": "Balón Parado"
+        },
+        "category": {
+            "U7": "U7",
+            "U9": "U9",
+            "U11": "U11",
+            "U13": "U13",
+            "U15": "U15",
+            "U17": "U17",
+            "U19": "U19",
+            "Séniors": "Séniors",
+            "Vétérans": "Veteranos"
+        },
+        "level": {
+            "Débutant": "Principiante",
+            "Ligue": "Liga",
+            "Régional": "Regional",
+            "National": "Nacional",
+            "Pro": "Profesional"
+        }
+    },
+    "error": {
+        "loading_sessions": "Error al cargar las sesiones de entrenamiento",
+        "loading_matches": "Error al cargar los partidos amistosos"
+    },
+    "pricing": {
+        "hero": {
+            "title": "Suscripciones",
+            "subtitle": "Elige el plan que se adapte a tus necesidades de entrenador."
+        },
+        "period": "/mes",
+        "plans": {
+            "free": {
+                "name": "Gratis",
+                "cta": "Empezar",
+                "current": "Plan actual",
+                "features": {
+                    "0": "5 ejercicios",
+                    "1": "Análisis de video básico",
+                    "2": "1 partido activo"
+                }
+            },
+            "pro": {
+                "name": "Pro",
+                "cta": "Pasar a Pro",
+                "popular": "Popular",
+                "features": {
+                    "0": "Ejercicios ilimitados",
+                    "1": "Análisis de video avanzado",
+                    "2": "10 partidos activos",
+                    "3": "Filtros avanzados"
+                }
+            },
+            "ultimate": {
+                "name": "Ultimate",
+                "cta": "Pasar a Ultimate",
+                "features": {
+                    "0": "Todo Pro +",
+                    "1": "IA personalizada",
+                    "2": "Partidos ilimitados",
+                    "3": "Soporte prioritario",
+                    "4": "Exportar PDF"
+                }
+            }
+        }
+    }
+}

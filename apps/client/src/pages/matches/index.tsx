@@ -21,7 +21,7 @@ const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilis�
 const VENUES: Venue[] = ['Domicile', 'Extérieur', 'Neutre'];
 
 export default function MatchesPage() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [view, setView] = useState<'find' | 'create'>('find');
     const [displayMode, setDisplayMode] = useState<'list' | 'calendar'>('list');
     const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -85,8 +85,18 @@ export default function MatchesPage() {
     const formatDateKey = (year: number, month: number, day: number) => {
         return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     };
-    const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-    const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+    // Dynamic date formatting
+    const getMonthName = (date: Date) => date.toLocaleDateString(i18n.language, { month: 'long' });
+    const dayNames = useMemo(() => {
+        const days = [];
+        const d = new Date(2024, 0, 1); // Monday Jan 1 2024
+        for (let i = 0; i < 7; i++) {
+            days.push(d.toLocaleDateString(i18n.language, { weekday: 'short' }));
+            d.setDate(d.getDate() + 1);
+        }
+        return days;
+    }, [i18n.language]);
 
     const prevMonth = () => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1));
     const nextMonth = () => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1));
@@ -135,8 +145,8 @@ export default function MatchesPage() {
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
                             {view === 'find'
-                                ? 'Parcourez les matchs amicaux disponibles près de chez vous. Utilisez les filtres pour affiner votre recherche et trouver l\'adversaire idéal.'
-                                : 'Publiez votre annonce de match amical en remplissant un maximum de détails pour attirer les clubs qui vous correspondent.'}
+                                ? t('matchesPage.description_find')
+                                : t('matchesPage.description_create')}
                         </p>
 
                         <div className="flex gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
@@ -152,7 +162,7 @@ export default function MatchesPage() {
                                     </svg>
                                 }
                             >
-                                {t('match.find', 'Trouver un match amical')}
+                                {t('match.find')}
                             </Button>
                             <Button
                                 color={view === 'create' ? "warning" : "default"}
@@ -166,7 +176,7 @@ export default function MatchesPage() {
                                     </svg>
                                 }
                             >
-                                {t('match.create', 'Créer un match amical')}
+                                {t('match.create')}
                             </Button>
                         </div>
                     </div>
@@ -187,49 +197,52 @@ export default function MatchesPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
                                                 </svg>
                                             </div>
-                                            <h3 className="text-lg font-semibold text-default-900 dark:text-default-100">Filtres</h3>
+                                            <h3 className="text-lg font-semibold text-default-900 dark:text-default-100">{t('matchesPage.filters.title')}</h3>
                                             {activeFilterCount > 0 && (
-                                                <Chip size="sm" color="warning" variant="flat" className="bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">{activeFilterCount} actif{activeFilterCount > 1 ? 's' : ''}</Chip>
+                                                <Chip size="sm" color="warning" variant="flat" className="bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">{activeFilterCount} {t('matchesPage.filters.active')}</Chip>
                                             )}
                                         </div>
                                         {activeFilterCount > 0 && (
                                             <Button size="sm" variant="light" color="danger" onPress={clearFilters}>
-                                                Effacer les filtres
+                                                {t('matchesPage.filters.clear')}
                                             </Button>
                                         )}
                                     </div>
                                 </CardHeader>
-                                <CardBody className="px-5 pb-5 relative">
+                                <CardBody className="px-5 pb-5 relative flex flex-col gap-4">
+                                    <p className="text-small text-default-500 italic">
+                                        {t("match.filters.explanation")}
+                                    </p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                                         <Select
-                                            label="Catégorie"
-                                            placeholder="Toutes"
+                                            label={t('matchesPage.filters.category')}
+                                            placeholder={t('matchesPage.filters.all')}
                                             selectedKeys={filters.category ? [filters.category] : []}
                                             onChange={(e) => handleFilterChange('category', e.target.value)}
                                             size="sm"
                                             classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {CATEGORIES.map((cat) => (
-                                                <SelectItem key={cat}>{cat}</SelectItem>
+                                                <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                                             ))}
                                         </Select>
 
                                         <Select
-                                            label="Niveau"
-                                            placeholder="Tous"
+                                            label={t('matchesPage.filters.level')}
+                                            placeholder={t('matchesPage.filters.all')}
                                             selectedKeys={filters.level ? [filters.level] : []}
                                             onChange={(e) => handleFilterChange('level', e.target.value)}
                                             size="sm"
                                             classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {LEVELS.map((lvl) => (
-                                                <SelectItem key={lvl}>{lvl}</SelectItem>
+                                                <SelectItem key={lvl}>{t(`enums.level.${lvl}`)}</SelectItem>
                                             ))}
                                         </Select>
 
                                         <Select
-                                            label="Format"
-                                            placeholder="Tous"
+                                            label={t('matchesPage.filters.format')}
+                                            placeholder={t('matchesPage.filters.all')}
                                             selectedKeys={filters.format ? [filters.format] : []}
                                             onChange={(e) => handleFilterChange('format', e.target.value)}
                                             size="sm"
@@ -241,33 +254,33 @@ export default function MatchesPage() {
                                         </Select>
 
                                         <Select
-                                            label="Genre"
-                                            placeholder="Tous"
+                                            label={t('matchesPage.filters.gender')}
+                                            placeholder={t('matchesPage.filters.all')}
                                             selectedKeys={filters.notes && filters.notes.includes('Genre:') ? [filters.notes.split('Genre: ')[1]] : []}
                                             onChange={(e) => handleFilterChange('notes', e.target.value ? `Genre: ${e.target.value}` : '')} // Hacky filter via notes
                                             size="sm"
                                             classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
-                                            <SelectItem key="Masculin">Masculin</SelectItem>
-                                            <SelectItem key="Féminin">Féminin</SelectItem>
-                                            <SelectItem key="Mixte">Mixte</SelectItem>
+                                            <SelectItem key="Masculin">{t('enums.gender.Masculin')}</SelectItem>
+                                            <SelectItem key="Féminin">{t('enums.gender.Féminin')}</SelectItem>
+                                            <SelectItem key="Mixte">{t('enums.gender.Mixte')}</SelectItem>
                                         </Select>
 
                                         <Select
-                                            label="Type de terrain"
-                                            placeholder="Tous"
+                                            label={t('matchesPage.filters.pitch_type')}
+                                            placeholder={t('matchesPage.filters.all')}
                                             selectedKeys={filters.pitch_type ? [filters.pitch_type] : []}
                                             onChange={(e) => handleFilterChange('pitch_type', e.target.value)}
                                             size="sm"
                                             classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {PITCH_TYPES.map((type) => (
-                                                <SelectItem key={type}>{type}</SelectItem>
+                                                <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
                                             ))}
                                         </Select>
 
                                         <Input
-                                            label="Date"
+                                            label={t('matchesPage.filters.date')}
                                             type="date"
                                             value={filters.date || ''}
                                             onChange={(e) => handleFilterChange('date', e.target.value)}
@@ -276,20 +289,20 @@ export default function MatchesPage() {
                                         />
 
                                         <Select
-                                            label="Lieu"
-                                            placeholder="Tous"
+                                            label={t('matchesPage.filters.venue')}
+                                            placeholder={t('matchesPage.filters.all')}
                                             selectedKeys={filters.venue ? [filters.venue] : []}
                                             onChange={(e) => handleFilterChange('venue', e.target.value)}
                                             size="sm"
                                             classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {VENUES.map((v) => (
-                                                <SelectItem key={v}>{v}</SelectItem>
+                                                <SelectItem key={v}>{t(`enums.venue.${v}`)}</SelectItem>
                                             ))}
                                         </Select>
 
                                         <Input
-                                            label="Ville"
+                                            label={t('matchesPage.filters.city')}
                                             placeholder="Ex: Lens"
                                             value={filters.location_city || ''}
                                             onChange={(e) => handleFilterChange('location_city', e.target.value)}
@@ -300,7 +313,7 @@ export default function MatchesPage() {
                                         />
 
                                         <Input
-                                            label="Code postal"
+                                            label={t('matchesPage.filters.zip')}
                                             placeholder="Ex: 62300"
                                             value={filters.location_zip || ''}
                                             onChange={(e) => handleFilterChange('location_zip', e.target.value)}
@@ -312,8 +325,8 @@ export default function MatchesPage() {
 
                                         <Input
                                             type="number"
-                                            label="Rayon (km)"
-                                            placeholder={canUseDistance ? "Ex: 20" : "Liez votre club"}
+                                            label={t('matchesPage.filters.radius')}
+                                            placeholder={canUseDistance ? "Ex: 20" : t('matchForm.labels.siret')}
                                             min={0}
                                             max={200}
                                             value={radiusKm > 0 ? String(radiusKm) : ''}
@@ -321,7 +334,7 @@ export default function MatchesPage() {
                                             size="sm"
                                             isDisabled={!canUseDistance}
                                             endContent={<span className="text-default-400 text-sm">km</span>}
-                                            description={!canUseDistance ? "SIRET requis" : radiusKm > 0 ? `depuis ${user?.club?.city || 'votre club'}` : undefined}
+                                            description={!canUseDistance ? t('matchForm.alerts.must_link') : radiusKm > 0 ? `depuis ${user?.club?.city || 'club'}` : undefined}
                                             classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         />
                                     </div>
@@ -343,7 +356,7 @@ export default function MatchesPage() {
                                             </svg>
                                         }
                                     >
-                                        Liste
+                                        {t('matchesPage.view.list')}
                                     </Button>
                                     <Button
                                         size="sm"
@@ -357,12 +370,12 @@ export default function MatchesPage() {
                                             </svg>
                                         }
                                     >
-                                        Calendrier
+                                        {t('matchesPage.view.calendar')}
                                     </Button>
                                 </div>
                                 {selectedDate && (
                                     <Button size="sm" variant="light" color="danger" onPress={() => { setSelectedDate(null); handleFilterChange('date', ''); }}>
-                                        ✕ {new Date(selectedDate + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                                        ✕ {new Date(selectedDate + 'T00:00:00').toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
                                     </Button>
                                 )}
                             </div>
@@ -378,7 +391,7 @@ export default function MatchesPage() {
                                                 </svg>
                                             </Button>
                                             <h3 className="text-xl font-bold text-orange-400">
-                                                {monthNames[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
+                                                {getMonthName(calendarMonth)} {calendarMonth.getFullYear()}
                                             </h3>
                                             <Button size="sm" variant="light" onPress={nextMonth} isIconOnly>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -448,7 +461,7 @@ export default function MatchesPage() {
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                                     </svg>
-                                    {t('error.loading_matches', 'Erreur lors du chargement des matchs')}
+                                    {t('error.loading_matches')}
                                 </div>
                             )}
 
@@ -456,7 +469,7 @@ export default function MatchesPage() {
                             {filteredMatches.length > 0 && (
                                 <div className="flex items-center gap-2 px-1">
                                     <Chip size="sm" variant="flat" color="warning" className="bg-orange-100 text-orange-700">{filteredMatches.length}</Chip>
-                                    <span className="text-sm text-default-500">match{filteredMatches.length > 1 ? 's' : ''} amical{filteredMatches.length > 1 ? 'aux' : ''} trouvé{filteredMatches.length > 1 ? 's' : ''}</span>
+                                    <span className="text-sm text-default-500">{filteredMatches.length > 1 ? t('matchesPage.found') : t('matchesPage.found').replace('(s)', '').replace('(aux)', 'al')}</span>
                                 </div>
                             )}
 
@@ -469,12 +482,12 @@ export default function MatchesPage() {
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                                         <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
                                                     </svg>
-                                                    Ma création
+                                                    {t('matchesPage.my_creation')}
                                                 </div>
                                             )}
                                             <div className="flex flex-col w-full">
                                                 <h4 className="font-bold text-xl text-default-900 group-hover:text-orange-500 transition-colors uppercase tracking-tight truncate w-full">
-                                                    {match.club?.name || 'Club Inconnu'}
+                                                    {match.club?.name || t('matchesPage.unknown_club')}
                                                 </h4>
                                                 <p className="text-small text-default-500 font-medium">{match.location_city || match.club?.city} ({match.location_zip || match.club?.zip})</p>
                                             </div>
@@ -486,7 +499,7 @@ export default function MatchesPage() {
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                                                     </svg>
-                                                    <span className="font-semibold capitalize">{new Date(match.match_date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                                                    <span className="font-semibold capitalize">{new Date(match.match_date).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
                                                 </div>
                                                 <div className="w-[1px] h-4 bg-default-300"></div>
                                                 <div className="flex items-center gap-1.5">
@@ -507,7 +520,7 @@ export default function MatchesPage() {
                                         </CardBody>
                                         <CardFooter className="px-4 pb-4">
                                             <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="warning" className="font-bold w-full bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md shadow-orange-500/20">
-                                                {t('details', 'Voir détails & Contacter')}
+                                                {t('details')}
                                             </Button>
                                         </CardFooter>
                                     </Card>
@@ -524,11 +537,11 @@ export default function MatchesPage() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-lg font-semibold text-orange-900/80 dark:text-orange-100">Aucun match amical trouvé</p>
-                                            <p className="text-sm text-orange-800/60 dark:text-orange-200/60 mt-1">Essayez de modifier vos filtres ou créez un nouveau match amical.</p>
+                                            <p className="text-lg font-semibold text-orange-900/80 dark:text-orange-100">{t('matchesPage.empty_title')}</p>
+                                            <p className="text-sm text-orange-800/60 dark:text-orange-200/60 mt-1">{t('matchesPage.empty_desc')}</p>
                                         </div>
                                         <Button color="warning" variant="flat" onPress={() => setView('create')} className="mt-2 font-semibold bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">
-                                            Créer un match amical
+                                            {t('match.create')}
                                         </Button>
                                     </CardBody>
                                 </Card>
