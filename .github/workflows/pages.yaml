@@ -90,6 +90,8 @@ jobs:
           echo "READ_PERMISSION=${{ secrets.READ_PERMISSION }}" >> .env
           echo "WRITE_PERMISSION=${{ secrets.WRITE_PERMISSION }}" >> .env
           echo "ADMIN_PERMISSION=${{ secrets.ADMIN_PERMISSION }}" >> .env
+          echo "VITE_FACEAPI_MODELS_URL=${{ secrets.VITE_FACEAPI_MODELS_URL }}" >> .env
+          echo "AUTH0_CACHE_DURATION_S=${{ secrets.AUTH0_CACHE_DURATION_S }}" >> .env
           echo "VITE_BASE_PATH=${{ github.event.repository.name }}" >> .env
 
       - name: Build project
