@@ -3,21 +3,31 @@
 	"compatibility_date": "2024-01-01",
 	"main": "src/index.ts",
 	"vars": {
-		"ENVIRONMENT": "development",
-		"CORS_ORIGIN": "http://localhost:5175",
+		"ENVIRONMENT": "production",
+		"AUTHENTICATION_PROVIDER_TYPE": "auth0",
 		"AUTH0_DOMAIN": "dev-vagn7ta27qabl45d.us.auth0.com",
+		"AUTH0_CLIENT_ID": "TiJdYnSJAeZHa06xpmhYgwZNFoBB9QQr",
+		"AUTH0_CLIENT_SECRET": "izvTMAMASbsolXc_ZH0vxI2eNfuRX3Rx1apHWJY8pM48GPbqNv",
 		"AUTH0_AUDIENCE": "https://api.kdufoot.com",
+		"AUTH0_SCOPE": "openid profile email read:api write:api",
+		"API_BASE_URL": "https://api.kdufoot.com/api/v1",
+		"CORS_ORIGIN": "https://yanni-delattre-balcer.github.io",
+		"READ_PERMISSION": "read:api",
+		"WRITE_PERMISSION": "write:api",
+		"ADMIN_PERMISSION": "admin:api",
 		"ADMIN_AUTH0_PERMISSION": "admin:auth0",
 		"SIRET_API_URL": "https://recherche-entreprises.api.gouv.fr/search",
-		"GOOGLE_MAPS_API_KEY": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+		"GOOGLE_MAPS_API_KEY": "none",
+		"AUTH0_CACHE_DURATION_S": "300"
 	},
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "kdufoot-db",
-			"database_id": "your-database-id"
+			"database_id": "22a59be4-5a74-43f7-9f25-2e9fe7ae4f5e"
 		}
-	],
+	]
+	/*
 	"r2_buckets": [
 		{
 			"binding": "VIDEOS_BUCKET",
@@ -34,4 +44,5 @@
 			"id": "your-kv-namespace-id"
 		}
 	]
+	*/
 }
