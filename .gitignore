@@ -54,3 +54,8 @@ _sensitive_datas/_sensitive_datas.tar.xz
 
 # GitHub template reference
 .template_ref
+
+package-lock.json
+apps/client/package-lock.json
+apps/cloudflare-worker/package-lock.json
+yarn.lock
