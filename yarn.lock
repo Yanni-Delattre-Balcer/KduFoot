@@ -1817,7 +1817,7 @@
 "@rollup/rollup-win32-x64-gnu@4.57.1":
   version "4.57.1"
 
-"@rollup/rollup-win32-x64-msvc@^4.57.1", "@rollup/rollup-win32-x64-msvc@4.57.1":
+"@rollup/rollup-win32-x64-msvc@4.57.1":
   version "4.57.1"
 
 "@rtsao/scc@^1.1.0":
