@@ -9,6 +9,7 @@ import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Link } from 'react-router-dom';
 import { Chip } from "@heroui/chip";
+import { showVideoAnalysis } from '@/config/site';
 
 export default function SessionPlannerPage() {
     const { t, i18n } = useTranslation();
@@ -41,7 +42,7 @@ export default function SessionPlannerPage() {
                                 </svg>
                             </div>
                             <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-red-500 to-rose-600">
-                                {t('sessions.title')}
+                                {showVideoAnalysis ? t('sessions.title') : t('sessions.title_public')}
                             </h1>
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
@@ -50,7 +51,7 @@ export default function SessionPlannerPage() {
                                 : t('sessions.description_matches')}
                         </p>
 
-                        <div className="flex gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
+                        <div className="flex flex-col sm:flex-row gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm w-full sm:w-auto">
                             <Button
                                 color={view === 'sessions' ? "success" : "default"}
                                 variant={view === 'sessions' ? "shadow" : "light"}
@@ -115,7 +116,7 @@ export default function SessionPlannerPage() {
                                                     {session.status}
                                                 </Chip>
                                             </div>
-                                            <h4 className="font-bold text-large group-hover:text-red-600 transition-colors">{session.name || t('session.untitled')}</h4>
+                                            <h4 className="font-bold text-large truncate group-hover:text-red-600 transition-colors">{session.name || t('session.untitled')}</h4>
                                         </CardHeader>
                                         <CardBody className="overflow-visible py-3">
                                             <div className="flex items-center gap-2 text-default-500 text-sm mb-2">
@@ -178,7 +179,7 @@ export default function SessionPlannerPage() {
                                                 <p className="text-tiny uppercase font-bold text-red-600">{match.category} - {match.format}</p>
                                                 <Chip size="sm" variant="flat" className="bg-red-50 text-red-800 dark:bg-red-500/10 dark:text-red-300">{t(`enums.venue.${match.venue}`)}</Chip>
                                             </div>
-                                            <h4 className="font-bold text-large mt-1 group-hover:text-red-600 transition-colors">vs {match.club?.name || t('sessions.opponent_default')}</h4>
+                                            <h4 className="font-bold text-large mt-1 truncate group-hover:text-red-600 transition-colors">vs {match.club?.name || t('sessions.opponent_default')}</h4>
                                             <small className="text-default-500 flex items-center gap-1 mt-1">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />

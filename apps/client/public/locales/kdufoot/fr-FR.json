@@ -8,6 +8,7 @@
         "training": "Mon Entraînement",
         "favorites": "Favoris",
         "sessions": "Historique Entraînement / Match",
+        "sessions_public": "Historique Match",
         "matches": "Trouver un match / tournoi",
         "pricing": "Tarifs",
         "profile": "Profil",
@@ -140,6 +141,7 @@
     },
     "sessions": {
         "title": "Historique Entraînement / Match",
+        "title_public": "Historique Match",
         "create": "Planifier une séance",
         "description_sessions": "Organisez et planifiez vos séances d'entraînement pour préparer au mieux vos joueurs.",
         "description_matches": "Suivez vos matchs amicaux programmés et gardez le contrôle sur votre calendrier sportif.",

@@ -13,8 +13,6 @@ export const showVideoAnalysis =
     window.location.hostname.endsWith(".local") ||
     window.location.hostname.includes("192.168."));
 
-const videoAnalysisRoutes = ["/exercises", "/training", "/pricing"];
-
 export const siteConfig = () => {
   const allNavItems = [
     {
@@ -34,7 +32,7 @@ export const siteConfig = () => {
       href: "/favorites",
     },
     {
-      label: i18next.t("nav.sessions"),
+      label: showVideoAnalysis ? i18next.t("nav.sessions") : i18next.t("nav.sessions_public"),
       href: "/sessions",
     },
     {
@@ -49,19 +47,19 @@ export const siteConfig = () => {
 
   const filteredNavItems = showVideoAnalysis
     ? allNavItems
-    : allNavItems.filter((item) => !videoAnalysisRoutes.includes(item.href));
+    : allNavItems.filter((item) => item.href !== "/exercises" && item.href !== "/training" && item.href !== "/pricing");
 
   return ({
-  name: "KduFoot",
-  needCookieConsent: true,
-  description: i18next.t("site.description"),
-  navItems: filteredNavItems,
-  navMenuItems: filteredNavItems,
-  links: {
-    github: "https://github.com/your-repo/kdufoot",
-    twitter: "https://twitter.com/kdufoot",
-    docs: "https://docs.kdufoot.com",
-    discord: "https://discord.gg/kdufoot",
-  },
-});
+    name: "KduFoot",
+    needCookieConsent: true,
+    description: i18next.t("site.description"),
+    navItems: filteredNavItems,
+    navMenuItems: filteredNavItems,
+    links: {
+      github: "https://github.com/your-repo/kdufoot",
+      twitter: "https://twitter.com/kdufoot",
+      docs: "https://docs.kdufoot.com",
+      discord: "https://discord.gg/kdufoot",
+    },
+  });
 };

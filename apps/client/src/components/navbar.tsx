@@ -43,14 +43,15 @@ import { availableLanguages } from "@/i18n";
 export const Navbar = () => {
   const { t } = useTranslation();
   const getNavItemClass = (href: string) => {
-    const base = "bg-clip-text text-transparent font-bold hover:scale-105 transition-transform";
-    if (href === '/') return `${base} bg-linear-to-r from-cyan-400 to-teal-400`;
-    if (href === '/exercises') return `${base} bg-linear-to-r from-blue-500 to-violet-500`;
-    if (href === '/training') return `${base} bg-linear-to-r from-emerald-500 to-green-600`;
-    if (href === '/favorites') return `${base} bg-linear-to-r from-pink-500 to-rose-500`;
-    if (href === '/sessions') return `${base} bg-linear-to-r from-red-500 to-rose-600`;
-    if (href === '/matches') return `${base} bg-linear-to-r from-orange-500 to-yellow-400`;
-    if (href === '/pricing') return `${base} bg-linear-to-r from-fuchsia-600 to-purple-600`;
+    const base = "font-bold hover:scale-105 transition-transform bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent";
+    // Vibrant saturated colors (3 steps) to see movement without being "extreme"
+    if (href === '/') return `${base} bg-[linear-gradient(to_right,#0891b2,#22d3ee,#0891b2)]`; // Cyan
+    if (href === '/exercises') return `${base} bg-[linear-gradient(to_right,#2563eb,#8b5cf6,#2563eb)]`; // Blue/Violet
+    if (href === '/training') return `${base} bg-[linear-gradient(to_right,#059669,#34d399,#059669)]`; // Green
+    if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#db2777,#f472b6,#db2777)]`; // Pink
+    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#dc2626,#f87171,#dc2626)]`; // Red
+    if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#ea580c,#facc15,#ea580c)]`; // Orange/Yellow
+    if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#c026d3,#9333ea,#c026d3)]`; // Fuchsia/Purple
     return "text-foreground font-bold";
   };
 
@@ -58,9 +59,9 @@ export const Navbar = () => {
     <HeroUINavbar 
       maxWidth="full" 
       position="sticky" 
-      className="h-20" 
+      className="h-28" 
       classNames={{
-        wrapper: "max-w-full px-4" // Remplace px-0 par px-4 si tu veux un tout petit peu d'air, ou px-0 pour coller complètement
+        wrapper: "max-w-full px-4"
       }}
     >
       <NavbarContent className="basis-0 grow" justify="start">
@@ -70,8 +71,8 @@ export const Navbar = () => {
             color="foreground"
             href="/"
           >
-            <Logo size={44} />
-            <p className="font-bold text-xl md:text-2xl bg-[linear-gradient(to_right,#1e3a8a,#06b6d4,#14532d,#22c55e,#eab308,#f97316,#7f1d1d,#ef4444,#db2777,#9333ea,#581c87)] bg-clip-text text-transparent">
+            <Logo size={64} />
+            <p className="font-bold bg-[linear-gradient(to_right,#1e3a8a,#06b6d4,#14532d,#22c55e,#eab308,#f97316,#7f1d1d,#ef4444,#db2777,#9333ea,#581c87,#1e3a8a)] bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent">
               {t("brand.name")}
             </p>
           </LinkUniversal>

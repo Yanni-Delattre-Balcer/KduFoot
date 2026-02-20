@@ -13,4 +13,11 @@
       hsl(var(--heroui-background))
     ),
     linear-gradient(83.87deg, #f54180, #9353d3);
+
+  --animate-gradient-flow: gradient-flow 10s linear infinite;
+
+  @keyframes gradient-flow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: -200% 50%; }
+  }
 }
