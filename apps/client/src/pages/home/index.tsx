@@ -18,9 +18,9 @@ export default function IndexPage() {
       <section className="flex flex-col gap-5 w-full px-4">
 
         {/* Hero Section - Compact, title on one line */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-cyan-500/10 border border-cyan-500/20">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent"></div>
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-cyan-500/10 via-blue-500/5 to-cyan-500/10 border border-cyan-500/20">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,var(--tw-gradient-stops))] from-cyan-500/10 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent"></div>
           <div className="relative flex flex-col items-center gap-3 py-8 px-6 text-center">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-2xl bg-cyan-500/10">
@@ -28,16 +28,16 @@ export default function IndexPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                 </svg>
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold whitespace-nowrap">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 to-blue-600">Kdufoot</span>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+                <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-500 to-blue-600">Kdufoot</span>
                 <span className="text-default-400 font-normal mx-2">—</span>
-                <span className="text-foreground text-2xl lg:text-3xl">Football Amateur Intelligent</span>
+                <span className="text-foreground">Football Amateur Intelligent</span>
               </h1>
             </div>
             <p className="text-default-500 text-base">
               Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.
             </p>
-            <div className="flex gap-3 mt-1">
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
               <Link
                 className={buttonStyles({
                   color: "primary",
@@ -64,7 +64,7 @@ export default function IndexPage() {
         </div>
 
         {/* Présentation personnelle */}
-        <Card className="border border-default-200 overflow-hidden">
+        <Card className="border border-default-200 bg-content1 overflow-hidden">
           <CardBody className="p-6 flex flex-col gap-3">
             <h2 className="text-lg font-bold text-foreground">👋 À propos du projet</h2>
             <p className="text-sm text-default-500 leading-relaxed">
@@ -87,8 +87,8 @@ export default function IndexPage() {
 
         {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-primary/5 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-primary/5 transition-all">
+            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
               <div className="p-3 rounded-2xl bg-primary/10">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-primary">
@@ -100,8 +100,8 @@ export default function IndexPage() {
             </CardBody>
           </Card>
 
-          <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-orange-500/5 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-orange-500/5 transition-all">
+            <div className="absolute inset-0 bg-linear-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
               <div className="p-3 rounded-2xl bg-orange-500/10">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-orange-500">
@@ -113,8 +113,8 @@ export default function IndexPage() {
             </CardBody>
           </Card>
 
-          <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-green-500/5 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-green-500/5 transition-all">
+            <div className="absolute inset-0 bg-linear-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
               <div className="p-3 rounded-2xl bg-green-500/10">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-green-500">

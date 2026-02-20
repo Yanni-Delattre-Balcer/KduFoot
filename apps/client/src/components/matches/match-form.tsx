@@ -230,7 +230,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-appearance-in">
             <Card className="shadow-medium">
-                <CardHeader className="flex gap-3 bg-gradient-to-r from-default-100 to-default-50 px-6 py-4">
+                <CardHeader className="flex gap-3 bg-linear-to-r from-default-100 to-default-50 px-6 py-4">
                     <div className="p-2 bg-primary/10 rounded-lg text-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                             <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" />
@@ -431,7 +431,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             className="md:col-span-2"
                             isDisabled
                             classNames={{
-                                inputWrapper: "!bg-default-200/70 text-default-500",
+                                inputWrapper: "bg-default-200/70! text-default-500",
                                 label: "text-default-500"
                             }}
                         />
@@ -441,7 +441,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             value={formData.location_zip || ''}
                             isDisabled
                             classNames={{
-                                inputWrapper: "!bg-default-200/70 text-default-500",
+                                inputWrapper: "bg-default-200/70! text-default-500",
                                 label: "text-default-500"
                             }}
                         />
@@ -451,7 +451,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             value={formData.location_city || ''}
                             isDisabled
                             classNames={{
-                                inputWrapper: "!bg-default-200/70 text-default-500",
+                                inputWrapper: "bg-default-200/70! text-default-500",
                                 label: "text-default-500"
                             }}
                         />
@@ -461,7 +461,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             <p className="text-sm font-bold text-white uppercase tracking-tight text-center">
                                 {t('matchForm.progress')}: {progress}%
                             </p>
-                            <div className="w-full h-4 bg-default-100 rounded-full overflow-hidden p-[1px] border border-white/10 ring-1 ring-white/5 shadow-inner">
+                            <div className="w-full h-4 bg-default-100 rounded-full overflow-hidden p-px border border-white/10 ring-1 ring-white/5 shadow-inner">
                                 <div
                                     className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(0,255,163,0.4)]"
                                     style={{

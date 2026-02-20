@@ -54,6 +54,7 @@ export const LoginButton: FC<{ text?: string }> = ({ text }) => {
     !isAuthenticated && (
       <Button
         className="text-sm font-normal text-default-600 bg-default-100"
+        radius="full"
         type="button"
         onPress={() => login()}
       >
@@ -146,6 +147,7 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
         <Button
           className="text-sm font-bold text-white bg-red-600 hover:bg-red-700 shadow-md transform hover:scale-105 transition-all"
           color="danger"
+          radius="full"
           type="button"
           onPress={() => {
             logout({
@@ -239,6 +241,7 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
         onPress={() => setIsAccountOpen(true)}
         variant="flat"
         color="default"
+        radius="full"
         className="font-semibold text-default-700 bg-default-100/50 hover:bg-default-200/50"
       >
         {t("auth.account")}

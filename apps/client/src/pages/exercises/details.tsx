@@ -44,8 +44,8 @@ export default function ExerciseDetailsPage() {
                     <div>
                         <h1 className="text-3xl font-bold mb-2">{exercise.title}</h1>
                         <div className="flex gap-2 flex-wrap">
-                            <Chip color="primary" variant="flat">{exercise.category}</Chip>
-                            <Chip color="secondary" variant="flat">{exercise.level}</Chip>
+                            <Chip color="primary" variant="flat">{t(`enums.category.${exercise.category}`)}</Chip>
+                            <Chip color="secondary" variant="flat">{t(`enums.level.${exercise.level}`)}</Chip>
                             <Chip variant="bordered">{exercise.duration} min</Chip>
                         </div>
                     </div>

@@ -65,6 +65,29 @@
     },
     "log-out-someone": "Déconnexion {{name}}",
     "log-in": "Connexion",
+    "all_f": "Toutes",
+    "all_m": "Tous",
+    "search_placeholder": "Rechercher...",
+    "selected": "Sélectionné",
+    "cancel": "Annuler",
+    "add": "Ajouter",
+    "update": "Mettre à jour",
+    "duration": "Durée",
+    "status": "Statut",
+    "summary": "Résumé",
+    "duration_total": "Durée Totale",
+    "players": "Joueurs",
+    "equipment": "Matériel",
+    "back": "Retour",
+    "back_to_list": "Retour à la liste",
+    "loading": "Chargement...",
+    "edit": "Modifier",
+    "error": {
+        "not_found": "Élément non trouvé",
+        "save_failed": "Erreur lors de la sauvegarde",
+        "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
+        "loading_matches": "Erreur lors du chargement des matchs amicaux"
+    },
     "video": {
         "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
         "analyze": "Analyser la vidéo",
@@ -113,7 +136,26 @@
         "unfavorite": "Retirer des favoris",
         "addToSession": "Ajouter à la séance",
         "adapt": "Adapter",
-        "exportPDF": "Exporter en PDF"
+        "exportPDF": "Exporter en PDF",
+        "synopsis_label": "Synopsis / Description",
+        "synopsis_placeholder": "Décrivez le déroulement de l'exercice...",
+        "details": "Détails",
+        "themes_label": "Thèmes",
+        "choose_themes": "Choisir des thèmes",
+        "players_label": "Nombre de joueurs",
+        "dimensions_label": "Dimensions",
+        "equipment_label": "Matériel",
+        "duration_label": "Durée (min)",
+        "category_label": "Catégorie",
+        "choose_category": "Choisir une catégorie",
+        "level_label": "Niveau",
+        "choose_level": "Choisir un niveau",
+        "create_title": "Créer un exercice",
+        "edit_title": "Modifier l'exercice",
+        "create_button": "Créer l'exercice",
+        "no_exercises_found": "Aucun exercice trouvé.",
+        "untitled": "Exercice sans titre",
+        "schema": "Schéma Tactic"
     },
     "match": {
         "create": "Créer un match amical",
@@ -130,7 +172,30 @@
         "create": "Nouvelle séance",
         "adapt": "Adapter",
         "timer": "Chronomètre",
-        "export": "Exporter en PDF"
+        "export": "Exporter en PDF",
+        "untitled": "Séance sans titre",
+        "not_scheduled": "Non planifiée",
+        "timeline": "Timeline de la séance",
+        "no_exercises": "Aucun exercice ajouté.",
+        "constraints": "Contraintes",
+        "info_general": "Informations Générales",
+        "name_label": "Nom de la séance",
+        "name_placeholder": "Ex: Séance Technico-Tactique",
+        "category_label": "Catégorie",
+        "choose_category": "Choisir une catégorie",
+        "level_label": "Niveau",
+        "choose_level": "Choisir un niveau",
+        "date_label": "Date prévue",
+        "duration_label": "Durée totale (min)",
+        "add_exercises": "Ajouter des exercices",
+        "create_title": "Planifier une séance",
+        "edit_title": "Modifier la séance",
+        "create_button": "Créer la séance",
+        "status_enum": {
+            "draft": "Brouillon",
+            "scheduled": "Planifiée",
+            "completed": "Terminée"
+        }
     },
     "sessions": {
         "title": "Historique Entraînement / Match",
@@ -169,22 +234,44 @@
             "COUPS_DE_PIED_ARRETES": "Coups de Pied Arrêtés"
         },
         "category": {
+            "U6": "U6",
             "U7": "U7",
+            "U8": "U8",
             "U9": "U9",
+            "U10": "U10",
             "U11": "U11",
+            "U12": "U12",
             "U13": "U13",
+            "U14": "U14",
             "U15": "U15",
+            "U16": "U16",
             "U17": "U17",
+            "U18": "U18",
             "U19": "U19",
+            "U20": "U20",
             "Séniors": "Séniors",
-            "Vétérans": "Vétérans"
+            "Vétérans": "Vétérans",
+            "Loisir": "Loisir"
         },
         "level": {
             "Débutant": "Débutant",
             "Ligue": "Ligue",
             "Régional": "Régional",
             "National": "National",
-            "Pro": "Professionnel"
+            "Pro": "Professionnel",
+            "Ligue 1": "Ligue 1",
+            "Ligue 2": "Ligue 2",
+            "National 2": "National 2",
+            "National 3": "National 3",
+            "Régional 1": "Régional 1",
+            "Régional 2": "Régional 2",
+            "Régional 3": "Régional 3",
+            "Départemental 1": "Départemental 1",
+            "Départemental 2": "Départemental 2",
+            "Départemental 3": "Départemental 3",
+            "Départemental 4": "Départemental 4",
+            "Départemental 5": "Départemental 5",
+            "Autre": "Autre"
         },
         "venue": {
             "Domicile": "Domicile",
@@ -202,6 +289,12 @@
             "Masculin": "Masculin",
             "Féminin": "Féminin",
             "Mixte": "Mixte"
+        },
+        "format": {
+            "11v11": "11 vs 11",
+            "8v8": "8 vs 8",
+            "5v5": "5 vs 5",
+            "Futsal": "Futsal"
         }
     },
     "matchesPage": {
@@ -283,10 +376,6 @@
             "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un match dans le passé.",
             "date_far": "⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée."
         }
-    },
-    "error": {
-        "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
-        "loading_matches": "Erreur lors du chargement des matchs amicaux"
     },
     "pricing": {
         "hero": {

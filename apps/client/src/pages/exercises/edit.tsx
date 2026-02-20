@@ -97,7 +97,7 @@ export default function ExerciseEditPage() {
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <Card>
-                        <CardHeader className="font-bold bg-default-50">Informations Grénérales</CardHeader>
+                        <CardHeader className="font-bold bg-default-50">{t('exercise.info_general', 'Informations Générales')}</CardHeader>
                         <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
                                 label={t('exercise.title_label', 'Titre de l\'exercice')}
@@ -108,41 +108,41 @@ export default function ExerciseEditPage() {
                                 className="md:col-span-2"
                             />
                             <Select
-                                label="Catégorie"
-                                placeholder="Choisir une catégorie"
+                                label={t('exercise.category_label', 'Catégorie')}
+                                placeholder={t('exercise.choose_category', 'Choisir une catégorie')}
                                 selectedKeys={formData.category ? [formData.category] : []}
                                 onChange={(e) => handleChange('category', e.target.value)}
                                 isRequired
                             >
                                 {Object.values(Category).map((cat) => (
-                                    <SelectItem key={cat}>{cat}</SelectItem>
+                                    <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                                 ))}
                             </Select>
                             <Select
-                                label="Niveau"
-                                placeholder="Choisir un niveau"
+                                label={t('exercise.level_label', 'Niveau')}
+                                placeholder={t('exercise.choose_level', 'Choisir un niveau')}
                                 selectedKeys={formData.level ? [formData.level] : []}
                                 onChange={(e) => handleChange('level', e.target.value)}
                                 isRequired
                             >
                                 {Object.values(Level).map((lvl) => (
-                                    <SelectItem key={lvl}>{lvl}</SelectItem>
+                                    <SelectItem key={lvl}>{t(`enums.level.${lvl}`)}</SelectItem>
                                 ))}
                             </Select>
                             <Select
-                                label="Thèmes"
-                                placeholder="Choisir des thèmes"
+                                label={t('exercise.themes_label', 'Thèmes')}
+                                placeholder={t('exercise.choose_themes', 'Choisir des thèmes')}
                                 selectionMode="multiple"
                                 selectedKeys={new Set(formData.themes || [])}
                                 onSelectionChange={(keys) => handleChange('themes', Array.from(keys))}
                                 isRequired
                             >
                                 {Object.values(Theme).map((thm) => (
-                                    <SelectItem key={thm}>{thm}</SelectItem>
+                                    <SelectItem key={thm}>{t(`enums.theme.${thm}`)}</SelectItem>
                                 ))}
                             </Select>
                             <Input
-                                label="Durée (min)"
+                                label={t('exercise.duration_label', 'Durée (min)')}
                                 type="number"
                                 value={formData.duration}
                                 onValueChange={(v) => handleChange('duration', v)}
@@ -155,27 +155,27 @@ export default function ExerciseEditPage() {
                         <CardHeader className="font-bold bg-default-50">Détails Techniques</CardHeader>
                         <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
-                                label="Nombre de joueurs"
+                                label={t('exercise.players_label', 'Nombre de joueurs')}
                                 value={formData.nb_joueurs}
                                 onValueChange={(v) => handleChange('nb_joueurs', v)}
                                 placeholder="Ex: 10 + 2 gardiens"
                             />
                             <Input
-                                label="Dimensions"
+                                label={t('exercise.dimensions_label', 'Dimensions')}
                                 value={formData.dimensions}
                                 onValueChange={(v) => handleChange('dimensions', v)}
                                 placeholder="Ex: 40x30m"
                             />
                             <Input
-                                label="Matériel"
+                                label={t('exercise.equipment_label', 'Matériel')}
                                 value={formData.materiel}
                                 onValueChange={(v) => handleChange('materiel', v)}
-                                placeholder="Ex: Ballons, chasubles, coupelles"
+                                placeholder="Ballons, chasubles, coupelles..."
                                 className="md:col-span-2"
                             />
                             <Textarea
-                                label="Synopsis / Description"
-                                placeholder="Décrivez le déroulement de l'exercice..."
+                                label={t('exercise.synopsis_label', 'Synopsis / Description')}
+                                placeholder={t('exercise.synopsis_placeholder', 'Décrivez le déroulement de l\'exercice...')}
                                 value={formData.synopsis}
                                 onValueChange={(v) => handleChange('synopsis', v)}
                                 minRows={5}
@@ -212,10 +212,10 @@ export default function ExerciseEditPage() {
 
                     <div className="flex justify-end gap-2 mt-4">
                         <Button type="button" variant="light" onClick={() => navigate('/exercises')}>
-                            Annuler
+                            {t('cancel', 'Annuler')}
                         </Button>
                         <Button type="submit" color="primary" isLoading={isSaving}>
-                            {isEditing ? 'Mettre à jour' : 'Créer l\'exercice'}
+                            {isEditing ? t('update', 'Mettre à jour') : t('exercise.create_button', 'Créer l\'exercice')}
                         </Button>
                     </div>
                 </form>

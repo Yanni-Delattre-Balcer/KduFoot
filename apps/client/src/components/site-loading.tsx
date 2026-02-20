@@ -45,8 +45,8 @@ export const SiteLoading = () => {
           w-48 h-48
           rounded-full
           bg-[conic-gradient(red,orange,yellow,green,blue,indigo,violet,red)]
-          [mask-image:radial-gradient(circle_closest-side,transparent_75%,#000_75%,#000_100%)]
-          [animation:spinner-rotate_800ms_linear_infinite]
+          mask-[radial-gradient(circle_closest-side,transparent_75%,#000_75%,#000_100%)]
+          animate-[spinner-rotate_800ms_linear_infinite]
         "
         role="status"
       />

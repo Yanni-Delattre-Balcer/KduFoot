@@ -120,11 +120,11 @@ export default function MatchesPage() {
             <section className="flex flex-col gap-6 w-full px-4">
 
                 {/* Hero - Matchs */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-red-500/10 border border-orange-500/20">
+                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-orange-500/15 via-amber-500/10 to-red-500/10 border border-orange-500/20">
                     {/* Grass stripes - standard green */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
                     {/* Field center line + circle */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
 
                     {/* Football clock - top right */}
@@ -139,7 +139,7 @@ export default function MatchesPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-amber-500">
+                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-orange-500 to-amber-500">
                                 {t('matches.title', 'Matchs Amicaux')}
                             </h1>
                         </div>
@@ -149,7 +149,7 @@ export default function MatchesPage() {
                                 : t('matchesPage.description_create')}
                         </p>
 
-                        <div className="flex gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
+                        <div className="flex flex-wrap justify-center gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
                             <Button
                                 color={view === 'find' ? "warning" : "default"}
                                 variant={view === 'find' ? "shadow" : "light"}
@@ -249,7 +249,7 @@ export default function MatchesPage() {
                                             classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {FORMATS.map((f) => (
-                                                <SelectItem key={f}>{f}</SelectItem>
+                                                <SelectItem key={f}>{t(`enums.format.${f}`, f)}</SelectItem>
                                             ))}
                                         </Select>
 
@@ -439,7 +439,7 @@ export default function MatchesPage() {
                                                             {day}
                                                         </span>
                                                         {count > 0 && (
-                                                            <div className="flex flex-wrap justify-center gap-[1px] max-w-[90%]">
+                                                            <div className="flex flex-wrap justify-center gap-px max-w-[90%]">
                                                                 {Array.from({ length: Math.min(count, 4) }).map((_, bi) => (
                                                                     <span key={bi} className="text-[10px] leading-none">⚽</span>
                                                                 ))}
@@ -458,7 +458,7 @@ export default function MatchesPage() {
 
                             {isError && (
                                 <div className="flex items-center gap-3 p-4 rounded-xl bg-danger/10 border border-danger/20 text-danger">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 shrink-0">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                                     </svg>
                                     {t('error.loading_matches')}
@@ -478,7 +478,7 @@ export default function MatchesPage() {
                                     <Card key={match.id} className={`group hover:shadow-lg transition-all border border-orange-500/20 hover:border-orange-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-orange-500 shadow-orange-500/20' : ''}`}>
                                         <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
                                             {user?.id === match.owner_id && (
-                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-orange-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                                         <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
                                                     </svg>
@@ -494,19 +494,19 @@ export default function MatchesPage() {
                                         </CardHeader>
                                         <CardBody className="py-2 px-4 gap-3">
                                             {/* Date & Time Row - Simplified */}
-                                            <div className="flex items-center gap-4 text-sm text-default-600 bg-default-50 p-2 rounded-lg justify-center">
-                                                <div className="flex items-center gap-1.5">
+                                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-default-600 bg-default-50 p-2 rounded-lg justify-center">
+                                                <div className="flex items-center gap-1.5 shrink-0">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                                                     </svg>
-                                                    <span className="font-semibold capitalize">{new Date(match.match_date).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                                                    <span className="font-semibold capitalize text-xs sm:text-sm">{new Date(match.match_date).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
                                                 </div>
-                                                <div className="w-[1px] h-4 bg-default-300"></div>
-                                                <div className="flex items-center gap-1.5">
+                                                <div className="hidden sm:block w-px h-4 bg-default-300"></div>
+                                                <div className="flex items-center gap-1.5 shrink-0">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                                     </svg>
-                                                    <span className="font-semibold">{match.match_time}</span>
+                                                    <span className="font-semibold text-xs sm:text-sm">{match.match_time}</span>
                                                 </div>
                                             </div>
 
@@ -519,7 +519,7 @@ export default function MatchesPage() {
                                             )}
                                         </CardBody>
                                         <CardFooter className="px-4 pb-4">
-                                            <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="warning" className="font-bold w-full bg-gradient-to-r from-orange-400 to-amber-500 text-white shadow-md shadow-orange-500/20">
+                                            <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="warning" className="font-bold w-full bg-linear-to-r from-orange-400 to-amber-500 text-white shadow-md shadow-orange-500/20">
                                                 {t('details')}
                                             </Button>
                                         </CardFooter>
@@ -529,7 +529,7 @@ export default function MatchesPage() {
 
                             {filteredMatches.length === 0 && !isError && (
                                 <Card className="border border-orange-500/20 bg-[#232120] overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none"></div>
+                                    <div className="absolute inset-0 bg-linear-to-br from-orange-500/5 to-transparent pointer-events-none"></div>
                                     <CardBody className="relative py-16 flex flex-col items-center gap-4 text-center">
                                         <div className="p-4 rounded-full bg-orange-500/10">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12 text-orange-400">

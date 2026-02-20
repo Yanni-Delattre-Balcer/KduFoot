@@ -16,11 +16,11 @@ export default function TrainingPage() {
             <div className="flex flex-col gap-8 w-full px-4">
 
                 {/* Hero - Mon Entraînement */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-600/15 via-emerald-500/10 to-teal-500/10 border border-[#17c964]/20">
+                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-green-600/15 via-emerald-500/10 to-teal-500/10 border border-[#17c964]/20">
                     {/* Grass stripes - standard green */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
                     {/* Field center line + circle */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
 
                     {/* Football clock - top right */}
@@ -35,7 +35,7 @@ export default function TrainingPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#17c964] to-[#12a150]">
+                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-[#17c964] to-[#12a150]">
                                 {t('nav.training', 'Mon Entraînement')}
                             </h1>
                         </div>
@@ -90,7 +90,7 @@ export default function TrainingPage() {
                         {selectedExercises.map((exercise, index) => (
                             <Card key={exercise.id} className="group hover:shadow-lg hover:shadow-green-500/10 transition-all bg-[#202221] border border-green-500/20 hover:border-green-500/40">
                                 <CardHeader className="flex flex-row items-center gap-4 p-4">
-                                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-[#17c964]/20 to-[#12a150]/20 flex items-center justify-center">
+                                    <div className="shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-[#17c964]/20 to-[#12a150]/20 flex items-center justify-center">
                                         <span className="font-bold text-[#17c964]">{index + 1}</span>
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -116,11 +116,11 @@ export default function TrainingPage() {
                             </Card>
                         ))}
 
-                        <div className="flex justify-between items-center mt-4 p-4 rounded-2xl bg-[#202221] border border-green-500/20">
-                            <div>
-                                <p className="font-bold text-lg">{t('training.hero_stats', { count: selectedExercises.length, duration: selectedExercises.length * 15 })}</p>
+                        <div className="flex flex-col sm:flex-row justify-between items-center mt-4 p-4 rounded-2xl bg-[#202221] border border-green-500/20 gap-4">
+                            <div className="text-center sm:text-left">
+                                <p className="font-bold text-base sm:text-lg">{t('training.hero_stats', { count: selectedExercises.length, duration: selectedExercises.length * 15 })}</p>
                             </div>
-                            <Button as={Link} to="/exercises" variant="flat" color="primary" size="sm">
+                            <Button as={Link} to="/exercises" variant="flat" color="primary" size="sm" className="w-full sm:w-auto">
                                 {t('training.add_exercises')}
                             </Button>
                         </div>

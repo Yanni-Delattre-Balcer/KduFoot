@@ -46,11 +46,11 @@ export default function PricingPage() {
       <section className="flex flex-col gap-10 w-full px-4">
 
         {/* Hero - Abonnements */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-500/15 via-amber-500/10 to-orange-500/10 border border-yellow-400/20">
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-yellow-500/15 via-amber-500/10 to-orange-500/10 border border-yellow-400/20">
           {/* Grass stripes - standard green */}
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
           {/* Field center line + circle */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
 
           {/* Football clock - top right */}
@@ -65,7 +65,7 @@ export default function PricingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455-2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
                 </svg>
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-amber-500">
+              <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-yellow-400 to-amber-500">
                 {t("pricing.hero.title")}
               </h1>
             </div>
@@ -85,7 +85,7 @@ export default function PricingPage() {
                 key={plan.key}
                 className={`relative overflow-hidden border ${plan.popular ? 'border-primary shadow-lg shadow-primary/10 scale-105 z-10' : 'border-default-200'}`}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${plan.gradient}`}></div>
+                <div className={`absolute inset-0 bg-linear-to-br ${plan.gradient}`}></div>
                 {plan.popular && (
                   <div className="absolute top-3 right-3">
                     <Chip size="sm" color="primary" variant="solid">{t(`pricing.plans.${plan.key}.popular`)}</Chip>
@@ -104,7 +104,7 @@ export default function PricingPage() {
                   <ul className="flex flex-col gap-3">
                     {features.map((feature, i) => (
                       <li key={i} className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-success flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-success shrink-0">
                           <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                         </svg>
                         <span className="text-sm">{feature}</span>

@@ -53,7 +53,7 @@ export const title = tv({
         "pink",
         "foreground",
       ],
-      class: "bg-clip-text text-transparent bg-gradient-to-b",
+      class: "bg-clip-text text-transparent bg-linear-to-b",
     },
   ],
 });
@@ -62,7 +62,7 @@ export const subtitle = tv({
   base: "w-full md:w-1/2 my-2 text-lg lg:text-xl text-default-600 block max-w-full",
   variants: {
     fullWidth: {
-      true: "!w-full",
+      true: "w-full!",
     },
   },
   defaultVariants: {
@@ -79,7 +79,7 @@ export const buttonGradient = tv({
     "data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2",
     "data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2",
     "min-w-20 h-10 text-small gap-2 rounded-large",
-    "[&>svg]:max-w-[theme(spacing.8)]",
+    "[&>svg]:max-w-8",
     "transition-transform-colors-opacity motion-reduce:transition-none",
     "bg-transparent text-default-foreground data-[hover=true]:opacity-hover",
     "px-4 font-medium",

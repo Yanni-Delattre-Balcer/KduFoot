@@ -1,5 +1,6 @@
 
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import { useTranslation } from 'react-i18next';
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
@@ -17,6 +18,7 @@ interface ExerciseSelectorProps {
 }
 
 export default function ExerciseSelector({ isOpen, onClose, onSelect }: ExerciseSelectorProps) {
+    const { t } = useTranslation();
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState<Category | "">("");
     const [theme, setTheme] = useState<Theme | "">("");
@@ -49,13 +51,13 @@ export default function ExerciseSelector({ isOpen, onClose, onSelect }: Exercise
     };
 
     const categories = [
-        { key: "", label: "Toutes" },
-        ...Object.values(Category).map(c => ({ key: c, label: c }))
+        { key: "", label: t('all_f', 'Toutes') },
+        ...Object.values(Category).map(c => ({ key: c, label: t(`enums.category.${c}`) }))
     ];
 
     const themes = [
-        { key: "", label: "Tous" },
-        ...Object.values(Theme).map(t => ({ key: t, label: t }))
+        { key: "", label: t('all_m', 'Tous') },
+        ...Object.values(Theme).map(t_val => ({ key: t_val, label: t(`enums.theme.${t_val}`) }))
     ];
 
     return (
@@ -68,18 +70,18 @@ export default function ExerciseSelector({ isOpen, onClose, onSelect }: Exercise
             <ModalContent>
                 {(onClose) => (
                     <>
-                        <ModalHeader className="flex flex-col gap-1">Ajouter des exercices</ModalHeader>
+                        <ModalHeader className="flex flex-col gap-1">{t('session.add_exercises', 'Ajouter des exercices')}</ModalHeader>
                         <ModalBody>
                             <div className="flex flex-col gap-4">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                     <Input
-                                        placeholder="Rechercher..."
+                                        placeholder={t('search_placeholder', 'Rechercher...')}
                                         value={search}
                                         onValueChange={setSearch}
                                         className="md:col-span-1"
                                     />
                                     <Select
-                                        placeholder="Catégorie"
+                                        placeholder={t('exercise.category_label', 'Catégorie')}
                                         selectedKeys={category ? [category] : []}
                                         onChange={(e) => setCategory(e.target.value as Category)}
                                         items={categories}
@@ -87,7 +89,7 @@ export default function ExerciseSelector({ isOpen, onClose, onSelect }: Exercise
                                         {(item) => <SelectItem key={item.key}>{item.label}</SelectItem>}
                                     </Select>
                                     <Select
-                                        placeholder="Thème"
+                                        placeholder={t('exercise.theme_label', 'Thème')}
                                         selectedKeys={theme ? [theme] : []}
                                         onChange={(e) => setTheme(e.target.value as Theme)}
                                         items={themes}
@@ -113,12 +115,12 @@ export default function ExerciseSelector({ isOpen, onClose, onSelect }: Exercise
                                                     <div className="flex flex-col">
                                                         <span className="font-semibold">{exercise.title}</span>
                                                         <div className="flex gap-2 text-tiny text-default-500">
-                                                            <Chip size="sm" variant="flat">{exercise.category}</Chip>
-                                                            {exercise.themes.map(t => <Chip key={t} size="sm" variant="dot">{t}</Chip>)}
+                                                            <Chip size="sm" variant="flat">{t(`enums.category.${exercise.category}`)}</Chip>
+                                                            {exercise.themes.map(t_val => <Chip key={t_val} size="sm" variant="dot">{t(`enums.theme.${t_val}`)}</Chip>)}
                                                         </div>
                                                     </div>
                                                     {selectedExercises.has(exercise.id) && (
-                                                        <Chip color="primary" size="sm">Sélectionné</Chip>
+                                                        <Chip color="primary" size="sm">{t('selected', 'Sélectionné')}</Chip>
                                                     )}
                                                 </CardBody>
                                             </Card>
@@ -126,7 +128,7 @@ export default function ExerciseSelector({ isOpen, onClose, onSelect }: Exercise
                                     )}
                                     {!isLoading && exercises.length === 0 && (
                                         <div className="text-center text-default-500 py-8">
-                                            Aucun exercice trouvé.
+                                            {t('exercise.no_exercises_found', 'Aucun exercice trouvé.')}
                                         </div>
                                     )}
                                 </div>
@@ -134,10 +136,10 @@ export default function ExerciseSelector({ isOpen, onClose, onSelect }: Exercise
                         </ModalBody>
                         <ModalFooter>
                             <Button color="danger" variant="light" onPress={onClose}>
-                                Annuler
+                                {t('cancel', 'Annuler')}
                             </Button>
                             <Button color="primary" onPress={handleConfirm} isDisabled={selectedExercises.size === 0}>
-                                Ajouter ({selectedExercises.size})
+                                {t('add', 'Ajouter')} ({selectedExercises.size})
                             </Button>
                         </ModalFooter>
                     </>

@@ -19,13 +19,13 @@ export default function IndexPage() {
       <section className="flex flex-col gap-5 w-full px-4">
 
         {/* Hero Section with football field background */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/15 via-green-500/10 to-pink-500/10 border border-blue-500/20">
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600/15 via-green-500/10 to-pink-500/10 border border-blue-500/20">
           {/* Grass stripes */}
           <div className="absolute inset-0 opacity-[0.03]" style={{
             backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)',
           }}></div>
           {/* Field center line + circle */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
 
           <div className="relative flex flex-col md:flex-row items-center gap-6 py-8 px-6">
@@ -39,13 +39,13 @@ export default function IndexPage() {
               <p className="text-default-500 text-base">
                 {t("homePage.description")}
               </p>
-              <div className="flex gap-3 mt-1">
+              <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                 <Link
                   className={`${buttonStyles({
                     radius: "full",
                     variant: "shadow",
                     size: "lg",
-                  })} bg-gradient-to-r from-blue-600 to-violet-600 text-white border-none`}
+                  })} bg-linear-to-r from-blue-600 to-violet-600 text-white border-none min-w-[160px]`}
                   href="/exercises"
                 >
                   {t("homePage.buttons.exercises")}
@@ -55,7 +55,7 @@ export default function IndexPage() {
                     radius: "full",
                     variant: "shadow",
                     size: "lg",
-                  })} bg-gradient-to-r from-orange-500 to-amber-500 text-white border-none`}
+                  })} bg-linear-to-r from-orange-500 to-amber-500 text-white border-none min-w-[160px]`}
                   href="/matches"
                 >
                   {t("homePage.buttons.sessions")}
@@ -64,7 +64,7 @@ export default function IndexPage() {
             </div>
 
             {/* Right: Football Clock */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <FootballClock size={140} />
             </div>
           </div>
@@ -103,7 +103,7 @@ export default function IndexPage() {
         {/* 2 Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-primary/5 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
               <div className="p-3 rounded-2xl bg-primary/10">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-primary">
@@ -116,7 +116,7 @@ export default function IndexPage() {
           </Card>
 
           <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-orange-500/5 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-0 bg-linear-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
               <div className="p-3 rounded-2xl bg-orange-500/10">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-orange-500">

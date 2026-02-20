@@ -132,76 +132,76 @@ export default function SessionEditPage() {
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <Card>
-                        <CardHeader className="font-bold bg-default-50">Informations Générales</CardHeader>
+                        <CardHeader className="font-bold bg-default-50">{t('session.info_general', 'Informations Générales')}</CardHeader>
                         <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
-                                label="Nom de la séance"
-                                placeholder="Ex: Séance Technico-Tactique"
+                                label={t('session.name_label', 'Nom de la séance')}
+                                placeholder={t('session.name_placeholder', 'Ex: Séance Technico-Tactique')}
                                 value={formData.name}
                                 onValueChange={(v) => handleChange('name', v)}
                                 isRequired
                                 className="md:col-span-2"
                             />
                             <Select
-                                label="Catégorie"
-                                placeholder="Choisir une catégorie"
+                                label={t('session.category_label', 'Catégorie')}
+                                placeholder={t('session.choose_category', 'Choisir une catégorie')}
                                 selectedKeys={formData.category ? [formData.category] : []}
                                 onChange={(e) => handleChange('category', e.target.value)}
                                 isRequired
                             >
                                 {Object.values(Category).map((cat) => (
-                                    <SelectItem key={cat}>{cat}</SelectItem>
+                                    <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                                 ))}
                             </Select>
                             <Select
-                                label="Niveau"
-                                placeholder="Choisir un niveau"
+                                label={t('session.level_label', 'Niveau')}
+                                placeholder={t('session.choose_level', 'Choisir un niveau')}
                                 selectedKeys={formData.level ? [formData.level] : []}
                                 onChange={(e) => handleChange('level', e.target.value)}
                                 isRequired
                             >
                                 {Object.values(Level).map((lvl) => (
-                                    <SelectItem key={lvl}>{lvl}</SelectItem>
+                                    <SelectItem key={lvl}>{t(`enums.level.${lvl}`)}</SelectItem>
                                 ))}
                             </Select>
 
                             <Input
                                 type="date"
-                                label="Date prévue"
+                                label={t('session.date_label', 'Date prévue')}
                                 value={formData.scheduled_date}
                                 onValueChange={(v) => handleChange('scheduled_date', v)}
                             />
                             <Input
                                 type="number"
-                                label="Durée totale (min)"
+                                label={t('session.duration_label', 'Durée totale (min)')}
                                 value={formData.total_duration?.toString()}
                                 onValueChange={(v) => handleChange('total_duration', parseInt(v))}
                                 isRequired
                             />
                             <Select
-                                label="Statut"
+                                label={t('status', 'Statut')}
                                 selectedKeys={formData.status ? [formData.status] : []}
                                 onChange={(e) => handleChange('status', e.target.value)}
                                 isRequired
                             >
-                                <SelectItem key="draft">Brouillon</SelectItem>
-                                <SelectItem key="scheduled">Planifiée</SelectItem>
-                                <SelectItem key="completed">Terminée</SelectItem>
+                                <SelectItem key="draft">{t('session.status_enum.draft', 'Brouillon')}</SelectItem>
+                                <SelectItem key="scheduled">{t('session.status_enum.scheduled', 'Planifiée')}</SelectItem>
+                                <SelectItem key="completed">{t('session.status_enum.completed', 'Terminée')}</SelectItem>
                             </Select>
                         </CardBody>
                     </Card>
 
                     <Card>
                         <CardHeader className="font-bold bg-default-50 flex justify-between">
-                            <span>Exercices</span>
+                            <span>{t('exercises.title', 'Exercices')}</span>
                             <Button size="sm" color="primary" onPress={() => setIsExerciseSelectorOpen(true)}>
-                                Ajouter des exercices
+                                {t('session.add_exercises', 'Ajouter des exercices')}
                             </Button>
                         </CardHeader>
                         <CardBody className="flex flex-col gap-4">
                             {sessionExercises.length === 0 ? (
                                 <p className="text-center text-default-500 py-8">
-                                    Aucun exercice ajouté.
+                                    {t('session.no_exercises', 'Aucun exercice ajouté.')}
                                 </p>
                             ) : (
                                 sessionExercises.map((se, index) => (
@@ -215,7 +215,7 @@ export default function SessionEditPage() {
                                                     <Input
                                                         type="number"
                                                         size="sm"
-                                                        label="Durée"
+                                                        label={t('duration', 'Durée')}
                                                         labelPlacement="outside-left"
                                                         value={se.duration.toString()}
                                                         onValueChange={(v) => handleUpdateExerciseDuration(index, parseInt(v) || 0)}
@@ -223,10 +223,10 @@ export default function SessionEditPage() {
                                                         className="w-28"
                                                     />
                                                 </div>
-                                                <div className="flex flex-col flex-grow">
-                                                    <span className="font-bold">{se.exercise?.title || 'Exercice'}</span>
+                                                <div className="flex flex-col grow">
+                                                    <span className="font-bold">{se.exercise?.title || t('exercise.untitled', 'Exercice')}</span>
                                                     <div className="flex gap-2">
-                                                        {se.exercise?.category && <Chip size="sm" variant="flat">{se.exercise.category}</Chip>}
+                                                        {se.exercise?.category && <Chip size="sm" variant="flat">{t(`enums.category.${se.exercise.category}`)}</Chip>}
                                                     </div>
                                                 </div>
                                                 <Button isIconOnly color="danger" variant="light" onPress={() => handleRemoveExercise(index)}>
@@ -248,10 +248,10 @@ export default function SessionEditPage() {
 
                     <div className="flex justify-end gap-2 mt-4">
                         <Button type="button" variant="light" onClick={() => navigate('/sessions')}>
-                            Annuler
+                            {t('cancel', 'Annuler')}
                         </Button>
                         <Button type="submit" color="primary" isLoading={isSaving}>
-                            {isEditing ? 'Mettre à jour' : 'Créer la séance'}
+                            {isEditing ? t('update', 'Mettre à jour') : t('session.create_button', 'Créer la séance')}
                         </Button>
                     </div>
                 </form>

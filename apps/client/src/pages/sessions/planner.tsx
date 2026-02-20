@@ -21,11 +21,11 @@ export default function SessionPlannerPage() {
             <section className="flex flex-col gap-6 w-full px-4">
 
                 {/* Hero - Mes Séances */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-600/15 via-rose-500/10 to-orange-500/10 border border-red-500/20">
+                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-red-600/15 via-rose-500/10 to-orange-500/10 border border-red-500/20">
                     {/* Grass stripes - standard green */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
                     {/* Field center line + circle */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
 
                     {/* Football clock - top right */}
@@ -40,7 +40,7 @@ export default function SessionPlannerPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5M9 12h1.5m3 0h1.5m-3 3h1.5m-1.5 3h1.5" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-rose-600">
+                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-red-500 to-rose-600">
                                 {t('sessions.title')}
                             </h1>
                         </div>
@@ -56,7 +56,7 @@ export default function SessionPlannerPage() {
                                 variant={view === 'sessions' ? "shadow" : "light"}
                                 onPress={() => setView('sessions')}
                                 size="lg"
-                                className={view === 'sessions' ? "font-bold text-white bg-gradient-to-r from-[#17c964] to-[#12a150]" : ""}
+                                className={view === 'sessions' ? "font-bold text-white bg-linear-to-r from-[#17c964] to-[#12a150]" : ""}
                                 startContent={
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5M9 12h1.5m3 0h1.5m-3 3h1.5m-1.5 3h1.5" />
@@ -70,7 +70,7 @@ export default function SessionPlannerPage() {
                                 variant={view === 'matches' ? "shadow" : "light"}
                                 onPress={() => setView('matches')}
                                 size="lg"
-                                className={view === 'matches' ? "font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500" : ""}
+                                className={view === 'matches' ? "font-bold text-white bg-linear-to-r from-orange-500 to-amber-500" : ""}
                                 startContent={
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m11.372-5.362c.962-.203 1.934-.377 2.916-.52M19.5 4.5c.125.163.233.332.322.508M19.5 4.5v.243a12.98 12.98 0 0 1-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35" />
