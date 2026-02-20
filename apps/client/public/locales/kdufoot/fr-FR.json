@@ -29,7 +29,7 @@
         "user-details": "Nom : {{name}}\nIdentifiant : {{nickname}}\nEmail : {{email}}\nID : {{sub}}"
     },
     "brand": {
-        "name": "KduFoot",
+        "name": "KduFoot.com",
         "slogan": "Football Intelligent"
     },
     "homePage": {
@@ -40,7 +40,7 @@
         },
         "buttons": {
             "exercises": "Analyser une vidéo",
-            "sessions": "Trouver un match amical"
+            "sessions": "Trouver un match / tournoi"
         },
         "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics. Maintenant avec support pour les tournois !",
         "about": {
@@ -102,7 +102,7 @@
         "empty_matches": "Aucun match favori",
         "empty_matches_desc": "Vos matchs likés apparaîtront ici.",
         "discover_exercises": "Découvrir les exercices",
-        "find_matches": "Trouver un match amical"
+        "find_matches": "Trouver un match / tournoi"
     },
     "myExercises": "Mes exercices",
     "mySessions": "Mes Séances",

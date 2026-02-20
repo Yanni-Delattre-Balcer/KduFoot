@@ -43,14 +43,15 @@ import { availableLanguages } from "@/i18n";
 export const Navbar = () => {
   const { t } = useTranslation();
   const getNavItemClass = (href: string) => {
-    if (href === '/') return "bg-linear-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent font-bold";
-    if (href === '/exercises') return "bg-linear-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent font-bold";
-    if (href === '/training') return "bg-linear-to-r from-[#17c964] to-[#12a150] bg-clip-text text-transparent font-bold";
-    if (href === '/favorites') return "bg-linear-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent font-bold";
-    if (href === '/sessions') return "bg-linear-to-r from-red-500 to-rose-600 bg-clip-text text-transparent font-bold";
-    if (href === '/matches') return "bg-linear-to-r from-orange-500 to-yellow-400 bg-clip-text text-transparent font-bold";
-    if (href === '/pricing') return "bg-linear-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent font-bold";
-    return "text-foreground font-medium";
+    const base = "bg-clip-text text-transparent font-bold hover:scale-105 transition-transform";
+    if (href === '/') return `${base} bg-linear-to-r from-cyan-400 to-teal-400`;
+    if (href === '/exercises') return `${base} bg-linear-to-r from-blue-500 to-violet-500`;
+    if (href === '/training') return `${base} bg-linear-to-r from-emerald-500 to-green-600`;
+    if (href === '/favorites') return `${base} bg-linear-to-r from-pink-500 to-rose-500`;
+    if (href === '/sessions') return `${base} bg-linear-to-r from-red-500 to-rose-600`;
+    if (href === '/matches') return `${base} bg-linear-to-r from-orange-500 to-yellow-400`;
+    if (href === '/pricing') return `${base} bg-linear-to-r from-fuchsia-600 to-purple-600`;
+    return "text-foreground font-bold";
   };
 
   return (
@@ -65,12 +66,14 @@ export const Navbar = () => {
       <NavbarContent className="basis-0 grow" justify="start">
         <NavbarBrand className="gap-3 max-w-fit">
           <LinkUniversal
-            className="flex justify-start items-center gap-1"
+            className="flex justify-start items-center gap-2"
             color="foreground"
             href="/"
           >
-            <Logo />
-            <p className="font-bold bg-linear-to-r from-orange-500 via-yellow-400 to-fuchsia-600 bg-clip-text text-transparent">{t("brand.name")}</p>
+            <Logo size={44} />
+            <p className="font-bold text-xl md:text-2xl bg-[linear-gradient(to_right,#1e3a8a,#06b6d4,#14532d,#22c55e,#eab308,#f97316,#7f1d1d,#ef4444,#db2777,#9333ea,#581c87)] bg-clip-text text-transparent">
+              {t("brand.name")}
+            </p>
           </LinkUniversal>
         </NavbarBrand>
       </NavbarContent>

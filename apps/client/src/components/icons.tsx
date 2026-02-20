@@ -32,10 +32,25 @@ export const Logo: React.FC<IconSvgProps> = ({
     width={size || height}
     {...props}
   >
+    <defs>
+      <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#1e3a8a" /> {/* Blue Dark */}
+        <stop offset="10%" stopColor="#06b6d4" /> {/* Cyan */}
+        <stop offset="20%" stopColor="#14532d" /> {/* Green Dark */}
+        <stop offset="30%" stopColor="#22c55e" /> {/* Green Light */}
+        <stop offset="40%" stopColor="#eab308" /> {/* Yellow */}
+        <stop offset="50%" stopColor="#f97316" /> {/* Orange */}
+        <stop offset="60%" stopColor="#7f1d1d" /> {/* Red Dark */}
+        <stop offset="70%" stopColor="#ef4444" /> {/* Red */}
+        <stop offset="80%" stopColor="#db2777" /> {/* Pink */}
+        <stop offset="90%" stopColor="#9333ea" /> {/* Purple Light */}
+        <stop offset="100%" stopColor="#581c87" /> {/* Purple Dark */}
+      </linearGradient>
+    </defs>
     <path
       clipRule="evenodd"
       d="M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z"
-      fill="currentColor"
+      fill="url(#logo-gradient)"
       fillRule="evenodd"
     />
   </svg>

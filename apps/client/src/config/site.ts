@@ -13,7 +13,7 @@ export const showVideoAnalysis =
     window.location.hostname.endsWith(".local") ||
     window.location.hostname.includes("192.168."));
 
-const videoAnalysisRoutes = ["/exercises", "/training"];
+const videoAnalysisRoutes = ["/exercises", "/training", "/pricing"];
 
 export const siteConfig = () => {
   const allNavItems = [
