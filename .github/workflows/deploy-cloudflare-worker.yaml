@@ -22,6 +22,7 @@ on:
       - V2
     paths:
       - apps/cloudflare-worker/**
+      - apps/client/**
       - yarn.lock
       - .github/workflows/deploy-cloudflare-worker.yaml
 
