@@ -38,6 +38,7 @@ import MatchesPage from "@/pages/matches";
 import FavoritesPage from "@/pages/favorites";
 import TrainingPage from "@/pages/training";
 import { TrainingProvider } from "@/contexts/training-context";
+import { showVideoAnalysis } from "@/config/site";
 
 function App() {
   const { isLoading } = useAuth();
@@ -66,18 +67,24 @@ function App() {
           />
           <Route element={<AboutPage />} path="/about" />
           <Route element={<PageNotFound />} path="*" />
+          {showVideoAnalysis && (
+          <>
           <Route
             element={<AuthenticationGuard component={ExercisesPage} />}
             path="/exercises"
           />
           <Route
-            element={<AuthenticationGuard component={FavoritesPage} />}
-            path="/favorites"
-          />
-          <Route
             element={<AuthenticationGuard component={TrainingPage} />}
             path="/training"
           />
+          </>
+          )}
+          <Route
+            element={<AuthenticationGuard component={FavoritesPage} />}
+            path="/favorites"
+          />
+          {showVideoAnalysis && (
+          <>
           <Route
             element={<AuthenticationGuard component={ExerciseEditPage} />}
             path="/exercises/new"
@@ -90,6 +97,8 @@ function App() {
             element={<AuthenticationGuard component={ExerciseDetailsPage} />}
             path="/exercises/:id"
           />
+          </>
+          )}
           <Route
             element={<AuthenticationGuard component={SessionPlannerPage} />}
             path="/sessions"

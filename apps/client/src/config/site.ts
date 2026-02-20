@@ -6,70 +6,52 @@
 export type SiteConfig = typeof siteConfig;
 import i18next from "../i18n";
 
-export const siteConfig = () => ({
+export const showVideoAnalysis = import.meta.env.DEV;
+
+const videoAnalysisRoutes = ["/exercises", "/training"];
+
+export const siteConfig = () => {
+  const allNavItems = [
+    {
+      label: i18next.t("nav.home"),
+      href: "/",
+    },
+    {
+      label: i18next.t("nav.exercises"),
+      href: "/exercises",
+    },
+    {
+      label: i18next.t("nav.training"),
+      href: "/training",
+    },
+    {
+      label: i18next.t("nav.favorites"),
+      href: "/favorites",
+    },
+    {
+      label: i18next.t("nav.sessions"),
+      href: "/sessions",
+    },
+    {
+      label: i18next.t("nav.matches"),
+      href: "/matches",
+    },
+    {
+      label: i18next.t("nav.pricing"),
+      href: "/pricing",
+    },
+  ];
+
+  const filteredNavItems = showVideoAnalysis
+    ? allNavItems
+    : allNavItems.filter((item) => !videoAnalysisRoutes.includes(item.href));
+
+  return ({
   name: "KduFoot",
   needCookieConsent: true,
   description: i18next.t("site.description"),
-  navItems: [
-    {
-      label: i18next.t("nav.home"),
-      href: "/",
-    },
-    {
-      label: i18next.t("nav.exercises"),
-      href: "/exercises",
-    },
-    {
-      label: i18next.t("nav.training"),
-      href: "/training",
-    },
-    {
-      label: i18next.t("nav.favorites"),
-      href: "/favorites",
-    },
-    {
-      label: i18next.t("nav.sessions"),
-      href: "/sessions",
-    },
-    {
-      label: i18next.t("nav.matches"),
-      href: "/matches",
-    },
-    {
-      label: i18next.t("nav.pricing"),
-      href: "/pricing",
-    },
-  ],
-  navMenuItems: [
-    {
-      label: i18next.t("nav.home"),
-      href: "/",
-    },
-    {
-      label: i18next.t("nav.exercises"),
-      href: "/exercises",
-    },
-    {
-      label: i18next.t("nav.training"),
-      href: "/training",
-    },
-    {
-      label: i18next.t("nav.favorites"),
-      href: "/favorites",
-    },
-    {
-      label: i18next.t("nav.sessions"),
-      href: "/sessions",
-    },
-    {
-      label: i18next.t("nav.matches"),
-      href: "/matches",
-    },
-    {
-      label: i18next.t("nav.pricing"),
-      href: "/pricing",
-    },
-  ],
+  navItems: filteredNavItems,
+  navMenuItems: filteredNavItems,
   links: {
     github: "https://github.com/your-repo/kdufoot",
     twitter: "https://twitter.com/kdufoot",
@@ -77,3 +59,4 @@ export const siteConfig = () => ({
     discord: "https://discord.gg/kdufoot",
   },
 });
+};

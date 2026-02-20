@@ -10,6 +10,7 @@ import { useTranslation, Trans } from "react-i18next";
 
 import DefaultLayout from "../layouts/default";
 import FootballClock from "../components/football-clock";
+import { showVideoAnalysis } from "../config/site";
 
 export default function IndexPage() {
   const { t } = useTranslation(["kdufoot", "base"]);
@@ -40,6 +41,7 @@ export default function IndexPage() {
                 {t("homePage.description")}
               </p>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
+                {showVideoAnalysis && (
                 <Link
                   className={`${buttonStyles({
                     radius: "full",
@@ -50,6 +52,7 @@ export default function IndexPage() {
                 >
                   {t("homePage.buttons.exercises")}
                 </Link>
+                )}
                 <Link
                   className={`${buttonStyles({
                     radius: "full",
@@ -102,6 +105,7 @@ export default function IndexPage() {
 
         {/* 2 Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {showVideoAnalysis && (
           <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-primary/5 transition-all">
             <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
@@ -114,6 +118,7 @@ export default function IndexPage() {
               <p className="text-xs text-default-500">{t("homePage.cards.video.description")}</p>
             </CardBody>
           </Card>
+          )}
 
           <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-orange-500/5 transition-all">
             <div className="absolute inset-0 bg-linear-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
