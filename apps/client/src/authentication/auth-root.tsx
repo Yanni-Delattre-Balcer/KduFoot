@@ -46,6 +46,8 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
         }}
         clientId={import.meta.env.AUTH0_CLIENT_ID}
         domain={import.meta.env.AUTH0_DOMAIN}
+        cacheLocation="localstorage"
+        useRefreshTokens={true}
         onRedirectCallback={(appState) => {
           // Redirect to the intended page or current path
           window.history.replaceState(

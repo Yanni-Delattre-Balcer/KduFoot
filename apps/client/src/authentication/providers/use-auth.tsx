@@ -86,7 +86,11 @@ export const withAuthentication = (
 
     // If not authenticated, redirect to login
     if (!auth.isAuthenticated) {
-      auth.login();
+      auth.login({
+        appState: {
+          returnTo: window.location.pathname,
+        },
+      });
 
       return options?.onRedirecting ? options.onRedirecting() : null;
     }
