@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "packageManager": "yarn@4.6.0",
+  "packageManager": "npm@11.6.2",
   "workspaces": [
     "apps/*"
   ],
