@@ -38,7 +38,11 @@ export default function IndexPage() {
                 <span className="text-foreground text-2xl lg:text-3xl">{t("homePage.title.highlight")}</span>
               </h1>
               <p className="text-default-500 text-base">
-                {t("homePage.description")}
+                {showVideoAnalysis ? (
+                  t("homePage.description")
+                ) : (
+                  "Kdufoot vous aide à trouver des matchs amicaux autour de chez vous en quelques clics."
+                )}
               </p>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                 {showVideoAnalysis && (
@@ -74,7 +78,6 @@ export default function IndexPage() {
         </div>
 
         {/* À propos - full width */}
-        {/* À propos - full width */}
         <Card className="border border-default-200 overflow-hidden w-full">
           <CardBody className="p-5 flex flex-col gap-2">
             <h2 className="text-lg font-bold text-foreground">{t("homePage.about.title")}</h2>
@@ -100,7 +103,7 @@ export default function IndexPage() {
               </p>
             ) : (
               <p className="text-base text-default-500 leading-relaxed">
-                ⚽ <strong className="text-orange-500">{t("homePage.buttons.sessions")}</strong> — Trouvez un adversaire autour de chez vous en quelques clics.
+                ⚽ <strong className="text-orange-500">Matchs amicaux</strong> — Trouvez un adversaire autour de chez vous en quelques clics.
               </p>
             )}
             <p className="text-sm text-default-400 italic">
