@@ -51,10 +51,6 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            .yarn/cache
-            .yarn/unplugged
-            .yarn/build-state.yml
-            .yarn/install-state.gz
             node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
@@ -70,8 +66,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          corepack enable
-          yarn install --immutable
+          npm ci
 
       - name: Create .env file
         run: |
