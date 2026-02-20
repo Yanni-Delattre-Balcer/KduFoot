@@ -28,6 +28,7 @@ import {
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 import { clsx } from "@heroui/shared-utils";
+import { useTranslation } from "react-i18next";
 
 
 import { I18nIcon, LanguageSwitch } from "./language-switch";
@@ -40,6 +41,7 @@ import { Logo } from "@/components/icons";
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
+  const { t } = useTranslation();
   console.log("Navbar rendering");
   return (
     <HeroUINavbar maxWidth="full" position="sticky">
@@ -51,7 +53,7 @@ export const Navbar = () => {
             href="/"
           >
             <Logo />
-            <p className="font-bold text-inherit bg-[linear-gradient(to_right,#3b82f6,#22c55e,#ec4899,#ef4444,#f97316,#eab308)] bg-clip-text text-transparent">KduFoot</p>
+            <p className="font-bold text-inherit bg-[linear-gradient(to_right,#3b82f6,#22c55e,#ec4899,#ef4444,#f97316,#eab308)] bg-clip-text text-transparent">{t("brand.name")}</p>
           </LinkUniversal>
         </NavbarBrand>
       </NavbarContent>

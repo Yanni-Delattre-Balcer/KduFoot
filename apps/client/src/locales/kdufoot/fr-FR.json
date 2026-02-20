@@ -12,14 +12,24 @@
         "pricing": "Tarifs",
         "profile": "Profil",
         "admin": "Administration",
-        "userPrefix": "Utilisateur :"
+        "userPrefix": "Utilisateur :",
+        "userDropdown": {
+            "connectedAs": "Connecté en tant que",
+            "tokenStatus": "Statut du Token",
+            "expiresIn": "Expire dans :",
+            "noExpiry": "Aucune expiration trouvée",
+            "accessToken": "Access Token (Bearer)",
+            "loading": "Chargement..."
+        }
     },
     "auth": {
         "logout": "Se déconnecter",
         "account": "Mon compte",
-        "login": "Connexion"
+        "login": "Connexion",
+        "user-details": "Nom : {{name}}\nIdentifiant : {{nickname}}\nEmail : {{email}}\nID : {{sub}}"
     },
     "brand": {
+        "name": "KduFoot",
         "slogan": "Football Intelligent"
     },
     "homePage": {
@@ -49,6 +59,9 @@
                 "description": "Publiez ou recherchez des matchs amicaux. Filtrez par catégorie, niveau, distance et format."
             }
         }
+    },
+    "footer": {
+        "poweredBy": "Propulsé par"
     },
     "log-out-someone": "Déconnexion {{name}}",
     "log-in": "Connexion",
@@ -285,6 +298,7 @@
         "plans": {
             "discovery": {
                 "name": "Découverte",
+                "price": "1€",
                 "cta": "Essayer pour 1€",
                 "features": {
                     "0": "1 heure d'analyse vidéo",
@@ -295,6 +309,7 @@
             },
             "starter": {
                 "name": "Espoir",
+                "price": "19€",
                 "cta": "Choisir Espoir",
                 "features": {
                     "0": "10 heures d'analyse vidéo",
@@ -305,6 +320,7 @@
             },
             "pro": {
                 "name": "Pro",
+                "price": "39€",
                 "cta": "Choisir Pro",
                 "popular": "Populaire",
                 "features": {
@@ -316,6 +332,7 @@
             },
             "elite": {
                 "name": "Élite",
+                "price": "59€",
                 "cta": "Devenir Élite",
                 "features": {
                     "0": "30 heures d'analyse vidéo",

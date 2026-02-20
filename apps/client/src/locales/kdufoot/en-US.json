@@ -12,14 +12,24 @@
         "pricing": "Pricing",
         "profile": "Profile",
         "admin": "Administration",
-        "userPrefix": "User :"
+        "userPrefix": "User :",
+        "userDropdown": {
+            "connectedAs": "Connected as",
+            "tokenStatus": "Token Status",
+            "expiresIn": "Expires in:",
+            "noExpiry": "No expiry found",
+            "accessToken": "Access Token (Bearer)",
+            "loading": "Loading..."
+        }
     },
     "auth": {
         "logout": "Log out",
         "account": "My Account",
-        "login": "Log in"
+        "login": "Log in",
+        "user-details": "Name: {{name}}\nNickname: {{nickname}}\nEmail: {{email}}\nID: {{sub}}"
     },
     "brand": {
+        "name": "KduFoot",
         "slogan": "Smart Football"
     },
     "homePage": {
@@ -36,7 +46,7 @@
         "about": {
             "title": "👋 About",
             "intro": "<0>Yanni</0>, cybersecurity student, majoring in <1>Networks & Telecommunications in Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
-            "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use exercises.<br/>⚽ <1>Friendly Matches</1> — Find an opponent near you in just a few clicks.",
+            "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use exercises.<br/>⚽ <1>Friendly Matches</H1> — Find an opponent near you in just a few clicks.",
             "footer": "Less searching, more field time."
         },
         "cards": {
@@ -49,6 +59,9 @@
                 "description": "Post or search for friendly matches. Filter by category, level, distance, and format."
             }
         }
+    },
+    "footer": {
+        "poweredBy": "Powered by"
     },
     "log-out-someone": "Log out {{name}}",
     "log-in": "Log in",
@@ -285,6 +298,7 @@
         "plans": {
             "discovery": {
                 "name": "Discovery",
+                "price": "1€",
                 "cta": "Try for 1€",
                 "features": {
                     "0": "1 hour of video analysis",
@@ -295,6 +309,7 @@
             },
             "starter": {
                 "name": "Rising Star",
+                "price": "19€",
                 "cta": "Choose Rising Star",
                 "features": {
                     "0": "10 hours of video analysis",
@@ -305,6 +320,7 @@
             },
             "pro": {
                 "name": "Pro",
+                "price": "39€",
                 "cta": "Choose Pro",
                 "popular": "Popular",
                 "features": {
@@ -316,6 +332,7 @@
             },
             "elite": {
                 "name": "Elite",
+                "price": "59€",
                 "cta": "Become Elite",
                 "features": {
                     "0": "30 hours of video analysis",

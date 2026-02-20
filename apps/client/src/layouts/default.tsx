@@ -85,31 +85,31 @@ export default function DefaultLayout({
               <DropdownMenu aria-label="Token Details" className="w-[340px]">
                 <DropdownItem key="user-info" isReadOnly className="opacity-100 cursor-default">
                   <div className="flex flex-col gap-1 p-2">
-                    <p className="font-bold text-primary">Connected as</p>
+                    <p className="font-bold text-primary">{t("nav.userDropdown.connectedAs")}</p>
                     <p className="text-sm font-semibold">{user.email}</p>
                     <p className="text-xs text-default-500 font-mono mt-1 break-all">ID: {user.sub}</p>
                   </div>
                 </DropdownItem>
                 <DropdownItem key="token-status" isReadOnly className="opacity-100 cursor-default border-t border-default-100">
                   <div className="flex flex-col gap-1 p-2">
-                    <p className="font-bold text-success">Token Status</p>
+                    <p className="font-bold text-success">{t("nav.userDropdown.tokenStatus")}</p>
                     {tokenPayload?.exp ? (
                       <div className="flex justify-between items-center text-xs">
-                        <span>Expires in:</span>
+                        <span>{t("nav.userDropdown.expiresIn")}</span>
                         <span className="font-mono text-warning">
                           {Math.max(0, Math.floor(tokenPayload.exp - Date.now() / 1000))}s
                         </span>
                       </div>
                     ) : (
-                      <p className="text-xs text-danger">No expiry found</p>
+                      <p className="text-xs text-danger">{t("nav.userDropdown.noExpiry")}</p>
                     )}
                   </div>
                 </DropdownItem>
                 <DropdownItem key="copy-token" variant="flat">
                   <div className="flex flex-col gap-2 p-1">
-                    <p className="text-xs font-bold text-default-400">Access Token (Bearer)</p>
+                    <p className="text-xs font-bold text-default-400">{t("nav.userDropdown.accessToken")}</p>
                     <Snippet variant="bordered" size="sm" symbol="" className="w-full">
-                      {accessToken || "Loading..."}
+                      {accessToken || t("nav.userDropdown.loading")}
                     </Snippet>
                   </div>
                 </DropdownItem>
@@ -124,7 +124,7 @@ export default function DefaultLayout({
           title="heroui.com homepage"
         >
           <span className="text-default-600">
-            <Trans i18nKey="powered-by">Powered by</Trans>
+            {t("footer.poweredBy")}
           </span>
           <p className="text-primary font-bold">HeroUI</p>
         </Link>

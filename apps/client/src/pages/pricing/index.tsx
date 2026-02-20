@@ -11,7 +11,7 @@ export default function PricingPage() {
   const plans = [
     {
       key: "discovery",
-      price: "1€",
+      price: t("pricing.plans.discovery.price"),
       oneTime: true,
       color: "default" as const,
       gradient: "from-blue-500/15 to-cyan-500/5",
@@ -19,14 +19,14 @@ export default function PricingPage() {
     },
     {
       key: "starter",
-      price: "19€",
+      price: t("pricing.plans.starter.price"),
       color: "primary" as const,
       gradient: "from-green-500/15 to-emerald-500/5",
       featuresCount: 4,
     },
     {
       key: "pro",
-      price: "39€",
+      price: t("pricing.plans.pro.price"),
       color: "secondary" as const,
       gradient: "from-orange-500/20 to-red-500/10",
       featuresCount: 4,
@@ -34,7 +34,7 @@ export default function PricingPage() {
     },
     {
       key: "elite",
-      price: "59€",
+      price: t("pricing.plans.elite.price"),
       color: "warning" as const,
       gradient: "from-yellow-500/25 to-amber-500/15",
       featuresCount: 4,

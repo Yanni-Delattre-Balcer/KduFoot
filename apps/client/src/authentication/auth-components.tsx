@@ -135,7 +135,12 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
   return (
     (isAuthenticated || showButtonIfNotAuthenticated) && (
       <Tooltip
-        content={`${user?.name || ""}\n${user?.nickname || ""}\n${user?.email || ""}\n${user?.sub || ""} `}
+        content={t("auth.user-details", {
+          name: user?.name || "",
+          nickname: user?.nickname || "",
+          email: user?.email || "",
+          sub: user?.sub || "",
+        })}
         delay={750}
       >
         <Button
