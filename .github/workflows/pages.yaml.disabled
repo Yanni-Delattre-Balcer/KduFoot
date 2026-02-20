@@ -44,15 +44,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
 
       - name: Cache Yarn dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: |
             .yarn/cache
@@ -65,7 +65,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Cache Turborepo
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}

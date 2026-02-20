@@ -40,15 +40,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
 
       - name: Cache Yarn dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: |
             .yarn/cache
@@ -61,7 +61,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Cache Turborepo
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
@@ -106,7 +106,9 @@ jobs:
           cat wrangler.jsonc.3 | sed 's|"your-database-id"|"'"${CLOUDFLARE_DATABASE_ID}"'"|' > wrangler.jsonc
           cat wrangler.jsonc
       - name: Build reproductible
-        run: ./build-reproductible-dev.sh
+        run: |
+          chmod +x ./build-reproductible-dev.sh
+          ./build-reproductible-dev.sh
 
       - name: Publish to Cloudflare Pages
         uses: sctg-development/pages-action-without-url@main
