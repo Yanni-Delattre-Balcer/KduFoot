@@ -117,7 +117,9 @@
     },
     "match": {
         "create": "Create a friendly match",
+        "create_tournament": "Create a friendly tournament",
         "find": "Find a friendly match",
+        "find_tournament": "Find a friendly tournament",
         "format": "Format",
         "venue": "Venue",
         "date": "Date",
@@ -176,6 +178,7 @@
             "U15": "U15",
             "U17": "U17",
             "U19": "U19",
+            "U20": "U20",
             "Séniors": "Seniors",
             "Vétérans": "Veterans"
         },
@@ -207,6 +210,8 @@
     "matchesPage": {
         "description_find": "Browse available friendly matches near you. Use filters to refine your search and find the perfect opponent.",
         "description_create": "Post your friendly match announcement by filling in as many details as possible to attract the right clubs.",
+        "description_find_tournament": "Discover friendly tournaments organized in your area. Register your team and participate in friendly competitions.",
+        "description_create_tournament": "Organize your own friendly tournament! Post the details, categories, and invite other clubs to join you.",
         "filters": {
             "title": "Filters",
             "active": "active",
@@ -283,6 +288,26 @@
             "date_past": "⚠️ INVALID DATE\n\nYou cannot create a match in the past.",
             "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future."
         }
+    },
+    "tournamentForm": {
+        "title": "Create a Friendly Tournament",
+        "subtitle": "Organize a competition and invite teams.",
+        "labels": {
+            "name": "Tournament Name",
+            "name_placeholder": "Ex: KduFoot Summer Cup",
+            "max_teams": "Max Teams",
+            "fee": "Registration Fee (€)",
+            "fee_placeholder": "0 for free",
+            "date": "Start Date",
+            "time": "Meeting Time",
+            "end_time": "End Time",
+            "contact_email": "Contact Email",
+            "notes": "Tournament Information",
+            "notes_placeholder": "Rules, rewards, catering...",
+            "publish": "Publish Tournament"
+        },
+        "link_club": "Club link required to organize",
+        "contact_title": "Contact & Extra Info"
     },
     "error": {
         "loading_sessions": "Error loading training sessions",

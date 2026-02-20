@@ -229,15 +229,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-appearance-in">
-            <Card className="shadow-medium">
-                <CardHeader className="flex gap-3 bg-linear-to-r from-default-100 to-default-50 px-6 py-4">
-                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            <Card className="shadow-medium border-yellow-500/20 bg-yellow-500/5">
+                <CardHeader className="flex gap-3 bg-linear-to-r from-yellow-500/10 to-transparent px-6 py-4">
+                    <div className="p-2 bg-yellow-500/20 rounded-lg text-yellow-600">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                             <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" />
                         </svg>
                     </div>
                     <div className="flex flex-col">
-                        <p className="text-md font-bold text-default-700">{t('matchForm.title')}</p>
+                        <p className="text-md font-bold text-yellow-700">{t('matchForm.title')}</p>
                         <p className="text-small text-default-500">{t('matchForm.subtitle')}</p>
                     </div>
                 </CardHeader>
@@ -366,49 +366,55 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         ))}
                     </Select>
 
-                    {/* Club Linking Section */}
+                    {/* Row 3: SIRET (Left) and Address Details (Right) */}
                     <div className="md:col-span-2">
                         {!user?.club_id ? (
-                            <div className="p-6 bg-warning-50 border border-warning-200 rounded-xl flex flex-col items-center text-center gap-6">
-                                <div className="flex flex-col items-center gap-3 max-w-2xl">
-                                    <div className="p-3 bg-warning-100 rounded-full text-warning-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                            <div className="p-5 bg-warning-50 border-2 border-warning-200 rounded-2xl flex flex-col gap-5 shadow-sm">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-2.5 bg-warning-100 rounded-full text-warning-600 shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                                         </svg>
                                     </div>
-                                    <div>
-                                        <h4 className="font-bold text-warning-900 text-xl">{t('matchForm.link_club.title')}</h4>
-                                        <div className="text-base text-warning-800 mt-2 space-y-1">
-                                            <p><span className="font-bold">Attention :</span> {t('matchForm.link_club.warning_siret')}</p>
+                                    <div className="flex flex-col gap-2">
+                                        <h4 className="text-sm md:text-base font-black text-warning-900 uppercase tracking-tighter">
+                                            {t('matchForm.link_club.title')}
+                                        </h4>
+                                        <div className="text-[12px] md:text-[14px] text-warning-800 space-y-2 font-bold leading-snug">
+                                            <p className="underline decoration-2 text-warning-900">{t('matchForm.link_club.warning_siret')}</p>
                                             <p>{t('matchForm.link_club.warning_auto')}</p>
-                                            <p>{t('matchForm.link_club.warning_final')}</p>
+                                            <p className="text-warning-950 font-black">{t('matchForm.link_club.warning_final')}</p>
+                                            <p className="italic opacity-90 text-[11px] md:text-[13px]">{t('matchForm.link_club.warning_support')}</p>
+                                            <p className="border-t border-warning-200/50 pt-2 text-warning-950">{t('matchForm.link_club.warning_search')}</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col sm:flex-row gap-3 items-center w-full justify-center">
+                                <div className="flex flex-col sm:flex-row gap-3 items-center w-full justify-start">
                                     <Input
-                                        label={t('matchForm.labels.siret')}
-                                        placeholder="14 chiffres"
+                                        size="md"
+                                        placeholder="EX: 123 456 789 00012"
                                         value={siret}
                                         onValueChange={setSiret}
-                                        className="max-w-xs"
+                                        className="w-full sm:max-w-xs"
                                         classNames={{
-                                            inputWrapper: "bg-white"
+                                            inputWrapper: "bg-white border-warning-200 shadow-inner h-10 font-bold"
                                         }}
                                     />
-                                    <Button color="warning" variant="solid" onPress={handleLinkClub} isLoading={isLinking} className="font-bold text-warning-900 h-14">
+                                    <Button size="md" color="warning" onPress={handleLinkClub} isLoading={isLinking} className="w-full sm:w-auto font-black px-8 shadow-md h-10 uppercase tracking-tighter">
                                         {t('matchForm.link_club.validate')}
                                     </Button>
                                 </div>
-                                <p className="text-xs text-warning-700 font-medium">
-                                    {t('matchForm.link_club.support')}
-                                </p>
                             </div>
                         ) : (
-                            <div className="p-3 bg-success-50 border border-success-200 rounded-xl flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-success-600"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
-                                    <span className="font-semibold text-success-700">{t('matchForm.link_club.linked')} : {user.club?.name || t('matchesPage.unknown_club')}</span>
+                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex items-center justify-between gap-4 shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-success-100 rounded-full text-success-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-success-900 font-black uppercase tracking-tighter text-[10px]">{t('matchForm.link_club.linked')}</span>
+                                        <span className="text-success-700 font-bold text-lg">{user.club?.name}</span>
+                                    </div>
                                 </div>
                                 {auth0User?.email === 'yannidelattrebalcer.artois@gmail.com' && (
                                     <Button size="sm" color="danger" variant="flat" onPress={async () => {
@@ -423,50 +429,53 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         )}
                     </div>
 
-                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-0 self-start">
+                    <div className="md:col-span-2 flex flex-col gap-3 justify-center">
                         <Input
                             label={t('matchForm.labels.address')}
                             placeholder={t('matchForm.labels.auto_siret')}
                             value={formData.location_address || ''}
-                            className="md:col-span-2"
                             isDisabled
                             classNames={{
-                                inputWrapper: "bg-default-200/70! text-default-500",
-                                label: "text-default-500"
+                                inputWrapper: "bg-default-100! text-default-500",
+                                label: "text-default-500 font-bold"
                             }}
                         />
-                        <Input
-                            label={t('matchForm.labels.zip')}
-                            placeholder={t('matchForm.labels.auto')}
-                            value={formData.location_zip || ''}
-                            isDisabled
-                            classNames={{
-                                inputWrapper: "bg-default-200/70! text-default-500",
-                                label: "text-default-500"
-                            }}
-                        />
-                        <Input
-                            label={t('matchForm.labels.city')}
-                            placeholder={t('matchForm.labels.auto')}
-                            value={formData.location_city || ''}
-                            isDisabled
-                            classNames={{
-                                inputWrapper: "bg-default-200/70! text-default-500",
-                                label: "text-default-500"
-                            }}
-                        />
+                        <div className="grid grid-cols-2 gap-3">
+                            <Input
+                                label={t('matchForm.labels.zip')}
+                                placeholder={t('matchForm.labels.auto')}
+                                value={formData.location_zip || ''}
+                                isDisabled
+                                classNames={{
+                                    inputWrapper: "bg-default-100! text-default-500",
+                                    label: "text-default-500 font-bold"
+                                }}
+                            />
+                            <Input
+                                label={t('matchForm.labels.city')}
+                                placeholder={t('matchForm.labels.auto')}
+                                value={formData.location_city || ''}
+                                isDisabled
+                                classNames={{
+                                    inputWrapper: "bg-default-100! text-default-500",
+                                    label: "text-default-500 font-bold"
+                                }}
+                            />
+                        </div>
+                    </div>
 
-                        {/* Progress Bar centered in the empty space */}
-                        <div className="md:col-span-2 flex flex-col justify-center min-h-[120px] space-y-3">
-                            <p className="text-sm font-bold text-white uppercase tracking-tight text-center">
+                    {/* Row 4: Centered Progress Bar */}
+                    <div className="md:col-span-4 flex flex-col justify-center space-y-3 mt-4">
+                        <div className="w-[64%] mx-auto flex flex-col space-y-3">
+                            <p className="text-sm font-bold text-yellow-700 uppercase tracking-tight text-center">
                                 {t('matchForm.progress')}: {progress}%
                             </p>
-                            <div className="w-full h-4 bg-default-100 rounded-full overflow-hidden p-px border border-white/10 ring-1 ring-white/5 shadow-inner">
+                            <div className="w-full h-4 bg-yellow-500/10 rounded-full overflow-hidden p-px border border-yellow-500/20 ring-1 ring-yellow-500/5 shadow-inner">
                                 <div
-                                    className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(0,255,163,0.4)]"
+                                    className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(234,179,8,0.3)]"
                                     style={{
                                         width: `${progress}%`,
-                                        background: 'linear-gradient(90deg, #006fee 0%, #00d2ff 25%, #00ffa3 50%, #adff2f 75%, #ccff00 100%)',
+                                        background: 'linear-gradient(90deg, #eab308 0%, #fbbf24 50%, #fef3c7 100%)',
                                         backgroundSize: '200% 100%'
                                     }}
                                 />
@@ -510,7 +519,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         {t('matchForm.buttons.cancel')}
                     </Button>
                 )}
-                <Button type="submit" color="primary" isLoading={isSaving} isDisabled={!user?.club_id}>
+                <Button type="submit" color="warning" className="bg-yellow-500 font-bold text-yellow-950" isLoading={isSaving} isDisabled={!user?.club_id}>
                     {initialData ? t('matchForm.buttons.update') : t('matchForm.buttons.create')}
                 </Button>
             </div>

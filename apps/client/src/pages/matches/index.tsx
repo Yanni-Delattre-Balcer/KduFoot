@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import DefaultLayout from '../../layouts/default';
 import { useMatches } from '../../hooks/use-matches';
 import { useUser } from '../../hooks/use-user';
-import MatchForm from '../../components/matches/match-form';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Link } from 'react-router-dom';
@@ -20,9 +19,13 @@ const FORMATS: Format[] = ['11v11', '8v8', '5v5', 'Futsal'];
 const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Indoor'];
 const VENUES: Venue[] = ['Domicile', 'Extérieur', 'Neutre'];
 
+import MatchForm from '@/components/matches/match-form';
+import TournamentForm from '@/components/matches/tournament-form';
+
 export default function MatchesPage() {
     const { t, i18n } = useTranslation();
     const [view, setView] = useState<'find' | 'create'>('find');
+    const [type, setType] = useState<'match' | 'tournament'>('match');
     const [displayMode, setDisplayMode] = useState<'list' | 'calendar'>('list');
     const [calendarMonth, setCalendarMonth] = useState(() => {
         const now = new Date();
@@ -115,13 +118,35 @@ export default function MatchesPage() {
         ? matches.filter(m => m.match_date === selectedDate)
         : matches;
 
+    // UI Configuration based on type
+    const uiConfig = {
+        match: {
+            gradient: "bg-linear-to-br from-orange-500/20 via-yellow-400/15 to-transparent",
+            border: "border-orange-500/20",
+            titleGradient: "from-orange-500 via-yellow-400 to-yellow-400",
+            iconColor: "text-orange-500",
+            title: t('match.title', 'Matchs Amicaux'),
+            desc_find: t('matchesPage.description_find'),
+            desc_create: t('matchesPage.description_create')
+        },
+        tournament: {
+            gradient: "bg-linear-to-br from-yellow-300/15 via-yellow-200/5 to-transparent",
+            border: "border-yellow-400/20",
+            titleGradient: "from-yellow-400 to-yellow-500",
+            iconColor: "text-yellow-500",
+            title: t('matchesPage.title_tournament', 'Tournois Amicaux'),
+            desc_find: t('matchesPage.description_find_tournament'),
+            desc_create: t('matchesPage.description_create_tournament')
+        }
+    }[type];
+
     return (
         <DefaultLayout maxWidth="max-w-full">
             <section className="flex flex-col gap-6 w-full px-4">
 
-                {/* Hero - Matchs */}
-                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-orange-500/15 via-amber-500/10 to-red-500/10 border border-orange-500/20">
-                    {/* Grass stripes - standard green */}
+                {/* Hero - Matchs / Tournois */}
+                <div className={`relative overflow-hidden rounded-3xl ${uiConfig.gradient} border ${uiConfig.border}`}>
+                    {/* Grass stripes */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
                     {/* Field center line + circle */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
@@ -134,66 +159,95 @@ export default function MatchesPage() {
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-2xl bg-orange-500/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-orange-500">
+                            <div className={`p-3 rounded-2xl ${type === 'match' ? 'bg-orange-500/10' : 'bg-yellow-500/10'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-8 h-8 ${uiConfig.iconColor}`}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-orange-500 to-amber-500">
-                                {t('matches.title', 'Matchs Amicaux')}
+                            <h1 className={`text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r ${uiConfig.titleGradient}`}>
+                                {uiConfig.title}
                             </h1>
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
-                            {view === 'find'
-                                ? t('matchesPage.description_find')
-                                : t('matchesPage.description_create')}
+                            {view === 'find' ? uiConfig.desc_find : uiConfig.desc_create}
                         </p>
 
-                        <div className="flex flex-wrap justify-center gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
-                            <Button
-                                color={view === 'find' ? "warning" : "default"}
-                                variant={view === 'find' ? "shadow" : "light"}
-                                onPress={() => setView('find')}
-                                size="lg"
-                                className={view === 'find' ? "font-bold" : ""}
-                                startContent={
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                    </svg>
-                                }
-                            >
-                                {t('match.find')}
-                            </Button>
-                            <Button
-                                color={view === 'create' ? "warning" : "default"}
-                                variant={view === 'create' ? "shadow" : "light"}
-                                onPress={() => setView('create')}
-                                size="lg"
-                                className={view === 'create' ? "font-bold" : ""}
-                                startContent={
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                    </svg>
-                                }
-                            >
-                                {t('match.create')}
-                            </Button>
+                        <div className="flex flex-col gap-4 items-center">
+                            {/* Primary Selector: Match vs Tournament */}
+                            <div className="flex gap-2 p-1 rounded-2xl bg-default-200/30 backdrop-blur-sm border border-white/5">
+                                <Button
+                                    size="sm"
+                                    color={type === 'match' ? "warning" : "default"}
+                                    variant={type === 'match' ? "solid" : "light"}
+                                    onPress={() => setType('match')}
+                                    className={type === 'match' ? "font-bold text-white shadow-lg shadow-orange-500/40 bg-linear-to-r from-orange-500 to-yellow-500" : ""}
+                                >
+                                    {t('match.tab_matches', 'Matchs')}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    color={type === 'tournament' ? "default" : "default"}
+                                    variant={type === 'tournament' ? "solid" : "light"}
+                                    onPress={() => setType('tournament')}
+                                    className={type === 'tournament' ? "font-bold text-yellow-900 shadow-lg shadow-yellow-500/20 bg-yellow-400" : ""}
+                                >
+                                    {t('match.tab_tournaments', 'Tournois')}
+                                </Button>
+                            </div>
+
+                            {/* Secondary Selector: Find vs Create */}
+                            <div className="flex flex-wrap justify-center gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
+                                <Button
+                                    color={view === 'find' ? "default" : "default"}
+                                    variant={view === 'find' ? "shadow" : "light"}
+                                    onPress={() => setView('find')}
+                                    size="lg"
+                                    className={view === 'find' ? (type === 'match' ? "font-bold bg-linear-to-r from-orange-500 via-yellow-400 to-yellow-400 text-white shadow-lg shadow-orange-500/30" : "font-bold bg-yellow-400 text-yellow-900 shadow-lg shadow-yellow-500/30") : ""}
+                                    startContent={
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                        </svg>
+                                    }
+                                >
+                                    {type === 'match' ? t('match.find') : t('match.find_tournament')}
+                                </Button>
+                                <Button
+                                    color={view === 'create' ? "default" : "default"}
+                                    variant={view === 'create' ? "shadow" : "light"}
+                                    onPress={() => setView('create')}
+                                    size="lg"
+                                    className={view === 'create' ? (type === 'match' ? "font-bold bg-linear-to-r from-orange-500 via-yellow-400 to-yellow-400 text-white shadow-lg shadow-orange-500/30" : "font-bold bg-yellow-400 text-yellow-900 shadow-lg shadow-yellow-500/30") : ""}
+                                    startContent={
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    }
+                                >
+                                    {type === 'match' ? t('match.create') : t('match.create_tournament')}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Content Block - Separated but Coordinated */}
                 <div className="flex flex-col gap-6 w-full animate-appearance-in">
-                    {view === 'find' && (
+                    {view === 'create' ? (
+                        type === 'match' ? (
+                            <MatchForm onSuccess={handleCreateSuccess} />
+                        ) : (
+                            <TournamentForm onSuccess={handleCreateSuccess} />
+                        )
+                    ) : (
                         <div className="flex flex-col gap-5">
 
                             {/* Filter Section - Coordinated container */}
-                            <Card className="shadow-lg shadow-orange-500/5 border border-orange-500/20 bg-[#232120] overflow-hidden">
+                            <Card className={`shadow-lg border ${type === 'match' ? 'shadow-orange-500/5 border-orange-500/20' : 'shadow-yellow-500/5 border-yellow-500/20'} bg-[#232120] overflow-hidden`}>
                                 <CardHeader className="pb-0 pt-5 px-5 relative">
                                     <div className="flex justify-between items-center w-full">
                                         <div className="flex items-center gap-2">
-                                            <div className="p-1.5 rounded-lg bg-orange-500/10">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-600 dark:text-orange-400">
+                                            <div className={`p-1.5 rounded-lg ${type === 'match' ? 'bg-orange-500/10' : 'bg-yellow-500/10'}`}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-4 h-4 ${type === 'match' ? 'text-orange-600 dark:text-orange-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
                                                 </svg>
                                             </div>
@@ -546,12 +600,6 @@ export default function MatchesPage() {
                                     </CardBody>
                                 </Card>
                             )}
-                        </div>
-                    )}
-
-                    {view === 'create' && (
-                        <div className="animate-appearance-in w-full">
-                            <MatchForm onSuccess={handleCreateSuccess} />
                         </div>
                     )}
                 </div>

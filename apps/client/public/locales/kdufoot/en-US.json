@@ -119,8 +119,11 @@
     },
     "match": {
         "create": "Create a friendly match",
+        "create_tournament": "Create a friendly tournament",
         "find": "Find a friendly match",
-        "format": "Format",
+        "find_tournament": "Find a friendly tournament",
+        "tab_matches": "Matches",
+        "tab_tournaments": "Tournaments",
         "venue": "Venue",
         "date": "Date",
         "time": "Time",
@@ -285,6 +288,25 @@
             "date_past": "⚠️ INVALID DATE\n\nYou cannot create a match in the past.",
             "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future."
         }
+    },
+    "tournamentForm": {
+        "title": "Create a Friendly Tournament",
+        "subtitle": "Organize a competition and invite teams.",
+        "labels": {
+            "name": "Tournament Name",
+            "name_placeholder": "Ex: KduFoot Summer Cup",
+            "max_teams": "Max Teams",
+            "fee": "Registration Fee (€)",
+            "fee_placeholder": "0 for free",
+            "date": "Start Date",
+            "time": "Meeting Time",
+            "contact_email": "Contact Email",
+            "notes": "Tournament Information",
+            "notes_placeholder": "Rules, rewards, catering...",
+            "publish": "Publish Tournament"
+        },
+        "link_club": "Club link required to organize",
+        "contact_title": "Contact & Extra Info"
     },
     "error": {
         "loading_sessions": "Error loading training sessions",

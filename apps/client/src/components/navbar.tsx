@@ -48,8 +48,8 @@ export const Navbar = () => {
     if (href === '/training') return "bg-linear-to-r from-[#17c964] to-[#12a150] bg-clip-text text-transparent font-bold";
     if (href === '/favorites') return "bg-linear-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent font-bold";
     if (href === '/sessions') return "bg-linear-to-r from-red-500 to-rose-600 bg-clip-text text-transparent font-bold";
-    if (href === '/matches') return "bg-linear-to-r from-orange-400 via-amber-500 to-indigo-600 bg-clip-text text-transparent font-bold";
-    if (href === '/pricing') return "bg-linear-to-r from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text text-transparent font-bold";
+    if (href === '/matches') return "bg-linear-to-r from-orange-500 to-yellow-400 bg-clip-text text-transparent font-bold";
+    if (href === '/pricing') return "bg-linear-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent font-bold";
     return "text-foreground font-medium";
   };
 
@@ -70,7 +70,7 @@ export const Navbar = () => {
             href="/"
           >
             <Logo />
-            <p className="font-bold bg-[linear-gradient(to_right,#3b82f6,#22c55e,#ec4899,#ef4444,#f97316,#eab308)] bg-clip-text text-transparent">{t("brand.name")}</p>
+            <p className="font-bold bg-linear-to-r from-orange-500 via-yellow-400 to-fuchsia-600 bg-clip-text text-transparent">{t("brand.name")}</p>
           </LinkUniversal>
         </NavbarBrand>
       </NavbarContent>

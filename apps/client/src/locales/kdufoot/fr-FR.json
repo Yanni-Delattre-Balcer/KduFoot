@@ -159,7 +159,9 @@
     },
     "match": {
         "create": "Créer un match amical",
+        "create_tournament": "Créer un tournoi amical",
         "find": "Trouver un match amical",
+        "find_tournament": "Trouver un tournoi amical",
         "format": "Format",
         "venue": "Lieu",
         "date": "Date",
@@ -300,6 +302,8 @@
     "matchesPage": {
         "description_find": "Parcourez les matchs amicaux disponibles près de chez vous. Utilisez les filtres pour affiner votre recherche et trouver l'adversaire idéal.",
         "description_create": "Publiez votre annonce de match amical en remplissant un maximum de détails pour attirer les clubs qui vous correspondent.",
+        "description_find_tournament": "Découvrez les tournois amicaux organisés dans votre région. Inscrivez votre équipe et participez à des compétitions conviviales.",
+        "description_create_tournament": "Organisez votre propre tournoi amical ! Publiez les détails, les catégories et invitez d'autres clubs à vous rejoindre.",
         "filters": {
             "title": "Filtres",
             "active": "actif(s)",
@@ -353,9 +357,11 @@
         },
         "link_club": {
             "title": "Lier votre club (Action irréversible)",
-            "warning_siret": "Attention : Le numéro SIRET ne peut être renseigné qu'une seule fois.",
-            "warning_auto": "Dès validation, l'adresse, le code postal et la ville seront automatiquement remplis.",
+            "warning_siret": "Le numéro SIRET ne peut être renseigné qu'une seule fois.",
+            "warning_auto": "L'adresse, le code postal et la ville seront alors automatiquement remplis.",
             "warning_final": "Le club sera définitivement associé à votre compte.",
+            "warning_support": "Si vous devez changer de club par la suite, contactez le support : support.kdufoot@gmail.com",
+            "warning_search": "Astuce : Cherchez 'Nom de votre club + SIRET' sur Internet pour le trouver.",
             "validate": "Valider et Lier le club",
             "support": "En cas de changement de club ultérieur, contactez le support avec justificatifs.",
             "linked": "Club lié"
@@ -376,6 +382,26 @@
             "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un match dans le passé.",
             "date_far": "⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée."
         }
+    },
+    "tournamentForm": {
+        "title": "Créer un Tournoi Amical",
+        "subtitle": "Organisez une compétition et invitez des équipes.",
+        "labels": {
+            "name": "Nom du tournoi",
+            "name_placeholder": "Ex: Tournoi d'été KduFoot",
+            "max_teams": "Nombre d'équipes max",
+            "fee": "Frais d'inscription (€)",
+            "fee_placeholder": "0 pour gratuit",
+            "date": "Date de début",
+            "time": "Heure de rendez-vous",
+            "end_time": "Heure de fin",
+            "contact_email": "Email de contact",
+            "notes": "Informations sur le tournoi",
+            "notes_placeholder": "Règlement, récompenses, restauration...",
+            "publish": "Publier le tournoi"
+        },
+        "link_club": "Lien club requis pour organiser",
+        "contact_title": "Contact & Infos complémentaires"
     },
     "pricing": {
         "hero": {
