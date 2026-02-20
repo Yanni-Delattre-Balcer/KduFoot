@@ -17,7 +17,7 @@
  */
 
 import { Link } from "@heroui/link";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import {

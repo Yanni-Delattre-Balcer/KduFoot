@@ -87,8 +87,6 @@ jobs:
           echo "WRITE_PERMISSION=${{ secrets.WRITE_PERMISSION }}" >> .env
           echo "ADMIN_PERMISSION=${{ secrets.ADMIN_PERMISSION }}" >> .env
           echo "AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}" >> .env
-          echo "AUTH0_MANAGEMENT_API_CLIENT_ID=${{ secrets.AUTH0_MANAGEMENT_API_CLIENT_ID }}" >> .env
-          echo "AUTH0_MANAGEMENT_API_CLIENT_SECRET=${{ secrets.AUTH0_MANAGEMENT_API_CLIENT_SECRET }}" >> .env
           echo "ADMIN_AUTH0_PERMISSION=${{ secrets.ADMIN_AUTH0_PERMISSION }}" >> .env
           echo "GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}" >> .env
           echo "GEMINI_MODEL=${{ secrets.GEMINI_MODEL }}" >> .env
@@ -103,7 +101,7 @@ jobs:
           cp wrangler.jsonc wrangler.jsonc.bak
           set -a && source .env && set +a 
           cat .env
-          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'", "AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "READ_PERMISSION": "'"${READ_PERMISSION}"'", "WRITE_PERMISSION": "'"${WRITE_PERMISSION}"'", "ADMIN_PERMISSION": "'"${ADMIN_PERMISSION}"'", "GOOGLE_API_KEY": "'"${GOOGLE_API_KEY}"'", "GEMINI_MODEL": "'"${GEMINI_MODEL}"'", "SIRET_API_URL": "'"${SIRET_API_URL}"'", "GOOGLE_MAPS_API_KEY": "'"${GOOGLE_MAPS_API_KEY}"'" }|' > wrangler.jsonc.2
+          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'", "AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "READ_PERMISSION": "'"${READ_PERMISSION}"'", "WRITE_PERMISSION": "'"${WRITE_PERMISSION}"'", "ADMIN_PERMISSION": "'"${ADMIN_PERMISSION}"'", "GOOGLE_API_KEY": "'"${GOOGLE_API_KEY}"'", "GEMINI_MODEL": "'"${GEMINI_MODEL}"'", "SIRET_API_URL": "'"${SIRET_API_URL}"'", "GOOGLE_MAPS_API_KEY": "'"${GOOGLE_MAPS_API_KEY}"'" }|' > wrangler.jsonc.2
           cat wrangler.jsonc.2 | sed 's|// "routes".*.|,"routes": [{ "pattern": "'"${DOMAIN_NAME}"'", "custom_domain": true }]|' > wrangler.jsonc.3
           cat wrangler.jsonc.3 | sed 's|"your-database-id"|"'"${CLOUDFLARE_DATABASE_ID}"'"|' > wrangler.jsonc
           cat wrangler.jsonc
@@ -137,8 +135,6 @@ jobs:
             WRITE_PERMISSION
             ADMIN_PERMISSION
             AUTH0_CLIENT_SECRET
-            AUTH0_MANAGEMENT_API_CLIENT_ID
-            AUTH0_MANAGEMENT_API_CLIENT_SECRET
             ADMIN_AUTH0_PERMISSION
             GOOGLE_API_KEY
             GEMINI_MODEL
@@ -156,8 +152,6 @@ jobs:
           WRITE_PERMISSION: ${{ secrets.WRITE_PERMISSION }}
           ADMIN_PERMISSION: ${{ secrets.ADMIN_PERMISSION }}
           AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
-          AUTH0_MANAGEMENT_API_CLIENT_ID: ${{ secrets.AUTH0_MANAGEMENT_API_CLIENT_ID }}
-          AUTH0_MANAGEMENT_API_CLIENT_SECRET: ${{ secrets.AUTH0_MANAGEMENT_API_CLIENT_SECRET }}
           ADMIN_AUTH0_PERMISSION: ${{ secrets.ADMIN_AUTH0_PERMISSION }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
@@ -165,3 +159,4 @@ jobs:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+```
