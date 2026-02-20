@@ -14,14 +14,12 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Backup Yarn workspace files
-echo -e "${YELLOW}💾 Backing up Yarn workspace files...${NC}"
+# Backup workspace files
+echo -e "${YELLOW}💾 Backing up workspace files...${NC}"
 if [ -f "package.json" ]; then
     mv package.json package.json.bak
 fi
-if [ -f "yarn.lock" ]; then
-    mv yarn.lock yarn.lock.bak
-fi
+
 
 # Clean existing node_modules
 echo -e "${YELLOW}🧹 Cleaning node_modules...${NC}"
@@ -43,23 +41,19 @@ cd apps/cloudflare-worker
 npm install
 cd ../../
 
-# Restore Yarn files
-echo -e "${YELLOW}🔄 Restoring Yarn files...${NC}"
+# Restore files
+echo -e "${YELLOW}🔄 Restoring files...${NC}"
 if [ -f "package.json.bak" ]; then
     mv package.json.bak package.json
 fi
-if [ -f "yarn.lock.bak" ]; then
-    mv yarn.lock.bak yarn.lock
-fi
 
-# Reinstall Yarn for Turborepo
-echo -e "${YELLOW}⚡ Installing Yarn for Turborepo...${NC}"
-corepack enable
-yarn install
+# Reinstall for Turborepo
+echo -e "${YELLOW}⚡ Installing for Turborepo...${NC}"
+npm install
 
 # Build client with environment
 echo -e "${YELLOW}🔨 Building project...${NC}"
-yarn build:env
+npm run build:env
 
 # Check
 if [ -d "apps/client/dist" ]; then
