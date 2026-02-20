@@ -110,14 +110,6 @@ jobs:
           chmod +x ./build-reproductible-dev.sh
           ./build-reproductible-dev.sh
 
-      - name: Publish to Cloudflare Pages
-        uses: sctg-development/pages-action-without-url@main
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: kdufoot
-          directory: apps/client/dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
