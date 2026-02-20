@@ -8,7 +8,7 @@
         "training": "Mon Entraînement",
         "favorites": "Favoris",
         "sessions": "Historique Entraînement / Match",
-        "matches": "Trouver un match",
+        "matches": "Trouver un match / tournoi",
         "pricing": "Tarifs",
         "profile": "Profil",
         "admin": "Administration",
@@ -42,7 +42,7 @@
             "exercises": "Analyser une vidéo",
             "sessions": "Trouver un match amical"
         },
-        "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics.",
+        "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics. Maintenant avec support pour les tournois !",
         "about": {
             "title": "👋 À propos",
             "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1>. J'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
@@ -55,7 +55,9 @@
                 "description": "Collez un lien vidéo et notre IA génère des exercices détaillés avec synopsis, thèmes et catégorie d'âge."
             },
             "match": {
-                "title": "⚽ Matchs Amicaux",
+                "title": "Matchs Amicaux",
+                "title_tournament": "Tournois Amicaux",
+                "title_mixed": "Matchs & Tournois Amicaux",
                 "description": "Publiez ou recherchez des matchs amicaux. Filtrez par catégorie, niveau, distance et format."
             }
         }
@@ -94,7 +96,7 @@
         "description_exercises": "Retrouvez ici tous les exercices que vous avez enregistrés en favoris pour y accéder en un clic.",
         "description_matches": "Consultez les matchs amicaux qui ont retenu votre attention et gardez un œil sur les opportunités.",
         "tab_exercises": "Exercices",
-        "tab_matches": "Matchs",
+        "tab_matches": "Matchs / Tournois",
         "empty_exercises": "Aucun exercice favori",
         "empty_exercises_desc": "Ajoutez des exercices à vos favoris pour les retrouver ici.",
         "empty_matches": "Aucun match favori",
@@ -117,7 +119,9 @@
     },
     "match": {
         "create": "Créer un match amical",
+        "create_tournament": "Créer un tournoi amical",
         "find": "Trouver un match amical",
+        "find_tournament": "Trouver un tournoi amical",
         "format": "Format",
         "venue": "Lieu",
         "date": "Date",
@@ -207,6 +211,8 @@
     "matchesPage": {
         "description_find": "Parcourez les matchs amicaux disponibles près de chez vous. Utilisez les filtres pour affiner votre recherche et trouver l'adversaire idéal.",
         "description_create": "Publiez votre annonce de match amical en remplissant un maximum de détails pour attirer les clubs qui vous correspondent.",
+        "description_find_tournament": "Découvrez les tournois amicaux organisés dans votre région. Inscrivez votre équipe et participez à des compétitions conviviales.",
+        "description_create_tournament": "Organisez votre propre tournoi amical ! Publiez les détails, les catégories et invitez d'autres clubs à vous rejoindre.",
         "filters": {
             "title": "Filtres",
             "active": "actif(s)",

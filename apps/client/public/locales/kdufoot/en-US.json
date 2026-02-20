@@ -55,8 +55,10 @@
                 "description": "Paste a video link and our AI generates detailed exercises with synopsis, themes, and age categories."
             },
             "match": {
-                "title": "⚽ Friendly Matches",
-                "description": "Post or search for friendly matches. Filter by category, level, distance, and format."
+                "title": "Friendly Matches",
+                "title_tournament": "Friendly Tournaments",
+                "title_mixed": "Matches & Tournaments",
+                "description": "Post or search for friendly matches. Filter by category, level, distance and format."
             }
         }
     },
