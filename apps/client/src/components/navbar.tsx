@@ -42,7 +42,17 @@ import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
   const { t } = useTranslation();
-  console.log("Navbar rendering");
+  const getNavItemClass = (href: string) => {
+    if (href === '/') return "bg-linear-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent font-bold";
+    if (href === '/exercises') return "bg-linear-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent font-bold";
+    if (href === '/training') return "bg-linear-to-r from-[#17c964] to-[#12a150] bg-clip-text text-transparent font-bold";
+    if (href === '/favorites') return "bg-linear-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent font-bold";
+    if (href === '/sessions') return "bg-linear-to-r from-red-500 to-rose-600 bg-clip-text text-transparent font-bold";
+    if (href === '/matches') return "bg-linear-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent font-bold";
+    if (href === '/pricing') return "bg-linear-to-r from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text text-transparent font-bold";
+    return "text-foreground font-medium";
+  };
+
   return (
     <HeroUINavbar 
       maxWidth="full" 
@@ -67,31 +77,20 @@ export const Navbar = () => {
 
       <NavbarContent className="hidden lg:flex" justify="center">
         <div className="flex gap-4 justify-center">
-          {siteConfig().navItems.map((item) => {
-            let colorClass = "data-[active=true]:text-primary data-[active=true]:font-medium text-foreground";
-            if (item.href === '/') colorClass = "bg-linear-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent font-bold";
-            else if (item.href === '/exercises') colorClass = "bg-linear-to-r from-blue-500 to-violet-500 bg-clip-text text-transparent font-bold";
-            else if (item.href === '/training') colorClass = "bg-linear-to-r from-[#17c964] to-[#12a150] bg-clip-text text-transparent font-bold";
-            else if (item.href === '/favorites') colorClass = "bg-linear-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent font-bold";
-            else if (item.href === '/sessions') colorClass = "bg-linear-to-r from-red-500 to-rose-600 bg-clip-text text-transparent font-bold";
-            else if (item.href === '/matches') colorClass = "bg-linear-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent font-bold";
-            else if (item.href === '/pricing') colorClass = "bg-linear-to-r from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text text-transparent font-bold";
-
-            return (
-              <NavbarItem key={item.href}>
-                <LinkUniversal
-                  className={clsx(
-                    linkStyles({ color: "foreground" }),
-                    colorClass
-                  )}
-                  color="foreground"
-                  href={item.href}
-                >
-                  {item.label}
-                </LinkUniversal>
-              </NavbarItem>
-            );
-          })}
+          {siteConfig().navItems.map((item) => (
+            <NavbarItem key={item.href}>
+              <LinkUniversal
+                className={clsx(
+                  linkStyles({ color: "foreground" }),
+                  getNavItemClass(item.href)
+                )}
+                color="foreground"
+                href={item.href}
+              >
+                {item.label}
+              </LinkUniversal>
+            </NavbarItem>
+          ))}
         </div>
       </NavbarContent>
 
@@ -124,13 +123,8 @@ export const Navbar = () => {
           {siteConfig().navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
               <LinkUniversal
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig().navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
-                }
+                className={getNavItemClass(item.href)}
+                color="foreground"
                 href={item.href}
                 size="lg"
               >
@@ -139,7 +133,7 @@ export const Navbar = () => {
             </NavbarMenuItem>
           ))}
           <NavbarMenuItem key="login-logout">
-            <LoginLogoutLink color="primary" />
+            <LoginLogoutLink color="danger" />
           </NavbarMenuItem>
         </div>
       </NavbarMenu>

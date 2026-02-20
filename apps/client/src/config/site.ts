@@ -69,14 +69,6 @@ export const siteConfig = () => ({
       label: i18next.t("nav.pricing"),
       href: "/pricing",
     },
-    {
-      label: i18next.t("nav.profile"),
-      href: "/profile",
-    },
-    {
-      label: i18next.t("nav.admin"),
-      href: "/admin",
-    },
   ],
   links: {
     github: "https://github.com/your-repo/kdufoot",

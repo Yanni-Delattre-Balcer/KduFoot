@@ -28,11 +28,20 @@
     "deploy:worker": "turbo run deploy --filter=@kdufoot/api"
   },
   "devDependencies": {
+    "@heroui/theme": "^2.4.26",
+    "@heroui/system": "^2.4.26",
+    "@tailwindcss/postcss": "^4.2.0",
+    "@tailwindcss/vite": "^4.2.0",
     "@types/node": "^24.10.11",
     "dotenv-cli": "^11.0.0",
+    "framer-motion": "12.33.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "shx": "^0.4.0",
     "turbo": "^2.8.3",
-    "typescript": "^5.9.2"  },
+    "typescript": "^5.9.2",
+    "vite": "^7.3.1"
+  },
   "engines": {
     "node": ">=24.0.0",
     "npm": ">=11.6.2"
