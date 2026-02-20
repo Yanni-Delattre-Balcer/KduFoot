@@ -6,7 +6,12 @@
 export type SiteConfig = typeof siteConfig;
 import i18next from "../i18n";
 
-export const showVideoAnalysis = import.meta.env.DEV;
+export const showVideoAnalysis =
+  import.meta.env.DEV ||
+  (typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname.endsWith(".local")));
 
 const videoAnalysisRoutes = ["/exercises", "/training"];
 

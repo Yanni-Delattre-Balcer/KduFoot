@@ -12,6 +12,7 @@ import { Spinner } from "@heroui/spinner";
 import { useNavigate, Link } from "react-router-dom";
 import { Chip } from "@heroui/chip";
 import FootballClock from '../../components/football-clock';
+import { showVideoAnalysis } from "../../config/site";
 
 export default function FavoritesPage() {
     const { t, i18n } = useTranslation();
@@ -20,7 +21,7 @@ export default function FavoritesPage() {
     const { matches, isLoading: loadingMatches } = useMatches();
 
     // View state for Toggle Buttons (like Matches Page)
-    const [view, setView] = useState<'exercises' | 'matches'>('exercises');
+    const [view, setView] = useState<'exercises' | 'matches'>(showVideoAnalysis ? 'exercises' : 'matches');
 
     const [favExercises, setFavExercises] = useState<Exercise[]>([]);
     const [favMatches, setFavMatches] = useState<Match[]>([]);
@@ -73,6 +74,7 @@ export default function FavoritesPage() {
                         </p>
 
                         <div className="flex gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
+                            {showVideoAnalysis && (
                             <Button
                                 color={view === 'exercises' ? "success" : "default"}
                                 variant={view === 'exercises' ? "shadow" : "light"}
@@ -87,6 +89,7 @@ export default function FavoritesPage() {
                             >
                                 {t('favorites.tab_exercises')}
                             </Button>
+                            )}
                             <Button
                                 color={view === 'matches' ? "warning" : "default"}
                                 variant={view === 'matches' ? "shadow" : "light"}

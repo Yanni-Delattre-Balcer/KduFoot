@@ -88,15 +88,21 @@ export default function IndexPage() {
                 ]}
               />
             </p>
-            <p className="text-base text-default-500 leading-relaxed">
-              <Trans
-                i18nKey="kdufoot:homePage.about.features"
-                components={[
-                  <strong className="text-primary" key="0" />,
-                  <strong className="text-orange-500" key="1" />
-                ]}
-              />
-            </p>
+            {showVideoAnalysis ? (
+              <p className="text-base text-default-500 leading-relaxed">
+                <Trans
+                  i18nKey="kdufoot:homePage.about.features"
+                  components={[
+                    <strong className="text-primary" key="0" />,
+                    <strong className="text-orange-500" key="1" />
+                  ]}
+                />
+              </p>
+            ) : (
+              <p className="text-base text-default-500 leading-relaxed">
+                ⚽ <strong className="text-orange-500">{t("homePage.buttons.sessions")}</strong> — Trouvez un adversaire autour de chez vous en quelques clics.
+              </p>
+            )}
             <p className="text-sm text-default-400 italic">
               {t("homePage.about.footer")}
             </p>
