@@ -109,6 +109,12 @@ jobs:
           chmod +x ./build-reproductible-dev.sh
           ./build-reproductible-dev.sh
 
+      - name: Deploy Frontend to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/client/dist --project-name=kdufoot --branch=main
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
