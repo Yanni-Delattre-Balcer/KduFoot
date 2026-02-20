@@ -51,3 +51,6 @@ _sensitive_datas/_sensitive_datas.tar.xz
 
 # Turbo
 .turbo
+
+# GitHub template reference
+.template_ref
