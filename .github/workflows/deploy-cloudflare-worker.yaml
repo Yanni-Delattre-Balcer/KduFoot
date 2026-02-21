@@ -90,6 +90,7 @@ jobs:
           echo "GEMINI_MODEL=${{ secrets.GEMINI_MODEL }}" >> .env
           echo "SIRET_API_URL=${{ secrets.SIRET_API_URL }}" >> .env
           echo "CLOUDFLARE_DATABASE_ID=${{ secrets.CLOUDFLARE_DATABASE_ID }}" >> .env
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
 
       - name: Replace "// vars.*" in wrangler.jsonc with a json string
         run: |
@@ -156,5 +157,6 @@ jobs:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
           SIRET_API_URL: ${{ secrets.SIRET_API_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
