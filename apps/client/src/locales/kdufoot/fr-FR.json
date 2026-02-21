@@ -10,6 +10,7 @@
         "sessions": "Historique Match / Tournoi / Exercice",
         "sessions_public": "Historique Match / Tournoi",
         "matches": "Trouver un match / tournoi",
+        "dashboard": "Tableau de Bord",
         "pricing": "Tarifs",
         "profile": "Profil",
         "admin": "Administration",
@@ -459,6 +460,36 @@
                     "3": "Support dédié 24/7"
                 }
             }
+        }
+    },
+    "dashboard": {
+        "title": "Tableau de Bord",
+        "subtitle": "Gérez vos organisations et vos participations en temps réel.",
+        "tabs": {
+            "requests": "Demandes Reçues",
+            "organized": "Mes Matchs Organisés",
+            "participations": "Mes Participations",
+            "all": "Tous",
+            "matches": "Matchs",
+            "tournaments": "Tournois"
+        },
+        "empty": {
+            "requests": "Vous n'avez aucune demande en attente pour le moment.",
+            "organized": "Vous n'avez publié aucune annonce.",
+            "participations": "Vous n'avez postulé à aucun match.",
+            "no_match": "Aucun match trouvé dans cette catégorie.",
+            "no_tournament": "Aucun tournoi trouvé dans cette catégorie."
+        },
+        "controls": {
+            "new": "Nouvelle Annonce",
+            "view": "Voir l'annonce",
+            "accept": "Accepter",
+            "refuse": "Refuser"
+        },
+        "status": {
+            "pending": "En attente",
+            "accepted": "Acceptée",
+            "refused": "Refusée"
         }
     }
 }

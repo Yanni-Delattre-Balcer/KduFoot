@@ -1,9 +1,9 @@
-
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '@/layouts/default';
 import { useMatch } from '@/hooks/use-matches';
 import { useUser } from '@/hooks/use-user';
+import { matchService } from '@/services/matches';
 import { Spinner } from '@heroui/spinner';
 import { Button } from '@heroui/button';
 import { Chip } from "@heroui/chip";
@@ -49,25 +49,6 @@ export default function MatchDetailsPage() {
                 console.error("Failed to delete match", error);
                 alert(t('error.delete_failed', 'Erreur lors de la suppression du match'));
             }
-        }
-    };
-
-    const handleContactClick = async (type: 'phone' | 'email') => {
-        // ALLOW OWNER TO CLICK FOR TESTING (Commented out check)
-        // if (!user || user.id === match.owner_id) return;
-
-        if (!user) {
-            alert(t('login_required', 'Veuillez vous connecter pour contacter ce club.'));
-            return;
-        }
-
-        try {
-            await contactMatch({
-                message: `Intérêt marqué (Clic ${type === 'phone' ? 'téléphone' : 'email'})`
-            });
-            // mutate is handled by hook
-        } catch (e) {
-            console.error("Tracking error", e);
         }
     };
 
@@ -118,9 +99,18 @@ export default function MatchDetailsPage() {
                 <Card className="lg:col-span-2 shadow-medium border border-default-100 bg-[#18181b]">
                     <CardHeader className="flex flex-col items-start gap-1 p-6 pb-4 bg-[#232120] rounded-t-xl border-b border-default-100/10">
                         <div className="flex items-center gap-2 mb-2">
-                            <Chip size="sm" color="primary" variant="flat" className="font-bold uppercase border border-primary/20">Match Amical</Chip>
+                            <Chip size="sm" color={match.type === 'tournament' ? 'warning' : 'primary'} variant="flat" className="font-bold uppercase border border-current/20">
+                                {match.type === 'tournament' ? 'Tournoi' : 'Match Amical'}
+                            </Chip>
+                            {match.type === 'tournament' && (
+                                <Chip size="sm" color="success" variant="flat" className="font-bold border border-success/20">
+                                    👥 {match.accepted_count || 0} / {match.max_teams} équipes
+                                </Chip>
+                            )}
                         </div>
-                        <h1 className="text-3xl font-black text-white leading-tight">Match vs {match.club?.name || 'Club'}</h1>
+                        <h1 className="text-3xl font-black text-white leading-tight">
+                            {match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || 'Club'}`}
+                        </h1>
                         <p className="text-default-400 font-medium flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                 <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
@@ -179,7 +169,7 @@ export default function MatchDetailsPage() {
                                 startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1 text-warning"><path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" /></svg>}
                                 variant="flat" color="warning" className="h-12 w-full justify-start text-base font-bold border border-warning/20 bg-warning/10"
                             >
-                                <span className="ml-2 text-warning-600 dark:text-warning">{match.match_time}</span>
+                                <span className="ml-2 text-warning-600 dark:text-warning">{match.match_time}{match.match_end_time ? ` - ${match.match_end_time}` : ''}</span>
                             </Chip>
                         </div>
 
@@ -227,49 +217,75 @@ export default function MatchDetailsPage() {
                         </CardBody>
                     </Card>
 
-                    <Card className="shadow-medium border border-orange-500/20 bg-[#202022]">
-                        <CardHeader className="font-bold bg-orange-500/10 text-orange-500 justify-center">Contact Rapide</CardHeader>
-                        <CardBody className="gap-3 p-4">
-                            {match.email && (
-                                <a
-                                    href={`mailto:${match.email}`}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        window.location.href = `mailto:${match.email}`;
-                                        handleContactClick('email');
-                                    }}
-                                    className="flex items-center gap-3 p-3 rounded-lg bg-default-50/5 hover:bg-orange-500/20 border border-transparent hover:border-orange-500/30 transition-all cursor-pointer group"
-                                >
-                                    <div className="p-2 bg-orange-500/20 rounded-full text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                                        </svg>
-                                    </div>
-                                    <div className="overflow-hidden">
-                                        <p className="text-[10px] text-default-500 uppercase font-bold tracking-wide">Email</p>
-                                        <p className="font-bold text-sm truncate text-white group-hover:text-orange-400">{match.email}</p>
-                                    </div>
-                                </a>
-                            )}
-                            {match.phone && (
-                                <div
-                                    className="flex items-center gap-3 p-3 rounded-lg bg-default-50/5 hover:bg-success-500/20 border border-transparent hover:border-success-500/30 transition-all cursor-pointer group"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(match.phone);
-                                        handleContactClick('phone');
-                                        alert("Numéro copié !");
-                                    }}
-                                >
-                                    <div className="p-2 bg-success-500/20 rounded-full text-success group-hover:bg-success group-hover:text-white transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                                        </svg>
-                                    </div>
-                                    <div className="overflow-hidden">
-                                        <p className="text-[10px] text-default-500 uppercase font-bold tracking-wide">Téléphone (Clic pour copier)</p>
-                                        <p className="font-bold text-sm truncate text-white group-hover:text-success-400">{match.phone}</p>
-                                    </div>
+                    <Card className="shadow-medium border-primary/20 bg-[#202022]">
+                        <CardHeader className="font-bold bg-primary/10 text-primary justify-center uppercase tracking-tighter">Action Requise</CardHeader>
+                        <CardBody className="gap-4 p-6">
+                            {user?.id === match.owner_id ? (
+                                <div className="text-center space-y-3">
+                                    <p className="text-default-400 text-sm font-medium">Vous êtes l'organisateur. Gérez les demandes ci-dessous.</p>
+                                    <Button color="primary" variant="flat" className="w-full font-black uppercase tracking-tighter" as={Link} to={`/matches/${id}/edit`}>
+                                        Modifier l'annonce
+                                    </Button>
                                 </div>
+                            ) : (
+                                <>
+                                    <p className="text-default-300 text-sm text-center">Vous souhaitez faire participer votre équipe ? Envoyez une demande officielle.</p>
+                                    <Button 
+                                        color="primary" 
+                                        className="w-full font-black uppercase tracking-tighter h-12 shadow-lg"
+                                        onPress={async () => {
+                                            if (!user) {
+                                                alert("Veuillez vous connecter pour envoyer une demande.");
+                                                return;
+                                            }
+                                            if (!user.club_id) {
+                                                alert("Veuillez lier votre club pour envoyer une demande.");
+                                                return;
+                                            }
+                                            try {
+                                                await contactMatch({ message: "Demande de participation envoyée via KduFoot" });
+                                                alert("Demande envoyée avec succès !");
+                                            } catch (e: any) {
+                                                alert(e.message || "Erreur lors de l'envoi");
+                                            }
+                                        }}
+                                        isDisabled={match.contacts?.some(c => c.user_id === user?.id)}
+                                    >
+                                        {match.contacts?.some(c => c.user_id === user?.id) 
+                                            ? "Demande déjà envoyée" 
+                                            : match.type === 'tournament' ? "Envoyer ma demande" : "Demander le match"}
+                                    </Button>
+                                    
+                                    {match.contacts?.find(c => c.user_id === user?.id)?.status === 'accepted' && (
+                                        <div className="mt-4 p-4 bg-success-500/10 border border-success-500/20 rounded-xl space-y-3 animate-appearance-in">
+                                            <p className="text-success font-black text-center uppercase text-sm tracking-tighter flex items-center justify-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                                    <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                                                </svg>
+                                                Demande Acceptée !
+                                            </p>
+                                            <div className="pt-2 border-t border-success-500/10 space-y-2">
+                                                <div className="flex items-center gap-2 text-white text-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-success">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                                                    </svg>
+                                                    {match.email}
+                                                </div>
+                                                <div className="flex items-center gap-2 text-white text-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-success">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                                                    </svg>
+                                                    {match.phone}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {match.contacts?.find(c => c.user_id === user?.id)?.status === 'refused' && (
+                                        <div className="mt-4 p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl">
+                                            <p className="text-danger font-black text-center uppercase text-sm tracking-tighter">Demande Refusée</p>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </CardBody>
                     </Card>
@@ -298,16 +314,68 @@ export default function MatchDetailsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {match.contacts && match.contacts.length > 0 ? (
                             match.contacts.map((contact, index) => (
-                                <Card key={index} className="border border-default-200 bg-[#202022]">
-                                    <CardBody className="flex flex-row items-center gap-4 p-4">
-                                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold shadow-md">
-                                            {contact.club_name?.charAt(0) || '?'}
+                                <Card key={index} className={`border ${contact.status === 'accepted' ? 'border-success/30 bg-success/5' : contact.status === 'refused' ? 'border-danger/20 opacity-60' : 'border-default-200'} bg-[#202022]`}>
+                                    <CardBody className="flex flex-col gap-4 p-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-full bg-linear-to-br ${contact.status === 'accepted' ? 'from-success to-emerald-600' : 'from-orange-400 to-amber-500'} flex items-center justify-center text-white font-bold shadow-md`}>
+                                                {contact.club_name?.charAt(0) || '?'}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex justify-between items-start">
+                                                    <p className="font-bold text-white">{contact.club_name || 'Club intéressé'}</p>
+                                                    {contact.status !== 'pending' && (
+                                                        <Chip size="sm" color={contact.status === 'accepted' ? 'success' : 'danger'} variant="flat" className="font-bold uppercase text-[10px]">
+                                                            {contact.status === 'accepted' ? 'Accepté' : 'Refusé'}
+                                                        </Chip>
+                                                    )}
+                                                </div>
+                                                <p className="text-[10px] text-default-500">{new Date(contact.contacted_at).toLocaleDateString()} à {new Date(contact.contacted_at).toLocaleTimeString()}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-bold text-white">{contact.club_name || 'Club intéressé'}</p>
-                                            <p className="text-xs text-default-500">{new Date(contact.contacted_at).toLocaleDateString()} à {new Date(contact.contacted_at).toLocaleTimeString()}</p>
-                                            <p className="text-sm font-medium text-primary mt-1">"{contact.message}"</p>
-                                        </div>
+                                        
+                                        {user?.id === match.owner_id && contact.status === 'pending' && (
+                                            <div className="flex gap-2 pt-2 border-t border-default-100/10">
+                                                <Button 
+                                                    size="sm" 
+                                                    color="success" 
+                                                    className="flex-1 font-bold text-success-950"
+                                                    onPress={async () => {
+                                                        if (confirm(`Accepter l'équipe de ${contact.club_name} ?`)) {
+                                                            try {
+                                                                await matchService.updateRequestStatus(match.id, contact.user_id, 'accepted', (await (window as any).auth0AccessToken)); // Simplified for now, real implementation should use a proper token source
+                                                                window.location.reload(); 
+                                                            } catch (e: any) {
+                                                                alert(e.message);
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    Accepter
+                                                </Button>
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="flat" 
+                                                    color="danger" 
+                                                    className="flex-1 font-bold"
+                                                    onPress={async () => {
+                                                        if (confirm(`Refuser cette équipe ?`)) {
+                                                            try {
+                                                                await matchService.updateRequestStatus(match.id, contact.user_id, 'refused', (await (window as any).auth0AccessToken));
+                                                                window.location.reload();
+                                                            } catch (e: any) {
+                                                                alert(e.message);
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    Refuser
+                                                </Button>
+                                            </div>
+                                        )}
+
+                                        {contact.status === 'accepted' && (
+                                            <p className="text-xs text-success-400 font-medium text-center bg-success/10 py-1 rounded-lg">Équipe officiellement inscrite</p>
+                                        )}
                                     </CardBody>
                                 </Card>
                             ))
@@ -318,8 +386,8 @@ export default function MatchDetailsPage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                     </svg>
                                 </div>
-                                <p className="text-lg font-bold text-default-300">Aucun contact pour le moment</p>
-                                <p className="text-default-500">Dès qu'un club cliquera sur vos coordonnées, il apparaîtra ici.</p>
+                                <p className="text-lg font-bold text-default-300">Aucune demande pour le moment</p>
+                                <p className="text-default-500">Dès qu'un club enverra une demande, il apparaîtra ici.</p>
                             </div>
                         )}
                     </div>

@@ -90,5 +90,60 @@ export const matchService = {
             }
         }
         return response.json();
+    },
+    
+    getRequests: async (token: string) => {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/requests`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                throw new Error(errorJson.error || errorJson.message || errorText);
+            } catch {
+                throw new Error(errorText);
+            }
+        }
+        return response.json();
+    },
+
+    getParticipations: async (token: string) => {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/participations`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                throw new Error(errorJson.error || errorJson.message || errorText);
+            } catch {
+                throw new Error(errorText);
+            }
+        }
+        return response.json();
+    },
+
+    updateRequestStatus: async (matchId: string, userId: string, status: 'accepted' | 'refused', token: string) => {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${matchId}/requests/${userId}`, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status }),
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                throw new Error(errorJson.error || errorJson.message || errorText);
+            } catch {
+                throw new Error(errorText);
+            }
+        }
+        return response.json();
     }
 };

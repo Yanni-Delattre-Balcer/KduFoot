@@ -11,11 +11,14 @@ export interface Match {
     owner_id: string;
     club_id: string;
     club: Club;
+    type: 'match' | 'tournament';
+    name?: string;
     category: Category;
     format: Format;
     level?: Level;
     match_date: string; // ISO 8601
     match_time: string; // HH:MM
+    match_end_time?: string;
     venue: Venue;
     location_address?: string;
     location_city?: string;
@@ -24,9 +27,12 @@ export interface Match {
     email: string;
     phone: string;
     notes?: string;
+    max_teams?: number;
+    registration_fee?: number;
     status: MatchStatus;
     contacts?: MatchContact[];
     contacts_count?: number;
+    accepted_count?: number;
     created_at: string;
     updated_at: string;
     // Distance fields (returned when radius filter is active)
@@ -61,6 +67,7 @@ export interface MatchContact {
     club_name?: string;
     message: string;
     contacted_at: string;
+    status: 'pending' | 'accepted' | 'refused';
 }
 
 export interface Club {
@@ -77,11 +84,14 @@ export interface Club {
 
 export interface CreateMatchDto {
     club_id: string;
+    type: 'match' | 'tournament';
+    name?: string;
     category: Category;
     level?: Level;
     format: Format;
     match_date: string;
     match_time: string;
+    match_end_time?: string;
     venue: Venue;
     location_address?: string;
     location_city?: string;
@@ -90,6 +100,8 @@ export interface CreateMatchDto {
     email: string;
     phone: string;
     notes?: string;
+    max_teams?: number;
+    registration_fee?: number;
 }
 
 export interface UpdateMatchDto extends Partial<CreateMatchDto> {
@@ -101,6 +113,7 @@ export interface ContactMatchDto {
 }
 
 export interface MatchFilters {
+    type?: 'match' | 'tournament';
     category?: Category;
     level?: Level;
     format?: Format;
@@ -111,8 +124,11 @@ export interface MatchFilters {
     location_city?: string;
     location_zip?: string;
     radius_km?: number;
+    user_lat?: number;
+    user_lng?: number;
     limit?: number;
     offset?: number;
     notes?: string;
     owner_id?: string;
+    include_past?: boolean;
 }

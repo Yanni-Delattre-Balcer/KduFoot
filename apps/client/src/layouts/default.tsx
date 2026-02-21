@@ -68,7 +68,7 @@ export default function DefaultLayout({
   }, [isAuthenticated, getAccessTokenSilently]);
 
   return (
-    <div className="relative flex flex-col h-screen">
+    <div className="relative flex flex-col min-h-screen overflow-x-hidden">
       <Navbar />
       <main className={`container mx-auto ${maxWidth} px-6 grow pt-16`}>
         {children}

@@ -20,6 +20,10 @@ export const siteConfig = () => {
       href: "/",
     },
     {
+      label: i18next.t("nav.dashboard", "Tableau de Bord"),
+      href: "/dashboard",
+    },
+    {
       label: i18next.t("nav.exercises"),
       href: "/exercises",
     },

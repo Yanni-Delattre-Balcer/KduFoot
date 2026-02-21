@@ -49,7 +49,7 @@ export class Router {
 
 	constructor(env: Env) {
 		this.corsHeaders = {
-			"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+			"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
 			"Access-Control-Allow-Origin": env.CORS_ORIGIN,
 			"Access-Control-Allow-Headers": "Content-Type, Authorization",
 			"Content-Type": "application/json",
@@ -81,6 +81,16 @@ export class Router {
 			...this.compileRoute(path),
 			path,
 			method: "PUT",
+			handler,
+			permission,
+		});
+	}
+
+	patch(path: string, handler: RouteHandler, permission?: string) {
+		this.routes.push({
+			...this.compileRoute(path),
+			path,
+			method: "PATCH",
 			handler,
 			permission,
 		});

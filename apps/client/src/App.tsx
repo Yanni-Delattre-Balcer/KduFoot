@@ -35,6 +35,7 @@ import SessionEditPage from "@/pages/sessions/edit";
 import MatchDetailsPage from "@/pages/matches/details";
 import MatchEditPage from "@/pages/matches/edit";
 import MatchesPage from "@/pages/matches";
+import DashboardPage from "@/pages/dashboard/index";
 import FavoritesPage from "@/pages/favorites";
 import TrainingPage from "@/pages/training";
 import { TrainingProvider } from "@/contexts/training-context";
@@ -114,6 +115,10 @@ function App() {
           <Route
             element={<AuthenticationGuard component={SessionDetailsPage} />}
             path="/sessions/:id"
+          />
+          <Route
+            element={<AuthenticationGuard component={DashboardPage} />}
+            path="/dashboard"
           />
           <Route
             element={<AuthenticationGuard component={MatchesPage} />}

@@ -16,11 +16,13 @@ export interface Match {
     owner_id: string;
     club_id: string;
     club?: Club; // Joined field
+    type: 'match' | 'tournament';
     category: string;
     level?: string;
     format: '11v11' | '8v8' | '5v5' | 'Futsal';
     match_date: string;
     match_time: string;
+    match_end_time?: string;
     venue: 'Domicile' | 'Extérieur' | 'Neutre';
     location_address?: string;
     location_city?: string;
@@ -29,9 +31,12 @@ export interface Match {
     email: string;
     phone: string;
     notes?: string;
+    max_teams?: number;
+    registration_fee?: number;
     status: 'active' | 'found' | 'expired';
     contacts?: MatchContact[];
     contacts_count?: number;
+    accepted_count?: number;
     created_at: number;
     updated_at: number;
     distance_km?: number;
@@ -40,11 +45,13 @@ export interface Match {
 
 export interface CreateMatchDto {
     club_id: string;
+    type: 'match' | 'tournament';
     category: string;
     level?: string;
     format: '11v11' | '8v8' | '5v5' | 'Futsal';
     match_date: string;
     match_time: string;
+    match_end_time?: string;
     venue: 'Domicile' | 'Extérieur' | 'Neutre';
     location_address?: string;
     location_city?: string;
@@ -53,6 +60,8 @@ export interface CreateMatchDto {
     email: string;
     phone: string;
     notes?: string;
+    max_teams?: number;
+    registration_fee?: number;
 }
 
 export interface UpdateMatchDto extends Partial<CreateMatchDto> {
@@ -65,6 +74,7 @@ export interface MatchContact {
     club_name?: string;
     message: string;
     contacted_at: string;
+    status: 'pending' | 'accepted' | 'refused';
 }
 
 export interface MatchFilters {

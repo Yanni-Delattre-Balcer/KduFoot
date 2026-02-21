@@ -7,6 +7,8 @@ import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Category } from '@/types/exercise.types';
 import { Level, PitchType } from '@/types/match.types';
 import { useUser } from '@/hooks/use-user';
+import { matchService } from '@/services/matches';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface TournamentFormProps {
     onSuccess?: () => void;
@@ -18,6 +20,7 @@ const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilis�
 export default function TournamentForm({ onSuccess, onCancel }: TournamentFormProps) {
     const { t } = useTranslation();
     const { user, linkClub } = useUser();
+    const { getAccessTokenSilently } = useAuth0();
     const [isSaving, setIsSaving] = useState(false);
     const [siret, setSiret] = useState('');
     const [isLinking, setIsLinking] = useState(false);
@@ -26,6 +29,8 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
         name: '',
         category: Category.SENIORS,
         level: Level.DEPARTEMENTAL_1,
+        format: '11v11' as any,
+        venue: 'Domicile' as any,
         max_teams: '16',
         registration_fee: '0',
         match_date: new Date().toISOString().split('T')[0],
@@ -84,12 +89,18 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
 
         setIsSaving(true);
         try {
-            // Simulate creation for now as API might not support tournaments yet
-            console.log("Creating tournament:", { ...formData, gender, club_id: user.club_id });
-            alert("Fonctionnalité de création de tournoi en cours d'activation sur le serveur. Version locale simulée.");
+            const token = await getAccessTokenSilently();
+            await matchService.create({
+                ...formData,
+                type: 'tournament',
+                club_id: user.club_id,
+                max_teams: parseInt(formData.max_teams),
+                registration_fee: parseFloat(formData.registration_fee)
+            }, token);
+            
             if (onSuccess) onSuccess();
-        } catch (error) {
-            alert(t('error.save_failed'));
+        } catch (error: any) {
+            alert(error.message || t('error.save_failed'));
         } finally {
             setIsSaving(false);
         }

@@ -12,18 +12,18 @@ export class MatchService {
 
         const result = await this.db.prepare(
             `INSERT INTO matches (
-        id, owner_id, club_id, category, format, match_date, match_time, 
+        id, owner_id, club_id, type, category, format, match_date, match_time, match_end_time,
         venue, location_address, location_city, location_zip, pitch_type,
-        email, phone, notes, status, created_at, updated_at
+        email, phone, notes, max_teams, registration_fee, status, created_at, updated_at
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, 
+        ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
-        ?, ?, ?, 'active', ?, ?
+        ?, ?, ?, ?, ?, 'active', ?, ?
       ) RETURNING *`
         ).bind(
-            id, userId, dto.club_id, dto.category, dto.format, dto.match_date, dto.match_time,
+            id, userId, dto.club_id, dto.type || 'match', dto.category, dto.format, dto.match_date, dto.match_time, dto.match_end_time || null,
             dto.venue, dto.location_address || null, dto.location_city || null, dto.location_zip || null, dto.pitch_type || null,
-            dto.email, dto.phone, dto.notes || null, now, now
+            dto.email, dto.phone, dto.notes || null, dto.max_teams || null, dto.registration_fee || null, now, now
         ).first<Match>();
 
         return result!;
@@ -83,13 +83,20 @@ export class MatchService {
             ORDER BY mc.contacted_at DESC
         `).bind(id).all<any>();
 
+        // Count accepted teams
+        const acceptedCountResult = await this.db.prepare(`
+            SELECT COUNT(*) as count FROM match_contacts WHERE match_id = ? AND status = 'accepted'
+        `).bind(id).first<{ count: number }>();
+
         const match = this.mapRowToMatch(result);
+        match.accepted_count = acceptedCountResult?.count || 0;
         match.contacts = contacts.map(c => ({
             user_id: c.user_id,
             club_id: c.club_id,
             club_name: c.club_name,
             message: c.message,
-            contacted_at: new Date(c.contacted_at * 1000).toISOString()
+            contacted_at: new Date(c.contacted_at * 1000).toISOString(),
+            status: c.status as any
         }));
 
         return match;
@@ -346,20 +353,62 @@ export class MatchService {
         // Check if match exists and is active
         const match = await this.getById(matchId);
         if (!match || match.status !== 'active') throw new Error('Match not available');
-        // if (match.owner_id === userId) throw new Error('Cannot contact own match');
+        if (match.owner_id === userId) throw new Error('Cannot contact own match');
 
         // Check if already contacted
-        // Primary key (match_id, user_id)
         try {
             await this.db.prepare(
-                'INSERT INTO match_contacts (match_id, user_id, message, contacted_at) VALUES (?, ?, ?, ?)'
-            ).bind(matchId, userId, dto.message, Math.floor(Date.now() / 1000)).run();
+                'INSERT INTO match_contacts (match_id, user_id, message, contacted_at, status) VALUES (?, ?, ?, ?, ?)'
+            ).bind(matchId, userId, dto.message, Math.floor(Date.now() / 1000), 'pending').run();
             return true;
         } catch (e: any) {
             if (e.message.includes('UNIQUE constraint failed')) {
-                return true; // Already contacted, treat as success or ignore
+                return true; 
             }
             throw e;
         }
+    }
+
+    async getIncomingRequests(userId: string): Promise<any[]> {
+        const { results } = await this.db.prepare(`
+            SELECT mc.*, m.type, m.category, m.match_date, m.match_time, 
+                   c.name as requester_club_name, c.logo_url as requester_club_logo,
+                   mc.status as request_status
+            FROM match_contacts mc
+            JOIN matches m ON mc.match_id = m.id
+            JOIN users u ON mc.user_id = u.id
+            LEFT JOIN clubs c ON u.club_id = c.id
+            WHERE m.owner_id = ?
+            ORDER BY mc.contacted_at DESC
+        `).bind(userId).all<any>();
+        
+        return results;
+    }
+
+    async getMyParticipations(userId: string): Promise<any[]> {
+        const { results } = await this.db.prepare(`
+            SELECT mc.*, m.type, m.category, m.match_date, m.match_time, 
+                   c.name as host_club_name, c.logo_url as host_club_logo,
+                   c.email as host_email, c.phone as host_phone,
+                   mc.status as request_status
+            FROM match_contacts mc
+            JOIN matches m ON mc.match_id = m.id
+            JOIN clubs c ON m.club_id = c.id
+            WHERE mc.user_id = ?
+            ORDER BY m.match_date ASC
+        `).bind(userId).all<any>();
+        
+        return results;
+    }
+
+    async updateRequestStatus(matchId: string, requestUserId: string, ownerId: string, status: 'accepted' | 'refused'): Promise<boolean> {
+        const match = await this.db.prepare('SELECT owner_id FROM matches WHERE id = ?').bind(matchId).first<{ owner_id: string }>();
+        if (!match || match.owner_id !== ownerId) throw new Error('Unauthorized');
+
+        await this.db.prepare(
+            'UPDATE match_contacts SET status = ? WHERE match_id = ? AND user_id = ?'
+        ).bind(status, matchId, requestUserId).run();
+
+        return true;
     }
 }

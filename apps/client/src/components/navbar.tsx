@@ -45,13 +45,14 @@ export const Navbar = () => {
   const getNavItemClass = (href: string) => {
     const base = "font-bold hover:scale-105 transition-transform bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent";
     // Vibrant saturated colors (3 steps) to see movement without being "extreme"
-    if (href === '/') return `${base} bg-[linear-gradient(to_right,#0891b2,#22d3ee,#0891b2)]`; // Cyan
-    if (href === '/exercises') return `${base} bg-[linear-gradient(to_right,#2563eb,#8b5cf6,#2563eb)]`; // Blue/Violet
-    if (href === '/training') return `${base} bg-[linear-gradient(to_right,#059669,#34d399,#059669)]`; // Green
-    if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#db2777,#f472b6,#db2777)]`; // Pink
-    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#f97316,#fbbf24,#f97316)]`; // Orange/Yellow (Match/Tournament theme)
-    if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#ea580c,#facc15,#ea580c)]`; // Orange/Yellow
-    if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#c026d3,#9333ea,#c026d3)]`; // Fuchsia/Purple
+    if (href === '/') return `${base} bg-[linear-gradient(to_right,#ef4444,#f87171,#ef4444)]`; // Red 🍎
+    if (href === '/dashboard') return `${base} bg-[linear-gradient(to_right,#f97316,#fb923c,#f97316)]`; // Orange 🍊
+    if (href === '/exercises') return `${base} bg-[linear-gradient(to_right,#f59e0b,#fbbf24,#f59e0b)]`; // Amber ☀️
+    if (href === '/training') return `${base} bg-[linear-gradient(to_right,#10b981,#34d399,#10b981)]`; // Green 🌿
+    if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#06b6d4,#22d3ee,#06b6d4)]`; // Cyan 💧
+    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#3b82f6,#60a5fa,#3b82f6)]`; // Royal Blue 📘
+    if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#8b5cf6,#a78bfa,#8b5cf6)]`; // Violet 🔮
+    if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#d946ef,#f0abfc,#d946ef)]`; // Pink 💖
     return "text-foreground font-bold";
   };
 
@@ -72,7 +73,7 @@ export const Navbar = () => {
             href="/"
           >
             <Logo size={64} />
-            <p className="font-bold bg-[linear-gradient(to_right,#1e3a8a,#06b6d4,#14532d,#22c55e,#eab308,#f97316,#7f1d1d,#ef4444,#db2777,#9333ea,#581c87,#1e3a8a)] bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent">
+            <p className="font-bold bg-[linear-gradient(to_right,#1e3a8a,#0d9488,#06b6d4,#14532d,#22c55e,#eab308,#f97316,#7f1d1d,#ef4444,#db2777,#9333ea,#581c87,#1e3a8a)] bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent">
               {t("brand.name")}
             </p>
           </LinkUniversal>

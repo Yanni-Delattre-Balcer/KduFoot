@@ -164,4 +164,71 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: e.message }, { status: 400 });
         }
     });
+
+    // Get incoming requests for current user
+    router.get('/api/matches/requests', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        if (!dbUser) {
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
+        }
+
+        const requests = await matchService.getIncomingRequests(dbUser.id);
+        return Response.json({ success: true, requests });
+    });
+
+    // Get outgoing requests (participations) for current user
+    router.get('/api/matches/participations', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CONTACT);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        if (!dbUser) {
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
+        }
+
+        const participations = await matchService.getMyParticipations(dbUser.id);
+        return Response.json({ success: true, participations });
+    });
+
+    // Update request status (Accept/Refuse)
+    router.patch('/api/matches/<matchId>/requests/<userId>', async (request: Request) => {
+        const params = (request as any).params as { matchId: string, userId: string };
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        if (!dbUser) {
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
+        }
+
+        const body = await request.json() as { status: 'accepted' | 'refused' };
+        if (!['accepted', 'refused'].includes(body.status)) {
+            return Response.json({ success: false, error: 'Invalid status' }, { status: 400 });
+        }
+
+        try {
+            const success = await matchService.updateRequestStatus(params.matchId, params.userId, dbUser.id, body.status);
+            return Response.json({ success });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 400 });
+        }
+    });
 };
