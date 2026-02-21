@@ -9,9 +9,10 @@
 		{
 			"binding": "DB",
 			"database_name": "kdufoot-db",
-			"database_id": "your-database-id"
+			"database_id": "22a59be4-5a74-43f7-9f25-2e9fe7ae4f5e"
 		}
 	],
+	/*
 	"r2_buckets": [
 		{
 			"binding": "VIDEOS_BUCKET",
@@ -28,4 +29,5 @@
 			"id": "your-kv-namespace-id"
 		}
 	]
+	*/
 }
