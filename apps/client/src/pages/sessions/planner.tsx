@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '@/layouts/default';
+import { useSessions } from '@/hooks/use-sessions';
 import { useMatches } from '@/hooks/use-matches';
 import FootballClock from '../../components/football-clock';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
@@ -12,7 +13,8 @@ import { showVideoAnalysis } from '@/config/site';
 
 export default function SessionPlannerPage() {
     const { t, i18n } = useTranslation();
-    const [view, setView] = useState<'matches' | 'tournaments'>('matches');
+    const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');
+    const { sessions, isError: isErrorSessions } = useSessions();
     const { matches, isError: isErrorMatches } = useMatches({ owner_id: 'me' }); // We want MY matches
 
     return (
@@ -36,7 +38,7 @@ export default function SessionPlannerPage() {
                         <div className="flex items-center gap-3">
                             <div className="p-3 rounded-2xl bg-orange-500/10">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-orange-500">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0_4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                             </div>
                             <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-orange-500 via-yellow-400 to-yellow-500">
@@ -44,12 +46,30 @@ export default function SessionPlannerPage() {
                             </h1>
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
-                            {view === 'matches'
-                                ? t('sessions.description_matches')
-                                : t('matchesPage.description_create_tournament')}
+                            {view === 'exercises' 
+                                ? t('sessions.description_exercises', 'Suivez vos séances d\'entraînement et exercices vidéo.')
+                                : view === 'matches'
+                                    ? t('sessions.description_matches')
+                                    : t('matchesPage.description_create_tournament')}
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm w-full sm:w-auto">
+                            {showVideoAnalysis && (
+                                <Button
+                                    color={view === 'exercises' ? "success" : "default"}
+                                    variant={view === 'exercises' ? "shadow" : "light"}
+                                    onPress={() => setView('exercises')}
+                                    size="lg"
+                                    className={view === 'exercises' ? "font-bold text-white bg-linear-to-r from-[#17c964] to-[#12a150]" : ""}
+                                    startContent={
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                        </svg>
+                                    }
+                                >
+                                    {t('favorites.tab_exercises')}
+                                </Button>
+                            )}
                             <Button
                                 color={view === 'matches' ? "warning" : "default"}
                                 variant={view === 'matches' ? "shadow" : "light"}
@@ -83,6 +103,58 @@ export default function SessionPlannerPage() {
                 </div>
 
                 <div className="animate-appearance-in">
+
+                    {view === 'exercises' && (
+                        <div className="flex flex-col gap-4">
+                            {isErrorSessions && <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">{t('error.loading_sessions', 'Erreur chargement séances')}</div>}
+
+                            {sessions.length === 0 && !isErrorSessions && (
+                                <Card className="border border-green-500/20 bg-green-500/5">
+                                    <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
+                                        <div className="p-4 rounded-full bg-green-500/10">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-green-500">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                            </svg>
+                                        </div>
+                                        <p className="text-lg font-semibold text-green-900/80 dark:text-green-100">{t('sessions.empty_sessions', 'Aucune séance trouvée')}</p>
+                                        <Button as={Link} to="/exercises" color="success" variant="flat" className="bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 font-bold">
+                                            {t('sessions.find_exercises', 'Découvrir des exercices')}
+                                        </Button>
+                                    </CardBody>
+                                </Card>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {sessions.map((session) => (
+                                    <Card key={session.id} className="group hover:shadow-lg hover:shadow-green-500/10 transition-all bg-[#18251e] border border-green-500/20 hover:border-green-500/40">
+                                        <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                                            <div className="flex justify-between w-full">
+                                                <p className="text-tiny uppercase font-bold text-green-600">{session.category || 'Séance'}</p>
+                                                <Chip size="sm" variant="flat" className="bg-green-50 text-green-800 dark:bg-green-500/10 dark:text-green-300">{session.status}</Chip>
+                                            </div>
+                                            <h4 className="font-bold text-large mt-1 truncate group-hover:text-green-600 transition-colors">{session.name || t('sessions.no_name', 'Séance sans nom')}</h4>
+                                            <small className="text-default-500 flex items-center gap-1 mt-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                                </svg>
+                                                {session.scheduled_date ? new Date(session.scheduled_date).toLocaleDateString(i18n.language) : ''}
+                                            </small>
+                                        </CardHeader>
+                                        <CardBody className="overflow-visible py-2">
+                                            <p className="text-sm text-default-600 line-clamp-2">
+                                                {session.category} - {session.level || t('sessions.all_levels', 'Tous niveaux')}
+                                            </p>
+                                        </CardBody>
+                                        <CardFooter>
+                                            <Button as={Link} to={`/sessions/${session.id}`} size="sm" variant="flat" className="bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 font-bold w-full">
+                                                {t('details')}
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {view === 'matches' && (
                         <div className="flex flex-col gap-4">

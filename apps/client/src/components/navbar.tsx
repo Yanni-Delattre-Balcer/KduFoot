@@ -49,7 +49,7 @@ export const Navbar = () => {
     if (href === '/exercises') return `${base} bg-[linear-gradient(to_right,#2563eb,#8b5cf6,#2563eb)]`; // Blue/Violet
     if (href === '/training') return `${base} bg-[linear-gradient(to_right,#059669,#34d399,#059669)]`; // Green
     if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#db2777,#f472b6,#db2777)]`; // Pink
-    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#dc2626,#f87171,#dc2626)]`; // Red
+    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#f97316,#fbbf24,#f97316)]`; // Orange/Yellow (Match/Tournament theme)
     if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#ea580c,#facc15,#ea580c)]`; // Orange/Yellow
     if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#c026d3,#9333ea,#c026d3)]`; // Fuchsia/Purple
     return "text-foreground font-bold";
