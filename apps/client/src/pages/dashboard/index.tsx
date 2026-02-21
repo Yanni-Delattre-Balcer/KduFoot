@@ -92,8 +92,8 @@ export default function DashboardPage() {
             <Button 
                 size="sm" 
                 variant={current === 'all' ? 'solid' : 'light'} 
-                color={current === 'all' ? 'warning' : 'default'}
-                className={current === 'all' ? 'font-bold bg-orange-600 text-white' : 'font-medium text-default-500'}
+                color={current === 'all' ? 'danger' : 'default'}
+                className={current === 'all' ? 'font-bold bg-danger text-white' : 'font-medium text-default-500'}
                 onPress={() => onChange('all')}
             >
                 {t('dashboard.tabs.all')}
@@ -101,8 +101,8 @@ export default function DashboardPage() {
             <Button 
                 size="sm" 
                 variant={current === 'match' ? 'solid' : 'light'} 
-                color={current === 'match' ? 'warning' : 'default'}
-                className={current === 'match' ? 'font-bold bg-linear-to-r from-orange-500 to-yellow-500 text-white' : 'font-medium text-default-500'}
+                color={current === 'match' ? 'secondary' : 'default'}
+                className={current === 'match' ? 'font-bold bg-violet-800 text-white' : 'font-medium text-default-500'}
                 onPress={() => onChange('match')}
             >
                 {t('dashboard.tabs.matches')}
@@ -110,8 +110,8 @@ export default function DashboardPage() {
             <Button 
                 size="sm" 
                 variant={current === 'tournament' ? 'solid' : 'light'} 
-                color={current === 'tournament' ? 'warning' : 'default'}
-                className={current === 'tournament' ? 'font-bold bg-yellow-400 text-yellow-900 shadow-sm' : 'font-medium text-default-500'}
+                color={current === 'tournament' ? 'default' : 'default'}
+                className={current === 'tournament' ? 'font-bold bg-purple-300 text-purple-950 shadow-sm' : 'font-medium text-default-500'}
                 onPress={() => onChange('tournament')}
             >
                 {t('dashboard.tabs.tournaments')}
@@ -121,7 +121,7 @@ export default function DashboardPage() {
 
     return (
         <DefaultLayout maxWidth="max-w-full">
-            <section className="flex flex-col gap-8 w-full px-4 py-8">
+            <section className="flex flex-col gap-8 w-full px-4 pt-2 pb-8">
                 
                 {/* Header Section - Rectangle Style matching Navbar */}
                 <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-orange-600/15 via-amber-500/10 to-yellow-500/10 border border-orange-500/20 mb-2">
@@ -137,27 +137,26 @@ export default function DashboardPage() {
                         <FootballClock size={140} />
                     </div>
 
-                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 py-12 px-8">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-3 bg-[linear-gradient(to_bottom_right,#f97316,#ea580c)] px-6 py-3 rounded-2xl shadow-lg shadow-orange-500/20 text-white">
-                                <h1 className="text-3xl font-black uppercase tracking-tighter italic whitespace-nowrap">
-                                    {t('dashboard.title')}
-                                </h1>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                    <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
+                        <div className="flex items-center gap-3">
+                            <div className="p-3 rounded-2xl bg-orange-500/10">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-orange-500">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                 </svg>
                             </div>
-                            <div className="hidden sm:block">
-                                <p className="text-default-500 font-bold uppercase tracking-widest text-xs opacity-70 mb-1">{t('dashboard.subtitle')}</p>
-                                <div className="h-1 w-12 bg-orange-500/50 rounded-full"></div>
-                            </div>
+                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-orange-500 to-amber-500">
+                                {t('dashboard.title')}
+                            </h1>
                         </div>
+                        <p className="text-default-500 text-lg max-w-lg">
+                            {t('dashboard.subtitle')}
+                        </p>
 
                         <Button 
                             as={Link} 
                             to="/matches/new" 
                             size="lg"
-                            className="font-bold bg-linear-to-r from-orange-500 to-amber-500 text-white shadow-xl shadow-orange-500/30 rounded-2xl h-14 px-8 w-full md:w-auto"
+                            className="font-bold bg-linear-to-r from-orange-500 to-amber-500 text-white shadow-xl shadow-orange-500/30 rounded-2xl h-14 px-8 w-full sm:w-auto relative z-20 mt-2"
                             startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" /></svg>}
                         >
                             {t('dashboard.controls.new')}
@@ -194,7 +193,7 @@ export default function DashboardPage() {
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {isLoadingIncoming ? (
-                                    <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" /></div>
+                                    <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
                                 ) : filteredRequests.length > 0 ? (
                                     filteredRequests.map((request, idx) => (
                                         <Card key={idx} className={`bg-default-50/5 border ${request.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'} hover:bg-default-50/10 transition-colors`}>
@@ -237,12 +236,12 @@ export default function DashboardPage() {
                                         </Card>
                                     ))
                                 ) : (
-                                    <div className="col-span-full py-20 text-center space-y-4">
+                                    <div className="col-span-full py-8 text-center space-y-4">
                                         <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-orange-500/20">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
                                         </div>
                                         <p className="text-default-400 font-medium whitespace-pre-wrap">
-                                            {requestsSubFilter === 'all' ? t('dashboard.empty.requests') : requestsSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
+                                            {requestsSubFilter === 'all' ? "Vous n'avez aucune demande en attente pour le moment." : requestsSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
                                         </p>
                                     </div>
                                 )}
@@ -262,7 +261,7 @@ export default function DashboardPage() {
                                         <Card key={match.id} as={Link} to={`/matches/${match.id}`} className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group">
                                             <CardBody className="p-5 flex flex-col gap-4">
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:rotate-6 ${match.type === 'tournament' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-orange-500/20 text-orange-500'}`}>
+                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:rotate-6 ${match.type === 'tournament' ? 'bg-purple-500/20 text-purple-400' : 'bg-orange-500/20 text-orange-500'}`}>
                                                         {match.type === 'tournament' ? (
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z" /></svg>
                                                         ) : (
@@ -290,11 +289,20 @@ export default function DashboardPage() {
                                         </Card>
                                     ))
                                 ) : (
-                                    <div className="col-span-full py-20 text-center space-y-6">
+                                    <div className="col-span-full py-8 text-center space-y-6">
                                         <p className="text-default-400 font-medium">
-                                            {organizedSubFilter === 'all' ? t('dashboard.empty.organized') : organizedSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
+                                            {organizedSubFilter === 'all' ? "Vous n'avez publié aucune annonce" : organizedSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
                                         </p>
-                                        <Button as={Link} to="/matches" color="warning" variant="flat" className="font-bold bg-orange-500/10 text-orange-400">Rechercher un match</Button>
+                                        {organizedSubFilter === 'all' ? (
+                                            <div className="flex gap-4 justify-center items-center">
+                                                <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400">Rechercher un match</Button>
+                                                <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400">Rechercher un tournoi</Button>
+                                            </div>
+                                        ) : (
+                                            <Button as={Link} to={organizedSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={organizedSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold ${organizedSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
+                                                {organizedSubFilter === 'tournament' ? "Rechercher un tournoi" : "Rechercher un match"}
+                                            </Button>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -365,11 +373,20 @@ export default function DashboardPage() {
                                         </Card>
                                     ))
                                 ) : (
-                                    <div className="col-span-full py-20 text-center space-y-4">
-                                        <p className="text-default-400 font-medium italic">
-                                            {participationsSubFilter === 'all' ? t('dashboard.empty.participations') : participationsSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
+                                    <div className="col-span-full py-8 text-center space-y-4">
+                                        <p className="text-default-400 font-medium">
+                                            {participationsSubFilter === 'all' ? "Vous n'avez postulé à aucun match ni tournoi" : participationsSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
                                         </p>
-                                        <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-teal-500/10 text-teal-400">Rechercher un match</Button>
+                                        {participationsSubFilter === 'all' ? (
+                                            <div className="flex gap-4 justify-center items-center">
+                                                <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400">Rechercher un match</Button>
+                                                <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400">Rechercher un tournoi</Button>
+                                            </div>
+                                        ) : (
+                                            <Button as={Link} to={participationsSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={participationsSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold ${participationsSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
+                                                {participationsSubFilter === 'tournament' ? "Rechercher un tournoi" : "Rechercher un match"}
+                                            </Button>
+                                        )}
                                     </div>
                                 )}
                             </div>

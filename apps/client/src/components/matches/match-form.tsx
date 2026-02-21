@@ -229,15 +229,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-appearance-in">
-            <Card className="shadow-medium border-yellow-500/20 bg-yellow-500/5">
-                <CardHeader className="flex gap-3 bg-linear-to-r from-yellow-500/10 to-transparent px-6 py-4">
-                    <div className="p-2 bg-yellow-500/20 rounded-lg text-yellow-600">
+            <Card className="shadow-medium border-violet-800/20 bg-violet-900/10">
+                <CardHeader className="flex gap-3 bg-linear-to-r from-violet-800/20 to-transparent px-6 py-4">
+                    <div className="p-2 bg-violet-800/30 rounded-lg text-violet-400">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                             <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" />
                         </svg>
                     </div>
                     <div className="flex flex-col">
-                        <p className="text-md font-bold text-yellow-700">{t('matchForm.title')}</p>
+                        <p className="text-md font-bold text-violet-300">{t('matchForm.title')}</p>
                         <p className="text-small text-default-500">{t('matchForm.subtitle')}</p>
                     </div>
                 </CardHeader>
@@ -369,23 +369,23 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     {/* Row 3: SIRET (Left) and Address Details (Right) */}
                     <div className="md:col-span-2">
                         {!user?.club_id ? (
-                            <div className="p-5 bg-warning-50 border-2 border-warning-200 rounded-2xl flex flex-col gap-5 shadow-sm">
+                            <div className="p-5 bg-violet-900/20 border-2 border-violet-700/50 rounded-2xl flex flex-col gap-5 shadow-sm">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-2.5 bg-warning-100 rounded-full text-warning-600 shrink-0">
+                                    <div className="p-2.5 bg-violet-800/40 rounded-full text-violet-400 shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                                         </svg>
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                        <h4 className="text-sm md:text-base font-black text-warning-900 uppercase tracking-tighter">
+                                        <h4 className="text-sm md:text-base font-black text-violet-100 uppercase tracking-tighter">
                                             {t('matchForm.link_club.title')}
                                         </h4>
-                                        <div className="text-[12px] md:text-[14px] text-warning-800 space-y-2 font-bold leading-snug">
-                                            <p className="underline decoration-2 text-warning-900">{t('matchForm.link_club.warning_siret')}</p>
+                                        <div className="text-[12px] md:text-[14px] text-violet-200 space-y-2 font-bold leading-snug">
+                                            <p className="underline decoration-2 text-violet-100">{t('matchForm.link_club.warning_siret')}</p>
                                             <p>{t('matchForm.link_club.warning_auto')}</p>
-                                            <p className="text-warning-950 font-black">{t('matchForm.link_club.warning_final')}</p>
+                                            <p className="text-white font-black">{t('matchForm.link_club.warning_final')}</p>
                                             <p className="italic opacity-90 text-[11px] md:text-[13px]">{t('matchForm.link_club.warning_support')}</p>
-                                            <p className="border-t border-warning-200/50 pt-2 text-warning-950">{t('matchForm.link_club.warning_search')}</p>
+                                            <p className="border-t border-violet-600/50 pt-2 text-white">{t('matchForm.link_club.warning_search')}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -397,10 +397,10 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                         onValueChange={setSiret}
                                         className="w-full sm:max-w-xs"
                                         classNames={{
-                                            inputWrapper: "bg-white border-warning-200 shadow-inner h-10 font-bold"
+                                            inputWrapper: "bg-white border-violet-700/50 shadow-inner h-10 font-bold"
                                         }}
                                     />
-                                    <Button size="md" color="warning" onPress={handleLinkClub} isLoading={isLinking} className="w-full sm:w-auto font-black px-8 shadow-md h-10 uppercase tracking-tighter">
+                                    <Button size="md" color="secondary" onPress={handleLinkClub} isLoading={isLinking} className="w-full sm:w-auto font-black px-8 shadow-md h-10 uppercase tracking-tighter">
                                         {t('matchForm.link_club.validate')}
                                     </Button>
                                 </div>
@@ -467,15 +467,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     {/* Row 4: Centered Progress Bar */}
                     <div className="md:col-span-4 flex flex-col justify-center space-y-3 mt-4">
                         <div className="w-[64%] mx-auto flex flex-col space-y-3">
-                            <p className="text-sm font-bold text-yellow-700 uppercase tracking-tight text-center">
+                            <p className="text-sm font-bold text-violet-300 uppercase tracking-tight text-center">
                                 {t('matchForm.progress')}: {progress}%
                             </p>
-                            <div className="w-full h-4 bg-yellow-500/10 rounded-full overflow-hidden p-px border border-yellow-500/20 ring-1 ring-yellow-500/5 shadow-inner">
+                            <div className="w-full h-4 bg-violet-900/30 rounded-full overflow-hidden p-px border border-violet-800/20 ring-1 ring-violet-500/10 shadow-inner">
                                 <div
-                                    className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(234,179,8,0.3)]"
+                                    className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(139,92,246,0.3)]"
                                     style={{
                                         width: `${progress}%`,
-                                        background: 'linear-gradient(90deg, #eab308 0%, #fbbf24 50%, #fef3c7 100%)',
+                                        background: 'linear-gradient(90deg, #5b21b6 0%, #7c3aed 50%, #c4b5fd 100%)',
                                         backgroundSize: '200% 100%'
                                     }}
                                 />
@@ -519,7 +519,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         {t('matchForm.buttons.cancel')}
                     </Button>
                 )}
-                <Button type="submit" color="warning" className="bg-yellow-500 font-bold text-yellow-950" isLoading={isSaving} isDisabled={!user?.club_id}>
+                <Button type="submit" color="secondary" className="bg-violet-700 font-bold text-white" isLoading={isSaving} isDisabled={!user?.club_id}>
                     {initialData ? t('matchForm.buttons.update') : t('matchForm.buttons.create')}
                 </Button>
             </div>

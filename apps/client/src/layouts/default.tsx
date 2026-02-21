@@ -70,10 +70,10 @@ export default function DefaultLayout({
   return (
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
       <Navbar />
-      <main className={`container mx-auto ${maxWidth} px-6 grow pt-16`}>
+      <main className={`container mx-auto ${maxWidth} px-6 grow pt-6 pb-16`}>
         {children}
       </main>
-      <footer className="w-full flex items-center justify-center py-3">
+      <footer className="absolute bottom-0 w-full flex items-center justify-center py-3">
         {isAuthenticated && user && (
           <div className="fixed bottom-4 right-4 z-50">
             <Dropdown placement="top-end">

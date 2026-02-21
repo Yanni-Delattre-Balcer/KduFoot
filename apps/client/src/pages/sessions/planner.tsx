@@ -47,7 +47,7 @@ export default function SessionPlannerPage() {
             <section className="flex flex-col gap-6 w-full px-4">
 
                 {/* Hero - Historique */}
-                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-500/20 via-sky-400/15 to-transparent border border-blue-500/20">
+                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-indigo-600/20 via-indigo-400/15 to-transparent border border-indigo-600/20">
                     {/* Grass stripes - standard green */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
                     {/* Field center line + circle */}
@@ -61,12 +61,12 @@ export default function SessionPlannerPage() {
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-2xl bg-blue-500/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-blue-500">
+                            <div className="p-3 rounded-2xl bg-indigo-600/10">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-indigo-600">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-500 via-sky-400 to-blue-500">
+                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-indigo-600 via-indigo-400 to-indigo-600">
                                 {showVideoAnalysis ? t('sessions.title') : t('sessions.title_public')}
                             </h1>
                         </div>
@@ -135,7 +135,7 @@ export default function SessionPlannerPage() {
 
                             {sessions.length === 0 && !isErrorSessions && (
                                 <Card className="border border-green-500/20 bg-green-500/5">
-                                    <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
+                                    <CardBody className="py-8 flex flex-col items-center gap-4 text-center">
                                         <div className="p-4 rounded-full bg-green-500/10">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-green-500">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
@@ -193,7 +193,7 @@ export default function SessionPlannerPage() {
                                 </div>
                                 
                                 {isLoadingMatches ? (
-                                    <div className="flex justify-center p-12"><Spinner color="secondary" /></div>
+                                    <div className="flex justify-center py-6 px-4"><Spinner color="secondary" /></div>
                                 ) : matches && matches.length > 0 ? (
                                     <div className="flex flex-col gap-4">
                                         {matches.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').map((match) => (
@@ -227,9 +227,9 @@ export default function SessionPlannerPage() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl p-12 text-center flex flex-col items-center gap-4">
-                                        <p className="text-default-400 font-medium italic">Aucune annonce publiée.</p>
-                                        <Button as={Link} to="/matches" color="primary" variant="flat" size="sm" className="font-bold">Créer une annonce</Button>
+                                    <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">
+                                        <p className="text-default-400 font-medium">Aucune annonce publiée.</p>
+                                        <Button as={Link} to={view === 'tournaments' ? "/matches/new?type=tournament" : "/matches/new"} color={view === 'tournaments' ? "default" : "secondary"} variant="flat" size="sm" className={`font-bold ${view === 'tournaments' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>Créer une annonce</Button>
                                     </div>
                                 )}
                             </div>
@@ -246,7 +246,7 @@ export default function SessionPlannerPage() {
                                 </div>
 
                                 {isLoadingRequests ? (
-                                    <div className="flex justify-center p-12"><Spinner color="primary" /></div>
+                                    <div className="flex justify-center py-6 px-4"><Spinner color="primary" /></div>
                                 ) : requests.length > 0 ? (
                                     <div className="flex flex-col gap-4">
                                         {requests
@@ -292,13 +292,13 @@ export default function SessionPlannerPage() {
                                                         </div>
                                                     )}
                                                     
-                                                    <Button size="sm" variant="light" className="w-full text-[10px] font-bold text-default-400 h-6" as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
+                                                    <Button size="sm" variant="flat" className={`w-full text-[10px] font-bold h-7 ${request.type === 'tournament' ? 'bg-purple-300/10 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`} as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
                                                 </CardBody>
                                             </Card>
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl p-12 text-center flex flex-col items-center gap-4">
+                                    <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">
                                         <div className="p-4 bg-white/5 rounded-full text-white/20">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />

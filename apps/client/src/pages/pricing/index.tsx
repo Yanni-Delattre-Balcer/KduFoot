@@ -35,8 +35,8 @@ export default function PricingPage() {
     {
       key: "elite",
       price: t("pricing.plans.elite.price"),
-      color: "secondary" as const,
-      gradient: "from-secondary/25 to-purple-500/15",
+      color: "default" as const,
+      gradient: "from-purple-400/25 to-fuchsia-500/15",
       featuresCount: 4,
     },
   ];
@@ -46,7 +46,7 @@ export default function PricingPage() {
       <section className="flex flex-col gap-10 w-full px-4">
 
         {/* Hero - Abonnements */}
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-secondary/15 via-purple-500/10 to-fuchsia-500/10 border border-secondary/20">
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-purple-400/20 via-purple-500/10 to-fuchsia-500/10 border border-purple-300/30">
           {/* Grass stripes - standard green */}
           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
           {/* Field center line + circle */}
@@ -60,12 +60,12 @@ export default function PricingPage() {
 
           <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-secondary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-secondary">
+              <div className="p-3 rounded-2xl bg-purple-400/10">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-purple-400">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455-2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
                 </svg>
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-secondary to-purple-500">
+              <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-purple-400 to-fuchsia-400">
                 {t("pricing.hero.title")}
               </h1>
             </div>
@@ -117,7 +117,7 @@ export default function PricingPage() {
                     fullWidth
                     color={plan.color}
                     variant={plan.popular ? "shadow" : "solid"}
-                    className="font-bold"
+                    className={`font-bold ${plan.color === 'default' && plan.key === 'elite' ? 'bg-purple-300/20 text-purple-400' : ''}`}
                   >
                     {t(`pricing.plans.${plan.key}.cta`)}
                   </Button>
