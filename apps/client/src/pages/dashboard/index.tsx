@@ -10,7 +10,7 @@ import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
 import { Tabs, Tab } from "@heroui/tabs";
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import FootballClock from '../../components/football-clock';
 
 export default function DashboardPage() {

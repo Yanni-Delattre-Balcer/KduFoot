@@ -121,19 +121,19 @@ export default function MatchesPage() {
     // UI Configuration based on type
     const uiConfig = {
         match: {
-            gradient: "bg-linear-to-br from-orange-500/20 via-yellow-400/15 to-transparent",
-            border: "border-orange-500/20",
-            titleGradient: "from-orange-500 via-yellow-400 to-yellow-400",
-            iconColor: "text-orange-500",
+            gradient: "bg-linear-to-br from-violet-500/20 via-purple-400/15 to-transparent",
+            border: "border-violet-500/20",
+            titleGradient: "from-violet-500 via-purple-400 to-purple-400",
+            iconColor: "text-violet-500",
             title: t('match.title', 'Matchs Amicaux'),
             desc_find: t('matchesPage.description_find'),
             desc_create: t('matchesPage.description_create')
         },
         tournament: {
-            gradient: "bg-linear-to-br from-yellow-300/15 via-yellow-200/5 to-transparent",
-            border: "border-yellow-400/20",
-            titleGradient: "from-yellow-400 to-yellow-500",
-            iconColor: "text-yellow-500",
+            gradient: "bg-linear-to-br from-purple-300/15 via-purple-200/5 to-transparent",
+            border: "border-purple-400/20",
+            titleGradient: "from-purple-400 to-purple-500",
+            iconColor: "text-purple-500",
             title: t('matchesPage.title_tournament', 'Tournois Amicaux'),
             desc_find: t('matchesPage.description_find_tournament'),
             desc_create: t('matchesPage.description_create_tournament')
@@ -159,7 +159,7 @@ export default function MatchesPage() {
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
                         <div className="flex items-center gap-3">
-                            <div className={`p-3 rounded-2xl ${type === 'match' ? 'bg-orange-500/10' : 'bg-yellow-500/10'}`}>
+                            <div className={`p-3 rounded-2xl ${type === 'match' ? 'bg-violet-500/10' : 'bg-purple-500/10'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-8 h-8 ${uiConfig.iconColor}`}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
@@ -177,10 +177,10 @@ export default function MatchesPage() {
                             <div className="flex gap-2 p-1 rounded-2xl bg-default-200/30 backdrop-blur-sm border border-white/5">
                                 <Button
                                     size="sm"
-                                    color={type === 'match' ? "warning" : "default"}
+                                    color={type === 'match' ? "secondary" : "default"}
                                     variant={type === 'match' ? "solid" : "light"}
                                     onPress={() => setType('match')}
-                                    className={type === 'match' ? "font-bold text-white shadow-lg shadow-orange-500/40 bg-linear-to-r from-orange-500 to-yellow-500" : ""}
+                                    className={type === 'match' ? "font-bold text-white shadow-lg shadow-violet-500/40 bg-linear-to-r from-violet-500 to-purple-500" : ""}
                                 >
                                     {t('match.tab_matches', 'Matchs')}
                                 </Button>
@@ -189,7 +189,7 @@ export default function MatchesPage() {
                                     color={type === 'tournament' ? "default" : "default"}
                                     variant={type === 'tournament' ? "solid" : "light"}
                                     onPress={() => setType('tournament')}
-                                    className={type === 'tournament' ? "font-bold text-yellow-900 shadow-lg shadow-yellow-500/20 bg-yellow-400" : ""}
+                                    className={type === 'tournament' ? "font-bold text-purple-900 shadow-lg shadow-purple-500/20 bg-purple-400" : ""}
                                 >
                                     {t('match.tab_tournaments', 'Tournois')}
                                 </Button>
@@ -202,7 +202,7 @@ export default function MatchesPage() {
                                     variant={view === 'find' ? "shadow" : "light"}
                                     onPress={() => setView('find')}
                                     size="lg"
-                                    className={view === 'find' ? (type === 'match' ? "font-bold bg-linear-to-r from-orange-500 via-yellow-400 to-yellow-400 text-white shadow-lg shadow-orange-500/30" : "font-bold bg-yellow-400 text-yellow-900 shadow-lg shadow-yellow-500/30") : ""}
+                                    className={view === 'find' ? (type === 'match' ? "font-bold bg-linear-to-r from-violet-500 via-purple-400 to-purple-400 text-white shadow-lg shadow-violet-500/30" : "font-bold bg-purple-400 text-purple-900 shadow-lg shadow-purple-500/30") : ""}
                                     startContent={
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -216,7 +216,7 @@ export default function MatchesPage() {
                                     variant={view === 'create' ? "shadow" : "light"}
                                     onPress={() => setView('create')}
                                     size="lg"
-                                    className={view === 'create' ? (type === 'match' ? "font-bold bg-linear-to-r from-orange-500 via-yellow-400 to-yellow-400 text-white shadow-lg shadow-orange-500/30" : "font-bold bg-yellow-400 text-yellow-900 shadow-lg shadow-yellow-500/30") : ""}
+                                    className={view === 'create' ? (type === 'match' ? "font-bold bg-linear-to-r from-violet-500 via-purple-400 to-purple-400 text-white shadow-lg shadow-violet-500/30" : "font-bold bg-purple-400 text-purple-900 shadow-lg shadow-purple-500/30") : ""}
                                     startContent={
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -242,18 +242,18 @@ export default function MatchesPage() {
                         <div className="flex flex-col gap-5">
 
                             {/* Filter Section - Coordinated container */}
-                            <Card className={`shadow-lg border ${type === 'match' ? 'shadow-orange-500/5 border-orange-500/20' : 'shadow-yellow-500/5 border-yellow-500/20'} bg-[#232120] overflow-hidden`}>
+                            <Card className={`shadow-lg border ${type === 'match' ? 'shadow-violet-500/5 border-violet-500/20' : 'shadow-purple-500/5 border-purple-500/20'} bg-[#232120] overflow-hidden`}>
                                 <CardHeader className="pb-0 pt-5 px-5 relative">
                                     <div className="flex justify-between items-center w-full">
                                         <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-lg ${type === 'match' ? 'bg-orange-500/10' : 'bg-yellow-500/10'}`}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-4 h-4 ${type === 'match' ? 'text-orange-600 dark:text-orange-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                                            <div className={`p-1.5 rounded-lg ${type === 'match' ? 'bg-violet-500/10' : 'bg-purple-500/10'}`}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-4 h-4 ${type === 'match' ? 'text-violet-600 dark:text-violet-400' : 'text-purple-600 dark:text-purple-400'}`}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
                                                 </svg>
                                             </div>
                                             <h3 className="text-lg font-semibold text-default-900 dark:text-default-100">{t('matchesPage.filters.title')}</h3>
                                             {activeFilterCount > 0 && (
-                                                <Chip size="sm" color="warning" variant="flat" className="bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">{activeFilterCount} {t('matchesPage.filters.active')}</Chip>
+                                                <Chip size="sm" color="secondary" variant="flat" className="bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">{activeFilterCount} {t('matchesPage.filters.active')}</Chip>
                                             )}
                                         </div>
                                         {activeFilterCount > 0 && (
@@ -274,7 +274,7 @@ export default function MatchesPage() {
                                             selectedKeys={filters.category ? [filters.category] : []}
                                             onChange={(e) => handleFilterChange('category', e.target.value)}
                                             size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {CATEGORIES.map((cat) => (
                                                 <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
@@ -287,7 +287,7 @@ export default function MatchesPage() {
                                             selectedKeys={filters.level ? [filters.level] : []}
                                             onChange={(e) => handleFilterChange('level', e.target.value)}
                                             size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {LEVELS.map((lvl) => (
                                                 <SelectItem key={lvl}>{t(`enums.level.${lvl}`)}</SelectItem>
@@ -300,7 +300,7 @@ export default function MatchesPage() {
                                             selectedKeys={filters.format ? [filters.format] : []}
                                             onChange={(e) => handleFilterChange('format', e.target.value)}
                                             size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {FORMATS.map((f) => (
                                                 <SelectItem key={f}>{t(`enums.format.${f}`, f)}</SelectItem>
@@ -313,7 +313,7 @@ export default function MatchesPage() {
                                             selectedKeys={filters.notes && filters.notes.includes('Genre:') ? [filters.notes.split('Genre: ')[1]] : []}
                                             onChange={(e) => handleFilterChange('notes', e.target.value ? `Genre: ${e.target.value}` : '')} // Hacky filter via notes
                                             size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             <SelectItem key="Masculin">{t('enums.gender.Masculin')}</SelectItem>
                                             <SelectItem key="Féminin">{t('enums.gender.Féminin')}</SelectItem>
@@ -326,7 +326,7 @@ export default function MatchesPage() {
                                             selectedKeys={filters.pitch_type ? [filters.pitch_type] : []}
                                             onChange={(e) => handleFilterChange('pitch_type', e.target.value)}
                                             size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {PITCH_TYPES.map((type) => (
                                                 <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
@@ -339,7 +339,7 @@ export default function MatchesPage() {
                                             value={filters.date || ''}
                                             onChange={(e) => handleFilterChange('date', e.target.value)}
                                             size="sm"
-                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         />
 
                                         <Select
@@ -348,7 +348,7 @@ export default function MatchesPage() {
                                             selectedKeys={filters.venue ? [filters.venue] : []}
                                             onChange={(e) => handleFilterChange('venue', e.target.value)}
                                             size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         >
                                             {VENUES.map((v) => (
                                                 <SelectItem key={v}>{t(`enums.venue.${v}`)}</SelectItem>
@@ -363,7 +363,7 @@ export default function MatchesPage() {
                                             size="sm"
                                             isClearable
                                             onClear={() => handleFilterChange('location_city', '')}
-                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         />
 
                                         <Input
@@ -374,7 +374,7 @@ export default function MatchesPage() {
                                             size="sm"
                                             isClearable
                                             onClear={() => handleFilterChange('location_zip', '')}
-                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         />
 
                                         <Input
@@ -389,7 +389,7 @@ export default function MatchesPage() {
                                             isDisabled={!canUseDistance}
                                             endContent={<span className="text-default-400 text-sm">km</span>}
                                             description={!canUseDistance ? t('matchForm.alerts.must_link') : radiusKm > 0 ? `depuis ${user?.club?.city || 'club'}` : undefined}
-                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-orange-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
                                         />
                                     </div>
                                 </CardBody>
@@ -401,7 +401,7 @@ export default function MatchesPage() {
                                     <Button
                                         size="sm"
                                         variant={displayMode === 'list' ? 'solid' : 'light'}
-                                        color={displayMode === 'list' ? 'warning' : 'default'}
+                                        color={displayMode === 'list' ? 'secondary' : 'default'}
                                         onPress={() => setDisplayMode('list')}
                                         className={displayMode === 'list' ? 'font-bold' : ''}
                                         startContent={
@@ -415,7 +415,7 @@ export default function MatchesPage() {
                                     <Button
                                         size="sm"
                                         variant={displayMode === 'calendar' ? 'solid' : 'light'}
-                                        color={displayMode === 'calendar' ? 'warning' : 'default'}
+                                        color={displayMode === 'calendar' ? 'secondary' : 'default'}
                                         onPress={() => setDisplayMode('calendar')}
                                         className={displayMode === 'calendar' ? 'font-bold' : ''}
                                         startContent={
@@ -436,7 +436,7 @@ export default function MatchesPage() {
 
                             {/* Calendar View */}
                             {displayMode === 'calendar' && (
-                                <Card className="shadow-lg shadow-orange-500/5 border border-orange-500/20 bg-[#232120] overflow-hidden">
+                                <Card className="shadow-lg shadow-violet-500/5 border border-violet-500/20 bg-[#232120] overflow-hidden">
                                     <CardHeader className="px-5 pt-5 pb-3">
                                         <div className="flex justify-between items-center w-full">
                                             <Button size="sm" variant="light" onPress={prevMonth} isIconOnly>
@@ -444,7 +444,7 @@ export default function MatchesPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                                                 </svg>
                                             </Button>
-                                            <h3 className="text-xl font-bold text-orange-400">
+                                            <h3 className="text-xl font-bold text-violet-400">
                                                 {getMonthName(calendarMonth)} {calendarMonth.getFullYear()}
                                             </h3>
                                             <Button size="sm" variant="light" onPress={nextMonth} isIconOnly>
@@ -483,13 +483,13 @@ export default function MatchesPage() {
                                                         onClick={() => count > 0 ? handleDayClick(dateKey) : undefined}
                                                         className={`
                                                             h-16 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all text-sm relative border border-white/5
-                                                            ${isSelected ? 'bg-orange-500/30 border-2 border-orange-500 shadow-lg shadow-orange-500/20' : ''}
-                                                            ${isToday && !isSelected ? 'ring-1 ring-orange-500/50 bg-orange-500/10' : ''}
-                                                            ${count > 0 ? 'hover:bg-orange-500/20 cursor-pointer bg-zinc-800/80' : 'cursor-default bg-zinc-900/40'}
+                                                            ${isSelected ? 'bg-violet-500/30 border-2 border-violet-500 shadow-lg shadow-violet-500/20' : ''}
+                                                            ${isToday && !isSelected ? 'ring-1 ring-violet-500/50 bg-violet-500/10' : ''}
+                                                            ${count > 0 ? 'hover:bg-violet-500/20 cursor-pointer bg-zinc-800/80' : 'cursor-default bg-zinc-900/40'}
                                                             ${!count && !isSelected && !isToday ? 'text-zinc-600' : ''}
                                                         `}
                                                     >
-                                                        <span className={`text-xs font-semibold ${isToday ? 'text-orange-400' : 'text-zinc-400'} ${isSelected ? 'text-orange-300' : ''} ${count > 0 ? 'text-zinc-200' : ''}`}>
+                                                        <span className={`text-xs font-semibold ${isToday ? 'text-violet-400' : 'text-zinc-400'} ${isSelected ? 'text-violet-300' : ''} ${count > 0 ? 'text-zinc-200' : ''}`}>
                                                             {day}
                                                         </span>
                                                         {count > 0 && (
@@ -498,7 +498,7 @@ export default function MatchesPage() {
                                                                     <span key={bi} className="text-[10px] leading-none">⚽</span>
                                                                 ))}
                                                                 {count > 4 && (
-                                                                    <span className="text-[8px] text-orange-400 font-bold">+{count - 4}</span>
+                                                                    <span className="text-[8px] text-violet-400 font-bold">+{count - 4}</span>
                                                                 )}
                                                             </div>
                                                         )}
@@ -522,17 +522,17 @@ export default function MatchesPage() {
                             {/* Match Results */}
                             {filteredMatches.length > 0 && (
                                 <div className="flex items-center gap-2 px-1">
-                                    <Chip size="sm" variant="flat" color="warning" className="bg-orange-100 text-orange-700">{filteredMatches.length}</Chip>
+                                    <Chip size="sm" variant="flat" color="secondary" className="bg-violet-100 text-violet-700">{filteredMatches.length}</Chip>
                                     <span className="text-sm text-default-500">{filteredMatches.length > 1 ? t('matchesPage.found') : t('matchesPage.found').replace('(s)', '').replace('(aux)', 'al')}</span>
                                 </div>
                             )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {filteredMatches.map((match) => (
-                                    <Card key={match.id} className={`group hover:shadow-lg transition-all border border-orange-500/20 hover:border-orange-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-orange-500 shadow-orange-500/20' : ''}`}>
+                                    <Card key={match.id} className={`group hover:shadow-lg transition-all border border-violet-500/20 hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
                                         <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
                                             {user?.id === match.owner_id && (
-                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-orange-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                                         <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
                                                     </svg>
@@ -540,7 +540,7 @@ export default function MatchesPage() {
                                                 </div>
                                             )}
                                             <div className="flex flex-col w-full">
-                                                <h4 className="font-bold text-xl text-default-900 group-hover:text-orange-500 transition-colors uppercase tracking-tight truncate w-full">
+                                                <h4 className="font-bold text-xl text-default-900 group-hover:text-violet-500 transition-colors uppercase tracking-tight truncate w-full">
                                                     {match.club?.name || t('matchesPage.unknown_club')}
                                                 </h4>
                                                 <p className="text-small text-default-500 font-medium">{match.location_city || match.club?.city} ({match.location_zip || match.club?.zip})</p>
@@ -550,14 +550,14 @@ export default function MatchesPage() {
                                             {/* Date & Time Row - Simplified */}
                                             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-default-600 bg-default-50 p-2 rounded-lg justify-center">
                                                 <div className="flex items-center gap-1.5 shrink-0">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-violet-500">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                                                     </svg>
                                                     <span className="font-semibold capitalize text-xs sm:text-sm">{new Date(match.match_date).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
                                                 </div>
                                                 <div className="hidden sm:block w-px h-4 bg-default-300"></div>
                                                 <div className="flex items-center gap-1.5 shrink-0">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-orange-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-violet-500">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                                     </svg>
                                                     <span className="font-semibold text-xs sm:text-sm">{match.match_time}</span>
@@ -573,7 +573,7 @@ export default function MatchesPage() {
                                             )}
                                         </CardBody>
                                         <CardFooter className="px-4 pb-4">
-                                            <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="warning" className="font-bold w-full bg-linear-to-r from-orange-400 to-amber-500 text-white shadow-md shadow-orange-500/20">
+                                            <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold w-full bg-linear-to-r from-violet-400 to-amber-500 text-white shadow-md shadow-violet-500/20">
                                                 {t('details')}
                                             </Button>
                                         </CardFooter>
@@ -582,19 +582,19 @@ export default function MatchesPage() {
                             </div>
 
                             {filteredMatches.length === 0 && !isError && (
-                                <Card className="border border-orange-500/20 bg-[#232120] overflow-hidden">
-                                    <div className="absolute inset-0 bg-linear-to-br from-orange-500/5 to-transparent pointer-events-none"></div>
+                                <Card className="border border-violet-500/20 bg-[#232120] overflow-hidden">
+                                    <div className="absolute inset-0 bg-linear-to-br from-violet-500/5 to-transparent pointer-events-none"></div>
                                     <CardBody className="relative py-16 flex flex-col items-center gap-4 text-center">
-                                        <div className="p-4 rounded-full bg-orange-500/10">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12 text-orange-400">
+                                        <div className="p-4 rounded-full bg-violet-500/10">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12 text-violet-400">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-lg font-semibold text-orange-900/80 dark:text-orange-100">{t('matchesPage.empty_title')}</p>
-                                            <p className="text-sm text-orange-800/60 dark:text-orange-200/60 mt-1">{t('matchesPage.empty_desc')}</p>
+                                            <p className="text-lg font-semibold text-violet-900/80 dark:text-violet-100">{t('matchesPage.empty_title')}</p>
+                                            <p className="text-sm text-violet-800/60 dark:text-violet-200/60 mt-1">{t('matchesPage.empty_desc')}</p>
                                         </div>
-                                        <Button color="warning" variant="flat" onPress={() => setView('create')} className="mt-2 font-semibold bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">
+                                        <Button color="secondary" variant="flat" onPress={() => setView('create')} className="mt-2 font-semibold bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
                                             {t('match.create')}
                                         </Button>
                                     </CardBody>

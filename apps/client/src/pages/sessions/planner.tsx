@@ -7,7 +7,7 @@ import FootballClock from '../../components/football-clock';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
 
 import { Button } from '@heroui/button';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
@@ -17,11 +17,10 @@ import { showVideoAnalysis } from '@/config/site';
 
 export default function SessionPlannerPage() {
     const { t, i18n } = useTranslation();
-    const navigate = useNavigate();
     const { getAccessTokenSilently } = useAuth0();
     const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');
     const { sessions, isError: isErrorSessions } = useSessions();
-    const { matches, isError: isErrorMatches, isLoading: isLoadingMatches } = useMatches({ owner_id: 'me', include_past: true });
+    const { matches, isLoading: isLoadingMatches } = useMatches({ owner_id: 'me', include_past: true });
     const [requests, setRequests] = useState<any[]>([]);
     const [isLoadingRequests, setIsLoadingRequests] = useState(false);
 
@@ -48,7 +47,7 @@ export default function SessionPlannerPage() {
             <section className="flex flex-col gap-6 w-full px-4">
 
                 {/* Hero - Historique */}
-                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-rose-500/20 via-pink-400/15 to-transparent border border-rose-500/20">
+                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-500/20 via-sky-400/15 to-transparent border border-blue-500/20">
                     {/* Grass stripes - standard green */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
                     {/* Field center line + circle */}
@@ -62,12 +61,12 @@ export default function SessionPlannerPage() {
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-2xl bg-rose-500/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-rose-500">
+                            <div className="p-3 rounded-2xl bg-blue-500/10">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-blue-500">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-rose-500 via-pink-400 to-rose-500">
+                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-500 via-sky-400 to-blue-500">
                                 {showVideoAnalysis ? t('sessions.title') : t('sessions.title_public')}
                             </h1>
                         </div>
@@ -97,11 +96,11 @@ export default function SessionPlannerPage() {
                                 </Button>
                             )}
                             <Button
-                                color={view === 'matches' ? "warning" : "default"}
+                                color={view === 'matches' ? "secondary" : "default"}
                                 variant={view === 'matches' ? "shadow" : "light"}
                                 onPress={() => setView('matches')}
                                 size="lg"
-                                className={view === 'matches' ? "font-bold text-white bg-linear-to-r from-orange-500 to-amber-500" : ""}
+                                className={view === 'matches' ? "font-bold text-white bg-linear-to-r from-violet-500 to-purple-500" : ""}
                                 startContent={
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m11.372-5.362c.962-.203 1.934-.377 2.916-.52M19.5 4.5c.125.163.233.332.322.508M19.5 4.5v.243a12.98 12.98 0 0 1-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35" />
@@ -115,7 +114,7 @@ export default function SessionPlannerPage() {
                                 variant={view === 'tournaments' ? "shadow" : "light"}
                                 onPress={() => setView('tournaments')}
                                 size="lg"
-                                className={view === 'tournaments' ? "font-bold text-yellow-900 shadow-lg shadow-yellow-500/20 bg-yellow-400" : ""}
+                                className={view === 'tournaments' ? "font-bold text-purple-900 shadow-lg shadow-purple-500/20 bg-purple-400" : ""}
                                 startContent={
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
@@ -194,13 +193,13 @@ export default function SessionPlannerPage() {
                                 </div>
                                 
                                 {isLoadingMatches ? (
-                                    <div className="flex justify-center p-12"><Spinner color="warning" /></div>
+                                    <div className="flex justify-center p-12"><Spinner color="secondary" /></div>
                                 ) : matches && matches.length > 0 ? (
                                     <div className="flex flex-col gap-4">
                                         {matches.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').map((match) => (
                                             <Card key={match.id} as={Link} to={`/matches/${match.id}`} className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group">
                                                 <CardBody className="flex flex-row items-center gap-4 p-4">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${match.type === 'tournament' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-orange-500/20 text-orange-500'}`}>
+                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${match.type === 'tournament' ? 'bg-purple-500/20 text-purple-500' : 'bg-violet-500/20 text-violet-500'}`}>
                                                         {match.type === 'tournament' ? (
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z" /><path d="m3.265 10.602 7.641 4.114a.75.75 0 0 0 .712 0l7.641-4.114.679.365a.75.75 0 0 1 0 1.32l-8.32 4.48a.75.75 0 0 1-.712 0l-8.32-4.48a.75.75 0 0 1 0-1.32l.679-.365Z" /></svg>
                                                         ) : (
@@ -240,7 +239,7 @@ export default function SessionPlannerPage() {
                                 <div className="flex items-center gap-3 px-2">
                                     <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Demandes Reçues</h2>
                                     {requests.filter(r => r.request_status === 'pending').length > 0 && (
-                                        <span className="bg-orange-500 px-2 py-0.5 rounded text-xs font-bold text-white leading-tight animate-pulse">
+                                        <span className="bg-violet-500 px-2 py-0.5 rounded text-xs font-bold text-white leading-tight animate-pulse">
                                             {requests.filter(r => r.request_status === 'pending').length}
                                         </span>
                                     )}

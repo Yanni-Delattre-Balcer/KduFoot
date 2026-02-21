@@ -95,11 +95,11 @@ export default function FavoritesPage() {
                             </Button>
                             )}
                             <Button
-                                color={view === 'matches' ? "warning" : "default"}
+                                color={view === 'matches' ? "secondary" : "default"}
                                 variant={view === 'matches' ? "shadow" : "light"}
                                 onPress={() => setView('matches')}
                                 size="lg"
-                                className={view === 'matches' ? "font-bold text-white bg-linear-to-r from-orange-500 to-amber-500" : ""}
+                                className={view === 'matches' ? "font-bold text-white bg-linear-to-r from-violet-500 to-purple-500" : ""}
                                 startContent={
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m11.372-5.362c.962-.203 1.934-.377 2.916-.52M19.5 4.5c.125.163.233.332.322.508M19.5 4.5v.243a12.98 12.98 0 0 1-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35" />
@@ -113,7 +113,7 @@ export default function FavoritesPage() {
                                 variant={view === 'tournaments' ? "shadow" : "light"}
                                 onPress={() => setView('tournaments')}
                                 size="lg"
-                                className={view === 'tournaments' ? "font-bold text-yellow-900 shadow-lg shadow-yellow-500/20 bg-yellow-400" : ""}
+                                className={view === 'tournaments' ? "font-bold text-purple-900 shadow-lg shadow-purple-500/20 bg-purple-400" : ""}
                                 startContent={
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
@@ -179,17 +179,17 @@ export default function FavoritesPage() {
                     {view === 'matches' && (
                         <>
                             {loadingMatches ? (
-                                <div className="flex justify-center py-10"><Spinner color="warning" /></div>
+                                <div className="flex justify-center py-10"><Spinner color="secondary" /></div>
                             ) : favMatches.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {favMatches.map(match => (
-                                        <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-orange-500/10 transition-all bg-[#252018] border border-orange-500/20 hover:border-orange-500/40">
+                                        <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-violet-500/10 transition-all bg-[#252018] border border-violet-500/20 hover:border-violet-500/40">
                                             <CardBody>
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">{match.category}</Chip>
+                                                    <Chip size="sm" variant="flat" color="secondary" className="font-semibold bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">{match.category}</Chip>
                                                     <Chip size="sm" variant="flat" color={match.venue === 'Domicile' ? 'success' : 'danger'}>{t(`enums.venue.${match.venue}`)}</Chip>
                                                 </div>
-                                                <p className="font-bold text-lg text-default-900 group-hover:text-orange-600 transition-colors">vs {match.club.name}</p>
+                                                <p className="font-bold text-lg text-default-900 group-hover:text-violet-600 transition-colors">vs {match.club.name}</p>
                                                 <div className="flex items-center gap-2 mt-2 text-sm text-default-600 font-medium">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -202,18 +202,18 @@ export default function FavoritesPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <Card className="border border-orange-500/20 bg-[#252018]">
+                                <Card className="border border-violet-500/20 bg-[#252018]">
                                     <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
-                                        <div className="p-4 rounded-full bg-orange-500/10 text-orange-500">
+                                        <div className="p-4 rounded-full bg-violet-500/10 text-violet-500">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m11.372-5.362c.962-.203 1.934-.377 2.916-.52M19.5 4.5c.125.163.233.332.322.508M19.5 4.5v.243a12.98 12.98 0 0 1-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-lg font-bold text-orange-900/90 dark:text-orange-100">{t('favorites.empty_matches')}</p>
-                                            <p className="text-md text-orange-900/70 dark:text-orange-200/70 mt-1">{t('favorites.empty_matches_desc')}</p>
+                                            <p className="text-lg font-bold text-violet-900/90 dark:text-violet-100">{t('favorites.empty_matches')}</p>
+                                            <p className="text-md text-violet-900/70 dark:text-violet-200/70 mt-1">{t('favorites.empty_matches_desc')}</p>
                                         </div>
-                                        <Button as={Link} to="/matches" color="warning" variant="flat" className="mt-2 bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 font-bold shadow-sm">
+                                        <Button as={Link} to="/matches" color="secondary" variant="flat" className="mt-2 bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 font-bold shadow-sm">
                                             {t('favorites.find_matches')}
                                         </Button>
                                     </CardBody>
@@ -225,17 +225,17 @@ export default function FavoritesPage() {
                     {view === 'tournaments' && (
                         <>
                             {loadingMatches ? (
-                                <div className="flex justify-center py-10"><Spinner color="warning" /></div>
+                                <div className="flex justify-center py-10"><Spinner color="secondary" /></div>
                             ) : favTournaments.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {favTournaments.map(match => (
-                                        <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-yellow-500/10 transition-all bg-[#252318] border border-yellow-500/20 hover:border-yellow-500/40">
+                                        <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-purple-500/10 transition-all bg-[#252318] border border-purple-500/20 hover:border-purple-500/40">
                                             <CardBody>
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300">{match.category}</Chip>
+                                                    <Chip size="sm" variant="flat" color="secondary" className="font-semibold bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">{match.category}</Chip>
                                                     <Chip size="sm" variant="flat" color={match.venue === 'Domicile' ? 'success' : 'danger'}>{t(`enums.venue.${match.venue}`)}</Chip>
                                                 </div>
-                                                <p className="font-bold text-lg text-default-900 group-hover:text-yellow-600 transition-colors">vs {match.club.name}</p>
+                                                <p className="font-bold text-lg text-default-900 group-hover:text-purple-600 transition-colors">vs {match.club.name}</p>
                                                 <div className="flex items-center gap-2 mt-2 text-sm text-default-600 font-medium">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -248,18 +248,18 @@ export default function FavoritesPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <Card className="border border-yellow-500/20 bg-[#252318]">
+                                <Card className="border border-purple-500/20 bg-[#252318]">
                                     <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
-                                        <div className="p-4 rounded-full bg-yellow-500/10 text-yellow-500">
+                                        <div className="p-4 rounded-full bg-purple-500/10 text-purple-500">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-lg font-bold text-yellow-900/90 dark:text-yellow-100">{t('favorites.empty_tournaments', 'Aucun tournoi favori')}</p>
-                                            <p className="text-md text-yellow-900/70 dark:text-yellow-200/70 mt-1">{t('favorites.empty_tournaments_desc', 'Ajoutez des tournois à vos favoris pour les retrouver ici.')}</p>
+                                            <p className="text-lg font-bold text-purple-900/90 dark:text-purple-100">{t('favorites.empty_tournaments', 'Aucun tournoi favori')}</p>
+                                            <p className="text-md text-purple-900/70 dark:text-purple-200/70 mt-1">{t('favorites.empty_tournaments_desc', 'Ajoutez des tournois à vos favoris pour les retrouver ici.')}</p>
                                         </div>
-                                        <Button as={Link} to="/matches" color="warning" variant="flat" className="mt-2 bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 font-bold shadow-sm">
+                                        <Button as={Link} to="/matches" color="secondary" variant="flat" className="mt-2 bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 font-bold shadow-sm">
                                             {t('favorites.find_tournaments', 'Trouver des tournois')}
                                         </Button>
                                     </CardBody>
