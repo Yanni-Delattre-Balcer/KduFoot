@@ -18,6 +18,7 @@ export interface Env {
     AUTH0_SUB: string;
     API_BASE_URL: string;
     CORS_ORIGIN: string;
+    CLOUDFLARE_DATABASE_ID?: string;
 
     // Permissions
     READ_PERMISSION: string;

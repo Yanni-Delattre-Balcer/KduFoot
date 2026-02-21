@@ -61,8 +61,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
         });
 
         if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Failed to link club');
+            const errorText = await res.text().catch(() => '');
+            let errorMessage = 'Failed to link club';
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.error || errorMessage;
+            } catch (e) {
+                // Not JSON
+                errorMessage = `${errorMessage} (Status: ${res.status})`;
+            }
+            throw new Error(errorMessage);
         }
 
         const data = await res.json();

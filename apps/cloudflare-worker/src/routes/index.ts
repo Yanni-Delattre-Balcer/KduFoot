@@ -52,6 +52,27 @@ export const setupRoutes = (router: Router, env: Env) => {
 		});
 	});
 
+	// Debug D1 (Public for now, carefully)
+	router.get("/api/debug-db", async () => {
+		try {
+			const count = await env.DB.prepare('SELECT count(*) as count FROM users').first();
+			return new Response(JSON.stringify({ 
+				success: true, 
+				database: "Connected", 
+				user_count: (count as any)?.count,
+				env_id: env.CLOUDFLARE_DATABASE_ID // This might be undefined unless injected
+			}), {
+				status: 200,
+				headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+			});
+		} catch (e: any) {
+			return new Response(JSON.stringify({ success: false, error: e.message }), {
+				status: 500,
+				headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+			});
+		}
+	});
+
 	// Protected ping (requires READ permission)
 	router.get(
 		"/api/ping",
