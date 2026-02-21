@@ -21,10 +21,11 @@ export default function FavoritesPage() {
     const { matches, isLoading: loadingMatches } = useMatches();
 
     // View state for Toggle Buttons (like Matches Page)
-    const [view, setView] = useState<'exercises' | 'matches'>(showVideoAnalysis ? 'exercises' : 'matches');
+    const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');
 
     const [favExercises, setFavExercises] = useState<Exercise[]>([]);
     const [favMatches, setFavMatches] = useState<Match[]>([]);
+    const [favTournaments, setFavTournaments] = useState<Match[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -36,6 +37,9 @@ export default function FavoritesPage() {
     useEffect(() => {
         if (matches && favorites?.matches) {
             setFavMatches(matches.filter(m => favorites.matches.includes(m.id)));
+        }
+        if (matches && favorites?.tournaments) {
+            setFavTournaments(matches.filter(m => favorites.tournaments.includes(m.id)));
         }
     }, [matches, favorites]);
 
@@ -104,6 +108,20 @@ export default function FavoritesPage() {
                             >
                                 {t('favorites.tab_matches')}
                             </Button>
+                            <Button
+                                color={view === 'tournaments' ? "default" : "default"}
+                                variant={view === 'tournaments' ? "shadow" : "light"}
+                                onPress={() => setView('tournaments')}
+                                size="lg"
+                                className={view === 'tournaments' ? "font-bold text-yellow-900 shadow-lg shadow-yellow-500/20 bg-yellow-400" : ""}
+                                startContent={
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                    </svg>
+                                }
+                            >
+                                {t('favorites.tab_tournaments')}
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -165,7 +183,7 @@ export default function FavoritesPage() {
                             ) : favMatches.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {favMatches.map(match => (
-                                        <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-pink-500/10 transition-all bg-[#251820] border border-pink-500/20 hover:border-pink-500/40">
+                                        <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-orange-500/10 transition-all bg-[#252018] border border-orange-500/20 hover:border-orange-500/40">
                                             <CardBody>
                                                 <div className="flex justify-between items-start mb-2">
                                                     <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">{match.category}</Chip>
@@ -184,7 +202,7 @@ export default function FavoritesPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <Card className="border border-pink-500/20 bg-[#251820]">
+                                <Card className="border border-orange-500/20 bg-[#252018]">
                                     <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
                                         <div className="p-4 rounded-full bg-orange-500/10 text-orange-500">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
@@ -197,6 +215,52 @@ export default function FavoritesPage() {
                                         </div>
                                         <Button as={Link} to="/matches" color="warning" variant="flat" className="mt-2 bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 font-bold shadow-sm">
                                             {t('favorites.find_matches')}
+                                        </Button>
+                                    </CardBody>
+                                </Card>
+                            )}
+                        </>
+                    )}
+
+                    {view === 'tournaments' && (
+                        <>
+                            {loadingMatches ? (
+                                <div className="flex justify-center py-10"><Spinner color="warning" /></div>
+                            ) : favTournaments.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {favTournaments.map(match => (
+                                        <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-yellow-500/10 transition-all bg-[#252318] border border-yellow-500/20 hover:border-yellow-500/40">
+                                            <CardBody>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <Chip size="sm" variant="flat" color="warning" className="font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300">{match.category}</Chip>
+                                                    <Chip size="sm" variant="flat" color={match.venue === 'Domicile' ? 'success' : 'danger'}>{t(`enums.venue.${match.venue}`)}</Chip>
+                                                </div>
+                                                <p className="font-bold text-lg text-default-900 group-hover:text-yellow-600 transition-colors">vs {match.club.name}</p>
+                                                <div className="flex items-center gap-2 mt-2 text-sm text-default-600 font-medium">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                                    </svg>
+                                                    {new Date(match.match_date).toLocaleDateString(i18n.language)}
+                                                </div>
+                                                {match.level && <Chip size="sm" variant="flat" color="secondary" className="mt-3">{match.level}</Chip>}
+                                            </CardBody>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Card className="border border-yellow-500/20 bg-[#252318]">
+                                    <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
+                                        <div className="p-4 rounded-full bg-yellow-500/10 text-yellow-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p className="text-lg font-bold text-yellow-900/90 dark:text-yellow-100">{t('favorites.empty_tournaments', 'Aucun tournoi favori')}</p>
+                                            <p className="text-md text-yellow-900/70 dark:text-yellow-200/70 mt-1">{t('favorites.empty_tournaments_desc', 'Ajoutez des tournois à vos favoris pour les retrouver ici.')}</p>
+                                        </div>
+                                        <Button as={Link} to="/matches" color="warning" variant="flat" className="mt-2 bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 font-bold shadow-sm">
+                                            {t('favorites.find_tournaments', 'Trouver des tournois')}
                                         </Button>
                                     </CardBody>
                                 </Card>

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 
-type FavoriteType = 'exercise' | 'match';
+type FavoriteType = 'exercise' | 'match' | 'tournament';
 
 export function useFavorites() {
-    const [favorites, setFavorites] = useState<{ exercises: string[], matches: string[] }>({
+    const [favorites, setFavorites] = useState<{ exercises: string[], matches: string[], tournaments: string[] }>({
         exercises: [],
-        matches: []
+        matches: [],
+        tournaments: []
     });
 
     useEffect(() => {
@@ -19,25 +20,27 @@ export function useFavorites() {
         }
     }, []);
 
-    const saveFavorites = (newFavs: { exercises: string[], matches: string[] }) => {
+    const saveFavorites = (newFavs: { exercises: string[], matches: string[], tournaments: string[] }) => {
         setFavorites(newFavs);
         localStorage.setItem('kdufoot_favorites', JSON.stringify(newFavs));
     };
 
     const toggleFavorite = (id: string, type: FavoriteType) => {
-        const list = type === 'exercise' ? favorites.exercises : favorites.matches;
+        const key = type === 'exercise' ? 'exercises' : type === 'match' ? 'matches' : 'tournaments';
+        const list = favorites[key] || [];
         const exists = list.includes(id);
         const newList = exists ? list.filter(fid => fid !== id) : [...list, id];
 
         const newFavs = {
             ...favorites,
-            [type === 'exercise' ? 'exercises' : 'matches']: newList
+            [key]: newList
         };
         saveFavorites(newFavs);
     };
 
     const isFavorite = (id: string, type: FavoriteType) => {
-        return (type === 'exercise' ? favorites.exercises : favorites.matches).includes(id);
+        const key = type === 'exercise' ? 'exercises' : type === 'match' ? 'matches' : 'tournaments';
+        return (favorites[key] || []).includes(id);
     };
 
     return { favorites, toggleFavorite, isFavorite };
