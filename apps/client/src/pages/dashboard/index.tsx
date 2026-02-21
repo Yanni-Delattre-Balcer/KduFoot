@@ -10,7 +10,8 @@ import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import FootballClock from '../../components/football-clock';
 
 export default function DashboardPage() {
     const { t } = useTranslation();
@@ -122,23 +123,46 @@ export default function DashboardPage() {
         <DefaultLayout maxWidth="max-w-full">
             <section className="flex flex-col gap-8 w-full px-4 py-8">
                 
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-default-100/10">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                             <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic">{t('dashboard.title')}</h1>
-                        </div>
-                        <p className="text-default-500 font-medium">{t('dashboard.subtitle')}</p>
+                {/* Header Section - Rectangle Style matching Navbar */}
+                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-orange-600/15 via-amber-500/10 to-yellow-500/10 border border-orange-500/20 mb-2">
+                    {/* Subtle grid pattern */}
+                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(249,115,22,0.3) 40px, rgba(249,115,22,0.3) 80px)' }}></div>
+                    
+                    {/* Field center line + circle */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
+
+                    {/* Football clock - top right */}
+                    <div className="hidden md:block absolute top-4 right-4 z-10">
+                        <FootballClock size={140} />
                     </div>
-                    <Button 
-                        as={Link} 
-                        to="/matches/new" 
-                        color="warning" 
-                        className="font-bold bg-linear-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20"
-                        startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" /></svg>}
-                    >
-                        {t('dashboard.controls.new')}
-                    </Button>
+
+                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-6 py-12 px-8">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3 bg-[linear-gradient(to_bottom_right,#f97316,#ea580c)] px-6 py-3 rounded-2xl shadow-lg shadow-orange-500/20 text-white">
+                                <h1 className="text-3xl font-black uppercase tracking-tighter italic whitespace-nowrap">
+                                    {t('dashboard.title')}
+                                </h1>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            </div>
+                            <div className="hidden sm:block">
+                                <p className="text-default-500 font-bold uppercase tracking-widest text-xs opacity-70 mb-1">{t('dashboard.subtitle')}</p>
+                                <div className="h-1 w-12 bg-orange-500/50 rounded-full"></div>
+                            </div>
+                        </div>
+
+                        <Button 
+                            as={Link} 
+                            to="/matches/new" 
+                            size="lg"
+                            className="font-bold bg-linear-to-r from-orange-500 to-amber-500 text-white shadow-xl shadow-orange-500/30 rounded-2xl h-14 px-8 w-full md:w-auto"
+                            startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" /></svg>}
+                        >
+                            {t('dashboard.controls.new')}
+                        </Button>
+                    </div>
                 </div>
 
                 <Tabs 

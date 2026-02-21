@@ -30,9 +30,9 @@ export default function ExercisesPage() {
             <section className="flex flex-col gap-10 w-full px-4">
 
                 {/* Hero - Analyse ta vidéo */}
-                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600/15 via-violet-500/10 to-fuchsia-500/10 border border-blue-600/20">
+                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-amber-600/15 via-yellow-500/10 to-orange-500/10 border border-amber-500/20">
                     {/* Grass stripes - standard green */}
-                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
+                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(245,158,11,0.3) 40px, rgba(245,158,11,0.3) 80px)' }}></div>
                     {/* Field center line + circle */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
@@ -44,16 +44,16 @@ export default function ExercisesPage() {
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-2xl bg-blue-600/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
+                            <div className="p-3 rounded-2xl bg-[linear-gradient(to_bottom_right,#f59e0b,#fbbf24)] shadow-lg shadow-amber-500/20 text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-violet-600">
+                            <h1 className="text-3xl lg:text-4xl font-black uppercase tracking-tighter italic bg-clip-text text-transparent bg-linear-to-r from-amber-500 to-yellow-500">
                                 {t('video.analyzeTitle')}
                             </h1>
                         </div>
-                        <p className="text-default-500 text-center max-w-lg">
+                        <p className="text-default-500 text-center max-w-lg font-bold uppercase tracking-widest text-xs opacity-70">
                             {t('video.analyzeSubtitle')}
                         </p>
                         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -106,9 +106,9 @@ export default function ExercisesPage() {
                                 }
                             />
                             <Button
-                                color="primary"
+                                color="warning"
                                 size="lg"
-                                className="sm:px-10 font-bold text-lg shadow-lg shadow-primary/20 h-14"
+                                className="sm:px-10 font-bold text-lg text-white bg-linear-to-r from-amber-500 to-yellow-500 shadow-xl shadow-amber-500/30 h-14"
                                 onPress={handleAnalyze}
                             >
                                 {t('video.analyze')}
@@ -126,7 +126,7 @@ export default function ExercisesPage() {
                             </svg>
                         </div>
                         <h2 className="text-2xl font-bold">{t('myExercises')}</h2>
-                        <Chip size="sm" variant="flat" color="primary">{exercises.length}</Chip>
+                        <Chip size="sm" variant="flat" color="warning" className="font-semibold">{exercises.length}</Chip>
                     </div>
 
                     {isError && (
@@ -136,10 +136,10 @@ export default function ExercisesPage() {
                     )}
 
                     {exercises.length === 0 && !isError && (
-                        <Card className="border border-blue-500/20 bg-[#202124]">
+                        <Card className="border border-amber-500/20 bg-[#202124]">
                             <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
-                                <div className="p-4 rounded-full bg-blue-500/10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-blue-500">
+                                <div className="p-4 rounded-full bg-[linear-gradient(to_bottom_right,#f59e0b,#fbbf24)]/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-amber-500">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                     </svg>
                                 </div>
@@ -155,13 +155,13 @@ export default function ExercisesPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {exercises.map((exercise) => (
-                            <Card key={exercise.id} className="group hover:shadow-lg hover:shadow-blue-500/10 transition-all bg-[#202124] border border-blue-500/20 hover:border-blue-500/40">
+                            <Card key={exercise.id} className="group hover:shadow-lg hover:shadow-amber-500/10 transition-all bg-[#202124] border border-amber-500/20 hover:border-amber-500/40">
                                 <CardHeader className="pb-0 pt-4 px-4 flex-col items-start gap-1">
                                     <div className="flex justify-between w-full">
-                                        <Chip size="sm" variant="flat" color="primary" className="font-semibold">{t(`enums.category.${exercise.category}`)}</Chip>
+                                        <Chip size="sm" variant="flat" color="warning" className="font-semibold">{t(`enums.category.${exercise.category}`)}</Chip>
                                     </div>
                                     <small className="text-default-400">{exercise.themes}</small>
-                                    <h4 className="font-bold text-large group-hover:text-primary transition-colors">{exercise.title}</h4>
+                                    <h4 className="font-bold text-large group-hover:text-amber-500 transition-colors">{exercise.title}</h4>
                                 </CardHeader>
                                 <CardBody className="overflow-visible py-3">
                                     <div className="w-full h-40 bg-linear-to-br from-default-50 to-default-100 rounded-xl flex items-center justify-center overflow-hidden">
@@ -191,11 +191,11 @@ export default function ExercisesPage() {
                                     </Button>
                                     <Button
                                         size="sm"
-                                        color={isInTraining(exercise.id) ? "danger" : "primary"}
+                                        color={isInTraining(exercise.id) ? "danger" : "warning"}
                                         variant={isInTraining(exercise.id) ? "flat" : "solid"}
                                         onPress={() => isInTraining(exercise.id) ? removeExercise(exercise.id) : addExercise(exercise)}
                                         isIconOnly
-                                        className="font-bold text-lg shadow-sm"
+                                        className="font-bold text-lg shadow-sm text-white"
                                     >
                                         {isInTraining(exercise.id) ? "−" : "+"}
                                     </Button>
@@ -208,11 +208,11 @@ export default function ExercisesPage() {
 
             {/* Training bar */}
             {selectedExercises.length > 0 && (
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-lg border-t border-primary/20 z-50 shadow-lg shadow-primary/5">
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-lg border-t border-amber-500/20 z-50 shadow-lg shadow-amber-500/5">
                     <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center max-w-7xl gap-4">
                         <div className="flex items-center gap-4 w-full sm:w-auto">
-                            <div className="p-2 rounded-xl bg-primary/10 shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-primary">
+                            <div className="p-2 rounded-xl bg-amber-500/10 shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-amber-500">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
                                 </svg>
                             </div>
@@ -221,7 +221,7 @@ export default function ExercisesPage() {
                                 <p className="text-tiny text-default-500">{selectedExercises.length * 15} min (est.)</p>
                             </div>
                         </div>
-                        <Button as={Link} to="/training" color="primary" size="lg" className="font-bold shadow-lg shadow-primary/30 w-full sm:w-auto">
+                        <Button as={Link} to="/training" color="warning" size="lg" className="font-bold shadow-lg shadow-amber-500/30 w-full sm:w-auto text-white">
                             {t('training.go')}
                         </Button>
                     </div>

@@ -48,7 +48,7 @@ export default function FavoritesPage() {
             <section className="flex flex-col gap-6 w-full px-4">
 
                 {/* Hero - Mes Favoris */}
-                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-pink-600/15 via-rose-500/10 to-purple-500/10 border border-pink-500/20">
+                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-cyan-600/15 via-sky-500/10 to-blue-500/10 border border-cyan-500/20">
                     {/* Grass stripes - standard green */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
                     {/* Field center line + circle */}
@@ -62,12 +62,12 @@ export default function FavoritesPage() {
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-2xl bg-pink-500/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-pink-500">
+                            <div className="p-3 rounded-2xl bg-cyan-500/10">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-cyan-500">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                 </svg>
                             </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-pink-500 to-rose-500">
+                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-cyan-500 to-blue-500">
                                 {t("nav.favorites")}
                             </h1>
                         </div>
@@ -77,7 +77,7 @@ export default function FavoritesPage() {
                                 : t('favorites.description_matches')}
                         </p>
 
-                        <div className="flex gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
+                        <div className="flex flex-wrap justify-center gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
                             {showVideoAnalysis && (
                             <Button
                                 color={view === 'exercises' ? "success" : "default"}
@@ -135,17 +135,17 @@ export default function FavoritesPage() {
                             ) : favExercises.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {favExercises.map(ex => (
-                                        <Card key={ex.id} isPressable onPress={() => navigate(`/exercises/${ex.id}`)} className="group hover:shadow-lg hover:shadow-pink-500/10 transition-all bg-[#251820] border border-pink-500/20 hover:border-pink-500/40">
+                                        <Card key={ex.id} isPressable onPress={() => navigate(`/exercises/${ex.id}`)} className="group hover:shadow-lg hover:shadow-cyan-500/10 transition-all bg-[#251820] border border-cyan-500/20 hover:border-cyan-500/40">
                                             <CardHeader className="flex gap-3">
-                                                <div className="shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-pink-500/10 to-rose-500/10 flex items-center justify-center">
-                                                    <div className="p-2 rounded-full bg-pink-500/10">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-pink-600 dark:text-pink-400">
+                                                <div className="shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500/10 to-blue-500/10 flex items-center justify-center">
+                                                    <div className="p-2 rounded-full bg-cyan-500/10">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-cyan-600 dark:text-cyan-400">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                                         </svg>
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col items-start">
-                                                    <p className="text-md font-bold text-default-900 group-hover:text-pink-600 transition-colors">{ex.title}</p>
+                                                    <p className="text-md font-bold text-default-900 group-hover:text-cyan-600 transition-colors">{ex.title}</p>
                                                     <p className="text-small text-default-600 font-medium">{ex.category}</p>
                                                 </div>
                                             </CardHeader>
@@ -156,18 +156,18 @@ export default function FavoritesPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <Card className="border border-pink-500/20 bg-[#251820]">
+                                <Card className="border border-cyan-500/20 bg-[#251820]">
                                     <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
-                                        <div className="p-4 rounded-full bg-green-500/10 text-green-500">
+                                        <div className="p-4 rounded-full bg-cyan-500/10 text-cyan-500">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-lg font-bold text-green-900/90 dark:text-green-100">{t('favorites.empty_exercises')}</p>
-                                            <p className="text-md text-green-900/70 dark:text-green-200/70 mt-1">{t('favorites.empty_exercises_desc')}</p>
+                                            <p className="text-lg font-bold text-cyan-900/90 dark:text-cyan-100">{t('favorites.empty_exercises')}</p>
+                                            <p className="text-md text-cyan-900/70 dark:text-cyan-200/70 mt-1">{t('favorites.empty_exercises_desc')}</p>
                                         </div>
-                                        <Button as={Link} to="/exercises" color="success" variant="flat" className="mt-2 text-green-700 bg-green-100 dark:bg-green-500/20 dark:text-green-300 font-bold shadow-sm">
+                                        <Button as={Link} to="/exercises" color="primary" variant="flat" className="mt-2 text-cyan-700 bg-cyan-100 dark:bg-cyan-500/20 dark:text-cyan-300 font-bold shadow-sm">
                                             {t('favorites.discover_exercises')}
                                         </Button>
                                     </CardBody>
