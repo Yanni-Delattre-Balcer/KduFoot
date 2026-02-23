@@ -33,9 +33,9 @@ export default function IndexPage() {
             {/* Left: Title & CTA */}
             <div className="flex-1 flex flex-col items-center md:items-start gap-3 text-center md:text-left">
               <h1 className="text-3xl lg:text-4xl font-bold">
-                <span className="bg-[linear-gradient(to_right,#3b82f6,#22c55e,#ec4899,#ef4444,#f97316,#eab308)] bg-clip-text text-transparent">Kdufoot</span>
-                <span className="text-default-400 font-normal mx-2">›</span>
-                <span className="text-foreground text-2xl lg:text-3xl">{t("homePage.title.highlight")}</span>
+                <span className="bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)] bg-clip-text text-transparent">Kdufoot</span>
+                <span className="text-default-400 font-normal mx-2">=</span>
+                <span className="bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)] bg-clip-text text-transparent text-2xl lg:text-3xl">{t("homePage.title.highlight")}</span>
               </h1>
               <p className="text-default-500 text-base">
                 {showVideoAnalysis ? (
