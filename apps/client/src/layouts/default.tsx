@@ -69,8 +69,19 @@ export default function DefaultLayout({
 
   return (
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
+      {/* Floating Logo - Independent of Navbar - Responsive */}
+      <div className="fixed top-0 left-4 lg:left-6 z-50 py-1 lg:py-2 pointer-events-none">
+        <a href="/" className="pointer-events-auto block">
+          <img 
+            src="/logo.png" 
+            alt="KduFoot Logo" 
+            className="h-14 lg:h-20 w-auto object-contain"
+          />
+        </a>
+      </div>
+
       <Navbar />
-      <main className={`container mx-auto ${maxWidth} px-6 grow pt-6 pb-16`}>
+      <main className={`container mx-auto ${maxWidth} px-6 grow pt-16 lg:pt-24 pb-16`}>
         {children}
       </main>
       <footer className="absolute bottom-0 w-full flex items-center justify-center py-3">

@@ -19,7 +19,6 @@
 import { LinkUniversal } from "./link-universal";
 import {
   Navbar as HeroUINavbar,
-  NavbarBrand,
   NavbarContent,
   NavbarItem,
   NavbarMenuToggle,
@@ -28,7 +27,7 @@ import {
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 import { clsx } from "@heroui/shared-utils";
-import { useTranslation } from "react-i18next";
+
 
 
 import { I18nIcon, LanguageSwitch } from "./language-switch";
@@ -41,7 +40,7 @@ import { siteConfig } from "@/config/site";
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
-  const { t } = useTranslation();
+
   const getNavItemClass = (href: string) => {
     const base = "font-bold hover:scale-105 transition-transform bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent";
     // Vibrant saturated colors (3 steps) to see movement without being "extreme"
@@ -60,47 +59,28 @@ export const Navbar = () => {
     <HeroUINavbar 
       maxWidth="full" 
       position="sticky" 
-      className="h-28" 
+      isBlurred={false}
+      className="h-16 lg:h-24 top-0 m-0! p-0! border-none shadow-none bg-background" 
       classNames={{
-        wrapper: "max-w-full px-4"
+        wrapper: "max-w-full px-6 h-full relative flex items-center justify-between"
       }}
     >
-      <NavbarContent className="basis-0 grow" justify="start">
-        <NavbarBrand className="gap-3 max-w-fit">
-          <LinkUniversal
-            className="flex justify-start items-center gap-0"
-            color="foreground"
-            href="/"
-          >
-            <img 
-              src="/logo.png" 
-              alt="KduFoot Logo" 
-              className="h-20 w-auto object-contain"
-            />
-            <p className="hidden font-bold bg-[linear-gradient(to_right,#1e3a8a,#0d9488,#06b6d4,#14532d,#22c55e,#eab308,#f97316,#7f1d1d,#ef4444,#db2777,#9333ea,#581c87,#1e3a8a)] bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent sm:block">
-              {t("brand.name")}
-            </p>
-          </LinkUniversal>
-        </NavbarBrand>
-      </NavbarContent>
-
-      <NavbarContent className="hidden lg:flex" justify="center">
-        <div className="flex gap-4 justify-center">
-          {siteConfig().navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <LinkUniversal
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  getNavItemClass(item.href)
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </LinkUniversal>
-            </NavbarItem>
-          ))}
-        </div>
+      {/* Navigation Links - Centered */}
+      <NavbarContent className="hidden lg:flex gap-8 justify-center w-full" justify="center">
+        {siteConfig().navItems.map((item) => (
+          <NavbarItem key={item.href}>
+            <LinkUniversal
+              className={clsx(
+                linkStyles({ color: "foreground" }),
+                getNavItemClass(item.href)
+              )}
+              color="foreground"
+              href={item.href}
+            >
+              {item.label}
+            </LinkUniversal>
+          </NavbarItem>
+        ))}
       </NavbarContent>
 
       <NavbarContent
