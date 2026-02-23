@@ -229,7 +229,7 @@ export default function SessionPlannerPage() {
                                 ) : (
                                     <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">
                                         <p className="text-default-400 font-medium">Aucune annonce publiée.</p>
-                                        <Button as={Link} to={view === 'tournaments' ? "/matches/new?type=tournament" : "/matches/new"} color={view === 'tournaments' ? "default" : "secondary"} variant="flat" size="sm" className={`font-bold ${view === 'tournaments' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>Créer une annonce</Button>
+                                        <Button as={Link} to={view === 'tournaments' ? "/matches?view=create&type=tournament" : "/matches?view=create&type=match"} color={view === 'tournaments' ? "default" : "secondary"} variant="flat" size="sm" className={`font-bold ${view === 'tournaments' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>Créer une annonce</Button>
                                     </div>
                                 )}
                             </div>

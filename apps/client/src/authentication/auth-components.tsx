@@ -268,13 +268,26 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
   color,
 }) => {
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   return isAuthenticated ? (
-    <LogoutLink
-      color={color}
-      showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
-      text={text}
-    />
+    <div className="flex flex-col gap-2">
+      <Link
+        color="foreground"
+        size="lg"
+        className="font-bold cursor-pointer"
+        onPress={() => setIsAccountOpen(true)}
+      >
+        {t("auth.account")}
+      </Link>
+      <LogoutLink
+        color={color}
+        showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
+        text={text}
+      />
+      <AccountModal isOpen={isAccountOpen} onOpenChange={setIsAccountOpen} />
+    </div>
   ) : (
     <LoginLink />
   );

@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '../../layouts/default';
 import { useMatches } from '../../hooks/use-matches';
 import { useUser } from '../../hooks/use-user';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
 import { Button } from '@heroui/button';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Chip } from "@heroui/chip";
 import { Select, SelectItem } from "@heroui/select";
 import FootballClock from '../../components/football-clock';
@@ -24,8 +24,17 @@ import TournamentForm from '@/components/matches/tournament-form';
 
 export default function MatchesPage() {
     const { t, i18n } = useTranslation();
-    const [view, setView] = useState<'find' | 'create'>('find');
-    const [type, setType] = useState<'match' | 'tournament'>('match');
+    const [searchParams] = useSearchParams();
+    const [view, setView] = useState<'find' | 'create'>((searchParams.get('view') as 'find' | 'create') || 'find');
+    const [type, setType] = useState<'match' | 'tournament'>((searchParams.get('type') as 'match' | 'tournament') || 'match');
+
+    useEffect(() => {
+        const v = searchParams.get('view') as 'find' | 'create';
+        const t = searchParams.get('type') as 'match' | 'tournament';
+        if (v && (v === 'find' || v === 'create')) setView(v);
+        if (t && (t === 'match' || t === 'tournament')) setType(t);
+    }, [searchParams]);
+
     const [displayMode, setDisplayMode] = useState<'list' | 'calendar'>('list');
     const [calendarMonth, setCalendarMonth] = useState(() => {
         const now = new Date();
