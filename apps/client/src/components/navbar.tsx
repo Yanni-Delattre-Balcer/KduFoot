@@ -37,7 +37,7 @@ import { LoginLogoutButton, LoginLogoutLink } from "@/authentication";
 import { siteConfig } from "@/config/site";
 
 
-import { Logo } from "@/components/icons";
+
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
@@ -68,12 +68,16 @@ export const Navbar = () => {
       <NavbarContent className="basis-0 grow" justify="start">
         <NavbarBrand className="gap-3 max-w-fit">
           <LinkUniversal
-            className="flex justify-start items-center gap-2"
+            className="flex justify-start items-center gap-0"
             color="foreground"
             href="/"
           >
-            <Logo size={64} />
-            <p className="font-bold bg-[linear-gradient(to_right,#1e3a8a,#0d9488,#06b6d4,#14532d,#22c55e,#eab308,#f97316,#7f1d1d,#ef4444,#db2777,#9333ea,#581c87,#1e3a8a)] bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent">
+            <img 
+              src="/logo.png" 
+              alt="KduFoot Logo" 
+              className="h-20 w-auto object-contain"
+            />
+            <p className="hidden font-bold bg-[linear-gradient(to_right,#1e3a8a,#0d9488,#06b6d4,#14532d,#22c55e,#eab308,#f97316,#7f1d1d,#ef4444,#db2777,#9333ea,#581c87,#1e3a8a)] bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent sm:block">
               {t("brand.name")}
             </p>
           </LinkUniversal>
