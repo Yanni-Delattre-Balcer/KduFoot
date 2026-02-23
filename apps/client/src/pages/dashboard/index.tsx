@@ -294,9 +294,9 @@ export default function DashboardPage() {
                                             {organizedSubFilter === 'all' ? "Vous n'avez publié aucune annonce" : organizedSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
                                         </p>
                                         {organizedSubFilter === 'all' ? (
-                                            <div className="flex gap-4 justify-center items-center">
-                                                <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400">Rechercher un match</Button>
-                                                <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400">Rechercher un tournoi</Button>
+                                            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                                                <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto">Rechercher un match</Button>
+                                                <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">Rechercher un tournoi</Button>
                                             </div>
                                         ) : (
                                             <Button as={Link} to={organizedSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={organizedSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold w-full sm:w-auto ${organizedSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
@@ -378,9 +378,9 @@ export default function DashboardPage() {
                                             {participationsSubFilter === 'all' ? "Vous n'avez postulé à aucun match ni tournoi" : participationsSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
                                         </p>
                                         {participationsSubFilter === 'all' ? (
-                                            <div className="flex gap-4 justify-center items-center">
-                                                <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400">Rechercher un match</Button>
-                                                <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400">Rechercher un tournoi</Button>
+                                            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                                                <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto">Rechercher un match</Button>
+                                                <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">Rechercher un tournoi</Button>
                                             </div>
                                         ) : (
                                             <Button as={Link} to={participationsSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={participationsSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold w-full sm:w-auto ${participationsSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
