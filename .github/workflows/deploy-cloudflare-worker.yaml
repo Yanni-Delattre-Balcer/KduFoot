@@ -107,6 +107,7 @@ jobs:
         run: |
           chmod +x ./build-reproductible-dev.sh
           ./build-reproductible-dev.sh
+          npm run dev:env
 
       - name: Deploy Frontend to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

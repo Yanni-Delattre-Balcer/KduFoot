@@ -53,6 +53,7 @@ npm install
 
 # Build client with environment
 echo -e "${YELLOW}🔨 Building project...${NC}"
+source .env
 npm run build:env
 
 # Check
