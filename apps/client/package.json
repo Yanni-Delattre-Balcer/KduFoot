@@ -6,12 +6,11 @@
   "scripts": {
     "dev": "vite",
     "dev:env": "dotenv -e ../../.env -- vite",
-    "build": "npm run clean && tsc && vite build",
-    "build:env": "npm run clean && tsc && npx dotenv-cli -e ../../.env -- vite build",
+    "build": "tsc && vite build",
+    "build:env": "tsc && npx dotenv-cli -e ../../.env -- vite build",
     "lint": "eslint ./src/**/**/*.{ts,tsx} --fix",
     "type-check": "tsc --noEmit",
     "preview:env": "bash ./scripts/preview-ensure.sh",
-    "clean": "rimraf dist .turbo node_modules/.vite node_modules/.cache",
     "update:heroui:cli": "npx heroui-cli@latest upgrade --all",
     "update:heroui": "node --no-warnings --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"ts-node/esm\", pathToFileURL(\"./\"));' ./update-heroui.ts"
   },

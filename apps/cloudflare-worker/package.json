@@ -13,10 +13,11 @@
     "test": "vitest",
     "type-check": "tsc --noEmit",
     "lint": "eslint ./src/**/*.{ts,tsx} --fix",
-    "clean": "rimraf .wrangler .dev.vars .turbo",
     "cf-typegen": "wrangler types",
     "d1:create": "wrangler d1 migrations apply kdufoot-db --local",
-    "d1:reset": "rimraf .wrangler/state/v3/d1 && wrangler d1 migrations apply kdufoot-db --local"
+    "d1:create:remote": "wrangler d1 migrations apply kdufoot-db --remote",
+    "d1:dropall": "wrangler d1 execute --local kdufoot-db --file ./scripts/dropall.sql",
+    "d1:dropall:remote": "wrangler d1 execute --remote kdufoot-db --file ./scripts/dropall.sql"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.12.10",
