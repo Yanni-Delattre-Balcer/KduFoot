@@ -113,7 +113,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/client/dist --project-name=kdufoot --branch=V2
+          command: pages deploy apps/client/dist --project-name=kdufoot --branch=V2 --env-file .env
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
