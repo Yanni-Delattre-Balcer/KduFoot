@@ -49,11 +49,11 @@ export default function DefaultLayout({
       getAccessTokenSilently()
         .then(async (token) => {
           setAccessToken(token);
-          const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+          const domain = import.meta.env.AUTH0_DOMAIN;
           const JWKS = await getLocalJwkSet(domain);
           const { payload } = await jwtVerify(token, JWKS, {
             issuer: `https://${domain}/`,
-            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+            audience: import.meta.env.AUTH0_AUDIENCE,
           });
           setTokenPayload(payload);
         })
