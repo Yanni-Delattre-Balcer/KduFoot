@@ -16,7 +16,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         // Using READ_API for list for now, or SESSIONS_CREATE if it implies managing them.
         // Let's stick to READ_API for basic access, and maybe ensure it's their own data via userId filter.
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -26,7 +26,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         // Default to seeing own sessions
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
-            return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const url = new URL(request.url);
@@ -40,7 +40,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         };
 
         const result = await sessionService.search(filters);
-        return Response.json({ success: true, ...result });
+        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     // Get single session
@@ -53,7 +53,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
 
         const result = await sessionService.getById(params.id);
         if (!result) {
-            return Response.json({ success: false, error: 'Session not found' }, { status: 404 });
+            return Response.json({ success: false, error: 'Session not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         // Security check: is it my session?
@@ -63,10 +63,10 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
 
         if (dbUser && result.session.user_id !== dbUser.id) {
-            return Response.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+            return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        return Response.json({ success: true, ...result });
+        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     // Create session
@@ -81,16 +81,16 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
-            return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const dto = await request.json() as CreateSessionDto;
 
         try {
             const session = await sessionService.create(dbUser.id, dto);
-            return Response.json({ success: true, session });
+            return Response.json({ success: true, session }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -118,13 +118,13 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
 
         try {
             const success = await sessionService.update(params.id, dbUser.id, dto);
-            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404 });
+            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
 
             // Return updated (would need fetch, but for efficiency just success)
-            return Response.json({ success: true });
+            return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            if (e.message === 'Unauthorized') return Response.json({ false: false, error: 'Unauthorized' }, { status: 403 });
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            if (e.message === 'Unauthorized') return Response.json({ false: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -146,11 +146,11 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
 
         try {
             const success = await sessionService.delete(params.id, dbUser.id);
-            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404 });
-            return Response.json({ success: true });
+            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403 });
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 };

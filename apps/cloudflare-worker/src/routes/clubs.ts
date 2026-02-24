@@ -14,11 +14,11 @@ export const setupClubRoutes = (router: Router, env: Env) => {
         const query = url.searchParams.get('q');
 
         if (!query || query.length < 3) {
-            return Response.json({ success: false, error: 'Query too short' }, { status: 400 });
+            return Response.json({ success: false, error: 'Query too short' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const clubs = await clubService.searchClubs(query);
-        return Response.json({ success: true, clubs });
+        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     router.get('/api/clubs/by-city', async (request: Request) => {
@@ -26,10 +26,10 @@ export const setupClubRoutes = (router: Router, env: Env) => {
         const city = url.searchParams.get('city');
 
         if (!city) {
-            return Response.json({ success: false, error: 'City required' }, { status: 400 });
+            return Response.json({ success: false, error: 'City required' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const clubs = await clubService.getClubByCity(city);
-        return Response.json({ success: true, clubs });
+        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 };

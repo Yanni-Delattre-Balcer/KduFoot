@@ -16,7 +16,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         if (!permissionCheck.hasPermission) {
             // Maybe allow public read for shared exercises?
             // For now detailed read requires auth
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const url = new URL(request.url);
@@ -31,7 +31,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         };
 
         const result = await exerciseService.search(filters);
-        return Response.json({ success: true, ...result });
+        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     // Get single exercise
@@ -44,10 +44,10 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
         const exercise = await exerciseService.getById(params.id);
         if (!exercise) {
-            return Response.json({ success: false, error: 'Exercise not found' }, { status: 404 });
+            return Response.json({ success: false, error: 'Exercise not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        return Response.json({ success: true, exercise });
+        return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     // Create exercise
@@ -70,16 +70,16 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
-            return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const dto = await request.json() as CreateExerciseDto;
 
         try {
             const exercise = await exerciseService.create(dbUser.id, dto);
-            return Response.json({ success: true, exercise });
+            return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -103,11 +103,11 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
         try {
             const exercise = await exerciseService.update(params.id, dbUser.id, dto);
-            if (!exercise) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404 });
-            return Response.json({ success: true, exercise });
+            if (!exercise) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403 });
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -129,11 +129,11 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
         try {
             const success = await exerciseService.delete(params.id, dbUser.id);
-            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404 });
-            return Response.json({ success: true });
+            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403 });
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 };

@@ -22,7 +22,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         // Or we use READ_API as a baseline.
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         // Get user info from request body or token?
@@ -31,7 +31,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         const body: any = await request.json();
 
         if (!body.sub || !body.email) {
-            return Response.json({ success: false, error: 'Missing user data' }, { status: 400 });
+            return Response.json({ success: false, error: 'Missing user data' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const dto: CreateUserDto = {
@@ -44,10 +44,10 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         try {
             const user = await userService.createOrUpdateUser(dto);
-            return Response.json({ success: true, user });
+            return Response.json({ success: true, user }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             console.error('User Sync Error:', e);
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -55,7 +55,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.get('/api/users/me', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         // Extract sub from token
@@ -74,7 +74,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found in D1. Call sync first.' }, { status: 404 });
+            return Response.json({ success: false, error: 'User not found in D1. Call sync first.' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         // Join club data if user has a club
@@ -83,14 +83,14 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
         }
 
-        return Response.json({ success: true, user: { ...user, club } });
+        return Response.json({ success: true, user: { ...user, club } }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     // Update current user profile
     router.put('/api/users/me', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -100,7 +100,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404 });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const body: UpdateUserDto = await request.json();
@@ -111,9 +111,9 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         try {
             const updated = await userService.updateUser(user.id, body);
-            return Response.json({ success: true, user: updated });
+            return Response.json({ success: true, user: updated }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -121,7 +121,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.post('/api/users/link-club', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -131,17 +131,17 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404 });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         // Check if user already has a club (irreversible)
         if (user.club_id) {
-            return Response.json({ success: false, error: 'Votre compte est déjà lié à un club. Cette action est irréversible.' }, { status: 400 });
+            return Response.json({ success: false, error: 'Votre compte est déjà lié à un club. Cette action est irréversible.' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const body: { siret: string } = await request.json();
         if (!body.siret || body.siret.length !== 14) {
-            return Response.json({ success: false, error: 'SIRET invalide. Il doit contenir 14 chiffres.' }, { status: 400 });
+            return Response.json({ success: false, error: 'SIRET invalide. Il doit contenir 14 chiffres.' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         try {
@@ -149,12 +149,12 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             const apiUrl = `${env.SIRET_API_URL}?q=${body.siret}&page=1&per_page=1`;
             const apiRes = await fetch(apiUrl);
             if (!apiRes.ok) {
-                return Response.json({ success: false, error: 'Erreur lors de la recherche de l\'entreprise.' }, { status: 502 });
+                return Response.json({ success: false, error: 'Erreur lors de la recherche de l\'entreprise.' }, { status: 502, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             }
 
             const apiData: any = await apiRes.json();
             if (!apiData.results || apiData.results.length === 0) {
-                return Response.json({ success: false, error: 'Aucune entreprise trouvée pour ce SIRET.' }, { status: 404 });
+                return Response.json({ success: false, error: 'Aucune entreprise trouvée pour ce SIRET.' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             }
 
             const entreprise = apiData.results[0];
@@ -199,10 +199,10 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                     ...updatedUser,
                     club: { id: clubId, siret: body.siret, name: clubName, city: clubCity, address: clubAddress, zip: clubZip, latitude: lat, longitude: lon }
                 }
-            });
+            }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             console.error('Link Club Error:', e);
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -210,7 +210,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.post('/api/users/unlink-club', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -220,12 +220,12 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404 });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         // Only allow admin email
         if (user.email !== 'yannidelattrebalcer.artois@gmail.com') {
-            return Response.json({ success: false, error: 'Seul l\'administrateur peut effectuer cette action.' }, { status: 403 });
+            return Response.json({ success: false, error: 'Seul l\'administrateur peut effectuer cette action.' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         try {
@@ -233,9 +233,9 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                 'UPDATE users SET club_id = NULL, siret = NULL, location = NULL, stadium_address = NULL WHERE id = ?'
             ).bind(user.id).run();
 
-            return Response.json({ success: true, message: 'Club détaché avec succès.' });
+            return Response.json({ success: true, message: 'Club détaché avec succès.' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500 });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 };
