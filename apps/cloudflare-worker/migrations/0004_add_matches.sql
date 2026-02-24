@@ -1,5 +1,6 @@
 -- apps/cloudflare-worker/migrations/0004_add_matches.sql
 -- Table matches
+
 CREATE TABLE matches (
   id TEXT PRIMARY KEY,
   owner_id TEXT NOT NULL,

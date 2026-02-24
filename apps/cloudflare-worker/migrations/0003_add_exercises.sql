@@ -1,5 +1,6 @@
 -- apps/cloudflare-worker/migrations/0003_add_exercises.sql
 -- Table exercises
+
 CREATE TABLE exercises (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,

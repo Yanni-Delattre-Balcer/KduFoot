@@ -1,5 +1,6 @@
 -- apps/cloudflare-worker/migrations/0005_add_sessions.sql
 -- Table training_sessions
+
 CREATE TABLE training_sessions (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,

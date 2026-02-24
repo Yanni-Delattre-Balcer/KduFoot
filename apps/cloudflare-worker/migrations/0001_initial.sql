@@ -1,5 +1,7 @@
 -- apps/cloudflare-worker/migrations/0001_initial.sql
 -- Table users (synchronisée avec Auth0)
+
+-- Create table users
 CREATE TABLE users (
   id TEXT PRIMARY KEY,
   auth0_sub TEXT UNIQUE NOT NULL,

@@ -1,5 +1,6 @@
 -- apps/cloudflare-worker/migrations/0002_add_clubs.sql
 -- Table clubs (cache API SIRENE)
+
 CREATE TABLE clubs (
   id TEXT PRIMARY KEY,
   siret TEXT UNIQUE NOT NULL,
