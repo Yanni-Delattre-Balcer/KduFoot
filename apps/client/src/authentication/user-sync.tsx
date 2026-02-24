@@ -11,7 +11,7 @@ export const UserSync = () => {
             syncedRef.current = user.sub;
 
             console.log('Syncing user profile with backend...');
-            postJson('/api/users/sync', user)
+            postJson(`${import.meta.env.API_BASE_URL}/api/users/sync`, user)
                 .then((res: any) => {
                     if (res.success) {
                         console.log('User synced successfully');
