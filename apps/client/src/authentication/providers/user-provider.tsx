@@ -2,8 +2,6 @@ import { createContext, useState, useEffect, useCallback, ReactNode } from 'reac
 import { useAuth0 } from '@auth0/auth0-react';
 import { User } from '@/types/user.types';
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 interface UserContextType {
     user: User | null;
     isLoading: boolean;
@@ -27,7 +25,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setIsLoading(true);
         try {
             const token = await getAccessTokenSilently();
-            const res = await fetch(`${API_URL}/api/users/me`, {
+            const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/me`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) throw new Error('Failed to fetch user');
@@ -51,7 +49,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const linkClub = async (siret: string) => {
         const token = await getAccessTokenSilently();
-        const res = await fetch(`${API_URL}/api/users/link-club`, {
+        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/link-club`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -80,7 +78,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const unlinkClub = async () => {
         const token = await getAccessTokenSilently();
-        const res = await fetch(`${API_URL}/api/users/unlink-club`, {
+        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/unlink-club`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -99,7 +97,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const updateUser = async (data: Partial<User>) => {
         const token = await getAccessTokenSilently();
-        const res = await fetch(`${API_URL}/api/users/me`, {
+        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/me`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

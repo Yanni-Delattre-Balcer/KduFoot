@@ -1,6 +1,4 @@
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
-
 export const getAuthHeaders = async (getAccessTokenSilently: () => Promise<string>) => {
     const token = await getAccessTokenSilently();
     return {
@@ -12,13 +10,13 @@ export const getAuthHeaders = async (getAccessTokenSilently: () => Promise<strin
 export const api = {
     get: async (url: string, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
-        const response = await fetch(`${API_URL}${url}`, { headers });
+        const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, { headers });
         if (!response.ok) throw new Error(await response.text());
         return response.json();
     },
     post: async (url: string, body: any, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
-        const response = await fetch(`${API_URL}${url}`, {
+        const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
             method: 'POST',
             headers,
             body: JSON.stringify(body),
@@ -28,7 +26,7 @@ export const api = {
     },
     put: async (url: string, body: any, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
-        const response = await fetch(`${API_URL}${url}`, {
+        const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
             method: 'PUT',
             headers,
             body: JSON.stringify(body),
@@ -38,7 +36,7 @@ export const api = {
     },
     delete: async (url: string, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
-        const response = await fetch(`${API_URL}${url}`, {
+        const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
             method: 'DELETE',
             headers,
         });

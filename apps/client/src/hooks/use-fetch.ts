@@ -1,8 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useCallback } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 interface UseFetchOptions extends RequestInit {
     skip?: boolean;
 }
@@ -19,7 +17,7 @@ export function useFetch() {
                 ...options.headers,
             };
 
-            const response = await fetch(`${API_URL}${endpoint}`, {
+            const response = await fetch(`${import.meta.env.API_BASE_URL}${endpoint}`, {
                 ...options,
                 headers,
             });
