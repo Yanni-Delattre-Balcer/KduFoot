@@ -20,7 +20,7 @@ export default function IndexPage() {
       <section className="flex flex-col gap-5 w-full px-4">
 
         {/* Hero Section with football field background */}
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blue-600/15 via-green-500/10 to-pink-500/10 border border-blue-500/20">
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-red-600/15 via-orange-500/10 to-red-500/10 border border-red-500/20">
           {/* Grass stripes */}
           <div className="absolute inset-0 opacity-[0.03]" style={{
             backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)',
@@ -97,13 +97,13 @@ export default function IndexPage() {
                   i18nKey="kdufoot:homePage.about.features"
                   components={[
                     <strong className="text-primary" key="0" />,
-                    <strong className="text-orange-500" key="1" />
+                    <strong className="text-violet-500" key="1" />
                   ]}
                 />
               </p>
             ) : (
               <p className="text-base text-default-500 leading-relaxed">
-                ⚽ <strong className="text-orange-500">Matchs amicaux</strong> — Trouvez un adversaire autour de chez vous en quelques clics.
+                ⚽ <strong className="text-violet-500">Matchs & Tournois amicaux</strong> — Trouvez un adversaire autour de chez vous en quelques clics.
               </p>
             )}
             <p className="text-sm text-default-400 italic">
@@ -112,35 +112,67 @@ export default function IndexPage() {
           </CardBody>
         </Card>
 
-        {/* 2 Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {showVideoAnalysis && (
-          <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-primary/5 transition-all">
-            <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
-              <div className="p-3 rounded-2xl bg-primary/10">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-primary">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-              </div>
-              <h3 className="text-base font-bold">{t("homePage.cards.video.title")}</h3>
-              <p className="text-xs text-default-500">{t("homePage.cards.video.description")}</p>
-            </CardBody>
-          </Card>
-          )}
+        {/* Feature Cards Grid - Split into two sections */}
+        <div className="flex flex-col gap-4">
+          {/* Row 1: AI & Training */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {showVideoAnalysis && (
+            <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-primary/5 transition-all">
+              <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
+                <div className="p-3 rounded-2xl bg-black shadow-inner border border-white/10 group-hover:border-primary/50 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-primary">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
+                </div>
+                <h3 className="text-base font-bold">{t("homePage.cards.video.title")}</h3>
+                <p className="text-xs text-default-500">{t("homePage.cards.video.description")}</p>
+              </CardBody>
+            </Card>
+            )}
 
-          <Card className="border border-default-200 overflow-hidden group hover:shadow-lg hover:shadow-orange-500/5 transition-all">
-            <div className="absolute inset-0 bg-linear-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
-              <div className="p-3 rounded-2xl bg-orange-500/10">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-orange-500">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                </svg>
-              </div>
-              <h3 className="text-base font-bold">{t("homePage.cards.match.title")}</h3>
-              <p className="text-xs text-default-500">{t("homePage.cards.match.description")}</p>
-            </CardBody>
-          </Card>
+            <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-green-500/5 transition-all">
+              <div className="absolute inset-0 bg-linear-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
+                <div className="p-3 rounded-2xl bg-black shadow-inner border border-white/10 group-hover:border-green-500/50 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-green-500">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+                  </svg>
+                </div>
+                <h3 className="text-base font-bold">📋 Gestion d'Entraînement</h3>
+                <p className="text-xs text-default-500">Organisez vos séances et planifiez votre calendrier sportif. Tout centralisé.</p>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Row 2: Matchs & Tournois (Violet/Purple) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-violet-500/10 transition-all">
+              <div className="absolute inset-0 bg-linear-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
+                <div className="p-3 rounded-2xl bg-black shadow-inner border border-white/10 group-hover:border-violet-500/50 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-violet-500">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                  </svg>
+                </div>
+                <h3 className="text-base font-bold">{t("homePage.cards.match.title")}</h3>
+                <p className="text-xs text-default-500">{t("homePage.cards.match.description")}</p>
+              </CardBody>
+            </Card>
+
+            <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-purple-400/10 transition-all">
+              <div className="absolute inset-0 bg-linear-to-br from-purple-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
+                <div className="p-3 rounded-2xl bg-black shadow-inner border border-white/10 group-hover:border-purple-400/50 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-purple-400">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-5.25c-.621 0-1.125.504-1.125 1.125v3.375m9 0h-9M4.5 10.5 12 3l7.5 7.5M4.5 10.5H18" />
+                  </svg>
+                </div>
+                <h3 className="text-base font-bold">{t("homePage.cards.tournament.title")}</h3>
+                <p className="text-xs text-default-500">{t("homePage.cards.tournament.description")}</p>
+              </CardBody>
+            </Card>
+          </div>
         </div>
       </section>
     </DefaultLayout>

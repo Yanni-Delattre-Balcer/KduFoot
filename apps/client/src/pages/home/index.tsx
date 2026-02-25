@@ -73,10 +73,10 @@ export default function IndexPage() {
               de trouver des exercices adaptés et d'organiser des matchs amicaux avec d'autres clubs.
             </p>
             <p className="text-sm text-default-500 leading-relaxed">
-              J'ai donc créé cette plateforme pour répondre à ces deux besoins.
+              J'ai donc créé cette plateforme pour répondre à ces besoins.
               Le premier outil — <strong className="text-primary">l'analyse vidéo par IA</strong> — permet de coller
               un lien YouTube, TikTok ou Instagram et d'obtenir automatiquement des exercices structurés avec synopsis,
-              thèmes et catégorie d'âge. Le second — <strong className="text-orange-500">les matchs amicaux</strong> — permet
+              thèmes et catégorie d'âge. Le second — <strong className="text-red-500">les matchs et tournois amicaux</strong> — permet
               de publier ou rechercher des rencontres entre clubs, en filtrant par catégorie, niveau, format et distance.
             </p>
             <p className="text-sm text-default-500 leading-relaxed">
@@ -86,11 +86,11 @@ export default function IndexPage() {
         </Card>
 
         {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-primary/5 transition-all">
             <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
-              <div className="p-3 rounded-2xl bg-primary/10">
+              <div className="p-3 rounded-2xl bg-black shadow-inner border border-white/10 group-hover:border-primary/50 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-primary">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
@@ -100,11 +100,11 @@ export default function IndexPage() {
             </CardBody>
           </Card>
 
-          <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-orange-500/5 transition-all">
-            <div className="absolute inset-0 bg-linear-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-red-500/5 transition-all">
+            <div className="absolute inset-0 bg-linear-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
-              <div className="p-3 rounded-2xl bg-orange-500/10">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-orange-500">
+              <div className="p-3 rounded-2xl bg-black shadow-inner border border-white/10 group-hover:border-red-500/50 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-red-500">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                 </svg>
               </div>
@@ -113,10 +113,23 @@ export default function IndexPage() {
             </CardBody>
           </Card>
 
+          <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-red-500/5 transition-all">
+            <div className="absolute inset-0 bg-linear-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
+              <div className="p-3 rounded-2xl bg-black shadow-inner border border-white/10 group-hover:border-red-500/50 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-red-500">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-5.25c-.621 0-1.125.504-1.125 1.125v3.375m9 0h-9M4.5 10.5 12 3l7.5 7.5M4.5 10.5H18" />
+                </svg>
+              </div>
+              <h3 className="text-base font-bold">🏆 Tournois Amicaux</h3>
+              <p className="text-xs text-default-500">Organisez ou recherchez des tournois de football amateur. Idéal pour dynamiser votre saison.</p>
+            </CardBody>
+          </Card>
+
           <Card className="border border-default-200 bg-content1 overflow-hidden group hover:shadow-lg hover:shadow-green-500/5 transition-all">
             <div className="absolute inset-0 bg-linear-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardBody className="relative p-5 flex flex-col items-center text-center gap-3">
-              <div className="p-3 rounded-2xl bg-green-500/10">
+              <div className="p-3 rounded-2xl bg-black shadow-inner border border-white/10 group-hover:border-green-500/50 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-7 h-7 text-green-500">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
                 </svg>
