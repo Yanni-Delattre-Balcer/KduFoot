@@ -62,10 +62,20 @@ export default function IndexPage() {
                     radius: "full",
                     variant: "shadow",
                     size: "lg",
-                  })} bg-linear-to-r from-orange-500 to-amber-500 text-white border-none min-w-[160px]`}
-                  href="/matches"
+                  })} bg-linear-to-r from-violet-700 to-indigo-800 text-white border-none min-w-[160px]`}
+                  href="/matches?type=match"
                 >
-                  {t("homePage.buttons.sessions")}
+                  {t("homePage.buttons.find_match")}
+                </Link>
+                <Link
+                  className={`${buttonStyles({
+                    radius: "full",
+                    variant: "shadow",
+                    size: "lg",
+                  })} bg-linear-to-r from-violet-400 to-violet-500 text-white border-none min-w-[160px]`}
+                  href="/matches?type=tournament"
+                >
+                  {t("homePage.buttons.find_tournament")}
                 </Link>
               </div>
             </div>
