@@ -20,17 +20,11 @@ import { Link } from "@heroui/link";
 import { useTranslation } from "react-i18next";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
 import { Button } from "@heroui/button";
-import { Snippet } from "@heroui/snippet";
 import { jwtVerify, JWTPayload } from "jose";
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
+import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
 
 export default function DefaultLayout({
   children,
@@ -43,6 +37,7 @@ export default function DefaultLayout({
   const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [tokenPayload, setTokenPayload] = useState<JWTPayload | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -86,47 +81,28 @@ export default function DefaultLayout({
       </main>
       <footer className="absolute bottom-0 w-full flex items-center justify-center py-3">
         {isAuthenticated && user && (
-          <div className="fixed bottom-4 right-4 z-50">
-            <Dropdown placement="top-end">
-              <DropdownTrigger>
-                <Button variant="flat" size="sm" className="bg-background/60 backdrop-blur-md border border-default-200 shadow-lg px-4">
-                  {t("nav.userPrefix")} {user.name}
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Token Details" className="w-[340px]">
-                <DropdownItem key="user-info" isReadOnly className="opacity-100 cursor-default">
-                  <div className="flex flex-col gap-1 p-2">
-                    <p className="font-bold text-primary">{t("nav.userDropdown.connectedAs")}</p>
-                    <p className="text-sm font-semibold">{user.email}</p>
-                    <p className="text-xs text-default-500 font-mono mt-1 break-all">ID: {user.sub}</p>
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="token-status" isReadOnly className="opacity-100 cursor-default border-t border-default-100">
-                  <div className="flex flex-col gap-1 p-2">
-                    <p className="font-bold text-success">{t("nav.userDropdown.tokenStatus")}</p>
-                    {tokenPayload?.exp ? (
-                      <div className="flex justify-between items-center text-xs">
-                        <span>{t("nav.userDropdown.expiresIn")}</span>
-                        <span className="font-mono text-warning">
-                          {Math.max(0, Math.floor(tokenPayload.exp - Date.now() / 1000))}s
-                        </span>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-danger">{t("nav.userDropdown.noExpiry")}</p>
-                    )}
-                  </div>
-                </DropdownItem>
-                <DropdownItem key="copy-token" variant="flat">
-                  <div className="flex flex-col gap-2 p-1">
-                    <p className="text-xs font-bold text-default-400">{t("nav.userDropdown.accessToken")}</p>
-                    <Snippet variant="bordered" size="sm" symbol="" className="w-full">
-                      {accessToken || t("nav.userDropdown.loading")}
-                    </Snippet>
-                  </div>
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
+          <>
+            {/* Floating trigger button — bottom-right on desktop */}
+            <div className="fixed bottom-4 right-4 z-50">
+              <Button
+                variant="flat"
+                size="sm"
+                className="bg-background/60 backdrop-blur-md border border-default-200 shadow-lg px-4"
+                onPress={() => setIsModalOpen(true)}
+              >
+                {t("nav.userPrefix")} {user.name}
+              </Button>
+            </div>
+
+            {/* Technical info modal */}
+            <UserTechnicalInfoModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              user={user}
+              accessToken={accessToken}
+              tokenPayload={tokenPayload}
+            />
+          </>
         )}
         <Link
           isExternal
