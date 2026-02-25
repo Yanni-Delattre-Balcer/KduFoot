@@ -72,9 +72,9 @@ export default function DefaultLayout({
       {/* Floating Logo - Independent of Navbar - Responsive */}
       <div className="fixed top-0 left-4 lg:left-6 z-50 py-1 lg:py-2 pointer-events-none">
         <a href="/" className="pointer-events-auto block">
-          <img 
-            src="/logo.png" 
-            alt="KduFoot Logo" 
+          <img
+            src="/logo.png"
+            alt="KduFoot Logo"
             className="h-14 lg:h-20 w-auto object-contain"
           />
         </a>
@@ -131,13 +131,13 @@ export default function DefaultLayout({
         <Link
           isExternal
           className="flex items-center gap-1 text-current"
-          href="https://heroui.com/"
-          title="heroui.com homepage"
+          href="https://github.com/sctg-development/vite-react-heroui-auth0-template"
+          title="React template"
         >
           <span className="text-default-600">
             {t("footer.poweredBy")}
           </span>
-          <p className="text-primary font-bold">HeroUI</p>
+          <p className="text-primary font-bold">React template</p>
         </Link>
       </footer>
     </div>

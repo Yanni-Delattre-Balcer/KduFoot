@@ -1,520 +1,520 @@
 {
-    "site": {
-        "description": "Kdufoot réunit deux outils essentiels pour les éducateurs de football : l'analyse vidéo pilotée par IA et la recherche de matchs amicaux entre clubs."
-    },
-        "nav": {
-        "home": "Accueil",
-        "exercises": "Analyse Vidéo",
-        "training": "Mon Entraînement",
-        "favorites": "Favoris",
-        "sessions": "Historique Match / Tournoi / Exercice",
-        "sessions_public": "Historique Match / Tournoi",
-        "matches": "Trouver un match / tournoi",
-        "dashboard": "Tableau de Bord",
-        "pricing": "Tarifs",
-        "remerciements": "Remerciements",
-        "profile": "Profil",
-        "admin": "Administration",
-        "userPrefix": "Utilisateur :",
-        "userDropdown": {
-            "connectedAs": "Connecté en tant que",
-            "tokenStatus": "Statut du Token",
-            "expiresIn": "Expire dans :",
-            "noExpiry": "Aucune expiration trouvée",
-            "accessToken": "Access Token (Bearer)",
-            "loading": "Chargement..."
-        }
-    },
-    "auth": {
-        "logout": "Se déconnecter",
-        "account": "Mon compte",
-        "login": "Connexion",
-        "user-details": "Nom : {{name}}\nIdentifiant : {{nickname}}\nEmail : {{email}}\nID : {{sub}}"
-    },
-    "brand": {
-        "name": "KduFoot.com",
-        "slogan": "Football Intelligent"
-    },
-    "homePage": {
-        "title": {
-            "prefix": "Votre assistant",
-            "highlight": "Intelligent",
-            "suffix": "pour le football amateur"
-        },
-        "buttons": {
-            "exercises": "Analyser une vidéo",
-            "sessions": "Trouver un match / tournoi"
-        },
-        "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics.",
-        "about": {
-            "title": "👋 À propos",
-            "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1>. J'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
-            "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez un adversaire autour de chez vous en quelques clics.",
-            "footer": "Moins de recherche, plus de terrain."
-        },
-        "cards": {
-            "video": {
-                "title": "🎬 Analyse Vidéo par IA",
-                "description": "Collez un lien vidéo et notre IA génère des exercices détaillés avec synopsis, thèmes et catégorie d'âge."
-            },
-            "match": {
-                "title": "⚽ Matchs Amicaux",
-                "description": "Publiez ou recherchez des matchs amicaux. Filtrez par catégorie, niveau, distance et format."
-            },
-            "tournament": {
-                "title": "🏆 Tournois Amicaux",
-                "description": "Organisez ou participez à des tournois. Idéal pour dynamiser votre saison et rencontrer de nouveaux clubs."
-            }
-        }
-    },
-    "footer": {
-        "poweredBy": "Propulsé par"
-    },
-    "log-out-someone": "Déconnexion {{name}}",
-    "log-in": "Connexion",
-    "all_f": "Toutes",
-    "all_m": "Tous",
-    "search_placeholder": "Rechercher...",
-    "selected": "Sélectionné",
-    "cancel": "Annuler",
-    "add": "Ajouter",
-    "update": "Mettre à jour",
-    "duration": "Durée",
-    "status": "Statut",
-    "summary": "Résumé",
-    "duration_total": "Durée Totale",
-    "players": "Joueurs",
-    "equipment": "Matériel",
-    "back": "Retour",
-    "back_to_list": "Retour à la liste",
-    "loading": "Chargement...",
-    "edit": "Modifier",
-    "error": {
-        "not_found": "Élément non trouvé",
-        "save_failed": "Erreur lors de la sauvegarde",
-        "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
-        "loading_matches": "Erreur lors du chargement des matchs amicaux"
-    },
-    "video": {
-        "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
-        "analyze": "Analyser la vidéo",
-        "analyzeTitle": "Analyse ta vidéo",
-        "analyzeSubtitle": "Colle le lien de ta vidéo YouTube pour obtenir une analyse détaillée de tes exercices.",
-        "analyzing": "Analyse en cours...",
-        "success": "{{count}} exercice(s) trouvé(s)",
-        "error": "Erreur lors de l'analyse"
-    },
-    "exercises": {
-        "emptyTitle": "Aucun exercice pour le moment",
-        "emptySubtitle": "Analysez une vidéo pour générer vos premiers exercices !",
-        "noImage": "Pas d'image",
-        "selected": "exercice(s)"
-    },
-    "training": {
-        "go": "Mon Entraînement",
-        "empty": "Pas d'entraînement en cours",
-        "description": "Sélectionnez des exercices depuis la bibliothèque pour construire votre séance d'entraînement.",
-        "go_exercises": "Découvrir les exercices",
-        "hero_stats": "{{count}} exercice(s) sélectionné(s) · Durée estimée : ~{{duration}} min",
-        "hero_create": "Créez votre séance d'entraînement personnalisée en ajoutant des exercices depuis la bibliothèque.",
-        "add_exercises": "+ Ajouter des exercices"
-    },
-    "favorites": {
-        "title": "Mes Favoris",
-        "description_exercises": "Retrouvez ici tous les exercices que vous avez enregistrés en favoris pour y accéder en un clic.",
-        "description_matches": "Consultez les matchs amicaux qui ont retenu votre attention et gardez un œil sur les opportunités.",
-        "tab_exercises": "Exercices",
-        "tab_matches": "Matchs",
-        "tab_tournaments": "Tournois",
-        "empty_exercises": "Aucun exercice favori",
-        "empty_exercises_desc": "Ajoutez des exercices à vos favoris pour les retrouver ici.",
-        "empty_matches": "Aucun match favori",
-        "empty_matches_desc": "Vos matchs likés apparaîtront ici.",
-        "discover_exercises": "Découvrir les exercices",
-        "find_matches": "Trouver un match / tournoi"
-    },
-    "myExercises": "Mes exercices",
-    "mySessions": "Mes Séances",
-    "myMatches": "Mes Matchs Amicaux",
-    "exercise": {
-        "title": "Titre",
-        "synopsis": "Synopsis",
-        "themes": "Thèmes",
-        "favorite": "Ajouter aux favoris",
-        "unfavorite": "Retirer des favoris",
-        "addToSession": "Ajouter à la séance",
-        "adapt": "Adapter",
-        "exportPDF": "Exporter en PDF",
-        "synopsis_label": "Synopsis / Description",
-        "synopsis_placeholder": "Décrivez le déroulement de l'exercice...",
-        "details": "Détails",
-        "themes_label": "Thèmes",
-        "choose_themes": "Choisir des thèmes",
-        "players_label": "Nombre de joueurs",
-        "dimensions_label": "Dimensions",
-        "equipment_label": "Matériel",
-        "duration_label": "Durée (min)",
-        "category_label": "Catégorie",
-        "choose_category": "Choisir une catégorie",
-        "level_label": "Niveau",
-        "choose_level": "Choisir un niveau",
-        "create_title": "Créer un exercice",
-        "edit_title": "Modifier l'exercice",
-        "create_button": "Créer l'exercice",
-        "no_exercises_found": "Aucun exercice trouvé.",
-        "untitled": "Exercice sans titre",
-        "schema": "Schéma Tactic"
-    },
-    "match": {
-        "create": "Créer un match amical",
-        "create_tournament": "Créer un tournoi amical",
-        "find": "Trouver un match amical",
-        "find_tournament": "Trouver un tournoi amical",
-        "format": "Format",
-        "venue": "Lieu",
-        "date": "Date",
-        "time": "Heure",
-        "filters": {
-            "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs de toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner votre recherche selon vos besoins."
-        }
-    },
-    "session": {
-        "create": "Nouvelle séance",
-        "adapt": "Adapter",
-        "timer": "Chronomètre",
-        "export": "Exporter en PDF",
-        "untitled": "Séance sans titre",
-        "not_scheduled": "Non planifiée",
-        "timeline": "Timeline de la séance",
-        "no_exercises": "Aucun exercice ajouté.",
-        "constraints": "Contraintes",
-        "info_general": "Informations Générales",
-        "name_label": "Nom de la séance",
-        "name_placeholder": "Ex: Séance Technico-Tactique",
-        "category_label": "Catégorie",
-        "choose_category": "Choisir une catégorie",
-        "level_label": "Niveau",
-        "choose_level": "Choisir un niveau",
-        "date_label": "Date prévue",
-        "duration_label": "Durée totale (min)",
-        "add_exercises": "Ajouter des exercices",
-        "create_title": "Planifier une séance",
-        "edit_title": "Modifier la séance",
-        "create_button": "Créer la séance",
-        "status_enum": {
-            "draft": "Brouillon",
-            "scheduled": "Planifiée",
-            "completed": "Terminée"
-        }
-    },
-    "sessions": {
-        "title": "Historique Match / Tournoi / Exercice",
-        "title_public": "Historique Match / Tournoi",
-        "create": "Planifier une séance",
-        "description_sessions": "Organisez et planifiez vos séances d'entraînement pour préparer au mieux vos joueurs.",
-        "description_matches": "Suivez vos matchs amicaux programmés et gardez le contrôle sur votre calendrier sportif.",
-        "empty_sessions": "Aucune séance planifiée",
-        "empty_matches": "Aucun match amical",
-        "not_scheduled": "Non planifiée",
-        "opponent_default": "Adversaire",
-        "status": "Statut"
-    },
-    "permissions": {
-        "quota": {
-            "videos": "Quota vidéos: {{used}}/{{total}}",
-            "sessions": "Séances: {{used}}/{{total}}",
-            "matches": "Annonces: {{used}}/{{total}}"
-        },
-        "upgradeRequired": "Mise à niveau requise",
-        "featureRequiresUpgrade": "Cette fonctionnalité nécessite un abonnement supérieur.",
-        "viewPlans": "Voir les offres",
-        "upgrade": "Passer à {{plan}} pour débloquer cette fonctionnalité"
-    },
-    "badges": {
-        "certifiedCoach": "Coach Certifié"
-    },
-    "enums": {
-        "theme": {
-            "TECHNIQUE": "Technique",
-            "PHYSIQUE": "Physique",
-            "TACTIQUE": "Tactique",
-            "FINITION": "Finition",
-            "TRANSITION": "Transition",
-            "DEFENSE_COLLECTIVE": "Défense Collective",
-            "ATTAQUE_RAPIDE": "Attaque Rapide",
-            "COUPS_DE_PIED_ARRETES": "Coups de Pied Arrêtés"
-        },
-        "category": {
-            "U6": "U6",
-            "U7": "U7",
-            "U8": "U8",
-            "U9": "U9",
-            "U10": "U10",
-            "U11": "U11",
-            "U12": "U12",
-            "U13": "U13",
-            "U14": "U14",
-            "U15": "U15",
-            "U16": "U16",
-            "U17": "U17",
-            "U18": "U18",
-            "U19": "U19",
-            "U20": "U20",
-            "Séniors": "Séniors",
-            "Vétérans": "Vétérans",
-            "Loisir": "Loisir"
-        },
-        "level": {
-            "Débutant": "Débutant",
-            "Ligue": "Ligue",
-            "Régional": "Régional",
-            "National": "National",
-            "Pro": "Professionnel",
-            "Ligue 1": "Ligue 1",
-            "Ligue 2": "Ligue 2",
-            "National 2": "National 2",
-            "National 3": "National 3",
-            "Régional 1": "Régional 1",
-            "Régional 2": "Régional 2",
-            "Régional 3": "Régional 3",
-            "Départemental 1": "Départemental 1",
-            "Départemental 2": "Départemental 2",
-            "Départemental 3": "Départemental 3",
-            "Départemental 4": "Départemental 4",
-            "Départemental 5": "Départemental 5",
-            "Autre": "Autre"
-        },
-        "venue": {
-            "Domicile": "Domicile",
-            "Extérieur": "Extérieur",
-            "Neutre": "Neutre"
-        },
-        "pitch": {
-            "Herbe": "Herbe",
-            "Synthétique": "Synthétique",
-            "Hybride": "Hybride",
-            "Stabilisé": "Stabilisé",
-            "Indoor": "Indoor"
-        },
-        "gender": {
-            "Masculin": "Masculin",
-            "Féminin": "Féminin",
-            "Mixte": "Mixte"
-        },
-        "format": {
-            "11v11": "11 vs 11",
-            "8v8": "8 vs 8",
-            "5v5": "5 vs 5",
-            "Futsal": "Futsal"
-        }
-    },
-    "matchesPage": {
-        "description_find": "Parcourez les matchs amicaux disponibles près de chez vous. Utilisez les filtres pour affiner votre recherche et trouver l'adversaire idéal.",
-        "description_create": "Publiez votre annonce de match amical en remplissant un maximum de détails pour attirer les clubs qui vous correspondent.",
-        "description_find_tournament": "Découvrez les tournois amicaux organisés dans votre région. Inscrivez votre équipe et participez à des compétitions conviviales.",
-        "description_create_tournament": "Organisez votre propre tournoi amical ! Publiez les détails, les catégories et invitez d'autres clubs à vous rejoindre.",
-        "filters": {
-            "title": "Filtres",
-            "active": "actif(s)",
-            "clear": "Effacer les filtres",
-            "category": "Catégorie",
-            "level": "Niveau",
-            "format": "Format",
-            "gender": "Genre",
-            "pitch_type": "Type de terrain",
-            "date": "Date",
-            "venue": "Lieu",
-            "city": "Ville",
-            "zip": "Code postal",
-            "radius": "Rayon (km)",
-            "all": "Tous"
-        },
-        "view": {
-            "list": "Liste",
-            "calendar": "Calendrier"
-        },
-        "my_creation": "Ma création",
-        "unknown_club": "Club Inconnu",
-        "found": "match(s) amical(aux) trouvé(s)",
-        "empty_title": "Aucun match amical trouvé",
-        "empty_desc": "Essayez de modifier vos filtres ou créez un nouveau match amical."
-    },
-    "matchForm": {
-        "title": "Informations du Match",
-        "subtitle": "Détails de la rencontre",
-        "contact_title": "Contact & Notes",
-        "labels": {
-            "category": "Catégorie",
-            "level": "Niveau",
-            "format": "Format",
-            "gender": "Genre",
-            "date": "Date",
-            "time": "Heure",
-            "venue": "Lieu",
-            "pitch_type": "Type terrain",
-            "siret": "Numéro SIRET",
-            "address": "Adresse du stade",
-            "zip": "Code Postal",
-            "city": "Ville",
-            "email": "Email de contact",
-            "phone": "Téléphone",
-            "notes": "Notes / Instructions",
-            "choose": "Choisir",
-            "auto_siret": "Rempli automatiquement via le SIRET",
-            "auto": "Rempli automatiquement",
-            "more_info": "Informations complémentaires..."
-        },
-        "link_club": {
-            "title": "Lier votre club (Action irréversible)",
-            "warning_siret": "Le numéro SIRET ne peut être renseigné qu'une seule fois.",
-            "warning_auto": "L'adresse, le code postal et la ville seront alors automatiquement remplis.",
-            "warning_final": "Le club sera définitivement associé à votre compte.",
-            "warning_support": "Si vous devez changer de club par la suite, contactez le support : support.kdufoot@gmail.com",
-            "warning_search": "Astuce : Cherchez 'Nom de votre club + SIRET' sur Internet pour le trouver.",
-            "validate": "Valider et Lier le club",
-            "support": "En cas de changement de club ultérieur, contactez le support avec justificatifs.",
-            "linked": "Club lié"
-        },
-        "progress": "Préparation de l'annonce du match",
-        "buttons": {
-            "cancel": "Annuler",
-            "create": "Créer le match",
-            "update": "Mettre à jour",
-            "unlink": "Détacher (Admin)"
-        },
-        "alerts": {
-            "siret_length": "Le SIRET doit contenir exactement 14 chiffres.",
-            "link_confirm": "⚠️ ATTENTION : Cette action est IRRÉVERSIBLE.\n\nVotre compte sera définitivement lié à ce club.\nPour toute modification ultérieure, vous devrez contacter le support avec une preuve à l'appui.\n\nVoulez-vous continuer ?",
-            "link_error": "Erreur lors de la liaison du club. Vérifiez le SIRET.",
-            "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un match.",
-            "contact_required": "⚠️ CONTACT OBLIGATOIRE\n\nL'email et le téléphone sont indispensables pour que les joueurs puissent vous contacter.",
-            "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un match dans le passé.",
-            "date_far": "⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée."
-        }
-    },
-    "tournamentForm": {
-        "title": "Créer un Tournoi Amical",
-        "subtitle": "Organisez une compétition et invitez des équipes.",
-        "labels": {
-            "name": "Nom du tournoi",
-            "name_placeholder": "Ex: Tournoi d'été KduFoot",
-            "max_teams": "Nombre d'équipes max",
-            "fee": "Frais d'inscription (€)",
-            "fee_placeholder": "0 pour gratuit",
-            "date": "Date de début",
-            "time": "Heure de rendez-vous",
-            "end_time": "Heure de fin",
-            "contact_email": "Email de contact",
-            "notes": "Informations sur le tournoi",
-            "notes_placeholder": "Règlement, récompenses, restauration...",
-            "publish": "Publier le tournoi"
-        },
-        "link_club": "Lien club requis pour organiser",
-        "contact_title": "Contact & Infos complémentaires"
-    },
-    "pricing": {
-        "hero": {
-            "title": "Offres & Tarifs",
-            "subtitle": "Des solutions flexibles pour chaque étape de votre saison."
-        },
-        "period": " / mois",
-        "one_time": "Paiement unique",
-        "plans": {
-            "discovery": {
-                "name": "Découverte",
-                "price": "1€",
-                "cta": "Essayer pour 1€",
-                "features": {
-                    "0": "1 heure d'analyse vidéo",
-                    "1": "Accès complet aux outils IA",
-                    "2": "Offre unique (1 fois par compte)",
-                    "3": "Sans engagement"
-                }
-            },
-            "starter": {
-                "name": "Espoir",
-                "price": "19€",
-                "cta": "Choisir Espoir",
-                "features": {
-                    "0": "10 heures d'analyse vidéo",
-                    "1": "Accès complet aux outils IA",
-                    "2": "Exports PDF basiques",
-                    "3": "Support standard"
-                }
-            },
-            "pro": {
-                "name": "Pro",
-                "price": "39€",
-                "cta": "Choisir Pro",
-                "popular": "Populaire",
-                "features": {
-                    "0": "20 heures d'analyse vidéo",
-                    "1": "IA Supérieure (Plus rapide)",
-                    "2": "Exports PDF complets",
-                    "3": "Support prioritaire"
-                }
-            },
-            "elite": {
-                "name": "Élite",
-                "price": "59€",
-                "cta": "Devenir Élite",
-                "features": {
-                    "0": "30 heures d'analyse vidéo",
-                    "1": "IA Max (Priorité absolue)",
-                    "2": "Exports PDF & Montage",
-                    "3": "Support dédié 24/7"
-                }
-            }
-        }
-    },
-    "dashboard": {
-        "title": "Tableau de Bord",
-        "subtitle": "Gérez vos organisations et vos participations en temps réel.",
-        "tabs": {
-            "requests": "Demandes Reçues",
-            "organized": "Mes Matchs Organisés",
-            "participations": "Mes Participations",
-            "all": "Tous",
-            "matches": "Matchs",
-            "tournaments": "Tournois"
-        },
-        "empty": {
-            "requests": "Vous n'avez aucune demande en attente pour le moment.",
-            "organized": "Vous n'avez publié aucune annonce.",
-            "participations": "Vous n'avez postulé à aucun match.",
-            "no_match": "Aucun match trouvé dans cette catégorie.",
-            "no_tournament": "Aucun tournoi trouvé dans cette catégorie."
-        },
-        "controls": {
-            "new": "Nouvelle Annonce",
-            "view": "Voir l'annonce",
-            "accept": "Accepter",
-            "refuse": "Refuser"
-        },
-        "status": {
-            "pending": "En attente",
-            "accepted": "Acceptée",
-            "refused": "Refusée"
-        }
-    },
-    "thank-you": {
-        "title": "Remerciements",
-        "ronan": {
-            "name": "Ronan Le Meillat",
-            "description": "Je tiens à remercier tout particulièrement Ronan Le Meillat pour son aide précieuse dans le développement de ce site. Il m'a aidé à corriger de nombreuses erreurs et a partagé son expertise approfondie en développement web.",
-            "support": "Pour le soutenir, n'hésitez pas à aller mettre des étoiles sur son entreprise en cliquant sur le logo SCTG ci-dessous."
-        },
-        "github": {
-            "instructions": "Comment faire ? Une fois sur la page, cliquez sur l'un des titres de ses projets, puis en haut à droite, vous verrez 'Star' avec un petit logo étoile. Cliquez dessus : quand l'étoile devient jaune, c'est validé !"
-        },
-        "philippe": {
-            "name": "Philippe Dubart"
-        },
-        "franck": {
-            "name": "Franck Dubart"
-        },
-        "family": {
-            "description": "Merci également à Philippe Dubart et Franck Dubart pour leur précieux soutien et leurs idées particulièrement enrichissantes, qui ont permis d'apporter une réelle valeur ajoutée à l'expérience KduFoot."
-        }
+  "site": {
+    "description": "Kdufoot réunit deux outils essentiels pour les éducateurs de football : l'analyse vidéo pilotée par IA et la recherche de matchs amicaux entre clubs."
+  },
+  "nav": {
+    "home": "Accueil",
+    "exercises": "Analyse Vidéo",
+    "training": "Mon Entraînement",
+    "favorites": "Favoris",
+    "sessions": "Historique Match / Tournoi / Exercice",
+    "sessions_public": "Historique Match / Tournoi",
+    "matches": "Trouver un match / tournoi",
+    "dashboard": "Tableau de Bord",
+    "pricing": "Tarifs",
+    "remerciements": "Remerciements",
+    "profile": "Profil",
+    "admin": "Administration",
+    "userPrefix": "Utilisateur :",
+    "userDropdown": {
+      "connectedAs": "Connecté en tant que",
+      "tokenStatus": "Statut du Token",
+      "expiresIn": "Expire dans :",
+      "noExpiry": "Aucune expiration trouvée",
+      "accessToken": "Access Token (Bearer)",
+      "loading": "Chargement..."
     }
+  },
+  "auth": {
+    "logout": "Se déconnecter",
+    "account": "Mon compte",
+    "login": "Connexion",
+    "user-details": "Nom : {{name}}\nIdentifiant : {{nickname}}\nEmail : {{email}}\nID : {{sub}}"
+  },
+  "brand": {
+    "name": "KduFoot.com",
+    "slogan": "Football Intelligent"
+  },
+  "homePage": {
+    "title": {
+      "prefix": "Votre assistant",
+      "highlight": "Intelligent",
+      "suffix": "pour le football amateur"
+    },
+    "buttons": {
+      "exercises": "Analyser une vidéo",
+      "sessions": "Trouver un match / tournoi"
+    },
+    "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics.",
+    "about": {
+      "title": "👋 À propos",
+      "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1>. J'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
+      "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez un adversaire autour de chez vous en quelques clics.",
+      "footer": "Moins de recherche, plus de terrain."
+    },
+    "cards": {
+      "video": {
+        "title": "🎬 Analyse Vidéo par IA",
+        "description": "Collez un lien vidéo et notre IA génère des exercices détaillés avec synopsis, thèmes et catégorie d'âge."
+      },
+      "match": {
+        "title": "⚽ Matchs Amicaux",
+        "description": "Publiez ou recherchez des matchs amicaux. Filtrez par catégorie, niveau, distance et format."
+      },
+      "tournament": {
+        "title": "🏆 Tournois Amicaux",
+        "description": "Organisez ou participez à des tournois. Idéal pour dynamiser votre saison et rencontrer de nouveaux clubs."
+      }
+    }
+  },
+  "footer": {
+    "poweredBy": "Propulsé par"
+  },
+  "log-out-someone": "Déconnexion {{name}}",
+  "log-in": "Connexion",
+  "all_f": "Toutes",
+  "all_m": "Tous",
+  "search_placeholder": "Rechercher...",
+  "selected": "Sélectionné",
+  "cancel": "Annuler",
+  "add": "Ajouter",
+  "update": "Mettre à jour",
+  "duration": "Durée",
+  "status": "Statut",
+  "summary": "Résumé",
+  "duration_total": "Durée Totale",
+  "players": "Joueurs",
+  "equipment": "Matériel",
+  "back": "Retour",
+  "back_to_list": "Retour à la liste",
+  "loading": "Chargement...",
+  "edit": "Modifier",
+  "error": {
+    "not_found": "Élément non trouvé",
+    "save_failed": "Erreur lors de la sauvegarde",
+    "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
+    "loading_matches": "Erreur lors du chargement des matchs amicaux"
+  },
+  "video": {
+    "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
+    "analyze": "Analyser la vidéo",
+    "analyzeTitle": "Analyse ta vidéo",
+    "analyzeSubtitle": "Colle le lien de ta vidéo YouTube pour obtenir une analyse détaillée de tes exercices.",
+    "analyzing": "Analyse en cours...",
+    "success": "{{count}} exercice(s) trouvé(s)",
+    "error": "Erreur lors de l'analyse"
+  },
+  "exercises": {
+    "emptyTitle": "Aucun exercice pour le moment",
+    "emptySubtitle": "Analysez une vidéo pour générer vos premiers exercices !",
+    "noImage": "Pas d'image",
+    "selected": "exercice(s)"
+  },
+  "training": {
+    "go": "Mon Entraînement",
+    "empty": "Pas d'entraînement en cours",
+    "description": "Sélectionnez des exercices depuis la bibliothèque pour construire votre séance d'entraînement.",
+    "go_exercises": "Découvrir les exercices",
+    "hero_stats": "{{count}} exercice(s) sélectionné(s) · Durée estimée : ~{{duration}} min",
+    "hero_create": "Créez votre séance d'entraînement personnalisée en ajoutant des exercices depuis la bibliothèque.",
+    "add_exercises": "+ Ajouter des exercices"
+  },
+  "favorites": {
+    "title": "Mes Favoris",
+    "description_exercises": "Retrouvez ici tous les exercices que vous avez enregistrés en favoris pour y accéder en un clic.",
+    "description_matches": "Consultez les matchs amicaux qui ont retenu votre attention et gardez un œil sur les opportunités.",
+    "tab_exercises": "Exercices",
+    "tab_matches": "Matchs",
+    "tab_tournaments": "Tournois",
+    "empty_exercises": "Aucun exercice favori",
+    "empty_exercises_desc": "Ajoutez des exercices à vos favoris pour les retrouver ici.",
+    "empty_matches": "Aucun match favori",
+    "empty_matches_desc": "Vos matchs likés apparaîtront ici.",
+    "discover_exercises": "Découvrir les exercices",
+    "find_matches": "Trouver un match / tournoi"
+  },
+  "myExercises": "Mes exercices",
+  "mySessions": "Mes Séances",
+  "myMatches": "Mes Matchs Amicaux",
+  "exercise": {
+    "title": "Titre",
+    "synopsis": "Synopsis",
+    "themes": "Thèmes",
+    "favorite": "Ajouter aux favoris",
+    "unfavorite": "Retirer des favoris",
+    "addToSession": "Ajouter à la séance",
+    "adapt": "Adapter",
+    "exportPDF": "Exporter en PDF",
+    "synopsis_label": "Synopsis / Description",
+    "synopsis_placeholder": "Décrivez le déroulement de l'exercice...",
+    "details": "Détails",
+    "themes_label": "Thèmes",
+    "choose_themes": "Choisir des thèmes",
+    "players_label": "Nombre de joueurs",
+    "dimensions_label": "Dimensions",
+    "equipment_label": "Matériel",
+    "duration_label": "Durée (min)",
+    "category_label": "Catégorie",
+    "choose_category": "Choisir une catégorie",
+    "level_label": "Niveau",
+    "choose_level": "Choisir un niveau",
+    "create_title": "Créer un exercice",
+    "edit_title": "Modifier l'exercice",
+    "create_button": "Créer l'exercice",
+    "no_exercises_found": "Aucun exercice trouvé.",
+    "untitled": "Exercice sans titre",
+    "schema": "Schéma Tactic"
+  },
+  "match": {
+    "create": "Créer un match amical",
+    "create_tournament": "Créer un tournoi amical",
+    "find": "Trouver un match amical",
+    "find_tournament": "Trouver un tournoi amical",
+    "format": "Format",
+    "venue": "Lieu",
+    "date": "Date",
+    "time": "Heure",
+    "filters": {
+      "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs de toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner votre recherche selon vos besoins."
+    }
+  },
+  "session": {
+    "create": "Nouvelle séance",
+    "adapt": "Adapter",
+    "timer": "Chronomètre",
+    "export": "Exporter en PDF",
+    "untitled": "Séance sans titre",
+    "not_scheduled": "Non planifiée",
+    "timeline": "Timeline de la séance",
+    "no_exercises": "Aucun exercice ajouté.",
+    "constraints": "Contraintes",
+    "info_general": "Informations Générales",
+    "name_label": "Nom de la séance",
+    "name_placeholder": "Ex: Séance Technico-Tactique",
+    "category_label": "Catégorie",
+    "choose_category": "Choisir une catégorie",
+    "level_label": "Niveau",
+    "choose_level": "Choisir un niveau",
+    "date_label": "Date prévue",
+    "duration_label": "Durée totale (min)",
+    "add_exercises": "Ajouter des exercices",
+    "create_title": "Planifier une séance",
+    "edit_title": "Modifier la séance",
+    "create_button": "Créer la séance",
+    "status_enum": {
+      "draft": "Brouillon",
+      "scheduled": "Planifiée",
+      "completed": "Terminée"
+    }
+  },
+  "sessions": {
+    "title": "Historique Match / Tournoi / Exercice",
+    "title_public": "Historique Match / Tournoi",
+    "create": "Planifier une séance",
+    "description_sessions": "Organisez et planifiez vos séances d'entraînement pour préparer au mieux vos joueurs.",
+    "description_matches": "Suivez vos matchs amicaux programmés et gardez le contrôle sur votre calendrier sportif.",
+    "empty_sessions": "Aucune séance planifiée",
+    "empty_matches": "Aucun match amical",
+    "not_scheduled": "Non planifiée",
+    "opponent_default": "Adversaire",
+    "status": "Statut"
+  },
+  "permissions": {
+    "quota": {
+      "videos": "Quota vidéos: {{used}}/{{total}}",
+      "sessions": "Séances: {{used}}/{{total}}",
+      "matches": "Annonces: {{used}}/{{total}}"
+    },
+    "upgradeRequired": "Mise à niveau requise",
+    "featureRequiresUpgrade": "Cette fonctionnalité nécessite un abonnement supérieur.",
+    "viewPlans": "Voir les offres",
+    "upgrade": "Passer à {{plan}} pour débloquer cette fonctionnalité"
+  },
+  "badges": {
+    "certifiedCoach": "Coach Certifié"
+  },
+  "enums": {
+    "theme": {
+      "TECHNIQUE": "Technique",
+      "PHYSIQUE": "Physique",
+      "TACTIQUE": "Tactique",
+      "FINITION": "Finition",
+      "TRANSITION": "Transition",
+      "DEFENSE_COLLECTIVE": "Défense Collective",
+      "ATTAQUE_RAPIDE": "Attaque Rapide",
+      "COUPS_DE_PIED_ARRETES": "Coups de Pied Arrêtés"
+    },
+    "category": {
+      "U6": "U6",
+      "U7": "U7",
+      "U8": "U8",
+      "U9": "U9",
+      "U10": "U10",
+      "U11": "U11",
+      "U12": "U12",
+      "U13": "U13",
+      "U14": "U14",
+      "U15": "U15",
+      "U16": "U16",
+      "U17": "U17",
+      "U18": "U18",
+      "U19": "U19",
+      "U20": "U20",
+      "Séniors": "Séniors",
+      "Vétérans": "Vétérans",
+      "Loisir": "Loisir"
+    },
+    "level": {
+      "Débutant": "Débutant",
+      "Ligue": "Ligue",
+      "Régional": "Régional",
+      "National": "National",
+      "Pro": "Professionnel",
+      "Ligue 1": "Ligue 1",
+      "Ligue 2": "Ligue 2",
+      "National 2": "National 2",
+      "National 3": "National 3",
+      "Régional 1": "Régional 1",
+      "Régional 2": "Régional 2",
+      "Régional 3": "Régional 3",
+      "Départemental 1": "Départemental 1",
+      "Départemental 2": "Départemental 2",
+      "Départemental 3": "Départemental 3",
+      "Départemental 4": "Départemental 4",
+      "Départemental 5": "Départemental 5",
+      "Autre": "Autre"
+    },
+    "venue": {
+      "Domicile": "Domicile",
+      "Extérieur": "Extérieur",
+      "Neutre": "Neutre"
+    },
+    "pitch": {
+      "Herbe": "Herbe",
+      "Synthétique": "Synthétique",
+      "Hybride": "Hybride",
+      "Stabilisé": "Stabilisé",
+      "Indoor": "Indoor"
+    },
+    "gender": {
+      "Masculin": "Masculin",
+      "Féminin": "Féminin",
+      "Mixte": "Mixte"
+    },
+    "format": {
+      "11v11": "11 vs 11",
+      "8v8": "8 vs 8",
+      "5v5": "5 vs 5",
+      "Futsal": "Futsal"
+    }
+  },
+  "matchesPage": {
+    "description_find": "Parcourez les matchs amicaux disponibles près de chez vous. Utilisez les filtres pour affiner votre recherche et trouver l'adversaire idéal.",
+    "description_create": "Publiez votre annonce de match amical en remplissant un maximum de détails pour attirer les clubs qui vous correspondent.",
+    "description_find_tournament": "Découvrez les tournois amicaux organisés dans votre région. Inscrivez votre équipe et participez à des compétitions conviviales.",
+    "description_create_tournament": "Organisez votre propre tournoi amical ! Publiez les détails, les catégories et invitez d'autres clubs à vous rejoindre.",
+    "filters": {
+      "title": "Filtres",
+      "active": "actif(s)",
+      "clear": "Effacer les filtres",
+      "category": "Catégorie",
+      "level": "Niveau",
+      "format": "Format",
+      "gender": "Genre",
+      "pitch_type": "Type de terrain",
+      "date": "Date",
+      "venue": "Lieu",
+      "city": "Ville",
+      "zip": "Code postal",
+      "radius": "Rayon (km)",
+      "all": "Tous"
+    },
+    "view": {
+      "list": "Liste",
+      "calendar": "Calendrier"
+    },
+    "my_creation": "Ma création",
+    "unknown_club": "Club Inconnu",
+    "found": "match(s) amical(aux) trouvé(s)",
+    "empty_title": "Aucun match amical trouvé",
+    "empty_desc": "Essayez de modifier vos filtres ou créez un nouveau match amical."
+  },
+  "matchForm": {
+    "title": "Informations du Match",
+    "subtitle": "Détails de la rencontre",
+    "contact_title": "Contact & Notes",
+    "labels": {
+      "category": "Catégorie",
+      "level": "Niveau",
+      "format": "Format",
+      "gender": "Genre",
+      "date": "Date",
+      "time": "Heure",
+      "venue": "Lieu",
+      "pitch_type": "Type terrain",
+      "siret": "Numéro SIRET",
+      "address": "Adresse du stade",
+      "zip": "Code Postal",
+      "city": "Ville",
+      "email": "Email de contact",
+      "phone": "Téléphone",
+      "notes": "Notes / Instructions",
+      "choose": "Choisir",
+      "auto_siret": "Rempli automatiquement via le SIRET",
+      "auto": "Rempli automatiquement",
+      "more_info": "Informations complémentaires..."
+    },
+    "link_club": {
+      "title": "Lier votre club (Action irréversible)",
+      "warning_siret": "Le numéro SIRET ne peut être renseigné qu'une seule fois.",
+      "warning_auto": "L'adresse, le code postal et la ville seront alors automatiquement remplis.",
+      "warning_final": "Le club sera définitivement associé à votre compte.",
+      "warning_support": "Si vous devez changer de club par la suite, contactez le support : support.kdufoot@gmail.com",
+      "warning_search": "Astuce : Cherchez 'Nom de votre club + SIRET' sur Internet pour le trouver.",
+      "validate": "Valider et Lier le club",
+      "support": "En cas de changement de club ultérieur, contactez le support avec justificatifs.",
+      "linked": "Club lié"
+    },
+    "progress": "Préparation de l'annonce du match",
+    "buttons": {
+      "cancel": "Annuler",
+      "create": "Créer le match",
+      "update": "Mettre à jour",
+      "unlink": "Détacher (Admin)"
+    },
+    "alerts": {
+      "siret_length": "Le SIRET doit contenir exactement 14 chiffres.",
+      "link_confirm": "⚠️ ATTENTION : Cette action est IRRÉVERSIBLE.\n\nVotre compte sera définitivement lié à ce club.\nPour toute modification ultérieure, vous devrez contacter le support avec une preuve à l'appui.\n\nVoulez-vous continuer ?",
+      "link_error": "Erreur lors de la liaison du club. Vérifiez le SIRET.",
+      "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un match.",
+      "contact_required": "⚠️ CONTACT OBLIGATOIRE\n\nL'email et le téléphone sont indispensables pour que les joueurs puissent vous contacter.",
+      "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un match dans le passé.",
+      "date_far": "⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée."
+    }
+  },
+  "tournamentForm": {
+    "title": "Créer un Tournoi Amical",
+    "subtitle": "Organisez une compétition et invitez des équipes.",
+    "labels": {
+      "name": "Nom du tournoi",
+      "name_placeholder": "Ex: Tournoi d'été KduFoot",
+      "max_teams": "Nombre d'équipes max",
+      "fee": "Frais d'inscription (€)",
+      "fee_placeholder": "0 pour gratuit",
+      "date": "Date de début",
+      "time": "Heure de rendez-vous",
+      "end_time": "Heure de fin",
+      "contact_email": "Email de contact",
+      "notes": "Informations sur le tournoi",
+      "notes_placeholder": "Règlement, récompenses, restauration...",
+      "publish": "Publier le tournoi"
+    },
+    "link_club": "Lien club requis pour organiser",
+    "contact_title": "Contact & Infos complémentaires"
+  },
+  "pricing": {
+    "hero": {
+      "title": "Offres & Tarifs",
+      "subtitle": "Des solutions flexibles pour chaque étape de votre saison."
+    },
+    "period": " / mois",
+    "one_time": "Paiement unique",
+    "plans": {
+      "discovery": {
+        "name": "Découverte",
+        "price": "1€",
+        "cta": "Essayer pour 1€",
+        "features": {
+          "0": "1 heure d'analyse vidéo",
+          "1": "Accès complet aux outils IA",
+          "2": "Offre unique (1 fois par compte)",
+          "3": "Sans engagement"
+        }
+      },
+      "starter": {
+        "name": "Espoir",
+        "price": "19€",
+        "cta": "Choisir Espoir",
+        "features": {
+          "0": "10 heures d'analyse vidéo",
+          "1": "Accès complet aux outils IA",
+          "2": "Exports PDF basiques",
+          "3": "Support standard"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "39€",
+        "cta": "Choisir Pro",
+        "popular": "Populaire",
+        "features": {
+          "0": "20 heures d'analyse vidéo",
+          "1": "IA Supérieure (Plus rapide)",
+          "2": "Exports PDF complets",
+          "3": "Support prioritaire"
+        }
+      },
+      "elite": {
+        "name": "Élite",
+        "price": "59€",
+        "cta": "Devenir Élite",
+        "features": {
+          "0": "30 heures d'analyse vidéo",
+          "1": "IA Max (Priorité absolue)",
+          "2": "Exports PDF & Montage",
+          "3": "Support dédié 24/7"
+        }
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de Bord",
+    "subtitle": "Gérez vos organisations et vos participations en temps réel.",
+    "tabs": {
+      "requests": "Demandes Reçues",
+      "organized": "Mes Matchs Organisés",
+      "participations": "Mes Participations",
+      "all": "Tous",
+      "matches": "Matchs",
+      "tournaments": "Tournois"
+    },
+    "empty": {
+      "requests": "Vous n'avez aucune demande en attente pour le moment.",
+      "organized": "Vous n'avez publié aucune annonce.",
+      "participations": "Vous n'avez postulé à aucun match.",
+      "no_match": "Aucun match trouvé dans cette catégorie.",
+      "no_tournament": "Aucun tournoi trouvé dans cette catégorie."
+    },
+    "controls": {
+      "new": "Nouvelle Annonce",
+      "view": "Voir l'annonce",
+      "accept": "Accepter",
+      "refuse": "Refuser"
+    },
+    "status": {
+      "pending": "En attente",
+      "accepted": "Acceptée",
+      "refused": "Refusée"
+    }
+  },
+  "thank-you": {
+    "title": "Remerciements",
+    "ronan": {
+      "name": "Ronan Le Meillat",
+      "description": "Je tiens à remercier tout particulièrement Ronan Le Meillat pour son aide précieuse dans le développement de ce site. Il m'a aidé à corriger de nombreuses erreurs et a partagé son expertise approfondie en développement web.",
+      "support": "Pour le soutenir, n'hésitez pas à aller mettre des étoiles sur son entreprise en cliquant sur le logo SCTG ci-dessous."
+    },
+    "github": {
+      "instructions": "Comment faire ? Une fois sur la page, cliquez sur l'un des titres de ses projets, puis en haut à droite, vous verrez 'Star' avec un petit logo étoile. Cliquez dessus : quand l'étoile devient jaune, c'est validé !"
+    },
+    "philippe": {
+      "name": "Philippe Dubart"
+    },
+    "franck": {
+      "name": "Franck Dubart"
+    },
+    "family": {
+      "description": "Merci également à Philippe Dubart et Franck Dubart pour leur précieux soutien et leurs idées particulièrement enrichissantes, qui ont permis d'apporter une réelle valeur ajoutée à l'expérience KduFoot."
+    }
+  }
 }

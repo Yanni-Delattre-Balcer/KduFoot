@@ -65,6 +65,7 @@ i18n
 
     ns: ["base", "kdufoot"],
     defaultNS: "kdufoot",
+    fallbackNS: "base",
     interpolation: {
       escapeValue: false, // react already safes from xss
     },
@@ -75,12 +76,15 @@ i18n
       loadPath: (lng, ns) => {
         let url: URL = new URL("./locales/base/en-US.json", import.meta.url);
 
+        const reqlng = lng[0];
+        const reqns = ns[0];
+
         // Vite does not know how to resolve
         // new URL(`./locales/${ns}/${reqlng}.json`, import.meta.url)
         // so we need to manually handle the different namespaces and languages
-        switch (ns[0]) {
+        switch (reqns) {
           case "base":
-            switch (lng[0]) {
+            switch (reqlng) {
               case "en-US":
                 url = new URL("./locales/base/en-US.json", import.meta.url);
                 break;
@@ -92,7 +96,7 @@ i18n
             }
             break;
           case "kdufoot":
-            switch (lng[0]) {
+            switch (reqlng) {
               case "en-US":
                 url = new URL("./locales/kdufoot/en-US.json", import.meta.url);
                 break;
