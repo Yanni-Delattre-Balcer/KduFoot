@@ -43,7 +43,9 @@
     },
     "buttons": {
       "exercises": "Analyser une vidéo",
-      "sessions": "Trouver un match / tournoi"
+      "sessions": "Trouver un match / tournoi",
+      "find_match": "Trouver un match",
+      "find_tournament": "Trouver un tournoi"
     },
     "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics.",
     "about": {

@@ -43,7 +43,9 @@
         },
         "buttons": {
             "exercises": "Analyze a video",
-            "sessions": "Find a match / tournament"
+            "sessions": "Find a match / tournament",
+            "find_match": "Find a match",
+            "find_tournament": "Find a tournament"
         },
         "description": "Kdufoot offers two tools designed to simplify your daily coaching life. Paste a video link and our IA generates detailed exercises adapted to your category. Publish or search for friendly matches around you in just a few clicks.",
         "about": {
@@ -403,7 +405,7 @@
             "fee_placeholder": "0 for free",
             "date": "Start date",
             "time": "Meeting time",
-            "end_time": "End time",
+            "end_time": "End Time",
             "contact_email": "Contact Email",
             "notes": "Tournament information",
             "notes_placeholder": "Rules, rewards, catering...",
