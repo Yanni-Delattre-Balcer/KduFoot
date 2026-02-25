@@ -12,16 +12,16 @@ export class MatchService {
 
         const result = await this.db.prepare(
             `INSERT INTO matches (
-        id, owner_id, club_id, type, category, format, match_date, match_time, match_end_time,
+        id, owner_id, club_id, type, category, level, format, match_date, match_time, match_end_time,
         venue, location_address, location_city, location_zip, pitch_type,
         email, phone, notes, max_teams, registration_fee, status, created_at, updated_at
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, 'active', ?, ?
       ) RETURNING *`
         ).bind(
-            id, userId, dto.club_id, dto.type || 'match', dto.category, dto.format, dto.match_date, dto.match_time, dto.match_end_time || null,
+            id, userId, dto.club_id, dto.type || 'match', dto.category, dto.level || null, dto.format, dto.match_date, dto.match_time, dto.match_end_time || null,
             dto.venue, dto.location_address || null, dto.location_city || null, dto.location_zip || null, dto.pitch_type || null,
             dto.email, dto.phone, dto.notes || null, dto.max_teams || null, dto.registration_fee || null, now, now
         ).first<Match>();
@@ -363,7 +363,7 @@ export class MatchService {
             return true;
         } catch (e: any) {
             if (e.message.includes('UNIQUE constraint failed')) {
-                return true; 
+                return true;
             }
             throw e;
         }
@@ -381,7 +381,7 @@ export class MatchService {
             WHERE m.owner_id = ?
             ORDER BY mc.contacted_at DESC
         `).bind(userId).all<any>();
-        
+
         return results;
     }
 
@@ -397,7 +397,7 @@ export class MatchService {
             WHERE mc.user_id = ?
             ORDER BY m.match_date ASC
         `).bind(userId).all<any>();
-        
+
         return results;
     }
 
