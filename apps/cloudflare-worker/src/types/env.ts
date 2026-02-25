@@ -20,11 +20,16 @@ export interface Env {
     CORS_ORIGIN: string;
     CLOUDFLARE_DATABASE_ID?: string;
 
+    // Auth0 Management API
+    AUTH0_MANAGEMENT_API_CLIENT_ID: string;
+    AUTH0_MANAGEMENT_API_CLIENT_SECRET: string;
+
     // Permissions
     READ_PERMISSION: string;
     WRITE_PERMISSION: string;
     ADMIN_PERMISSION: string;
     BACKUP_PERMISSION: string;
+    ADMIN_AUTH0_PERMISSION: string;
     CRYPTOKEN: string;
     AUTH0_TOKEN: string;
 

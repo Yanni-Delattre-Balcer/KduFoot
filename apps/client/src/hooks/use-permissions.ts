@@ -43,6 +43,7 @@ export enum Permission {
     ADMIN_MATCHES = 'admin:matches',
     ADMIN_ANALYTICS = 'admin:analytics',
     ADMIN_BILLING = 'admin:billing',
+    ADMIN_AUTH0 = 'auth0:admin:api',
     COACH_CERTIFIED = 'coach:certified',
 }
 

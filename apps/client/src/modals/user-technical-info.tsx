@@ -19,6 +19,8 @@ import { ScrollShadow } from "@heroui/scroll-shadow";
 import { JWTPayload } from "jose";
 import { useTranslation } from "react-i18next";
 import { CopyButton } from "@/components/copy-button";
+import { AuthenticationGuardWithPermission } from "@/authentication";
+import { useNavigate } from "react-router-dom";
 
 interface UserTechnicalInfoModalProps {
     isOpen: boolean;
@@ -49,6 +51,7 @@ function getSecondsLeft(exp: number): number {
 export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
     ({ isOpen, onClose, user, accessToken, tokenPayload }) => {
         const { t } = useTranslation();
+        const navigate = useNavigate();
         const [secondsLeft, setSecondsLeft] = useState<number>(0);
 
         useEffect(() => {
@@ -146,17 +149,41 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                                         Permissions
                                     </p>
                                     <div className="flex flex-wrap gap-1.5">
-                                        {permissions.map((perm) => (
-                                            <Chip
-                                                key={perm}
-                                                size="sm"
-                                                variant="flat"
-                                                color="secondary"
-                                                className="text-xs font-mono"
-                                            >
-                                                {perm}
-                                            </Chip>
-                                        ))}
+                                        {permissions.map((perm) => {
+                                            if (perm === "auth0:admin:api") {
+                                                return (
+                                                    <AuthenticationGuardWithPermission
+                                                        key={perm}
+                                                        permission="auth0:admin:api"
+                                                    >
+                                                        <Chip
+                                                            size="sm"
+                                                            variant="solid"
+                                                            color="primary"
+                                                            className="text-xs font-mono cursor-pointer hover:bg-primary-600 transition-colors"
+                                                            onClick={() => {
+                                                                navigate("/admin/users");
+                                                                onClose();
+                                                            }}
+                                                        >
+                                                            {perm} (Admin Panel)
+                                                        </Chip>
+                                                    </AuthenticationGuardWithPermission>
+                                                );
+                                            }
+
+                                            return (
+                                                <Chip
+                                                    key={perm}
+                                                    size="sm"
+                                                    variant="flat"
+                                                    color="secondary"
+                                                    className="text-xs font-mono"
+                                                >
+                                                    {perm}
+                                                </Chip>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </>

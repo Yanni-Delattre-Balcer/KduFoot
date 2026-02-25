@@ -41,6 +41,7 @@ import FavoritesPage from "@/pages/favorites";
 import TrainingPage from "@/pages/training";
 import { TrainingProvider } from "@/contexts/training-context";
 import { showVideoAnalysis } from "@/config/site";
+import UsersAndPermissionsPage from "@/pages/admin/users-and-permissions";
 
 function App() {
   const { isLoading } = useAuth();
@@ -71,36 +72,36 @@ function App() {
           <Route element={<ThankYouPage />} path="/remerciements" />
           <Route element={<PageNotFound />} path="*" />
           {showVideoAnalysis && (
-          <>
-          <Route
-            element={<AuthenticationGuard component={ExercisesPage} />}
-            path="/exercises"
-          />
-          <Route
-            element={<AuthenticationGuard component={TrainingPage} />}
-            path="/training"
-          />
-          </>
+            <>
+              <Route
+                element={<AuthenticationGuard component={ExercisesPage} />}
+                path="/exercises"
+              />
+              <Route
+                element={<AuthenticationGuard component={TrainingPage} />}
+                path="/training"
+              />
+            </>
           )}
           <Route
             element={<AuthenticationGuard component={FavoritesPage} />}
             path="/favorites"
           />
           {showVideoAnalysis && (
-          <>
-          <Route
-            element={<AuthenticationGuard component={ExerciseEditPage} />}
-            path="/exercises/new"
-          />
-          <Route
-            element={<AuthenticationGuard component={ExerciseEditPage} />}
-            path="/exercises/:id/edit"
-          />
-          <Route
-            element={<AuthenticationGuard component={ExerciseDetailsPage} />}
-            path="/exercises/:id"
-          />
-          </>
+            <>
+              <Route
+                element={<AuthenticationGuard component={ExerciseEditPage} />}
+                path="/exercises/new"
+              />
+              <Route
+                element={<AuthenticationGuard component={ExerciseEditPage} />}
+                path="/exercises/:id/edit"
+              />
+              <Route
+                element={<AuthenticationGuard component={ExerciseDetailsPage} />}
+                path="/exercises/:id"
+              />
+            </>
           )}
           <Route
             element={<AuthenticationGuard component={SessionPlannerPage} />}
@@ -137,6 +138,10 @@ function App() {
           <Route
             element={<AuthenticationGuard component={MatchDetailsPage} />}
             path="/matches/:id"
+          />
+          <Route
+            element={<AuthenticationGuard component={UsersAndPermissionsPage} />}
+            path="/admin/users"
           />
         </Routes>
       </TrainingProvider>

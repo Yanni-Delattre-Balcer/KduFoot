@@ -36,3 +36,26 @@ export interface Auth0Permission {
     resource_server_identifier: string;
     resource_server_name: string;
 }
+
+/**
+ * Réponse succès du token Auth0 Management API
+ * retourné par la route /api/__auth0/token du worker
+ */
+export interface Auth0ManagementTokenResponse {
+    access_token: string;
+    token_type?: string;
+    expires_in?: number;
+    /** true si le token provient du cache KV (pas d'appel Auth0 fait) */
+    from_cache?: boolean;
+}
+
+/** Erreur retournée par la route /api/__auth0/token */
+export interface Auth0ManagementTokenError {
+    success: false;
+    error: string;
+}
+
+/** Union type pour la réponse de /api/__auth0/token */
+export type Auth0ManagementTokenApiResponse =
+    | Auth0ManagementTokenResponse
+    | Auth0ManagementTokenError;

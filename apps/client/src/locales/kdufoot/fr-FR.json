@@ -519,5 +519,41 @@
       "description": "Merci également à Philippe Dubart et Franck Dubart pour leur précieux soutien et leurs idées particulièrement enrichissantes, qui ont permis d'apporter une réelle valeur ajoutée à l'expérience KduFoot."
     }
   },
+  "adminUsersPage": {
+    "title": "Gestion des utilisateurs et permissions",
+    "subtitle": "Gérez les accès des utilisateurs KduFoot.",
+    "tokenFromCache": "token Management en cache ✓",
+    "loading": "Chargement des utilisateurs…",
+    "columns": {
+      "user": "Utilisateur",
+      "email": "Email",
+      "subscription": "Abonnement",
+      "logins": "Connexions",
+      "actions": "Actions"
+    },
+    "empty": "Aucun utilisateur trouvé",
+    "actions": {
+      "permissions": "Permissions",
+      "delete": "Supprimer"
+    },
+    "modal": {
+      "title": "Permissions de",
+      "close": "Fermer",
+      "loading": "Chargement des permissions…",
+      "save": "Enregistrer les permissions",
+      "cancel": "Annuler"
+    },
+    "toasts": {
+      "errorLoadingUsers": "Erreur chargement utilisateurs",
+      "noManagementToken": "Impossible d'obtenir le token Management",
+      "errorLoadingPerms": "Erreur chargement permissions",
+      "successUpdate": "Permissions mises à jour avec succès",
+      "errorUpdate": "Erreur lors de la mise à jour des permissions",
+      "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte",
+      "confirmDelete": "Supprimer l'utilisateur {{id}} ?",
+      "successDelete": "Utilisateur supprimé avec succès",
+      "errorDelete": "Erreur lors de la suppression de l'utilisateur"
+    }
+  },
   "delete": "Supprimer"
 }
