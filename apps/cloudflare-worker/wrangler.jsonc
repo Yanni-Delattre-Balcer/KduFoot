@@ -11,6 +11,12 @@
 			"database_name": "kdufoot-db",
 			"database_id": "22a59be4-5a74-43f7-9f25-2e9fe7ae4f5e"
 		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "KV_CACHE",
+			"id": "d5f9c08aeb9e4cbaa708042aa30dfa02"
+		}
 	]
 	/*
 	"r2_buckets": [
