@@ -26,6 +26,7 @@ import ApiPage from "@/pages/api";
 import PricingPage from "@/pages/pricing/index";
 import BlogPage from "@/pages/blog";
 import AboutPage from "@/pages/about";
+import ThankYouPage from "@/pages/thank-you";
 import ExercisesPage from "@/pages/exercises";
 import ExerciseDetailsPage from "@/pages/exercises/details";
 import ExerciseEditPage from "@/pages/exercises/edit";
@@ -67,6 +68,7 @@ function App() {
             path="/blog"
           />
           <Route element={<AboutPage />} path="/about" />
+          <Route element={<ThankYouPage />} path="/remerciements" />
           <Route element={<PageNotFound />} path="*" />
           {showVideoAnalysis && (
           <>

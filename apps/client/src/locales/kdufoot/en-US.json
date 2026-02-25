@@ -10,6 +10,7 @@
         "sessions": "Training / Match Summary",
         "matches": "Find a Match",
         "pricing": "Pricing",
+        "remerciements": "Acknowledgments",
         "profile": "Profile",
         "admin": "Administration",
         "userPrefix": "User :",
@@ -365,6 +366,26 @@
                     "2": "PDF Exports & Editing",
                     "3": "Dedicated 24/7 support"
                 }
+            }
+        },
+        "thank-you": {
+            "title": "Acknowledgments",
+            "ronan": {
+                "name": "Ronan Le Meillat",
+                "description": "I would like to especially thank Ronan Le Meillat for his invaluable help in developing this site. He helped me fix many errors and shared his deep expertise in web development.",
+                "support": "To support him, feel free to give stars to his GitHub repositories by clicking the SCTG logo below."
+            },
+            "github": {
+                "instructions": "How to do it? Once on the page, click on one of his project titles, then at the top right, you will see 'Star' with a small star logo. Click on it: when the star turns yellow, it's done!"
+            },
+            "philippe": {
+                "name": "Philippe Dubart"
+            },
+            "franck": {
+                "name": "Franck Dubart"
+            },
+            "family": {
+                "description": "Thanks also to Philippe Dubart and Franck Dubart for their valuable support and their particularly enriching ideas, which have added real value to the KduFoot experience."
             }
         }
     }

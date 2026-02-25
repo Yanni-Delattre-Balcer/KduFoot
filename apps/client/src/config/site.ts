@@ -47,6 +47,10 @@ export const siteConfig = () => {
       label: i18next.t("nav.pricing"),
       href: "/pricing",
     },
+    {
+      label: i18next.t("nav.remerciements"),
+      href: "/remerciements",
+    },
   ];
 
   const filteredNavItems = showVideoAnalysis

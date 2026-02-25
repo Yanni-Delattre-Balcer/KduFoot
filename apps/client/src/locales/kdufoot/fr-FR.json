@@ -2,7 +2,7 @@
     "site": {
         "description": "Kdufoot réunit deux outils essentiels pour les éducateurs de football : l'analyse vidéo pilotée par IA et la recherche de matchs amicaux entre clubs."
     },
-    "nav": {
+        "nav": {
         "home": "Accueil",
         "exercises": "Analyse Vidéo",
         "training": "Mon Entraînement",
@@ -12,6 +12,7 @@
         "matches": "Trouver un match / tournoi",
         "dashboard": "Tableau de Bord",
         "pricing": "Tarifs",
+        "remerciements": "Remerciements",
         "profile": "Profil",
         "admin": "Administration",
         "userPrefix": "Utilisateur :",
@@ -490,6 +491,26 @@
             "pending": "En attente",
             "accepted": "Acceptée",
             "refused": "Refusée"
+        }
+    },
+    "thank-you": {
+        "title": "Remerciements",
+        "ronan": {
+            "name": "Ronan Le Meillat",
+            "description": "Je tiens à remercier tout particulièrement Ronan Le Meillat pour son aide précieuse dans le développement de ce site. Il m'a aidé à corriger de nombreuses erreurs et a partagé son expertise approfondie en développement web.",
+            "support": "Pour le soutenir, n'hésitez pas à aller mettre des étoiles sur son entreprise en cliquant sur le logo SCTG ci-dessous."
+        },
+        "github": {
+            "instructions": "Comment faire ? Une fois sur la page, cliquez sur l'un des titres de ses projets, puis en haut à droite, vous verrez 'Star' avec un petit logo étoile. Cliquez dessus : quand l'étoile devient jaune, c'est validé !"
+        },
+        "philippe": {
+            "name": "Philippe Dubart"
+        },
+        "franck": {
+            "name": "Franck Dubart"
+        },
+        "family": {
+            "description": "Merci également à Philippe Dubart et Franck Dubart pour leur précieux soutien et leurs idées particulièrement enrichissantes, qui ont permis d'apporter une réelle valeur ajoutée à l'expérience KduFoot."
         }
     }
 }

@@ -42,16 +42,17 @@ import { availableLanguages } from "@/i18n";
 export const Navbar = () => {
 
   const getNavItemClass = (href: string) => {
-    const base = "font-bold hover:scale-105 transition-transform bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent";
+    const base = "font-bold hover:scale-105 transition-transform bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent text-base";
     // Vibrant saturated colors (3 steps) to see movement without being "extreme"
-    if (href === '/') return `${base} bg-[linear-gradient(to_right,#ef4444,#f87171,#ef4444)]`; // Red 🍎
-    if (href === '/dashboard') return `${base} bg-[linear-gradient(to_right,#f97316,#fb923c,#f97316)]`; // Orange 🍊
-    if (href === '/exercises') return `${base} bg-[linear-gradient(to_right,#f59e0b,#fbbf24,#f59e0b)]`; // Amber ☀️
-    if (href === '/training') return `${base} bg-[linear-gradient(to_right,#10b981,#34d399,#10b981)]`; // Green 🌿
-    if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#06b6d4,#22d3ee,#06b6d4)]`; // Cyan 💧
-    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#3b82f6,#60a5fa,#3b82f6)]`; // Royal Blue 📘
-    if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#8b5cf6,#a78bfa,#8b5cf6)]`; // Violet 🔮
-    if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#d946ef,#f0abfc,#d946ef)]`; // Pink 💖
+    if (href === '/') return `${base} bg-[linear-gradient(to_right,#991b1b,#f87171,#991b1b)]`; // Red 🍎
+    if (href === '/dashboard') return `${base} bg-[linear-gradient(to_right,#9a3412,#fb923c,#9a3412)]`; // Orange 🍊
+    if (href === '/exercises') return `${base} bg-[linear-gradient(to_right,#92400e,#fbbf24,#92400e)]`; // Amber ☀️
+    if (href === '/training') return `${base} bg-[linear-gradient(to_right,#14532d,#22c55e,#14532d)]`; // Grass Green 🌳
+    if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#164e63,#22d3ee,#164e63)]`; // Cyan 💧
+    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#1e3a8a,#3b82f6,#1e3a8a)]`; // Deep Blue 📘
+    if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#5b21b6,#a78bfa,#5b21b6)]`; // Violet 🔮
+    if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#86198f,#f0abfc,#86198f)]`; // Pink 💖
+    if (href === '/remerciements') return `${base} bg-[linear-gradient(to_right,#115e59,#2dd4bf,#115e59)]`; // Teal 🌊
     return "text-foreground font-bold";
   };
 
@@ -66,7 +67,7 @@ export const Navbar = () => {
       }}
     >
       {/* Navigation Links - Centered */}
-      <NavbarContent className="hidden lg:flex gap-8 justify-center w-full" justify="center">
+      <NavbarContent className="hidden lg:flex gap-4 justify-center w-full" justify="center">
         {siteConfig().navItems.map((item) => (
           <NavbarItem key={item.href}>
             <LinkUniversal
