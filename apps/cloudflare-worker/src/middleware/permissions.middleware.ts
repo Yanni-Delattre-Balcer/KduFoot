@@ -3,6 +3,10 @@ import { checkPermissions } from '../auth0';
 import { Permission, PermissionCheck } from '../types/permissions';
 import type { Env } from '../types/env';
 
+/**
+ * This middleware checks if a request is authorized.
+ * 'Middleware' is code that runs BEFORE the main route handler.
+ */
 export async function checkPermission(
     request: Request,
     env: Env,
@@ -10,21 +14,29 @@ export async function checkPermission(
 ): Promise<PermissionCheck> {
     const authHeader = request.headers.get('Authorization');
 
+    // Check if the Authorization header is present and starts with 'Bearer '
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return { hasPermission: false, reason: 'Token manquant' };
     }
 
     const token = authHeader.substring(7);
 
-    // Vérification Auth0
-    // Note: checkPermissions from auth0.ts returns { access: boolean, payload: jose.JWTPayload, permissions: string[] }
+    /**
+     * Auth0 Verification:
+     * We check if the token is valid and if the user has the required permission 'scope'.
+     */
     const { access, payload } = await checkPermissions(token, [permission], env);
 
     if (!access) {
         return { hasPermission: false, reason: 'Permission refusée' };
     }
 
-    // Vérification quotas
+    /**
+     * Quota Verification:
+     * Some actions (like analyzing a video) are limited to a certain number of uses.
+     * We use Cloudflare KV (Key-Value storage) to track how many times the user 
+     * has performed the action in the current period (day/month).
+     */
     const quotaCheck = await checkQuota(request, env, permission, token, payload);
 
     return quotaCheck.hasPermission ? { hasPermission: true, quota: quotaCheck.quota } : quotaCheck;

@@ -1,13 +1,17 @@
 
 import { D1Database, R2Bucket, KVNamespace } from '@cloudflare/workers-types';
 
+/**
+ * The Env interface defines all the external resources and configurations
+ * that our Cloudflare Worker can access.
+ */
 export interface Env {
-    // Bindings defined in wrangler.jsonc
-    DB: D1Database;
-    VIDEOS_BUCKET: R2Bucket;
+    // 'Bindings' are direct connections to Cloudflare services
+    DB: D1Database; // SQL Database (SQLite based)
+    VIDEOS_BUCKET: R2Bucket; // Object Storage (like Amazon S3)
     THUMBNAILS_BUCKET: R2Bucket;
-    KV_CACHE: KVNamespace;
-    RATE_LIMITER: any; // RateLimit type not always available in all envs
+    KV_CACHE: KVNamespace; // Fast global Key-Value storage
+    RATE_LIMITER: any; // Limits the number of requests to prevent abuse
 
     // Environment variables
     AUTH0_DOMAIN: string;

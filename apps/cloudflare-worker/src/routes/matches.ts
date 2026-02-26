@@ -9,15 +9,18 @@ import { checkPermission } from '../middleware/permissions.middleware';
 export const setupMatchRoutes = (router: Router, env: Env) => {
     const matchService = new MatchService(env.DB);
 
-    // Search matches (Public? or Read permission?)
+    // Search matches
     router.get('/api/matches', async (request: Request) => {
-        // READ_API for now
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const url = new URL(request.url);
+        /**
+         * We extract geolocation parameters for specialized searching.
+         * 'radius_km' allows finding matches within a certain distance of a user.
+         */
         const radiusParam = url.searchParams.get('radius_km');
         const userLatParam = url.searchParams.get('user_lat');
         const userLngParam = url.searchParams.get('user_lng');
@@ -40,6 +43,10 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             user_lng: userLngParam ? parseFloat(userLngParam) : undefined,
         };
 
+        /**
+         * The matchService performs the actual database query.
+         * It may also use the Google Maps API Key for geocoding cities into coordinates.
+         */
         const result = await matchService.search(filters, env.GOOGLE_MAPS_API_KEY);
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });

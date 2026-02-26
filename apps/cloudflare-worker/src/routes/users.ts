@@ -7,11 +7,16 @@ import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
 
 export const setupUserRoutes = (router: Router, env: Env) => {
+    // We instantiate the UserService which handles database operations for users
     const userService = new UserService(env.DB);
 
-    // Sync user from Auth0 (called after login)
-    // Public or semi-public? Usually authenticated with the token.
-    // We accept the token and use the payload to create/sync the user.
+    /**
+     * POST /api/users/sync
+     * 
+     * This route "synchronizes" a user from Auth0 to our local database (D1).
+     * When a user logs in for the first time, we need to save their profile info
+     * so we can associate them with clubs, sessions, etc.
+     */
     router.post('/api/users/sync', async (request: Request) => {
         // We expect the standard Auth0 token check to have happened via router or middleware if we used it.
         // Here we can re-verify or trust the router if configured.
@@ -34,8 +39,9 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: 'Missing user data' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
+        // DTO (Data Transfer Object) is a simple object used to pass data between processes
         const dto: CreateUserDto = {
-            auth0_sub: body.sub,
+            auth0_sub: body.sub, // Unique identifier from Auth0
             email: body.email,
             firstname: body.given_name || body.name || 'User',
             lastname: body.family_name || '',
@@ -145,7 +151,10 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
 
         try {
-            // Fetch club info from Government API
+            /** 
+             * We fetch business information (Clubs) using the French Government's SIRET API.
+             * A SIRET is a 14-digit unique identifier for a business or organization in France.
+             */
             const apiUrl = `${env.SIRET_API_URL}?q=${body.siret}&page=1&per_page=1`;
             const apiRes = await fetch(apiUrl);
             if (!apiRes.ok) {

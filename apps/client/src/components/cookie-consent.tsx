@@ -34,8 +34,13 @@ import { buttonGradient } from "./primitives";
 
 import { siteConfig } from "@/config/site";
 
+/**
+ * This component displays a popup asking users for permission to use cookies.
+ * It's a common legal requirement in many regions (like the EU).
+ */
 export const CookieConsent: React.FC = () => {
   const { t } = useTranslation();
+  // We use a custom hook to manage the state of the consent (pending, accepted, rejected)
   const { cookieConsent, acceptCookies, rejectCookies } = useCookieConsent();
 
   // État pour contrôler la visibilité du modal
@@ -47,6 +52,10 @@ export const CookieConsent: React.FC = () => {
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
+      /** 
+       * 'motionProps' allows us to define animations.
+       * Here we make the modal slide up from the bottom when it appears.
+       */
       motionProps={{
         variants: {
           enter: {

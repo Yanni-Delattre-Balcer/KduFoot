@@ -8,11 +8,30 @@ import { Button } from '@heroui/button';
 import { Chip } from "@heroui/chip";
 import { Card, CardBody, CardHeader } from '@heroui/card';
 
+/**
+ * This component displays the details of a specific training session.
+ * It uses several "hooks" to manage state and logic.
+ */
 export default function SessionDetailsPage() {
+    /** 
+     * useParams allows us to access dynamic parameters from the URL.
+     * In this case, we get the 'id' of the session from the address bar.
+     */
     const { id } = useParams<{ id: string }>();
+
+    /** 
+     * useTranslation is part of 'react-i18next'. 
+     * It provides the 't' function to translate text based on the user's language.
+     */
     const { t } = useTranslation();
+
+    /** 
+     * useSession is a custom hook that fetches session data from our API.
+     * It handles the complex logic of fetching and provides simple status flags like 'isLoading'.
+     */
     const { session, isLoading, isError } = useSession(id || null);
 
+    // If the data is still being fetched, we show a loading spinner
     if (isLoading) {
         return (
             <DefaultLayout>
@@ -50,6 +69,7 @@ export default function SessionDetailsPage() {
                             </span>
                         </div>
                     </div>
+                    {/* Navigation buttons to edit or go back */}
                     <div className="flex gap-2">
                         <Button as={Link} to={`/sessions/${id}/edit`} color="secondary" variant="flat">
                             {t('edit', 'Modifier')}

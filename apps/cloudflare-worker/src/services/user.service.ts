@@ -3,7 +3,13 @@ import { D1Database } from '@cloudflare/workers-types';
 import { User, CreateUserDto, UpdateUserDto } from '../types/user';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * The 'Service' class is responsible for interacting with the database.
+ * This keeps our routes clean and allows us to reuse the same logic
+ * in different part of the application.
+ */
 export class UserService {
+    // The constructor takes the D1 database instance provided by Cloudflare
     constructor(private db: D1Database) { }
 
     async getUserByAuth0Sub(sub: string): Promise<User | null> {
@@ -53,7 +59,11 @@ export class UserService {
     }
 
     async updateUser(id: string, dto: UpdateUserDto): Promise<User | null> {
-        // Construct dynamic update query
+        /**
+         * Construct a dynamic UPDATE query.
+         * Since we don't know which fields the user wants to update (email? name?),
+         * we build the SQL string programmatically.
+         */
         const keys = Object.keys(dto) as (keyof UpdateUserDto)[];
         if (keys.length === 0) return this.getUserById(id);
 

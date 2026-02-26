@@ -11,11 +11,12 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
     // Search exercises
     router.get('/api/exercises', async (request: Request) => {
-        // Requires READ scope?
+        /**
+         * Before processing the request, we check if the user has the required permission.
+         * Permissions are often called "Scopes" in OAuth2/Auth0.
+         */
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_READ);
         if (!permissionCheck.hasPermission) {
-            // Maybe allow public read for shared exercises?
-            // For now detailed read requires auth
             return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
@@ -58,16 +59,14 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         }
 
         const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const payload = JSON.parse(atob(token.split('.')[1])); // Decode the middle part (Payload) of the JWT
 
-        // We need to resolve user_id from auth0_sub
-        // Or we store auth0_sub in exercise? Schema says user_id (TEXT).
-        // Usually user_id refers to our internal UUID from D1 users table in these migrations (see users.id)
-        // So we need to look up the user first.
-        // Optimization: Store internal ID in token claims? Or duplicate lookups?
-        // Let's do a lookup for now.
-
+        /**
+         * Auth0 provides a 'sub' (subject) which is a unique string for the user.
+         * However, our database (D1) uses its own internal UUIDs for relational integrity.
+         * We must look up our internal ID using the Auth0 'sub'.
+         */
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

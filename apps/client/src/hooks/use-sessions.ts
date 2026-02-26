@@ -8,7 +8,15 @@ import { useCallback } from 'react';
 export function useSessions(filters?: SessionFilters) {
     const { getAccessTokenSilently } = useAuth0();
 
+    /**
+     * SWR (Stale-While-Revalidate) is a library for data fetching.
+     * It first returns the data from cache (stale), then sends the fetch request (revalidate), 
+     * and finally comes with the up-to-date data.
+     * 
+     * The fetcher function is responsible for the actual network request.
+     */
     const fetcher = async (url: string) => {
+        // We get a fresh security token from Auth0 to prove the user is logged in
         const token = await getAccessTokenSilently();
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -28,10 +36,15 @@ export function useSessions(filters?: SessionFilters) {
 
     const { data, error, isLoading, mutate } = useSWR(key, fetcher);
 
+    /**
+     * createSession, updateSession, and deleteSession are wrapped in 'useCallback'.
+     * This prevents the functions from being recreated on every render, 
+     * which improves performance.
+     */
     const createSession = useCallback(async (dto: CreateSessionDto) => {
         const token = await getAccessTokenSilently();
         await sessionService.create(dto, token);
-        mutate();
+        mutate(); // Tells SWR to refresh the data after a change
     }, [getAccessTokenSilently, mutate]);
 
     const updateSession = useCallback(async (id: string, dto: UpdateSessionDto) => {

@@ -6,11 +6,14 @@ import { ClubService } from '../services/club.service';
 export const setupClubRoutes = (router: Router, env: Env) => {
     const clubService = new ClubService(env);
 
-    // Search clubs (Public or Authenticated?)
-    // Let's make it public for registration flow, or maybe require basic token?
-    // User registration needs it.
+    /**
+     * GET /api/clubs/search
+     * 
+     * Allows searching for clubs by name. We check if the query is long enough
+     * to avoid returning too many irrelevant results and to save resources.
+     */
     router.get('/api/clubs/search', async (request: Request) => {
-        const url = new URL(request.url);
+        const url = new URL(request.url); // Use the built-in URL class to parse the request URI
         const query = url.searchParams.get('q');
 
         if (!query || query.length < 3) {

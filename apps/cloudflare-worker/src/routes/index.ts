@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 
+// Library for working with JSON Web Tokens (JWT)
 import { decodeJwt } from "jose";
 
+// Local imports for routing and environment definitions
 import { Router } from "./router";
 import { setupUserRoutes } from "./users";
 import { setupClubRoutes } from "./clubs";
@@ -32,6 +34,10 @@ import { setupSessionRoutes } from "./sessions";
 import { setupMatchRoutes } from "./matches";
 import { Env } from "../types/env";
 
+/**
+ * Main function to configure all application routes.
+ * It takes a router instance and the environment configuration.
+ */
 export const setupRoutes = (router: Router, env: Env) => {
 	/**
 	 * POST /api/__auth0/token
@@ -44,6 +50,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 		"/api/__auth0/token",
 		async () => {
 			try {
+				// Check if all necessary environment variables are present
 				if (
 					!env.AUTH0_MANAGEMENT_API_CLIENT_ID ||
 					!env.AUTH0_MANAGEMENT_API_CLIENT_SECRET ||
@@ -53,6 +60,8 @@ export const setupRoutes = (router: Router, env: Env) => {
 					if (!env.AUTH0_MANAGEMENT_API_CLIENT_ID) missings.push("AUTH0_MANAGEMENT_API_CLIENT_ID")
 					if (!env.AUTH0_MANAGEMENT_API_CLIENT_SECRET) missings.push("AUTH0_MANAGEMENT_API_CLIENT_SECRET")
 					if (!env.AUTH0_DOMAIN) missings.push("AUTH0_DOMAIN")
+
+					// Return an error response if configuration is incomplete
 					return new Response(
 						JSON.stringify({ success: false, error: `Missing Auth0 configuration: ${missings.join(", ")}` }),
 						{
@@ -108,7 +117,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 					}
 				}
 
-				// Call Auth0 to obtain a new token
+				// Call Auth0's OAuth service to obtain a new token
 				const resp = await fetch(tokenUrl, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -189,6 +198,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 					},
 				);
 			} catch (error) {
+				// Universal error handler for this route
 				return new Response(
 					JSON.stringify({ success: false, error: String(error) }),
 					{
@@ -198,8 +208,9 @@ export const setupRoutes = (router: Router, env: Env) => {
 				);
 			}
 		},
-		env.ADMIN_AUTH0_PERMISSION,
+		env.ADMIN_AUTH0_PERMISSION, // Middleware: only users with this permission can access
 	);
+	// Sub-section of routes for different domains (users, clubs, etc.)
 	setupUserRoutes(router, env);
 	setupClubRoutes(router, env);
 	setupExerciseRoutes(router, env);

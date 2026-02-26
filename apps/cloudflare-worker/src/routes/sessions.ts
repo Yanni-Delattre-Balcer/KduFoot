@@ -30,9 +30,13 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         }
 
         const url = new URL(request.url);
+        /**
+         * We filter the results based on URL parameters.
+         * We also enforce 'userId' to ensure users can only see their own sessions.
+         */
         const filters = {
             status: url.searchParams.get('status') || undefined,
-            userId: dbUser.id, // Enforce own data for now
+            userId: dbUser.id, // Security: Enforce own data
             limit: parseInt(url.searchParams.get('limit') || '20'),
             offset: parseInt(url.searchParams.get('offset') || '0'),
             from: url.searchParams.get('from') || undefined,

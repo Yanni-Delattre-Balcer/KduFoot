@@ -24,7 +24,9 @@ import {
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
 
 /**
- * Auth0 implementation of the AuthProvider interface
+ * Auth0 implementation of the AuthProvider interface.
+ * An 'AuthProvider' is a common pattern to abstract the underlying authentication service
+ * (like Auth0, Firebase, or a custom one) so the rest of the app doesn't need to know the details.
  */
 export const useAuth0Provider = (): AuthProvider => {
   const {
@@ -40,6 +42,10 @@ export const useAuth0Provider = (): AuthProvider => {
     options?: TokenOptions,
   ): Promise<string | null> => {
     try {
+      /**
+       * 'Audience' identifies the API the token is intended for.
+       * 'Scope' identifies the permissions the token should have.
+       */
       const token = await getAccessTokenSilently({
         authorizationParams: {
           audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
@@ -100,6 +106,10 @@ export const useAuth0Provider = (): AuthProvider => {
 
         const localSet = await getLocalJwkSet(import.meta.env.AUTH0_DOMAIN);
 
+        /**
+         * We verify the JWT (JSON Web Token) locally to check if it contains
+         * the specific permission we need. This is faster than calling an API.
+         */
         const joseResult = await jwtVerify(accessToken, localSet, {
           issuer: `https://${import.meta.env.AUTH0_DOMAIN}/`,
           audience: import.meta.env.AUTH0_AUDIENCE,
@@ -110,6 +120,10 @@ export const useAuth0Provider = (): AuthProvider => {
           Array.isArray(payload.permissions) &&
           payload.permissions.includes(permission);
 
+        /**
+         * 'permissionCheckCache' stores the result so we don't have to 
+         * verify the JWT again for the same permission and token.
+         */
         permissionCheckCache.set(cacheKey, result);
 
         return result;
