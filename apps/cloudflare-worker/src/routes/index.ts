@@ -207,7 +207,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 	setupMatchRoutes(router, env);
 	// Preserve the original root response for backwards compatibility
 	router.get("/", async () => {
-		return new Response("Hello World!", {
+		return new Response("KduFoot API is running", {
 			status: 200,
 			headers: { "Content-Type": "text/plain" },
 		});
