@@ -5,6 +5,13 @@
 	// "vars": { "ENVIRONMENT": "production" }
 	// "routes": { "pattern": "api.kdufoot.com", "custom_domain": true }
 	,
+	"observability": {
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"persist": false
+		}
+	},
 	"d1_databases": [
 		{
 			"binding": "DB",
