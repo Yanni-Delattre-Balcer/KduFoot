@@ -36,9 +36,9 @@ export const setupRoutes = (router: Router, env: Env) => {
 	/**
 	 * POST /api/__auth0/token
 	 *
-	 * Demande un token Auth0 Management API via le flux client_credentials.
-	 * Le token est mis en cache dans KV pour limiter les appels à Auth0.
-	 * Nécessite la permission env.ADMIN_AUTH0_PERMISSION (auth0:admin:api).
+	 * Requests an Auth0 Management API token via the client_credentials flow.
+	 * The token is cached in KV to limit calls to Auth0.
+	 * Requires the env.ADMIN_AUTH0_PERMISSION (auth0:admin:api) permission.
 	 */
 	router.post(
 		"/api/__auth0/token",
@@ -49,8 +49,12 @@ export const setupRoutes = (router: Router, env: Env) => {
 					!env.AUTH0_MANAGEMENT_API_CLIENT_SECRET ||
 					!env.AUTH0_DOMAIN
 				) {
+					const missings = [] as string[]
+					if (!env.AUTH0_MANAGEMENT_API_CLIENT_ID) missings.push("AUTH0_MANAGEMENT_API_CLIENT_ID")
+					if (!env.AUTH0_MANAGEMENT_API_CLIENT_SECRET) missings.push("AUTH0_MANAGEMENT_API_CLIENT_SECRET")
+					if (!env.AUTH0_DOMAIN) missings.push("AUTH0_DOMAIN")
 					return new Response(
-						JSON.stringify({ success: false, error: "Configuration Auth0 manquante" }),
+						JSON.stringify({ success: false, error: `Missing Auth0 configuration: ${missings.join(", ")}` }),
 						{
 							status: 500,
 							headers: { ...router.corsHeaders, "Content-Type": "application/json" },
@@ -62,13 +66,13 @@ export const setupRoutes = (router: Router, env: Env) => {
 				const audience = `https://${env.AUTH0_DOMAIN}/api/v2/`;
 				const cacheKey = `auth0:management_token`;
 
-				// Vérification du cache KV d'abord
+				// Check KV cache first
 				if (env.KV_CACHE) {
 					try {
 						const cached = await env.KV_CACHE.get(cacheKey);
 						if (cached) {
 							let parsed: { token?: string; exp?: number } | null = null;
-							try { parsed = JSON.parse(cached); } catch (_) { /* token brut */ }
+							try { parsed = JSON.parse(cached); } catch (_) { /* raw token */ }
 
 							const token = parsed?.token ?? cached;
 							let exp = parsed?.exp;
@@ -83,7 +87,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 							if (exp) {
 								const now = Math.floor(Date.now() / 1000);
 								if (exp > now + 5) {
-									// Token en cache encore valide → on le retourne directement
+									// Cached token still valid -> return it directly
 									return new Response(
 										JSON.stringify({
 											access_token: token,
@@ -100,11 +104,11 @@ export const setupRoutes = (router: Router, env: Env) => {
 							}
 						}
 					} catch (e) {
-						console.warn("KV_CACHE inaccessible, demande d'un nouveau token", String(e));
+						console.warn("KV_CACHE inaccessible, requesting a new token", String(e));
 					}
 				}
 
-				// Appel Auth0 pour obtenir un nouveau token
+				// Call Auth0 to obtain a new token
 				const resp = await fetch(tokenUrl, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
@@ -119,7 +123,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 				if (!resp.ok) {
 					const errorText = await resp.text();
 					return new Response(
-						JSON.stringify({ success: false, error: `Échec Auth0: ${errorText}` }),
+						JSON.stringify({ success: false, error: `Auth0 failure: ${errorText}` }),
 						{
 							status: 500,
 							headers: { ...router.corsHeaders, "Content-Type": "application/json" },
@@ -136,7 +140,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 
 				if (!data?.access_token) {
 					return new Response(
-						JSON.stringify({ success: false, error: "Réponse Auth0 invalide : pas d'access_token" }),
+						JSON.stringify({ success: false, error: "Invalid Auth0 response: no access_token" }),
 						{
 							status: 500,
 							headers: { ...router.corsHeaders, "Content-Type": "application/json" },
@@ -144,7 +148,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 					);
 				}
 
-				// Mise en cache du token dans KV
+				// Cache token in KV
 				if (env.KV_CACHE && data.access_token) {
 					try {
 						const tokenStr = data.access_token as string;
@@ -168,7 +172,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 							);
 						}
 					} catch (e) {
-						console.warn("Échec mise en cache KV_CACHE", String(e));
+						console.warn("KV_CACHE cache failure", String(e));
 					}
 				}
 
