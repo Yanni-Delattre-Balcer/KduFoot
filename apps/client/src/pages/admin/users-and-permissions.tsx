@@ -73,7 +73,8 @@ const KDUFOOT_PERMISSIONS: Array<{
         // Export
         { key: "export_pdf", label: "Export PDF", value: "export:pdf", group: "Export" },
         { key: "export_video", label: "Export vidéo", value: "export:video", group: "Export" },
-        { key: "share_library", label: "Partager bibliothèque", value: "share:library", group: "Export" },
+        // Share
+        { key: "share_library", label: "Partager bibliothèque", value: "share:library", group: "Share" },
 
         // Admin
         { key: "admin_users", label: "Gérer utilisateurs", value: "admin:users", group: "Admin" },
@@ -96,6 +97,7 @@ const groupColor = (group: string): "primary" | "secondary" | "success" | "warni
         Séances: "success",
         Matchs: "danger",
         Export: "default",
+        Share: "default",
         Admin: "danger",
         Certification: "success",
     };
