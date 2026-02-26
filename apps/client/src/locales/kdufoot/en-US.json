@@ -1,603 +1,599 @@
 {
-    "site": {
-        "description": "Video analysis and training management platform for football."
-    },
-    "nav": {
-        "home": "Home",
-        "exercises": "Video Analysis",
-        "training": "My Training",
-        "favorites": "Favorites",
-        "sessions": "Match / Tournament / Exercise History",
-        "sessions_public": "Match / Tournament History",
-        "matches": "Find a Match / Tournament",
-        "dashboard": "Dashboard",
-        "pricing": "Pricing",
-        "remerciements": "Acknowledgments",
-        "profile": "Profile",
-        "admin": "Administration",
-        "userPrefix": "User:",
-        "userDropdown": {
-            "connectedAs": "Connected as",
-            "tokenStatus": "Token Status",
-            "expiresIn": "Expires in:",
-            "noExpiry": "No expiry found",
-            "accessToken": "Access Token (Bearer)",
-            "loading": "Loading..."
-        }
-    },
-    "auth": {
-        "logout": "Log out",
-        "account": "My account",
-        "login": "Login",
-        "user-details": "Name: {{name}}\nNickname: {{nickname}}\nEmail: {{email}}\nID: {{sub}}"
-    },
-    "brand": {
-        "name": "KduFoot.com",
-        "slogan": "Smart Football"
-    },
-    "homePage": {
-        "title": {
-            "prefix": "Your",
-            "highlight": "Intelligent",
-            "suffix": "assistant for amateur football"
-        },
-        "buttons": {
-            "exercises": "Analyze a video",
-            "sessions": "Find a match / tournament",
-            "find_match": "Find a match",
-            "find_tournament": "Find a tournament"
-        },
-        "description": "Kdufoot offers two tools designed to simplify your daily coaching life. Paste a video link and our IA generates detailed exercises adapted to your category. Publish or search for friendly matches around you in just a few clicks.",
-        "about": {
-            "title": "👋 About",
-            "intro": "<0>Yanni</0>, cybersecurity student, majoring in <1>Networks & Telecommunications in Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
-            "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use exercises.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in just a few clicks.",
-            "footer": "Less searching, more field time."
-        },
-        "cards": {
-            "video": {
-                "title": "🎬 AI Video Analysis",
-                "description": "Paste a video link and our AI generates detailed exercises with synopsis, themes, and age category."
-            },
-            "match": {
-                "title": "⚽ Friendly Matches",
-                "description": "Publish or search for friendly matches. Filter by category, level, distance, and format."
-            },
-            "tournament": {
-                "title": "🏆 Friendly Tournaments",
-                "description": "Organize or participate in tournaments. Ideal for boosting your season and meeting new clubs."
-            }
-        }
-    },
-    "footer": {
-        "poweredBy": "Powered by"
-    },
-    "log-out-someone": "Log out {{name}}",
-    "log-in": "Log in",
-    "all_f": "All",
-    "all_m": "All",
-    "search_placeholder": "Search...",
-    "selected": "Selected",
-    "cancel": "Cancel",
-    "add": "Add",
-    "update": "Update",
-    "duration": "Duration",
-    "status": "Status",
-    "summary": "Summary",
-    "duration_total": "Total Duration",
-    "players": "Players",
-    "equipment": "Equipment",
-    "back": "Back",
-    "back_to_list": "Back to list",
-    "loading": "Loading...",
-    "edit": "Edit",
-    "error": {
-        "not_found": "Item not found",
-        "save_failed": "Error during save",
-        "loading_sessions": "Error loading training sessions",
-        "loading_matches": "Error loading friendly matches"
-    },
-    "video": {
-        "urlPlaceholder": "Paste your YouTube, TikTok, Insta, etc. video link",
-        "analyze": "Analyze video",
-        "analyzeTitle": "Analyze your video",
-        "analyzeSubtitle": "Paste your YouTube video link to get a detailed analysis of your exercises.",
-        "analyzing": "Analyzing...",
-        "success": "{{count}} exercise(s) found",
-        "error": "Error during analysis"
-    },
-    "exercises": {
-        "emptyTitle": "No exercises yet",
-        "emptySubtitle": "Analyze a video to generate your first exercises!",
-        "noImage": "No image",
-        "selected": "exercise(s)"
-    },
-    "training": {
-        "go": "My Training",
-        "empty": "No training in progress",
-        "description": "Select exercises from the library to build your training session.",
-        "go_exercises": "Discover exercises",
-        "hero_stats": "{{count}} exercise(s) selected · Estimated duration: ~{{duration}} min",
-        "hero_create": "Create your custom training session by adding exercises from the library.",
-        "add_exercises": "+ Add exercises"
-    },
-    "favorites": {
-        "title": "My Favorites",
-        "description_exercises": "Find here all the exercises you have saved as favorites for one-click access.",
-        "description_matches": "Check out the friendly matches that caught your eye and keep an eye on opportunities.",
-        "tab_exercises": "Exercises",
-        "tab_matches": "Matches",
-        "tab_tournaments": "Tournaments",
-        "empty_exercises": "No favorite exercises",
-        "empty_exercises_desc": "Add exercises to your favorites to find them here.",
-        "empty_matches": "No favorite matches",
-        "empty_matches_desc": "Your liked matches will appear here.",
-        "discover_exercises": "Discover exercises",
-        "find_matches": "Find a match / tournament"
-    },
-    "myExercises": "My Exercises",
-    "mySessions": "My Sessions",
-    "myMatches": "My Friendly Matches",
-    "exercise": {
-        "title": "Title",
-        "synopsis": "Synopsis",
-        "themes": "Themes",
-        "favorite": "Add to favorites",
-        "unfavorite": "Remove from favorites",
-        "addToSession": "Add to session",
-        "adapt": "Adapt",
-        "exportPDF": "Export to PDF",
-        "synopsis_label": "Synopsis / Description",
-        "synopsis_placeholder": "Describe the exercise workflow...",
-        "details": "Details",
-        "themes_label": "Themes",
-        "choose_themes": "Choose themes",
-        "players_label": "Number of players",
-        "dimensions_label": "Dimensions",
-        "equipment_label": "Equipment",
-        "duration_label": "Duration (min)",
-        "category_label": "Category",
-        "choose_category": "Choose a category",
-        "level_label": "Level",
-        "choose_level": "Choose a level",
-        "create_title": "Create an exercise",
-        "edit_title": "Modify the exercise",
-        "create_button": "Create the exercise",
-        "no_exercises_found": "No exercises found.",
-        "untitled": "Untitled Exercise",
-        "schema": "Tactic Diagram"
-    },
-    "match": {
-        "create": "Create a friendly match",
-        "create_tournament": "Create a friendly tournament",
-        "find": "Find a friendly match",
-        "find_tournament": "Find a friendly tournament",
-        "format": "Format",
-        "venue": "Venue",
-        "date": "Date",
-        "time": "Time",
-        "filters": {
-            "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
-        }
-    },
-    "session": {
-        "create": "New session",
-        "adapt": "Adapt",
-        "timer": "Timer",
-        "export": "Export to PDF",
-        "untitled": "Untitled Session",
-        "not_scheduled": "Not scheduled",
-        "timeline": "Session timeline",
-        "no_exercises": "No exercises added.",
-        "constraints": "Constraints",
-        "info_general": "General Information",
-        "name_label": "Session name",
-        "name_placeholder": "Ex: Technico-Tactical Session",
-        "category_label": "Category",
-        "choose_category": "Choose a category",
-        "level_label": "Level",
-        "choose_level": "Choose a level",
-        "date_label": "Scheduled date",
-        "duration_label": "Total duration (min)",
-        "add_exercises": "Add exercises",
-        "create_title": "Plan a session",
-        "edit_title": "Modify the session",
-        "create_button": "Create the session",
-        "status_enum": {
-            "draft": "Draft",
-            "scheduled": "Scheduled",
-            "completed": "Completed"
-        }
-    },
-    "sessions": {
-        "title": "Match / Tournament / Exercise History",
-        "title_public": "Match / Tournament History",
-        "create": "Plan a session",
-        "description_sessions": "Organize and plan your training sessions to best prepare your players.",
-        "description_matches": "Track your scheduled friendly matches and keep control of your sports calendar.",
-        "empty_sessions": "No scheduled sessions",
-        "empty_matches": "No friendly matches",
-        "not_scheduled": "Not scheduled",
-        "opponent_default": "Opponent",
-        "status": "Status"
-    },
-    "permissions": {
-        "quota": {
-            "videos": "Video quota: {{used}}/{{total}}",
-            "sessions": "Sessions: {{used}}/{{total}}",
-            "matches": "Ads: {{used}}/{{total}}"
-        },
-        "upgradeRequired": "Upgrade required",
-        "featureRequiresUpgrade": "This feature requires a higher subscription plan.",
-        "viewPlans": "View plans",
-        "upgrade": "Upgrade to {{plan}} to unlock this feature"
-    },
-    "badges": {
-        "certifiedCoach": "Certified Coach"
-    },
-    "enums": {
-        "theme": {
-            "TECHNIQUE": "Technique",
-            "PHYSIQUE": "Physical",
-            "TACTIQUE": "Tactical",
-            "FINITION": "Finishing",
-            "TRANSITION": "Transition",
-            "DEFENSE_COLLECTIVE": "Collective Defense",
-            "ATTAQUE_RAPIDE": "Fast Attack",
-            "COUPS_DE_PIED_ARRETES": "Set Pieces"
-        },
-        "category": {
-            "U6": "U6",
-            "U7": "U7",
-            "U8": "U8",
-            "U9": "U9",
-            "U10": "U10",
-            "U11": "U11",
-            "U12": "U12",
-            "U13": "U13",
-            "U14": "U14",
-            "U15": "U15",
-            "U16": "U16",
-            "U17": "U17",
-            "U18": "U18",
-            "U19": "U19",
-            "U20": "U20",
-            "Séniors": "Seniors",
-            "Vétérans": "Veterans",
-            "Loisir": "Leisure"
-        },
-        "level": {
-            "Débutant": "Beginner",
-            "Ligue": "League",
-            "Régional": "Regional",
-            "National": "National",
-            "Pro": "Professional",
-            "Ligue 1": "League 1",
-            "Ligue 2": "League 2",
-            "National 2": "National 2",
-            "National 3": "National 3",
-            "Régional 1": "Regional 1",
-            "Régional 2": "Regional 2",
-            "Régional 3": "Regional 3",
-            "Départemental 1": "Departmental 1",
-            "Départemental 2": "Departmental 2",
-            "Départemental 3": "Departmental 3",
-            "Départemental 4": "Departmental 4",
-            "Départemental 5": "Departmental 5",
-            "Autre": "Other"
-        },
-        "venue": {
-            "Domicile": "Home",
-            "Extérieur": "Away",
-            "Neutre": "Neutral"
-        },
-        "pitch": {
-            "Herbe": "Grass",
-            "Synthétique": "Artificial",
-            "Hybride": "Hybrid",
-            "Stabilisé": "Stabilized",
-            "Indoor": "Indoor"
-        },
-        "gender": {
-            "Masculin": "Male",
-            "Féminin": "Female",
-            "Mixte": "Mixed"
-        },
-        "format": {
-            "11v11": "11 vs 11",
-            "8v8": "8 vs 8",
-            "5v5": "5 vs 5",
-            "Futsal": "Futsal"
-        }
-    },
-    "matchesPage": {
-        "description_find": "Browse available friendly matches near you. Use filters to refine your search and find the perfect opponent.",
-        "description_create": "Post your friendly match announcement by filling in as many details as possible to attract the right clubs.",
-        "description_find_tournament": "Discover friendly tournaments organized in your area. Register your team and participate in friendly competitions.",
-        "description_create_tournament": "Organize your own friendly tournament! Post the details, categories, and invite other clubs to join you.",
-        "filters": {
-            "title": "Filters",
-            "active": "active",
-            "clear": "Clear filters",
-            "category": "Category",
-            "level": "Level",
-            "format": "Format",
-            "gender": "Gender",
-            "pitch_type": "Pitch type",
-            "date": "Date",
-            "venue": "Venue",
-            "city": "City",
-            "zip": "Zip code",
-            "radius": "Radius (km)",
-            "all": "All"
-        },
-        "view": {
-            "list": "List",
-            "calendar": "Calendar"
-        },
-        "my_creation": "My creation",
-        "unknown_club": "Unknown Club",
-        "found": "friendly match(es) found",
-        "empty_title": "No friendly matches found",
-        "empty_desc": "Try modifying your filters or create a new friendly match."
-    },
-    "matchForm": {
-        "title": "Match Information",
-        "subtitle": "Match Details",
-        "contact_title": "Contact & Notes",
-        "labels": {
-            "category": "Category",
-            "level": "Level",
-            "format": "Format",
-            "gender": "Gender",
-            "date": "Date",
-            "time": "Time",
-            "venue": "Venue",
-            "pitch_type": "Pitch type",
-            "siret": "SIRET Number",
-            "address": "Stadium Address",
-            "zip": "Zip code",
-            "city": "City",
-            "email": "Contact Email",
-            "phone": "Phone",
-            "notes": "Notes / Instructions",
-            "choose": "Choose",
-            "auto_siret": "Automatically filled via SIRET",
-            "auto": "Automatically filled",
-            "more_info": "Additional information..."
-        },
-        "link_club": {
-            "title": "Link your club (Irreversible Action)",
-            "warning_siret": "The SIRET number can only be entered once.",
-            "warning_auto": "The address, zip code, and city will then be automatically filled.",
-            "warning_final": "The club will be permanently associated with your account.",
-            "warning_support": "If you need to change your club later, contact support: support.kdufoot@gmail.com",
-            "warning_search": "Tip: Search for 'Your club name + SIRET' on the Internet to find it.",
-            "validate": "Validate and Link the club",
-            "support": "In case of subsequent club change, contact support with proof.",
-            "linked": "Linked club"
-        },
-        "progress": "Match announcement preparation",
-        "buttons": {
-            "cancel": "Cancel",
-            "create": "Create the match",
-            "update": "Update",
-            "unlink": "Unlink (Admin)"
-        },
-        "alerts": {
-            "siret_length": "The SIRET must contain exactly 14 digits.",
-            "link_confirm": "⚠️ WARNING: This action is IRREVERSIBLE.\n\nYour account will be permanently linked to this club.\nFor any subsequent changes, you will need to contact support with proof.\n\nDo you want to continue ?",
-            "link_error": "Error linking the club. Check the SIRET.",
-            "must_link": "You must first link your club via the SIRET number before creating a match.",
-            "contact_required": "⚠️ CONTACT REQUIRED\n\nEmail and phone are essential for players to contact you.",
-            "date_past": "⚠️ INVALID DATE\n\nYou cannot create a match in the past.",
-            "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future."
-        }
-    },
-    "tournamentForm": {
-        "title": "Create a Friendly Tournament",
-        "subtitle": "Organize a competition and invite teams.",
-        "labels": {
-            "name": "Tournament Name",
-            "name_placeholder": "Ex: KduFoot Summer Cup",
-            "max_teams": "Max teams",
-            "fee": "Registration fee (€)",
-            "fee_placeholder": "0 for free",
-            "date": "Start date",
-            "time": "Meeting time",
-            "end_time": "End Time",
-            "contact_email": "Contact Email",
-            "notes": "Tournament information",
-            "notes_placeholder": "Rules, rewards, catering...",
-            "publish": "Publish tournament"
-        },
-        "link_club": "Club link required to organize",
-        "contact_title": "Contact & Additional Info"
-    },
-    "pricing": {
-        "hero": {
-            "title": "Plans & Pricing",
-            "subtitle": "Flexible solutions for every stage of your season."
-        },
-        "period": " / month",
-        "one_time": "One-time payment",
-        "plans": {
-            "discovery": {
-                "name": "Discovery",
-                "price": "1€",
-                "cta": "Try for 1€",
-                "features": {
-                    "0": "1 hour of video analysis",
-                    "1": "Full access to AI tools",
-                    "2": "One-time offer (1 per account)",
-                    "3": "No commitment"
-                }
-            },
-            "starter": {
-                "name": "Rising Star",
-                "price": "19€",
-                "cta": "Choose Rising Star",
-                "features": {
-                    "0": "10 hours of video analysis",
-                    "1": "Full access to AI tools",
-                    "2": "Basic PDF exports",
-                    "3": "Standard support"
-                }
-            },
-            "pro": {
-                "name": "Pro",
-                "price": "39€",
-                "cta": "Choose Pro",
-                "popular": "Popular",
-                "features": {
-                    "0": "20 hours of video analysis",
-                    "1": "Superior AI (Faster)",
-                    "2": "Full PDF exports",
-                    "3": "Priority support"
-                }
-            },
-            "elite": {
-                "name": "Elite",
-                "price": "59€",
-                "cta": "Become Elite",
-                "features": {
-                    "0": "30 hours of video analysis",
-                    "1": "Max AI (Top priority)",
-                    "2": "PDF Exports & Editing",
-                    "3": "Dedicated 24/7 support"
-                }
-            }
-        }
-    },
-    "dashboard": {
-        "title": "Dashboard",
-        "subtitle": "Manage your organizations and participations in real time.",
-        "tabs": {
-            "requests": "Requests Received",
-            "organized": "My Organized Matches",
-            "participations": "My Participations",
-            "all": "All",
-            "matches": "Matches",
-            "tournaments": "Tournaments"
-        },
-        "empty": {
-            "requests": "You have no pending requests at the moment.",
-            "organized": "You haven't posted any ads.",
-            "participations": "You haven't applied for any matches.",
-            "no_match": "No matches found in this category.",
-            "no_tournament": "No tournaments found in this category."
-        },
-        "controls": {
-            "new": "New Ad",
-            "view": "View ad",
-            "accept": "Accept",
-            "refuse": "Refuse"
-        },
-        "status": {
-            "pending": "Pending",
-            "accepted": "Accepted",
-            "refused": "Refused"
-        }
-    },
-    "thank-you": {
-        "title": "Acknowledgments",
-        "ronan": {
-            "name": "Ronan Le Meillat",
-            "description": "I would like to especially thank Ronan Le Meillat for his invaluable help in developing this site. He helped me fix many errors and shared his deep expertise in web development.",
-            "support": "To support him, feel free to give stars to his GitHub repositories by clicking the SCTG logo below."
-        },
-        "github": {
-            "instructions": "How to do it? Once on the page, click on one of his project titles, then at the top right, you will see 'Star' with a small star logo. Click on it: when the star turns yellow, it's done!"
-        },
-        "philippe": {
-            "name": "Philippe Dubart"
-        },
-        "franck": {
-            "name": "Franck Dubart"
-        },
-        "family": {
-            "description": "Thanks also to Philippe Dubart and Franck Dubart for their valuable support and their particularly enriching ideas, which have added real value to the KduFoot experience."
-        }
-    },
-    "adminUsersPage": {
-        "title": "Users Management and Permissions",
-        "subtitle": "Manage KduFoot users access.",
-        "tokenFromCache": "Management token in cache ✓",
-        "loading": "Loading users...",
-        "columns": {
-            "user": "User",
-            "email": "Email",
-            "subscription": "Subscription",
-            "logins": "Logins",
-            "actions": "Actions"
-        },
-        "empty": "No user found",
-        "actions": {
-            "permissions": "Permissions",
-            "delete": "Delete"
-        },
-        "modal": {
-            "title": "Permissions for",
-            "close": "Close",
-            "loading": "Loading permissions...",
-            "save": "Save permissions",
-            "cancel": "Cancel"
-        },
-        "toasts": {
-            "errorLoadingUsers": "Error loading users",
-            "noManagementToken": "Failed to get Management token",
-            "errorLoadingPerms": "Error loading permissions",
-            "successUpdate": "Permissions successfully updated",
-            "errorUpdate": "Error while updating permissions",
-            "cannotDeleteSelf": "You cannot delete your own account",
-            "confirmDelete": "Delete user {{id}}?",
-            "successDelete": "User successfully deleted",
-            "errorDelete": "Error while deleting user"
-        }
-    },
-    "delete": "Delete",
-    "permission": {
-        "group": {
-            "read": "Base",
-            "write": "Base",
-            "exercises": "Exercises",
-            "videos": "Videos",
-            "sessions": "Sessions",
-            "matches": "Matches",
-            "export": "Export",
-            "share": "Shares",
-            "admin": "Administration",
-            "auth0": "Auth0 Administration",
-            "coach": "Certification"
-        },
-        "read_api": "Read API",
-        "write_api": "Write API",
-        "exercises_read": "Read exercises",
-        "exercises_read_all": "Read all exercises",
-        "exercises_create": "Create exercises",
-        "exercises_update": "Modify exercises",
-        "exercises_delete": "Delete exercises",
-        "exercises_share": "Share exercises",
-        "videos_analyze": "Analyze videos",
-        "videos_analyze_long": "Analyze long videos",
-        "videos_analyze_batch": "Batch analysis",
-        "videos_priority": "Video priority",
-        "sessions_create": "Create sessions",
-        "sessions_adapt": "Adapt sessions",
-        "sessions_template": "Session templates",
-        "sessions_share": "Share sessions",
-        "matches_create": "Create matches",
-        "matches_premium": "Premium matches",
-        "matches_contact": "Contact for matches",
-        "export_pdf": "Export to PDF",
-        "export_video": "Export to video",
-        "share_library": "Share library",
-        "admin_users": "Manage users",
-        "admin_exercises": "Manage exercises",
-        "admin_matches": "Manage matches",
-        "admin_analytics": "ADM Analytics",
-        "admin_billing": "Billing",
-        "auth0_admin_api": "Auth0 API Access",
-        "coach_certified": "Certified coach"
+  "site": {
+    "description": "Video analysis and training management platform for football."
+  },
+  "nav": {
+    "home": "Home",
+    "exercises": "Video Analysis",
+    "training": "My Training",
+    "favorites": "Favorites",
+    "sessions": "Match / Tournament / Exercise History",
+    "sessions_public": "Match / Tournament History",
+    "matches": "Find a Match / Tournament",
+    "dashboard": "Dashboard",
+    "pricing": "Pricing",
+    "remerciements": "Acknowledgments",
+    "profile": "Profile",
+    "admin": "Administration",
+    "userPrefix": "User:",
+    "userDropdown": {
+      "connectedAs": "Connected as",
+      "tokenStatus": "Token Status",
+      "expiresIn": "Expires in:",
+      "noExpiry": "No expiry found",
+      "accessToken": "Access Token (Bearer)",
+      "loading": "Loading..."
     }
+  },
+  "auth": {
+    "logout": "Log out",
+    "account": "My account",
+    "login": "Login",
+    "user-details": "Name: {{name}}\nNickname: {{nickname}}\nEmail: {{email}}\nID: {{sub}}"
+  },
+  "brand": {
+    "name": "KduFoot.com",
+    "slogan": "Smart Football"
+  },
+  "homePage": {
+    "title": {
+      "prefix": "Your",
+      "highlight": "Intelligent",
+      "suffix": "assistant for amateur football"
+    },
+    "buttons": {
+      "exercises": "Analyze a video",
+      "sessions": "Find a match / tournament",
+      "find_match": "Find a match",
+      "find_tournament": "Find a tournament"
+    },
+    "description": "Kdufoot offers two tools designed to simplify your daily coaching life. Paste a video link and our IA generates detailed exercises adapted to your category. Publish or search for friendly matches around you in just a few clicks.",
+    "about": {
+      "title": "👋 About",
+      "intro": "<0>Yanni</0>, cybersecurity student, majoring in <1>Networks & Telecommunications in Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
+      "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use exercises.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in just a few clicks.",
+      "footer": "Less searching, more field time."
+    },
+    "cards": {
+      "video": {
+        "title": "🎬 AI Video Analysis",
+        "description": "Paste a video link and our AI generates detailed exercises with synopsis, themes, and age category."
+      },
+      "match": {
+        "title": "⚽ Friendly Matches",
+        "description": "Publish or search for friendly matches. Filter by category, level, distance, and format."
+      },
+      "tournament": {
+        "title": "🏆 Friendly Tournaments",
+        "description": "Organize or participate in tournaments. Ideal for boosting your season and meeting new clubs."
+      }
+    }
+  },
+  "footer": {
+    "poweredBy": "Powered by"
+  },
+  "log-out-someone": "Log out {{name}}",
+  "log-in": "Log in",
+  "all_f": "All",
+  "all_m": "All",
+  "search_placeholder": "Search...",
+  "selected": "Selected",
+  "cancel": "Cancel",
+  "add": "Add",
+  "update": "Update",
+  "duration": "Duration",
+  "status": "Status",
+  "summary": "Summary",
+  "duration_total": "Total Duration",
+  "players": "Players",
+  "equipment": "Equipment",
+  "back": "Back",
+  "back_to_list": "Back to list",
+  "loading": "Loading...",
+  "edit": "Edit",
+  "error": {
+    "not_found": "Item not found",
+    "save_failed": "Error during save",
+    "loading_sessions": "Error loading training sessions",
+    "loading_matches": "Error loading friendly matches"
+  },
+  "video": {
+    "urlPlaceholder": "Paste your YouTube, TikTok, Insta, etc. video link",
+    "analyze": "Analyze video",
+    "analyzeTitle": "Analyze your video",
+    "analyzeSubtitle": "Paste your YouTube video link to get a detailed analysis of your exercises.",
+    "analyzing": "Analyzing...",
+    "success": "{{count}} exercise(s) found",
+    "error": "Error during analysis"
+  },
+  "exercises": {
+    "emptyTitle": "No exercises yet",
+    "emptySubtitle": "Analyze a video to generate your first exercises!",
+    "noImage": "No image",
+    "selected": "exercise(s)"
+  },
+  "training": {
+    "go": "My Training",
+    "empty": "No training in progress",
+    "description": "Select exercises from the library to build your training session.",
+    "go_exercises": "Discover exercises",
+    "hero_stats": "{{count}} exercise(s) selected · Estimated duration: ~{{duration}} min",
+    "hero_create": "Create your custom training session by adding exercises from the library.",
+    "add_exercises": "+ Add exercises"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "description_exercises": "Find here all the exercises you have saved as favorites for one-click access.",
+    "description_matches": "Check out the friendly matches that caught your eye and keep an eye on opportunities.",
+    "tab_exercises": "Exercises",
+    "tab_matches": "Matches",
+    "tab_tournaments": "Tournaments",
+    "empty_exercises": "No favorite exercises",
+    "empty_exercises_desc": "Add exercises to your favorites to find them here.",
+    "empty_matches": "No favorite matches",
+    "empty_matches_desc": "Your liked matches will appear here.",
+    "discover_exercises": "Discover exercises",
+    "find_matches": "Find a match / tournament"
+  },
+  "myExercises": "My Exercises",
+  "mySessions": "My Sessions",
+  "myMatches": "My Friendly Matches",
+  "exercise": {
+    "title": "Title",
+    "synopsis": "Synopsis",
+    "themes": "Themes",
+    "favorite": "Add to favorites",
+    "unfavorite": "Remove from favorites",
+    "addToSession": "Add to session",
+    "adapt": "Adapt",
+    "exportPDF": "Export to PDF",
+    "synopsis_label": "Synopsis / Description",
+    "synopsis_placeholder": "Describe the exercise workflow...",
+    "details": "Details",
+    "themes_label": "Themes",
+    "choose_themes": "Choose themes",
+    "players_label": "Number of players",
+    "dimensions_label": "Dimensions",
+    "equipment_label": "Equipment",
+    "duration_label": "Duration (min)",
+    "category_label": "Category",
+    "choose_category": "Choose a category",
+    "level_label": "Level",
+    "choose_level": "Choose a level",
+    "create_title": "Create an exercise",
+    "edit_title": "Modify the exercise",
+    "create_button": "Create the exercise",
+    "no_exercises_found": "No exercises found.",
+    "untitled": "Untitled Exercise",
+    "schema": "Tactic Diagram"
+  },
+  "match": {
+    "create": "Create a friendly match",
+    "create_tournament": "Create a friendly tournament",
+    "find": "Find a friendly match",
+    "find_tournament": "Find a friendly tournament",
+    "format": "Format",
+    "venue": "Venue",
+    "date": "Date",
+    "time": "Time",
+    "filters": {
+      "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
+    }
+  },
+  "session": {
+    "create": "New session",
+    "adapt": "Adapt",
+    "timer": "Timer",
+    "export": "Export to PDF",
+    "untitled": "Untitled Session",
+    "not_scheduled": "Not scheduled",
+    "timeline": "Session timeline",
+    "no_exercises": "No exercises added.",
+    "constraints": "Constraints",
+    "info_general": "General Information",
+    "name_label": "Session name",
+    "name_placeholder": "Ex: Technico-Tactical Session",
+    "category_label": "Category",
+    "choose_category": "Choose a category",
+    "level_label": "Level",
+    "choose_level": "Choose a level",
+    "date_label": "Scheduled date",
+    "duration_label": "Total duration (min)",
+    "add_exercises": "Add exercises",
+    "create_title": "Plan a session",
+    "edit_title": "Modify the session",
+    "create_button": "Create the session",
+    "status_enum": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "completed": "Completed"
+    }
+  },
+  "sessions": {
+    "title": "Match / Tournament / Exercise History",
+    "title_public": "Match / Tournament History",
+    "create": "Plan a session",
+    "description_sessions": "Organize and plan your training sessions to best prepare your players.",
+    "description_matches": "Track your scheduled friendly matches and keep control of your sports calendar.",
+    "empty_sessions": "No scheduled sessions",
+    "empty_matches": "No friendly matches",
+    "not_scheduled": "Not scheduled",
+    "opponent_default": "Opponent",
+    "status": "Status"
+  },
+  "permissions": {
+    "quota": {
+      "videos": "Video quota: {{used}}/{{total}}",
+      "sessions": "Sessions: {{used}}/{{total}}",
+      "matches": "Ads: {{used}}/{{total}}"
+    },
+    "upgradeRequired": "Upgrade required",
+    "featureRequiresUpgrade": "This feature requires a higher subscription plan.",
+    "viewPlans": "View plans",
+    "upgrade": "Upgrade to {{plan}} to unlock this feature"
+  },
+  "badges": {
+    "certifiedCoach": "Certified Coach"
+  },
+  "enums": {
+    "theme": {
+      "TECHNIQUE": "Technique",
+      "PHYSIQUE": "Physical",
+      "TACTIQUE": "Tactical",
+      "FINITION": "Finishing",
+      "TRANSITION": "Transition",
+      "DEFENSE_COLLECTIVE": "Collective Defense",
+      "ATTAQUE_RAPIDE": "Fast Attack",
+      "COUPS_DE_PIED_ARRETES": "Set Pieces"
+    },
+    "category": {
+      "U6": "U6",
+      "U7": "U7",
+      "U8": "U8",
+      "U9": "U9",
+      "U10": "U10",
+      "U11": "U11",
+      "U12": "U12",
+      "U13": "U13",
+      "U14": "U14",
+      "U15": "U15",
+      "U16": "U16",
+      "U17": "U17",
+      "U18": "U18",
+      "U19": "U19",
+      "U20": "U20",
+      "Séniors": "Seniors",
+      "Vétérans": "Veterans",
+      "Loisir": "Leisure"
+    },
+    "level": {
+      "Débutant": "Beginner",
+      "Ligue": "League",
+      "Régional": "Regional",
+      "National": "National",
+      "Pro": "Professional",
+      "Ligue 1": "League 1",
+      "Ligue 2": "League 2",
+      "National 2": "National 2",
+      "National 3": "National 3",
+      "Régional 1": "Regional 1",
+      "Régional 2": "Regional 2",
+      "Régional 3": "Regional 3",
+      "Départemental 1": "Departmental 1",
+      "Départemental 2": "Departmental 2",
+      "Départemental 3": "Departmental 3",
+      "Départemental 4": "Departmental 4",
+      "Départemental 5": "Departmental 5",
+      "Autre": "Other"
+    },
+    "venue": {
+      "Domicile": "Home",
+      "Extérieur": "Away",
+      "Neutre": "Neutral"
+    },
+    "pitch": {
+      "Herbe": "Grass",
+      "Synthétique": "Artificial",
+      "Hybride": "Hybrid",
+      "Stabilisé": "Stabilized",
+      "Indoor": "Indoor"
+    },
+    "gender": {
+      "Masculin": "Male",
+      "Féminin": "Female",
+      "Mixte": "Mixed"
+    },
+    "format": {
+      "11v11": "11 vs 11",
+      "8v8": "8 vs 8",
+      "5v5": "5 vs 5",
+      "Futsal": "Futsal"
+    }
+  },
+  "matchesPage": {
+    "description_find": "Browse available friendly matches near you. Use filters to refine your search and find the perfect opponent.",
+    "description_create": "Post your friendly match announcement by filling in as many details as possible to attract the right clubs.",
+    "description_find_tournament": "Discover friendly tournaments organized in your area. Register your team and participate in friendly competitions.",
+    "description_create_tournament": "Organize your own friendly tournament! Post the details, categories, and invite other clubs to join you.",
+    "filters": {
+      "title": "Filters",
+      "active": "active",
+      "clear": "Clear filters",
+      "category": "Category",
+      "level": "Level",
+      "format": "Format",
+      "gender": "Gender",
+      "pitch_type": "Pitch type",
+      "date": "Date",
+      "venue": "Venue",
+      "city": "City",
+      "zip": "Zip code",
+      "radius": "Radius (km)",
+      "all": "All"
+    },
+    "view": {
+      "list": "List",
+      "calendar": "Calendar"
+    },
+    "my_creation": "My creation",
+    "unknown_club": "Unknown Club",
+    "found": "friendly match(es) found",
+    "empty_title": "No friendly matches found",
+    "empty_desc": "Try modifying your filters or create a new friendly match."
+  },
+  "matchForm": {
+    "title": "Match Information",
+    "subtitle": "Match Details",
+    "contact_title": "Contact & Notes",
+    "labels": {
+      "category": "Category",
+      "level": "Level",
+      "format": "Format",
+      "gender": "Gender",
+      "date": "Date",
+      "time": "Time",
+      "venue": "Venue",
+      "pitch_type": "Pitch type",
+      "siret": "SIRET Number",
+      "address": "Stadium Address",
+      "zip": "Zip code",
+      "city": "City",
+      "email": "Contact Email",
+      "phone": "Phone",
+      "notes": "Notes / Instructions",
+      "choose": "Choose",
+      "auto_siret": "Automatically filled via SIRET",
+      "auto": "Automatically filled",
+      "more_info": "Additional information..."
+    },
+    "link_club": {
+      "title": "Link your club (Irreversible Action)",
+      "warning_siret": "The SIRET number can only be entered once.",
+      "warning_auto": "The address, zip code, and city will then be automatically filled.",
+      "warning_final": "The club will be permanently associated with your account.",
+      "warning_support": "If you need to change your club later, contact support: support.kdufoot@gmail.com",
+      "warning_search": "Tip: Search for 'Your club name + SIRET' on the Internet to find it.",
+      "validate": "Validate and Link the club",
+      "support": "In case of subsequent club change, contact support with proof.",
+      "linked": "Linked club"
+    },
+    "progress": "Match announcement preparation",
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create the match",
+      "update": "Update",
+      "unlink": "Unlink (Admin)"
+    },
+    "alerts": {
+      "siret_length": "The SIRET must contain exactly 14 digits.",
+      "link_confirm": "⚠️ WARNING: This action is IRREVERSIBLE.\n\nYour account will be permanently linked to this club.\nFor any subsequent changes, you will need to contact support with proof.\n\nDo you want to continue ?",
+      "link_error": "Error linking the club. Check the SIRET.",
+      "must_link": "You must first link your club via the SIRET number before creating a match.",
+      "contact_required": "⚠️ CONTACT REQUIRED\n\nEmail and phone are essential for players to contact you.",
+      "date_past": "⚠️ INVALID DATE\n\nYou cannot create a match in the past.",
+      "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future."
+    }
+  },
+  "tournamentForm": {
+    "title": "Create a Friendly Tournament",
+    "subtitle": "Organize a competition and invite teams.",
+    "labels": {
+      "name": "Tournament Name",
+      "name_placeholder": "Ex: KduFoot Summer Cup",
+      "max_teams": "Max teams",
+      "fee": "Registration fee (€)",
+      "fee_placeholder": "0 for free",
+      "date": "Start date",
+      "time": "Meeting time",
+      "end_time": "End Time",
+      "contact_email": "Contact Email",
+      "notes": "Tournament information",
+      "notes_placeholder": "Rules, rewards, catering...",
+      "publish": "Publish tournament"
+    },
+    "link_club": "Club link required to organize",
+    "contact_title": "Contact & Additional Info"
+  },
+  "pricing": {
+    "hero": {
+      "title": "Plans & Pricing",
+      "subtitle": "Flexible solutions for every stage of your season."
+    },
+    "period": " / month",
+    "one_time": "One-time payment",
+    "plans": {
+      "discovery": {
+        "name": "Discovery",
+        "price": "1€",
+        "cta": "Try for 1€",
+        "features": {
+          "0": "1 hour of video analysis",
+          "1": "Full access to AI tools",
+          "2": "One-time offer (1 per account)",
+          "3": "No commitment"
+        }
+      },
+      "starter": {
+        "name": "Rising Star",
+        "price": "19€",
+        "cta": "Choose Rising Star",
+        "features": {
+          "0": "10 hours of video analysis",
+          "1": "Full access to AI tools",
+          "2": "Basic PDF exports",
+          "3": "Standard support"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "39€",
+        "cta": "Choose Pro",
+        "popular": "Popular",
+        "features": {
+          "0": "20 hours of video analysis",
+          "1": "Superior AI (Faster)",
+          "2": "Full PDF exports",
+          "3": "Priority support"
+        }
+      },
+      "elite": {
+        "name": "Elite",
+        "price": "59€",
+        "cta": "Become Elite",
+        "features": {
+          "0": "30 hours of video analysis",
+          "1": "Max AI (Top priority)",
+          "2": "PDF Exports & Editing",
+          "3": "Dedicated 24/7 support"
+        }
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Manage your organizations and participations in real time.",
+    "tabs": {
+      "requests": "Requests Received",
+      "organized": "My Organized Matches",
+      "participations": "My Participations",
+      "all": "All",
+      "matches": "Matches",
+      "tournaments": "Tournaments"
+    },
+    "empty": {
+      "requests": "You have no pending requests at the moment.",
+      "organized": "You haven't posted any ads.",
+      "participations": "You haven't applied for any matches.",
+      "no_match": "No matches found in this category.",
+      "no_tournament": "No tournaments found in this category."
+    },
+    "controls": {
+      "new": "New Ad",
+      "view": "View ad",
+      "accept": "Accept",
+      "refuse": "Refuse"
+    },
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "refused": "Refused"
+    }
+  },
+  "adminUsersPage": {
+    "pageTitle": "Users Management and Permissions",
+    "pageSubtitle": "Manage KduFoot users access.",
+    "cacheTokenSuccess": "(Management token in cache ✓)",
+    "loadingUsers": "Loading users...",
+    "colUser": "User",
+    "colEmail": "Email",
+    "colSubscription": "Subscription",
+    "colLogins": "Logins",
+    "colActions": "Actions",
+    "emptyUsers": "No user found",
+    "btnPermissions": "Permissions",
+    "btnDelete": "Delete",
+    "modalTitlePrefix": "Permissions for",
+    "modalBtnClose": "Close",
+    "modalLoadingPerms": "Loading permissions...",
+    "modalBtnSave": "Save permissions",
+    "modalBtnCancel": "Cancel",
+    "confirmDeletePrefix": "Delete user {{userId}} ?",
+    "toasts": {
+      "errorLoadingUsers": "Error loading users",
+      "noManagementToken": "Failed to get Management token",
+      "errorLoadingPerms": "Error loading permissions",
+      "successUpdate": "Permissions successfully updated",
+      "errorUpdate": "Error while updating permissions",
+      "cannotDeleteSelf": "You cannot delete your own account",
+      "confirmDelete": "Delete user {{id}}?",
+      "successDelete": "User successfully deleted",
+      "errorDelete": "Error while deleting user"
+    }
+  },
+  "thank-you": {
+    "title": "Acknowledgments",
+    "ronan": {
+      "name": "Ronan Le Meillat",
+      "description": "I would like to especially thank Ronan Le Meillat for his invaluable help in developing this site. He helped me fix many errors and shared his deep expertise in web development.",
+      "support": "To support him, feel free to give stars to his GitHub repositories by clicking the SCTG logo below."
+    },
+    "github": {
+      "instructions": "How to do it? Once on the page, click on one of his project titles, then at the top right, you will see 'Star' with a small star logo. Click on it: when the star turns yellow, it's done!"
+    },
+    "philippe": {
+      "name": "Philippe Dubart"
+    },
+    "franck": {
+      "name": "Franck Dubart"
+    },
+    "family": {
+      "description": "Thanks also to Philippe Dubart and Franck Dubart for their valuable support and their particularly enriching ideas, which have added real value to the KduFoot experience."
+    }
+  },
+  "delete": "Delete",
+  "permission": {
+    "group": {
+      "read": "Base",
+      "write": "Base",
+      "exercises": "Exercises",
+      "videos": "Videos",
+      "sessions": "Sessions",
+      "matches": "Matches",
+      "export": "Export",
+      "share": "Shares",
+      "admin": "Administration",
+      "auth0": "Auth0 Administration",
+      "coach": "Certification"
+    },
+    "read_api": "Read API",
+    "write_api": "Write API",
+    "exercises_read": "Read exercises",
+    "exercises_read_all": "Read all exercises",
+    "exercises_create": "Create exercises",
+    "exercises_update": "Modify exercises",
+    "exercises_delete": "Delete exercises",
+    "exercises_share": "Share exercises",
+    "videos_analyze": "Analyze videos",
+    "videos_analyze_long": "Analyze long videos",
+    "videos_analyze_batch": "Batch analysis",
+    "videos_priority": "Video priority",
+    "sessions_create": "Create sessions",
+    "sessions_adapt": "Adapt sessions",
+    "sessions_template": "Session templates",
+    "sessions_share": "Share sessions",
+    "matches_create": "Create matches",
+    "matches_premium": "Premium matches",
+    "matches_contact": "Contact for matches",
+    "export_pdf": "Export to PDF",
+    "export_video": "Export to video",
+    "share_library": "Share library",
+    "admin_users": "Manage users",
+    "admin_exercises": "Manage exercises",
+    "admin_matches": "Manage matches",
+    "admin_analytics": "ADM Analytics",
+    "admin_billing": "Billing",
+    "auth0_admin_api": "Auth0 API Access",
+    "coach_certified": "Certified coach"
+  },
+  "error-updating-user": "Error updating user"
 }

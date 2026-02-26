@@ -112,15 +112,15 @@ export default function UsersAndPermissionsPage() {
                         setUsers(u ?? []);
                     } catch (err) {
                         console.error("Erreur chargement utilisateurs:", err);
-                        addToast({ title: t("error"), description: t("error-fetching-data"), variant: "solid" });
+                        addToast({ title: t("error"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
                     }
                 } else {
-                    addToast({ title: t("error"), description: t("no-management-token"), variant: "solid" });
+                    addToast({ title: t("error"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
                 }
             })
             .catch((err) => {
                 console.error("Erreur token Management:", err);
-                addToast({ title: t("error"), description: t("no-management-token"), variant: "solid" });
+                addToast({ title: t("error"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
             })
             .finally(() => setLoadingUsers(false));
     }, []);
@@ -148,7 +148,7 @@ export default function UsersAndPermissionsPage() {
             setEditing((prev) => ({ ...prev, [userId]: permState }));
         } catch (err) {
             console.error("Erreur chargement permissions:", err);
-            addToast({ title: t("error"), description: t("failed-loading-user-permissions"), variant: "solid" });
+            addToast({ title: t("error"), description: t("adminUsersPage.toasts.errorLoadingPerms"), variant: "solid" });
         } finally {
             setModalLoading(false);
         }
@@ -191,7 +191,7 @@ export default function UsersAndPermissionsPage() {
                 }
             }
 
-            addToast({ title: t("success"), description: t("user-updated-successfully"), variant: "solid", timeout: 4000 });
+            addToast({ title: t("success"), description: t("adminUsersPage.toasts.successUpdate"), variant: "solid", timeout: 4000 });
             setEditing((prev) => ({ ...prev, [userId]: {} }));
             setSelectedUserId(null);
         } catch (err) {
@@ -206,18 +206,18 @@ export default function UsersAndPermissionsPage() {
     const deleteUser = async (userId: string) => {
         if (!mgmtToken) return;
         if (userId === currentUserId) {
-            addToast({ title: t("error"), description: t("cannot-delete-self"), variant: "solid" });
+            addToast({ title: t("error"), description: t("adminUsersPage.toasts.cannotDeleteSelf"), variant: "solid" });
             return;
         }
-        if (!window.confirm(`Supprimer l'utilisateur ${userId} ?`)) return;
+        if (!window.confirm(t("adminUsersPage.confirmDeletePrefix", { userId }))) return;
         try {
             await deleteAuth0User(mgmtToken, userId);
             setUsers((prev) => prev.filter((u) => u.user_id !== userId));
             if (selectedUserId === userId) setSelectedUserId(null);
-            addToast({ title: t("success"), description: t("user-deleted"), variant: "solid" });
+            addToast({ title: t("success"), description: t("adminUsersPage.toasts.successDelete"), variant: "solid" });
         } catch (err) {
             console.error(err);
-            addToast({ title: t("error"), description: t("error-deleting-user"), variant: "solid" });
+            addToast({ title: t("error"), description: t("adminUsersPage.toasts.errorDelete"), variant: "solid" });
         }
     };
 
@@ -227,11 +227,11 @@ export default function UsersAndPermissionsPage() {
             <section className="flex flex-col gap-6 py-8 md:py-10 px-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Gestion des utilisateurs et permissions</h1>
+                        <h1 className="text-2xl font-bold">{t("adminUsersPage.pageTitle")}</h1>
                         <p className="text-default-500 text-sm mt-1">
-                            Gérez les accès des utilisateurs KduFoot.
+                            {t("adminUsersPage.pageSubtitle")}
                             {tokenFromCache && (
-                                <span className="ml-2 text-success-600 text-xs">(token Management en cache ✓)</span>
+                                <span className="ml-2 text-success-600 text-xs">{t("adminUsersPage.cacheTokenSuccess")}</span>
                             )}
                         </p>
                     </div>
@@ -239,17 +239,17 @@ export default function UsersAndPermissionsPage() {
 
                 {/* Table des utilisateurs */}
                 {loadingUsers ? (
-                    <p className="text-default-500">Chargement des utilisateurs…</p>
+                    <p className="text-default-500">{t("adminUsersPage.loadingUsers")}</p>
                 ) : (
                     <Table aria-label="Utilisateurs Auth0" selectionMode="none">
                         <TableHeader>
-                            <TableColumn>Utilisateur</TableColumn>
-                            <TableColumn>Email</TableColumn>
-                            <TableColumn>Abonnement</TableColumn>
-                            <TableColumn>Connexions</TableColumn>
-                            <TableColumn>Actions</TableColumn>
+                            <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
+                            <TableColumn>{t("adminUsersPage.colEmail")}</TableColumn>
+                            <TableColumn>{t("adminUsersPage.colSubscription")}</TableColumn>
+                            <TableColumn>{t("adminUsersPage.colLogins")}</TableColumn>
+                            <TableColumn>{t("adminUsersPage.colActions")}</TableColumn>
                         </TableHeader>
-                        <TableBody emptyContent="Aucun utilisateur trouvé">
+                        <TableBody emptyContent={t("adminUsersPage.emptyUsers")}>
                             {users.map((u) => (
                                 <TableRow key={u.user_id}>
                                     <TableCell>
@@ -306,7 +306,7 @@ export default function UsersAndPermissionsPage() {
                                                 onPress={() => openUserEditing(u.user_id)}
                                                 isDisabled={!mgmtToken}
                                             >
-                                                Permissions
+                                                {t("adminUsersPage.btnPermissions")}
                                             </Button>
                                             {u.user_id !== currentUserId && (
                                                 <Button
@@ -316,7 +316,7 @@ export default function UsersAndPermissionsPage() {
                                                     onPress={() => deleteUser(u.user_id)}
                                                     isDisabled={!mgmtToken}
                                                 >
-                                                    Supprimer
+                                                    {t("adminUsersPage.btnDelete")}
                                                 </Button>
                                             )}
                                         </div>
@@ -332,7 +332,7 @@ export default function UsersAndPermissionsPage() {
                     <div className="mt-6 p-6 border border-default-200 rounded-xl bg-default-50">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold">
-                                Permissions de{" "}
+                                {t("adminUsersPage.modalTitlePrefix")}{" "}
                                 <span className="text-primary">
                                     {users.find((u) => u.user_id === selectedUserId)?.name ?? selectedUserId}
                                 </span>
@@ -342,12 +342,12 @@ export default function UsersAndPermissionsPage() {
                                 variant="light"
                                 onPress={() => { setSelectedUserId(null); setEditing((prev) => ({ ...prev, [selectedUserId]: {} })); }}
                             >
-                                Fermer
+                                {t("adminUsersPage.modalBtnClose")}
                             </Button>
                         </div>
 
                         {modalLoading ? (
-                            <p className="text-default-500">Chargement des permissions…</p>
+                            <p className="text-default-500">{t("adminUsersPage.modalLoadingPerms")}</p>
                         ) : (
                             <>
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
@@ -396,13 +396,13 @@ export default function UsersAndPermissionsPage() {
                                         isLoading={savingUserId === selectedUserId}
                                         isDisabled={Object.keys(editing[selectedUserId] ?? {}).length === 0}
                                     >
-                                        Enregistrer les permissions
+                                        {t("adminUsersPage.modalBtnSave")}
                                     </Button>
                                     <Button
                                         variant="flat"
                                         onPress={() => { setSelectedUserId(null); setEditing((prev) => ({ ...prev, [selectedUserId]: {} })); }}
                                     >
-                                        Annuler
+                                        {t("adminUsersPage.modalBtnCancel")}
                                     </Button>
                                 </div>
                             </>
