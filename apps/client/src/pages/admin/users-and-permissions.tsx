@@ -35,71 +35,38 @@ import type {
     Auth0User,
     Auth0Permission,
 } from "@/types/auth0.types";
+import { Permission } from "@/types/permissions";
 
-// ─── Permissions KduFoot à gérer dans l'interface ──────────────────────────
-const KDUFOOT_PERMISSIONS: Array<{
-    key: string;
-    label: string;
-    value: string;
-    group: string;
-}> = [
-        // Base
-        { key: "read_api", label: "Lire API", value: "read:api", group: "Base" },
-        { key: "write_api", label: "Écrire API", value: "write:api", group: "Base" },
-
-        // Exercices
-        { key: "exercises_read", label: "Lire exercices", value: "exercises:read", group: "Exercices" },
-        { key: "exercises_create", label: "Créer exercices", value: "exercises:create", group: "Exercices" },
-        { key: "exercises_update", label: "Modifier exercices", value: "exercises:update", group: "Exercices" },
-        { key: "exercises_delete", label: "Supprimer exercices", value: "exercises:delete", group: "Exercices" },
-        { key: "exercises_share", label: "Partager exercices", value: "exercises:share", group: "Exercices" },
-
-        // Vidéos
-        { key: "videos_analyze", label: "Analyser vidéos", value: "videos:analyze", group: "Vidéos" },
-        { key: "videos_analyze_long", label: "Analyser vidéos (long)", value: "videos:analyze:long", group: "Vidéos" },
-        { key: "videos_priority", label: "Priorité vidéos", value: "videos:priority", group: "Vidéos" },
-
-        // Séances
-        { key: "sessions_create", label: "Créer séances", value: "sessions:create", group: "Séances" },
-        { key: "sessions_adapt", label: "Adapter séances", value: "sessions:adapt", group: "Séances" },
-        { key: "sessions_template", label: "Templates séances", value: "sessions:template", group: "Séances" },
-        { key: "sessions_share", label: "Partager séances", value: "sessions:share", group: "Séances" },
-
-        // Matchs
-        { key: "matches_create", label: "Créer matchs", value: "matches:create", group: "Matchs" },
-        { key: "matches_premium", label: "Matchs premium", value: "matches:premium", group: "Matchs" },
-        { key: "matches_contact", label: "Contact matchs", value: "matches:contact", group: "Matchs" },
-
-        // Export
-        { key: "export_pdf", label: "Export PDF", value: "export:pdf", group: "Export" },
-        { key: "export_video", label: "Export vidéo", value: "export:video", group: "Export" },
-        // Share
-        { key: "share_library", label: "Partager bibliothèque", value: "share:library", group: "Share" },
-
-        // Admin
-        { key: "admin_users", label: "Gérer utilisateurs", value: "admin:users", group: "Admin" },
-        { key: "admin_exercises", label: "Admin exercices", value: "admin:exercises", group: "Admin" },
-        { key: "admin_matches", label: "Admin matchs", value: "admin:matches", group: "Admin" },
-        { key: "admin_analytics", label: "Analytics", value: "admin:analytics", group: "Admin" },
-        { key: "admin_billing", label: "Facturation", value: "admin:billing", group: "Admin" },
-        { key: "admin_auth0", label: "Admin Auth0", value: "auth0:admin:api", group: "Admin" },
-
-        // Certification
-        { key: "coach_certified", label: "Coach certifié", value: "coach:certified", group: "Certification" },
-    ];
+// ─── Permissions KduFoot à gérer dans l'interface (Généré dynamiquement) ─────
+const getKdufootPermissions = (t: any) => {
+    return Object.values(Permission).map((val) => {
+        const value = val as string;
+        const key = value.replace(/:/g, "_");
+        const group = value.split(":")[0];
+        return {
+            key,
+            label: t(`permission.${key}`),
+            value,
+            group,
+            groupLabel: t(`permission.group.${group}`),
+        };
+    });
+};
 
 // ─── Couleur d'un groupe ───────────────────────────────────────────────────
 const groupColor = (group: string): "primary" | "secondary" | "success" | "warning" | "danger" | "default" => {
     const map: Record<string, "primary" | "secondary" | "success" | "warning" | "danger" | "default"> = {
-        Base: "primary",
-        Exercices: "secondary",
-        Vidéos: "warning",
-        Séances: "success",
-        Matchs: "danger",
-        Export: "default",
-        Share: "default",
-        Admin: "danger",
-        Certification: "success",
+        read: "primary",
+        write: "primary",
+        exercises: "secondary",
+        videos: "warning",
+        sessions: "success",
+        matches: "danger",
+        export: "default",
+        share: "default",
+        admin: "danger",
+        auth0: "danger",
+        coach: "success",
     };
     return map[group] ?? "default";
 };
@@ -108,6 +75,7 @@ export default function UsersAndPermissionsPage() {
     const { user: currentUser } = useAuth0();
     const currentUserId = (currentUser?.sub ?? "").toString().trim();
     const { t } = useTranslation();
+    const KDUFOOT_PERMISSIONS = getKdufootPermissions(t);
 
     const {
         getAuth0ManagementToken,
@@ -385,18 +353,23 @@ export default function UsersAndPermissionsPage() {
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
                                     {(() => {
                                         // Regrouper par catégorie
-                                        const groups: Record<string, typeof KDUFOOT_PERMISSIONS> = {};
+                                        const groups: Record<string, { label: string; perms: typeof KDUFOOT_PERMISSIONS }> = {};
                                         for (const perm of KDUFOOT_PERMISSIONS) {
-                                            if (!groups[perm.group]) groups[perm.group] = [];
-                                            groups[perm.group].push(perm);
+                                            if (!groups[perm.group]) {
+                                                groups[perm.group] = {
+                                                    label: perm.groupLabel,
+                                                    perms: [],
+                                                };
+                                            }
+                                            groups[perm.group].perms.push(perm);
                                         }
-                                        return Object.entries(groups).map(([group, perms]) => (
-                                            <div key={group} className="bg-default-100 rounded-lg p-3">
-                                                <Chip size="sm" color={groupColor(group)} variant="flat" className="mb-2">
-                                                    {group}
+                                        return Object.entries(groups).map(([groupKey, group]) => (
+                                            <div key={groupKey} className="bg-default-100 rounded-lg p-3">
+                                                <Chip size="sm" color={groupColor(groupKey)} variant="flat" className="mb-2">
+                                                    {group.label}
                                                 </Chip>
                                                 <div className="flex flex-col gap-1.5">
-                                                    {perms.map((perm) => (
+                                                    {group.perms.map((perm) => (
                                                         <Checkbox
                                                             key={perm.key}
                                                             isSelected={editing[selectedUserId]?.[perm.key] ?? false}

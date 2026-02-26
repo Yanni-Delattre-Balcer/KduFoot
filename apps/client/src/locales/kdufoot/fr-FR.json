@@ -555,5 +555,49 @@
       "errorDelete": "Erreur lors de la suppression de l'utilisateur"
     }
   },
-  "delete": "Supprimer"
+  "delete": "Supprimer",
+  "permission": {
+    "group": {
+      "read": "Base",
+      "write": "Base",
+      "exercises": "Exercices",
+      "videos": "Vidéos",
+      "sessions": "Séances",
+      "matches": "Matchs",
+      "export": "Export",
+      "share": "Partages",
+      "admin": "Administration",
+      "auth0": "Administration Auth0",
+      "coach": "Certification"
+    },
+    "read_api": "Lire l'API",
+    "write_api": "Écrire dans l'API",
+    "exercises_read": "Lire les exercices",
+    "exercises_read_all": "Lire tous les exercices",
+    "exercises_create": "Créer des exercices",
+    "exercises_update": "Modifier des exercices",
+    "exercises_delete": "Supprimer des exercices",
+    "exercises_share": "Partager des exercices",
+    "videos_analyze": "Analyser des vidéos",
+    "videos_analyze_long": "Analyser des vidéos longues",
+    "videos_analyze_batch": "Analyse par lots",
+    "videos_priority": "Priorité vidéo",
+    "sessions_create": "Créer des séances",
+    "sessions_adapt": "Adapter des séances",
+    "sessions_template": "Modèles de séances",
+    "sessions_share": "Partager des séances",
+    "matches_create": "Créer des matchs",
+    "matches_premium": "Matchs premium",
+    "matches_contact": "Contacter pour un match",
+    "export_pdf": "Exporter en PDF",
+    "export_video": "Exporter en vidéo",
+    "share_library": "Partager la bibliothèque",
+    "admin_users": "Gérer les utilisateurs",
+    "admin_exercises": "Gérer les exercices",
+    "admin_matches": "Gérer les matchs",
+    "admin_analytics": "Statistiques ADM",
+    "admin_billing": "Facturation",
+    "auth0_admin_api": "Accès API Auth0",
+    "coach_certified": "Coach certifié"
+  }
 }

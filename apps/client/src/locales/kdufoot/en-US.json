@@ -555,5 +555,49 @@
             "errorDelete": "Error while deleting user"
         }
     },
-    "delete": "Delete"
+    "delete": "Delete",
+    "permission": {
+        "group": {
+            "read": "Base",
+            "write": "Base",
+            "exercises": "Exercises",
+            "videos": "Videos",
+            "sessions": "Sessions",
+            "matches": "Matches",
+            "export": "Export",
+            "share": "Shares",
+            "admin": "Administration",
+            "auth0": "Auth0 Administration",
+            "coach": "Certification"
+        },
+        "read_api": "Read API",
+        "write_api": "Write API",
+        "exercises_read": "Read exercises",
+        "exercises_read_all": "Read all exercises",
+        "exercises_create": "Create exercises",
+        "exercises_update": "Modify exercises",
+        "exercises_delete": "Delete exercises",
+        "exercises_share": "Share exercises",
+        "videos_analyze": "Analyze videos",
+        "videos_analyze_long": "Analyze long videos",
+        "videos_analyze_batch": "Batch analysis",
+        "videos_priority": "Video priority",
+        "sessions_create": "Create sessions",
+        "sessions_adapt": "Adapt sessions",
+        "sessions_template": "Session templates",
+        "sessions_share": "Share sessions",
+        "matches_create": "Create matches",
+        "matches_premium": "Premium matches",
+        "matches_contact": "Contact for matches",
+        "export_pdf": "Export to PDF",
+        "export_video": "Export to video",
+        "share_library": "Share library",
+        "admin_users": "Manage users",
+        "admin_exercises": "Manage exercises",
+        "admin_matches": "Manage matches",
+        "admin_analytics": "ADM Analytics",
+        "admin_billing": "Billing",
+        "auth0_admin_api": "Auth0 API Access",
+        "coach_certified": "Certified coach"
+    }
 }

@@ -1,11 +1,16 @@
 
-import { usePermissions, Permission } from '@/hooks/use-permissions';
+import { usePermissions } from '@/hooks/use-permissions';
+import { Permission } from '@/types/permissions';
 import { Card, CardBody } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 
+/**
+ * The PermissionGate component is a common pattern to protect parts of the UI.
+ * It only renders its children if the user has the required permission.
+ */
 interface PermissionGateProps {
     permission: Permission | string;
     showUpgrade?: boolean;
@@ -22,10 +27,16 @@ export const PermissionGate: React.FC<PermissionGateProps> = ({
 
     if (isLoading) return null;
 
+    /**
+     * If the user has the permission, we show the protected content.
+     */
     if (hasPermission(permission)) {
         return <>{children}</>;
     }
 
+    /**
+     * If not, we can show an upgrade message (common in 'Freemium' apps).
+     */
     if (showUpgrade) {
         return (
             <Card className="border-2 border-warning">
