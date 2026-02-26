@@ -456,10 +456,10 @@ export const useSecuredApi = () => {
   };
 
   /**
-   * Ajoute une permission à un utilisateur Auth0.
+   * Add a permission to a Auth0 user
    * @param mgmtToken Token Auth0 Management API
-   * @param userId Identifiant Auth0 de l'utilisateur
-   * @param permissionName Nom de la permission (ex: exercises:read)
+   * @param userId Auth0 user ID (ex: auth0|xxx)
+   * @param permissionName Permission name (ex: exercises:read)
    */
   const addPermissionToUser = async (
     mgmtToken: string,
@@ -495,10 +495,10 @@ export const useSecuredApi = () => {
   };
 
   /**
-   * Supprime une permission d'un utilisateur Auth0.
+   * Remove a permission from an Auth0 user
    * @param mgmtToken Token Auth0 Management API
-   * @param userId Identifiant Auth0 de l'utilisateur
-   * @param permissionName Nom de la permission à supprimer
+   * @param userId Auth0 user ID (ex: auth0|xxx)
+   * @param permissionName Permission name (ex: exercises:read)
    */
   const removePermissionFromUser = async (
     mgmtToken: string,
@@ -534,9 +534,9 @@ export const useSecuredApi = () => {
   };
 
   /**
-   * Supprime un utilisateur de Auth0.
+   * Delete an Auth0 user
    * @param mgmtToken Token Auth0 Management API
-   * @param userId Identifiant Auth0 de l'utilisateur
+   * @param userId Auth0 user ID (ex: auth0|xxx)
    */
   const deleteAuth0User = async (
     mgmtToken: string,
@@ -556,6 +556,149 @@ export const useSecuredApi = () => {
     if (!resp.ok) throw new Error(await resp.text());
   };
 
+  /**
+   * Get the list of Resource Servers (APIs) configured in Auth0
+   * @param mgmtToken Token Auth0 Management API
+   */
+  const getResourceServers = async (mgmtToken: string): Promise<any[]> => {
+    const resp = await fetch(`https://${auth0Domain}/api/v2/resource-servers`, {
+      headers: {
+        Authorization: `Bearer ${mgmtToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!resp.ok) throw new Error(await resp.text());
+    return resp.json();
+  };
+
+  /**
+   * Update the scopes of an Auth0 Resource Server
+   * @param mgmtToken Token Auth0 Management API
+   * @param id Auth0 Resource Server ID (ex: "65f..." or its audience)
+   * @param scopes List of scopes to define
+   */
+  const updateResourceServerScopes = async (
+    mgmtToken: string,
+    id: string,
+    scopes: { value: string; description: string }[],
+  ): Promise<void> => {
+    // Note: Auth0 accepts the ID or the identifier (URL) for the PATCH /resource-servers/{id} endpoint
+    const encodedId = encodeURIComponent(id);
+    const resp = await fetch(
+      `https://${auth0Domain}/api/v2/resource-servers/${encodedId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${mgmtToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          scopes,
+        }),
+      },
+    );
+    if (!resp.ok) throw new Error(await resp.text());
+  };
+
+  /**
+   * Get the scopes (permissions) of a specific Auth0 Resource Server by its ID or identifier.
+   * @param mgmtToken Auth0 Management API Token
+   * @param id Auth0 Resource Server ID or identifier
+   */
+  const getResourceServerScopes = async (
+    mgmtToken: string,
+    id: string,
+  ): Promise<{ value: string; description: string }[]> => {
+    const encodedId = encodeURIComponent(id);
+    const resp = await fetch(
+      `https://${auth0Domain}/api/v2/resource-servers/${encodedId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${mgmtToken}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    if (!resp.ok) throw new Error(await resp.text());
+    const data = await resp.json();
+    return data.scopes ?? [];
+  };
+
+  /**
+   * Get the scopes (permissions) of a Resource Server using its audience.
+   * @param mgmtToken Auth0 Management API Token
+   * @param audience The audience identifier (URL) of the API
+   */
+  const getResourcesServerScopesWithAudience = async (
+    mgmtToken: string,
+    audience: string,
+  ): Promise<{ value: string; description: string }[]> => {
+    const servers = await getResourceServers(mgmtToken);
+    const server = servers.find((s) => s.identifier === audience);
+    if (!server) throw new Error(`Resource server with audience ${audience} not found`);
+    return getResourceServerScopes(mgmtToken, server.id);
+  };
+
+  /**
+   * Update the scopes of a Resource Server using its audience.
+   * @param mgmtToken Auth0 Management API Token
+   * @param audience The audience identifier of the API
+   * @param scopes Complete list of scopes to set
+   */
+  const updateResourceServerScopesWithAudience = async (
+    mgmtToken: string,
+    audience: string,
+    scopes: { value: string; description: string }[],
+  ): Promise<void> => {
+    const servers = await getResourceServers(mgmtToken);
+    const server = servers.find((s) => s.identifier === audience);
+    if (!server) throw new Error(`Resource server with audience ${audience} not found`);
+    return updateResourceServerScopes(mgmtToken, server.id, scopes);
+  };
+
+  /**
+   * Check if a set of scopes exactly matches those defined on a Resource Server.
+   * @param mgmtToken Auth0 Management API Token
+   * @param id Resource Server ID or identifier
+   * @param targetScopes The scopes we want to verify
+   * @returns true if synchronized, false if update is needed
+   */
+  const checkResourceServerScopes = async (
+    mgmtToken: string,
+    id: string,
+    targetScopes: { value: string; description: string }[],
+  ): Promise<boolean> => {
+    const currentScopes = await getResourceServerScopes(mgmtToken, id);
+    if (currentScopes.length !== targetScopes.length) return false;
+
+    const currentValues = new Set(currentScopes.map((s) => s.value));
+    const targetValues = new Set(targetScopes.map((s) => s.value));
+
+    // Check if every target scope exists in current ones
+    for (const val of targetValues) {
+      if (!currentValues.has(val)) return false;
+    }
+    // Since lengths are equal, if all target are in current, they are identical
+    return true;
+  };
+
+  /**
+   * Check if scopes are synchronized using the audience to find the server.
+   * @param mgmtToken Auth0 Management API Token
+   * @param audience API audience
+   * @param targetScopes Scopes to verify
+   */
+  const checkResourceServerScopesWithAudience = async (
+    mgmtToken: string,
+    audience: string,
+    targetScopes: { value: string; description: string }[],
+  ): Promise<boolean> => {
+    const servers = await getResourceServers(mgmtToken);
+    const server = servers.find((s) => s.identifier === audience);
+    if (!server) throw new Error(`Resource server with audience ${audience} not found`);
+    return checkResourceServerScopes(mgmtToken, server.id, targetScopes);
+  };
+
   return {
     getJson,
     postJson,
@@ -569,5 +712,12 @@ export const useSecuredApi = () => {
     addPermissionToUser,
     removePermissionFromUser,
     deleteAuth0User,
+    getResourceServers,
+    updateResourceServerScopes,
+    getResourceServerScopes,
+    getResourcesServerScopesWithAudience,
+    updateResourceServerScopesWithAudience,
+    checkResourceServerScopes,
+    checkResourceServerScopesWithAudience,
   };
 };

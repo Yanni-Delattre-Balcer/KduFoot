@@ -512,6 +512,8 @@
     "emptyUsers": "Aucun utilisateur trouvé",
     "btnPermissions": "Permissions",
     "btnDelete": "Supprimer",
+    "btnSyncAuth0": "Synchroniser Auth0",
+    "auth0UpToDate": "Auth0 synchrone",
     "modalTitlePrefix": "Permissions de",
     "modalBtnClose": "Fermer",
     "modalLoadingPerms": "Chargement des permissions…",
@@ -527,7 +529,10 @@
       "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte",
       "confirmDelete": "Supprimer l'utilisateur {{id}} ?",
       "successDelete": "Utilisateur supprimé avec succès",
-      "errorDelete": "Erreur lors de la suppression de l'utilisateur"
+      "errorDelete": "Erreur lors de la suppression de l'utilisateur",
+      "syncSuccess": "Permissions Auth0 synchronisées",
+      "syncError": "Erreur synchronisation Auth0",
+      "noResourceServer": "API Auth0 non trouvée pour l'audience"
     }
   },
   "thank-you": {

@@ -84,6 +84,8 @@ export default function UsersAndPermissionsPage() {
         addPermissionToUser,
         removePermissionFromUser,
         deleteAuth0User,
+        checkResourceServerScopesWithAudience,
+        updateResourceServerScopesWithAudience,
     } = useSecuredApi();
 
     const [mgmtToken, setMgmtToken] = useState<string | null>(null);
@@ -97,6 +99,30 @@ export default function UsersAndPermissionsPage() {
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [modalLoading, setModalLoading] = useState(false);
     const [savingUserId, setSavingUserId] = useState<string | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [isUpToDate, setIsUpToDate] = useState<boolean | null>(null);
+
+    /**
+     * Helper to verify if Auth0 Resource Server scopes are synchronized with the local Permission enum.
+     */
+    const checkSyncStatus = async (token: string) => {
+        try {
+            const audience = import.meta.env.AUTH0_AUDIENCE;
+            const targetScopes = Object.values(Permission).map((val) => {
+                const value = val as string;
+                const key = value.replace(/:/g, "_");
+                return {
+                    value,
+                    description: t(`permission.${key}`)
+                };
+            });
+            const upToDate = await checkResourceServerScopesWithAudience(token, audience, targetScopes);
+            setIsUpToDate(upToDate);
+        } catch (err) {
+            console.error("Error checking sync status:", err);
+            setIsUpToDate(false); // Default to false on error to allow manual sync
+        }
+    };
 
     // ─── 1. Chargement du token Management API ──────────────────────────────
     useEffect(() => {
@@ -106,6 +132,10 @@ export default function UsersAndPermissionsPage() {
                     const tokenResp = resp as Auth0ManagementTokenResponse;
                     setMgmtToken(tokenResp.access_token);
                     setTokenFromCache(tokenResp.from_cache ?? false);
+
+                    // Trigger sync check
+                    checkSyncStatus(tokenResp.access_token);
+
                     // Charger la liste des utilisateurs
                     try {
                         const u = await listAuth0Users(tokenResp.access_token);
@@ -221,6 +251,61 @@ export default function UsersAndPermissionsPage() {
         }
     };
 
+    // ─── 6. Synchronisation des permissions sur Auth0 ───────────────────────
+    const syncAuth0Permissions = async () => {
+        if (!mgmtToken) return;
+        setIsSyncing(true);
+        try {
+            const audience = import.meta.env.AUTH0_AUDIENCE;
+
+            // Target scopes derived from the Permission enum
+            const targetScopes = Object.values(Permission).map((val) => {
+                const value = val as string;
+                const key = value.replace(/:/g, "_");
+                return {
+                    value,
+                    description: t(`permission.${key}`)
+                };
+            });
+
+            // Check if synchronization is already up to date
+            const isUpToDate = await checkResourceServerScopesWithAudience(mgmtToken, audience, targetScopes);
+
+            if (isUpToDate) {
+                addToast({
+                    title: t("success"),
+                    description: t("adminUsersPage.toasts.syncSuccess"), // Reusing success message for "already synced"
+                    variant: "solid",
+                    timeout: 5000
+                });
+                return;
+            }
+
+            // Perform the update
+            await updateResourceServerScopesWithAudience(mgmtToken, audience, targetScopes);
+            setIsUpToDate(true); // Mark as synced after update
+
+            addToast({
+                title: t("success"),
+                description: t("adminUsersPage.toasts.syncSuccess"),
+                variant: "solid",
+                timeout: 5000
+            });
+        } catch (err) {
+            console.error("Error synchronizing Auth0 Resource Server:", err);
+            const msg = (err as Error).message ?? "";
+            addToast({
+                title: t("error"),
+                description: msg.includes("not found")
+                    ? t("adminUsersPage.toasts.noResourceServer")
+                    : t("adminUsersPage.toasts.syncError"),
+                variant: "solid"
+            });
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
     // ─── Rendu ──────────────────────────────────────────────────────────────
     return (
         <DefaultLayout>
@@ -235,6 +320,27 @@ export default function UsersAndPermissionsPage() {
                             )}
                         </p>
                     </div>
+                    {isUpToDate === true ? (
+                        <Chip
+                            color="success"
+                            variant="flat"
+                            size="sm"
+                            startContent={<span className="ml-1">✓</span>}
+                        >
+                            {t("adminUsersPage.auth0UpToDate")}
+                        </Chip>
+                    ) : (
+                        <Button
+                            color="secondary"
+                            variant="flat"
+                            size="sm"
+                            onPress={syncAuth0Permissions}
+                            isLoading={isSyncing}
+                            isDisabled={!mgmtToken || isUpToDate === null}
+                        >
+                            {t("adminUsersPage.btnSyncAuth0")}
+                        </Button>
+                    )}
                 </div>
 
                 {/* Table des utilisateurs */}

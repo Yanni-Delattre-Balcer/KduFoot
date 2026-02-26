@@ -512,6 +512,8 @@
     "emptyUsers": "No user found",
     "btnPermissions": "Permissions",
     "btnDelete": "Delete",
+    "btnSyncAuth0": "Sync Auth0",
+    "auth0UpToDate": "Auth0 up to date",
     "modalTitlePrefix": "Permissions for",
     "modalBtnClose": "Close",
     "modalLoadingPerms": "Loading permissions...",
@@ -527,7 +529,10 @@
       "cannotDeleteSelf": "You cannot delete your own account",
       "confirmDelete": "Delete user {{id}}?",
       "successDelete": "User successfully deleted",
-      "errorDelete": "Error while deleting user"
+      "errorDelete": "Error while deleting user",
+      "syncSuccess": "Auth0 permissions synchronized",
+      "syncError": "Auth0 sync error",
+      "noResourceServer": "Auth0 API not found for audience"
     }
   },
   "thank-you": {
