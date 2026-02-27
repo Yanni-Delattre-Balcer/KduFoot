@@ -195,6 +195,58 @@ export default function UsersAndPermissionsPage() {
         }));
     };
 
+    // ─── 3b. Attribution rapide d'un rôle ─────────────────────────────────────
+    const applyRole = (role: string) => {
+        if (!selectedUserId) return;
+
+        let newPerms: Record<string, boolean> = {};
+        const currentEdits = editing[selectedUserId] || {};
+
+        // Prevent removing self auth0:admin:api if it evaluates to true
+        const preserveAdmin = selectedUserId === currentUserId && currentEdits["auth0_admin_api"];
+
+        KDUFOOT_PERMISSIONS.forEach(p => {
+            newPerms[p.key] = false;
+        });
+
+        if (preserveAdmin) {
+            newPerms["auth0_admin_api"] = true;
+        }
+
+        const setPerms = (values: string[]) => {
+            values.forEach(v => {
+                const p = KDUFOOT_PERMISSIONS.find(k => k.value === v);
+                if (p) newPerms[p.key] = true;
+            });
+        };
+
+        switch (role) {
+            case "free":
+                setPerms(["read:api", "write:api", "matches:create", "matches:contact"]);
+                break;
+            case "premium":
+                setPerms([
+                    "read:api", "write:api", "matches:create", "matches:contact",
+                    "exercises:read", "exercises:create", "exercises:update",
+                    "videos:analyze", "export:video"
+                ]);
+                break;
+            case "admin":
+                setPerms([
+                    "read:api", "write:api", "matches:create", "matches:contact",
+                    "admin:matches", "sessions:share", "share:library"
+                ]);
+                break;
+            case "superadmin":
+                KDUFOOT_PERMISSIONS.forEach(p => {
+                    newPerms[p.key] = true;
+                });
+                break;
+        }
+
+        setEditing(prev => ({ ...prev, [selectedUserId]: newPerms }));
+    };
+
     // ─── 4. Sauvegarde des permissions ──────────────────────────────────────
     const savePermissions = async (userId: string) => {
         if (!mgmtToken) return;
@@ -456,6 +508,22 @@ export default function UsersAndPermissionsPage() {
                             <p className="text-default-500">{t("adminUsersPage.modalLoadingPerms")}</p>
                         ) : (
                             <>
+                                <div className="mb-4 flex flex-wrap gap-2 items-center">
+                                    <span className="text-sm font-medium">Attribution rapide :</span>
+                                    <Button size="sm" variant="flat" color="default" onPress={() => applyRole("free")}>
+                                        Abonné Free
+                                    </Button>
+                                    <Button size="sm" variant="flat" color="warning" onPress={() => applyRole("premium")}>
+                                        Abonné Premium
+                                    </Button>
+                                    <Button size="sm" variant="flat" color="secondary" onPress={() => applyRole("admin")}>
+                                        Administrateur
+                                    </Button>
+                                    <Button size="sm" variant="flat" color="danger" onPress={() => applyRole("superadmin")}>
+                                        Super Administrateur
+                                    </Button>
+                                </div>
+
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
                                     {(() => {
                                         // Regrouper par catégorie
