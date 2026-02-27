@@ -226,7 +226,7 @@ export class Router {
 
 			if (!match) continue;
 
-			if (route.permission) {
+			if (route.permission !== undefined) {
 				if (!request.headers.has("Authorization")) {
 					return new Response(
 						JSON.stringify({

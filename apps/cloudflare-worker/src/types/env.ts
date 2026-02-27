@@ -28,6 +28,9 @@ export interface Env {
     AUTH0_MANAGEMENT_API_CLIENT_ID: string;
     AUTH0_MANAGEMENT_API_CLIENT_SECRET: string;
 
+    // Automatic Permissions
+    AUTH0_AUTOMATIC_PERMISSIONS: string;
+
     // Permissions
     READ_PERMISSION: string;
     WRITE_PERMISSION: string;

@@ -124,10 +124,10 @@ export default defineConfig(({ mode }) => {
       "import.meta.env.DEX_JWKS_ENDPOINT": JSON.stringify(
         env.DEX_JWKS_ENDPOINT,
       ),
-      "import.meta.env.DEX_DOMAIN": JSON.stringify(env.DEX_DOMAIN),
-      "import.meta.env.AUTH0_CACHE_DURATION_S": JSON.stringify(
-        env.AUTH0_CACHE_DURATION_S || "300",
-      ),
+      "import.meta.env.PERMISSIONS": JSON.stringify([process.env.READ_PERMISSION || "read:api",
+      process.env.WRITE_PERMISSION || "write:api",
+      process.env.ADMIN_AUTH0_PERMISSION || "auth0:admin:api"]),
+      "import.meta.env.AUTH0_AUTOMATIC_PERMISSIONS": JSON.stringify(process.env.AUTH0_AUTOMATIC_PERMISSIONS?.split(",") || []),
     },
     plugins: [react(), tsconfigPaths(), tailwindcss(), githubPagesSpa()],
     build: {
