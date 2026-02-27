@@ -9,7 +9,57 @@ import { checkPermission } from '../middleware/permissions.middleware';
 export const setupExerciseRoutes = (router: Router, env: Env) => {
     const exerciseService = new ExerciseService(env.DB);
 
-    // Search exercises
+    /**
+ * @openapi
+ * /api/exercises:
+ *   get:
+ *     tags:
+ *       - Exercises
+ *     summary: Search for and filter exercises
+ *     description: >
+ *       Retrieves a paginated list of exercises, with optional filters for keyword search, category, target level, and theme.
+ *       Requires the 'exercises:read' permission (scope).
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: search
+ *         in: query
+ *         description: Keyword to find in title or description.
+ *         schema: { type: string }
+ *       - name: category
+ *         in: query
+ *         description: Specific category filter (e.g., Tactical).
+ *         schema: { type: string }
+ *       - name: level
+ *         in: query
+ *         description: Difficulty level filter.
+ *         schema: { type: string }
+ *       - name: theme
+ *         in: query
+ *         description: Specific theme filter (e.g., Finishing).
+ *         schema: { type: string }
+ *       - name: limit
+ *         in: query
+ *         description: Maximum number of results to return.
+ *         schema: { type: integer, default: 20 }
+ *       - name: offset
+ *         in: query
+ *         description: Number of results to skip for pagination.
+ *         schema: { type: integer, default: 0 }
+ *     responses:
+ *       200:
+ *         description: Paginated search results.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 exercises: { type: array, items: { $ref: '#/components/schemas/Exercise' } }
+ *                 total: { type: integer }
+ *       403:
+ *         description: Forbidden - Insufficient permissions.
+ */
     router.get('/api/exercises', async (request: Request) => {
         /**
          * Before processing the request, we check if the user has the required permission.
@@ -35,7 +85,39 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
-    // Get single exercise
+    /**
+ * @openapi
+ * /api/exercises/{id}:
+ *   get:
+ *     tags:
+ *       - Exercises
+ *     summary: Retrieve a detailed exercise by ID
+ *     description: >
+ *       Fetches the full details of a single exercise record.
+ *       Requires the 'exercises:read' permission.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Unique UUID of the exercise.
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved exercise details.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 exercise: { $ref: '#/components/schemas/Exercise' }
+ *       404:
+ *         description: Not Found - Exercise ID does not exist.
+ *       403:
+ *         description: Forbidden - Access denied.
+ */
     router.get('/api/exercises/<id>', async (request: Request) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_READ);
@@ -51,7 +133,42 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
-    // Create exercise
+    /**
+ * @openapi
+ * /api/exercises:
+ *   post:
+ *     tags:
+ *       - Exercises
+ *     summary: Create a new exercise drill
+ *     description: >
+ *       Saves a new exercise record to the database. The exercise is automatically associated with the authenticated user.
+ *       Requires the 'exercises:create' permission.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       description: Details of the exercise to be created.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Exercise'
+ *     responses:
+ *       200:
+ *         description: Exercise successfully created.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 exercise: { $ref: '#/components/schemas/Exercise' }
+ *       400:
+ *         description: Bad Request - User profile not synchronized.
+ *       403:
+ *         description: Forbidden - Insufficient rights to create exercises.
+ *       500:
+ *         description: Internal Server Error - Failed to save the record.
+ */
     router.post('/api/exercises', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_CREATE);
         if (!permissionCheck.hasPermission) {
@@ -82,7 +199,41 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         }
     });
 
-    // Update exercise
+    /**
+     * @openapi
+     * /api/exercises/{id}:
+     *   put:
+     *     tags:
+     *       - Exercises
+     *     summary: Update an existing exercise
+     *     description: >
+     *       Modifies the details of an existing exercise. Users can only update exercises they have created.
+     *       Requires the 'exercises:update' permission.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         description: Unique ID of the exercise.
+     *         schema: { type: string, format: uuid }
+     *     requestBody:
+     *       description: Fields to update.
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/Exercise'
+     *     responses:
+     *       200:
+     *         description: Exercise successfully updated.
+     *       403:
+     *         description: Forbidden - Lacks mandatory permissions or not the owner.
+     *       404:
+     *         description: Not Found - Exercise ID does not exist.
+     *       500:
+     *         description: Internal Server Error - Update failed.
+     */
     router.put('/api/exercises/<id>', async (request: Request) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_UPDATE);
@@ -110,7 +261,32 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         }
     });
 
-    // Delete exercise
+    /**
+     * @openapi
+     * /api/exercises/{id}:
+     *   delete:
+     *     tags:
+     *       - Exercises
+     *     summary: Delete an exercise
+     *     description: >
+     *       Permanently removes an exercise record. Users can only delete their own exercises.
+     *       Requires the 'exercises:delete' permission.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         description: Unique ID of the exercise.
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: Successful deletion.
+     *       403:
+     *         description: Forbidden - Unauthorized or not the owner.
+     *       404:
+     *         description: Not Found - Exercise identifier invalid.
+     */
     router.delete('/api/exercises/<id>', async (request: Request) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_DELETE);

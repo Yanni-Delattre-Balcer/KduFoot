@@ -7,41 +7,69 @@ import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
 
 export const setupUserRoutes = (router: Router, env: Env) => {
-    // We instantiate the UserService which handles database operations for users
     const userService = new UserService(env.DB);
 
     /**
-     * POST /api/users/sync
-     * 
-     * This route "synchronizes" a user from Auth0 to our local database (D1).
-     * When a user logs in for the first time, we need to save their profile info
-     * so we can associate them with clubs, sessions, etc.
+     * @openapi
+     * /api/users/sync:
+     *   post:
+     *     tags:
+     *       - User Management
+     *     summary: Synchronize Auth0 profile with the local database
+     *     description: >
+     *       Synchronizes user information from an Auth0 identification token into the local KduFoot database (Cloudflare D1).
+     *       This ensures that subsequent operations (like creating exercises) can correctly reference the local user ID.
+     *       It should be called at every login to keep the local profile (name, picture, email) up to date.
+     *       Requires a valid JWT.
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       description: User profile data from Auth0.
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - sub
+     *               - email
+     *             properties:
+     *               sub: { type: string, description: "The Auth0 unique subject identifier." }
+     *               email: { type: string, description: "User's email address." }
+     *               given_name: { type: string, description: "User's first name." }
+     *               family_name: { type: string, description: "User's last name." }
+     *               picture: { type: string, description: "URL to the user's profile picture." }
+     *     responses:
+     *       200:
+     *         description: User profile successfully synchronized.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success: { type: boolean }
+     *                 user: { $ref: '#/components/schemas/User' }
+     *       400:
+     *         description: Bad Request - Missing mandatory user data (sub or email).
+     *       401:
+     *         description: Unauthorized - Invalid or missing JWT.
+     *       500:
+     *         description: Internal Server Error - Failed to update the database.
      */
     router.post('/api/users/sync', async (request: Request) => {
-        // We expect the standard Auth0 token check to have happened via router or middleware if we used it.
-        // Here we can re-verify or trust the router if configured.
-        // The Router in router.ts handles auth if permission is passed, but here we want to allow any authenticated user to sync.
-        // Let's check for a basic "read:api" or just existence of a valid token.
-
-        // Manually checking auth because 'sync' might not map nicely to a specific permission other than "being logged in".
-        // Or we use READ_API as a baseline.
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Get user info from request body or token?
-        // Usually the client sends the user info from Auth0 (idToken payload) in the body
-        // because the access token might not have profile info (email, name).
         const body: any = await request.json();
 
         if (!body.sub || !body.email) {
             return Response.json({ success: false, error: 'Missing user data' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // DTO (Data Transfer Object) is a simple object used to pass data between processes
         const dto: CreateUserDto = {
-            auth0_sub: body.sub, // Unique identifier from Auth0
+            auth0_sub: body.sub,
             email: body.email,
             firstname: body.given_name || body.name || 'User',
             lastname: body.family_name || '',
@@ -57,22 +85,39 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
     });
 
-    // Get current user profile
+    /**
+     * @openapi
+     * /api/users/me:
+     *   get:
+     *     tags:
+     *       - User Management
+     *     summary: Retrieve the current user's profile
+     *     description: >
+     *       Fetches the complete profile and club association for the currently authenticated user.
+     *       The user is identified via the 'sub' claim in the provided JWT.
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: The user's detailed profile, including associated club info if linked.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success: { type: boolean }
+     *                 user: { $ref: '#/components/schemas/User' }
+     *       404:
+     *         description: Not Found - User record not found in the local database. User sync may be required.
+     *       401:
+     *         description: Unauthorized - Invalid or missing JWT.
+     */
     router.get('/api/users/me', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Extract sub from token
-        // The middleware checkPermission verified the token but didn't return the payload in a way accessing it here is clean 
-        // without re-decoding.
-        // However, router.ts attaches payload to 'this.jwtPayload' if used via route.permission.
-        // Since we called checkPermission manually, we have to handle it.
-        // Ideally update checkPermission to return payload too, which I did in the previous step!
-
-        // Better yet, let's use the router's permission/middleware mechanism if possible, 
-        // OR just decode it here again (lightweight).
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -83,7 +128,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: 'User not found in D1. Call sync first.' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Join club data if user has a club
         let club = null;
         if (user.club_id) {
             club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
@@ -92,7 +136,42 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         return Response.json({ success: true, user: { ...user, club } }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
-    // Update current user profile
+    /**
+     * @openapi
+     * /api/users/me:
+     *   put:
+     *     tags:
+     *       - User Management
+     *     summary: Update the current user's profile
+     *     description: >
+     *       Updates mutable fields of the current user's profile (e.g., location, stadium address).
+     *       Administrative fields like subscription and club association are protected and cannot be modified here.
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       description: Fields to update in the user's profile.
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/User'
+     *     responses:
+     *       200:
+     *         description: Successful update. Returns the updated user record.
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success: { type: boolean }
+     *                 user: { $ref: '#/components/schemas/User' }
+     *       401:
+     *         description: Unauthorized - Access denied.
+     *       404:
+     *         description: Not Found - User record not found.
+     *       500:
+     *         description: Internal Server Error - Database update failed.
+     */
     router.put('/api/users/me', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
         if (!permissionCheck.hasPermission) {
@@ -110,9 +189,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
 
         const body: UpdateUserDto = await request.json();
-
-        // Security: Validate what can be updated
-        // Prevent updating subscription directly via API (should handle via payment hooks)
         delete body.subscription;
 
         try {
@@ -123,7 +199,39 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
     });
 
-    // Link club to user via SIRET (IRREVERSIBLE)
+    /**
+     * @openapi
+     * /api/users/link-club:
+     *   post:
+     *     tags:
+     *       - User Management
+     *     summary: Link the current user to a football club via SIRET
+     *     description: >
+     *       Links the current user's profile to a club identified by a 14-digit SIRET number.
+     *       It fetches official club information (name, address, coordinates) from an external French government API.
+     *       If the club does not exist locally, it is created.
+     *       **Note:** This action is irreversible for the user.
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required: [siret]
+     *             properties:
+     *               siret: { type: string, minLength: 14, maxLength: 14, description: "14-digit SIRET number." }
+     *     responses:
+     *       200:
+     *         description: Successfully linked. Returns the updated user and club details.
+     *       400:
+     *         description: Bad Request - Missing SIRET or user already linked.
+     *       404:
+     *         description: Not Found - No business found for the provided SIRET.
+     *       502:
+     *         description: Bad Gateway - Failed to retrieve data from the SIRET API.
+     */
     router.post('/api/users/link-club', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
@@ -140,7 +248,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Check if user already has a club (irreversible)
         if (user.club_id) {
             return Response.json({ success: false, error: 'Votre compte est déjà lié à un club. Cette action est irréversible.' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
@@ -151,10 +258,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
 
         try {
-            /** 
-             * We fetch business information (Clubs) using the French Government's SIRET API.
-             * A SIRET is a 14-digit unique identifier for a business or organization in France.
-             */
             const apiUrl = `${env.SIRET_API_URL}?q=${body.siret}&page=1&per_page=1`;
             const apiRes = await fetch(apiUrl);
             if (!apiRes.ok) {
@@ -176,7 +279,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             const lat = siege.latitude ? parseFloat(siege.latitude) : null;
             const lon = siege.longitude ? parseFloat(siege.longitude) : null;
 
-            // Upsert club in DB
             const { v4: uuidv4 } = await import('uuid');
             const existingClub = await env.DB.prepare('SELECT * FROM clubs WHERE siret = ?').bind(body.siret).first();
 
@@ -193,7 +295,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                 ).bind(clubId, body.siret, clubName, clubCity, clubAddress, clubZip, lat, lon).run();
             }
 
-            // Link user to club
             const updatedUser = await userService.updateUser(user.id, {
                 club_id: clubId,
                 siret: body.siret,
@@ -201,7 +302,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                 stadium_address: clubAddress,
             });
 
-            // Return user with club info
             return Response.json({
                 success: true,
                 user: {
@@ -215,7 +315,24 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
     });
 
-    // Admin-only: Unlink club (for testing — restricted to admin email)
+    /**
+     * @openapi
+     * /api/users/unlink-club:
+     *   post:
+     *     tags:
+     *       - Administrative Actions
+     *     summary: Unlink a user from their club (Admin only)
+     *     description: >
+     *       Administrative endpoint to reset a user's club association.
+     *       Currently restricted to a specific administrator email for testing and support purposes.
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Successfully unlinked.
+     *       403:
+     *         description: Forbidden - Lacks administrative privileges.
+     */
     router.post('/api/users/unlink-club', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
@@ -232,7 +349,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Only allow admin email
         if (user.email !== 'yannidelattrebalcer.artois@gmail.com') {
             return Response.json({ success: false, error: 'Seul l\'administrateur peut effectuer cette action.' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }

@@ -9,7 +9,45 @@ import { checkPermission } from '../middleware/permissions.middleware';
 export const setupSessionRoutes = (router: Router, env: Env) => {
     const sessionService = new SessionService(env.DB);
 
-    // Search sessions
+    /**
+     * @openapi
+     * /api/sessions:
+     *   get:
+     *     tags:
+     *       - Sessions
+     *     summary: Retrieve and filter training sessions
+     *     description: >
+     *       Lists training sessions associated with the current user. Results can be filtered by status (e.g., scheduled, completed) and date range.
+     *       Requires a valid JWT. Access is restricted to the user's own sessions.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: status
+     *         in: query
+     *         description: Filter by session status.
+     *         schema: { type: string }
+     *       - name: from
+     *         in: query
+     *         description: Start date filter (ISO 8601).
+     *         schema: { type: string, format: date-time }
+     *       - name: to
+     *         in: query
+     *         description: End date filter (ISO 8601).
+     *         schema: { type: string, format: date-time }
+     *       - name: limit
+     *         in: query
+     *         description: Max number of sessions to return.
+     *         schema: { type: integer, default: 20 }
+     *       - name: offset
+     *         in: query
+     *         description: Pagination offset.
+     *         schema: { type: integer, default: 0 }
+     *     responses:
+     *       200:
+     *         description: A list of sessions matching the filters.
+     *       403:
+     *         description: Forbidden - Invalid token or insufficient permissions.
+     */
     router.get('/api/sessions', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API); // Minimal read permission? Or specific SESSIONS_READ?
         // Permissions enum doesn't have SESSIONS_READ explicitly, maybe use generic READ_API or add it?
@@ -47,7 +85,32 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
-    // Get single session
+    /**
+     * @openapi
+     * /api/sessions/{id}:
+     *   get:
+     *     tags:
+     *       - Sessions
+     *     summary: Get session details by ID
+     *     description: >
+     *       Retrieves the full configuration and drill list for a specific training session.
+     *       Access is restricted to the owner of the session.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         description: Unique UUID of the session.
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: Session details retrieved successfully.
+     *       403:
+     *         description: Forbidden - User does not own this session.
+     *       404:
+     *         description: Not Found - Session ID invalid.
+     */
     router.get('/api/sessions/<id>', async (request: Request) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
@@ -73,7 +136,35 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
-    // Create session
+    /**
+     * @openapi
+     * /api/sessions:
+     *   post:
+     *     tags:
+     *       - Sessions
+     *     summary: Create a new training session
+     *     description: >
+     *       Saves a new training session configuration. The session must include at least one exercise.
+     *       Requires the 'sessions:create' permission.
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required: [title]
+     *             properties:
+     *               title: { type: string, description: "Display title for the session." }
+     *               description: { type: string }
+     *               exercises: { type: array, items: { type: string, format: uuid }, description: "List of exercise IDs." }
+     *     responses:
+     *       200:
+     *         description: Session successfully created.
+     *       403:
+     *         description: Forbidden - Insufficient rights.
+     */
     router.post('/api/sessions', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.SESSIONS_CREATE);
         if (!permissionCheck.hasPermission) {
@@ -98,7 +189,40 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         }
     });
 
-    // Update session
+    /**
+     * @openapi
+     * /api/sessions/{id}:
+     *   put:
+     *     tags:
+     *       - Sessions
+     *     summary: Update an existing session
+     *     description: >
+     *       Updates the title, description, or exercise list of a session.
+     *       Only the creator can modify the session.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         description: Unique UUID of the session.
+     *         schema: { type: string, format: uuid }
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               title: { type: string }
+     *               description: { type: string }
+     *               exercises: { type: array, items: { type: string, format: uuid } }
+     *     responses:
+     *       200:
+     *         description: Session updated.
+     *       403:
+     *         description: Forbidden - Lacks permissions or ownership.
+     */
     router.put('/api/sessions/<id>', async (request: Request) => {
         const params = (request as any).params as { id: string };
         // Update might use same permission or generic write? 
@@ -132,7 +256,28 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         }
     });
 
-    // Delete session
+    /**
+     * @openapi
+     * /api/sessions/{id}:
+     *   delete:
+     *     tags:
+     *       - Sessions
+     *     summary: Delete a session
+     *     description: Permanently removes a training session. Only the creator can perform this action.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         description: Unique UUID of the session.
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: Session successfully deleted.
+     *       403:
+     *         description: Forbidden - Unauthorized.
+     */
     router.delete('/api/sessions/<id>', async (request: Request) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.SESSIONS_CREATE); // Assuming delete is part of management

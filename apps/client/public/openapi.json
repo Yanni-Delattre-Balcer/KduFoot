@@ -1,0 +1,1654 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "KduFoot API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/__auth0/token": {
+      "post": {
+        "tags": [
+          "Auth0 Administration"
+        ],
+        "summary": "Obtain an Auth0 Management API token",
+        "description": "Requests an Auth0 Management API token via the client_credentials flow. This token is used by the backend to perform administrative tasks (like assigning permissions). The token is cached in Cloudflare KV to respect Auth0 rate limits and improve performance. Access is restricted to users with the 'auth0:admin:api' permission.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the Management API token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auth0TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - The provided JWT is invalid or lacks the required administrative scope."
+          },
+          "500": {
+            "description": "Internal Server Error - An error occurred while communicating with Auth0 or the KV store."
+          }
+        }
+      }
+    },
+    "/api/__auth0/autopermissions": {
+      "post": {
+        "tags": [
+          "Auth0 Administration"
+        ],
+        "summary": "Automatically assign default permissions to the current user",
+        "description": "Checks the current user's permissions against a predefined list (AUTH0_AUTOMATIC_PERMISSIONS). If any permissions are missing, they are automatically granted via the Auth0 Management API. This is typically called by the client application after a successful login to ensure the user has a baseline set of capabilities. Requires a valid JWT.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully processed. Returns details about added permissions or a message if none were needed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "added": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "List of permissions newly granted."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Informational message if no permissions were added."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Failed to grant permissions due to an API or configuration error."
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Retrieve the OpenAPI Specification",
+        "description": "Provides the full OpenAPI 3.0.0 specification for this API in JSON format. Note: This route currently serves a placeholder description, as the actual file is typically served from the frontend's public directory.\n",
+        "responses": {
+          "200": {
+            "description": "The OpenAPI specification document."
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "API Health Check",
+        "description": "Returns the status of the API to verify it is running and accessible.",
+        "responses": {
+          "200": {
+            "description": "API is healthy and operational.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/debug-db": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Database Connectivity Debugging",
+        "description": "Verifies the connection to the Cloudflare D1 database by performing a simple count query on the users table. Returns the database status and environment details. Warning: This endpoint should be restricted or disabled in production.\n",
+        "responses": {
+          "200": {
+            "description": "Database connection is successful."
+          },
+          "500": {
+            "description": "Database connection failed or query error."
+          }
+        }
+      }
+    },
+    "/api/ping": {
+      "get": {
+        "tags": [
+          "Development"
+        ],
+        "summary": "Connectivity and Authentication Ping",
+        "description": "A simple authenticated endpoint to verify that the user's JWT is valid and permissions are working.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully reached. Returns the user's sub claim from the JWT."
+          }
+        }
+      }
+    },
+    "/api/get_users": {
+      "get": {
+        "tags": [
+          "Development"
+        ],
+        "summary": "Legacy Current User Identification",
+        "description": "Returns the Auth0 'sub' claim for the currently authenticated user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved user mapping identification."
+          }
+        }
+      }
+    },
+    "/api/get/{user}": {
+      "get": {
+        "tags": [
+          "Development"
+        ],
+        "summary": "Parameterized Identity Test",
+        "description": "A test endpoint that accepts a user identifier in the path and returns it along with the current token and permissions. Used for verifying path parameter parsing and JWT context availability.\n",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "description": "Identifiant de l'utilisateur à tester.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Echo of provided parameters and authenticating token details."
+          }
+        }
+      }
+    },
+    "/api/clubs/search": {
+      "get": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Search for clubs by name",
+        "description": "Searches the local database for football clubs matching the provided name query. This is typically used in autocomplete fields to help users find and link their club. Requires a query string of at least 3 characters to ensure relevance and performance.\n",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search query for the club name (min 3 chars).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of clubs matching the search criteria.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "clubs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Club"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - The query is missing or too short."
+          }
+        }
+      }
+    },
+    "/api/clubs/by-city": {
+      "get": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Retrieve clubs by city",
+        "description": "Returns a list of clubs located in a specific city. Useful for regional filtering and helping users find clubs near their location.\n",
+        "parameters": [
+          {
+            "name": "city",
+            "in": "query",
+            "required": true,
+            "description": "Name of the city to filter by.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of clubs found in the specified city.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "clubs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Club"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - The city parameter is missing."
+          }
+        }
+      }
+    },
+    "/api/exercises": {
+      "get": {
+        "tags": [
+          "Exercises"
+        ],
+        "summary": "Search for and filter exercises",
+        "description": "Retrieves a paginated list of exercises, with optional filters for keyword search, category, target level, and theme. Requires the 'exercises:read' permission (scope).\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Keyword to find in title or description.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Specific category filter (e.g., Tactical).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "description": "Difficulty level filter.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "theme",
+            "in": "query",
+            "description": "Specific theme filter (e.g., Finishing).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip for pagination.",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated search results.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "exercises": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Exercise"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Exercises"
+        ],
+        "summary": "Create a new exercise drill",
+        "description": "Saves a new exercise record to the database. The exercise is automatically associated with the authenticated user. Requires the 'exercises:create' permission.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Details of the exercise to be created.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Exercise"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exercise successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "exercise": {
+                      "$ref": "#/components/schemas/Exercise"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - User profile not synchronized."
+          },
+          "403": {
+            "description": "Forbidden - Insufficient rights to create exercises."
+          },
+          "500": {
+            "description": "Internal Server Error - Failed to save the record."
+          }
+        }
+      }
+    },
+    "/api/exercises/{id}": {
+      "get": {
+        "tags": [
+          "Exercises"
+        ],
+        "summary": "Retrieve a detailed exercise by ID",
+        "description": "Fetches the full details of a single exercise record. Requires the 'exercises:read' permission.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique UUID of the exercise.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved exercise details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "exercise": {
+                      "$ref": "#/components/schemas/Exercise"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Access denied."
+          },
+          "404": {
+            "description": "Not Found - Exercise ID does not exist."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Exercises"
+        ],
+        "summary": "Update an existing exercise",
+        "description": "Modifies the details of an existing exercise. Users can only update exercises they have created. Requires the 'exercises:update' permission.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique ID of the exercise.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Fields to update.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Exercise"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exercise successfully updated."
+          },
+          "403": {
+            "description": "Forbidden - Lacks mandatory permissions or not the owner."
+          },
+          "404": {
+            "description": "Not Found - Exercise ID does not exist."
+          },
+          "500": {
+            "description": "Internal Server Error - Update failed."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Exercises"
+        ],
+        "summary": "Delete an exercise",
+        "description": "Permanently removes an exercise record. Users can only delete their own exercises. Requires the 'exercises:delete' permission.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique ID of the exercise.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful deletion."
+          },
+          "403": {
+            "description": "Forbidden - Unauthorized or not the owner."
+          },
+          "404": {
+            "description": "Not Found - Exercise identifier invalid."
+          }
+        }
+      }
+    },
+    "/api/matches": {
+      "get": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Search and filter football matches",
+        "description": "Retrieves a list of matches with advanced filtering capabilities including category, level, venue type, and geographical proximity. Geographical search uses 'radius_km' along with 'user_lat' and 'user_lng'. Requires a valid JWT.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by age or gender category.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "description": "Filter by competitive level.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "Match format (e.g., 5v5, 11v11).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Current status of the match.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "radius_km",
+            "in": "query",
+            "description": "Search radius in kilometers.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "user_lat",
+            "in": "query",
+            "description": "Reference latitude for proximity search.",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "user_lng",
+            "in": "query",
+            "description": "Reference longitude for proximity search.",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated match list."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Create a new match offer",
+        "description": "Registers a new match in the system. The creating user is assigned as the owner. Requires 'matches:create' permission.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "date",
+                  "category",
+                  "level",
+                  "format"
+                ],
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "level": {
+                    "type": "string"
+                  },
+                  "format": {
+                    "type": "string"
+                  },
+                  "venue": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Match successfully created."
+          },
+          "403": {
+            "description": "Forbidden."
+          }
+        }
+      }
+    },
+    "/api/matches/{id}": {
+      "get": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Retrieve detailed match information by ID",
+        "description": "Fetches full match criteria, location, and owner details for a given match identifier.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique UUID of the match.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Match details."
+          },
+          "404": {
+            "description": "Not Found."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Update an existing match offer",
+        "description": "Updates match details. Only the match owner can perform this action.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Match successfully updated."
+          },
+          "403": {
+            "description": "Forbidden - Not the owner."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Delete a match offer",
+        "description": "Permanently removes a match. Only the owner can delete it.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Match successfully deleted."
+          },
+          "404": {
+            "description": "Not Found."
+          }
+        }
+      }
+    },
+    "/api/matches/{id}/contact": {
+      "post": {
+        "tags": [
+          "Match Participation"
+        ],
+        "summary": "Apply to participate in a match",
+        "description": "Sends a request to the match owner to participate (or accept the offer). Requires 'matches:contact' permission.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application sent."
+          }
+        }
+      }
+    },
+    "/api/matches/requests": {
+      "get": {
+        "tags": [
+          "Match Participation"
+        ],
+        "summary": "List incoming match participation requests",
+        "description": "Displays all requests sent by other users to participate in matches owned by the current user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of incoming requests."
+          }
+        }
+      }
+    },
+    "/api/matches/participations": {
+      "get": {
+        "tags": [
+          "Match Participation"
+        ],
+        "summary": "List outgoing match participation applications",
+        "description": "Displays all matches the current user has applied to join.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of outgoing applications."
+          }
+        }
+      }
+    },
+    "/api/matches/{matchId}/requests/{userId}": {
+      "patch": {
+        "tags": [
+          "Match Participation"
+        ],
+        "summary": "Update status of a participation request",
+        "description": "Allows the match owner to accept or refuse an incoming request from a specific user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "matchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "accepted",
+                      "refused"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request status updated."
+          },
+          "403": {
+            "description": "Forbidden - Lacks ownership."
+          }
+        }
+      }
+    },
+    "/api/sessions": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Retrieve and filter training sessions",
+        "description": "Lists training sessions associated with the current user. Results can be filtered by status (e.g., scheduled, completed) and date range. Requires a valid JWT. Access is restricted to the user's own sessions.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by session status.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Start date filter (ISO 8601).",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "End date filter (ISO 8601).",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max number of sessions to return.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Pagination offset.",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of sessions matching the filters."
+          },
+          "403": {
+            "description": "Forbidden - Invalid token or insufficient permissions."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Create a new training session",
+        "description": "Saves a new training session configuration. The session must include at least one exercise. Requires the 'sessions:create' permission.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Display title for the session."
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "exercises": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "description": "List of exercise IDs."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session successfully created."
+          },
+          "403": {
+            "description": "Forbidden - Insufficient rights."
+          }
+        }
+      }
+    },
+    "/api/sessions/{id}": {
+      "get": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Get session details by ID",
+        "description": "Retrieves the full configuration and drill list for a specific training session. Access is restricted to the owner of the session.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique UUID of the session.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session details retrieved successfully."
+          },
+          "403": {
+            "description": "Forbidden - User does not own this session."
+          },
+          "404": {
+            "description": "Not Found - Session ID invalid."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Update an existing session",
+        "description": "Updates the title, description, or exercise list of a session. Only the creator can modify the session.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique UUID of the session.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "exercises": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session updated."
+          },
+          "403": {
+            "description": "Forbidden - Lacks permissions or ownership."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Sessions"
+        ],
+        "summary": "Delete a session",
+        "description": "Permanently removes a training session. Only the creator can perform this action.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Unique UUID of the session.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session successfully deleted."
+          },
+          "403": {
+            "description": "Forbidden - Unauthorized."
+          }
+        }
+      }
+    },
+    "/api/users/sync": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Synchronize Auth0 profile with the local database",
+        "description": "Synchronizes user information from an Auth0 identification token into the local KduFoot database (Cloudflare D1). This ensures that subsequent operations (like creating exercises) can correctly reference the local user ID. It should be called at every login to keep the local profile (name, picture, email) up to date. Requires a valid JWT.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "User profile data from Auth0.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sub",
+                  "email"
+                ],
+                "properties": {
+                  "sub": {
+                    "type": "string",
+                    "description": "The Auth0 unique subject identifier."
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "User's email address."
+                  },
+                  "given_name": {
+                    "type": "string",
+                    "description": "User's first name."
+                  },
+                  "family_name": {
+                    "type": "string",
+                    "description": "User's last name."
+                  },
+                  "picture": {
+                    "type": "string",
+                    "description": "URL to the user's profile picture."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile successfully synchronized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Missing mandatory user data (sub or email)."
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing JWT."
+          },
+          "500": {
+            "description": "Internal Server Error - Failed to update the database."
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Retrieve the current user's profile",
+        "description": "Fetches the complete profile and club association for the currently authenticated user. The user is identified via the 'sub' claim in the provided JWT.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user's detailed profile, including associated club info if linked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing JWT."
+          },
+          "404": {
+            "description": "Not Found - User record not found in the local database. User sync may be required."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Update the current user's profile",
+        "description": "Updates mutable fields of the current user's profile (e.g., location, stadium address). Administrative fields like subscription and club association are protected and cannot be modified here.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "description": "Fields to update in the user's profile.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update. Returns the updated user record.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Access denied."
+          },
+          "404": {
+            "description": "Not Found - User record not found."
+          },
+          "500": {
+            "description": "Internal Server Error - Database update failed."
+          }
+        }
+      }
+    },
+    "/api/users/link-club": {
+      "post": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Link the current user to a football club via SIRET",
+        "description": "Links the current user's profile to a club identified by a 14-digit SIRET number. It fetches official club information (name, address, coordinates) from an external French government API. If the club does not exist locally, it is created. **Note:** This action is irreversible for the user.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "siret"
+                ],
+                "properties": {
+                  "siret": {
+                    "type": "string",
+                    "minLength": 14,
+                    "maxLength": 14,
+                    "description": "14-digit SIRET number."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully linked. Returns the updated user and club details."
+          },
+          "400": {
+            "description": "Bad Request - Missing SIRET or user already linked."
+          },
+          "404": {
+            "description": "Not Found - No business found for the provided SIRET."
+          },
+          "502": {
+            "description": "Bad Gateway - Failed to retrieve data from the SIRET API."
+          }
+        }
+      }
+    },
+    "/api/users/unlink-club": {
+      "post": {
+        "tags": [
+          "Administrative Actions"
+        ],
+        "summary": "Unlink a user from their club (Admin only)",
+        "description": "Administrative endpoint to reset a user's club association. Currently restricted to a specific administrator email for testing and support purposes.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully unlinked."
+          },
+          "403": {
+            "description": "Forbidden - Lacks administrative privileges."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "description": "Represents a user within the KduFoot ecosystem, synchronized from Auth0 and enriched with local data.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Internal unique identifier for the user (UUID v4)."
+          },
+          "auth0_sub": {
+            "type": "string",
+            "description": "Unique identifier provided by Auth0 (e.g., auth0|xxx)."
+          },
+          "email": {
+            "type": "string",
+            "description": "Primary email address of the user."
+          },
+          "firstname": {
+            "type": "string",
+            "description": "User's first name."
+          },
+          "lastname": {
+            "type": "string",
+            "description": "User's last name."
+          },
+          "picture": {
+            "type": "string",
+            "description": "URL to the user's profile picture."
+          },
+          "location": {
+            "type": "string",
+            "description": "General location or city of the user."
+          },
+          "stadium_address": {
+            "type": "string",
+            "description": "Physical address of the user's primary stadium or playground."
+          },
+          "siret": {
+            "type": "string",
+            "description": "French business identifier (14 digits) for the user's club."
+          },
+          "club_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Reference ID to the associated Club record."
+          },
+          "subscription": {
+            "type": "string",
+            "description": "Current subscription level or status of the user."
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "Unix timestamp of when the user record was created."
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "Unix timestamp of the last update to the user record."
+          }
+        }
+      },
+      "Club": {
+        "type": "object",
+        "description": "Represents a football club or organization identified by its SIRET number.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Internal unique identifier for the club."
+          },
+          "siret": {
+            "type": "string",
+            "description": "Unique 14-digit SIRET identifier."
+          },
+          "name": {
+            "type": "string",
+            "description": "Full official name of the club."
+          },
+          "city": {
+            "type": "string",
+            "description": "City where the club is located."
+          },
+          "address": {
+            "type": "string",
+            "description": "Full street address of the club's headquarters or headquarters."
+          },
+          "zip": {
+            "type": "string",
+            "description": "Zip or postal code."
+          },
+          "latitude": {
+            "type": "number",
+            "description": "Geographical latitude for mapping."
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Geographical longitude for mapping."
+          }
+        }
+      },
+      "Exercise": {
+        "type": "object",
+        "description": "A training drill or exercise created by a user.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the exercise."
+          },
+          "title": {
+            "type": "string",
+            "description": "Title or name of the exercise."
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed instructions or description of the drill."
+          },
+          "category": {
+            "type": "string",
+            "description": "Broad category of the exercise (e.g., Tactical, Technical)."
+          },
+          "level": {
+            "type": "string",
+            "description": "Target skill level (e.g., Beginner, Advanced)."
+          },
+          "theme": {
+            "type": "string",
+            "description": "Specific theme of the exercise (e.g., Finishing, Passing)."
+          },
+          "video_url": {
+            "type": "string",
+            "description": "Optional link to a demonstration video."
+          },
+          "thumbnail_url": {
+            "type": "string",
+            "description": "Optional link to an image representing the exercise."
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the user who created this exercise."
+          }
+        }
+      },
+      "Auth0TokenResponse": {
+        "type": "object",
+        "description": "Response containing the Auth0 Management API access token.",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "The JWT access token to be used in subsequent Management API calls."
+          },
+          "token_type": {
+            "type": "string",
+            "description": "The type of token (typically \"Bearer\")."
+          },
+          "expires_in": {
+            "type": "integer",
+            "description": "Remaining lifetime of the token in seconds."
+          },
+          "from_cache": {
+            "type": "boolean",
+            "description": "Indicates if the token was retrieved from the KV cache."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "tags": [],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

@@ -36,16 +36,164 @@ import { setupMatchRoutes } from "./matches";
 import { Env } from "../types/env";
 
 /**
+ * @openapi
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       description: Represents a user within the KduFoot ecosystem, synchronized from Auth0 and enriched with local data.
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: Internal unique identifier for the user (UUID v4).
+ *         auth0_sub:
+ *           type: string
+ *           description: Unique identifier provided by Auth0 (e.g., auth0|xxx).
+ *         email:
+ *           type: string
+ *           description: Primary email address of the user.
+ *         firstname:
+ *           type: string
+ *           description: User's first name.
+ *         lastname:
+ *           type: string
+ *           description: User's last name.
+ *         picture:
+ *           type: string
+ *           description: URL to the user's profile picture.
+ *         location:
+ *           type: string
+ *           description: General location or city of the user.
+ *         stadium_address:
+ *           type: string
+ *           description: Physical address of the user's primary stadium or playground.
+ *         siret:
+ *           type: string
+ *           description: French business identifier (14 digits) for the user's club.
+ *         club_id:
+ *           type: string
+ *           format: uuid
+ *           description: Reference ID to the associated Club record.
+ *         subscription:
+ *           type: string
+ *           description: Current subscription level or status of the user.
+ *         created_at:
+ *           type: integer
+ *           description: Unix timestamp of when the user record was created.
+ *         updated_at:
+ *           type: integer
+ *           description: Unix timestamp of the last update to the user record.
+ *     Club:
+ *       type: object
+ *       description: Represents a football club or organization identified by its SIRET number.
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: Internal unique identifier for the club.
+ *         siret:
+ *           type: string
+ *           description: Unique 14-digit SIRET identifier.
+ *         name:
+ *           type: string
+ *           description: Full official name of the club.
+ *         city:
+ *           type: string
+ *           description: City where the club is located.
+ *         address:
+ *           type: string
+ *           description: Full street address of the club's headquarters or headquarters.
+ *         zip:
+ *           type: string
+ *           description: Zip or postal code.
+ *         latitude:
+ *           type: number
+ *           description: Geographical latitude for mapping.
+ *         longitude:
+ *           type: number
+ *           description: Geographical longitude for mapping.
+ *     Exercise:
+ *       type: object
+ *       description: A training drill or exercise created by a user.
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: Unique identifier for the exercise.
+ *         title:
+ *           type: string
+ *           description: Title or name of the exercise.
+ *         description:
+ *           type: string
+ *           description: Detailed instructions or description of the drill.
+ *         category:
+ *           type: string
+ *           description: Broad category of the exercise (e.g., Tactical, Technical).
+ *         level:
+ *           type: string
+ *           description: Target skill level (e.g., Beginner, Advanced).
+ *         theme:
+ *           type: string
+ *           description: Specific theme of the exercise (e.g., Finishing, Passing).
+ *         video_url:
+ *           type: string
+ *           description: Optional link to a demonstration video.
+ *         thumbnail_url:
+ *           type: string
+ *           description: Optional link to an image representing the exercise.
+ *         user_id:
+ *           type: string
+ *           format: uuid
+ *           description: ID of the user who created this exercise.
+ *     Auth0TokenResponse:
+ *       type: object
+ *       description: Response containing the Auth0 Management API access token.
+ *       properties:
+ *         access_token:
+ *           type: string
+ *           description: The JWT access token to be used in subsequent Management API calls.
+ *         token_type:
+ *           type: string
+ *           description: The type of token (typically "Bearer").
+ *         expires_in:
+ *           type: integer
+ *           description: Remaining lifetime of the token in seconds.
+ *         from_cache:
+ *           type: boolean
+ *           description: Indicates if the token was retrieved from the KV cache.
+ */
+
+/**
  * Main function to configure all application routes.
  * It takes a router instance and the environment configuration.
  */
 export const setupRoutes = (router: Router, env: Env) => {
 	/**
-	 * POST /api/__auth0/token
-	 *
-	 * Requests an Auth0 Management API token via the client_credentials flow.
-	 * The token is cached in KV to limit calls to Auth0.
-	 * Requires the env.ADMIN_AUTH0_PERMISSION (auth0:admin:api) permission.
+	 * @openapi
+	 * /api/__auth0/token:
+	 *   post:
+	 *     tags:
+	 *       - Auth0 Administration
+	 *     summary: Obtain an Auth0 Management API token
+	 *     description: >
+	 *       Requests an Auth0 Management API token via the client_credentials flow.
+	 *       This token is used by the backend to perform administrative tasks (like assigning permissions).
+	 *       The token is cached in Cloudflare KV to respect Auth0 rate limits and improve performance.
+	 *       Access is restricted to users with the 'auth0:admin:api' permission.
+	 *     security:
+	 *       - bearerAuth: []
+	 *     responses:
+	 *       200:
+	 *         description: Successfully retrieved the Management API token.
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: '#/components/schemas/Auth0TokenResponse'
+	 *       401:
+	 *         description: Unauthorized - The provided JWT is invalid or lacks the required administrative scope.
+	 *       500:
+	 *         description: Internal Server Error - An error occurred while communicating with Auth0 or the KV store.
 	 */
 	router.post(
 		"/api/__auth0/token",
@@ -80,10 +228,32 @@ export const setupRoutes = (router: Router, env: Env) => {
 	);
 
 	/**
-	 * POST /api/__auth0/autopermissions
-	 *
-	 * Automatically assigns permissions listed in AUTH0_AUTOMATIC_PERMISSIONS
-	 * if the user doesn't already have them.
+	 * @openapi
+	 * /api/__auth0/autopermissions:
+	 *   post:
+	 *     tags:
+	 *       - Auth0 Administration
+	 *     summary: Automatically assign default permissions to the current user
+	 *     description: >
+	 *       Checks the current user's permissions against a predefined list (AUTH0_AUTOMATIC_PERMISSIONS).
+	 *       If any permissions are missing, they are automatically granted via the Auth0 Management API.
+	 *       This is typically called by the client application after a successful login to ensure the user has a baseline set of capabilities.
+	 *       Requires a valid JWT.
+	 *     security:
+	 *       - bearerAuth: []
+	 *     responses:
+	 *       200:
+	 *         description: Successfully processed. Returns details about added permissions or a message if none were needed.
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 success: { type: boolean }
+	 *                 added: { type: array, items: { type: string }, description: "List of permissions newly granted." }
+	 *                 message: { type: string, description: "Informational message if no permissions were added." }
+	 *       500:
+	 *         description: Internal Server Error - Failed to grant permissions due to an API or configuration error.
 	 */
 	router.post(
 		"/api/__auth0/autopermissions",
@@ -149,7 +319,46 @@ export const setupRoutes = (router: Router, env: Env) => {
 		});
 	});
 
-	// Simple health check (public)
+	/**
+	 * @openapi
+	 * /openapi.json:
+	 *   get:
+	 *     tags:
+	 *       - System
+	 *     summary: Retrieve the OpenAPI Specification
+	 *     description: >
+	 *       Provides the full OpenAPI 3.0.0 specification for this API in JSON format.
+	 *       Note: This route currently serves a placeholder description, as the actual file is typically served from the frontend's public directory.
+	 *     responses:
+	 *       200:
+	 *         description: The OpenAPI specification document.
+	 */
+	router.get("/openapi.json", async () => {
+		return new Response("OpenAPI spec is generated by the client build and available at /openapi.json on the frontend.", {
+			status: 200,
+			headers: { "Content-Type": "text/plain" },
+		});
+	});
+
+	/**
+	 * @openapi
+	 * /health:
+	 *   get:
+	 *     tags:
+	 *       - System
+	 *     summary: API Health Check
+	 *     description: Returns the status of the API to verify it is running and accessible.
+	 *     responses:
+	 *       200:
+	 *         description: API is healthy and operational.
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 success: { type: boolean }
+	 *                 status: { type: string, example: "ok" }
+	 */
 	router.get("/health", async () => {
 		return new Response(JSON.stringify({ success: true, status: "ok" }), {
 			status: 200,
@@ -157,7 +366,23 @@ export const setupRoutes = (router: Router, env: Env) => {
 		});
 	});
 
-	// Debug D1 (Public for now, carefully)
+	/**
+	 * @openapi
+	 * /api/debug-db:
+	 *   get:
+	 *     tags:
+	 *       - System
+	 *     summary: Database Connectivity Debugging
+	 *     description: >
+	 *       Verifies the connection to the Cloudflare D1 database by performing a simple count query on the users table.
+	 *       Returns the database status and environment details.
+	 *       Warning: This endpoint should be restricted or disabled in production.
+	 *     responses:
+	 *       200:
+	 *         description: Database connection is successful.
+	 *       500:
+	 *         description: Database connection failed or query error.
+	 */
 	router.get("/api/debug-db", async () => {
 		try {
 			const count = await env.DB.prepare('SELECT count(*) as count FROM users').first();
@@ -178,7 +403,20 @@ export const setupRoutes = (router: Router, env: Env) => {
 		}
 	});
 
-	// Protected ping (requires READ permission)
+	/**
+	 * @openapi
+	 * /api/ping:
+	 *   get:
+	 *     tags:
+	 *       - Development
+	 *     summary: Connectivity and Authentication Ping
+	 *     description: A simple authenticated endpoint to verify that the user's JWT is valid and permissions are working.
+	 *     security:
+	 *       - bearerAuth: []
+	 *     responses:
+	 *       200:
+	 *         description: Successfully reached. Returns the user's sub claim from the JWT.
+	 */
 	router.get(
 		"/api/ping",
 		async (_request) => {
@@ -196,7 +434,20 @@ export const setupRoutes = (router: Router, env: Env) => {
 		env.READ_PERMISSION,
 	);
 
-	// Protected /api/get_users (requires READ permission)
+	/**
+	 * @openapi
+	 * /api/get_users:
+	 *   get:
+	 *     tags:
+	 *       - Development
+	 *     summary: Legacy Current User Identification
+	 *     description: Returns the Auth0 'sub' claim for the currently authenticated user.
+	 *     security:
+	 *       - bearerAuth: []
+	 *     responses:
+	 *       200:
+	 *         description: Successfully retrieved user mapping identification.
+	 */
 	router.get(
 		"/api/get_users",
 		async (_request) => {
@@ -210,7 +461,29 @@ export const setupRoutes = (router: Router, env: Env) => {
 		env.READ_PERMISSION,
 	);
 
-	// Protected /api/get/<user> (requires READ permission)
+	/**
+	 * @openapi
+	 * /api/get/{user}:
+	 *   get:
+	 *     tags:
+	 *       - Development
+	 *     summary: Parameterized Identity Test
+	 *     description: >
+	 *       A test endpoint that accepts a user identifier in the path and returns it along with the current token and permissions.
+	 *       Used for verifying path parameter parsing and JWT context availability.
+	 *     parameters:
+	 *       - name: user
+	 *         in: path
+	 *         required: true
+	 *         description: Identifiant de l'utilisateur à tester.
+	 *         schema:
+	 *           type: string
+	 *     security:
+	 *       - bearerAuth: []
+	 *     responses:
+	 *       200:
+	 *         description: Echo of provided parameters and authenticating token details.
+	 */
 	router.get(
 		"/api/get/<user>",
 		async (request) => {
