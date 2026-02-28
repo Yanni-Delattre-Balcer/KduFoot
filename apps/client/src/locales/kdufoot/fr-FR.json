@@ -516,9 +516,10 @@
     "title": "Tableau de Bord",
     "subtitle": "Gérez vos organisations et vos participations en temps réel.",
     "tabs": {
-      "requests": "Demandes Reçues",
-      "organized": "Mes Organisations",
-      "participations": "Mes Participations",
+      "requests": "DEMANDES REÇUES",
+      "organized": "MES MATCHS / TOURNOIS ORGANISÉS",
+      "participations": "MES PARTICIPATIONS TOURNOIS",
+      "confirmed_matches": "MATCHS CONFIRMÉS",
       "all": "Tous",
       "matches": "Matchs",
       "tournaments": "Tournois"

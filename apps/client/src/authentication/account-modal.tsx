@@ -34,6 +34,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
     const [category, setCategory] = useState("");
     const [pitchType, setPitchType] = useState("");
     const [clubColors, setClubColors] = useState("");
+    const [phone, setPhone] = useState("");
     const [siret, setSiret] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -56,6 +57,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             setCategory(dbUser.category || "");
             setPitchType(dbUser.pitch_type || "");
             setClubColors(dbUser.club_colors || "");
+            setPhone(dbUser.phone || "");
             setSiret(dbUser.siret || "");
         }
     }, [dbUser]);
@@ -116,6 +118,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                 category,
                 pitch_type: pitchType,
                 club_colors: clubColors,
+                phone: phone,
                 picture: previewUrl || dbUser?.picture || authUser.picture
             });
             addToast({ title: t('success', 'Succès'), description: t('accountModal.alerts.update_success', 'Profil mis à jour avec succès'), variant: 'flat', color: 'success' });
@@ -226,10 +229,15 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                                 <span className="text-default-500">Email</span>
                                                 <span className="font-medium">{authUser.email}</span>
                                             </div>
-                                            <div className="flex justify-between items-center text-sm">
-                                                <span className="text-default-500">Téléphone</span>
-                                                <span className="font-medium">{dbUser?.phone || "Non renseigné"}</span>
-                                            </div>
+                                            <Input
+                                                label="Téléphone"
+                                                variant="bordered"
+                                                size="sm"
+                                                value={phone}
+                                                onValueChange={setPhone}
+                                                placeholder="06 12 34 56 78"
+                                                className="mt-2"
+                                            />
                                             <Input
                                                 label="Numéro de licence"
                                                 variant="bordered"
@@ -289,6 +297,11 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                                 ))}
                                             </Select>
                                             <Input
+                                                label="Couleur des maillots"
+                                                variant="bordered"
+                                                size="sm"
+                                                value={clubColors}
+                                                onValueChange={setClubColors}
                                                 placeholder="Rouge et Noir..."
                                             />
                                         </div>

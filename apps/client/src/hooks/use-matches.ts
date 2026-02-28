@@ -166,12 +166,19 @@ export function useMyParticipations() {
         refreshInterval: 30000,
     });
 
+    const markAsRead = useCallback(async (matchId: string) => {
+        const token = await getAccessTokenSilently();
+        await matchService.markNotificationsAsRead(matchId, token);
+        mutate();
+    }, [getAccessTokenSilently, mutate]);
+
     return {
         participations: data?.participations as any[] || [],
         modifiedCount: (data?.participations as any[] || []).filter(p => p.notification_state === 1).length,
         isLoading,
         isError: error,
-        mutate
+        mutate,
+        markAsRead
     };
 }
 

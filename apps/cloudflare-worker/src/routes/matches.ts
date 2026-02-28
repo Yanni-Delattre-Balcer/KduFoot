@@ -538,4 +538,42 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
+
+    /**
+     * @openapi
+     * /api/matches/{id}/notifications/read:
+     *   patch:
+     *     tags:
+     *       - Match Participation
+     *     summary: Mark match notifications as read
+     *     description: Resets the notification state for a specific match and user.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: Notification marked as read.
+     */
+    router.patch('/api/matches/<id>/notifications/read', async (request: Request) => {
+        const params = (request as any).params as { id: string };
+        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        if (!dbUser) {
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        await matchService.markNotificationsAsRead(params.id, dbUser.id);
+        return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+    });
 };

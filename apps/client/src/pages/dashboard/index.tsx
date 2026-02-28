@@ -12,6 +12,9 @@ import { Spinner } from "@heroui/spinner";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Link } from 'react-router-dom';
 import FootballClock from '../../components/football-clock';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
+import { useUser } from '@/hooks/use-user';
+
 import { addToast } from '@heroui/toast';
 
 const formatDate = (dateStr: string) => {
@@ -29,10 +32,28 @@ const formatTime = (timeStr: string) => {
     return timeStr.replace(':', 'h');
 };
 
+const formatTimestamp = (ts: number) => {
+    try {
+        const date = new Date(ts * 1000);
+        return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+    } catch {
+        return 'Date inconnue';
+    }
+};
+
+const formatTimestampTime = (ts: number) => {
+    try {
+        const date = new Date(ts * 1000);
+        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    } catch {
+        return '';
+    }
+};
+
 export default function DashboardPage() {
     const { t } = useTranslation();
     const { getAccessTokenSilently } = useAuth0();
-    // We use the direct import of addToast from @heroui/toast
+    const { user: dbUser } = useUser();
 
     // 1. Mes Annonces (Organisateur)
     const { matches: myAnnouncements, isLoading: isLoadingAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
@@ -48,7 +69,10 @@ export default function DashboardPage() {
     // Sub-filters states
     const [requestsSubFilter, setRequestsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
     const [organizedSubFilter, setOrganizedSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
-    const [participationsSubFilter, setParticipationsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
+
+    // Modal state for 'Voir le profil'
+    const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
+    const [selectedClubProfile, setSelectedClubProfile] = useState<any>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -113,7 +137,6 @@ export default function DashboardPage() {
             if (res.success) setIncomingRequests(res.requests);
         } catch (e: any) {
             const rawMessage = e.message || "";
-            // Si le message est un JSON stringifié, on essaie de l'extraire
             let cleanMessage = rawMessage;
             try {
                 if (rawMessage.startsWith('{')) {
@@ -131,6 +154,19 @@ export default function DashboardPage() {
                 description: errorMessage,
                 color: "danger"
             });
+        }
+    };
+
+    const markAsRead = async (matchId: string) => {
+        try {
+            const token = await getAccessTokenSilently();
+            await matchService.markNotificationsAsRead(matchId, token);
+            // Local update to avoid full refresh if possible, or just re-fetch
+            setMyParticipations(prev => prev.map(p =>
+                p.match_id === matchId ? { ...p, notification_state: 0 } : p
+            ));
+        } catch (e) {
+            console.error("Failed to mark as read", e);
         }
     };
 
@@ -184,23 +220,78 @@ export default function DashboardPage() {
     const filteredRequests = incomingRequests.filter(r => {
         // Auto-masquage des demandes pour matchs passés
         if (isMatchPast(r.match_date, r.match_time)) return false;
+        // Only show PENDING requests in "Demandes Reçues"
+        if (r.request_status !== 'pending') return false;
 
         if (requestsSubFilter === 'all') return true;
-        return r.type === requestsSubFilter;
+        return r.match_type === requestsSubFilter;
     });
 
+    // Get IDs of matches that have at least one accepted request (they go to Matchs Confirmés)
+    const confirmedMatchIds = new Set(
+        incomingRequests.filter(r => r.request_status === 'accepted').map(r => r.match_id)
+    );
+
     const filteredOrganized = (myAnnouncements || []).filter(m => {
+        // Hide matches that are confirmed (moved to Matchs Confirmés tab)
+        if (confirmedMatchIds.has(m.id)) return false;
         if (organizedSubFilter === 'all') return true;
         return m.type === organizedSubFilter;
     });
 
     const filteredParticipations = myParticipations.filter(p => {
-        // Auto-masquage des matchs terminés
         if (isMatchPast(p.match_date, p.match_time)) return false;
-
-        if (participationsSubFilter === 'all') return true;
-        return p.type === participationsSubFilter;
+        // Skip accepted matches (they go to confirmed tab), but keep accepted tournaments here?
+        // Actually, user wants "Friday match" even if sent.
+        if (p.request_status === 'accepted' && p.match_type === 'match') return false;
+        return true;
     });
+
+    // Combine accepted participations + accepted incoming requests into "Matchs Confirmés"
+    const acceptedIncomingAsOrganizer = incomingRequests
+        .filter(r => r.request_status === 'accepted' && !isMatchPast(r.match_date, r.match_time))
+        .map(r => ({
+            ...r,
+            _source: 'organizer' as const,
+            // Normalize: organizer sees requester info
+            opponent_club_name: r.requester_club_name,
+            opponent_club_logo: r.requester_club_logo,
+            opponent_city: r.requester_city,
+            opponent_category: r.requester_category,
+            opponent_level: r.requester_level,
+            opponent_firstname: r.requester_firstname,
+            opponent_lastname: r.requester_lastname,
+            opponent_phone: r.requester_phone,
+            opponent_email: r.requester_email,
+            opponent_club_colors: r.requester_club_colors,
+            opponent_pitch_type: r.requester_pitch_type,
+            // If organizer created match as 'home', organizer plays at home
+            isUserHome: r.match_type === 'tournament' || r.venue === 'Domicile',
+        }));
+
+    const acceptedParticipations = myParticipations
+        .filter(p => !isMatchPast(p.match_date, p.match_time) && p.request_status === 'accepted' && p.match_type === 'match')
+        .map(p => ({
+            ...p,
+            _source: 'participant' as const,
+            // Normalize: participant sees host/organizer info
+            opponent_club_name: p.host_club_name,
+            opponent_club_logo: p.host_club_logo,
+            opponent_city: p.host_city || p.location_city,
+            opponent_category: p.host_category || p.match_category,
+            opponent_level: p.host_level || p.match_level,
+            opponent_firstname: p.host_firstname,
+            opponent_lastname: p.host_lastname,
+            opponent_phone: p.host_phone,
+            opponent_email: p.host_email,
+            opponent_club_colors: p.host_club_colors,
+            opponent_pitch_type: null,
+            // If organizer created match as 'away', organizer plays away, so participant plays at home.
+            // For tournaments, participant is always Away.
+            isUserHome: p.match_type === 'tournament' ? false : p.venue === 'Extérieur',
+        }));
+
+    const allConfirmedMatches = [...acceptedIncomingAsOrganizer, ...acceptedParticipations];
 
     const renderSubFilters = (current: 'all' | 'match' | 'tournament', onChange: (v: 'all' | 'match' | 'tournament') => void) => (
         <div className="flex gap-2 p-1 rounded-xl bg-default-100/50 w-fit">
@@ -233,6 +324,7 @@ export default function DashboardPage() {
             </Button>
         </div>
     );
+
 
     return (
         <DefaultLayout maxWidth="max-w-full">
@@ -267,15 +359,7 @@ export default function DashboardPage() {
                             {t('dashboard.subtitle')}
                         </p>
 
-                        <Button
-                            as={Link}
-                            to="/matches/new"
-                            size="lg"
-                            className="font-bold bg-linear-to-r from-orange-500 to-amber-500 text-white shadow-xl shadow-orange-500/30 rounded-2xl h-14 px-8 w-full sm:w-auto relative z-20 mt-2"
-                            startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" /></svg>}
-                        >
-                            {t('dashboard.controls.new')}
-                        </Button>
+
                     </div>
                 </div>
 
@@ -296,7 +380,7 @@ export default function DashboardPage() {
                             <div className="flex items-center space-x-2">
                                 <span>{t('dashboard.tabs.requests')}</span>
                                 {incomingRequests.filter(r => r.request_status === 'pending').length > 0 && (
-                                    <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1">
+                                    <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1 font-black">
                                         {incomingRequests.filter(r => r.request_status === 'pending').length}
                                     </Chip>
                                 )}
@@ -311,42 +395,99 @@ export default function DashboardPage() {
                                     <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
                                 ) : filteredRequests.length > 0 ? (
                                     filteredRequests.map((request, idx) => (
-                                        <Card key={idx} className={`bg-default-50/5 border ${request.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'} hover:bg-default-50/10 transition-colors`}>
-                                            <CardBody className="p-5 flex flex-col gap-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1">
-                                                        {request.requester_club_logo ? (
-                                                            <Image src={request.requester_club_logo} className="object-contain" />
-                                                        ) : (
-                                                            <span className="text-white font-black text-xl">{request.requester_club_name?.charAt(0)}</span>
+                                        <Card key={idx} className={`overflow-hidden border ${request.request_status === 'accepted' ? 'border-success/30 bg-success/5' : request.request_status === 'refused' ? 'border-danger/20 bg-danger/5' : 'border-orange-500/20 bg-linear-to-br from-orange-500/5 to-transparent'} hover:scale-[1.01] transition-all duration-200`}>
+                                            <CardBody className="p-0">
+                                                {/* Top accent bar */}
+                                                <div className={`h-1 w-full ${request.request_status === 'accepted' ? 'bg-success' : request.request_status === 'refused' ? 'bg-danger' : 'bg-linear-to-r from-orange-500 via-amber-400 to-orange-500'}`} />
+
+                                                <div className="p-5 flex flex-col gap-4">
+                                                    {/* Header: Club info + Status */}
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20 shrink-0">
+                                                            {request.requester_club_logo ? (
+                                                                <Image src={request.requester_club_logo} className="object-contain w-10 h-10" />
+                                                            ) : (
+                                                                <span className="text-orange-400 font-black text-2xl">{request.requester_club_name?.charAt(0)}</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="font-black text-white text-sm leading-tight truncate uppercase tracking-tight">{request.requester_club_name}</h3>
+                                                            <div className="flex items-center gap-1.5 mt-1">
+                                                                <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase">
+                                                                    {request.match_type === 'tournament' ? '🏆 TOURNOI' : '⚽ MATCH'}
+                                                                </Chip>
+                                                                <Chip size="sm" variant="flat" color={(request.match_type === 'tournament' || request.venue === 'Domicile') ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase grayscale-[0.5]">
+                                                                    {(request.match_type === 'tournament' || request.venue === 'Domicile') ? '🏠 Dom' : '✈️ Ext'}
+                                                                </Chip>
+                                                                <Chip size="sm" variant="dot" color="default" className="font-bold text-[9px] h-5 border-none">
+                                                                    {request.requester_category ? t(`enums.category.${request.requester_category}`) : (request.match_category ? t(`enums.category.${request.match_category}`) : '—')}
+                                                                </Chip>
+                                                            </div>
+                                                        </div>
+                                                        <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black uppercase text-[9px] shadow-sm">
+                                                            {t('dashboard.status.' + request.request_status)}
+                                                        </Chip>
+                                                    </div>
+                                                    {/* Quick Info: Responsable, Ville, Catégorie, Niveau */}
+                                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
+                                                        <div className="flex items-center gap-1 text-[9px] text-default-400">
+                                                            <span className="text-default-600">👤</span>
+                                                            <span className="truncate">{request.requester_firstname && request.requester_lastname ? `${request.requester_firstname} ${request.requester_lastname}` : 'Non renseigné'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 text-[9px] text-default-400">
+                                                            <span className="text-default-600">📍</span>
+                                                            <span className="truncate">{request.requester_city || request.location_city || 'Ville inconnue'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 text-[9px] text-default-400">
+                                                            <span className="text-default-600">🏅</span>
+                                                            <span>{request.requester_category ? t(`enums.category.${request.requester_category}`) : '—'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 text-[9px] text-default-400">
+                                                            <span className="text-default-600">🛡️</span>
+                                                            <span>{request.requester_level ? t(`enums.level.${request.requester_level}`) : '—'}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Match info banner */}
+                                                    <div className="bg-white/[0.03] rounded-xl p-3 border border-white/5">
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">Pour le {request.match_type === 'tournament' ? 'tournoi' : 'match'} du</span>
+                                                                <span className="text-sm font-black text-white mt-0.5">{formatDate(request.match_date)} à {formatTime(request.match_time)}</span>
+                                                            </div>
+                                                            {request.location_city && (
+                                                                <Chip size="sm" variant="flat" className="bg-white/5 text-default-400 text-[9px] font-bold">
+                                                                    📍 {request.location_city}
+                                                                </Chip>
+                                                            )}
+                                                        </div>
+                                                        {request.message && request.message !== 'Demande de participation envoyée via KduFoot' && (
+                                                            <p className="text-[11px] text-default-300 italic mt-2 line-clamp-2 border-t border-white/5 pt-2">"{request.message}"</p>
                                                         )}
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h3 className="font-bold text-white text-base leading-tight truncate">{request.requester_club_name}</h3>
-                                                        <p className="text-[10px] text-default-500 font-bold uppercase tracking-widest mt-0.5">
-                                                            {request.type === 'tournament' ? '🏆 Tournoi' : '⚽ Match'} • {t(`enums.category.${request.category}`)}
-                                                        </p>
-                                                    </div>
-                                                    <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
-                                                        {t('dashboard.status.' + request.request_status)}
-                                                    </Chip>
-                                                </div>
-                                                <div className="bg-white/5 rounded-lg p-3 space-y-2">
-                                                    <div className="flex justify-between items-center text-[10px] font-bold text-default-400">
-                                                        <span>POUR LE MATCH DU</span>
-                                                        <span className="text-white">{formatDate(request.match_date)} à {formatTime(request.match_time)}</span>
-                                                    </div>
-                                                    <p className="text-xs text-default-200 italic line-clamp-2">"{request.message || 'Aucun message'}"</p>
-                                                </div>
 
-                                                {request.request_status === 'pending' ? (
-                                                    <div className="flex gap-2">
-                                                        <Button size="sm" color="success" className="flex-1 font-black uppercase text-[10px] h-9 text-success-950" onPress={() => handleUpdateStatus(request.match_id, request.user_id, 'accepted')}>{t('dashboard.controls.accept')}</Button>
-                                                        <Button size="sm" variant="flat" color="danger" className="flex-1 font-black uppercase text-[10px] h-9" onPress={() => handleUpdateStatus(request.match_id, request.user_id, 'refused')}>{t('dashboard.controls.refuse')}</Button>
-                                                    </div>
-                                                ) : (
-                                                    <Button size="sm" variant="flat" className="w-full text-[10px] font-bold h-9" as={Link} to={`/matches/${request.match_id}`}>{t('dashboard.controls.view')}</Button>
-                                                )}
+                                                    {/* Action Buttons */}
+                                                    {request.request_status === 'pending' ? (
+                                                        <div className="flex flex-col gap-2">
+                                                            <div className="flex gap-2">
+                                                                <Button size="sm" color="success" className="flex-1 font-black uppercase text-[10px] h-10 shadow-md shadow-success/20" onPress={() => handleUpdateStatus(request.match_id, request.user_id, 'accepted')}>
+                                                                    ✓ {t('dashboard.controls.accept')}
+                                                                </Button>
+                                                                <Button size="sm" variant="flat" color="danger" className="flex-1 font-black uppercase text-[10px] h-10" onPress={() => handleUpdateStatus(request.match_id, request.user_id, 'refused')}>
+                                                                    ✕ {t('dashboard.controls.refuse')}
+                                                                </Button>
+                                                            </div>
+                                                            <Button size="sm" variant="bordered" color="secondary" className="w-full font-bold text-[10px] h-8 border-secondary/30 text-secondary" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>
+                                                                👤 Voir le profil du club
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex gap-2 w-full">
+                                                            <Button size="sm" variant="flat" className="flex-1 text-[10px] font-bold h-9" as={Link} to={`/matches/${request.match_id}`}>{t('dashboard.controls.view')}</Button>
+                                                            <Button size="sm" variant="bordered" color="secondary" className="flex-1 text-[10px] font-bold h-9 border-secondary/30" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>👤 Voir le profil</Button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </CardBody>
                                         </Card>
                                     ))
@@ -386,7 +527,10 @@ export default function DashboardPage() {
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{formatDate(match.match_date)}</span>
-                                                            <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] uppercase font-black">{match.status}</Chip>
+                                                            <Chip size="sm" variant="flat" color={(match.type === 'tournament' || match.venue === 'Domicile') ? 'primary' : 'warning'} className="h-4 text-[8px] uppercase font-black grayscale-[0.5]">
+                                                                {(match.type === 'tournament' || match.venue === 'Domicile') ? '🏠 Dom' : '✈️ Ext'}
+                                                            </Chip>
+                                                            <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[8px] uppercase font-black uppercase">{match.status}</Chip>
                                                         </div>
                                                         <h3 className="font-bold text-white truncate text-base mt-0.5">
                                                             {match.type === 'tournament' ? match.name : `vs ${match.club?.name || '??'}`}
@@ -455,17 +599,15 @@ export default function DashboardPage() {
                         title={
                             <div className="flex items-center space-x-2">
                                 <span>{t('dashboard.tabs.participations')}</span>
-                                {myParticipations.filter(p => p.notification_state === 1).length > 0 && (
-                                    <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1">
-                                        {myParticipations.filter(p => p.notification_state === 1).length}
+                                {filteredParticipations.filter(p => p.notification_state === 1).length > 0 && (
+                                    <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1 font-black">
+                                        {filteredParticipations.filter(p => p.notification_state === 1).length}
                                     </Chip>
                                 )}
                             </div>
                         }
                     >
                         <div className="flex flex-col gap-6 pt-6">
-                            {renderSubFilters(participationsSubFilter, setParticipationsSubFilter)}
-
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {isLoadingParticipations ? (
                                     <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
@@ -483,14 +625,45 @@ export default function DashboardPage() {
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <h3 className="font-bold text-white text-base leading-tight truncate">{part.host_club_name}</h3>
-                                                        <p className="text-[10px] text-default-500 font-bold uppercase tracking-widest mt-0.5">
-                                                            {part.type === 'tournament' ? '🏆 Tournoi' : '⚽ Match'} • {t(`enums.category.${part.category}`)}
-                                                        </p>
+                                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                                            <p className="text-[10px] text-default-500 font-bold uppercase tracking-widest">
+                                                                {part.type === 'tournament' ? '🏆 Tournoi' : '⚽ Match'} • {t(`enums.category.${part.category}`)}
+                                                            </p>
+                                                            <Chip size="sm" variant="flat" color={(part.type === 'tournament' || part.venue === 'Domicile') ? 'warning' : 'primary'} className="h-4 text-[8px] uppercase font-black grayscale-[0.5]">
+                                                                {(part.type === 'tournament' || part.venue === 'Domicile') ? '✈️ Ext' : '🏠 Dom'}
+                                                            </Chip>
+                                                        </div>
                                                     </div>
                                                     <Chip size="sm" color={part.request_status === 'accepted' ? 'success' : part.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
                                                         {t('dashboard.status.' + part.request_status)}
                                                     </Chip>
                                                 </div>
+
+                                                {/* Modification Alert */}
+                                                {part.notification_state === 1 && (
+                                                    <div className="bg-danger/10 border border-danger/20 rounded-xl p-3 flex flex-col gap-2 animate-pulse shadow-lg shadow-danger/5">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="bg-danger/20 p-1.5 rounded-lg">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-danger"><path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" /></svg>
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-[11px] font-black text-danger uppercase tracking-tight">Attention !</p>
+                                                                <p className="text-[10px] text-danger/90 font-bold leading-tight">
+                                                                    L'organisateur ({part.host_club_name}) a modifié les informations.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="flat"
+                                                            color="danger"
+                                                            className="h-7 text-[10px] font-black uppercase bg-danger/20 hover:bg-danger/30"
+                                                            onPress={() => markAsRead(part.match_id)}
+                                                        >
+                                                            J'ai compris, marquer comme lu
+                                                        </Button>
+                                                    </div>
+                                                )}
 
                                                 <div className="bg-white/5 rounded-xl p-4 space-y-3">
                                                     <div className="flex justify-between items-center text-[10px] font-black text-default-400 border-b border-white/5 pb-2">
@@ -529,24 +702,322 @@ export default function DashboardPage() {
                                 ) : (
                                     <div className="col-span-full py-8 text-center space-y-4">
                                         <p className="text-default-400 font-medium">
-                                            {participationsSubFilter === 'all' ? "Vous n'avez postulé à aucun match ni tournoi" : participationsSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
+                                            Vous n'avez postulé à aucun tournoi
                                         </p>
-                                        {participationsSubFilter === 'all' ? (
-                                            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                                                <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto">Rechercher un match</Button>
-                                                <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">Rechercher un tournoi</Button>
-                                            </div>
-                                        ) : (
-                                            <Button as={Link} to={participationsSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={participationsSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold w-full sm:w-auto ${participationsSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
-                                                {participationsSubFilter === 'tournament' ? "Rechercher un tournoi" : "Rechercher un match"}
-                                            </Button>
-                                        )}
+                                        <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">Rechercher un tournoi</Button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </Tab>
+
+                    <Tab
+                        key="confirmed_matches"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                <span>{t('dashboard.tabs.confirmed_matches')}</span>
+                                {allConfirmedMatches.length > 0 && (
+                                    <Chip size="sm" variant="solid" color="success" className="h-5 min-w-5 px-1">
+                                        {allConfirmedMatches.length}
+                                    </Chip>
+                                )}
+                            </div>
+                        }
+                    >
+                        <div className="flex flex-col gap-6 pt-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {(isLoadingIncoming || isLoadingParticipations) ? (
+                                    <div className="col-span-full flex justify-center py-12"><Spinner color="success" /></div>
+                                ) : allConfirmedMatches.length > 0 ? (
+                                    allConfirmedMatches.map((cm, idx) => (
+                                        <Card key={idx} className="overflow-hidden border border-success/20 bg-linear-to-br from-success/5 via-transparent to-emerald-500/5 hover:scale-[1.01] transition-all duration-200 shadow-lg shadow-success/5">
+                                            <CardBody className="p-0">
+                                                {/* Top bar */}
+                                                <div className="h-1.5 w-full bg-linear-to-r from-green-500 via-emerald-400 to-green-500" />
+
+                                                <div className="p-5 flex flex-col gap-4">
+                                                    {/* MATCH CONFIRMÉ Badge + Domicile/Extérieur */}
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <Chip size="sm" variant="solid" color="success" className="font-black text-[9px] uppercase shadow-sm">
+                                                                ✅ MATCH CONFIRMÉ
+                                                            </Chip>
+                                                            <Chip size="sm" variant="flat" color={cm.isUserHome ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 border-none">
+                                                                {cm.isUserHome ? '🏠 À Domicile' : '✈️ À l\'Extérieur'}
+                                                            </Chip>
+                                                        </div>
+                                                        <span className="text-[9px] font-bold text-default-400">
+                                                            {cm._source === 'organizer' ? 'Organisateur' : 'Participant'}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* VS Layout — Home first, Away second (like TV) */}
+                                                    <div className="bg-white/[0.03] rounded-2xl p-4 border border-white/5">
+                                                        <div className="flex items-center gap-2">
+                                                            {/* HOME Team (left) */}
+                                                            <div className="flex-1 flex flex-col items-center text-center min-w-0">
+                                                                <span className="text-[8px] font-bold text-default-500 uppercase tracking-widest mb-1">Domicile</span>
+                                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border shrink-0 ${cm.isUserHome ? 'bg-linear-to-br from-orange-500/20 to-amber-500/10 border-orange-500/20' : 'bg-linear-to-br from-green-500/20 to-emerald-500/10 border-green-500/20'}`}>
+                                                                    {cm.isUserHome ? (
+                                                                        dbUser?.club?.logo_url ? (
+                                                                            <Image src={dbUser.club.logo_url} className="object-contain w-8 h-8" />
+                                                                        ) : (
+                                                                            <span className="text-orange-400 font-black text-lg">{(dbUser?.club?.name || '?')?.charAt(0)}</span>
+                                                                        )
+                                                                    ) : (
+                                                                        cm.opponent_club_logo ? (
+                                                                            <Image src={cm.opponent_club_logo} className="object-contain w-8 h-8" />
+                                                                        ) : (
+                                                                            <span className="text-green-400 font-black text-lg">{cm.opponent_club_name?.charAt(0)}</span>
+                                                                        )
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-[9px] font-black text-white mt-1.5 w-full leading-tight line-clamp-2">
+                                                                    {cm.isUserHome ? (dbUser?.club?.name || 'Mon Club') : cm.opponent_club_name}
+                                                                </p>
+                                                            </div>
+
+                                                            {/* VS Badge */}
+                                                            <div className="shrink-0 flex flex-col items-center">
+                                                                <div className="w-10 h-10 rounded-full bg-linear-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30">
+                                                                    <span className="text-white font-black text-xs">VS</span>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* AWAY Team (right) */}
+                                                            <div className="flex-1 flex flex-col items-center text-center min-w-0">
+                                                                <span className="text-[8px] font-bold text-default-500 uppercase tracking-widest mb-1">Extérieur</span>
+                                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border shrink-0 ${!cm.isUserHome ? 'bg-linear-to-br from-orange-500/20 to-amber-500/10 border-orange-500/20' : 'bg-linear-to-br from-green-500/20 to-emerald-500/10 border-green-500/20'}`}>
+                                                                    {!cm.isUserHome ? ( // User is away => user is right side
+                                                                        dbUser?.club?.logo_url ? (
+                                                                            <Image src={dbUser.club.logo_url} className="object-contain w-8 h-8" />
+                                                                        ) : (
+                                                                            <span className="text-orange-400 font-black text-lg">{(dbUser?.club?.name || '?')?.charAt(0)}</span>
+                                                                        )
+                                                                    ) : ( // User is home => opponent is right side
+                                                                        cm.opponent_club_logo ? (
+                                                                            <Image src={cm.opponent_club_logo} className="object-contain w-8 h-8" />
+                                                                        ) : (
+                                                                            <span className="text-green-400 font-black text-lg">{cm.opponent_club_name?.charAt(0)}</span>
+                                                                        )
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-[9px] font-black text-white mt-1.5 w-full leading-tight line-clamp-2">
+                                                                    {!cm.isUserHome ? (dbUser?.club?.name || 'Mon Club') : cm.opponent_club_name}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Category + Level chips */}
+                                                        <div className="flex items-center justify-center gap-1.5 mt-3">
+                                                            {cm.opponent_category && (
+                                                                <Chip size="sm" variant="flat" color="success" className="font-bold text-[9px] h-5 px-1.5">
+                                                                    {t(`enums.category.${cm.opponent_category}`)}
+                                                                </Chip>
+                                                            )}
+                                                            {cm.opponent_level && (
+                                                                <Chip size="sm" variant="dot" color="default" className="font-bold text-[9px] h-5 border-none">
+                                                                    {t(`enums.level.${cm.opponent_level}`)}
+                                                                </Chip>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Match Date & Location */}
+                                                    <div className="bg-white/[0.03] rounded-xl p-3 border border-white/5">
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">📅 Date du match</span>
+                                                                <span className="text-sm font-black text-white mt-0.5">{formatDate(cm.match_date)} à {formatTime(cm.match_time)}</span>
+                                                            </div>
+                                                            {cm.location_city && (
+                                                                <Chip size="sm" variant="flat" className="bg-white/5 text-default-400 text-[9px] font-bold">
+                                                                    📍 {cm.location_city}
+                                                                </Chip>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Contact Info — Unlocked */}
+                                                    <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5 space-y-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
+                                                                <span className="text-[10px]">🔓</span>
+                                                            </div>
+                                                            <span className="text-[10px] font-black text-success uppercase tracking-wider">Coordonnées débloquées</span>
+                                                        </div>
+
+                                                        {/* Responsable Name */}
+                                                        {(cm.opponent_firstname || cm.opponent_lastname) && (
+                                                            <div className="flex justify-between items-center text-xs">
+                                                                <span className="text-default-500 font-bold">👤 Responsable</span>
+                                                                <span className="text-white font-bold">{cm.opponent_firstname} {cm.opponent_lastname}</span>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Phone */}
+                                                        {cm.opponent_phone && (
+                                                            <div className="flex justify-between items-center text-xs">
+                                                                <span className="text-default-500 font-bold">📞 N° du responsable</span>
+                                                                <a href={`tel:${cm.opponent_phone}`} className="text-success font-black hover:underline">
+                                                                    {cm.opponent_phone}
+                                                                </a>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Email */}
+                                                        {cm.opponent_email && (
+                                                            <div className="flex justify-between items-center text-xs gap-2">
+                                                                <span className="text-default-500 font-bold shrink-0">✉️ Email</span>
+                                                                <a href={`mailto:${cm.opponent_email}`} className="text-primary font-black hover:underline truncate">
+                                                                    {cm.opponent_email}
+                                                                </a>
+                                                            </div>
+                                                        )}
+
+                                                        {/* City */}
+                                                        {cm.opponent_city && (
+                                                            <div className="flex justify-between items-center text-xs">
+                                                                <span className="text-default-500 font-bold">📍 Ville</span>
+                                                                <span className="text-white font-bold">{cm.opponent_city}</span>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Club Colors */}
+                                                        {cm.opponent_club_colors && (
+                                                            <div className="flex justify-between items-center text-xs">
+                                                                <span className="text-default-500 font-bold">👕 Couleurs maillots</span>
+                                                                <span className="text-white font-bold">{cm.opponent_club_colors}</span>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Address — Google Maps link (Only for AWAY team) */}
+                                                        {!cm.isUserHome && cm.location_address && (
+                                                            <div className="flex justify-between items-center text-xs gap-2">
+                                                                <span className="text-default-500 font-bold shrink-0">🏟️ Adresse</span>
+                                                                <a
+                                                                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(cm.location_address + (cm.location_zip ? ' ' + cm.location_zip : '') + (cm.location_city ? ' ' + cm.location_city : ''))}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-warning font-black hover:underline truncate"
+                                                                    title="Ouvrir l'itinéraire dans Google Maps"
+                                                                >
+                                                                    {cm.location_address}{cm.location_zip ? `, ${cm.location_zip}` : ''} 📍
+                                                                </a>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <Button size="sm" variant="flat" className="w-full text-[10px] font-bold h-9 bg-success/10 text-success" as={Link} to={`/matches/${cm.match_id}`}>
+                                                        ⚽ Voir les détails du match
+                                                    </Button>
+                                                </div>
+                                            </CardBody>
+                                        </Card>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full py-8 text-center space-y-4">
+                                        <div className="w-16 h-16 bg-success/5 rounded-full flex items-center justify-center mx-auto">
+                                            <span className="text-3xl">⚽</span>
+                                        </div>
+                                        <p className="text-default-400 font-medium">
+                                            Aucun match confirmé pour le moment
+                                        </p>
+                                        <p className="text-[11px] text-default-500">
+                                            Les matchs apparaîtront ici lorsque des demandes seront acceptées.
+                                        </p>
                                     </div>
                                 )}
                             </div>
                         </div>
                     </Tab>
                 </Tabs>
+
+                {/* Profile Modal */}
+                <Modal isOpen={isProfileOpen} onOpenChange={onProfileChange} backdrop="blur">
+                    <ModalContent className="bg-[#1a1a1c] border border-white/10">
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Profil du Club Demandeur</ModalHeader>
+                                <ModalBody>
+                                    {selectedClubProfile ? (
+                                        <div className="flex flex-col items-center gap-4 py-4">
+                                            {/* Club Logo / Initial */}
+                                            <div className="w-24 h-24 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-lg text-white font-bold text-4xl">
+                                                {selectedClubProfile.requester_club_logo ? (
+                                                    <Image src={selectedClubProfile.requester_club_logo} className="w-full h-full object-contain rounded-full" />
+                                                ) : (
+                                                    selectedClubProfile.requester_club_name?.charAt(0)
+                                                )}
+                                            </div>
+
+                                            {/* Club Name */}
+                                            <div className="text-center space-y-1">
+                                                <h3 className="font-black text-xl text-white">{selectedClubProfile.requester_club_name || 'Club inconnu'}</h3>
+                                            </div>
+
+                                            {/* Info Grid */}
+                                            <div className="bg-default-100/5 p-4 rounded-xl border border-default-100/10 w-full mt-2 space-y-3">
+                                                {/* Responsable (Coach Name) */}
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-default-500 font-bold uppercase tracking-wider">Responsable</span>
+                                                    <span className="text-white font-bold">
+                                                        {selectedClubProfile.requester_firstname && selectedClubProfile.requester_lastname
+                                                            ? `${selectedClubProfile.requester_firstname} ${selectedClubProfile.requester_lastname}`
+                                                            : selectedClubProfile.requester_firstname || selectedClubProfile.requester_lastname || 'Non renseigné'}
+                                                    </span>
+                                                </div>
+                                                {/* City */}
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-default-500 font-bold uppercase tracking-wider">Ville</span>
+                                                    <span className="text-white font-bold">{selectedClubProfile.requester_city || selectedClubProfile.location_city || 'Non renseignée'}</span>
+                                                </div>
+                                                {/* Category */}
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-default-500 font-bold uppercase tracking-wider">Catégorie</span>
+                                                    <span className="text-white font-bold">
+                                                        {selectedClubProfile.requester_category
+                                                            ? t(`enums.category.${selectedClubProfile.requester_category}`)
+                                                            : 'Non renseignée'}
+                                                    </span>
+                                                </div>
+                                                {/* Level */}
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-default-500 font-bold uppercase tracking-wider">Niveau</span>
+                                                    <span className="text-white font-bold">
+                                                        {selectedClubProfile.requester_level
+                                                            ? t(`enums.level.${selectedClubProfile.requester_level}`)
+                                                            : 'Non renseigné'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Request Details */}
+                                            <div className="bg-default-100/5 p-4 rounded-xl border border-default-100/10 w-full space-y-2">
+                                                <p className="text-[10px] text-default-400 font-bold uppercase tracking-wider">Demande envoyée</p>
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-default-500">Date</span>
+                                                    <span className="text-white font-bold">{formatTimestamp(selectedClubProfile.contacted_at)} à {formatTimestampTime(selectedClubProfile.contacted_at)}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-default-500">Pour le {selectedClubProfile.match_type === 'tournament' ? 'tournoi' : 'match'} du</span>
+                                                    <span className="text-warning-500 font-bold">{formatDate(selectedClubProfile.match_date)} à {formatTime(selectedClubProfile.match_time)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex justify-center p-8"><Spinner /></div>
+                                    )}
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="secondary" onPress={onClose} className="font-black uppercase tracking-tighter w-full">
+                                        Fermer
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                </Modal>
             </section>
         </DefaultLayout>
     );
