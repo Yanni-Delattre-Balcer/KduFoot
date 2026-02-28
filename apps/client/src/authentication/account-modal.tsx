@@ -38,6 +38,47 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
     const [siret, setSiret] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+    const formatPhoneNumber = (value: string) => {
+        let raw = value.replace(/\D/g, '');
+        if (raw.length > 0 && !raw.startsWith('33')) {
+            if (raw.startsWith('0')) raw = '33' + raw.substring(1);
+            else raw = '33' + raw;
+        }
+        if (raw.length > 11) raw = raw.substring(0, 11);
+
+        let formatted = '';
+        if (raw.length > 0) formatted += '+';
+        if (raw.length > 0) formatted += raw.substring(0, 2);
+        if (raw.length > 2) formatted += ' ' + raw.substring(2, 3);
+        if (raw.length > 3) formatted += ' ' + raw.substring(3, 5);
+        if (raw.length > 5) formatted += ' ' + raw.substring(5, 7);
+        if (raw.length > 7) formatted += ' ' + raw.substring(7, 9);
+        if (raw.length > 9) formatted += ' ' + raw.substring(9, 11);
+
+        return formatted;
+    };
+
+    const handlePhoneChange = (v: string) => {
+        setPhone(formatPhoneNumber(v));
+    };
+
+    const formatSiret = (value: string) => {
+        let raw = value.replace(/\D/g, '');
+        if (raw.length > 14) raw = raw.substring(0, 14);
+
+        // Format: XXX XXX XXX XXXXX
+        let formatted = '';
+        for (let i = 0; i < raw.length; i++) {
+            if (i === 3 || i === 6 || i === 9) formatted += ' ';
+            formatted += raw[i];
+        }
+        return formatted;
+    };
+
+    const handleSiretChange = (v: string) => {
+        setSiret(formatSiret(v));
+    };
+
     // Load face-api models on mount
     useEffect(() => {
         const loadModels = async () => {
@@ -57,12 +98,13 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             setCategory(dbUser.category || "");
             setPitchType(dbUser.pitch_type || "");
             setClubColors(dbUser.club_colors || "");
-            setPhone(dbUser.phone || "");
-            setSiret(dbUser.siret || "");
+            setPhone(formatPhoneNumber(dbUser.phone || ""));
+            setSiret(formatSiret(dbUser.siret || ""));
         }
     }, [dbUser]);
 
     if (!authUser) return null;
+
 
     const handleAvatarClick = () => {
         fileInputRef.current?.click();
@@ -99,6 +141,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             setIsAnalyzing(false);
         }
     };
+
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -234,8 +277,8 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                                 variant="bordered"
                                                 size="sm"
                                                 value={phone}
-                                                onValueChange={setPhone}
-                                                placeholder="06 12 34 56 78"
+                                                onValueChange={handlePhoneChange}
+                                                placeholder="+33 6 12 34 56 78"
                                                 className="mt-2"
                                             />
                                             <Input
@@ -323,8 +366,8 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                                         variant="bordered"
                                                         size="sm"
                                                         value={siret}
-                                                        onValueChange={setSiret}
-                                                        placeholder="EX: 123 456 789 00012"
+                                                        onValueChange={handleSiretChange}
+                                                        placeholder="123 456 789 00012"
                                                         isDisabled={!!dbUser?.club_id}
                                                         className="flex-1"
                                                     />

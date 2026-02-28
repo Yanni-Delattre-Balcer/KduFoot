@@ -395,7 +395,7 @@ export default function DashboardPage() {
                                     <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
                                 ) : filteredRequests.length > 0 ? (
                                     filteredRequests.map((request, idx) => (
-                                        <Card key={idx} className={`overflow-hidden border ${request.request_status === 'accepted' ? 'border-success/30 bg-success/5' : request.request_status === 'refused' ? 'border-danger/20 bg-danger/5' : 'border-orange-500/20 bg-linear-to-br from-orange-500/5 to-transparent'} hover:scale-[1.01] transition-all duration-200`}>
+                                        <Card key={idx} className={`overflow-hidden border ${request.request_status === 'accepted' ? 'border-success/30 bg-success/5' : request.request_status === 'refused' ? 'border-danger/20 bg-danger/5' : 'border-orange-500/20 bg-linear-to-br from-orange-500/5 to-transparent'} md:hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shadow-sm hover:shadow-md`}>
                                             <CardBody className="p-0">
                                                 {/* Top accent bar */}
                                                 <div className={`h-1 w-full ${request.request_status === 'accepted' ? 'bg-success' : request.request_status === 'refused' ? 'bg-danger' : 'bg-linear-to-r from-orange-500 via-amber-400 to-orange-500'}`} />
@@ -469,11 +469,22 @@ export default function DashboardPage() {
                                                     {/* Action Buttons */}
                                                     {request.request_status === 'pending' ? (
                                                         <div className="flex flex-col gap-2">
-                                                            <div className="flex gap-2">
-                                                                <Button size="sm" color="success" className="flex-1 font-black uppercase text-[10px] h-10 shadow-md shadow-success/20" onPress={() => handleUpdateStatus(request.match_id, request.user_id, 'accepted')}>
+                                                            <div className="flex gap-2 relative z-10">
+                                                                <Button
+                                                                    size="sm"
+                                                                    color="success"
+                                                                    className="flex-1 font-black uppercase text-[11px] h-12 shadow-md shadow-success/20 active:scale-95"
+                                                                    onPress={(e) => { e.continuePropagation(); handleUpdateStatus(request.match_id, request.user_id, 'accepted'); }}
+                                                                >
                                                                     ✓ {t('dashboard.controls.accept')}
                                                                 </Button>
-                                                                <Button size="sm" variant="flat" color="danger" className="flex-1 font-black uppercase text-[10px] h-10" onPress={() => handleUpdateStatus(request.match_id, request.user_id, 'refused')}>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="flat"
+                                                                    color="danger"
+                                                                    className="flex-1 font-black uppercase text-[11px] h-12 active:scale-95"
+                                                                    onPress={(e) => { e.continuePropagation(); handleUpdateStatus(request.match_id, request.user_id, 'refused'); }}
+                                                                >
                                                                     ✕ {t('dashboard.controls.refuse')}
                                                                 </Button>
                                                             </div>
@@ -514,7 +525,7 @@ export default function DashboardPage() {
                                     <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
                                 ) : filteredOrganized.length > 0 ? (
                                     filteredOrganized.map((match) => (
-                                        <Card key={match.id} as={Link} to={`/matches/${match.id}`} className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group">
+                                        <Card key={match.id} as={Link} to={`/matches/${match.id}`} className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group md:hover:scale-[1.01] active:scale-[0.99]">
                                             <CardBody className="p-5 flex flex-col gap-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:rotate-6 ${match.type === 'tournament' ? 'bg-purple-500/20 text-purple-400' : 'bg-orange-500/20 text-orange-500'}`}>
@@ -545,7 +556,8 @@ export default function DashboardPage() {
                                                                 to={`/matches/${match.id}/edit`}
                                                                 size="sm"
                                                                 variant="flat"
-                                                                className="flex-1 font-bold text-[10px] h-8 bg-amber-500/10 text-amber-500"
+                                                                className="flex-1 font-bold text-[10px] h-10 bg-amber-500/10 text-amber-500 active:scale-95"
+                                                                onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 Modifier
                                                             </Button>
@@ -553,10 +565,11 @@ export default function DashboardPage() {
                                                                 size="sm"
                                                                 variant="flat"
                                                                 color="danger"
-                                                                className="h-8 font-bold text-[10px]"
+                                                                className="h-10 font-bold text-[10px] active:scale-95"
                                                                 onPress={() => {
                                                                     handleDeleteMatch(match.id, match.match_date, match.match_time);
                                                                 }}
+                                                                onClick={(e) => e.stopPropagation()}
                                                                 isLoading={isSaving}
                                                             >
                                                                 Supprimer

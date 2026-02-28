@@ -431,7 +431,8 @@
   "accountModal": {
     "alerts": {
       "update_success": "Votre profil a été mis à jour avec succès !",
-      "update_error": "Une erreur est survenue lors de la mise à jour de votre profil."
+      "update_error": "Une erreur est survenue lors de la mise à jour de votre profil.",
+      "club_linked_success": "Club certifié avec succès !"
     }
   },
   "tournamentForm": {

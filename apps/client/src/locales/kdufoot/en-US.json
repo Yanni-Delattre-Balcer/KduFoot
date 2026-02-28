@@ -398,6 +398,13 @@
       "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future."
     }
   },
+  "accountModal": {
+    "alerts": {
+      "update_success": "Your profile has been successfully updated!",
+      "update_error": "An error occurred while updating your profile.",
+      "club_linked_success": "Club successfully certified!"
+    }
+  },
   "tournamentForm": {
     "title": "Create a Friendly Tournament",
     "subtitle": "Organize a competition and invite teams.",
