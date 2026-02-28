@@ -367,11 +367,12 @@ export default function DashboardPage() {
                     aria-label="Dashboard Options"
                     color="warning"
                     variant="underlined"
+                    className="w-full"
                     classNames={{
-                        tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-                        cursor: "w-full bg-orange-500",
-                        tab: "max-w-fit px-0 h-12",
-                        tabContent: "group-data-[selected=true]:text-orange-500 font-bold uppercase tracking-widest text-xs"
+                        tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full overflow-x-auto no-scrollbar border-b-0 gap-3",
+                        cursor: "rounded-xl shadow-lg shadow-orange-500/20",
+                        tab: "h-11 sm:h-12 uppercase font-black tracking-tight text-[10px] sm:text-xs min-w-[max-content] flex-none px-4",
+                        tabContent: "group-data-[selected=true]:text-white whitespace-nowrap"
                     }}
                 >
                     <Tab
@@ -395,7 +396,7 @@ export default function DashboardPage() {
                                     <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
                                 ) : filteredRequests.length > 0 ? (
                                     filteredRequests.map((request, idx) => (
-                                        <Card key={idx} className={`overflow-hidden border ${request.request_status === 'accepted' ? 'border-success/30 bg-success/5' : request.request_status === 'refused' ? 'border-danger/20 bg-danger/5' : 'border-orange-500/20 bg-linear-to-br from-orange-500/5 to-transparent'} md:hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shadow-sm hover:shadow-md`}>
+                                        <Card key={idx} className={`overflow-hidden border ${request.request_status === 'accepted' ? 'border-success/30 bg-success/5' : request.request_status === 'refused' ? 'border-danger/20 bg-danger/5' : 'border-orange-500/20 bg-linear-to-br from-orange-500/5 to-transparent'} md:hover:scale-[1.01] transition-all duration-200 shadow-sm hover:shadow-md`}>
                                             <CardBody className="p-0">
                                                 {/* Top accent bar */}
                                                 <div className={`h-1 w-full ${request.request_status === 'accepted' ? 'bg-success' : request.request_status === 'refused' ? 'bg-danger' : 'bg-linear-to-r from-orange-500 via-amber-400 to-orange-500'}`} />
@@ -468,13 +469,13 @@ export default function DashboardPage() {
 
                                                     {/* Action Buttons */}
                                                     {request.request_status === 'pending' ? (
-                                                        <div className="flex flex-col gap-2">
-                                                            <div className="flex gap-2 relative z-10">
+                                                        <div className="flex flex-col gap-2 relative z-20">
+                                                            <div className="flex flex-col sm:flex-row gap-2">
                                                                 <Button
                                                                     size="sm"
                                                                     color="success"
-                                                                    className="flex-1 font-black uppercase text-[11px] h-12 shadow-md shadow-success/20 active:scale-95"
-                                                                    onPress={(e) => { e.continuePropagation(); handleUpdateStatus(request.match_id, request.user_id, 'accepted'); }}
+                                                                    className="w-full sm:flex-1 font-black uppercase text-[11px] h-12 shadow-md shadow-success/20 active:scale-95"
+                                                                    onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'accepted'); }}
                                                                 >
                                                                     ✓ {t('dashboard.controls.accept')}
                                                                 </Button>
@@ -482,20 +483,26 @@ export default function DashboardPage() {
                                                                     size="sm"
                                                                     variant="flat"
                                                                     color="danger"
-                                                                    className="flex-1 font-black uppercase text-[11px] h-12 active:scale-95"
-                                                                    onPress={(e) => { e.continuePropagation(); handleUpdateStatus(request.match_id, request.user_id, 'refused'); }}
+                                                                    className="w-full sm:flex-1 font-black uppercase text-[11px] h-12 active:scale-95"
+                                                                    onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'refused'); }}
                                                                 >
                                                                     ✕ {t('dashboard.controls.refuse')}
                                                                 </Button>
                                                             </div>
-                                                            <Button size="sm" variant="bordered" color="secondary" className="w-full font-bold text-[10px] h-8 border-secondary/30 text-secondary" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="bordered"
+                                                                color="secondary"
+                                                                className="w-full font-bold text-[11px] h-11 border-secondary/30 text-secondary active:scale-95"
+                                                                onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}
+                                                            >
                                                                 👤 Voir le profil du club
                                                             </Button>
                                                         </div>
                                                     ) : (
-                                                        <div className="flex gap-2 w-full">
-                                                            <Button size="sm" variant="flat" className="flex-1 text-[10px] font-bold h-9" as={Link} to={`/matches/${request.match_id}`}>{t('dashboard.controls.view')}</Button>
-                                                            <Button size="sm" variant="bordered" color="secondary" className="flex-1 text-[10px] font-bold h-9 border-secondary/30" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>👤 Voir le profil</Button>
+                                                        <div className="flex flex-col sm:flex-row gap-2 w-full relative z-20">
+                                                            <Button size="sm" variant="flat" className="w-full sm:flex-1 text-[11px] font-bold h-11 active:scale-95" as={Link} to={`/matches/${request.match_id}`} onClick={(e) => e.stopPropagation()}>{t('dashboard.controls.view')}</Button>
+                                                            <Button size="sm" variant="bordered" color="secondary" className="w-full sm:flex-1 text-[11px] font-bold h-11 border-secondary/30 active:scale-95" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>👤 Voir le profil</Button>
                                                         </div>
                                                     )}
                                                 </div>
@@ -550,13 +557,13 @@ export default function DashboardPage() {
                                                 </div>
                                                 <div className="flex gap-2 mt-2">
                                                     {!isTooLate(match.match_date, match.match_time) ? (
-                                                        <>
+                                                        <div className="flex flex-col sm:flex-row gap-2 w-full">
                                                             <Button
                                                                 as={Link}
                                                                 to={`/matches/${match.id}/edit`}
                                                                 size="sm"
                                                                 variant="flat"
-                                                                className="flex-1 font-bold text-[10px] h-10 bg-amber-500/10 text-amber-500 active:scale-95"
+                                                                className="w-full sm:flex-1 font-bold text-[11px] h-11 bg-amber-500/10 text-amber-500 active:scale-95"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 Modifier
@@ -565,7 +572,7 @@ export default function DashboardPage() {
                                                                 size="sm"
                                                                 variant="flat"
                                                                 color="danger"
-                                                                className="h-10 font-bold text-[10px] active:scale-95"
+                                                                className="w-full sm:flex-1 h-11 font-bold text-[11px] active:scale-95"
                                                                 onPress={() => {
                                                                     handleDeleteMatch(match.id, match.match_date, match.match_time);
                                                                 }}
@@ -574,7 +581,7 @@ export default function DashboardPage() {
                                                             >
                                                                 Supprimer
                                                             </Button>
-                                                        </>
+                                                        </div>
                                                     ) : (
                                                         <div className="flex-1 py-1 text-center border border-dashed border-danger/30 rounded-lg bg-danger/5">
                                                             <p className="text-[10px] font-bold text-danger leading-tight uppercase italic px-2">

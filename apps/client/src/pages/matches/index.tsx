@@ -179,7 +179,7 @@ export default function MatchesPage() {
                                 {uiConfig.title}
                             </h1>
                         </div>
-                        <p className="text-default-500 text-lg max-w-lg">
+                        <p className="text-default-500 text-sm md:text-lg max-w-lg">
                             {view === 'find' ? uiConfig.desc_find : uiConfig.desc_create}
                         </p>
 
@@ -207,35 +207,25 @@ export default function MatchesPage() {
                             </div>
 
                             {/* Secondary Selector: Find vs Create */}
-                            <div className="flex flex-wrap justify-center gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm">
-                                <Button
-                                    color={view === 'find' ? "default" : "default"}
-                                    variant={view === 'find' ? "shadow" : "light"}
-                                    onPress={() => setView('find')}
-                                    size="lg"
-                                    className={view === 'find' ? (type === 'match' ? "font-bold bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "font-bold bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : ""}
-                                    startContent={
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                        </svg>
-                                    }
+                            <div className="flex flex-col sm:flex-row justify-center gap-3 p-1 rounded-2xl bg-default-100/50 backdrop-blur-sm w-full sm:w-auto">
+                                <button
+                                    onClick={() => setView('find')}
+                                    className={`flex items-center justify-center gap-2 py-3 px-6 rounded-xl transition-all ${view === 'find' ? (type === 'match' ? "font-bold bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40 scale-[1.02]" : "font-bold bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40 scale-[1.02]") : "text-default-500 hover:bg-default-200"}`}
                                 >
-                                    {type === 'match' ? t('match.find') : t('match.find_tournament')}
-                                </Button>
-                                <Button
-                                    color={view === 'create' ? "default" : "default"}
-                                    variant={view === 'create' ? "shadow" : "light"}
-                                    onPress={() => setView('create')}
-                                    size="lg"
-                                    className={view === 'create' ? (type === 'match' ? "font-bold bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "font-bold bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : ""}
-                                    startContent={
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                        </svg>
-                                    }
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    </svg>
+                                    <span className="whitespace-nowrap">{type === 'match' ? t('match.find') : t('match.find_tournament')}</span>
+                                </button>
+                                <button
+                                    onClick={() => setView('create')}
+                                    className={`flex items-center justify-center gap-2 py-3 px-6 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "font-bold bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40 scale-[1.02]" : "font-bold bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40 scale-[1.02]") : "text-default-500 hover:bg-default-200"}`}
                                 >
-                                    {type === 'match' ? t('match.create') : t('match.create_tournament')}
-                                </Button>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                    </svg>
+                                    <span className="whitespace-nowrap">{type === 'match' ? t('match.create') : t('match.create_tournament')}</span>
+                                </button>
                             </div>
                         </div>
                     </div>

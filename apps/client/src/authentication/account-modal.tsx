@@ -202,8 +202,9 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             onOpenChange={onOpenChange}
             backdrop="blur"
             size="md"
+            scrollBehavior="inside"
             classNames={{
-                base: "bg-background border border-default-100",
+                base: "bg-background border border-default-100 mx-2",
                 header: "border-b border-default-100",
                 footer: "border-t border-default-100 font-bold",
             }}
@@ -212,7 +213,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                 {(onClose) => (
                     <>
                         <ModalHeader className="flex flex-col gap-1">Mon Compte</ModalHeader>
-                        <ModalBody className="py-6 overflow-y-auto max-h-[70vh]">
+                        <ModalBody className="py-6 overflow-y-auto">
                             <div className="flex flex-col items-center gap-6">
                                 {/* Invisible File Input */}
                                 <input
@@ -360,7 +361,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                             </div>
 
                                             <div className="flex flex-col gap-2">
-                                                <div className="flex gap-2 items-start">
+                                                <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start">
                                                     <Input
                                                         label="Numéro de SIRET"
                                                         variant="bordered"
@@ -375,7 +376,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                                         <Button
                                                             color="primary"
                                                             size="sm"
-                                                            className="h-12 font-bold px-4"
+                                                            className="h-12 font-bold px-4 w-full sm:w-auto"
                                                             onPress={handleLinkSiret}
                                                             isLoading={isSaving}
                                                         >
@@ -408,15 +409,15 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                 </div>
                             </div>
                         </ModalBody>
-                        <ModalFooter className="flex justify-between">
-                            <Button color="danger" variant="light" onPress={onClose} className="font-bold">
+                        <ModalFooter className="flex flex-col sm:flex-row gap-2">
+                            <Button color="danger" variant="light" onPress={onClose} className="font-bold w-full sm:w-auto order-2 sm:order-1">
                                 Fermer
                             </Button>
                             <Button
                                 color="primary"
                                 onPress={handleSave}
                                 isLoading={isSaving}
-                                className="font-bold px-8 shadow-lg shadow-primary/30"
+                                className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto order-1 sm:order-2"
                             >
                                 Enregistrer les modifications
                             </Button>
