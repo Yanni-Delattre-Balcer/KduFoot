@@ -25,7 +25,7 @@ interface AccountModalProps {
 export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
     const { t } = useTranslation();
     const { user: authUser } = useAuth();
-    const { user: dbUser, updateUser } = useUser();
+    const { user: dbUser, updateUser, linkClub } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -34,6 +34,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
     const [category, setCategory] = useState("");
     const [pitchType, setPitchType] = useState("");
     const [clubColors, setClubColors] = useState("");
+    const [siret, setSiret] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     // Load face-api models on mount
@@ -55,6 +56,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             setCategory(dbUser.category || "");
             setPitchType(dbUser.pitch_type || "");
             setClubColors(dbUser.club_colors || "");
+            setSiret(dbUser.siret || "");
         }
     }, [dbUser]);
 
@@ -99,6 +101,15 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
     const handleSave = async () => {
         setIsSaving(true);
         try {
+            // SIRET is now handled by dedicated button, but we keep a check here for safety
+            const cleanSiret = siret.replace(/\s/g, '').trim();
+            if (cleanSiret && cleanSiret !== dbUser?.siret && !dbUser?.club_id) {
+                if (cleanSiret.length !== 14) {
+                    throw new Error(t('matchForm.alerts.siret_length', 'Le SIRET doit contenir exactement 14 chiffres'));
+                }
+                await linkClub(cleanSiret);
+            }
+
             await updateUser({
                 license_id: licenseId,
                 level,
@@ -112,6 +123,23 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
         } catch (error: any) {
             console.error("Update profile error:", error);
             addToast({ title: t('error.title'), description: error.message || t('accountModal.alerts.update_error', 'Erreur de mise à jour'), variant: 'flat', color: 'danger' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    const handleLinkSiret = async () => {
+        const cleanSiret = siret.replace(/\s/g, '').trim();
+        if (cleanSiret.length !== 14) {
+            addToast({ title: t('error.title'), description: t('matchForm.alerts.siret_length'), variant: 'flat', color: 'danger' });
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await linkClub(cleanSiret);
+            addToast({ title: t('success'), description: t('accountModal.alerts.club_linked_success', 'Club certifié avec succès'), variant: 'flat', color: 'success' });
+        } catch (error: any) {
+            addToast({ title: t('error.title'), description: error.message, variant: 'flat', color: 'danger' });
         } finally {
             setIsSaving(false);
         }
@@ -261,11 +289,6 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                                 ))}
                                             </Select>
                                             <Input
-                                                label="Couleurs du club"
-                                                variant="bordered"
-                                                size="sm"
-                                                value={clubColors}
-                                                onValueChange={setClubColors}
                                                 placeholder="Rouge et Noir..."
                                             />
                                         </div>
@@ -279,7 +302,44 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                                 <span className="text-default-500">Club actuel</span>
                                                 <span className="font-bold text-primary">{dbUser?.club?.name || "Aucun club lié"}</span>
                                             </div>
-                                            <div className="flex justify-between items-center text-sm">
+
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex gap-2 items-start">
+                                                    <Input
+                                                        label="Numéro de SIRET"
+                                                        variant="bordered"
+                                                        size="sm"
+                                                        value={siret}
+                                                        onValueChange={setSiret}
+                                                        placeholder="EX: 123 456 789 00012"
+                                                        isDisabled={!!dbUser?.club_id}
+                                                        className="flex-1"
+                                                    />
+                                                    {!dbUser?.club_id && (
+                                                        <Button
+                                                            color="primary"
+                                                            size="sm"
+                                                            className="h-12 font-bold px-4"
+                                                            onPress={handleLinkSiret}
+                                                            isLoading={isSaving}
+                                                        >
+                                                            VALIDER MON CLUB
+                                                        </Button>
+                                                    )}
+                                                </div>
+
+                                                {/* Security Warning */}
+                                                <div className="p-3 rounded-xl bg-warning/10 border border-warning/20 space-y-2">
+                                                    <p className="text-[11px] leading-tight text-warning-700 font-medium">
+                                                        ⚠️ <strong>Attention :</strong> Une fois le SIRET validé et le club lié à votre compte, cette action est <strong>irréversible</strong>.
+                                                    </p>
+                                                    <p className="text-[10px] leading-tight text-default-500 italic">
+                                                        Pour toute modification ultérieure (changement de club ou erreur de saisie), vous devrez contacter le support technique.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-between items-center text-sm pt-2">
                                                 <span className="text-default-500">Ville</span>
                                                 <span className="font-medium">{dbUser?.club?.city || dbUser?.location || "Non renseigné"}</span>
                                             </div>

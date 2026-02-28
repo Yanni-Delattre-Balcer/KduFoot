@@ -22,30 +22,9 @@ const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilis�
 export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFormProps) {
     const { t } = useTranslation();
     const { createMatch, updateMatch } = useMatches();
-    const { user, linkClub, unlinkClub, updateUser } = useUser();
+    const { user, unlinkClub, updateUser } = useUser();
     const { user: auth0User } = useAuth0();
     const [isSaving, setIsSaving] = useState(false);
-    const [siret, setSiret] = useState('');
-    const [isLinking, setIsLinking] = useState(false);
-
-    const handleLinkClub = async () => {
-        const cleanSiret = siret.replace(/\s/g, '').trim();
-        if (!cleanSiret || cleanSiret.length !== 14) {
-            addToast({ title: t('error', 'Erreur'), description: t('matchForm.alerts.siret_length', 'Le SIRET doit contenir exactement 14 chiffres'), variant: 'flat', color: 'danger' });
-            return;
-        }
-        const confirmed = confirm(t('matchForm.alerts.link_confirm'));
-        if (!confirmed) return;
-        setIsLinking(true);
-        try {
-            await linkClub(cleanSiret);
-            addToast({ title: t('success'), description: t('matchForm.alerts.link_success', 'Club lié avec succès'), variant: 'flat', color: 'success' });
-        } catch (error: any) {
-            addToast({ title: t('error'), description: error.message || t('matchForm.alerts.link_error'), variant: 'flat', color: 'danger' });
-        } finally {
-            setIsLinking(false);
-        }
-    };
 
     // Initialize form data
     const [formData, setFormData] = useState<Partial<CreateMatchDto>>({
@@ -257,35 +236,36 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     {/* Row 1: SIRET (Left) and Address Details (Right) */}
                     <div className="md:col-span-2">
                         {!user?.club_id ? (
-                            <div className="p-5 bg-violet-900/20 border-2 border-violet-700/50 rounded-2xl flex flex-col gap-5 shadow-sm h-full">
+                            <div className="p-5 bg-violet-900/20 border-2 border-violet-700/50 rounded-2xl flex flex-col gap-4 shadow-sm h-full">
                                 <div className="flex items-start gap-4">
                                     <div className="p-2.5 bg-violet-800/40 rounded-full text-violet-400 shrink-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                                         </svg>
                                     </div>
-                                    <div className="flex flex-col gap-2">
-                                        <h4 className="text-sm md:text-base font-black text-violet-100 uppercase tracking-tighter">
+                                    <div className="flex flex-col gap-1">
+                                        <h4 className="text-sm font-black text-violet-100 uppercase tracking-tighter">
                                             {t('matchForm.link_club.title')}
                                         </h4>
-                                        <div className="text-[12px] md:text-[14px] text-violet-200 space-y-2 font-bold leading-snug">
-                                            <p className="underline decoration-2 text-violet-100">{t('matchForm.link_club.warning_siret')}</p>
-                                        </div>
+                                        <p className="text-[11px] text-violet-200 font-bold leading-tight">
+                                            Veuillez renseigner votre SIRET dans votre profil pour publier.
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="flex flex-col sm:flex-row gap-3 items-center w-full justify-start mt-auto">
-                                    <Input
-                                        size="md"
-                                        placeholder="EX: 123 456 789 00012"
-                                        value={siret}
-                                        onValueChange={setSiret}
-                                        className="w-full sm:max-w-xs"
-                                        classNames={{
-                                            inputWrapper: "bg-white border-violet-700/50 shadow-inner h-10 font-bold text-black"
+                                <div className="mt-auto">
+                                    <Button
+                                        size="sm"
+                                        color="secondary"
+                                        className="w-full font-black px-8 shadow-md h-9 uppercase tracking-tighter"
+                                        onPress={() => {
+                                            addToast({
+                                                title: "Action requise",
+                                                description: "Cliquez sur l'icône de votre profil dans la barre de navigation pour renseigner votre SIRET.",
+                                                color: "warning"
+                                            });
                                         }}
-                                    />
-                                    <Button size="md" color="secondary" onPress={handleLinkClub} isLoading={isLinking} className="w-full sm:w-auto font-black px-8 shadow-md h-10 uppercase tracking-tighter">
-                                        {t('matchForm.link_club.validate')}
+                                    >
+                                        Aller au profil
                                     </Button>
                                 </div>
                             </div>

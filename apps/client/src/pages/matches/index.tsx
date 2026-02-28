@@ -245,25 +245,60 @@ export default function MatchesPage() {
                 <div className="flex flex-col gap-6 w-full animate-appearance-in">
                     {view === 'create' ? (
                         (() => {
-                            const isProfileComplete = !!(user?.category && user?.level && user?.pitch_type && user?.club_colors && user?.license_id);
+                            const isProfileComplete = !!(
+                                user?.club_id &&
+                                user?.category &&
+                                user?.level &&
+                                user?.pitch_type &&
+                                user?.club_colors
+                            );
+
                             if (!isProfileComplete) {
                                 return (
-                                    <div className="flex flex-col items-center justify-center gap-4 py-20 px-4 bg-[#232120] rounded-3xl border border-warning/50 shadow-lg mt-4 text-center">
-                                        <div className="p-4 rounded-full bg-warning/20 text-warning-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12">
+                                    <div className="flex flex-col items-center justify-center gap-6 py-20 px-8 bg-[#232120] rounded-3xl border border-warning/50 shadow-2xl mt-4 text-center">
+                                        <div className="p-5 rounded-full bg-warning/20 text-warning-500 animate-pulse">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-16 h-16">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                             </svg>
                                         </div>
-                                        <h3 className="text-xl font-bold text-default-900">Profil Sportif Incomplet</h3>
-                                        <p className="max-w-md text-default-500">
-                                            Pour organiser un {type === 'match' ? 'match' : 'tournoi'}, vous devez d'abord remplir vos informations sportives (Catégorie, Niveau, Terrain, Couleurs et **Licence**) dans votre profil.
-                                        </p>
-                                        <div className="flex gap-3 mt-4">
-                                            <Button color="primary" onPress={() => setIsAccountModalOpen(true)} className="font-bold shadow-lg shadow-primary/30">
-                                                Compléter mon profil
+                                        <div className="space-y-2">
+                                            <h3 className="text-2xl font-black text-warning-500 uppercase tracking-tight">⚠️ Action requise dans 'Mon Compte'</h3>
+                                            <p className="max-w-md text-default-500 font-medium">
+                                                Pour publier une annonce, vous devez obligatoirement :
+                                            </p>
+                                        </div>
+
+                                        <div className="bg-default-50 p-6 rounded-2xl border border-default-100 w-full max-w-sm text-left space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${user?.club_id ? 'bg-success text-white' : 'bg-default-200 text-default-600'}`}>
+                                                    {user?.club_id ? '✓' : '1'}
+                                                </div>
+                                                <span className={`text-sm ${user?.club_id ? 'text-success font-bold' : 'text-default-700'}`}>Renseigner votre SIRET (Certification)</span>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? 'bg-success text-white' : 'bg-default-200 text-default-600'}`}>
+                                                    {(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? '✓' : '2'}
+                                                </div>
+                                                <span className={`text-sm ${(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? 'text-success font-bold' : 'text-default-700'}`}>Informations Sportives (Catégorie, Niveau...)</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col sm:flex-row gap-4 mt-2">
+                                            <Button
+                                                color="primary"
+                                                size="lg"
+                                                onPress={() => setIsAccountModalOpen(true)}
+                                                className="font-bold px-10 shadow-xl shadow-primary/40 text-lg"
+                                            >
+                                                Certifier mon Club & Profil
                                             </Button>
-                                            <Button color="default" variant="flat" onPress={() => setView('find')} className="font-bold">
-                                                Retour aux annonces
+                                            <Button
+                                                color="default"
+                                                variant="flat"
+                                                onPress={() => setView('find')}
+                                                className="font-bold"
+                                            >
+                                                Plus tard
                                             </Button>
                                         </div>
                                     </div>
