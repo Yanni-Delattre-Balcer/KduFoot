@@ -485,6 +485,17 @@ export class MatchService {
             await this.db.prepare(
                 'UPDATE matches SET status = "found", updated_at = unixepoch() WHERE id = ?'
             ).bind(matchId).run();
+        } else if (status === 'refused') {
+            // Check if there are no more matches with status 'accepted'
+            const acceptedCountResult = await this.db.prepare(
+                'SELECT COUNT(*) as count FROM match_contacts WHERE match_id = ? AND status = "accepted"'
+            ).bind(matchId).first<any>();
+
+            if ((acceptedCountResult?.count || 0) === 0) {
+                await this.db.prepare(
+                    'UPDATE matches SET status = "active", updated_at = unixepoch() WHERE id = ?'
+                ).bind(matchId).run();
+            }
         }
 
         return true;
@@ -500,9 +511,27 @@ export class MatchService {
             throw new Error('Unauthorized to cancel this contact');
         }
 
+        // Check if we are deleting an 'accepted' contact
+        const contact = await this.db.prepare(
+            'SELECT status FROM match_contacts WHERE match_id = ? AND user_id = ?'
+        ).bind(matchId, userId).first<any>();
+
         await this.db.prepare(
             'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
         ).bind(matchId, userId).run();
+
+        // If it was accepted, we might need to reopen the match
+        if (contact?.status === 'accepted') {
+            const acceptedCountResult = await this.db.prepare(
+                'SELECT COUNT(*) as count FROM match_contacts WHERE match_id = ? AND status = "accepted"'
+            ).bind(matchId).first<any>();
+
+            if ((acceptedCountResult?.count || 0) === 0) {
+                await this.db.prepare(
+                    'UPDATE matches SET status = "active", updated_at = unixepoch() WHERE id = ?'
+                ).bind(matchId).run();
+            }
+        }
 
         return true;
     }

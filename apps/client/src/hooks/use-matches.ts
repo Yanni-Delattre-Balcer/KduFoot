@@ -26,7 +26,9 @@ export function useMatches(filters?: MatchFilters) {
 
     const key = `/api/matches?${query.toString()}`;
 
-    const { data, error, isLoading, mutate } = useSWR(key, fetcher);
+    const { data, error, isLoading, mutate } = useSWR(key, fetcher, {
+        refreshInterval: 20000, // Refresh matches list every 20 seconds
+    });
 
     const createMatch = useCallback(async (dto: CreateMatchDto) => {
         const token = await getAccessTokenSilently();
@@ -75,7 +77,9 @@ export function useMatch(id: string | null) {
         return response.json();
     };
 
-    const { data, error, isLoading, mutate } = useSWR(id ? `/api/matches/${id}` : null, fetcher);
+    const { data, error, isLoading, mutate } = useSWR(id ? `/api/matches/${id}` : null, fetcher, {
+        refreshInterval: 10000, // Refresh specific match every 10 seconds
+    });
 
     const updateMatch = useCallback(async (dto: UpdateMatchDto) => {
         if (!id) return;

@@ -1021,6 +1021,36 @@
         }
       }
     },
+    "/api/matches/{id}/notifications/read": {
+      "patch": {
+        "tags": [
+          "Match Participation"
+        ],
+        "summary": "Mark match notifications as read",
+        "description": "Resets the notification state for a specific match and user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification marked as read."
+          }
+        }
+      }
+    },
     "/api/sessions": {
       "get": {
         "tags": [

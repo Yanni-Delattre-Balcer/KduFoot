@@ -125,9 +125,10 @@ export default function MatchesPage() {
         }
     };
 
-    const filteredMatches = selectedDate
+    const filteredMatches = (selectedDate
         ? matches.filter(m => m.match_date === selectedDate)
-        : matches;
+        : matches
+    ).filter(m => m.status !== 'found');
 
     // UI Configuration based on type
     const uiConfig = {

@@ -24,8 +24,8 @@ interface AccountModalProps {
 
 export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
     const { t } = useTranslation();
-    const { user: authUser } = useAuth();
-    const { user: dbUser, updateUser, linkClub } = useUser();
+    const { user: authUser, getAccessToken } = useAuth();
+    const { user: dbUser, updateUser, linkClub, refetch } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -164,6 +164,11 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                 phone: phone,
                 picture: previewUrl || dbUser?.picture || authUser.picture
             });
+
+            // Force token refresh to update permissions in claims
+            await getAccessToken({ cacheMode: 'off' } as any);
+            await refetch();
+
             addToast({ title: t('success', 'Succès'), description: t('accountModal.alerts.update_success', 'Profil mis à jour avec succès'), variant: 'flat', color: 'success' });
             onOpenChange(false);
         } catch (error: any) {
@@ -183,6 +188,11 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
         setIsSaving(true);
         try {
             await linkClub(cleanSiret);
+
+            // Force token refresh to update permissions in claims
+            await getAccessToken({ cacheMode: 'off' } as any);
+            await refetch();
+
             addToast({ title: t('success'), description: t('accountModal.alerts.club_linked_success', 'Club certifié avec succès'), variant: 'flat', color: 'success' });
         } catch (error: any) {
             addToast({ title: t('error.title'), description: error.message, variant: 'flat', color: 'danger' });

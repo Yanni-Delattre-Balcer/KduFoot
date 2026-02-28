@@ -369,10 +369,10 @@ export default function DashboardPage() {
                     variant="underlined"
                     className="w-full"
                     classNames={{
-                        tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full overflow-x-auto no-scrollbar border-b-0 gap-3",
+                        tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-wrap border-b-0 gap-2",
                         cursor: "rounded-xl shadow-lg shadow-orange-500/20",
-                        tab: "h-11 sm:h-12 uppercase font-black tracking-tight text-[10px] sm:text-xs min-w-[max-content] flex-none px-4",
-                        tabContent: "group-data-[selected=true]:text-white whitespace-nowrap"
+                        tab: "h-auto py-2.5 sm:h-12 uppercase font-black tracking-tight text-[10px] sm:text-xs flex-1 min-w-[max-content] sm:min-w-0 px-3 sm:px-4",
+                        tabContent: "group-data-[selected=true]:text-white whitespace-normal text-center leading-tight"
                     }}
                 >
                     <Tab
