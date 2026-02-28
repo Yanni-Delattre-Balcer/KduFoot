@@ -1,4 +1,8 @@
 {
+  "success": "Succès",
+  "warning": "Attention",
+  "info": "Information",
+  "profile_incomplete": "Complète ton profil club pour postuler à ce match",
   "site": {
     "description": "Kdufoot réunit deux outils essentiels pour les éducateurs de football : l'analyse vidéo pilotée par IA et la recherche de matchs amicaux entre clubs."
   },
@@ -84,6 +88,7 @@
   "duration": "Durée",
   "status": "Statut",
   "summary": "Résumé",
+  "details": "DÉTAILS",
   "duration_total": "Durée Totale",
   "players": "Joueurs",
   "equipment": "Matériel",
@@ -92,8 +97,11 @@
   "loading": "Chargement...",
   "edit": "Modifier",
   "error": {
+    "title": "Erreur",
+    "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
     "not_found": "Élément non trouvé",
     "save_failed": "Erreur lors de la sauvegarde",
+    "delete_failed": "La suppression a échoué",
     "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
     "loading_matches": "Erreur lors du chargement des matchs amicaux"
   },
@@ -168,14 +176,20 @@
     "schema": "Schéma Tactic"
   },
   "match": {
-    "create": "Créer un match amical",
-    "create_tournament": "Créer un tournoi amical",
-    "find": "Trouver un match amical",
-    "find_tournament": "Trouver un tournoi amical",
+    "title": "Matchs Amicaux",
+    "tab_matches": "Matchs",
+    "tab_tournaments": "Tournois",
+    "create": "Créer un Match",
+    "create_tournament": "Créer un Tournoi",
+    "find": "Chercher un Match",
+    "find_tournament": "Chercher un Tournoi",
     "format": "Format",
     "venue": "Lieu",
     "date": "Date",
     "time": "Heure",
+    "delete_confirmation": "Es-tu sûr de vouloir supprimer cette annonce ? Cette action est irréversible.",
+    "accept_confirm": "Accepter l'équipe de {{clubName}} ?",
+    "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",
     "filters": {
       "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs de toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner votre recherche selon vos besoins."
     }
@@ -219,6 +233,10 @@
     "empty_matches": "Aucun match amical",
     "not_scheduled": "Non planifiée",
     "opponent_default": "Adversaire",
+    "description_exercises": "Suivez vos séances d'entraînement et exercices vidéo.",
+    "find_exercises": "Découvrir des exercices",
+    "no_name": "Séance sans nom",
+    "all_levels": "Tous niveaux",
     "status": "Statut"
   },
   "permissions": {
@@ -287,8 +305,8 @@
       "Autre": "Autre"
     },
     "venue": {
-      "Domicile": "Domicile",
-      "Extérieur": "Extérieur",
+      "Domicile": "Cherche à domicile",
+      "Extérieur": "Cherche à l'extérieur",
       "Neutre": "Neutre"
     },
     "pitch": {
@@ -308,9 +326,14 @@
       "8v8": "8 vs 8",
       "5v5": "5 vs 5",
       "Futsal": "Futsal"
+    },
+    "type": {
+      "match": "Match",
+      "tournament": "Tournoi"
     }
   },
   "matchesPage": {
+    "title_tournament": "Tournois Amicaux",
     "description_find": "Parcourez les matchs amicaux disponibles près de chez vous. Utilisez les filtres pour affiner votre recherche et trouver l'adversaire idéal.",
     "description_create": "Publiez votre annonce de match amical en remplissant un maximum de détails pour attirer les clubs qui vous correspondent.",
     "description_find_tournament": "Découvrez les tournois amicaux organisés dans votre région. Inscrivez votre équipe et participez à des compétitions conviviales.",
@@ -366,6 +389,10 @@
       "auto": "Rempli automatiquement",
       "more_info": "Informations complémentaires..."
     },
+    "venue_labels": {
+      "Domicile": "Nous recevons (Domicile)",
+      "Extérieur": "Nous nous déplaçons (Extérieur)"
+    },
     "link_club": {
       "title": "Lier votre club (Action irréversible)",
       "warning_siret": "Le numéro SIRET ne peut être renseigné qu'une seule fois.",
@@ -391,7 +418,20 @@
       "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un match.",
       "contact_required": "⚠️ CONTACT OBLIGATOIRE\n\nL'email et le téléphone sont indispensables pour que les joueurs puissent vous contacter.",
       "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un match dans le passé.",
-      "date_far": "⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée."
+      "date_far": "⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée.",
+      "link_success": "Club lié avec succès !",
+      "create_success": "Annonce de match créée avec succès !",
+      "update_success": "Match mis à jour avec succès !"
+    },
+    "confirm": {
+      "accept": "Accepter cette demande ?",
+      "refuse": "Refuser cette demande ?"
+    }
+  },
+  "accountModal": {
+    "alerts": {
+      "update_success": "Votre profil a été mis à jour avec succès !",
+      "update_error": "Une erreur est survenue lors de la mise à jour de votre profil."
     }
   },
   "tournamentForm": {
@@ -412,7 +452,10 @@
       "publish": "Publier le tournoi"
     },
     "link_club": "Lien club requis pour organiser",
-    "contact_title": "Contact & Infos complémentaires"
+    "contact_title": "Contact & Infos complémentaires",
+    "alerts": {
+      "create_success": "Votre tournoi a été publié avec succès !"
+    }
   },
   "pricing": {
     "hero": {
@@ -495,8 +538,8 @@
     },
     "status": {
       "pending": "En attente",
-      "accepted": "Acceptée",
-      "refused": "Refusée"
+      "accepted": "Accepted",
+      "refused": "Refused"
     }
   },
   "adminUsersPage": {

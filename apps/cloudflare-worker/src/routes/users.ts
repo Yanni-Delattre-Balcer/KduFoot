@@ -5,6 +5,7 @@ import { UserService } from '../services/user.service';
 import { CreateUserDto, UpdateUserDto } from '../types/user';
 import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
+import { validateClubSiret } from '../utils/siret.validator';
 
 export const setupUserRoutes = (router: Router, env: Env) => {
     const userService = new UserService(env.DB);
@@ -273,6 +274,13 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             const siege = entreprise.siege || {};
 
             const clubName = entreprise.nom_complet || entreprise.nom_raison_sociale || 'Club inconnu';
+
+            // SECURITY: SIRET Filtering (Strict Additions)
+            const validation = validateClubSiret(entreprise.activite_principale, clubName);
+            if (!validation.isValid) {
+                return Response.json({ success: false, error: validation.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            }
+
             const clubAddress = siege.adresse || '';
             const clubCity = siege.libelle_commune || siege.commune || '';
             const clubZip = siege.code_postal || '';

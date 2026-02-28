@@ -1,12 +1,21 @@
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Button } from "@heroui/button";
+import { addToast } from "@heroui/toast";
 import { Image } from "@heroui/image";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 import { useAuth } from "./providers/use-auth";
 import { useUser } from "@/hooks/use-user";
 import { useState, useRef, useEffect } from "react";
 import * as faceapi from "face-api.js";
+import { useTranslation } from "react-i18next";
+import { Category } from "@/types/exercise.types";
+import { Level, PitchType } from "@/types/match.types";
+
+const CATEGORIES = Object.values(Category);
+const LEVELS = Object.values(Level);
+const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Indoor'];
 
 interface AccountModalProps {
     isOpen: boolean;
@@ -14,12 +23,17 @@ interface AccountModalProps {
 }
 
 export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
+    const { t } = useTranslation();
     const { user: authUser } = useAuth();
     const { user: dbUser, updateUser } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [licenseId, setLicenseId] = useState("");
+    const [level, setLevel] = useState("");
+    const [category, setCategory] = useState("");
+    const [pitchType, setPitchType] = useState("");
+    const [clubColors, setClubColors] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     // Load face-api models on mount
@@ -33,10 +47,14 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
         loadModels();
     }, []);
 
-    // Sync license_id from dbUser when it loads
+    // Sync properties from dbUser when it loads
     useEffect(() => {
-        if (dbUser?.license_id) {
-            setLicenseId(dbUser.license_id);
+        if (dbUser) {
+            setLicenseId(dbUser.license_id || "");
+            setLevel(dbUser.level || "");
+            setCategory(dbUser.category || "");
+            setPitchType(dbUser.pitch_type || "");
+            setClubColors(dbUser.club_colors || "");
         }
     }, [dbUser]);
 
@@ -83,12 +101,17 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
         try {
             await updateUser({
                 license_id: licenseId,
+                level,
+                category,
+                pitch_type: pitchType,
+                club_colors: clubColors,
                 picture: previewUrl || dbUser?.picture || authUser.picture
             });
-            alert("Profil mis à jour avec succès !");
+            addToast({ title: t('success', 'Succès'), description: t('accountModal.alerts.update_success', 'Profil mis à jour avec succès'), variant: 'flat', color: 'success' });
             onOpenChange(false);
         } catch (error: any) {
-            alert("Erreur lors de la sauvegarde : " + error.message);
+            console.error("Update profile error:", error);
+            addToast({ title: t('error.title'), description: error.message || t('accountModal.alerts.update_error', 'Erreur de mise à jour'), variant: 'flat', color: 'danger' });
         } finally {
             setIsSaving(false);
         }
@@ -115,7 +138,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                 {(onClose) => (
                     <>
                         <ModalHeader className="flex flex-col gap-1">Mon Compte</ModalHeader>
-                        <ModalBody className="py-6">
+                        <ModalBody className="py-6 overflow-y-auto max-h-[70vh]">
                             <div className="flex flex-col items-center gap-6">
                                 {/* Invisible File Input */}
                                 <input
@@ -125,6 +148,11 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                     accept="image/*"
                                     onChange={handleFileChange}
                                 />
+
+                                {/* Profile Picture Advice */}
+                                <p className="text-[10px] font-bold text-primary uppercase tracking-widest -mb-4 animate-pulse">
+                                    Le mieux à faire c'était de mettre le logo du club
+                                </p>
 
                                 {/* Profile Picture with Plus Overlay */}
                                 <div className="relative group cursor-pointer z-10" onClick={handleAvatarClick}>
@@ -161,9 +189,9 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                     </div>
                                 </div>
 
-                                <div className="w-full space-y-4">
+                                <div className="w-full space-y-8">
                                     {/* Identity Section */}
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         <p className="text-xs font-bold text-default-400 uppercase ml-1">Identité & Contact</p>
                                         <div className="bg-default-50 p-4 rounded-2xl space-y-3">
                                             <div className="flex justify-between items-center text-sm">
@@ -186,9 +214,66 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                                         </div>
                                     </div>
 
+                                    {/* Informations Sportives Section */}
+                                    <div className="space-y-3">
+                                        <p className="text-xs font-bold text-default-400 uppercase ml-1 mt-2">Profil Sportif (Requis pour créer des annonces)</p>
+                                        <div className="bg-default-50 p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <Select
+                                                label="Catégorie"
+                                                variant="bordered"
+                                                size="sm"
+                                                selectedKeys={category ? [category] : []}
+                                                onChange={(e) => setCategory(e.target.value)}
+                                                placeholder="Choisir..."
+                                            >
+                                                {CATEGORIES.map((cat) => (
+                                                    <SelectItem key={cat} textValue={t(`enums.category.${cat}`)}>
+                                                        {t(`enums.category.${cat}`)}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Select
+                                                label="Niveau"
+                                                variant="bordered"
+                                                size="sm"
+                                                selectedKeys={level ? [level] : []}
+                                                onChange={(e) => setLevel(e.target.value)}
+                                                placeholder="Choisir..."
+                                            >
+                                                {LEVELS.map((lvl) => (
+                                                    <SelectItem key={lvl} textValue={t(`enums.level.${lvl}`)}>
+                                                        {t(`enums.level.${lvl}`)}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Select
+                                                label="Terrain habituel"
+                                                variant="bordered"
+                                                size="sm"
+                                                selectedKeys={pitchType ? [pitchType] : []}
+                                                onChange={(e) => setPitchType(e.target.value)}
+                                                placeholder="Choisir..."
+                                            >
+                                                {PITCH_TYPES.map((type) => (
+                                                    <SelectItem key={type} textValue={t(`enums.pitch.${type}`)}>
+                                                        {t(`enums.pitch.${type}`)}
+                                                    </SelectItem>
+                                                ))}
+                                            </Select>
+                                            <Input
+                                                label="Couleurs du club"
+                                                variant="bordered"
+                                                size="sm"
+                                                value={clubColors}
+                                                onValueChange={setClubColors}
+                                                placeholder="Rouge et Noir..."
+                                            />
+                                        </div>
+                                    </div>
+
                                     {/* Club Section */}
-                                    <div className="space-y-2">
-                                        <p className="text-xs font-bold text-default-400 uppercase ml-1">Club & Localisation</p>
+                                    <div className="space-y-3">
+                                        <p className="text-xs font-bold text-default-400 uppercase ml-1 mt-2">Club & Localisation</p>
                                         <div className="bg-default-50 p-4 rounded-2xl space-y-3">
                                             <div className="flex justify-between items-center text-sm">
                                                 <span className="text-default-500">Club actuel</span>

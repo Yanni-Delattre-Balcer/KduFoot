@@ -21,12 +21,14 @@ const VENUES: Venue[] = ['Domicile', 'Extérieur', 'Neutre'];
 
 import MatchForm from '@/components/matches/match-form';
 import TournamentForm from '@/components/matches/tournament-form';
+import { AccountModal } from '@/authentication/account-modal';
 
 export default function MatchesPage() {
     const { t, i18n } = useTranslation();
     const [searchParams] = useSearchParams();
     const [view, setView] = useState<'find' | 'create'>((searchParams.get('view') as 'find' | 'create') || 'find');
     const [type, setType] = useState<'match' | 'tournament'>((searchParams.get('type') as 'match' | 'tournament') || 'match');
+    const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
 
     useEffect(() => {
         const v = searchParams.get('view') as 'find' | 'create';
@@ -242,11 +244,38 @@ export default function MatchesPage() {
                 {/* Content Block - Separated but Coordinated */}
                 <div className="flex flex-col gap-6 w-full animate-appearance-in">
                     {view === 'create' ? (
-                        type === 'match' ? (
-                            <MatchForm onSuccess={handleCreateSuccess} />
-                        ) : (
-                            <TournamentForm onSuccess={handleCreateSuccess} />
-                        )
+                        (() => {
+                            const isProfileComplete = !!(user?.category && user?.level && user?.pitch_type && user?.club_colors && user?.license_id);
+                            if (!isProfileComplete) {
+                                return (
+                                    <div className="flex flex-col items-center justify-center gap-4 py-20 px-4 bg-[#232120] rounded-3xl border border-warning/50 shadow-lg mt-4 text-center">
+                                        <div className="p-4 rounded-full bg-warning/20 text-warning-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-default-900">Profil Sportif Incomplet</h3>
+                                        <p className="max-w-md text-default-500">
+                                            Pour organiser un {type === 'match' ? 'match' : 'tournoi'}, vous devez d'abord remplir vos informations sportives (Catégorie, Niveau, Terrain, Couleurs et **Licence**) dans votre profil.
+                                        </p>
+                                        <div className="flex gap-3 mt-4">
+                                            <Button color="primary" onPress={() => setIsAccountModalOpen(true)} className="font-bold shadow-lg shadow-primary/30">
+                                                Compléter mon profil
+                                            </Button>
+                                            <Button color="default" variant="flat" onPress={() => setView('find')} className="font-bold">
+                                                Retour aux annonces
+                                            </Button>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            return type === 'match' ? (
+                                <MatchForm onSuccess={handleCreateSuccess} />
+                            ) : (
+                                <TournamentForm onSuccess={handleCreateSuccess} />
+                            );
+                        })()
                     ) : (
                         <div className="flex flex-col gap-5">
 
@@ -552,6 +581,17 @@ export default function MatchesPage() {
                                                 <h4 className="font-bold text-xl text-default-900 group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full">
                                                     {match.club?.name || t('matchesPage.unknown_club')}
                                                 </h4>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
+                                                        {match.type === 'tournament' ? '🏆' : '⚽'} {t(`enums.type.${match.type}`)}
+                                                    </Chip>
+                                                    <Chip size="sm" variant="flat" color="warning" className="h-4 text-[9px] uppercase font-bold">
+                                                        {t(`enums.category.${match.category}`)}
+                                                    </Chip>
+                                                    <Chip size="sm" variant="flat" color="secondary" className="h-4 text-[9px] uppercase font-bold">
+                                                        {match.venue === 'Domicile' ? '🏠 Reçoit' : match.venue === 'Extérieur' ? '🚗 Se déplace' : '📍 Neutre'}
+                                                    </Chip>
+                                                </div>
                                                 <p className="text-small text-default-500 font-medium">{match.location_city || match.club?.city} ({match.location_zip || match.club?.zip})</p>
                                             </div>
                                         </CardHeader>
@@ -583,7 +623,7 @@ export default function MatchesPage() {
                                         </CardBody>
                                         <CardFooter className="px-4 pb-4">
                                             <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold w-full bg-linear-to-r from-violet-400 to-amber-500 text-white shadow-md shadow-violet-500/20">
-                                                {t('details')}
+                                                DÉTAILS
                                             </Button>
                                         </CardFooter>
                                     </Card>
@@ -613,6 +653,7 @@ export default function MatchesPage() {
                     )}
                 </div>
             </section>
+            <AccountModal isOpen={isAccountModalOpen} onOpenChange={setIsAccountModalOpen} />
         </DefaultLayout>
     );
 }

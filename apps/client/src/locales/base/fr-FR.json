@@ -48,5 +48,25 @@
   "permissions": "autorisation",
   "token": "jeton",
   "user": "utilisateur",
-  "success": "Succès"
+  "success": "Succès",
+  "warning": "Attention",
+  "info": "Information",
+  "matchForm": {
+    "alerts": {
+      "link_success": "Club lié avec succès !",
+      "create_success": "Annonce créée avec succès !",
+      "update_success": "Match mis à jour avec succès !"
+    }
+  },
+  "tournamentForm": {
+    "alerts": {
+      "create_success": "Tournoi publié avec succès !"
+    }
+  },
+  "accountModal": {
+    "alerts": {
+      "update_success": "Profil mis à jour !",
+      "update_error": "Erreur de mise à jour"
+    }
+  }
 }

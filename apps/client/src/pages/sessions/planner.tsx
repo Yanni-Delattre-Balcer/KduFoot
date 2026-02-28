@@ -5,6 +5,7 @@ import { useSessions } from '@/hooks/use-sessions';
 import { useMatches } from '@/hooks/use-matches';
 import FootballClock from '../../components/football-clock';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
+import { addToast } from "@heroui/toast";
 
 import { Button } from '@heroui/button';
 import { Link } from 'react-router-dom';
@@ -20,7 +21,7 @@ export default function SessionPlannerPage() {
     const { getAccessTokenSilently } = useAuth0();
     const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');
     const { sessions, isError: isErrorSessions } = useSessions();
-    const { matches, isLoading: isLoadingMatches } = useMatches({ owner_id: 'me', include_past: true });
+    const { matches, isLoading: isLoadingMatches } = useMatches({ ownerId: 'me', include_past: true });
     const [requests, setRequests] = useState<any[]>([]);
     const [isLoadingRequests, setIsLoadingRequests] = useState(false);
 
@@ -71,7 +72,7 @@ export default function SessionPlannerPage() {
                             </h1>
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
-                            {view === 'exercises' 
+                            {view === 'exercises'
                                 ? t('sessions.description_exercises', 'Suivez vos séances d\'entraînement et exercices vidéo.')
                                 : view === 'matches'
                                     ? t('sessions.description_matches')
@@ -191,7 +192,7 @@ export default function SessionPlannerPage() {
                                         {matches?.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').length || 0}
                                     </span>
                                 </div>
-                                
+
                                 {isLoadingMatches ? (
                                     <div className="flex justify-center py-6 px-4"><Spinner color="secondary" /></div>
                                 ) : matches && matches.length > 0 ? (
@@ -252,50 +253,84 @@ export default function SessionPlannerPage() {
                                         {requests
                                             .filter(r => view === 'matches' ? r.type === 'match' : r.type === 'tournament')
                                             .map((request, idx) => (
-                                            <Card key={idx} className={`bg-[#1e1e20] border ${request.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'}`}>
-                                                <CardBody className="p-4 flex flex-col gap-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
-                                                            {request.requester_club_logo ? (
-                                                                <Image src={request.requester_club_logo} className="object-contain" />
-                                                            ) : (
-                                                                <span className="text-white font-bold">{request.requester_club_name?.charAt(0)}</span>
-                                                            )}
+                                                <Card key={idx} className={`bg-[#1e1e20] border ${request.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'}`}>
+                                                    <CardBody className="p-4 flex flex-col gap-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
+                                                                {request.requester_club_logo ? (
+                                                                    <Image src={request.requester_club_logo} className="object-contain" />
+                                                                ) : (
+                                                                    <span className="text-white font-bold">{request.requester_club_name?.charAt(0)}</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 text-left">
+                                                                <h3 className="font-bold text-white text-sm line-clamp-1">{request.requester_club_name}</h3>
+                                                                <p className="text-[10px] text-default-500 font-bold uppercase tracking-widest truncate">
+                                                                    {t(`enums.category.${request.category}`)} • {request.match_date}
+                                                                </p>
+                                                            </div>
+                                                            <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
+                                                                {request.request_status}
+                                                            </Chip>
                                                         </div>
-                                                        <div className="flex-1 text-left">
-                                                            <h3 className="font-bold text-white text-sm line-clamp-1">{request.requester_club_name}</h3>
-                                                            <p className="text-[10px] text-default-500 font-bold uppercase tracking-widest truncate">
-                                                                {t(`enums.category.${request.category}`)} • {request.match_date}
-                                                            </p>
-                                                        </div>
-                                                        <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
-                                                            {request.request_status}
-                                                        </Chip>
-                                                    </div>
-                                                    
-                                                    {request.request_status === 'pending' && (
-                                                        <div className="flex gap-2">
-                                                            <Button size="sm" color="success" className="flex-1 font-black uppercase text-[10px] h-8 text-success-950" onPress={async () => {
-                                                                if (confirm(t('matchForm.confirm.accept', 'Accepter cette demande ?'))) {
-                                                                    const token = await getAccessTokenSilently();
-                                                                    await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
-                                                                    window.location.reload();
-                                                                }
-                                                            }}>Accepter</Button>
-                                                            <Button size="sm" variant="flat" color="danger" className="flex-1 font-black uppercase text-[10px] h-8" onPress={async () => {
-                                                                if (confirm(t('matchForm.confirm.refuse', 'Refuser cette demande ?'))) {
-                                                                    const token = await getAccessTokenSilently();
-                                                                    await matchService.updateRequestStatus(request.match_id, request.user_id, 'refused', token);
-                                                                    window.location.reload();
-                                                                }
-                                                            }}>Refuser</Button>
-                                                        </div>
-                                                    )}
-                                                    
-                                                    <Button size="sm" variant="flat" className={`w-full text-[10px] font-bold h-7 ${request.type === 'tournament' ? 'bg-purple-300/10 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`} as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
-                                                </CardBody>
-                                            </Card>
-                                        ))}
+
+                                                        {request.request_status === 'pending' && (
+                                                            <div className="flex gap-2">
+                                                                <Button size="sm" color="success" className="flex-1 font-black uppercase text-[10px] h-8 text-success-950" onPress={async () => {
+                                                                    if (confirm(t('matchForm.confirm.accept', 'Accepter cette demande ?'))) {
+                                                                        try {
+                                                                            const token = await getAccessTokenSilently();
+                                                                            await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
+                                                                            window.location.reload();
+                                                                        } catch (e: any) {
+                                                                            const rawMessage = e.message || "";
+                                                                            let cleanMessage = rawMessage;
+                                                                            try {
+                                                                                if (rawMessage.startsWith('{')) {
+                                                                                    const parsed = JSON.parse(rawMessage);
+                                                                                    cleanMessage = parsed.error || parsed.message || rawMessage;
+                                                                                }
+                                                                            } catch { /* ignore */ }
+
+                                                                            addToast({
+                                                                                title: t('error.title'),
+                                                                                description: cleanMessage === 'TOO_LATE_TO_MODIFY' ? t('error.too_late_to_modify') : cleanMessage,
+                                                                                color: "danger"
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                }}>Accepter</Button>
+                                                                <Button size="sm" variant="flat" color="danger" className="flex-1 font-black uppercase text-[10px] h-8" onPress={async () => {
+                                                                    if (confirm(t('matchForm.confirm.refuse', 'Refuser cette demande ?'))) {
+                                                                        try {
+                                                                            const token = await getAccessTokenSilently();
+                                                                            await matchService.updateRequestStatus(request.match_id, request.user_id, 'refused', token);
+                                                                            window.location.reload();
+                                                                        } catch (e: any) {
+                                                                            const rawMessage = e.message || "";
+                                                                            let cleanMessage = rawMessage;
+                                                                            try {
+                                                                                if (rawMessage.startsWith('{')) {
+                                                                                    const parsed = JSON.parse(rawMessage);
+                                                                                    cleanMessage = parsed.error || parsed.message || rawMessage;
+                                                                                }
+                                                                            } catch { /* ignore */ }
+
+                                                                            addToast({
+                                                                                title: t('error.title'),
+                                                                                description: cleanMessage === 'TOO_LATE_TO_MODIFY' ? t('error.too_late_to_modify') : cleanMessage,
+                                                                                color: "danger"
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                }}>Refuser</Button>
+                                                            </div>
+                                                        )}
+
+                                                        <Button size="sm" variant="flat" className={`w-full text-[10px] font-bold h-7 ${request.type === 'tournament' ? 'bg-purple-300/10 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`} as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
+                                                    </CardBody>
+                                                </Card>
+                                            ))}
                                     </div>
                                 ) : (
                                     <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">

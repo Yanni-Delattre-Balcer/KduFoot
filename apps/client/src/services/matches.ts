@@ -145,5 +145,22 @@ export const matchService = {
             }
         }
         return response.json();
+    },
+
+    cancelRequest: async (matchId: string, userId: string, token: string) => {
+        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${matchId}/requests/${userId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                throw new Error(errorJson.error || errorJson.message || errorText);
+            } catch {
+                throw new Error(errorText);
+            }
+        }
+        return response.json();
     }
 };

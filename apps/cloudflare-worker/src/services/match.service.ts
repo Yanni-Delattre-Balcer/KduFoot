@@ -6,6 +6,27 @@ import { v4 as uuidv4 } from 'uuid';
 export class MatchService {
     constructor(private db: D1Database) { }
 
+    /**
+     * Sécurité H-2 : Vérifie si on est à moins de 2h du début du match.
+     * Bloque aussi si le match a commencé il y a moins de 2h.
+     */
+    private isTooLateToModify(matchDate: string, matchTime: string): boolean {
+        try {
+            // matchDate is YYYY-MM-DD, matchTime is HH:MM
+            const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+            if (isNaN(matchDateTime.getTime())) return false; // Fail safe if date is invalid
+
+            const now = new Date();
+            const diffMs = matchDateTime.getTime() - now.getTime();
+            const diffHours = diffMs / (1000 * 60 * 60);
+
+            // Bloque si entre -2h et +2h du début
+            return diffHours < 2 && diffHours > -2;
+        } catch {
+            return false;
+        }
+    }
+
     async create(userId: string, dto: CreateMatchDto): Promise<Match> {
         const id = uuidv4();
         const now = Math.floor(Date.now() / 1000);
@@ -34,6 +55,11 @@ export class MatchService {
         if (!existing) return null;
         if (existing.owner_id !== userId) throw new Error('Unauthorized');
 
+        // Sécurité H-2 : Verrouillage si le match commence dans moins de 2h
+        if (this.isTooLateToModify(existing.match_date, existing.match_time)) {
+            throw new Error('TOO_LATE_TO_MODIFY');
+        }
+
         const keys = Object.keys(dto) as (keyof UpdateMatchDto)[];
         if (keys.length === 0) return existing;
 
@@ -49,14 +75,35 @@ export class MatchService {
         const query = `UPDATE matches SET ${setClauses.join(', ')} WHERE id = ?`;
         await this.db.prepare(query).bind(...values, id).run();
 
+        // System d'Alertes: Si le match est confirmé, notifier les participants acceptés
+        const criticalFields = ['match_date', 'match_time', 'match_end_time', 'venue', 'location_address', 'location_city', 'location_zip'];
+        const isCriticalChange = keys.some(k => criticalFields.includes(k));
+
+        if (isCriticalChange) {
+            // Uniquement pour les contacts dont le statut est 'accepted'
+            await this.db.prepare(
+                'UPDATE match_contacts SET notification_state = 1 WHERE match_id = ? AND status = "accepted"'
+            ).bind(id).run();
+        }
+
         return await this.getById(id); // Return full object with club info
     }
 
     async delete(id: string, userId: string): Promise<boolean> {
         const existing = await this.getById(id);
         if (!existing) return false;
-        if (existing.owner_id !== userId) throw new Error('Unauthorized');
 
+        if (existing.owner_id !== userId) {
+            throw new Error('Unauthorized');
+        }
+
+        // Sécurité H-2
+        if (this.isTooLateToModify(existing.match_date, existing.match_time)) {
+            throw new Error('TOO_LATE_TO_MODIFY');
+        }
+
+        // D1 SQLite requires explicit PRAGMA to enforce ON DELETE CASCADE
+        await this.db.prepare('PRAGMA foreign_keys = ON;').run();
         await this.db.prepare('DELETE FROM matches WHERE id = ?').bind(id).run();
         return true;
     }
@@ -214,8 +261,12 @@ export class MatchService {
             params.push(filters.format);
         }
         if (filters.venue) {
+            let searchVenue = filters.venue;
+            if (filters.venue === 'Domicile') searchVenue = 'Extérieur';
+            else if (filters.venue === 'Extérieur') searchVenue = 'Domicile';
+
             query += ' AND m.venue = ?';
-            params.push(filters.venue);
+            params.push(searchVenue);
         }
         if (filters.pitch_type) {
             query += ' AND m.pitch_type = ?';
@@ -371,13 +422,21 @@ export class MatchService {
 
     async getIncomingRequests(userId: string): Promise<any[]> {
         const { results } = await this.db.prepare(`
-            SELECT mc.*, m.type, m.category, m.match_date, m.match_time, 
-                   c.name as requester_club_name, c.logo_url as requester_club_logo,
-                   mc.status as request_status
+            SELECT mc.*, 
+                   m.type as match_type, m.match_date, m.match_time, m.category as match_category, m.level as match_level,
+                   m.venue, m.location_city,
+                   c_host.name as host_club_name, c_host.logo_url as host_club_logo,
+                   m.email as host_email, m.phone as host_phone,
+                   c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
+                   u_req.phone as requester_phone, u_req.email as requester_email,
+                   u_req.level as requester_level, u_req.category as requester_category, u_req.club_colors as requester_club_colors, u_req.pitch_type as requester_pitch_type,
+                   mc.status as request_status,
+                   COALESCE(mc.notification_state, 0) as notification_state
             FROM match_contacts mc
             JOIN matches m ON mc.match_id = m.id
-            JOIN users u ON mc.user_id = u.id
-            LEFT JOIN clubs c ON u.club_id = c.id
+            JOIN users u_req ON mc.user_id = u_req.id
+            LEFT JOIN clubs c_req ON u_req.club_id = c_req.id
+            JOIN clubs c_host ON m.club_id = c_host.id
             WHERE m.owner_id = ?
             ORDER BY mc.contacted_at DESC
         `).bind(userId).all<any>();
@@ -387,13 +446,21 @@ export class MatchService {
 
     async getMyParticipations(userId: string): Promise<any[]> {
         const { results } = await this.db.prepare(`
-            SELECT mc.*, m.type, m.category, m.match_date, m.match_time, 
-                   c.name as host_club_name, c.logo_url as host_club_logo,
-                   c.email as host_email, c.phone as host_phone,
-                   mc.status as request_status
+            SELECT mc.*, 
+                   m.type as match_type, m.category as match_category, m.level as match_level, m.match_date, m.match_time, 
+                   m.venue, m.location_city,
+                   c_host.name as host_club_name, c_host.logo_url as host_club_logo,
+                   m.email as host_email, m.phone as host_phone,
+                   c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
+                   u_req.phone as requester_phone, u_req.email as requester_email,
+                   u_req.level as requester_level, u_req.category as requester_category, u_req.club_colors as requester_club_colors, u_req.pitch_type as requester_pitch_type,
+                   mc.status as request_status,
+                   COALESCE(mc.notification_state, 0) as notification_state
             FROM match_contacts mc
             JOIN matches m ON mc.match_id = m.id
-            JOIN clubs c ON m.club_id = c.id
+            JOIN clubs c_host ON m.club_id = c_host.id
+            JOIN users u_req ON mc.user_id = u_req.id
+            LEFT JOIN clubs c_req ON u_req.club_id = c_req.id
             WHERE mc.user_id = ?
             ORDER BY m.match_date ASC
         `).bind(userId).all<any>();
@@ -402,12 +469,41 @@ export class MatchService {
     }
 
     async updateRequestStatus(matchId: string, requestUserId: string, ownerId: string, status: 'accepted' | 'refused'): Promise<boolean> {
-        const match = await this.db.prepare('SELECT owner_id FROM matches WHERE id = ?').bind(matchId).first<{ owner_id: string }>();
+        const match = await this.db.prepare('SELECT owner_id, match_date, match_time FROM matches WHERE id = ?').bind(matchId).first<any>();
         if (!match || match.owner_id !== ownerId) throw new Error('Unauthorized');
+
+        // Sécurité H-2 : On ne peut plus accepter/refuser si le match est trop proche
+        if (this.isTooLateToModify(match.match_date, match.match_time)) {
+            throw new Error('TOO_LATE_TO_MODIFY');
+        }
 
         await this.db.prepare(
             'UPDATE match_contacts SET status = ? WHERE match_id = ? AND user_id = ?'
         ).bind(status, matchId, requestUserId).run();
+
+        // If accepted, mark match as found (closed)
+        if (status === 'accepted') {
+            await this.db.prepare(
+                'UPDATE matches SET status = "found", updated_at = unixepoch() WHERE id = ?'
+            ).bind(matchId).run();
+        }
+
+        return true;
+    }
+
+    async deleteContact(matchId: string, userId: string, requesterId: string): Promise<boolean> {
+        // Find the match to check ownership
+        const match = await this.getById(matchId);
+        if (!match) throw new Error('Match not found');
+
+        // Check if the requester is either the match owner OR the contact user itself
+        if (match.owner_id !== requesterId && userId !== requesterId) {
+            throw new Error('Unauthorized to cancel this contact');
+        }
+
+        await this.db.prepare(
+            'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
+        ).bind(matchId, userId).run();
 
         return true;
     }

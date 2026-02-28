@@ -12,14 +12,31 @@ import { Spinner } from "@heroui/spinner";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Link } from 'react-router-dom';
 import FootballClock from '../../components/football-clock';
+import { addToast } from '@heroui/toast';
+
+const formatDate = (dateStr: string) => {
+    try {
+        const [year, month, day] = dateStr.split('-');
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+    } catch {
+        return dateStr;
+    }
+};
+
+const formatTime = (timeStr: string) => {
+    if (!timeStr) return '';
+    return timeStr.replace(':', 'h');
+};
 
 export default function DashboardPage() {
     const { t } = useTranslation();
     const { getAccessTokenSilently } = useAuth0();
-    
+    // We use the direct import of addToast from @heroui/toast
+
     // 1. Mes Annonces (Organisateur)
-    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements } = useMatches({ owner_id: 'me', include_past: true });
-    
+    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
+
     // 2. Demandes Reçues (Organisateur - pour agir sur les autres)
     const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
     const [isLoadingIncoming, setIsLoadingIncoming] = useState(false);
@@ -39,15 +56,15 @@ export default function DashboardPage() {
             setIsLoadingParticipations(true);
             try {
                 const token = await getAccessTokenSilently();
-                
+
                 // Fetch incoming
                 const incRes = await matchService.getRequests(token);
                 if (incRes.success) setIncomingRequests(incRes.requests);
-                
+
                 // Fetch participations
                 const partRes = await matchService.getParticipations(token);
                 if (partRes.success) setMyParticipations(partRes.participations);
-                
+
             } catch (e) {
                 console.error("Dashboard data fetch failed", e);
             } finally {
@@ -58,6 +75,22 @@ export default function DashboardPage() {
         fetchData();
     }, [getAccessTokenSilently]);
 
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Sécurité H-2 : Verrouillage si le match commence dans moins de 2h
+    const isTooLate = (matchDate: string, matchTime: string) => {
+        try {
+            const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+            if (isNaN(matchDateTime.getTime())) return false;
+            const now = new Date();
+            const diffMs = matchDateTime.getTime() - now.getTime();
+            const diffHours = diffMs / (1000 * 60 * 60);
+            return diffHours < 2 && diffHours > -2;
+        } catch (e) {
+            return false;
+        }
+    };
+
     const handleUpdateStatus = async (matchId: string, userId: string, status: 'accepted' | 'refused') => {
         if (!confirm(t('matchForm.confirm.' + status, `Voulez-vous ${status === 'accepted' ? 'accepter' : 'refuser'} cette équipe ?`))) return;
         try {
@@ -67,7 +100,71 @@ export default function DashboardPage() {
             const res = await matchService.getRequests(token);
             if (res.success) setIncomingRequests(res.requests);
         } catch (e: any) {
-            alert(e.message);
+            const rawMessage = e.message || "";
+            // Si le message est un JSON stringifié, on essaie de l'extraire
+            let cleanMessage = rawMessage;
+            try {
+                if (rawMessage.startsWith('{')) {
+                    const parsed = JSON.parse(rawMessage);
+                    cleanMessage = parsed.error || parsed.message || rawMessage;
+                }
+            } catch { /* ignore */ }
+
+            const errorMessage = cleanMessage === 'TOO_LATE_TO_MODIFY'
+                ? t('error.too_late_to_modify')
+                : (cleanMessage || t('error.save_failed'));
+
+            addToast({
+                title: t('error.title'),
+                description: errorMessage,
+                color: "danger"
+            });
+        }
+    };
+
+    const handleDeleteMatch = async (id: string, matchDate: string, matchTime: string) => {
+        if (isTooLate(matchDate, matchTime)) {
+            addToast({
+                title: t('error.title'),
+                description: t('error.too_late_to_modify'),
+                color: "danger"
+            });
+            return;
+        }
+        if (!confirm('Voulez-vous vraiment supprimer cette annonce ?')) return;
+        setIsSaving(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await matchService.delete(id, token);
+            if (res.success) {
+                addToast({
+                    title: t('success', 'Succès'),
+                    description: "Annonce supprimée avec succès",
+                    color: "success"
+                });
+                window.location.reload();
+            }
+        } catch (err: any) {
+            const rawMessage = err.message || "";
+            let cleanMessage = rawMessage;
+            try {
+                if (rawMessage.startsWith('{')) {
+                    const parsed = JSON.parse(rawMessage);
+                    cleanMessage = parsed.error || parsed.message || rawMessage;
+                }
+            } catch { /* ignore */ }
+
+            const errorMessage = cleanMessage === 'TOO_LATE_TO_MODIFY'
+                ? t('error.too_late_to_modify')
+                : t('error.delete_failed');
+
+            addToast({
+                title: t('error.title'),
+                description: errorMessage,
+                color: "danger"
+            });
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -89,27 +186,27 @@ export default function DashboardPage() {
 
     const renderSubFilters = (current: 'all' | 'match' | 'tournament', onChange: (v: 'all' | 'match' | 'tournament') => void) => (
         <div className="flex gap-2 p-1 rounded-xl bg-default-100/50 w-fit">
-            <Button 
-                size="sm" 
-                variant={current === 'all' ? 'solid' : 'light'} 
+            <Button
+                size="sm"
+                variant={current === 'all' ? 'solid' : 'light'}
                 color={current === 'all' ? 'danger' : 'default'}
                 className={current === 'all' ? 'font-bold bg-danger text-white' : 'font-medium text-default-500'}
                 onPress={() => onChange('all')}
             >
                 {t('dashboard.tabs.all')}
             </Button>
-            <Button 
-                size="sm" 
-                variant={current === 'match' ? 'solid' : 'light'} 
+            <Button
+                size="sm"
+                variant={current === 'match' ? 'solid' : 'light'}
                 color={current === 'match' ? 'secondary' : 'default'}
                 className={current === 'match' ? 'font-bold bg-violet-800 text-white' : 'font-medium text-default-500'}
                 onPress={() => onChange('match')}
             >
                 {t('dashboard.tabs.matches')}
             </Button>
-            <Button 
-                size="sm" 
-                variant={current === 'tournament' ? 'solid' : 'light'} 
+            <Button
+                size="sm"
+                variant={current === 'tournament' ? 'solid' : 'light'}
                 color={current === 'tournament' ? 'default' : 'default'}
                 className={current === 'tournament' ? 'font-bold bg-purple-300 text-purple-950 shadow-sm' : 'font-medium text-default-500'}
                 onPress={() => onChange('tournament')}
@@ -122,12 +219,12 @@ export default function DashboardPage() {
     return (
         <DefaultLayout maxWidth="max-w-full">
             <section className="flex flex-col gap-8 w-full px-4 pt-2 pb-8">
-                
+
                 {/* Header Section - Rectangle Style matching Navbar */}
                 <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-orange-600/15 via-amber-500/10 to-yellow-500/10 border border-orange-500/20 mb-2">
                     {/* Subtle grid pattern */}
                     <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(249,115,22,0.3) 40px, rgba(249,115,22,0.3) 80px)' }}></div>
-                    
+
                     {/* Field center line + circle */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
@@ -152,9 +249,9 @@ export default function DashboardPage() {
                             {t('dashboard.subtitle')}
                         </p>
 
-                        <Button 
-                            as={Link} 
-                            to="/matches/new" 
+                        <Button
+                            as={Link}
+                            to="/matches/new"
                             size="lg"
                             className="font-bold bg-linear-to-r from-orange-500 to-amber-500 text-white shadow-xl shadow-orange-500/30 rounded-2xl h-14 px-8 w-full sm:w-auto relative z-20 mt-2"
                             startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" /></svg>}
@@ -164,10 +261,10 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <Tabs 
-                    aria-label="Dashboard Options" 
-                    color="warning" 
-                    variant="underlined" 
+                <Tabs
+                    aria-label="Dashboard Options"
+                    color="warning"
+                    variant="underlined"
                     classNames={{
                         tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
                         cursor: "w-full bg-orange-500",
@@ -175,8 +272,8 @@ export default function DashboardPage() {
                         tabContent: "group-data-[selected=true]:text-orange-500 font-bold uppercase tracking-widest text-xs"
                     }}
                 >
-                    <Tab 
-                        key="requests" 
+                    <Tab
+                        key="requests"
                         title={
                             <div className="flex items-center space-x-2">
                                 <span>{t('dashboard.tabs.requests')}</span>
@@ -190,7 +287,7 @@ export default function DashboardPage() {
                     >
                         <div className="flex flex-col gap-6 pt-6">
                             {renderSubFilters(requestsSubFilter, setRequestsSubFilter)}
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {isLoadingIncoming ? (
                                     <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
@@ -218,12 +315,12 @@ export default function DashboardPage() {
                                                 </div>
                                                 <div className="bg-white/5 rounded-lg p-3 space-y-2">
                                                     <div className="flex justify-between items-center text-[10px] font-bold text-default-400">
-                                                        <span>DATE DU MATCH</span>
-                                                        <span className="text-white">{request.match_date}</span>
+                                                        <span>POUR LE MATCH DU</span>
+                                                        <span className="text-white">{formatDate(request.match_date)} à {formatTime(request.match_time)}</span>
                                                     </div>
                                                     <p className="text-xs text-default-200 italic line-clamp-2">"{request.message || 'Aucun message'}"</p>
                                                 </div>
-                                                
+
                                                 {request.request_status === 'pending' ? (
                                                     <div className="flex gap-2">
                                                         <Button size="sm" color="success" className="flex-1 font-black uppercase text-[10px] h-9 text-success-950" onPress={() => handleUpdateStatus(request.match_id, request.user_id, 'accepted')}>{t('dashboard.controls.accept')}</Button>
@@ -270,7 +367,7 @@ export default function DashboardPage() {
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{match.match_date}</span>
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{formatDate(match.match_date)}</span>
                                                             <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] uppercase font-black">{match.status}</Chip>
                                                         </div>
                                                         <h3 className="font-bold text-white truncate text-base mt-0.5">
@@ -278,12 +375,38 @@ export default function DashboardPage() {
                                                         </h3>
                                                     </div>
                                                 </div>
-                                                <div className="flex justify-between items-center pt-3 border-t border-white/5">
-                                                    <span className="text-xs font-bold text-default-400 uppercase tracking-tighter">Inscriptions</span>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-sm font-black text-orange-500">{match.contacts_count || 0}</span>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-orange-500"><path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
-                                                    </div>
+                                                <div className="flex gap-2 mt-2">
+                                                    {!isTooLate(match.match_date, match.match_time) ? (
+                                                        <>
+                                                            <Button
+                                                                as={Link}
+                                                                to={`/matches/${match.id}/edit`}
+                                                                size="sm"
+                                                                variant="flat"
+                                                                className="flex-1 font-bold text-[10px] h-8 bg-amber-500/10 text-amber-500"
+                                                            >
+                                                                Modifier
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="flat"
+                                                                color="danger"
+                                                                className="h-8 font-bold text-[10px]"
+                                                                onPress={() => {
+                                                                    handleDeleteMatch(match.id, match.match_date, match.match_time);
+                                                                }}
+                                                                isLoading={isSaving}
+                                                            >
+                                                                Supprimer
+                                                            </Button>
+                                                        </>
+                                                    ) : (
+                                                        <div className="flex-1 py-1 text-center border border-dashed border-danger/30 rounded-lg bg-danger/5">
+                                                            <p className="text-[10px] font-bold text-danger leading-tight uppercase italic px-2">
+                                                                Modifications verrouillées (H-2)
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </CardBody>
                                         </Card>
@@ -320,7 +443,7 @@ export default function DashboardPage() {
                                     filteredParticipations.map((part, idx) => (
                                         <Card key={idx} className={`bg-default-50/5 border ${part.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'} hover:bg-default-50/10 transition-colors`}>
                                             <CardBody className="p-5 flex flex-col gap-4">
-                                                 <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-4">
                                                     <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1">
                                                         {part.host_club_logo ? (
                                                             <Image src={part.host_club_logo} className="object-contain" />
@@ -342,9 +465,9 @@ export default function DashboardPage() {
                                                 <div className="bg-white/5 rounded-xl p-4 space-y-3">
                                                     <div className="flex justify-between items-center text-[10px] font-black text-default-400 border-b border-white/5 pb-2">
                                                         <span className="uppercase">Rappel Événement</span>
-                                                        <span className="text-white">{part.match_date} @ {part.match_time}</span>
+                                                        <span className="text-white">{formatDate(part.match_date)} @ {formatTime(part.match_time)}</span>
                                                     </div>
-                                                    
+
                                                     {part.request_status === 'accepted' ? (
                                                         <div className="space-y-2 animate-appearance-in">
                                                             <div className="flex items-center gap-2 text-xs text-success-500 font-bold">
@@ -352,7 +475,7 @@ export default function DashboardPage() {
                                                                 Demande Acceptée !
                                                             </div>
                                                             <div className="grid grid-cols-1 gap-2">
-                                                                <a href={`tel:${part.host_phone}`} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-success-500/10 hover:bg-success-500/20 text-success-500 text-xs font-black transition-colors">
+                                                                <a href={`tel:${part.host_phone}`} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-success-500/10 hover:bg-success-500/20 text-success-500 text-xs font-black transition-colors truncate">
                                                                     📞 {part.host_phone || 'Non renseigné'}
                                                                 </a>
                                                                 <a href={`mailto:${part.host_email}`} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-primary-500/10 hover:bg-primary-500/20 text-primary-500 text-xs font-black transition-colors truncate">
@@ -361,9 +484,10 @@ export default function DashboardPage() {
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div className="flex items-center gap-2 text-xs text-default-500 font-medium py-2">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-                                                            Les coordonnées seront visibles après acceptation.
+                                                        <div className="flex-1 py-1 text-center border border-dashed border-danger/30 rounded-lg bg-danger/5">
+                                                            <p className="text-[10px] font-bold text-danger leading-tight uppercase italic px-2">
+                                                                Les coordonnées seront visibles après acceptation.
+                                                            </p>
                                                         </div>
                                                     )}
                                                 </div>

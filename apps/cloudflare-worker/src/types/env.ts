@@ -44,6 +44,13 @@ export interface Env {
     AUTHENTICATION_PROVIDER_TYPE: string;
     DEX_JWKS_ENDPOINT: string;
 
+    // APIs & Models
+    GOOGLE_API_KEY: string;
+    GEMINI_MODEL: string;
+
+    // Cloudflare
+    CLOUDFLARE_ACCOUNT_ID: string;
+
     // API Gouvernementale (SIRET)
     SIRET_API_URL: string;
 

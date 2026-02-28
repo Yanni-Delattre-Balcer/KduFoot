@@ -64,13 +64,18 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         }
 
         const url = new URL(request.url);
-        /**
-         * We extract geolocation parameters for specialized searching.
-         * 'radius_km' allows finding matches within a certain distance of a user.
-         */
         const radiusParam = url.searchParams.get('radius_km');
         const userLatParam = url.searchParams.get('user_lat');
         const userLngParam = url.searchParams.get('user_lng');
+
+        const authHeader = request.headers.get('Authorization');
+        let currentUserId: string | null = null;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.substring(7);
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+            if (dbUser) currentUserId = dbUser.id;
+        }
 
         const filters: any = {
             category: url.searchParams.get('category') || undefined,
@@ -83,6 +88,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             location_city: url.searchParams.get('location_city') || undefined,
             location_zip: url.searchParams.get('location_zip') || undefined,
             ownerId: url.searchParams.get('ownerId') || undefined,
+            include_past: url.searchParams.get('include_past') === 'true',
             limit: parseInt(url.searchParams.get('limit') || '50'),
             offset: parseInt(url.searchParams.get('offset') || '0'),
             radius_km: radiusParam ? parseFloat(radiusParam) : undefined,
@@ -90,36 +96,104 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             user_lng: userLngParam ? parseFloat(userLngParam) : undefined,
         };
 
-        /**
-         * The matchService performs the actual database query.
-         * It may also use the Google Maps API Key for geocoding cities into coordinates.
-         */
+        // Handle 'me' for ownerId
+        if (filters.ownerId === 'me') {
+            if (!currentUserId) {
+                return Response.json({ success: false, error: 'Authentication required for ownerId=me' }, { status: 401, headers: router.corsHeaders });
+            }
+            filters.ownerId = currentUserId;
+        }
+
         const result = await matchService.search(filters, env.GOOGLE_MAPS_API_KEY);
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     /**
- * @openapi
- * /api/matches/{id}:
- *   get:
- *     tags:
- *       - Matches
- *     summary: Retrieve detailed match information by ID
- *     description: Fetches full match criteria, location, and owner details for a given match identifier.
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: Unique UUID of the match.
- *         schema: { type: string, format: uuid }
- *     responses:
- *       200:
- *         description: Match details.
- *       404:
- *         description: Not Found.
- */
+     * @openapi
+     * /api/matches/requests:
+     *   get:
+     *     tags:
+     *       - Match Participation
+     *     summary: List incoming match requests for the organizer
+     *     description: Retrieves all participation requests for matches owned by the current user.
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: List of incoming requests.
+     */
+    router.get('/api/matches/requests', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        if (!dbUser) {
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const requests = await matchService.getIncomingRequests(dbUser.id);
+        return Response.json({ success: true, requests }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+    });
+
+    /**
+     * @openapi
+     * /api/matches/participations:
+     *   get:
+     *     tags:
+     *       - Match Participation
+     *     summary: List outgoing match participation applications
+     *     description: Displays all matches the current user has applied to join.
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: List of outgoing applications.
+     */
+    router.get('/api/matches/participations', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CONTACT);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        if (!dbUser) {
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const participations = await matchService.getMyParticipations(dbUser.id);
+        return Response.json({ success: true, participations }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+    });
+
+    /**
+    * @openapi
+    * /api/matches/{id}:
+    *   get:
+    *     tags:
+    *       - Matches
+    *     summary: Retrieve detailed match information by ID
+    *     description: Fetches full match criteria, location, and owner details for a given match identifier.
+    *     security:
+    *       - bearerAuth: []
+    *     parameters:
+    *       - name: id
+    *         in: path
+    *         required: true
+    *         description: Unique UUID of the match.
+    *         schema: { type: string, format: uuid }
+    *     responses:
+    *       200:
+    *         description: Match details.
+    *       404:
+    *         description: Not Found.
+    */
     router.get('/api/matches/<id>', async (request: Request) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
@@ -332,9 +406,17 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
         const payload = JSON.parse(atob(token.split('.')[1]));
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type, club_colors FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string, level: string, category: string, pitch_type: string, club_colors: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // Security check: Profile must be 100% complete
+        if (!dbUser.level || !dbUser.category || !dbUser.pitch_type || !dbUser.club_colors) {
+            return Response.json({
+                success: false,
+                error: 'Profil incomplet : Veuillez renseigner votre niveau, catégorie, type de terrain et couleurs dans votre compte.'
+            }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const dto = await request.json() as ContactMatchDto;
@@ -345,70 +427,6 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
-
-    /**
-     * @openapi
-     * /api/matches/requests:
-     *   get:
-     *     tags:
-     *       - Match Participation
-     *     summary: List incoming match participation requests
-     *     description: Displays all requests sent by other users to participate in matches owned by the current user.
-     *     security:
-     *       - bearerAuth: []
-     *     responses:
-     *       200:
-     *         description: List of incoming requests.
-     */
-    router.get('/api/matches/requests', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
-        if (!dbUser) {
-            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const requests = await matchService.getIncomingRequests(dbUser.id);
-        return Response.json({ success: true, requests }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-    });
-
-    /**
-     * @openapi
-     * /api/matches/participations:
-     *   get:
-     *     tags:
-     *       - Match Participation
-     *     summary: List outgoing match participation applications
-     *     description: Displays all matches the current user has applied to join.
-     *     security:
-     *       - bearerAuth: []
-     *     responses:
-     *       200:
-     *         description: List of outgoing applications.
-     */
-    router.get('/api/matches/participations', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CONTACT);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
-        if (!dbUser) {
-            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const participations = await matchService.getMyParticipations(dbUser.id);
-        return Response.json({ success: true, participations }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     /**
@@ -467,6 +485,54 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         try {
             const success = await matchService.updateRequestStatus(params.matchId, params.userId, dbUser.id, body.status);
+            return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+    });
+
+    /**
+     * @openapi
+     * /api/matches/{matchId}/requests/{userId}:
+     *   delete:
+     *     tags:
+     *       - Match Participation
+     *     summary: Cancel or remove a participation request
+     *     description: Allows the requester or the match owner to remove a contact request.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: matchId
+     *         in: path
+     *         required: true
+     *         schema: { type: string, format: uuid }
+     *       - name: userId
+     *         in: path
+     *         required: true
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: Request removed.
+     *       403:
+     *         description: Forbidden - Lacks authority.
+     */
+    router.delete('/api/matches/<matchId>/requests/<userId>', async (request: Request) => {
+        const params = (request as any).params as { matchId: string, userId: string };
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CONTACT);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        if (!dbUser) {
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        try {
+            const success = await matchService.deleteContact(params.matchId, params.userId, dbUser.id);
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

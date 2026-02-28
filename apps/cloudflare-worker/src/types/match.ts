@@ -75,6 +75,8 @@ export interface MatchContact {
     message: string;
     contacted_at: string;
     status: 'pending' | 'accepted' | 'refused';
+    notification_state?: number; // 0: none, 1: modified, 2: cancelled
+    cancellation_reason?: string;
 }
 
 export interface MatchFilters {

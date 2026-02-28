@@ -308,6 +308,10 @@
       "8v8": "8 vs 8",
       "5v5": "5 vs 5",
       "Futsal": "Futsal"
+    },
+    "type": {
+      "match": "Match",
+      "tournament": "Tournament"
     }
   },
   "matchesPage": {

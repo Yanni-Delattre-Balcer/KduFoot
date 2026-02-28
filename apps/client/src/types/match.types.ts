@@ -129,6 +129,6 @@ export interface MatchFilters {
     limit?: number;
     offset?: number;
     notes?: string;
-    owner_id?: string;
+    ownerId?: string;
     include_past?: boolean;
 }

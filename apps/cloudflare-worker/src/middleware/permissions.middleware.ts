@@ -50,10 +50,10 @@ async function checkQuota(
     payload: any
 ): Promise<PermissionCheck> {
     const quotaConfig: Record<string, { limit: number; period: string }> = {
-        [Permission.VIDEOS_ANALYZE]: { limit: 3, period: 'daily' },
-        [Permission.VIDEOS_ANALYZE_LONG]: { limit: 10, period: 'daily' },
-        [Permission.SESSIONS_ADAPT]: { limit: 3, period: 'monthly' },
-        [Permission.MATCHES_CREATE]: { limit: 50, period: 'monthly' },
+        [Permission.VIDEOS_ANALYZE]: { limit: 0, period: 'daily' },
+        [Permission.VIDEOS_ANALYZE_LONG]: { limit: 0, period: 'daily' },
+        [Permission.SESSIONS_ADAPT]: { limit: 1000, period: 'monthly' },
+        [Permission.MATCHES_CREATE]: { limit: 1000, period: 'monthly' },
     };
 
     const config = quotaConfig[permission];
@@ -62,7 +62,14 @@ async function checkQuota(
     const userId = extractUserIdFromPayload(payload);
     const kvKey = `quota:${userId}:${permission}:${getCurrentPeriod(config.period)}`;
 
-    const current = parseInt(await env.KV_CACHE.get(kvKey) || '0');
+    let current = parseInt(await env.KV_CACHE.get(kvKey) || '0');
+
+    // TEMPORARY: Reset quota if reached in local development
+    const isLocal = env.API_BASE_URL?.includes('localhost') || env.API_BASE_URL?.includes('127.0.0.1');
+    if (isLocal && current >= config.limit) {
+        current = 0;
+        await env.KV_CACHE.put(kvKey, '0');
+    }
 
     if (current >= config.limit) {
         return {

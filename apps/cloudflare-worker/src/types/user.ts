@@ -12,6 +12,8 @@ export interface User {
     license_id?: string | null;
     category?: string | null;
     level?: string | null;
+    pitch_type?: string | null;
+    club_colors?: string | null;
     stadium_address?: string | null;
     latitude?: number | null;
     longitude?: number | null;
@@ -39,6 +41,8 @@ export interface UpdateUserDto {
     license_id?: string;
     category?: string;
     level?: string;
+    pitch_type?: string;
+    club_colors?: string;
     stadium_address?: string;
     latitude?: number;
     longitude?: number;

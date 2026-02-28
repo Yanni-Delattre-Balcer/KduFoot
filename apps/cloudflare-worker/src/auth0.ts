@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 import * as jose from "jose";
+import type { Env } from "./types/env";
 
 /**
  * Auth0 Management API Token response

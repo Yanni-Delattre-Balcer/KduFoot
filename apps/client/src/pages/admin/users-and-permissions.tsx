@@ -142,15 +142,15 @@ export default function UsersAndPermissionsPage() {
                         setUsers(u ?? []);
                     } catch (err) {
                         console.error("Erreur chargement utilisateurs:", err);
-                        addToast({ title: t("error"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
+                        addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
                     }
                 } else {
-                    addToast({ title: t("error"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
+                    addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
                 }
             })
             .catch((err) => {
                 console.error("Erreur token Management:", err);
-                addToast({ title: t("error"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
+                addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
             })
             .finally(() => setLoadingUsers(false));
     }, []);
@@ -178,7 +178,7 @@ export default function UsersAndPermissionsPage() {
             setEditing((prev) => ({ ...prev, [userId]: permState }));
         } catch (err) {
             console.error("Erreur chargement permissions:", err);
-            addToast({ title: t("error"), description: t("adminUsersPage.toasts.errorLoadingPerms"), variant: "solid" });
+            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingPerms"), variant: "solid" });
         } finally {
             setModalLoading(false);
         }
@@ -278,7 +278,7 @@ export default function UsersAndPermissionsPage() {
             setSelectedUserId(null);
         } catch (err) {
             console.error(err);
-            addToast({ title: t("error"), description: t("error-updating-user"), variant: "solid" });
+            addToast({ title: t("error.title"), description: t("error-updating-user"), variant: "solid" });
         } finally {
             setSavingUserId(null);
         }
@@ -288,7 +288,7 @@ export default function UsersAndPermissionsPage() {
     const deleteUser = async (userId: string) => {
         if (!mgmtToken) return;
         if (userId === currentUserId) {
-            addToast({ title: t("error"), description: t("adminUsersPage.toasts.cannotDeleteSelf"), variant: "solid" });
+            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.cannotDeleteSelf"), variant: "solid" });
             return;
         }
         if (!window.confirm(t("adminUsersPage.confirmDeletePrefix", { userId }))) return;
@@ -299,7 +299,7 @@ export default function UsersAndPermissionsPage() {
             addToast({ title: t("success"), description: t("adminUsersPage.toasts.successDelete"), variant: "solid" });
         } catch (err) {
             console.error(err);
-            addToast({ title: t("error"), description: t("adminUsersPage.toasts.errorDelete"), variant: "solid" });
+            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorDelete"), variant: "solid" });
         }
     };
 

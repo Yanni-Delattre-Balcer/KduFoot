@@ -34,12 +34,15 @@ import { I18nIcon, LanguageSwitch } from "./language-switch";
 
 import { LoginLogoutButton, LoginLogoutLink } from "@/authentication";
 import { siteConfig } from "@/config/site";
+import { useNotificationStats } from "@/hooks/use-matches";
+import { Chip } from "@heroui/chip";
 
 
 
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
+  const { totalCount } = useNotificationStats();
 
   const getNavItemClass = (href: string) => {
     const base = "font-bold hover:scale-105 transition-transform bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent text-base";
@@ -57,11 +60,11 @@ export const Navbar = () => {
   };
 
   return (
-    <HeroUINavbar 
-      maxWidth="full" 
-      position="sticky" 
+    <HeroUINavbar
+      maxWidth="full"
+      position="sticky"
       isBlurred={false}
-      className="h-16 lg:h-24 top-0 m-0! p-0! border-none shadow-none bg-background" 
+      className="h-16 lg:h-24 top-0 m-0! p-0! border-none shadow-none bg-background"
       classNames={{
         wrapper: "max-w-full px-6 h-full relative flex items-center justify-between"
       }}
@@ -78,7 +81,19 @@ export const Navbar = () => {
               color="foreground"
               href={item.href}
             >
-              {item.label}
+              <div className="flex items-center gap-1.5">
+                {item.label}
+                {item.href === '/dashboard' && totalCount > 0 && (
+                  <Chip
+                    size="sm"
+                    color="danger"
+                    variant="solid"
+                    className="h-4 min-w-[18px] px-1 text-[10px] font-extrabold animate-bounce shadow-lg shadow-danger/40 border border-white/20"
+                  >
+                    {totalCount}
+                  </Chip>
+                )}
+              </div>
             </LinkUniversal>
           </NavbarItem>
         ))}
@@ -118,7 +133,14 @@ export const Navbar = () => {
                 href={item.href}
                 size="lg"
               >
-                {item.label}
+                <div className="flex items-center gap-2">
+                  {item.label}
+                  {item.href === '/dashboard' && totalCount > 0 && (
+                    <Chip size="sm" color="danger" variant="solid" className="h-5 font-black animate-bounce">
+                      {totalCount}
+                    </Chip>
+                  )}
+                </div>
               </LinkUniversal>
             </NavbarMenuItem>
           ))}

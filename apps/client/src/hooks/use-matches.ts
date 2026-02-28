@@ -99,12 +99,88 @@ export function useMatch(id: string | null) {
         mutate(); // Re-fetch to see the new contact in the list
     }, [id, getAccessTokenSilently, mutate]);
 
+    const cancelMatchContact = useCallback(async (userId: string) => {
+        if (!id) return;
+        const token = await getAccessTokenSilently();
+        await matchService.cancelRequest(id, userId, token);
+        mutate();
+    }, [id, getAccessTokenSilently, mutate]);
+
+    const updateRequestStatus = useCallback(async (userId: string, status: 'accepted' | 'refused') => {
+        if (!id) return;
+        const token = await getAccessTokenSilently();
+        await matchService.updateRequestStatus(id, userId, status, token);
+        mutate();
+    }, [id, getAccessTokenSilently, mutate]);
+
     return {
         match: data?.match as Match,
         isLoading,
         isError: error,
         updateMatch,
         deleteMatch,
-        contactMatch
+        contactMatch,
+        cancelMatchContact,
+        updateRequestStatus
+    };
+}
+
+export function useIncomingRequests() {
+    const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+
+    const fetcher = async (url: string) => {
+        const token = await getAccessTokenSilently();
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch requests');
+        return response.json();
+    };
+
+    const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/requests' : null, fetcher, {
+        refreshInterval: 30000, // Refresh every 30 seconds
+    });
+
+    return {
+        requests: data?.requests as any[] || [],
+        pendingCount: (data?.requests as any[] || []).filter(r => r.request_status === 'pending').length,
+        isLoading,
+        isError: error,
+        mutate
+    };
+}
+
+export function useMyParticipations() {
+    const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+
+    const fetcher = async (url: string) => {
+        const token = await getAccessTokenSilently();
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch participations');
+        return response.json();
+    };
+
+    const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/participations' : null, fetcher, {
+        refreshInterval: 30000,
+    });
+
+    return {
+        participations: data?.participations as any[] || [],
+        modifiedCount: (data?.participations as any[] || []).filter(p => p.notification_state === 1).length,
+        isLoading,
+        isError: error,
+        mutate
+    };
+}
+
+export function useNotificationStats() {
+    const { pendingCount: requestsPending, isLoading: isLoadingReq } = useIncomingRequests();
+    const { modifiedCount: participationsModified, isLoading: isLoadingPart } = useMyParticipations();
+
+    return {
+        totalCount: requestsPending + participationsModified,
+        isLoading: isLoadingReq || isLoadingPart
     };
 }

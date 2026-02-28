@@ -4,6 +4,7 @@ import { Button } from '@heroui/button';
 import { Input, Textarea } from '@heroui/input';
 import { Select, SelectItem } from "@heroui/select";
 import { Card, CardBody, CardHeader } from '@heroui/card';
+import { addToast } from "@heroui/toast";
 import { CreateMatchDto, Match, PitchType, Level } from '@/types/match.types';
 import { Category } from '@/types/exercise.types';
 import { useMatches } from '@/hooks/use-matches';
@@ -30,7 +31,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
     const handleLinkClub = async () => {
         const cleanSiret = siret.replace(/\s/g, '').trim();
         if (!cleanSiret || cleanSiret.length !== 14) {
-            alert(t('matchForm.alerts.siret_length'));
+            addToast({ title: t('error', 'Erreur'), description: t('matchForm.alerts.siret_length', 'Le SIRET doit contenir exactement 14 chiffres'), variant: 'flat', color: 'danger' });
             return;
         }
         const confirmed = confirm(t('matchForm.alerts.link_confirm'));
@@ -38,8 +39,9 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         setIsLinking(true);
         try {
             await linkClub(cleanSiret);
+            addToast({ title: t('success'), description: t('matchForm.alerts.link_success', 'Club lié avec succès'), variant: 'flat', color: 'success' });
         } catch (error: any) {
-            alert(error.message || t('matchForm.alerts.link_error'));
+            addToast({ title: t('error'), description: error.message || t('matchForm.alerts.link_error'), variant: 'flat', color: 'danger' });
         } finally {
             setIsLinking(false);
         }
@@ -98,7 +100,10 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                 location_city: user.club?.city || prev.location_city || '',
                 location_zip: user.club?.zip || prev.location_zip || '',
                 email: user.email || prev.email || '',
-                phone: user.phone || prev.phone || ''
+                phone: user.phone || prev.phone || '',
+                category: user.category as Category || prev.category,
+                level: user.level as Level || prev.level,
+                pitch_type: user.pitch_type as PitchType || prev.pitch_type,
             }));
         }
     }, [initialData, user]);
@@ -141,24 +146,12 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user?.club_id) {
-            alert(t('matchForm.alerts.must_link'));
+            addToast({ title: t('warning', 'Attention'), description: t('matchForm.alerts.must_link', 'Veuillez lier votre club avant de créer un match'), variant: 'flat', color: 'warning' });
             return;
         }
-
-        // Enforcement: Mandatory profile picture (REMOVED as requested)
-        /*
-        const isDefaultAvatar = auth0User?.picture?.includes('gravatar.com') ||
-            auth0User?.picture?.includes('default') ||
-            !auth0User?.picture;
-
-        if (isDefaultAvatar) {
-            alert('⚠️ PHOTO DE PROFIL OBLIGATOIRE\n\nVous devez ajouter une photo de vous....');
-            return;
-        }
-        */
 
         if (!formData.email || !formData.phone) {
-            alert(t('matchForm.alerts.contact_required'));
+            addToast({ title: t('warning', 'Attention'), description: t('matchForm.alerts.contact_required', 'Email et téléphone requis'), variant: 'flat', color: 'warning' });
             return;
         }
 
@@ -169,7 +162,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         selectedDate.setHours(hours, minutes);
 
         if (selectedDate < now) {
-            alert(t('matchForm.alerts.date_past'));
+            addToast({ title: t('error'), description: t('matchForm.alerts.date_past'), variant: 'flat', color: 'danger' });
             return;
         }
 
@@ -177,7 +170,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         const twoYearsFromNow = new Date();
         twoYearsFromNow.setFullYear(now.getFullYear() + 2);
         if (selectedDate > twoYearsFromNow) {
-            alert(t('matchForm.alerts.date_far'));
+            addToast({ title: t('error'), description: t('matchForm.alerts.date_far'), variant: 'flat', color: 'danger' });
             return;
         }
         setIsSaving(true);
@@ -195,13 +188,32 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
             if (initialData?.id) {
                 await updateMatch(initialData.id, payload as any);
+                addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.update_success', 'Match mis à jour avec succès'), variant: 'flat', color: 'success' });
             } else {
                 await createMatch(payload as any);
+                addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.create_success', 'Match créé avec succès'), variant: 'flat', color: 'success' });
             }
             if (onSuccess) onSuccess();
-        } catch (error) {
-            console.error("Failed to save match", error);
-            alert((error as any).message || t('error.save_failed', 'Erreur lors de la sauvegarde'));
+        } catch (error: any) {
+            const rawMessage = error.message || "";
+            let cleanMessage = rawMessage;
+            try {
+                if (rawMessage.startsWith('{')) {
+                    const parsed = JSON.parse(rawMessage);
+                    cleanMessage = parsed.error || parsed.message || rawMessage;
+                }
+            } catch { /* ignore */ }
+
+            const errorMessage = cleanMessage === 'TOO_LATE_TO_MODIFY'
+                ? t('error.too_late_to_modify')
+                : (cleanMessage || t('error.save_failed'));
+
+            addToast({
+                title: t('error.title'),
+                description: errorMessage,
+                variant: 'flat',
+                color: 'danger'
+            });
         } finally {
             setIsSaving(false);
         }
@@ -242,6 +254,101 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     </div>
                 </CardHeader>
                 <CardBody className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
+                    {/* Row 1: SIRET (Left) and Address Details (Right) */}
+                    <div className="md:col-span-2">
+                        {!user?.club_id ? (
+                            <div className="p-5 bg-violet-900/20 border-2 border-violet-700/50 rounded-2xl flex flex-col gap-5 shadow-sm h-full">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-2.5 bg-violet-800/40 rounded-full text-violet-400 shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <h4 className="text-sm md:text-base font-black text-violet-100 uppercase tracking-tighter">
+                                            {t('matchForm.link_club.title')}
+                                        </h4>
+                                        <div className="text-[12px] md:text-[14px] text-violet-200 space-y-2 font-bold leading-snug">
+                                            <p className="underline decoration-2 text-violet-100">{t('matchForm.link_club.warning_siret')}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-3 items-center w-full justify-start mt-auto">
+                                    <Input
+                                        size="md"
+                                        placeholder="EX: 123 456 789 00012"
+                                        value={siret}
+                                        onValueChange={setSiret}
+                                        className="w-full sm:max-w-xs"
+                                        classNames={{
+                                            inputWrapper: "bg-white border-violet-700/50 shadow-inner h-10 font-bold text-black"
+                                        }}
+                                    />
+                                    <Button size="md" color="secondary" onPress={handleLinkClub} isLoading={isLinking} className="w-full sm:w-auto font-black px-8 shadow-md h-10 uppercase tracking-tighter">
+                                        {t('matchForm.link_club.validate')}
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex items-center justify-between gap-4 shadow-sm h-full">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-success-100 rounded-full text-success-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-success-900 font-black uppercase tracking-tighter text-[10px]">{t('matchForm.link_club.linked')}</span>
+                                        <span className="text-success-700 font-bold text-xl">{user.club?.name}</span>
+                                    </div>
+                                </div>
+                                {auth0User?.email === 'yannidelattrebalcer.artois@gmail.com' && (
+                                    <Button size="sm" color="danger" variant="flat" onPress={async () => {
+                                        try {
+                                            await unlinkClub();
+                                        } catch (e: any) {
+                                            alert(e.message);
+                                        }
+                                    }}>{t('matchForm.buttons.unlink')}</Button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="md:col-span-2 flex flex-col gap-3 justify-center">
+                        <Input
+                            label={t('matchForm.labels.address')}
+                            placeholder={t('matchForm.labels.auto_siret')}
+                            value={formData.location_address || ''}
+                            isDisabled
+                            classNames={{
+                                inputWrapper: "bg-default-100! text-default-500",
+                                label: "text-default-500 font-bold"
+                            }}
+                        />
+                        <div className="grid grid-cols-2 gap-3">
+                            <Input
+                                label={t('matchForm.labels.zip')}
+                                placeholder={t('matchForm.labels.auto')}
+                                value={formData.location_zip || ''}
+                                isDisabled
+                                classNames={{
+                                    inputWrapper: "bg-default-100! text-default-500",
+                                    label: "text-default-500 font-bold"
+                                }}
+                            />
+                            <Input
+                                label={t('matchForm.labels.city')}
+                                placeholder={t('matchForm.labels.auto')}
+                                value={formData.location_city || ''}
+                                isDisabled
+                                classNames={{
+                                    inputWrapper: "bg-default-100! text-default-500",
+                                    label: "text-default-500 font-bold"
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Row 2: Category, Level, Format, Gender */}
                     <Select
                         label={t('matchForm.labels.category')}
                         placeholder={t('matchForm.labels.choose')}
@@ -344,8 +451,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             </svg>
                         }
                     >
-                        <SelectItem key="Domicile">{t('enums.venue.Domicile')}</SelectItem>
-                        <SelectItem key="Extérieur">{t('enums.venue.Extérieur')}</SelectItem>
+                        <SelectItem key="Domicile">{t('matchForm.venue_labels.Domicile')}</SelectItem>
+                        <SelectItem key="Extérieur">{t('matchForm.venue_labels.Extérieur')}</SelectItem>
                         <SelectItem key="Neutre">{t('enums.venue.Neutre')}</SelectItem>
                     </Select>
 
@@ -366,103 +473,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         ))}
                     </Select>
 
-                    {/* Row 3: SIRET (Left) and Address Details (Right) */}
-                    <div className="md:col-span-2">
-                        {!user?.club_id ? (
-                            <div className="p-5 bg-violet-900/20 border-2 border-violet-700/50 rounded-2xl flex flex-col gap-5 shadow-sm">
-                                <div className="flex items-start gap-4">
-                                    <div className="p-2.5 bg-violet-800/40 rounded-full text-violet-400 shrink-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                        </svg>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <h4 className="text-sm md:text-base font-black text-violet-100 uppercase tracking-tighter">
-                                            {t('matchForm.link_club.title')}
-                                        </h4>
-                                        <div className="text-[12px] md:text-[14px] text-violet-200 space-y-2 font-bold leading-snug">
-                                            <p className="underline decoration-2 text-violet-100">{t('matchForm.link_club.warning_siret')}</p>
-                                            <p>{t('matchForm.link_club.warning_auto')}</p>
-                                            <p className="text-white font-black">{t('matchForm.link_club.warning_final')}</p>
-                                            <p className="italic opacity-90 text-[11px] md:text-[13px]">{t('matchForm.link_club.warning_support')}</p>
-                                            <p className="border-t border-violet-600/50 pt-2 text-white">{t('matchForm.link_club.warning_search')}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col sm:flex-row gap-3 items-center w-full justify-start">
-                                    <Input
-                                        size="md"
-                                        placeholder="EX: 123 456 789 00012"
-                                        value={siret}
-                                        onValueChange={setSiret}
-                                        className="w-full sm:max-w-xs"
-                                        classNames={{
-                                            inputWrapper: "bg-white border-violet-700/50 shadow-inner h-10 font-bold"
-                                        }}
-                                    />
-                                    <Button size="md" color="secondary" onPress={handleLinkClub} isLoading={isLinking} className="w-full sm:w-auto font-black px-8 shadow-md h-10 uppercase tracking-tighter">
-                                        {t('matchForm.link_club.validate')}
-                                    </Button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex items-center justify-between gap-4 shadow-sm">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-success-100 rounded-full text-success-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-success-900 font-black uppercase tracking-tighter text-[10px]">{t('matchForm.link_club.linked')}</span>
-                                        <span className="text-success-700 font-bold text-lg">{user.club?.name}</span>
-                                    </div>
-                                </div>
-                                {auth0User?.email === 'yannidelattrebalcer.artois@gmail.com' && (
-                                    <Button size="sm" color="danger" variant="flat" onPress={async () => {
-                                        try {
-                                            await unlinkClub();
-                                        } catch (e: any) {
-                                            alert(e.message);
-                                        }
-                                    }}>{t('matchForm.buttons.unlink')}</Button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="md:col-span-2 flex flex-col gap-3 justify-center">
-                        <Input
-                            label={t('matchForm.labels.address')}
-                            placeholder={t('matchForm.labels.auto_siret')}
-                            value={formData.location_address || ''}
-                            isDisabled
-                            classNames={{
-                                inputWrapper: "bg-default-100! text-default-500",
-                                label: "text-default-500 font-bold"
-                            }}
-                        />
-                        <div className="grid grid-cols-2 gap-3">
-                            <Input
-                                label={t('matchForm.labels.zip')}
-                                placeholder={t('matchForm.labels.auto')}
-                                value={formData.location_zip || ''}
-                                isDisabled
-                                classNames={{
-                                    inputWrapper: "bg-default-100! text-default-500",
-                                    label: "text-default-500 font-bold"
-                                }}
-                            />
-                            <Input
-                                label={t('matchForm.labels.city')}
-                                placeholder={t('matchForm.labels.auto')}
-                                value={formData.location_city || ''}
-                                isDisabled
-                                classNames={{
-                                    inputWrapper: "bg-default-100! text-default-500",
-                                    label: "text-default-500 font-bold"
-                                }}
-                            />
-                        </div>
-                    </div>
+                    {/* Removed Row 3 since it was moved to Row 1 */}
 
                     {/* Row 4: Centered Progress Bar */}
                     <div className="md:col-span-4 flex flex-col justify-center space-y-3 mt-4">
@@ -520,7 +531,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     </Button>
                 )}
                 <Button type="submit" color="secondary" className="bg-violet-700 font-bold text-white" isLoading={isSaving} isDisabled={!user?.club_id}>
-                    {initialData ? t('matchForm.buttons.update') : t('matchForm.buttons.create')}
+                    {initialData ? t('matchForm.buttons.update', 'METTRE À JOUR') : t('matchForm.buttons.create', 'CRÉER DÉFINITIVEMENT')}
                 </Button>
             </div>
         </form>
