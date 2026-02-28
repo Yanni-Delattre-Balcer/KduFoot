@@ -450,7 +450,19 @@ export default function DashboardPage() {
                         </div>
                     </Tab>
 
-                    <Tab key="participations" title={t('dashboard.tabs.participations')}>
+                    <Tab
+                        key="participations"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                <span>{t('dashboard.tabs.participations')}</span>
+                                {myParticipations.filter(p => p.notification_state === 1).length > 0 && (
+                                    <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1">
+                                        {myParticipations.filter(p => p.notification_state === 1).length}
+                                    </Chip>
+                                )}
+                            </div>
+                        }
+                    >
                         <div className="flex flex-col gap-6 pt-6">
                             {renderSubFilters(participationsSubFilter, setParticipationsSubFilter)}
 

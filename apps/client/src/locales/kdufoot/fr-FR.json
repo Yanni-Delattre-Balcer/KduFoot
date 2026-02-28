@@ -517,7 +517,7 @@
     "subtitle": "Gérez vos organisations et vos participations en temps réel.",
     "tabs": {
       "requests": "Demandes Reçues",
-      "organized": "Mes Matchs Organisés",
+      "organized": "Mes Organisations",
       "participations": "Mes Participations",
       "all": "Tous",
       "matches": "Matchs",
@@ -538,8 +538,8 @@
     },
     "status": {
       "pending": "En attente",
-      "accepted": "Accepted",
-      "refused": "Refused"
+      "accepted": "Acceptée",
+      "refused": "Refusée"
     }
   },
   "adminUsersPage": {
