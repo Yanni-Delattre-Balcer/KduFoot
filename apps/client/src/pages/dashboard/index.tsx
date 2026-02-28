@@ -77,7 +77,7 @@ export default function DashboardPage() {
 
     const [isSaving, setIsSaving] = useState(false);
 
-    // Sécurité H-2 : Verrouillage si le match commence dans moins de 2h
+    // Sécurité H-2 : Verrouillage uniquement dans les 2h AVANT le match
     const isTooLate = (matchDate: string, matchTime: string) => {
         try {
             const matchDateTime = new Date(`${matchDate}T${matchTime}`);
@@ -85,8 +85,20 @@ export default function DashboardPage() {
             const now = new Date();
             const diffMs = matchDateTime.getTime() - now.getTime();
             const diffHours = diffMs / (1000 * 60 * 60);
-            return diffHours < 2 && diffHours > -2;
+
+            // On ne bloque QUE si on est dans la fenêtre des 2h avant le début
+            return diffHours > 0 && diffHours < 2;
         } catch (e) {
+            return false;
+        }
+    };
+
+    const isMatchPast = (matchDate: string, matchTime: string) => {
+        try {
+            const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+            if (isNaN(matchDateTime.getTime())) return false;
+            return matchDateTime.getTime() < new Date().getTime();
+        } catch {
             return false;
         }
     };
@@ -170,6 +182,9 @@ export default function DashboardPage() {
 
     // Filtered lists
     const filteredRequests = incomingRequests.filter(r => {
+        // Auto-masquage des demandes pour matchs passés
+        if (isMatchPast(r.match_date, r.match_time)) return false;
+
         if (requestsSubFilter === 'all') return true;
         return r.type === requestsSubFilter;
     });
@@ -180,6 +195,9 @@ export default function DashboardPage() {
     });
 
     const filteredParticipations = myParticipations.filter(p => {
+        // Auto-masquage des matchs terminés
+        if (isMatchPast(p.match_date, p.match_time)) return false;
+
         if (participationsSubFilter === 'all') return true;
         return p.type === participationsSubFilter;
     });

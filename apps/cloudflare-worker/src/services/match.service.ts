@@ -20,8 +20,9 @@ export class MatchService {
             const diffMs = matchDateTime.getTime() - now.getTime();
             const diffHours = diffMs / (1000 * 60 * 60);
 
-            // Bloque si entre -2h et +2h du début
-            return diffHours < 2 && diffHours > -2;
+            // Seule restriction : les 2h AVANT le match
+            // Une fois le match commencé (diffHours <= 0), on peut de nouveau supprimer/modifier
+            return diffHours > 0 && diffHours < 2;
         } catch {
             return false;
         }
