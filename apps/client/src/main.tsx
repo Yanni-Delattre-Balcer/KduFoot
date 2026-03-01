@@ -28,6 +28,7 @@ import { CookieConsentProvider } from "./contexts/cookie-consent-context.tsx";
 import { CookieConsent } from "./components/cookie-consent.tsx";
 import { AuthenticationProvider } from "./authentication";
 import { UserProvider } from "./authentication/providers/user-provider";
+import { WelcomeGatewayProvider } from "./contexts/welcome-gateway-context.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -40,8 +41,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             }
           >
             <UserProvider>
-              <CookieConsent />
-              <App />
+              <WelcomeGatewayProvider>
+                <CookieConsent />
+                <App />
+              </WelcomeGatewayProvider>
             </UserProvider>
           </AuthenticationProvider>
         </CookieConsentProvider>

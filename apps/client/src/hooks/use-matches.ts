@@ -9,9 +9,20 @@ export function useMatches(filters?: MatchFilters) {
     const { getAccessTokenSilently } = useAuth0();
 
     const fetcher = async (url: string) => {
-        const token = await getAccessTokenSilently();
+        let token: string | null = null;
+        try {
+            token = await getAccessTokenSilently();
+        } catch (e) {
+            // Unauthenticated
+        }
+
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers,
         });
         if (!response.ok) throw new Error('Failed to fetch matches');
         return response.json();
@@ -70,9 +81,20 @@ export function useMatch(id: string | null) {
     const { getAccessTokenSilently } = useAuth0();
 
     const fetcher = async (url: string) => {
-        const token = await getAccessTokenSilently();
+        let token: string | null = null;
+        try {
+            token = await getAccessTokenSilently();
+        } catch (e) {
+            // Unauthenticated
+        }
+
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers,
         });
         if (!response.ok) throw new Error('Failed to fetch match');
         return response.json();

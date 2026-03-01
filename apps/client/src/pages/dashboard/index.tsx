@@ -17,6 +17,9 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { useUser } from '@/hooks/use-user';
 import { useIncomingRequests, useMyParticipations } from '@/hooks/use-matches';
 import { useRef } from 'react';
+import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
+import { isProfileComplete } from '@/utils/profile';
+import AccountSettings from '@/components/account-settings';
 
 import { addToast } from '@heroui/toast';
 
@@ -76,6 +79,18 @@ export default function DashboardPage() {
 
     // Modal state for 'Voir le profil'
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
+
+    const { isVisitor, setVisitorMode } = useWelcomeGateway();
+    const profileComplete = isProfileComplete(dbUser);
+    const isLocked = !profileComplete && !isVisitor;
+
+    const [selectedTab, setSelectedTab] = useState<any>("requests");
+
+    useEffect(() => {
+        if (isLocked) {
+            setSelectedTab("account");
+        }
+    }, [isLocked]);
 
     // Track seen notifications to trigger toasts only once
     const seenNotificationsRef = useRef<Set<string>>(new Set());
@@ -363,7 +378,28 @@ export default function DashboardPage() {
                             {t('dashboard.subtitle')}
                         </p>
 
-
+                        {isLocked && (
+                            <div className="mt-6 flex flex-col items-center gap-3 animate-appearance-in">
+                                <Card className="bg-orange-500/10 border border-orange-500/30 p-4 max-w-xl">
+                                    <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                                        <div className="text-3xl">🔒</div>
+                                        <div className="flex-1">
+                                            <p className="text-orange-500 font-bold text-sm uppercase mb-1">Profil Incomplet</p>
+                                            <p className="text-default-400 text-xs">Veuillez compléter vos informations pour accéder à toutes les fonctionnalités.</p>
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            variant="flat"
+                                            color="warning"
+                                            className="font-bold border border-orange-500/30"
+                                            onPress={() => setVisitorMode()}
+                                        >
+                                            Visiter sans s'inscrire
+                                        </Button>
+                                    </div>
+                                </Card>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -403,6 +439,18 @@ export default function DashboardPage() {
                     color="warning"
                     variant="underlined"
                     className="w-full"
+                    selectedKey={selectedTab}
+                    onSelectionChange={(key) => {
+                        if (isLocked && key !== "account") {
+                            addToast({
+                                title: "Action bloquée",
+                                description: t('account.locking_message', "Veuillez compléter votre profil pour accéder à cet onglet."),
+                                color: "warning"
+                            });
+                            return;
+                        }
+                        setSelectedTab(key);
+                    }}
                     classNames={{
                         tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-wrap border-b-0 gap-2",
                         cursor: "rounded-xl shadow-lg shadow-orange-500/20",
@@ -1117,6 +1165,22 @@ export default function DashboardPage() {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </Tab>
+
+                    <Tab
+                        key="account"
+                        title={
+                            <div className="flex items-center space-x-2">
+                                <span>{t('dashboard.tabs.account', 'MON COMPTE')}</span>
+                                {!profileComplete && (
+                                    <div className="w-2 h-2 rounded-full bg-danger animate-pulse" />
+                                )}
+                            </div>
+                        }
+                    >
+                        <div className="pt-6">
+                            <AccountSettings />
                         </div>
                     </Tab>
                 </Tabs>

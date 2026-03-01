@@ -23,9 +23,13 @@ const VENUES: Venue[] = ['Domicile', 'Extérieur', 'Neutre'];
 import MatchForm from '@/components/matches/match-form';
 import TournamentForm from '@/components/matches/tournament-form';
 import { AccountModal } from '@/authentication/account-modal';
+import { isProfileComplete } from '@/utils/profile';
+
+import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 
 export default function MatchesPage() {
     const { t, i18n } = useTranslation();
+    const { openGateway, isVisitor, setVisitorMode } = useWelcomeGateway();
     const [searchParams, setSearchParams] = useSearchParams();
     const [view, setView] = useState<'find' | 'create'>((searchParams.get('view') as 'find' | 'create') || 'find');
     const [type, setType] = useState<'match' | 'tournament'>((searchParams.get('type') as 'match' | 'tournament') || 'match');
@@ -45,7 +49,7 @@ export default function MatchesPage() {
         return new Date(now.getFullYear(), now.getMonth(), 1);
     });
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const { user } = useUser();
+    const { user, isLoading: isUserLoading } = useUser();
     const [filters, setFilters] = useState<MatchFilters>({});
     const [radiusKm, setRadiusKm] = useState<number>(0); // 0 = pas de filtre distance
 
@@ -222,7 +226,13 @@ export default function MatchesPage() {
                                     <span className="whitespace-nowrap">{type === 'match' ? t('match.find') : t('match.find_tournament')}</span>
                                 </button>
                                 <button
-                                    onClick={() => setView('create')}
+                                    onClick={() => {
+                                        if (isVisitor) {
+                                            openGateway("Veuillez compléter votre profil pour effectuer cette action");
+                                            return;
+                                        }
+                                        setView('create');
+                                    }}
                                     className={`flex items-center justify-center gap-2 py-3 px-6 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "font-bold bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40 scale-[1.02]" : "font-bold bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40 scale-[1.02]") : "text-default-500 hover:bg-default-200"}`}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -235,464 +245,471 @@ export default function MatchesPage() {
                     </div>
                 </div>
 
-                {/* Content Block - Separated but Coordinated */}
-                <div className="flex flex-col gap-6 w-full animate-appearance-in">
-                    {view === 'create' ? (
-                        (() => {
-                            const isProfileComplete = !!(
-                                user?.club_id &&
-                                user?.category &&
-                                user?.level &&
-                                user?.pitch_type &&
-                                user?.club_colors
-                            );
+                {isUserLoading ? (
+                    <div className="flex justify-center py-20">
+                        <Spinner color="secondary" size="lg" />
+                    </div>
+                ) : (() => {
+                    const profileFinished = isProfileComplete(user);
+                    const isLocked = !!user && !profileFinished && !isVisitor;
 
-                            if (!isProfileComplete) {
-                                return (
-                                    <div className="flex flex-col items-center justify-center gap-6 py-20 px-8 bg-[#232120] rounded-3xl border border-warning/50 shadow-2xl mt-4 text-center">
-                                        <div className="p-5 rounded-full bg-warning/20 text-warning-500 animate-pulse">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-16 h-16">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                            </svg>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h3 className="text-2xl font-black text-warning-500 uppercase tracking-tight">⚠️ Action requise dans 'Mon Compte'</h3>
-                                            <p className="max-w-md text-default-500 font-medium">
-                                                Pour publier une annonce, vous devez obligatoirement :
-                                            </p>
-                                        </div>
+                    if (isLocked) {
+                        return (
+                            <div className="flex flex-col items-center justify-center gap-6 py-20 px-8 bg-[#232120] rounded-3xl border border-warning/50 shadow-2xl mt-4 text-center animate-appearance-in">
+                                <div className="p-5 rounded-full bg-warning/20 text-warning-500 animate-pulse">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-16 h-16">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-2xl font-black text-warning-500 uppercase tracking-tight">⚠️ Profil à compléter obligatoire</h3>
+                                    <p className="max-w-md text-default-500 font-medium text-sm">
+                                        Pour accéder aux annonces et aux tournois, vous devez finaliser votre profil club.
+                                    </p>
+                                </div>
 
-                                        <div className="bg-default-50 p-6 rounded-2xl border border-default-100 w-full max-w-sm text-left space-y-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${user?.club_id ? 'bg-success text-white' : 'bg-default-200 text-default-600'}`}>
-                                                    {user?.club_id ? '✓' : '1'}
-                                                </div>
-                                                <span className={`text-sm ${user?.club_id ? 'text-success font-bold' : 'text-default-700'}`}>Renseigner votre SIRET (Certification)</span>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? 'bg-success text-white' : 'bg-default-200 text-default-600'}`}>
-                                                    {(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? '✓' : '2'}
-                                                </div>
-                                                <span className={`text-sm ${(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? 'text-success font-bold' : 'text-default-700'}`}>Informations Sportives (Catégorie, Niveau...)</span>
-                                            </div>
+                                <div className="bg-default-50 p-6 rounded-2xl border border-default-100 w-full max-w-sm text-left space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${user?.club_id ? 'bg-success text-white' : 'bg-default-200 text-default-600'}`}>
+                                            {user?.club_id ? '✓' : '1'}
                                         </div>
-
-                                        <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                                            <Button
-                                                color="primary"
-                                                size="lg"
-                                                onPress={() => setIsAccountModalOpen(true)}
-                                                className="font-bold px-10 shadow-xl shadow-primary/40 text-lg"
-                                            >
-                                                Certifier mon Club & Profil
-                                            </Button>
-                                            <Button
-                                                color="default"
-                                                variant="flat"
-                                                onPress={() => setView('find')}
-                                                className="font-bold"
-                                            >
-                                                Plus tard
-                                            </Button>
-                                        </div>
+                                        <span className={`text-sm ${user?.club_id ? 'text-success font-bold' : 'text-default-700'}`}>Renseigner votre SIRET</span>
                                     </div>
-                                );
-                            }
-
-                            return type === 'match' ? (
-                                <MatchForm onSuccess={handleCreateSuccess} />
-                            ) : (
-                                <TournamentForm onSuccess={handleCreateSuccess} />
-                            );
-                        })()
-                    ) : (
-                        <div className="flex flex-col gap-5">
-
-                            {/* Filter Section - Coordinated container */}
-                            <Card className={`shadow-lg border ${type === 'match' ? 'shadow-violet-500/5 border-violet-800/50' : 'shadow-fuchsia-500/5 border-fuchsia-500/20'} bg-[#232120] overflow-hidden`}>
-                                <CardHeader className="pb-0 pt-5 px-5 relative">
-                                    <div className="flex justify-between items-center w-full">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-lg ${type === 'match' ? 'bg-violet-800/20' : 'bg-purple-300/20'}`}>
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-4 h-4 ${type === 'match' ? 'text-violet-800 dark:text-violet-300' : 'text-purple-400 dark:text-purple-200'}`}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
-                                                </svg>
-                                            </div>
-                                            <h3 className="text-lg font-semibold text-default-900 dark:text-default-100">{t('matchesPage.filters.title')}</h3>
-                                            {activeFilterCount > 0 && (
-                                                <Chip size="sm" color="secondary" variant="flat" className="bg-violet-900/20 text-violet-200 dark:bg-violet-500/20 dark:text-violet-300">{activeFilterCount} {t('matchesPage.filters.active')}</Chip>
-                                            )}
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? 'bg-success text-white' : 'bg-default-200 text-default-600'}`}>
+                                            {(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? '✓' : '2'}
                                         </div>
-                                        {activeFilterCount > 0 && (
-                                            <Button size="sm" variant="light" color="danger" onPress={clearFilters}>
-                                                {t('matchesPage.filters.clear')}
+                                        <span className={`text-sm ${(user?.category && user?.level && user?.pitch_type && user?.club_colors) ? 'text-success font-bold' : 'text-default-700'}`}>Informations Sportives</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-4 mt-2 w-full max-w-xs">
+                                    <Button
+                                        color="primary"
+                                        size="lg"
+                                        onPress={() => setIsAccountModalOpen(true)}
+                                        className="font-bold shadow-xl shadow-primary/40"
+                                    >
+                                        Compléter mon Profil
+                                    </Button>
+                                    <div className="relative flex items-center py-2">
+                                        <div className="flex-1 border-t border-default-100/10"></div>
+                                        <span className="shrink-0 px-2 text-default-500 text-[10px] font-bold uppercase tracking-widest">ou</span>
+                                        <div className="flex-1 border-t border-default-100/10"></div>
+                                    </div>
+                                    <Button
+                                        color="warning"
+                                        variant="flat"
+                                        onPress={() => setVisitorMode()}
+                                        className="font-bold border border-warning/20"
+                                    >
+                                        Visiter sans s'inscrire
+                                    </Button>
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <div className="flex flex-col gap-6 w-full animate-appearance-in">
+                            {view === 'create' ? (
+                                type === 'match' ? (
+                                    <MatchForm onSuccess={handleCreateSuccess} />
+                                ) : (
+                                    <TournamentForm onSuccess={handleCreateSuccess} />
+                                )
+                            ) : (
+                                <div className="flex flex-col gap-5">
+
+                                    {/* Filter Section - Coordinated container */}
+                                    <Card className={`shadow-lg border ${type === 'match' ? 'shadow-violet-500/5 border-violet-800/50' : 'shadow-fuchsia-500/5 border-fuchsia-500/20'} bg-[#232120] overflow-hidden`}>
+                                        <CardHeader className="pb-0 pt-5 px-5 relative">
+                                            <div className="flex justify-between items-center w-full">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`p-1.5 rounded-lg ${type === 'match' ? 'bg-violet-800/20' : 'bg-purple-300/20'}`}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-4 h-4 ${type === 'match' ? 'text-violet-800 dark:text-violet-300' : 'text-purple-400 dark:text-purple-200'}`}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
+                                                        </svg>
+                                                    </div>
+                                                    <h3 className="text-lg font-semibold text-default-900 dark:text-default-100">{t('matchesPage.filters.title')}</h3>
+                                                    {activeFilterCount > 0 && (
+                                                        <Chip size="sm" color="secondary" variant="flat" className="bg-violet-900/20 text-violet-200 dark:bg-violet-500/20 dark:text-violet-300">{activeFilterCount} {t('matchesPage.filters.active')}</Chip>
+                                                    )}
+                                                </div>
+                                                {activeFilterCount > 0 && (
+                                                    <Button size="sm" variant="light" color="danger" onPress={clearFilters}>
+                                                        {t('matchesPage.filters.clear')}
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </CardHeader>
+                                        <CardBody className="px-5 pb-5 relative flex flex-col gap-4">
+                                            <p className="text-small text-default-500 italic">
+                                                {t("match.filters.explanation")}
+                                            </p>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                                <Select
+                                                    label={t('matchesPage.filters.category')}
+                                                    placeholder={t('matchesPage.filters.all')}
+                                                    selectedKeys={filters.category ? [filters.category] : []}
+                                                    onChange={(e) => handleFilterChange('category', e.target.value)}
+                                                    size="sm"
+                                                    classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                >
+                                                    {CATEGORIES.map((cat) => (
+                                                        <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
+                                                    ))}
+                                                </Select>
+
+                                                <Select
+                                                    label={t('matchesPage.filters.level')}
+                                                    placeholder={t('matchesPage.filters.all')}
+                                                    selectedKeys={filters.level ? [filters.level] : []}
+                                                    onChange={(e) => handleFilterChange('level', e.target.value)}
+                                                    size="sm"
+                                                    classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                >
+                                                    {LEVELS.map((lvl) => (
+                                                        <SelectItem key={lvl}>{t(`enums.level.${lvl}`)}</SelectItem>
+                                                    ))}
+                                                </Select>
+
+                                                <Select
+                                                    label={t('matchesPage.filters.format')}
+                                                    placeholder={t('matchesPage.filters.all')}
+                                                    selectedKeys={filters.format ? [filters.format] : []}
+                                                    onChange={(e) => handleFilterChange('format', e.target.value)}
+                                                    size="sm"
+                                                    classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                >
+                                                    {FORMATS.map((f) => (
+                                                        <SelectItem key={f}>{t(`enums.format.${f}`, f)}</SelectItem>
+                                                    ))}
+                                                </Select>
+
+                                                <Select
+                                                    label={t('matchesPage.filters.gender')}
+                                                    placeholder={t('matchesPage.filters.all')}
+                                                    selectedKeys={filters.notes && filters.notes.includes('Genre:') ? [filters.notes.split('Genre: ')[1]] : []}
+                                                    onChange={(e) => handleFilterChange('notes', e.target.value ? `Genre: ${e.target.value}` : '')} // Hacky filter via notes
+                                                    size="sm"
+                                                    classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                >
+                                                    <SelectItem key="Masculin">{t('enums.gender.Masculin')}</SelectItem>
+                                                    <SelectItem key="Féminin">{t('enums.gender.Féminin')}</SelectItem>
+                                                    <SelectItem key="Mixte">{t('enums.gender.Mixte')}</SelectItem>
+                                                </Select>
+
+                                                <Select
+                                                    label={t('matchesPage.filters.pitch_type')}
+                                                    placeholder={t('matchesPage.filters.all')}
+                                                    selectedKeys={filters.pitch_type ? [filters.pitch_type] : []}
+                                                    onChange={(e) => handleFilterChange('pitch_type', e.target.value)}
+                                                    size="sm"
+                                                    classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                >
+                                                    {PITCH_TYPES.map((type) => (
+                                                        <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
+                                                    ))}
+                                                </Select>
+
+                                                <Input
+                                                    label={t('matchesPage.filters.date')}
+                                                    type="date"
+                                                    value={filters.date || ''}
+                                                    onChange={(e) => handleFilterChange('date', e.target.value)}
+                                                    size="sm"
+                                                    classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                />
+
+                                                <Select
+                                                    label={t('matchesPage.filters.venue')}
+                                                    placeholder={t('matchesPage.filters.all')}
+                                                    selectedKeys={filters.venue ? [filters.venue] : []}
+                                                    onChange={(e) => handleFilterChange('venue', e.target.value)}
+                                                    size="sm"
+                                                    classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                >
+                                                    {VENUES.map((v) => (
+                                                        <SelectItem key={v}>{t(`enums.venue.${v}`)}</SelectItem>
+                                                    ))}
+                                                </Select>
+
+                                                <Input
+                                                    label={t('matchesPage.filters.city')}
+                                                    placeholder="Ex: Lens"
+                                                    value={filters.location_city || ''}
+                                                    onChange={(e) => handleFilterChange('location_city', e.target.value)}
+                                                    size="sm"
+                                                    isClearable
+                                                    onClear={() => handleFilterChange('location_city', '')}
+                                                    classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                />
+
+                                                <Input
+                                                    label={t('matchesPage.filters.zip')}
+                                                    placeholder="Ex: 62300"
+                                                    value={filters.location_zip || ''}
+                                                    onChange={(e) => handleFilterChange('location_zip', e.target.value)}
+                                                    size="sm"
+                                                    isClearable
+                                                    onClear={() => handleFilterChange('location_zip', '')}
+                                                    classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                />
+
+                                                <Input
+                                                    type="number"
+                                                    label={t('matchesPage.filters.radius')}
+                                                    placeholder={canUseDistance ? "Ex: 20" : t('matchForm.labels.siret')}
+                                                    min={0}
+                                                    max={200}
+                                                    value={radiusKm > 0 ? String(radiusKm) : ''}
+                                                    onChange={(e) => setRadiusKm(parseInt(e.target.value) || 0)}
+                                                    size="sm"
+                                                    isDisabled={!canUseDistance}
+                                                    endContent={<span className="text-default-400 text-sm">km</span>}
+                                                    description={!canUseDistance ? t('matchForm.alerts.must_link') : radiusKm > 0 ? `depuis ${user?.club?.city || 'club'}` : undefined}
+                                                    classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
+                                                />
+                                            </div>
+                                        </CardBody>
+                                    </Card>
+
+                                    {/* Display Mode Toggle */}
+                                    <div className="flex items-center gap-2 px-1">
+                                        <div className="flex gap-1 p-0.5 rounded-xl bg-default-100/50">
+                                            <Button
+                                                size="sm"
+                                                variant={displayMode === 'list' ? 'solid' : 'light'}
+                                                color={displayMode === 'list' ? 'secondary' : 'default'}
+                                                onPress={() => setDisplayMode('list')}
+                                                className={displayMode === 'list' ? 'font-bold' : ''}
+                                                startContent={
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                                    </svg>
+                                                }
+                                            >
+                                                {t('matchesPage.view.list')}
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant={displayMode === 'calendar' ? 'solid' : 'light'}
+                                                color={displayMode === 'calendar' ? 'secondary' : 'default'}
+                                                onPress={() => setDisplayMode('calendar')}
+                                                className={displayMode === 'calendar' ? 'font-bold' : ''}
+                                                startContent={
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                                    </svg>
+                                                }
+                                            >
+                                                {t('matchesPage.view.calendar')}
+                                            </Button>
+                                        </div>
+                                        {selectedDate && (
+                                            <Button size="sm" variant="light" color="danger" onPress={() => { setSelectedDate(null); handleFilterChange('date', ''); }}>
+                                                ✕ {new Date(selectedDate + 'T00:00:00').toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
                                             </Button>
                                         )}
                                     </div>
-                                </CardHeader>
-                                <CardBody className="px-5 pb-5 relative flex flex-col gap-4">
-                                    <p className="text-small text-default-500 italic">
-                                        {t("match.filters.explanation")}
-                                    </p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                                        <Select
-                                            label={t('matchesPage.filters.category')}
-                                            placeholder={t('matchesPage.filters.all')}
-                                            selectedKeys={filters.category ? [filters.category] : []}
-                                            onChange={(e) => handleFilterChange('category', e.target.value)}
-                                            size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        >
-                                            {CATEGORIES.map((cat) => (
-                                                <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
-                                            ))}
-                                        </Select>
 
-                                        <Select
-                                            label={t('matchesPage.filters.level')}
-                                            placeholder={t('matchesPage.filters.all')}
-                                            selectedKeys={filters.level ? [filters.level] : []}
-                                            onChange={(e) => handleFilterChange('level', e.target.value)}
-                                            size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        >
-                                            {LEVELS.map((lvl) => (
-                                                <SelectItem key={lvl}>{t(`enums.level.${lvl}`)}</SelectItem>
-                                            ))}
-                                        </Select>
-
-                                        <Select
-                                            label={t('matchesPage.filters.format')}
-                                            placeholder={t('matchesPage.filters.all')}
-                                            selectedKeys={filters.format ? [filters.format] : []}
-                                            onChange={(e) => handleFilterChange('format', e.target.value)}
-                                            size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        >
-                                            {FORMATS.map((f) => (
-                                                <SelectItem key={f}>{t(`enums.format.${f}`, f)}</SelectItem>
-                                            ))}
-                                        </Select>
-
-                                        <Select
-                                            label={t('matchesPage.filters.gender')}
-                                            placeholder={t('matchesPage.filters.all')}
-                                            selectedKeys={filters.notes && filters.notes.includes('Genre:') ? [filters.notes.split('Genre: ')[1]] : []}
-                                            onChange={(e) => handleFilterChange('notes', e.target.value ? `Genre: ${e.target.value}` : '')} // Hacky filter via notes
-                                            size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        >
-                                            <SelectItem key="Masculin">{t('enums.gender.Masculin')}</SelectItem>
-                                            <SelectItem key="Féminin">{t('enums.gender.Féminin')}</SelectItem>
-                                            <SelectItem key="Mixte">{t('enums.gender.Mixte')}</SelectItem>
-                                        </Select>
-
-                                        <Select
-                                            label={t('matchesPage.filters.pitch_type')}
-                                            placeholder={t('matchesPage.filters.all')}
-                                            selectedKeys={filters.pitch_type ? [filters.pitch_type] : []}
-                                            onChange={(e) => handleFilterChange('pitch_type', e.target.value)}
-                                            size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        >
-                                            {PITCH_TYPES.map((type) => (
-                                                <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
-                                            ))}
-                                        </Select>
-
-                                        <Input
-                                            label={t('matchesPage.filters.date')}
-                                            type="date"
-                                            value={filters.date || ''}
-                                            onChange={(e) => handleFilterChange('date', e.target.value)}
-                                            size="sm"
-                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        />
-
-                                        <Select
-                                            label={t('matchesPage.filters.venue')}
-                                            placeholder={t('matchesPage.filters.all')}
-                                            selectedKeys={filters.venue ? [filters.venue] : []}
-                                            onChange={(e) => handleFilterChange('venue', e.target.value)}
-                                            size="sm"
-                                            classNames={{ trigger: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        >
-                                            {VENUES.map((v) => (
-                                                <SelectItem key={v}>{t(`enums.venue.${v}`)}</SelectItem>
-                                            ))}
-                                        </Select>
-
-                                        <Input
-                                            label={t('matchesPage.filters.city')}
-                                            placeholder="Ex: Lens"
-                                            value={filters.location_city || ''}
-                                            onChange={(e) => handleFilterChange('location_city', e.target.value)}
-                                            size="sm"
-                                            isClearable
-                                            onClear={() => handleFilterChange('location_city', '')}
-                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        />
-
-                                        <Input
-                                            label={t('matchesPage.filters.zip')}
-                                            placeholder="Ex: 62300"
-                                            value={filters.location_zip || ''}
-                                            onChange={(e) => handleFilterChange('location_zip', e.target.value)}
-                                            size="sm"
-                                            isClearable
-                                            onClear={() => handleFilterChange('location_zip', '')}
-                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        />
-
-                                        <Input
-                                            type="number"
-                                            label={t('matchesPage.filters.radius')}
-                                            placeholder={canUseDistance ? "Ex: 20" : t('matchForm.labels.siret')}
-                                            min={0}
-                                            max={200}
-                                            value={radiusKm > 0 ? String(radiusKm) : ''}
-                                            onChange={(e) => setRadiusKm(parseInt(e.target.value) || 0)}
-                                            size="sm"
-                                            isDisabled={!canUseDistance}
-                                            endContent={<span className="text-default-400 text-sm">km</span>}
-                                            description={!canUseDistance ? t('matchForm.alerts.must_link') : radiusKm > 0 ? `depuis ${user?.club?.city || 'club'}` : undefined}
-                                            classNames={{ inputWrapper: "bg-zinc-900/80 border-white/20 hover:border-violet-500/50 transition-colors", label: "text-zinc-400 font-medium" }}
-                                        />
-                                    </div>
-                                </CardBody>
-                            </Card>
-
-                            {/* Display Mode Toggle */}
-                            <div className="flex items-center gap-2 px-1">
-                                <div className="flex gap-1 p-0.5 rounded-xl bg-default-100/50">
-                                    <Button
-                                        size="sm"
-                                        variant={displayMode === 'list' ? 'solid' : 'light'}
-                                        color={displayMode === 'list' ? 'secondary' : 'default'}
-                                        onPress={() => setDisplayMode('list')}
-                                        className={displayMode === 'list' ? 'font-bold' : ''}
-                                        startContent={
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                            </svg>
-                                        }
-                                    >
-                                        {t('matchesPage.view.list')}
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant={displayMode === 'calendar' ? 'solid' : 'light'}
-                                        color={displayMode === 'calendar' ? 'secondary' : 'default'}
-                                        onPress={() => setDisplayMode('calendar')}
-                                        className={displayMode === 'calendar' ? 'font-bold' : ''}
-                                        startContent={
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                            </svg>
-                                        }
-                                    >
-                                        {t('matchesPage.view.calendar')}
-                                    </Button>
-                                </div>
-                                {selectedDate && (
-                                    <Button size="sm" variant="light" color="danger" onPress={() => { setSelectedDate(null); handleFilterChange('date', ''); }}>
-                                        ✕ {new Date(selectedDate + 'T00:00:00').toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' })}
-                                    </Button>
-                                )}
-                            </div>
-
-                            {/* Calendar View */}
-                            {displayMode === 'calendar' && (
-                                <Card className="shadow-lg shadow-violet-500/5 border border-violet-800/50 bg-[#232120] overflow-hidden">
-                                    <CardHeader className="px-5 pt-5 pb-3">
-                                        <div className="flex justify-between items-center w-full">
-                                            <Button size="sm" variant="light" onPress={prevMonth} isIconOnly>
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                                                </svg>
-                                            </Button>
-                                            <h3 className="text-xl font-bold text-violet-400">
-                                                {getMonthName(calendarMonth)} {calendarMonth.getFullYear()}
-                                            </h3>
-                                            <Button size="sm" variant="light" onPress={nextMonth} isIconOnly>
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                                                </svg>
-                                            </Button>
-                                        </div>
-                                    </CardHeader>
-                                    <CardBody className="px-3 pb-5 pt-0">
-                                        {/* Day headers */}
-                                        <div className="grid grid-cols-7 gap-1 mb-2">
-                                            {dayNames.map(d => (
-                                                <div key={d} className="text-center text-xs font-semibold text-default-400 uppercase py-1">
-                                                    {d}
+                                    {/* Calendar View */}
+                                    {displayMode === 'calendar' && (
+                                        <Card className="shadow-lg shadow-violet-500/5 border border-violet-800/50 bg-[#232120] overflow-hidden">
+                                            <CardHeader className="px-5 pt-5 pb-3">
+                                                <div className="flex justify-between items-center w-full">
+                                                    <Button size="sm" variant="light" onPress={prevMonth} isIconOnly>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                                                        </svg>
+                                                    </Button>
+                                                    <h3 className="text-xl font-bold text-violet-400">
+                                                        {getMonthName(calendarMonth)} {calendarMonth.getFullYear()}
+                                                    </h3>
+                                                    <Button size="sm" variant="light" onPress={nextMonth} isIconOnly>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                                        </svg>
+                                                    </Button>
                                                 </div>
-                                            ))}
-                                        </div>
-                                        {/* Calendar grid */}
-                                        <div className="grid grid-cols-7 gap-1">
-                                            {/* Empty cells for days before the 1st */}
-                                            {Array.from({ length: getFirstDayOfMonth(calendarMonth) }).map((_, i) => (
-                                                <div key={`empty-${i}`} className="h-16" />
-                                            ))}
-                                            {/* Day cells */}
-                                            {Array.from({ length: getDaysInMonth(calendarMonth) }).map((_, i) => {
-                                                const day = i + 1;
-                                                const dateKey = formatDateKey(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
-                                                const count = matchesByDate[dateKey] || 0;
-                                                const isToday = dateKey === formatDateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-                                                const isSelected = selectedDate === dateKey;
+                                            </CardHeader>
+                                            <CardBody className="px-3 pb-5 pt-0">
+                                                {/* Day headers */}
+                                                <div className="grid grid-cols-7 gap-1 mb-2">
+                                                    {dayNames.map(d => (
+                                                        <div key={d} className="text-center text-xs font-semibold text-default-400 uppercase py-1">
+                                                            {d}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                {/* Calendar grid */}
+                                                <div className="grid grid-cols-7 gap-1">
+                                                    {/* Empty cells for days before the 1st */}
+                                                    {Array.from({ length: getFirstDayOfMonth(calendarMonth) }).map((_, i) => (
+                                                        <div key={`empty-${i}`} className="h-16" />
+                                                    ))}
+                                                    {/* Day cells */}
+                                                    {Array.from({ length: getDaysInMonth(calendarMonth) }).map((_, i) => {
+                                                        const day = i + 1;
+                                                        const dateKey = formatDateKey(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
+                                                        const count = matchesByDate[dateKey] || 0;
+                                                        const isToday = dateKey === formatDateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+                                                        const isSelected = selectedDate === dateKey;
 
-                                                return (
-                                                    <button
-                                                        key={day}
-                                                        onClick={() => count > 0 ? handleDayClick(dateKey) : undefined}
-                                                        className={`
+                                                        return (
+                                                            <button
+                                                                key={day}
+                                                                onClick={() => count > 0 ? handleDayClick(dateKey) : undefined}
+                                                                className={`
                                                             h-16 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all text-sm relative border border-white/5
                                                             ${isSelected ? 'bg-violet-500/30 border-2 border-violet-500 shadow-lg shadow-violet-500/20' : ''}
                                                             ${isToday && !isSelected ? 'ring-1 ring-violet-500/50 bg-violet-800/20' : ''}
                                                             ${count > 0 ? 'hover:bg-violet-500/20 cursor-pointer bg-zinc-800/80' : 'cursor-default bg-zinc-900/40'}
                                                             ${!count && !isSelected && !isToday ? 'text-zinc-600' : ''}
                                                         `}
-                                                    >
-                                                        <span className={`text-xs font-semibold ${isToday ? 'text-violet-400' : 'text-zinc-400'} ${isSelected ? 'text-violet-300' : ''} ${count > 0 ? 'text-zinc-200' : ''}`}>
-                                                            {day}
-                                                        </span>
-                                                        {count > 0 && (
-                                                            <div className="flex flex-wrap justify-center gap-px max-w-[90%]">
-                                                                {Array.from({ length: Math.min(count, 4) }).map((_, bi) => (
-                                                                    <span key={bi} className="text-[10px] leading-none">⚽</span>
-                                                                ))}
-                                                                {count > 4 && (
-                                                                    <span className="text-[8px] text-violet-400 font-bold">+{count - 4}</span>
+                                                            >
+                                                                <span className={`text-xs font-semibold ${isToday ? 'text-violet-400' : 'text-zinc-400'} ${isSelected ? 'text-violet-300' : ''} ${count > 0 ? 'text-zinc-200' : ''}`}>
+                                                                    {day}
+                                                                </span>
+                                                                {count > 0 && (
+                                                                    <div className="flex flex-wrap justify-center gap-px max-w-[90%]">
+                                                                        {Array.from({ length: Math.min(count, 4) }).map((_, bi) => (
+                                                                            <span key={bi} className="text-[10px] leading-none">⚽</span>
+                                                                        ))}
+                                                                        {count > 4 && (
+                                                                            <span className="text-[8px] text-violet-400 font-bold">+{count - 4}</span>
+                                                                        )}
+                                                                    </div>
                                                                 )}
-                                                            </div>
-                                                        )}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </CardBody>
-                                </Card>
-                            )}
-
-                            {isError && (
-                                <div className="flex items-center gap-3 p-4 rounded-xl bg-danger/10 border border-danger/20 text-danger">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 shrink-0">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                                    </svg>
-                                    {t('error.loading_matches')}
-                                </div>
-                            )}
-
-                            {/* Match Results */}
-                            {!isLoading && filteredMatches.length > 0 && (
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
-                                    <span className="text-sm font-bold text-white uppercase tracking-wider">{filteredMatches.length} {type === 'tournament' ? t('matchesPage.found_tournament') : t('matchesPage.found')}</span>
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredMatches.map((match) => (
-                                    <Card key={match.id} className={`group hover:shadow-lg transition-all border border-violet-800/50 hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
-                                        <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
-                                            {user?.id === match.owner_id && (
-                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                                                        <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
-                                                    </svg>
-                                                    {t('matchesPage.my_creation')}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
-                                            )}
-                                            <div className="flex flex-col w-full">
-                                                <h4 className="font-bold text-xl text-default-900 group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full">
-                                                    {match.club?.name || t('matchesPage.unknown_club')}
-                                                </h4>
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
-                                                        {match.type === 'tournament' ? '🏆' : '⚽'} {t(`enums.type.${match.type}`)}
-                                                    </Chip>
-                                                    <Chip size="sm" variant="flat" color="warning" className="h-4 text-[9px] uppercase font-bold">
-                                                        {t(`enums.category.${match.category}`)}
-                                                    </Chip>
-                                                    <Chip size="sm" variant="flat" color="secondary" className="h-4 text-[9px] uppercase font-bold">
-                                                        {match.venue === 'Domicile' ? '🏠 Reçoit' : match.venue === 'Extérieur' ? '🚗 Se déplace' : '📍 Neutre'}
-                                                    </Chip>
-                                                </div>
-                                                <p className="text-small text-default-500 font-medium">{match.location_city || match.club?.city} ({match.location_zip || match.club?.zip})</p>
-                                            </div>
-                                        </CardHeader>
-                                        <CardBody className="py-2 px-4 gap-3">
-                                            {/* Date & Time Row - Simplified */}
-                                            <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-default-600 bg-default-50 p-2 rounded-lg justify-center">
-                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-violet-200">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                                    </svg>
-                                                    <span className="font-semibold capitalize text-xs sm:text-sm">{new Date(match.match_date).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
-                                                </div>
-                                                <div className="hidden sm:block w-px h-4 bg-default-300"></div>
-                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-violet-200">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                    </svg>
-                                                    <span className="font-semibold text-xs sm:text-sm">{match.match_time}</span>
-                                                </div>
-                                            </div>
+                                            </CardBody>
+                                        </Card>
+                                    )}
 
-                                            {match.distance_km != null && (
-                                                <div className="flex justify-center">
-                                                    <Chip size="sm" variant="flat" color="primary" className="h-5 text-[10px]">
-                                                        {match.distance_approximate ? '~' : ''}{match.distance_km} km
-                                                    </Chip>
-                                                </div>
-                                            )}
-                                        </CardBody>
-                                        <CardFooter className="px-4 pb-4">
-                                            <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold w-full bg-linear-to-r from-violet-400 to-amber-500 text-white shadow-md shadow-violet-500/20">
-                                                DÉTAILS
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
-                                ))}
-                            </div>
-
-                            {isLoading && (
-                                <div className="flex justify-center py-20">
-                                    <Spinner color="secondary" size="lg" />
-                                </div>
-                            )}
-
-                            {!isLoading && filteredMatches.length === 0 && !isError && (
-                                <Card className="border border-violet-800/50 bg-[#232120] overflow-hidden">
-                                    <div className="absolute inset-0 bg-linear-to-br from-violet-500/5 to-transparent pointer-events-none"></div>
-                                    <CardBody className="relative py-16 flex flex-col items-center gap-4 text-center">
-                                        <div className="p-4 rounded-full bg-violet-800/20">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12 text-violet-400">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    {isError && (
+                                        <div className="flex items-center gap-3 p-4 rounded-xl bg-danger/10 border border-danger/20 text-danger">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 shrink-0">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                                             </svg>
+                                            {t('error.loading_matches')}
                                         </div>
-                                        <div>
-                                            <p className="text-lg font-semibold text-violet-900/80 dark:text-violet-100">
-                                                {type === 'tournament' ? t('matchesPage.empty_title_tournament') : t('matchesPage.empty_title')}
-                                            </p>
-                                            <p className="text-sm text-violet-800/60 dark:text-violet-200/60 mt-1">
-                                                {type === 'tournament' ? t('matchesPage.empty_desc_tournament') : t('matchesPage.empty_desc')}
-                                            </p>
+                                    )}
+
+                                    {/* Match Results */}
+                                    {!isLoading && filteredMatches.length > 0 && (
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
+                                            <span className="text-sm font-bold text-white uppercase tracking-wider">{filteredMatches.length} {type === 'tournament' ? t('matchesPage.found_tournament') : t('matchesPage.found')}</span>
                                         </div>
-                                        <Button color="secondary" variant="flat" onPress={() => setView('create')} className="mt-2 font-semibold bg-violet-900/20 text-violet-200 dark:bg-violet-500/20 dark:text-violet-300">
-                                            {type === 'tournament' ? t('match.create_tournament') : t('match.create')}
-                                        </Button>
-                                    </CardBody>
-                                </Card>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {filteredMatches.map((match) => (
+                                            <Card key={match.id} className={`group hover:shadow-lg transition-all border border-violet-800/50 hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
+                                                <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
+                                                    {user?.id === match.owner_id && (
+                                                        <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                                                                <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                                                            </svg>
+                                                            {t('matchesPage.my_creation')}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex flex-col w-full">
+                                                        <h4 className={`font-bold text-xl text-default-900 group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                                            {isVisitor ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
+                                                                {match.type === 'tournament' ? '🏆' : '⚽'} {t(`enums.type.${match.type}`)}
+                                                            </Chip>
+                                                            <Chip size="sm" variant="flat" color="warning" className="h-4 text-[9px] uppercase font-bold">
+                                                                {t(`enums.category.${match.category}`)}
+                                                            </Chip>
+                                                            <Chip size="sm" variant="flat" color="secondary" className="h-4 text-[9px] uppercase font-bold">
+                                                                {match.venue === 'Domicile' ? '🏠 Reçoit' : match.venue === 'Extérieur' ? '🚗 Se déplace' : '📍 Neutre'}
+                                                            </Chip>
+                                                        </div>
+                                                        <p className={`text-small text-default-500 font-medium ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                                            {isVisitor ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
+                                                        </p>
+                                                    </div>
+                                                </CardHeader>
+                                                <CardBody className="py-2 px-4 gap-3">
+                                                    {/* Date & Time Row - Simplified */}
+                                                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-default-600 bg-default-50 p-2 rounded-lg justify-center">
+                                                        <div className="flex items-center gap-1.5 shrink-0">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-violet-200">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                                            </svg>
+                                                            <span className="font-semibold capitalize text-xs sm:text-sm">{new Date(match.match_date).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                                                        </div>
+                                                        <div className="hidden sm:block w-px h-4 bg-default-300"></div>
+                                                        <div className="flex items-center gap-1.5 shrink-0">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-violet-200">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                            </svg>
+                                                            <span className="font-semibold text-xs sm:text-sm">{match.match_time}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {match.distance_km != null && (
+                                                        <div className="flex justify-center">
+                                                            <Chip size="sm" variant="flat" color="primary" className="h-5 text-[10px]">
+                                                                {match.distance_approximate ? '~' : ''}{match.distance_km} km
+                                                            </Chip>
+                                                        </div>
+                                                    )}
+                                                </CardBody>
+                                                <CardFooter className="px-4 pb-4">
+                                                    <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold w-full bg-linear-to-r from-violet-400 to-amber-500 text-white shadow-md shadow-violet-500/20">
+                                                        DÉTAILS
+                                                    </Button>
+                                                </CardFooter>
+                                            </Card>
+                                        ))}
+                                    </div>
+
+                                    {isLoading && (
+                                        <div className="flex justify-center py-20">
+                                            <Spinner color="secondary" size="lg" />
+                                        </div>
+                                    )}
+
+                                    {!isLoading && filteredMatches.length === 0 && !isError && (
+                                        <Card className="border border-violet-800/50 bg-[#232120] overflow-hidden">
+                                            <div className="absolute inset-0 bg-linear-to-br from-violet-500/5 to-transparent pointer-events-none"></div>
+                                            <CardBody className="relative py-16 flex flex-col items-center gap-4 text-center">
+                                                <div className="p-4 rounded-full bg-violet-800/20">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-12 h-12 text-violet-400">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p className="text-lg font-semibold text-violet-900/80 dark:text-violet-100">
+                                                        {type === 'tournament' ? t('matchesPage.empty_title_tournament') : t('matchesPage.empty_title')}
+                                                    </p>
+                                                    <p className="text-sm text-violet-800/60 dark:text-violet-200/60 mt-1">
+                                                        {type === 'tournament' ? t('matchesPage.empty_desc_tournament') : t('matchesPage.empty_desc')}
+                                                    </p>
+                                                </div>
+                                                <Button color="secondary" variant="flat" onPress={() => setView('create')} className="mt-2 font-semibold bg-violet-900/20 text-violet-200 dark:bg-violet-500/20 dark:text-violet-300">
+                                                    {type === 'tournament' ? t('match.create_tournament') : t('match.create')}
+                                                </Button>
+                                            </CardBody>
+                                        </Card>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
-                </div>
+                    );
+                })()}
             </section>
             <AccountModal isOpen={isAccountModalOpen} onOpenChange={setIsAccountModalOpen} />
-        </DefaultLayout>
+        </DefaultLayout >
     );
 }

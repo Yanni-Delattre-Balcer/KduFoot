@@ -20,6 +20,7 @@ import { Route, Routes } from "react-router-dom";
 import { SiteLoading } from "./components/site-loading";
 import { AuthenticationGuard, useAuth, UserSync } from "./authentication";
 import { PageNotFound } from "./pages/404";
+import { WelcomeGateway } from "./components/welcome-gateway";
 
 import IndexPage from "@/pages/index";
 import ApiPage from "@/pages/api";
@@ -54,6 +55,7 @@ function App() {
     <Suspense fallback={<SiteLoading />}>
       <TrainingProvider>
         <UserSync />
+        <WelcomeGateway />
         <Routes>
           <Route element={<IndexPage />} path="/" />
           <Route
@@ -124,7 +126,7 @@ function App() {
             path="/dashboard"
           />
           <Route
-            element={<AuthenticationGuard component={MatchesPage} />}
+            element={<MatchesPage />}
             path="/matches"
           />
           <Route
@@ -136,7 +138,7 @@ function App() {
             path="/matches/:id/edit"
           />
           <Route
-            element={<AuthenticationGuard component={MatchDetailsPage} />}
+            element={<MatchDetailsPage />}
             path="/matches/:id"
           />
           <Route

@@ -6,6 +6,7 @@ import { useMatch } from '@/hooks/use-matches';
 import { useUser } from '@/hooks/use-user';
 import { Spinner } from '@heroui/spinner';
 import { Button } from '@heroui/button';
+import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 import { Chip } from "@heroui/chip";
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Image } from "@heroui/image";
@@ -21,6 +22,7 @@ export default function MatchDetailsPage() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useUser();
+    const { openGateway, isVisitor } = useWelcomeGateway();
     const { match, isLoading, isError, contactMatch, deleteMatch, cancelMatchContact, updateRequestStatus } = useMatch(id || null);
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
     const { isOpen: isCancelOpen, onOpen: onCancelOpen, onOpenChange: onCancelOpenChange } = useDisclosure();
@@ -135,14 +137,14 @@ export default function MatchDetailsPage() {
                                     </Chip>
                                 )}
                             </div>
-                            <h1 className="text-3xl font-black text-white leading-tight">
-                                {match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || 'Club'}`}
+                            <h1 className={`text-3xl font-black text-white leading-tight ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                {isVisitor ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || 'Club'}`)}
                             </h1>
-                            <p className="text-default-400 font-medium flex items-center gap-1">
+                            <p className={`text-default-400 font-medium flex items-center gap-1 ${isVisitor ? 'blur-sm select-none' : ''}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                     <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                                 </svg>
-                                {match.location_address || match.club?.address}, {match.location_city || match.club?.city} ({match.location_zip || match.club?.zip})
+                                {isVisitor ? 'ADRESSE MASQUÉE, VILLE MASQUÉE (00000)' : `${match.location_address || match.club?.address}, ${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
                             </p>
                         </CardHeader>
 
@@ -227,10 +229,10 @@ export default function MatchDetailsPage() {
                                         <span className="text-4xl font-black">{match.club?.name?.charAt(0)}</span>
                                     </div>
                                 )}
-                                <div className="text-center">
-                                    <h3 className="font-black text-xl text-white leading-tight">{match.club?.name}</h3>
-                                    <p className="text-white font-black uppercase mt-1 text-lg">{match.club?.city}</p>
-                                    <p className="text-default-400 text-xs font-medium">({match.club?.zip})</p>
+                                <div className={`text-center ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                    <h3 className="font-black text-xl text-white leading-tight">{isVisitor ? 'CLUB MASQUÉ' : match.club?.name}</h3>
+                                    <p className="text-white font-black uppercase mt-1 text-lg">{isVisitor ? 'VILLE MASQUÉE' : match.club?.city}</p>
+                                    <p className="text-default-400 text-xs font-medium">({isVisitor ? '00000' : match.club?.zip})</p>
                                 </div>
                             </CardBody>
                         </Card>
@@ -274,15 +276,15 @@ export default function MatchDetailsPage() {
 
                                                     <div className="grid grid-cols-2 gap-2 mt-2">
                                                         <Button
-                                                            as="a"
-                                                            href={`tel:${match.phone}`}
                                                             color="warning"
                                                             variant="flat"
                                                             className="font-black uppercase tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
                                                             onPress={() => {
-                                                                // Delayed prompt to not block the tel: link opening immediately if possible, 
-                                                                // though window.confirm is blocking. 
-                                                                // Most browsers handle tel: links asynchronously.
+                                                                if (isVisitor) {
+                                                                    openGateway("Veuillez compléter votre profil pour effectuer cette action");
+                                                                    return;
+                                                                }
+                                                                window.location.href = `tel:${match.phone}`;
                                                                 setTimeout(() => {
                                                                     if (user?.club_id && !match.contacts?.some(c => c.user_id === user.id)) {
                                                                         if (window.confirm("Voulez-vous aussi envoyer vos coordonnées au club sur l'application ?")) {
@@ -295,12 +297,15 @@ export default function MatchDetailsPage() {
                                                             📞 Appeler
                                                         </Button>
                                                         <Button
-                                                            as="a"
-                                                            href={`mailto:${match.email}`}
                                                             color="secondary"
                                                             variant="flat"
                                                             className="font-black uppercase tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
                                                             onPress={() => {
+                                                                if (isVisitor) {
+                                                                    openGateway("Veuillez compléter votre profil pour effectuer cette action");
+                                                                    return;
+                                                                }
+                                                                window.location.href = `mailto:${match.email}`;
                                                                 setTimeout(() => {
                                                                     if (user?.club_id && !match.contacts?.some(c => c.user_id === user.id)) {
                                                                         if (window.confirm("Voulez-vous aussi envoyer vos coordonnées au club sur l'application ?")) {
@@ -350,6 +355,10 @@ export default function MatchDetailsPage() {
                                                             color={isProfileIncomplete ? "default" : "primary"}
                                                             className="w-full font-black uppercase tracking-tighter h-12 shadow-lg"
                                                             onPress={async () => {
+                                                                if (isVisitor) {
+                                                                    openGateway("Veuillez compléter votre profil pour effectuer cette action");
+                                                                    return;
+                                                                }
                                                                 if (!user) {
                                                                     alert("Veuillez vous connecter pour envoyer une demande.");
                                                                     return;
@@ -365,7 +374,7 @@ export default function MatchDetailsPage() {
                                                                     alert(e.message || "Erreur lors de l'envoi");
                                                                 }
                                                             }}
-                                                            isDisabled={isProfileIncomplete}
+                                                            isDisabled={isProfileIncomplete && !isVisitor}
                                                         >
                                                             ENVOYER UNE DEMANDE
                                                         </Button>
@@ -432,7 +441,7 @@ export default function MatchDetailsPage() {
                             Liste des clubs intéressés par ce match.
                         </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isVisitor ? 'blur-md pointer-events-none grayscale opacity-40 select-none' : ''}`}>
                             {match.contacts && match.contacts.length > 0 ? (
                                 match.contacts.map((contact, index) => (
                                     <Card key={index} className={`border ${contact.status === 'accepted' ? 'border-success/30 bg-success/5' : contact.status === 'refused' ? 'border-danger/20 opacity-60' : 'border-default-200'} bg-[#202022]`}>

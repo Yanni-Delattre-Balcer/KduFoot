@@ -1128,6 +1128,35 @@
         }
       }
     },
+    "/api/matches/{id}/pairings/generate": {
+      "post": {
+        "tags": [
+          "Tournament"
+        ],
+        "summary": "Generate tournament pairings",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pairings generated."
+          }
+        }
+      }
+    },
     "/api/sessions": {
       "get": {
         "tags": [
