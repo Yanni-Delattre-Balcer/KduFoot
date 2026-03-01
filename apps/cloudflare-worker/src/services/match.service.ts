@@ -1,6 +1,5 @@
-
 import { D1Database } from '@cloudflare/workers-types';
-import { Match, CreateMatchDto, UpdateMatchDto, MatchFilters, ContactMatchDto } from '../types/match';
+import { Match, CreateMatchDto, UpdateMatchDto, MatchFilters, ContactMatchDto, TournamentPairing } from '../types/match';
 import { v4 as uuidv4 } from 'uuid';
 
 export class MatchService {
@@ -142,7 +141,77 @@ export class MatchService {
             status: c.status as any
         }));
 
+        if (match.type === 'tournament') {
+            match.pairings = await this.getPairings(id);
+        }
+
         return match;
+    }
+
+    async getPairings(matchId: string): Promise<TournamentPairing[]> {
+        const { results } = await this.db.prepare(`
+            SELECT tp.*, 
+                   c_a.name as team_a_club_name, c_a.logo_url as team_a_club_logo,
+                   c_b.name as team_b_club_name, c_b.logo_url as team_b_club_logo
+            FROM tournament_pairings tp
+            LEFT JOIN clubs c_a ON tp.team_a_club_id = c_a.id
+            LEFT JOIN clubs c_b ON tp.team_b_club_id = c_b.id
+            WHERE tp.match_id = ?
+            ORDER BY tp.scheduled_time ASC
+        `).bind(matchId).all<any>();
+
+        return results.map(r => ({
+            ...r,
+            team_a_club_name: r.team_a_club_name,
+            team_a_club_logo: r.team_a_club_logo,
+            team_b_club_name: r.team_b_club_name,
+            team_b_club_logo: r.team_b_club_logo
+        }));
+    }
+
+    async updatePairingTime(pairingId: string, userId: string, scheduledTime: string): Promise<boolean> {
+        // Validation: Verify if the user is the owner of the tournament
+        const pairing = await this.db.prepare(`
+            SELECT tp.*, m.owner_id, m.match_time, m.match_end_time 
+            FROM tournament_pairings tp
+            JOIN matches m ON tp.match_id = m.id
+            WHERE tp.id = ?
+        `).bind(pairingId).first<any>();
+
+        if (!pairing) throw new Error('Pairing not found');
+        if (pairing.owner_id !== userId) throw new Error('Unauthorized');
+
+        // Validation: scheduledTime must be within [match_time, match_end_time]
+        if (pairing.match_time && scheduledTime < pairing.match_time) {
+            throw new Error(`L'heure doit être après le début du tournoi (${pairing.match_time})`);
+        }
+        if (pairing.match_end_time && scheduledTime > pairing.match_end_time) {
+            throw new Error(`L'heure doit être avant la fin du tournoi (${pairing.match_end_time})`);
+        }
+
+        await this.db.prepare(
+            'UPDATE tournament_pairings SET scheduled_time = ?, updated_at = unixepoch() WHERE id = ?'
+        ).bind(scheduledTime, pairingId).run();
+
+        // Notify participants (optional but good for 'Real-time Vue')
+        // We'll mark the tournament as modified for all accepted participants
+        await this.db.prepare(
+            'UPDATE match_contacts SET notification_state = 1 WHERE match_id = ? AND status = "accepted"'
+        ).bind(pairing.match_id).run();
+
+        return true;
+    }
+
+    async createPairing(matchId: string, teamAId: string, teamBId: string, scheduledTime: string): Promise<TournamentPairing> {
+        const id = uuidv4();
+        const now = Math.floor(Date.now() / 1000);
+        await this.db.prepare(`
+            INSERT INTO tournament_pairings (id, match_id, team_a_club_id, team_b_club_id, scheduled_time, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).bind(id, matchId, teamAId, teamBId, scheduledTime, now, now).run();
+
+        const pairings = await this.getPairings(matchId);
+        return pairings.find(p => p.id === id)!;
     }
 
     /**
@@ -244,6 +313,11 @@ export class MatchService {
             }
         }
 
+        if (filters.type) {
+            query += ' AND m.type = ?';
+            params.push(filters.type);
+        }
+
         if (filters.category) {
             query += ' AND m.category = ?';
             params.push(filters.category);
@@ -311,7 +385,13 @@ export class MatchService {
             // So comparing User Entered Time (e.g. 20:00) with UTC Time (e.g. 19:00) 
             // Means matches stay visible for (Offset) hours longer. 
             // This is acceptable/safe.
-            query += ` AND (m.match_date > DATE('now') OR (m.match_date = DATE('now') AND m.match_time >= TIME('now')))`;
+            query += " AND (m.match_date > DATE('now') OR (m.match_date = DATE('now') AND m.match_time >= TIME('now')))";
+        }
+
+        // Logic for Tournament Visibility: Stay active until max_teams is reached
+        // Only for tournaments
+        if (!filters.ownerId && filters.type !== 'match') {
+            query += ` AND (m.type != 'tournament' OR m.status = 'active' OR (m.type = 'tournament' AND m.max_teams IS NOT NULL AND (SELECT COUNT(*) FROM match_contacts mc2 WHERE mc2.match_id = m.id AND mc2.status = 'accepted') < m.max_teams))`;
         }
 
         // Haversine bounding box pre-filter (30% wider than requested radius to account for road vs straight-line)
@@ -419,14 +499,14 @@ export class MatchService {
     async getIncomingRequests(userId: string): Promise<any[]> {
         const { results } = await this.db.prepare(`
             SELECT mc.*, 
-                   m.type as match_type, m.match_date, m.match_time, m.category as match_category, m.level as match_level,
-                   m.venue, m.location_city,
-                   c_host.name as host_club_name, c_host.logo_url as host_club_logo,
-                   m.email as host_email, m.phone as host_phone,
-                   c_req.name as requester_club_name, c_req.logo_url as requester_club_logo, c_req.city as requester_city,
+                   m.type as match_type, m.category, m.level, m.match_date, m.match_time, m.venue, m.max_teams as match_max_teams,
+                   (SELECT COUNT(*) FROM match_contacts mc2 WHERE mc2.match_id = m.id AND mc2.status = 'accepted') as accepted_count,
                    u_req.firstname as requester_firstname, u_req.lastname as requester_lastname,
+                   u_req.club_colors as requester_club_colors, u_req.category as requester_category,
+                   u_req.level as requester_level, u_req.pitch_type as requester_pitch_type,
                    u_req.phone as requester_phone, u_req.email as requester_email,
-                   u_req.level as requester_level, u_req.category as requester_category, u_req.club_colors as requester_club_colors, u_req.pitch_type as requester_pitch_type,
+                   c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
+                   c_req.city as requester_city,
                    mc.status as request_status,
                    COALESCE(mc.notification_state, 0) as notification_state
             FROM match_contacts mc
@@ -445,7 +525,8 @@ export class MatchService {
         const { results } = await this.db.prepare(`
             SELECT mc.*, 
                    m.type as match_type, m.category as match_category, m.level as match_level, m.match_date, m.match_time, 
-                   m.venue, m.location_city, m.location_address, m.location_zip,
+                   m.venue, m.location_city, m.location_address, m.location_zip, m.max_teams as match_max_teams,
+                   (SELECT COUNT(*) FROM match_contacts mc2 WHERE mc2.match_id = m.id AND mc2.status = 'accepted') as accepted_count,
                    c_host.name as host_club_name, c_host.logo_url as host_club_logo, c_host.city as host_city,
                    u_host.firstname as host_firstname, u_host.lastname as host_lastname, u_host.club_colors as host_club_colors, u_host.category as host_category, u_host.level as host_level,
                    m.email as host_email, m.phone as host_phone,
@@ -482,9 +563,22 @@ export class MatchService {
 
         // If accepted, mark match as found (closed)
         if (status === 'accepted') {
-            await this.db.prepare(
-                'UPDATE matches SET status = "found", updated_at = unixepoch() WHERE id = ?'
-            ).bind(matchId).run();
+            const acceptedCountResult = await this.db.prepare(
+                'SELECT COUNT(*) as count FROM match_contacts WHERE match_id = ? AND status = "accepted"'
+            ).bind(matchId).first<any>();
+            const acceptedCount = (acceptedCountResult?.count || 0);
+
+            const matchDetails = await this.db.prepare('SELECT type, max_teams FROM matches WHERE id = ?').bind(matchId).first<any>();
+
+            if (matchDetails?.type === 'match') {
+                await this.db.prepare(
+                    'UPDATE matches SET status = "found", updated_at = unixepoch() WHERE id = ?'
+                ).bind(matchId).run();
+            } else if (matchDetails?.type === 'tournament' && matchDetails?.max_teams && acceptedCount >= matchDetails.max_teams) {
+                await this.db.prepare(
+                    'UPDATE matches SET status = "found", updated_at = unixepoch() WHERE id = ?'
+                ).bind(matchId).run();
+            }
         } else if (status === 'refused') {
             // Check if there are no more matches with status 'accepted'
             const acceptedCountResult = await this.db.prepare(
@@ -541,5 +635,56 @@ export class MatchService {
             'UPDATE match_contacts SET notification_state = 0 WHERE match_id = ? AND user_id = ?'
         ).bind(matchId, userId).run();
         return true;
+    }
+
+    async generatePairings(matchId: string, userId: string): Promise<TournamentPairing[]> {
+        const match = await this.getById(matchId);
+        if (!match || match.owner_id !== userId) throw new Error('Unauthorized or match not found');
+        if (match.type !== 'tournament') throw new Error('Cannot generate pairings for a simple match');
+
+        // 1. Get all accepted participants
+        const { results: acceptedContacts } = await this.db.prepare(`
+            SELECT mc.user_id, u.club_id, c.name as club_name, c.logo_url
+            FROM match_contacts mc
+            JOIN users u ON mc.user_id = u.id
+            JOIN clubs c ON u.club_id = c.id
+            WHERE mc.match_id = ? AND mc.status = 'accepted'
+        `).bind(matchId).all<any>();
+
+        // 2. Include the organizer club
+        const teams = [
+            { club_id: match.club_id, club_name: match.club!.name, logo_url: match.club!.logo_url },
+            ...acceptedContacts.map(c => ({ club_id: c.club_id, club_name: c.club_name, logo_url: c.logo_url }))
+        ];
+
+        if (teams.length < 2) throw new Error('Il faut au moins 2 équipes acceptées pour générer des matchs');
+
+        // 3. Shuffle teams
+        const shuffled = [...teams].sort(() => Math.random() - 0.5);
+
+        // 4. Delete existing pairings
+        await this.db.prepare('DELETE FROM tournament_pairings WHERE match_id = ?').bind(matchId).run();
+
+        // 5. Create new pairings (Round Robin or Simple Pairs?)
+        // Let's do a simple draw (pairs) for now
+        const pairings: TournamentPairing[] = [];
+        const matchTime = match.match_time || '10:00';
+
+        for (let i = 0; i < shuffled.length - 1; i += 2) {
+            const teamA = shuffled[i];
+            const teamB = shuffled[i + 1];
+
+            // Increment time slightly for each match? Or same time?
+            // Let's keep same time, user will edit it.
+            const id = uuidv4();
+            const now = Math.floor(Date.now() / 1000);
+
+            await this.db.prepare(`
+                INSERT INTO tournament_pairings (id, match_id, team_a_club_id, team_b_club_id, scheduled_time, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `).bind(id, matchId, teamA.club_id, teamB.club_id, matchTime, now, now).run();
+        }
+
+        return await this.getPairings(matchId);
     }
 }

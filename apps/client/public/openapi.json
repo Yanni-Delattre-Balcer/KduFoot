@@ -1051,6 +1051,83 @@
         }
       }
     },
+    "/api/matches/{id}/pairings": {
+      "get": {
+        "tags": [
+          "Tournament"
+        ],
+        "summary": "Get tournament pairings",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pairings."
+          }
+        }
+      }
+    },
+    "/api/matches/pairings/{pairingId}": {
+      "patch": {
+        "tags": [
+          "Tournament"
+        ],
+        "summary": "Update pairing time",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "pairingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "scheduled_time"
+                ],
+                "properties": {
+                  "scheduled_time": {
+                    "type": "string",
+                    "format": "time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pairing updated."
+          }
+        }
+      }
+    },
     "/api/sessions": {
       "get": {
         "tags": [

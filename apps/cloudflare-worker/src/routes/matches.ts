@@ -87,6 +87,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             date: url.searchParams.get('date') || undefined,
             location_city: url.searchParams.get('location_city') || undefined,
             location_zip: url.searchParams.get('location_zip') || undefined,
+            type: url.searchParams.get('type') || undefined,
             ownerId: url.searchParams.get('ownerId') || undefined,
             include_past: url.searchParams.get('include_past') === 'true',
             limit: parseInt(url.searchParams.get('limit') || '50'),
@@ -575,5 +576,109 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         await matchService.markNotificationsAsRead(params.id, dbUser.id);
         return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+    });
+
+    /**
+     * @openapi
+     * /api/matches/{id}/pairings:
+     *   get:
+     *     tags:
+     *       - Tournament
+     *     summary: Get tournament pairings
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: List of pairings.
+     */
+    router.get('/api/matches/<id>/pairings', async (request: Request) => {
+        const params = (request as any).params as { id: string };
+        const pairings = await matchService.getPairings(params.id);
+        return Response.json({ success: true, pairings }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+    });
+
+    /**
+     * @openapi
+     * /api/matches/pairings/{pairingId}:
+     *   patch:
+     *     tags:
+     *       - Tournament
+     *     summary: Update pairing time
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: pairingId
+     *         in: path
+     *         required: true
+     *         schema: { type: string, format: uuid }
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required: [scheduled_time]
+     *             properties:
+     *               scheduled_time: { type: string, format: time }
+     *     responses:
+     *       200:
+     *         description: Pairing updated.
+     */
+    router.patch('/api/matches/pairings/<pairingId>', async (request: Request) => {
+        const params = (request as any).params as { pairingId: string };
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+
+        if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
+
+        const { scheduled_time } = await request.json() as { scheduled_time: string };
+        try {
+            await matchService.updatePairingTime(params.pairingId, dbUser.id, scheduled_time);
+            return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+    });
+
+    /**
+     * @openapi
+     * /api/matches/{id}/pairings/generate:
+     *   post:
+     *     tags:
+     *       - Tournament
+     *     summary: Generate tournament pairings
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: Pairings generated.
+     */
+    router.post('/api/matches/<id>/pairings/generate', async (request: Request) => {
+        const params = (request as any).params as { id: string };
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+
+        if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
+
+        try {
+            const pairings = await matchService.generatePairings(params.id, dbUser.id);
+            return Response.json({ success: true, pairings }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
     });
 };

@@ -171,5 +171,39 @@ export const matchService = {
         });
         if (!response.ok) throw new Error('Failed to mark notification as read');
         return response.json();
+    },
+
+    generatePairings: async (matchId: string, token: string) => {
+        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${matchId}/pairings/generate`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+        return response.json();
+    },
+
+    getPairings: async (matchId: string, token: string) => {
+        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${matchId}/pairings`, {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch pairings');
+        return response.json();
+    },
+
+    updatePairingTime: async (pairingId: string, scheduledTime: string, token: string) => {
+        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/pairings/${pairingId}`, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ scheduled_time: scheduledTime }),
+        });
+        if (!response.ok) throw new Error('Failed to update pairing');
+        return response.json();
     }
 };

@@ -33,11 +33,25 @@ export interface Match {
     contacts?: MatchContact[];
     contacts_count?: number;
     accepted_count?: number;
-    created_at: string;
     updated_at: string;
     // Distance fields (returned when radius filter is active)
     distance_km?: number;
     distance_approximate?: boolean;
+    pairings?: TournamentPairing[];
+}
+
+export interface TournamentPairing {
+    id: string;
+    match_id: string;
+    team_a_club_id: string;
+    team_b_club_id: string;
+    team_a_club_name?: string;
+    team_a_club_logo?: string;
+    team_b_club_name?: string;
+    team_b_club_logo?: string;
+    scheduled_time: string; // HH:MM
+    created_at: string;
+    updated_at: string;
 }
 
 export type Format = '11v11' | '8v8' | '5v5' | 'Futsal';

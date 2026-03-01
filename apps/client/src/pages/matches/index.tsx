@@ -8,6 +8,7 @@ import { Button } from '@heroui/button';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Chip } from "@heroui/chip";
 import { Select, SelectItem } from "@heroui/select";
+import { Spinner } from "@heroui/spinner";
 import FootballClock from '../../components/football-clock';
 import { Input } from "@heroui/input";
 import { Category } from '../../types/exercise.types';
@@ -25,17 +26,18 @@ import { AccountModal } from '@/authentication/account-modal';
 
 export default function MatchesPage() {
     const { t, i18n } = useTranslation();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [view, setView] = useState<'find' | 'create'>((searchParams.get('view') as 'find' | 'create') || 'find');
     const [type, setType] = useState<'match' | 'tournament'>((searchParams.get('type') as 'match' | 'tournament') || 'match');
     const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
 
+    // Sync URL with state
     useEffect(() => {
-        const v = searchParams.get('view') as 'find' | 'create';
-        const t = searchParams.get('type') as 'match' | 'tournament';
-        if (v && (v === 'find' || v === 'create')) setView(v);
-        if (t && (t === 'match' || t === 'tournament')) setType(t);
-    }, [searchParams]);
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.set('view', view);
+        nextParams.set('type', type);
+        setSearchParams(nextParams, { replace: true });
+    }, [view, type]);
 
     const [displayMode, setDisplayMode] = useState<'list' | 'calendar'>('list');
     const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -49,7 +51,7 @@ export default function MatchesPage() {
 
     // Build filters with user coordinates when radius is active
     const effectiveFilters = useMemo(() => {
-        const f = { ...filters };
+        const f = { ...filters, type };
         if (radiusKm > 0 && user?.club?.latitude && user?.club?.longitude) {
             (f as any).radius_km = radiusKm;
             (f as any).user_lat = user.club.latitude;
@@ -58,7 +60,7 @@ export default function MatchesPage() {
         return f;
     }, [filters, radiusKm, user?.club?.latitude, user?.club?.longitude]);
 
-    const { matches, isError } = useMatches(effectiveFilters);
+    const { matches, isError, isLoading, mutate } = useMatches(effectiveFilters);
 
     const handleFilterChange = (key: keyof MatchFilters, value: string) => {
         setFilters(prev => ({
@@ -76,6 +78,7 @@ export default function MatchesPage() {
 
     const handleCreateSuccess = () => {
         setView('find');
+        mutate();
     };
 
     const canUseDistance = !!(user?.club?.latitude && user?.club?.longitude);
@@ -128,7 +131,7 @@ export default function MatchesPage() {
     const filteredMatches = (selectedDate
         ? matches.filter(m => m.match_date === selectedDate)
         : matches
-    ).filter(m => m.status !== 'found');
+    ).filter(m => m.status !== 'found' && m.type === type);
 
     // UI Configuration based on type
     const uiConfig = {
@@ -584,10 +587,10 @@ export default function MatchesPage() {
                             )}
 
                             {/* Match Results */}
-                            {filteredMatches.length > 0 && (
-                                <div className="flex items-center gap-2 px-1">
-                                    <Chip size="sm" variant="flat" color="secondary" className="bg-violet-900/20 text-violet-200">{filteredMatches.length}</Chip>
-                                    <span className="text-sm text-default-500">{filteredMatches.length > 1 ? t('matchesPage.found') : t('matchesPage.found').replace('(s)', '').replace('(aux)', 'al')}</span>
+                            {!isLoading && filteredMatches.length > 0 && (
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
+                                    <span className="text-sm font-bold text-white uppercase tracking-wider">{filteredMatches.length} {type === 'tournament' ? t('matchesPage.found_tournament') : t('matchesPage.found')}</span>
                                 </div>
                             )}
 
@@ -656,7 +659,13 @@ export default function MatchesPage() {
                                 ))}
                             </div>
 
-                            {filteredMatches.length === 0 && !isError && (
+                            {isLoading && (
+                                <div className="flex justify-center py-20">
+                                    <Spinner color="secondary" size="lg" />
+                                </div>
+                            )}
+
+                            {!isLoading && filteredMatches.length === 0 && !isError && (
                                 <Card className="border border-violet-800/50 bg-[#232120] overflow-hidden">
                                     <div className="absolute inset-0 bg-linear-to-br from-violet-500/5 to-transparent pointer-events-none"></div>
                                     <CardBody className="relative py-16 flex flex-col items-center gap-4 text-center">
@@ -666,11 +675,15 @@ export default function MatchesPage() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="text-lg font-semibold text-violet-900/80 dark:text-violet-100">{t('matchesPage.empty_title')}</p>
-                                            <p className="text-sm text-violet-800/60 dark:text-violet-200/60 mt-1">{t('matchesPage.empty_desc')}</p>
+                                            <p className="text-lg font-semibold text-violet-900/80 dark:text-violet-100">
+                                                {type === 'tournament' ? t('matchesPage.empty_title_tournament') : t('matchesPage.empty_title')}
+                                            </p>
+                                            <p className="text-sm text-violet-800/60 dark:text-violet-200/60 mt-1">
+                                                {type === 'tournament' ? t('matchesPage.empty_desc_tournament') : t('matchesPage.empty_desc')}
+                                            </p>
                                         </div>
                                         <Button color="secondary" variant="flat" onPress={() => setView('create')} className="mt-2 font-semibold bg-violet-900/20 text-violet-200 dark:bg-violet-500/20 dark:text-violet-300">
-                                            {t('match.create')}
+                                            {type === 'tournament' ? t('match.create_tournament') : t('match.create')}
                                         </Button>
                                     </CardBody>
                                 </Card>

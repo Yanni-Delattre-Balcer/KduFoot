@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '@/layouts/default';
 import { useMatches } from '@/hooks/use-matches';
@@ -10,6 +10,7 @@ import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
 import { Tabs, Tab } from "@heroui/tabs";
+import { Input } from "@heroui/input";
 import { Link } from 'react-router-dom';
 import FootballClock from '../../components/football-clock';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
@@ -58,42 +59,50 @@ export default function DashboardPage() {
     const { user: dbUser } = useUser();
 
     // 1. Mes Annonces (Organisateur)
-    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
+    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
 
     // 2. Demandes Reçues (Organisateur)
     const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateIncoming } = useIncomingRequests();
 
     // 3. Mes Participations (Candidat)
-    const { participations: myParticipations, isLoading: isLoadingParticipations, markAsRead: markAsReadHook } = useMyParticipations();
+    const { participations: myParticipations, isLoading: isLoadingParticipations, mutate: mutateParticipations, markAsRead: markAsReadHook } = useMyParticipations();
 
-    // Sub-filters states
+    // States
     const [requestsSubFilter, setRequestsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
     const [organizedSubFilter, setOrganizedSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
+    const [highlightedCardId, setHighlightedCardIdState] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [selectedClubProfile, setSelectedClubProfile] = useState<any>(null);
 
     // Modal state for 'Voir le profil'
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
-    const [selectedClubProfile, setSelectedClubProfile] = useState<any>(null);
 
     // Track seen notifications to trigger toasts only once
     const seenNotificationsRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
-        myParticipations.forEach(p => {
+        (myParticipations || []).forEach(p => {
             if (p.notification_state === 1 && !seenNotificationsRef.current.has(p.match_id)) {
                 addToast({
-                    title: t('dashboard.alerts.title', 'Modification détectée'),
-                    description: t('dashboard.alerts.message', `Le match contre ${p.host_club_name} a été modifié.`),
+                    title: t('dashboard.alerts.title'),
+                    description: t('dashboard.alerts.message', { host_club_name: p.host_club_name }),
                     color: "warning"
                 });
                 seenNotificationsRef.current.add(p.match_id);
             } else if (p.notification_state === 0 && seenNotificationsRef.current.has(p.match_id)) {
-                // Clear from seen if marked as read
                 seenNotificationsRef.current.delete(p.match_id);
             }
         });
     }, [myParticipations, t]);
 
-    const [isSaving, setIsSaving] = useState(false);
+    const setHighlightedCardId = (id: string) => {
+        const element = document.getElementById(`card-${id}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setHighlightedCardIdState(id);
+            setTimeout(() => setHighlightedCardIdState(null), 3000);
+        }
+    };
 
     // Sécurité H-2 : Verrouillage uniquement dans les 2h AVANT le match
     const isTooLate = (matchDate: string, matchTime: string) => {
@@ -126,8 +135,10 @@ export default function DashboardPage() {
         try {
             const token = await getAccessTokenSilently();
             await matchService.updateRequestStatus(matchId, userId, status, token);
-            // Refresh via SWR mutation
+            // Refresh all relevant hooks
             mutateIncoming();
+            mutateAnnouncements();
+            mutateParticipations();
         } catch (e: any) {
             const rawMessage = e.message || "";
             let cleanMessage = rawMessage;
@@ -178,7 +189,8 @@ export default function DashboardPage() {
                     description: "Annonce supprimée avec succès",
                     color: "success"
                 });
-                window.location.reload();
+                mutateAnnouncements();
+                mutateIncoming();
             }
         } catch (err: any) {
             const rawMessage = err.message || "";
@@ -205,7 +217,7 @@ export default function DashboardPage() {
     };
 
     // Filtered lists
-    const filteredRequests = incomingRequests.filter(r => {
+    const filteredRequests = (incomingRequests || []).filter(r => {
         // Auto-masquage des demandes pour matchs passés
         if (isMatchPast(r.match_date, r.match_time)) return false;
         // Only show PENDING requests in "Demandes Reçues"
@@ -217,7 +229,7 @@ export default function DashboardPage() {
 
     // Get IDs of matches that have at least one accepted request (they go to Matchs Confirmés)
     const confirmedMatchIds = new Set(
-        incomingRequests.filter(r => r.request_status === 'accepted').map(r => r.match_id)
+        (incomingRequests || []).filter(r => r.request_status === 'accepted').map(r => r.match_id)
     );
 
     const filteredOrganized = (myAnnouncements || []).filter(m => {
@@ -227,16 +239,8 @@ export default function DashboardPage() {
         return m.type === organizedSubFilter;
     });
 
-    const filteredParticipations = myParticipations.filter(p => {
-        if (isMatchPast(p.match_date, p.match_time)) return false;
-        // Skip accepted matches (they go to confirmed tab), but keep accepted tournaments here?
-        // Actually, user wants "Friday match" even if sent.
-        if (p.request_status === 'accepted' && p.match_type === 'match') return false;
-        return true;
-    });
-
     // Combine accepted participations + accepted incoming requests into "Matchs Confirmés"
-    const acceptedIncomingAsOrganizer = incomingRequests
+    const acceptedIncomingAsOrganizer = (incomingRequests || [])
         .filter(r => r.request_status === 'accepted' && !isMatchPast(r.match_date, r.match_time))
         .map(r => ({
             ...r,
@@ -247,6 +251,8 @@ export default function DashboardPage() {
             opponent_city: r.requester_city,
             opponent_category: r.requester_category,
             opponent_level: r.requester_level,
+            category: r.category,
+            level: r.level,
             opponent_firstname: r.requester_firstname,
             opponent_lastname: r.requester_lastname,
             opponent_phone: r.requester_phone,
@@ -255,10 +261,12 @@ export default function DashboardPage() {
             opponent_pitch_type: r.requester_pitch_type,
             // If organizer created match as 'home', organizer plays at home
             isUserHome: r.match_type === 'tournament' || r.venue === 'Domicile',
+            max_teams: r.match_max_teams,
+            accepted_count: r.accepted_count,
         }));
 
-    const acceptedParticipations = myParticipations
-        .filter(p => !isMatchPast(p.match_date, p.match_time) && p.request_status === 'accepted' && p.match_type === 'match')
+    const acceptedParticipations = (myParticipations || [])
+        .filter(p => !isMatchPast(p.match_date, p.match_time) && p.request_status === 'accepted')
         .map(p => ({
             ...p,
             _source: 'participant' as const,
@@ -268,6 +276,8 @@ export default function DashboardPage() {
             opponent_city: p.host_city || p.location_city,
             opponent_category: p.host_category || p.match_category,
             opponent_level: p.host_level || p.match_level,
+            category: p.match_category || p.category,
+            level: p.match_level || p.level,
             opponent_firstname: p.host_firstname,
             opponent_lastname: p.host_lastname,
             opponent_phone: p.host_phone,
@@ -277,12 +287,15 @@ export default function DashboardPage() {
             // If organizer created match as 'away', organizer plays away, so participant plays at home.
             // For tournaments, participant is always Away.
             isUserHome: p.match_type === 'tournament' ? false : p.venue === 'Extérieur',
+            max_teams: p.match_max_teams,
+            accepted_count: p.accepted_count,
         }));
 
-    const allConfirmedMatches = [...acceptedIncomingAsOrganizer, ...acceptedParticipations];
+    const allConfirmedMatches = [...acceptedIncomingAsOrganizer, ...acceptedParticipations].filter(m => m.match_type === 'match');
+    const allConfirmedTournaments = [...acceptedIncomingAsOrganizer, ...acceptedParticipations].filter(m => m.match_type === 'tournament');
 
     // Notification summary for the "Flash" panel
-    const modifiedParticipations = myParticipations.filter(p => p.notification_state === 1);
+    const modifiedParticipations = (myParticipations || []).filter(p => p.notification_state === 1);
 
     const renderSubFilters = (current: 'all' | 'match' | 'tournament', onChange: (v: 'all' | 'match' | 'tournament') => void) => (
         <div className="flex gap-2 p-1 rounded-xl bg-default-100/50 w-fit">
@@ -375,12 +388,10 @@ export default function DashboardPage() {
                                     size="sm"
                                     className="font-bold uppercase text-[10px] px-6"
                                     onPress={() => {
-                                        // Scroll to first modified participation
-                                        const element = document.getElementById(`card-${modifiedParticipations[0].match_id}`);
-                                        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        setHighlightedCardId(modifiedParticipations[0].match_id);
                                     }}
                                 >
-                                    Voir les changements
+                                    {t('dashboard.alerts.view_changes')}
                                 </Button>
                             </CardBody>
                         </Card>
@@ -613,6 +624,66 @@ export default function DashboardPage() {
                                                             </p>
                                                         </div>
                                                     )}
+                                                    {match.type === 'tournament' && (
+                                                        <div className="mt-4 space-y-3 border-t border-white/5 pt-4" onClick={(e) => e.stopPropagation()}>
+                                                            <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest flex items-center gap-2">
+                                                                <span>📋 {t('dashboard.tournament.pairings')}</span>
+                                                                <span className="text-[8px] text-default-500 font-medium lowercase">({match.accepted_count || 0}/{match.max_teams || '∞'} équipes)</span>
+                                                            </p>
+                                                            {match.pairings && match.pairings.length > 0 ? (
+                                                                <div className="grid gap-2">
+                                                                    {match.pairings.map((pairing: any) => (
+                                                                        <div key={pairing.id} className="bg-white/5 rounded-xl p-3 border border-white/5 flex flex-col gap-2">
+                                                                            <div className="flex items-center justify-between gap-2">
+                                                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                                                    <span className="text-[11px] font-bold text-white truncate">{pairing.team_a_club_name}</span>
+                                                                                    <span className="text-[9px] text-default-500 font-black">VS</span>
+                                                                                    <span className="text-[11px] font-bold text-white truncate">{pairing.team_b_club_name}</span>
+                                                                                </div>
+                                                                                <Input
+                                                                                    type="time"
+                                                                                    size="sm"
+                                                                                    variant="flat"
+                                                                                    defaultValue={pairing.scheduled_time}
+                                                                                    className="w-24 shrink-0"
+                                                                                    classNames={{ input: "text-[10px] font-black" }}
+                                                                                    onChange={async (e: React.ChangeEvent<HTMLInputElement>) => {
+                                                                                        const newTime = e.target.value;
+                                                                                        if (newTime === pairing.scheduled_time) return;
+                                                                                        try {
+                                                                                            const token = await getAccessTokenSilently();
+                                                                                            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/matches/pairings/${pairing.id}`, {
+                                                                                                method: 'PATCH',
+                                                                                                headers: {
+                                                                                                    'Content-Type': 'application/json',
+                                                                                                    'Authorization': `Bearer ${token}`
+                                                                                                },
+                                                                                                body: JSON.stringify({ scheduled_time: newTime })
+                                                                                            });
+                                                                                            const data = await res.json();
+                                                                                            if (!data.success) {
+                                                                                                alert(data.error || "Erreur lors de la mise à jour");
+                                                                                                e.target.value = pairing.scheduled_time;
+                                                                                            } else {
+                                                                                                mutateAnnouncements();
+                                                                                            }
+                                                                                        } catch (err) {
+                                                                                            alert("Erreur réseau");
+                                                                                            e.target.value = pairing.scheduled_time;
+                                                                                        }
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <div className="bg-purple-500/5 rounded-xl p-4 border border-dashed border-purple-500/20 text-center">
+                                                                    <p className="text-[10px] text-purple-300 font-medium">Les confrontations apparaîtront ici une fois les équipes acceptées.</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </CardBody>
                                         </Card>
@@ -643,9 +714,9 @@ export default function DashboardPage() {
                         title={
                             <div className="flex items-center space-x-2">
                                 <span>{t('dashboard.tabs.participations')}</span>
-                                {filteredParticipations.filter(p => p.notification_state === 1).length > 0 && (
-                                    <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1 font-black">
-                                        {filteredParticipations.filter(p => p.notification_state === 1).length}
+                                {allConfirmedTournaments.length > 0 && (
+                                    <Chip size="sm" variant="solid" color="secondary" className="h-5 min-w-5 px-1 font-black">
+                                        {allConfirmedTournaments.length}
                                     </Chip>
                                 )}
                             </div>
@@ -654,10 +725,14 @@ export default function DashboardPage() {
                         <div className="flex flex-col gap-6 pt-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {isLoadingParticipations ? (
-                                    <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
-                                ) : filteredParticipations.length > 0 ? (
-                                    filteredParticipations.map((part) => (
-                                        <Card key={part.match_id} id={`card-${part.match_id}`} className={`bg-default-50/5 border transition-all ${part.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'} ${part.notification_state === 1 ? 'border-danger/50 shadow-2xl shadow-danger/5 scale-[1.02] bg-danger/5' : 'hover:bg-default-50/10'}`}>
+                                    <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" /></div>
+                                ) : allConfirmedTournaments.length > 0 ? (
+                                    allConfirmedTournaments.map((part) => (
+                                        <Card
+                                            key={part.match_id}
+                                            id={`card-${part.match_id}`}
+                                            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md ${highlightedCardId === part.match_id ? 'border-danger ring-4 ring-danger/20 animate-pulse' : 'border-purple-400/50'} md:hover:scale-[1.01]`}
+                                        >
                                             <CardBody className="p-5 flex flex-col gap-4">
                                                 {part.notification_state === 1 && (
                                                     <div className="bg-danger/20 border border-danger/30 rounded-xl p-3 mb-2 animate-pulse">
@@ -732,23 +807,71 @@ export default function DashboardPage() {
 
                                                 <div className="bg-white/5 rounded-xl p-4 space-y-3">
                                                     <div className="flex justify-between items-center text-[10px] font-black text-default-400 border-b border-white/5 pb-2">
-                                                        <span className="uppercase">Rappel Événement</span>
+                                                        <span className="uppercase">{part.type === 'tournament' ? 'Informations Tournoi' : 'Rappel Événement'}</span>
                                                         <span className="text-white">{formatDate(part.match_date)} @ {formatTime(part.match_time)}</span>
                                                     </div>
 
                                                     {part.request_status === 'accepted' ? (
-                                                        <div className="space-y-2 animate-appearance-in">
+                                                        <div className="space-y-3 animate-appearance-in">
                                                             <div className="flex items-center gap-2 text-xs text-success-500 font-bold">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M19.91 4.1a.75.75 0 0 1 .11 1.05l-9 12.5a.75.75 0 0 1-1.15.08l-5.25-5.25a.75.75 0 1 1 1.06-1.06l4.63 4.63 8.56-11.83a.75.75 0 0 1 1.05-.12Z" clipRule="evenodd" /></svg>
-                                                                Demande Acceptée !
+                                                                {part.type === 'tournament' ? 'Participation Confirmée !' : 'Demande Acceptée !'}
                                                             </div>
-                                                            <div className="grid grid-cols-1 gap-2">
-                                                                <a href={`tel:${part.host_phone}`} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-success-500/10 hover:bg-success-500/20 text-success-500 text-xs font-black transition-colors truncate">
-                                                                    📞 {part.host_phone || 'Non renseigné'}
-                                                                </a>
-                                                                <a href={`mailto:${part.host_email}`} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-primary-500/10 hover:bg-primary-500/20 text-primary-500 text-xs font-black transition-colors truncate">
-                                                                    ✉️ {part.host_email || 'Non renseigné'}
-                                                                </a>
+
+                                                            {part.type === 'tournament' && (
+                                                                <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 flex flex-col gap-2">
+                                                                    <div className="flex items-center justify-between text-[10px] font-bold text-purple-200 uppercase tracking-tighter">
+                                                                        <span>Confrontations prévues</span>
+                                                                        <Chip size="sm" variant="flat" color="secondary" className="h-4 text-[8px]">Mise à jour en direct</Chip>
+                                                                    </div>
+                                                                    <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1 custom-scrollbar">
+                                                                        {/* Mock or real pairings list */}
+                                                                        <div className="flex items-center justify-between p-2 bg-white/5 rounded-lg border border-white/5">
+                                                                            <span className="text-[10px] font-bold text-white truncate max-w-[40%] text-left">{part.host_club_name}</span>
+                                                                            <span className="text-[10px] font-black text-purple-400">VS</span>
+                                                                            <span className="text-[10px] font-bold text-white truncate max-w-[40%] text-right">{part.opponent_club_name}</span>
+                                                                        </div>
+                                                                        <div className="text-[9px] text-center text-default-400 italic">
+                                                                            D'autres matchs seront ajoutés par l'organisateur.
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            <div className="flex flex-col gap-2">
+                                                                <div className="flex gap-2">
+                                                                    <Button
+                                                                        as="a"
+                                                                        href={`tel:${part.host_phone}`}
+                                                                        size="sm"
+                                                                        color="success"
+                                                                        className="flex-1 font-black text-[10px] uppercase h-8"
+                                                                    >
+                                                                        📞 Appeler
+                                                                    </Button>
+                                                                    <Button
+                                                                        as="a"
+                                                                        href={`mailto:${part.host_email}`}
+                                                                        size="sm"
+                                                                        color="primary"
+                                                                        className="flex-1 font-black text-[10px] uppercase h-8"
+                                                                    >
+                                                                        ✉️ Email
+                                                                    </Button>
+                                                                </div>
+
+                                                                {/* Logic Domicile/Extérieur for address */}
+                                                                {(part.venue === 'Extérieur') && (
+                                                                    <Button
+                                                                        as="a"
+                                                                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${part.location_address || ''} ${part.location_city || ''}`)}`}
+                                                                        target="_blank"
+                                                                        size="sm"
+                                                                        variant="flat"
+                                                                        className="w-full font-black text-[10px] uppercase h-8 bg-white/5"
+                                                                    >
+                                                                        🗺️ Itinéraire : {part.location_city}
+                                                                    </Button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     ) : (
@@ -998,16 +1121,14 @@ export default function DashboardPage() {
                     </Tab>
                 </Tabs>
 
-                {/* Profile Modal */}
                 <Modal isOpen={isProfileOpen} onOpenChange={onProfileChange} backdrop="blur">
                     <ModalContent className="bg-[#1a1a1c] border border-white/10">
                         {(onClose) => (
                             <>
-                                <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Profil du Club Demandeur</ModalHeader>
+                                <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Profil du Club</ModalHeader>
                                 <ModalBody>
                                     {selectedClubProfile ? (
                                         <div className="flex flex-col items-center gap-4 py-4">
-                                            {/* Club Logo / Initial */}
                                             <div className="w-24 h-24 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-lg text-white font-bold text-4xl">
                                                 {selectedClubProfile.requester_club_logo ? (
                                                     <Image src={selectedClubProfile.requester_club_logo} className="w-full h-full object-contain rounded-full" />
@@ -1016,43 +1137,31 @@ export default function DashboardPage() {
                                                 )}
                                             </div>
 
-                                            {/* Club Name */}
                                             <div className="text-center space-y-1">
                                                 <h3 className="font-black text-xl text-white">{selectedClubProfile.requester_club_name || 'Club inconnu'}</h3>
                                             </div>
 
-                                            {/* Info Grid */}
                                             <div className="bg-default-100/5 p-4 rounded-xl border border-default-100/10 w-full mt-2 space-y-3">
-                                                {/* Responsable (Coach Name) */}
                                                 <div className="flex justify-between items-center text-xs">
                                                     <span className="text-default-500 font-bold uppercase tracking-wider">Responsable</span>
                                                     <span className="text-white font-bold">
-                                                        {selectedClubProfile.requester_firstname && selectedClubProfile.requester_lastname
-                                                            ? `${selectedClubProfile.requester_firstname} ${selectedClubProfile.requester_lastname}`
-                                                            : selectedClubProfile.requester_firstname || selectedClubProfile.requester_lastname || 'Non renseigné'}
+                                                        {selectedClubProfile.requester_firstname} {selectedClubProfile.requester_lastname}
                                                     </span>
                                                 </div>
-                                                {/* City */}
                                                 <div className="flex justify-between items-center text-xs">
                                                     <span className="text-default-500 font-bold uppercase tracking-wider">Ville</span>
-                                                    <span className="text-white font-bold">{selectedClubProfile.requester_city || selectedClubProfile.location_city || 'Non renseignée'}</span>
+                                                    <span className="text-white font-bold">{selectedClubProfile.requester_city || 'Non renseignée'}</span>
                                                 </div>
-                                                {/* Category */}
                                                 <div className="flex justify-between items-center text-xs">
                                                     <span className="text-default-500 font-bold uppercase tracking-wider">Catégorie</span>
                                                     <span className="text-white font-bold">
-                                                        {selectedClubProfile.requester_category
-                                                            ? t(`enums.category.${selectedClubProfile.requester_category}`)
-                                                            : 'Non renseignée'}
+                                                        {selectedClubProfile.requester_category ? t(`enums.category.${selectedClubProfile.requester_category}`) : 'Non renseignée'}
                                                     </span>
                                                 </div>
-                                                {/* Level */}
                                                 <div className="flex justify-between items-center text-xs">
                                                     <span className="text-default-500 font-bold uppercase tracking-wider">Niveau</span>
                                                     <span className="text-white font-bold">
-                                                        {selectedClubProfile.requester_level
-                                                            ? t(`enums.level.${selectedClubProfile.requester_level}`)
-                                                            : 'Non renseigné'}
+                                                        {selectedClubProfile.requester_level ? t(`enums.level.${selectedClubProfile.requester_level}`) : 'Non renseigné'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -1062,7 +1171,9 @@ export default function DashboardPage() {
                                                 <p className="text-[10px] text-default-400 font-bold uppercase tracking-wider">Demande envoyée</p>
                                                 <div className="flex justify-between items-center text-xs">
                                                     <span className="text-default-500">Date</span>
-                                                    <span className="text-white font-bold">{formatTimestamp(selectedClubProfile.contacted_at)} à {formatTimestampTime(selectedClubProfile.contacted_at)}</span>
+                                                    <span className="text-white font-bold">
+                                                        {selectedClubProfile.contacted_at ? `${formatTimestamp(selectedClubProfile.contacted_at)} à ${formatTimestampTime(selectedClubProfile.contacted_at)}` : 'Inconnue'}
+                                                    </span>
                                                 </div>
                                                 <div className="flex justify-between items-center text-xs">
                                                     <span className="text-default-500">Pour le {selectedClubProfile.match_type === 'tournament' ? 'tournoi' : 'match'} du</span>

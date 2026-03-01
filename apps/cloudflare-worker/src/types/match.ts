@@ -9,6 +9,24 @@ export interface Club {
     latitude?: number;
     longitude?: number;
     siret?: string;
+    club_colors?: string;
+    category?: string;
+    level?: string;
+    pitch_type?: string;
+}
+
+export interface TournamentPairing {
+    id: string;
+    match_id: string;
+    team_a_club_id: string;
+    team_b_club_id: string;
+    team_a_club_name?: string;
+    team_a_club_logo?: string;
+    team_b_club_name?: string;
+    team_b_club_logo?: string;
+    scheduled_time: string; // HH:MM
+    created_at: number;
+    updated_at: number;
 }
 
 export interface Match {
@@ -41,6 +59,7 @@ export interface Match {
     updated_at: number;
     distance_km?: number;
     distance_approximate?: boolean;
+    pairings?: TournamentPairing[];
 }
 
 export interface CreateMatchDto {
@@ -100,6 +119,7 @@ export interface MatchFilters {
     user_lng?: number;
     notes?: string;
     include_past?: boolean;
+    type?: string;
 }
 
 export interface ContactMatchDto {

@@ -100,10 +100,13 @@
     "title": "Erreur",
     "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
     "not_found": "Élément non trouvé",
-    "save_failed": "Erreur lors de la sauvegarde",
-    "delete_failed": "La suppression a échoué",
+    "save_failed": "Erreur lors de la sauvegarde. Veuillez vérifier votre connexion.",
+    "delete_failed": "La suppression a échoué. Si le match est dans moins de 2h, il est verrouillé.",
     "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
-    "loading_matches": "Erreur lors du chargement des matchs amicaux"
+    "loading_matches": "Erreur lors du chargement des matchs amicaux",
+    "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
+    "invalid_date": "La date saisie est invalide ou déjà passée.",
+    "missing_fields": "Veuillez remplir tous les champs obligatoires."
   },
   "video": {
     "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
@@ -280,7 +283,7 @@
       "U18": "U18",
       "U19": "U19",
       "U20": "U20",
-      "Séniors": "Séniors",
+      "Seniors": "Séniors",
       "Vétérans": "Vétérans",
       "Loisir": "Loisir"
     },
@@ -361,8 +364,11 @@
     "my_creation": "Ma création",
     "unknown_club": "Club Inconnu",
     "found": "match(s) amical(aux) trouvé(s)",
+    "found_tournament": "tournoi(s) trouvé(s)",
     "empty_title": "Aucun match amical trouvé",
-    "empty_desc": "Essayez de modifier vos filtres ou créez un nouveau match amical."
+    "empty_title_tournament": "Aucun tournoi trouvé",
+    "empty_desc": "Essayez de modifier vos filtres ou créez un nouveau match amical.",
+    "empty_desc_tournament": "Essayez de modifier vos filtres ou créez un nouveau tournoi amical."
   },
   "matchForm": {
     "title": "Informations du Match",
@@ -454,8 +460,11 @@
     },
     "link_club": "Lien club requis pour organiser",
     "contact_title": "Contact & Infos complémentaires",
+    "progress": "Préparation de l'annonce du tournoi",
     "alerts": {
-      "create_success": "Votre tournoi a été publié avec succès !"
+      "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un tournoi.",
+      "create_success": "Votre tournoi a été publié avec succès !",
+      "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un tournoi dans le passé."
     }
   },
   "pricing": {
@@ -519,11 +528,16 @@
     "tabs": {
       "requests": "DEMANDES REÇUES",
       "organized": "MES MATCHS / TOURNOIS ORGANISÉS",
-      "participations": "MES PARTICIPATIONS TOURNOIS",
+      "participations": "TOURNOIS CONFIRMÉS",
       "confirmed_matches": "MATCHS CONFIRMÉS",
       "all": "Tous",
       "matches": "Matchs",
       "tournaments": "Tournois"
+    },
+    "tournament": {
+      "pairings": "Confrontations",
+      "edit_time": "Modifier l'heure",
+      "time_range_error": "L'heure doit être comprise entre {{start}} et {{end}}"
     },
     "empty": {
       "requests": "Vous n'avez aucune demande en attente pour le moment.",
@@ -545,7 +559,22 @@
     },
     "alerts": {
       "title": "Modification détectée",
-      "message": "Le match contre {{host_club_name}} a été modifié."
+      "message": "Le match contre {{host_club_name}} a été modifié.",
+      "specific": {
+        "date": "La date du match a été modifiée.",
+        "time": "L'heure du match a été modifiée.",
+        "venue": "Le lieu du match a été modifié.",
+        "jerseys": "Les couleurs de maillots ont été modifiées.",
+        "multiple": "Plusieurs informations du match ont été modifiées."
+      },
+      "action_required": "Action Requise : Modifications Détectées",
+      "match_count": "{{count}} match a été modifié par l'organisateur. Veuillez vérifier les détails.",
+      "matches_count": "{{count}} matchs ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
+      "view_changes": "Voir les changements",
+      "mark_as_read": "J'ai compris, marquer comme lu",
+      "verify": "VÉRIFIER",
+      "attention": "Attention !",
+      "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations."
     }
   },
   "adminUsersPage": {

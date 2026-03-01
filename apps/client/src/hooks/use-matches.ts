@@ -61,7 +61,8 @@ export function useMatches(filters?: MatchFilters) {
         createMatch,
         updateMatch,
         deleteMatch,
-        contactMatch
+        contactMatch,
+        mutate
     };
 }
 

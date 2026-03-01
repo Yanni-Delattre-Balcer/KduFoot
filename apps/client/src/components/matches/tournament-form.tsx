@@ -70,7 +70,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user?.club_id) {
-            addToast({ title: t('warning'), description: t('matchForm.alerts.must_link'), variant: 'flat', color: 'warning' });
+            addToast({ title: t('warning'), description: t('tournamentForm.alerts.must_link'), variant: 'flat', color: 'warning' });
             return;
         }
 
@@ -85,7 +85,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 registration_fee: parseFloat(formData.registration_fee)
             }, token);
 
-            addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success', 'Tournoi publié avec succès'), variant: 'flat', color: 'success' });
+            addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success'), variant: 'flat', color: 'success' });
             if (onSuccess) onSuccess();
         } catch (error: any) {
             const rawMessage = error.message || "";
@@ -333,7 +333,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                     <div className="md:col-span-4 flex flex-col justify-center space-y-3 mt-4">
                         <div className="w-[64%] mx-auto flex flex-col space-y-3">
                             <p className="text-sm font-bold text-purple-300 uppercase tracking-tight text-center">
-                                {t('matchForm.progress')}: {progress}%
+                                {t('tournamentForm.progress')}: {progress}%
                             </p>
                             <div className="w-full h-4 bg-purple-400/20 rounded-full overflow-hidden p-px border border-purple-300/40 ring-1 ring-purple-300/20 shadow-inner">
                                 <div
