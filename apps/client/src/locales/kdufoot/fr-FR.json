@@ -542,6 +542,10 @@
       "pending": "En attente",
       "accepted": "Acceptée",
       "refused": "Refusée"
+    },
+    "alerts": {
+      "title": "Modification détectée",
+      "message": "Le match contre {{host_club_name}} a été modifié."
     }
   },
   "adminUsersPage": {

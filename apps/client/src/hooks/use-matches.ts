@@ -27,7 +27,7 @@ export function useMatches(filters?: MatchFilters) {
     const key = `/api/matches?${query.toString()}`;
 
     const { data, error, isLoading, mutate } = useSWR(key, fetcher, {
-        refreshInterval: 20000, // Refresh matches list every 20 seconds
+        refreshInterval: 5000, // Accelerated to 5 seconds for high interactivity
     });
 
     const createMatch = useCallback(async (dto: CreateMatchDto) => {
@@ -78,7 +78,7 @@ export function useMatch(id: string | null) {
     };
 
     const { data, error, isLoading, mutate } = useSWR(id ? `/api/matches/${id}` : null, fetcher, {
-        refreshInterval: 10000, // Refresh specific match every 10 seconds
+        refreshInterval: 5000, // Accelerated to 5 seconds
     });
 
     const updateMatch = useCallback(async (dto: UpdateMatchDto) => {
@@ -142,7 +142,7 @@ export function useIncomingRequests() {
     };
 
     const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/requests' : null, fetcher, {
-        refreshInterval: 30000, // Refresh every 30 seconds
+        refreshInterval: 5000, // High frequency 5s polling
     });
 
     return {
@@ -167,7 +167,7 @@ export function useMyParticipations() {
     };
 
     const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/participations' : null, fetcher, {
-        refreshInterval: 30000,
+        refreshInterval: 5000, // High frequency 5s polling
     });
 
     const markAsRead = useCallback(async (matchId: string) => {

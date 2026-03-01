@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom';
 import FootballClock from '../../components/football-clock';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { useUser } from '@/hooks/use-user';
+import { useIncomingRequests, useMyParticipations } from '@/hooks/use-matches';
+import { useRef } from 'react';
 
 import { addToast } from '@heroui/toast';
 
@@ -58,13 +60,11 @@ export default function DashboardPage() {
     // 1. Mes Annonces (Organisateur)
     const { matches: myAnnouncements, isLoading: isLoadingAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
 
-    // 2. Demandes Reçues (Organisateur - pour agir sur les autres)
-    const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
-    const [isLoadingIncoming, setIsLoadingIncoming] = useState(false);
+    // 2. Demandes Reçues (Organisateur)
+    const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateIncoming } = useIncomingRequests();
 
-    // 3. Mes Participations (Candidat - pour suivre mes propres demandes)
-    const [myParticipations, setMyParticipations] = useState<any[]>([]);
-    const [isLoadingParticipations, setIsLoadingParticipations] = useState(false);
+    // 3. Mes Participations (Candidat)
+    const { participations: myParticipations, isLoading: isLoadingParticipations, markAsRead: markAsReadHook } = useMyParticipations();
 
     // Sub-filters states
     const [requestsSubFilter, setRequestsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
@@ -74,30 +74,24 @@ export default function DashboardPage() {
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
     const [selectedClubProfile, setSelectedClubProfile] = useState<any>(null);
 
+    // Track seen notifications to trigger toasts only once
+    const seenNotificationsRef = useRef<Set<string>>(new Set());
+
     useEffect(() => {
-        const fetchData = async () => {
-            setIsLoadingIncoming(true);
-            setIsLoadingParticipations(true);
-            try {
-                const token = await getAccessTokenSilently();
-
-                // Fetch incoming
-                const incRes = await matchService.getRequests(token);
-                if (incRes.success) setIncomingRequests(incRes.requests);
-
-                // Fetch participations
-                const partRes = await matchService.getParticipations(token);
-                if (partRes.success) setMyParticipations(partRes.participations);
-
-            } catch (e) {
-                console.error("Dashboard data fetch failed", e);
-            } finally {
-                setIsLoadingIncoming(false);
-                setIsLoadingParticipations(false);
+        myParticipations.forEach(p => {
+            if (p.notification_state === 1 && !seenNotificationsRef.current.has(p.match_id)) {
+                addToast({
+                    title: t('dashboard.alerts.title', 'Modification détectée'),
+                    description: t('dashboard.alerts.message', `Le match contre ${p.host_club_name} a été modifié.`),
+                    color: "warning"
+                });
+                seenNotificationsRef.current.add(p.match_id);
+            } else if (p.notification_state === 0 && seenNotificationsRef.current.has(p.match_id)) {
+                // Clear from seen if marked as read
+                seenNotificationsRef.current.delete(p.match_id);
             }
-        };
-        fetchData();
-    }, [getAccessTokenSilently]);
+        });
+    }, [myParticipations, t]);
 
     const [isSaving, setIsSaving] = useState(false);
 
@@ -132,9 +126,8 @@ export default function DashboardPage() {
         try {
             const token = await getAccessTokenSilently();
             await matchService.updateRequestStatus(matchId, userId, status, token);
-            // Refresh
-            const res = await matchService.getRequests(token);
-            if (res.success) setIncomingRequests(res.requests);
+            // Refresh via SWR mutation
+            mutateIncoming();
         } catch (e: any) {
             const rawMessage = e.message || "";
             let cleanMessage = rawMessage;
@@ -159,12 +152,7 @@ export default function DashboardPage() {
 
     const markAsRead = async (matchId: string) => {
         try {
-            const token = await getAccessTokenSilently();
-            await matchService.markNotificationsAsRead(matchId, token);
-            // Local update to avoid full refresh if possible, or just re-fetch
-            setMyParticipations(prev => prev.map(p =>
-                p.match_id === matchId ? { ...p, notification_state: 0 } : p
-            ));
+            await markAsReadHook(matchId);
         } catch (e) {
             console.error("Failed to mark as read", e);
         }
@@ -293,6 +281,9 @@ export default function DashboardPage() {
 
     const allConfirmedMatches = [...acceptedIncomingAsOrganizer, ...acceptedParticipations];
 
+    // Notification summary for the "Flash" panel
+    const modifiedParticipations = myParticipations.filter(p => p.notification_state === 1);
+
     const renderSubFilters = (current: 'all' | 'match' | 'tournament', onChange: (v: 'all' | 'match' | 'tournament') => void) => (
         <div className="flex gap-2 p-1 rounded-xl bg-default-100/50 w-fit">
             <Button
@@ -362,6 +353,39 @@ export default function DashboardPage() {
 
                     </div>
                 </div>
+
+                {/* Flash Notifications Panel */}
+                {modifiedParticipations.length > 0 && (
+                    <div className="mb-6 animate-appearance-in">
+                        <Card className="bg-danger/10 border-2 border-danger/30 shadow-xl shadow-danger/10">
+                            <CardBody className="p-4 flex flex-col sm:flex-row items-center gap-4">
+                                <div className="flex items-center gap-3 flex-1">
+                                    <div className="p-3 rounded-2xl bg-danger/20 text-danger animate-pulse">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z" /></svg>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <h4 className="font-black text-danger uppercase tracking-tight text-sm">Action Requise : Modifications Détectées</h4>
+                                        <p className="text-default-400 text-xs">
+                                            {modifiedParticipations.length} match{modifiedParticipations.length > 1 ? 's ont' : ' a'} été modifié par l'organisateur. Veuillez vérifier les détails.
+                                        </p>
+                                    </div>
+                                </div>
+                                <Button
+                                    color="danger"
+                                    size="sm"
+                                    className="font-bold uppercase text-[10px] px-6"
+                                    onPress={() => {
+                                        // Scroll to first modified participation
+                                        const element = document.getElementById(`card-${modifiedParticipations[0].match_id}`);
+                                        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }}
+                                >
+                                    Voir les changements
+                                </Button>
+                            </CardBody>
+                        </Card>
+                    </div>
+                )}
 
                 <Tabs
                     aria-label="Dashboard Options"
@@ -632,9 +656,30 @@ export default function DashboardPage() {
                                 {isLoadingParticipations ? (
                                     <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
                                 ) : filteredParticipations.length > 0 ? (
-                                    filteredParticipations.map((part, idx) => (
-                                        <Card key={idx} className={`bg-default-50/5 border ${part.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'} hover:bg-default-50/10 transition-colors`}>
+                                    filteredParticipations.map((part) => (
+                                        <Card key={part.match_id} id={`card-${part.match_id}`} className={`bg-default-50/5 border transition-all ${part.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'} ${part.notification_state === 1 ? 'border-danger/50 shadow-2xl shadow-danger/5 scale-[1.02] bg-danger/5' : 'hover:bg-default-50/10'}`}>
                                             <CardBody className="p-5 flex flex-col gap-4">
+                                                {part.notification_state === 1 && (
+                                                    <div className="bg-danger/20 border border-danger/30 rounded-xl p-3 mb-2 animate-pulse">
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-danger text-xs font-black uppercase tracking-tighter">⚠️ Modification détectée</span>
+                                                            </div>
+                                                            <Button
+                                                                size="sm"
+                                                                color="danger"
+                                                                variant="solid"
+                                                                className="h-7 min-w-unit-16 text-[10px] font-black uppercase px-3 shadow-lg shadow-danger/20"
+                                                                onPress={() => {
+                                                                    markAsRead(part.match_id);
+                                                                }}
+                                                            >
+                                                                VÉRIFIER
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1">
                                                         {part.host_club_logo ? (

@@ -14,7 +14,7 @@
   "blog": "Blog",
   "about": "À propos",
   "profile": "Profil",
-  "dashboard": "Tableau de bord",
+  "dashboard_nav": "Tableau de bord",
   "projects": "Projets",
   "team": "Équipe",
   "calendar": "Calendrier",
@@ -56,6 +56,17 @@
       "link_success": "Club lié avec succès !",
       "create_success": "Annonce créée avec succès !",
       "update_success": "Match mis à jour avec succès !"
+    }
+  },
+  "dashboard": {
+    "status": {
+      "pending": "En attente",
+      "accepted": "Accepté",
+      "refused": "Refusé"
+    },
+    "alerts": {
+      "title": "Modification détectée",
+      "message": "Le match contre {{host_club_name}} a été modifié."
     }
   },
   "tournamentForm": {
