@@ -10,6 +10,7 @@ import { useUser } from '@/hooks/use-user';
 import { matchService } from '@/services/matches';
 import { useAuth0 } from '@auth0/auth0-react';
 import { addToast } from "@heroui/toast";
+import { useSWRConfig } from 'swr';
 
 interface TournamentFormProps {
     onSuccess?: () => void;
@@ -20,8 +21,9 @@ const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilis�
 
 export default function TournamentForm({ onSuccess, onCancel }: TournamentFormProps) {
     const { t } = useTranslation();
-    const { user } = useUser();
+    const { user, unlinkClub } = useUser();
     const { getAccessTokenSilently } = useAuth0();
+    const { mutate } = useSWRConfig();
     const [isSaving, setIsSaving] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -74,6 +76,17 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
             return;
         }
 
+        // SECURITY: Date Validation
+        const now = new Date();
+        const selectedDate = new Date(formData.match_date!);
+        const [hours, minutes] = (formData.match_time || '00:00').split(':').map(Number);
+        selectedDate.setHours(hours, minutes);
+
+        if (selectedDate < now) {
+            addToast({ title: t('error'), description: t('matchForm.alerts.date_past'), variant: 'flat', color: 'danger' });
+            return;
+        }
+
         setIsSaving(true);
         try {
             const token = await getAccessTokenSilently();
@@ -86,6 +99,8 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
             }, token);
 
             addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success'), variant: 'flat', color: 'success' });
+            // Global mutation to refresh lists
+            mutate(key => typeof key === 'string' && key.startsWith('/api/matches'));
             if (onSuccess) onSuccess();
         } catch (error: any) {
             const rawMessage = error.message || "";
@@ -197,8 +212,15 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 </div>
                                 {user?.email === 'yannidelattrebalcer.artois@gmail.com' && (
                                     <Button size="sm" color="danger" variant="flat" onPress={async () => {
-                                        alert("Détachement du club réservé à l'administration.");
-                                    }}>{t('matchForm.buttons.unlink')}</Button>
+                                        if (confirm("Détacher le club ? (Admin uniquement)")) {
+                                            try {
+                                                await unlinkClub();
+                                                addToast({ title: "Club détaché", color: "success" });
+                                            } catch (e: any) {
+                                                addToast({ title: e.message, color: "danger" });
+                                            }
+                                        }
+                                    }}>{t('matchForm.buttons.unlink', 'Détacher (Admin)')}</Button>
                                 )}
                             </div>
                         )}
@@ -237,6 +259,9 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 }}
                             />
                         </div>
+                        <p className="text-[10px] text-default-400 italic leading-tight px-1 mt-1">
+                            {t('matchForm.labels.stadium_note', "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement.")}
+                        </p>
                     </div>
 
                     <Input
@@ -308,6 +333,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                             label={t('tournamentForm.labels.date')}
                             value={formData.match_date}
                             onValueChange={(v) => handleChange('match_date', v)}
+                            min={new Date().toISOString().split('T')[0]}
                             isRequired
                         />
                         <Input

@@ -1573,6 +1573,28 @@
         }
       }
     },
+    "/api/me/context": {
+      "get": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Retrieve complete user context (Profile + Notifications)",
+        "description": "Aggregates user profile, club association, and notification counts in a single \"one-shot\" request. Designed to minimize KV reads and API calls during initial application load.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete user context."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        }
+      }
+    },
     "/api/users/link-club": {
       "post": {
         "tags": [
@@ -1597,9 +1619,7 @@
                 "properties": {
                   "siret": {
                     "type": "string",
-                    "minLength": 14,
-                    "maxLength": 14,
-                    "description": "14-digit SIRET number."
+                    "description": "9-digit SIREN or 14-digit SIRET number."
                   }
                 }
               }

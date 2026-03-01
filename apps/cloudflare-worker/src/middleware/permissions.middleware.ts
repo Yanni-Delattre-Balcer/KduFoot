@@ -87,13 +87,17 @@ async function checkQuota(
     // Ideally we should have a separate consumeQuota function.
     // Let's stick to the analysis logic but maybe add a flag if needed later.
 
-    await env.KV_CACHE.put(kvKey, String(current + 1), {
-        expirationTtl: getPeriodTTL(config.period)
-    });
+    // Optimization: Only increment quota (KV.put) for non-GET requests
+    if (request.method !== 'GET') {
+        await env.KV_CACHE.put(kvKey, String(current + 1), {
+            expirationTtl: getPeriodTTL(config.period)
+        });
+        current++;
+    }
 
     return {
         hasPermission: true,
-        quota: { current: current + 1, limit: config.limit }
+        quota: { current, limit: config.limit }
     };
 }
 

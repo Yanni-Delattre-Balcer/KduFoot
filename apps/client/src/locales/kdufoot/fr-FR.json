@@ -182,6 +182,7 @@
     "title": "Matchs Amicaux",
     "tab_matches": "Matchs",
     "tab_tournaments": "Tournois",
+    "tournament": "Tournoi",
     "create": "Créer un Match",
     "create_tournament": "Créer un Tournoi",
     "find": "Chercher un Match",
@@ -322,7 +323,8 @@
     "gender": {
       "Masculin": "Masculin",
       "Féminin": "Féminin",
-      "Mixte": "Mixte"
+      "Mixte": "Mixte",
+      "Non spécifié": "Non spécifié"
     },
     "format": {
       "11v11": "11 vs 11",
@@ -393,7 +395,9 @@
       "choose": "Choisir",
       "auto_siret": "Rempli automatiquement via le SIRET",
       "auto": "Rempli automatiquement",
-      "more_info": "Informations complémentaires..."
+      "more_info": "Informations complémentaires...",
+      "free": "Gratuit",
+      "stadium_note": "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement."
     },
     "venue_labels": {
       "Domicile": "Nous recevons (Domicile)",
@@ -406,6 +410,7 @@
       "warning_final": "Le club sera définitivement associé à votre compte.",
       "warning_support": "Si vous devez changer de club par la suite, contactez le support : support.kdufoot@gmail.com",
       "warning_search": "Astuce : Cherchez 'Nom de votre club + SIRET' sur Internet pour le trouver.",
+      "search_help": "Pour trouver votre numéro, tapez sur Google : \"SIRET + [Nom exact de votre club]\". Exemple : \"SIRET RC Lens\".",
       "validate": "Valider et Lier le club",
       "support": "En cas de changement de club ultérieur, contactez le support avec justificatifs.",
       "linked": "Club lié"
@@ -418,7 +423,7 @@
       "unlink": "Détacher (Admin)"
     },
     "alerts": {
-      "siret_length": "Le SIRET doit contenir exactement 14 chiffres.",
+      "siret_length": "Le numéro doit contenir 9 (SIREN) ou 14 (SIRET) chiffres.",
       "link_confirm": "⚠️ ATTENTION : Cette action est IRRÉVERSIBLE.\n\nVotre compte sera définitivement lié à ce club.\nPour toute modification ultérieure, vous devrez contacter le support avec une preuve à l'appui.\n\nVoulez-vous continuer ?",
       "link_error": "Erreur lors de la liaison du club. Vérifiez le SIRET.",
       "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un match.",
@@ -427,7 +432,8 @@
       "date_far": "⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée.",
       "link_success": "Club lié avec succès !",
       "create_success": "Annonce de match créée avec succès !",
-      "update_success": "Match mis à jour avec succès !"
+      "update_success": "Match mis à jour avec succès !",
+      "delete_success": "Match supprimé avec succès !"
     },
     "confirm": {
       "accept": "Accepter cette demande ?",
@@ -464,6 +470,8 @@
     "alerts": {
       "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un tournoi.",
       "create_success": "Votre tournoi a été publié avec succès !",
+      "update_success": "Votre tournoi a été mis à jour avec succès !",
+      "delete_success": "Le tournoi a été supprimé avec succès !",
       "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un tournoi dans le passé."
     }
   },
@@ -525,6 +533,8 @@
   "dashboard": {
     "title": "Tableau de Bord",
     "subtitle": "Gérez vos organisations et vos participations en temps réel.",
+    "organized_label": "Organisateur",
+    "away_label": "Extérieur",
     "tabs": {
       "requests": "DEMANDES REÇUES",
       "organized": "MES MATCHS / TOURNOIS ORGANISÉS",
@@ -537,7 +547,15 @@
     "tournament": {
       "pairings": "Confrontations",
       "edit_time": "Modifier l'heure",
-      "time_range_error": "L'heure doit être comprise entre {{start}} et {{end}}"
+      "time_range_error": "L'heure doit être comprise entre {{start}} et {{end}}",
+      "filling": "Remplissage du tournoi",
+      "registered_teams": "Équipes inscrites",
+      "waiting_teams": "En attente d'équipes..."
+    },
+    "memo": {
+      "title": "📋 Historique de mes créations",
+      "loading": "Chargement du mémo...",
+      "empty": "Aucun événement créé pour le moment."
     },
     "empty": {
       "requests": "Vous n'avez aucune demande en attente pour le moment.",
@@ -550,12 +568,17 @@
       "new": "Nouvelle Annonce",
       "view": "Voir l'annonce",
       "accept": "Accepter",
-      "refuse": "Refuser"
+      "refuse": "Refuser",
+      "manage_registrations": "Gérer les inscriptions",
+      "contact": "Contacter"
     },
     "status": {
       "pending": "En attente",
       "accepted": "Acceptée",
-      "refused": "Refusée"
+      "refused": "Refusée",
+      "completed": "Terminé",
+      "full": "Complet",
+      "open": "Ouvert"
     },
     "alerts": {
       "title": "Modification détectée",
@@ -574,7 +597,24 @@
       "mark_as_read": "J'ai compris, marquer comme lu",
       "verify": "VÉRIFIER",
       "attention": "Attention !",
-      "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations."
+      "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations.",
+      "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
+    },
+    "labels": {
+      "organizer": "Organisateur",
+      "participant": "Participant",
+      "my_club": "Mon Club",
+      "home_badge": "🏠 À Domicile",
+      "away_badge": "✈️ À l'Extérieur",
+      "home": "Domicile",
+      "away": "Extérieur",
+      "confirmed_match": "✅ MATCH CONFIRMÉ",
+      "view_club_profile": "👤 Voir le profil du club",
+      "view_profile": "👤 Voir le profil",
+      "search_match": "Rechercher un match",
+      "search_tournament": "Rechercher un tournoi",
+      "no_participation_tournament": "Vous n'avez postulé à aucun tournoi",
+      "for_event": "Pour le {{type}} du"
     }
   },
   "adminUsersPage": {

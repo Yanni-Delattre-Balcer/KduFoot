@@ -40,12 +40,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               import.meta.env.AUTHENTICATION_PROVIDER_TYPE || "auth0"
             }
           >
-            <UserProvider>
-              <WelcomeGatewayProvider>
+            <WelcomeGatewayProvider>
+              <UserProvider>
                 <CookieConsent />
                 <App />
-              </WelcomeGatewayProvider>
-            </UserProvider>
+              </UserProvider>
+            </WelcomeGatewayProvider>
           </AuthenticationProvider>
         </CookieConsentProvider>
       </Provider>

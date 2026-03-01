@@ -17,6 +17,8 @@
  */
 
 import { LinkUniversal } from "./link-universal";
+import { clsx } from "@heroui/shared-utils";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -26,36 +28,39 @@ import {
   NavbarMenuItem,
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
-import { clsx } from "@heroui/shared-utils";
-
-
 
 import { I18nIcon, LanguageSwitch } from "./language-switch";
-
-import { LoginLogoutButton, LoginLogoutLink } from "@/authentication";
+import { LoginLogoutButton, LoginLogoutLink, useUser } from "@/authentication";
 import { siteConfig } from "@/config/site";
-import { useNotificationStats } from "@/hooks/use-matches";
 import { Chip } from "@heroui/chip";
-
-
-
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
-  const { totalCount } = useNotificationStats();
+  const { notifications } = useUser();
+  const totalCount = notifications.pendingRequests + notifications.modifiedParticipations;
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (href.startsWith('/matches') && location.pathname === '/matches') {
+      e.preventDefault();
+      const params = new URLSearchParams(location.search);
+      params.set('scroll_ts', Date.now().toString());
+      navigate(`/matches?${params.toString()}`, { replace: true });
+    }
+  };
 
   const getNavItemClass = (href: string) => {
     const base = "font-bold hover:scale-105 transition-transform bg-size-[200%_auto] animate-gradient-flow bg-clip-text text-transparent text-base";
-    // Vibrant saturated colors (3 steps) to see movement without being "extreme"
-    if (href === '/') return `${base} bg-[linear-gradient(to_right,#991b1b,#f87171,#991b1b)]`; // Red 🍎
-    if (href === '/dashboard') return `${base} bg-[linear-gradient(to_right,#9a3412,#fb923c,#9a3412)]`; // Orange 🍊
-    if (href === '/exercises') return `${base} bg-[linear-gradient(to_right,#92400e,#fbbf24,#92400e)]`; // Amber ☀️
-    if (href === '/training') return `${base} bg-[linear-gradient(to_right,#14532d,#22c55e,#14532d)]`; // Grass Green 🌳
-    if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#164e63,#22d3ee,#164e63)]`; // Cyan 💧
-    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#1e3a8a,#3b82f6,#1e3a8a)]`; // Deep Blue 📘
-    if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#5b21b6,#a78bfa,#5b21b6)]`; // Violet 🔮
-    if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#86198f,#f0abfc,#86198f)]`; // Pink 💖
-    if (href === '/remerciements') return `${base} bg-[linear-gradient(to_right,#115e59,#2dd4bf,#115e59)]`; // Teal 🌊
+    if (href === '/') return `${base} bg-[linear-gradient(to_right,#991b1b,#f87171,#991b1b)]`;
+    if (href === '/dashboard') return `${base} bg-[linear-gradient(to_right,#9a3412,#fb923c,#9a3412)]`;
+    if (href === '/exercises') return `${base} bg-[linear-gradient(to_right,#92400e,#fbbf24,#92400e)]`;
+    if (href === '/training') return `${base} bg-[linear-gradient(to_right,#14532d,#22c55e,#14532d)]`;
+    if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#164e63,#22d3ee,#164e63)]`;
+    if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#1e3a8a,#3b82f6,#1e3a8a)]`;
+    if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#5b21b6,#a78bfa,#5b21b6)]`;
+    if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#86198f,#f0abfc,#86198f)]`;
+    if (href === '/remerciements') return `${base} bg-[linear-gradient(to_right,#115e59,#2dd4bf,#115e59)]`;
     return "text-foreground font-bold";
   };
 
@@ -69,7 +74,6 @@ export const Navbar = () => {
         wrapper: "max-w-full px-6 h-full relative flex items-center justify-between"
       }}
     >
-      {/* Navigation Links - Centered */}
       <NavbarContent className="hidden lg:flex gap-4 justify-center w-full" justify="center">
         {siteConfig().navItems.map((item) => (
           <NavbarItem key={item.href}>
@@ -80,6 +84,7 @@ export const Navbar = () => {
               )}
               color="foreground"
               href={item.href}
+              onClick={(e) => handleNavClick(e, item.href)}
             >
               <div className="flex items-center gap-1.5">
                 {item.label}
@@ -99,19 +104,11 @@ export const Navbar = () => {
         ))}
       </NavbarContent>
 
-      <NavbarContent
-        className="hidden sm:flex basis-0 grow"
-        justify="end"
-      >
+      <NavbarContent className="hidden sm:flex basis-0 grow" justify="end">
         <NavbarItem className="hidden sm:flex items-center gap-2">
-          <LanguageSwitch
-            availableLanguages={availableLanguages}
-            icon={I18nIcon}
-          />
+          <LanguageSwitch availableLanguages={availableLanguages} icon={I18nIcon} />
           <LoginLogoutButton />
         </NavbarItem>
-
-
       </NavbarContent>
 
       <NavbarContent className="lg:hidden basis-1 pl-4" justify="end">
@@ -119,11 +116,7 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarMenu className="bg-background/95 backdrop-blur-md pt-6 border-t border-default-100">
-
-        <LanguageSwitch
-          availableLanguages={availableLanguages}
-          icon={I18nIcon}
-        />
+        <LanguageSwitch availableLanguages={availableLanguages} icon={I18nIcon} />
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig().navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
@@ -132,6 +125,7 @@ export const Navbar = () => {
                 color="foreground"
                 href={item.href}
                 size="lg"
+                onClick={(e) => handleNavClick(e, item.href)}
               >
                 <div className="flex items-center gap-2">
                   {item.label}
@@ -151,4 +145,4 @@ export const Navbar = () => {
       </NavbarMenu>
     </HeroUINavbar>
   );
-}
+};

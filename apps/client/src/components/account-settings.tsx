@@ -23,7 +23,7 @@ interface AccountSettingsProps {
 export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const { t } = useTranslation();
     const { user: authUser, getAccessToken } = useAuth();
-    const { user: dbUser, updateUser, linkClub, refetch } = useUser();
+    const { user: dbUser, updateUser, linkClub, unlinkClub, refetch } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -35,6 +35,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const [phone, setPhone] = useState("");
     const [siret, setSiret] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const formatPhoneNumber = (value: string) => {
         let raw = value.replace(/\D/g, '');
@@ -137,13 +138,31 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         }
     };
 
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!phone || phone.length < 11) newErrors.phone = "Numéro de téléphone requis";
+        if (!category) newErrors.category = "Catégorie requise";
+        if (!level) newErrors.level = "Niveau requis";
+        if (!pitchType) newErrors.pitchType = "Type de terrain requis";
+        const cleanSiret = siret.replace(/\s/g, '').trim();
+        if (!dbUser?.club_id && (!siret || (cleanSiret.length !== 14 && cleanSiret.length !== 9))) {
+            newErrors.siret = t('matchForm.alerts.siret_length', "Numéro SIRET (14 chiffres) ou SIREN (9 chiffres) requis");
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async () => {
+        if (!validate()) {
+            addToast({ title: t('error.title'), description: "Veuillez remplir tous les champs obligatoires", variant: 'flat', color: 'danger' });
+            return;
+        }
         setIsSaving(true);
         try {
             const cleanSiret = siret.replace(/\s/g, '').trim();
             if (cleanSiret && cleanSiret !== dbUser?.siret && !dbUser?.club_id) {
-                if (cleanSiret.length !== 14) {
-                    throw new Error(t('matchForm.alerts.siret_length', 'Le SIRET doit contenir exactement 14 chiffres'));
+                if (cleanSiret.length !== 14 && cleanSiret.length !== 9) {
+                    throw new Error(t('matchForm.alerts.siret_length', 'Le numéro doit contenir 9 (SIREN) ou 14 (SIRET) chiffres'));
                 }
                 await linkClub(cleanSiret);
             }
@@ -173,7 +192,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
     const handleLinkSiret = async () => {
         const cleanSiret = siret.replace(/\s/g, '').trim();
-        if (cleanSiret.length !== 14) {
+        if (cleanSiret.length !== 14 && cleanSiret.length !== 9) {
             addToast({ title: t('error.title'), description: t('matchForm.alerts.siret_length'), variant: 'flat', color: 'danger' });
             return;
         }
@@ -253,15 +272,21 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 <span className="text-default-500">Email</span>
                                 <span className="font-medium">{authUser.email}</span>
                             </div>
-                            <Input
-                                label="Téléphone"
-                                variant="bordered"
-                                size="sm"
-                                value={phone}
-                                onValueChange={handlePhoneChange}
-                                placeholder="+33 6 12 34 56 78"
-                                className="mt-2"
-                            />
+                            <div className="space-y-1">
+                                <Input
+                                    label="Téléphone"
+                                    variant="bordered"
+                                    size="sm"
+                                    value={phone}
+                                    onValueChange={(v) => {
+                                        handlePhoneChange(v);
+                                        if (errors.phone) setErrors(prev => ({ ...prev, phone: "" }));
+                                    }}
+                                    placeholder="+33 6 12 34 56 78"
+                                    isInvalid={!!errors.phone}
+                                />
+                                {errors.phone && <p className="text-[10px] text-danger font-bold pl-1">{errors.phone}</p>}
+                            </div>
                             <Input
                                 label="Numéro de licence"
                                 variant="bordered"
@@ -277,48 +302,69 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     <div className="space-y-3">
                         <p className="text-xs font-bold text-default-400 uppercase ml-1 mt-2">Profil Sportif (Requis pour créer des annonces)</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <Select
-                                label="Catégorie"
-                                variant="bordered"
-                                size="sm"
-                                selectedKeys={category ? [category] : []}
-                                onChange={(e) => setCategory(e.target.value)}
-                                placeholder="Choisir..."
-                            >
-                                {CATEGORIES.map((cat) => (
-                                    <SelectItem key={cat} textValue={t(`enums.category.${cat}`)}>
-                                        {t(`enums.category.${cat}`)}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                            <Select
-                                label="Niveau"
-                                variant="bordered"
-                                size="sm"
-                                selectedKeys={level ? [level] : []}
-                                onChange={(e) => setLevel(e.target.value)}
-                                placeholder="Choisir..."
-                            >
-                                {LEVELS.map((lvl) => (
-                                    <SelectItem key={lvl} textValue={t(`enums.level.${lvl}`)}>
-                                        {t(`enums.level.${lvl}`)}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                            <Select
-                                label="Terrain habituel"
-                                variant="bordered"
-                                size="sm"
-                                selectedKeys={pitchType ? [pitchType] : []}
-                                onChange={(e) => setPitchType(e.target.value)}
-                                placeholder="Choisir..."
-                            >
-                                {PITCH_TYPES.map((type) => (
-                                    <SelectItem key={type} textValue={t(`enums.pitch.${type}`)}>
-                                        {t(`enums.pitch.${type}`)}
-                                    </SelectItem>
-                                ))}
-                            </Select>
+                            <div className="space-y-1">
+                                <Select
+                                    label="Catégorie"
+                                    variant="bordered"
+                                    size="sm"
+                                    selectedKeys={category ? [category] : []}
+                                    onChange={(e) => {
+                                        setCategory(e.target.value);
+                                        if (errors.category) setErrors(prev => ({ ...prev, category: "" }));
+                                    }}
+                                    placeholder="Choisir..."
+                                    isInvalid={!!errors.category}
+                                >
+                                    {CATEGORIES.map((cat) => (
+                                        <SelectItem key={cat} textValue={t(`enums.category.${cat}`)}>
+                                            {t(`enums.category.${cat}`)}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+                                {errors.category && <p className="text-[10px] text-danger font-bold pl-1">{errors.category}</p>}
+                            </div>
+                            <div className="space-y-1">
+                                <Select
+                                    label="Niveau"
+                                    variant="bordered"
+                                    size="sm"
+                                    selectedKeys={level ? [level] : []}
+                                    onChange={(e) => {
+                                        setLevel(e.target.value);
+                                        if (errors.level) setErrors(prev => ({ ...prev, level: "" }));
+                                    }}
+                                    placeholder="Choisir..."
+                                    isInvalid={!!errors.level}
+                                >
+                                    {LEVELS.map((lvl) => (
+                                        <SelectItem key={lvl} textValue={t(`enums.level.${lvl}`)}>
+                                            {t(`enums.level.${lvl}`)}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+                                {errors.level && <p className="text-[10px] text-danger font-bold pl-1">{errors.level}</p>}
+                            </div>
+                            <div className="space-y-1">
+                                <Select
+                                    label="Terrain habituel"
+                                    variant="bordered"
+                                    size="sm"
+                                    selectedKeys={pitchType ? [pitchType] : []}
+                                    onChange={(e) => {
+                                        setPitchType(e.target.value);
+                                        if (errors.pitchType) setErrors(prev => ({ ...prev, pitchType: "" }));
+                                    }}
+                                    placeholder="Choisir..."
+                                    isInvalid={!!errors.pitchType}
+                                >
+                                    {PITCH_TYPES.map((type) => (
+                                        <SelectItem key={type} textValue={t(`enums.pitch.${type}`)}>
+                                            {t(`enums.pitch.${type}`)}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+                                {errors.pitchType && <p className="text-[10px] text-danger font-bold pl-1">{errors.pitchType}</p>}
+                            </div>
                             <Input
                                 label="Couleur des maillots"
                                 variant="bordered"
@@ -346,16 +392,24 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                             variant="bordered"
                                             size="sm"
                                             value={siret}
-                                            onValueChange={handleSiretChange}
+                                            onValueChange={(v) => {
+                                                handleSiretChange(v);
+                                                if (errors.siret) setErrors(prev => ({ ...prev, siret: "" }));
+                                            }}
                                             placeholder="123 456 789 00012"
                                             isDisabled={!!dbUser?.club_id}
+                                            isInvalid={!!errors.siret}
                                             className="w-full"
                                         />
-                                        <p className="text-[10px] text-default-400 pl-1">
-                                            Besoin d'aide ? Trouvez votre SIRET sur <a href="https://www.societe.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Société.com</a> ou <a href="https://annuaire-entreprises.data.gouv.fr/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Annuaire-Entreprises</a>.
-                                        </p>
+                                        {errors.siret ? (
+                                            <p className="text-[10px] text-danger font-bold pl-1 animate-shake">{errors.siret}</p>
+                                        ) : (
+                                            <p className="text-[10px] text-default-400 pl-1 leading-relaxed">
+                                                {t('matchForm.link_club.search_help', "Pour trouver votre numéro, tapez sur Google : \"SIRET + [Nom exact de votre club]\". Exemple : \"SIRET RC Lens\".")}
+                                            </p>
+                                        )}
                                     </div>
-                                    {!dbUser?.club_id && (
+                                    {!dbUser?.club_id ? (
                                         <Button
                                             color="primary"
                                             size="sm"
@@ -365,6 +419,27 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         >
                                             VALIDER MON CLUB
                                         </Button>
+                                    ) : (
+                                        authUser?.email === 'yannidelattrebalcer.artois@gmail.com' && (
+                                            <Button
+                                                color="danger"
+                                                variant="flat"
+                                                size="sm"
+                                                className="h-12 font-bold px-4 w-full sm:w-auto uppercase"
+                                                onPress={async () => {
+                                                    if (confirm("Détacher le club ? (Admin uniquement)")) {
+                                                        try {
+                                                            await unlinkClub();
+                                                            addToast({ title: "Club détaché", color: "success" });
+                                                        } catch (e: any) {
+                                                            addToast({ title: e.message, color: "danger" });
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                {t('matchForm.buttons.unlink', 'Détacher (Admin)')}
+                                            </Button>
+                                        )
                                     )}
                                 </div>
 

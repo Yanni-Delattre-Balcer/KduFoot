@@ -1,5 +1,9 @@
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { AccountSettings } from "@/components/account-settings";
+import { useUser } from "@/hooks/use-user";
+import { isProfileComplete } from "@/utils/profile";
+import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
+import { useMemo } from "react";
 
 interface AccountModalProps {
     isOpen: boolean;
@@ -7,6 +11,14 @@ interface AccountModalProps {
 }
 
 export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
+    const { user } = useUser();
+    const { isVisitor } = useWelcomeGateway();
+
+    const isLocked = useMemo(() => {
+        if (!user || isVisitor) return false;
+        return !isProfileComplete(user);
+    }, [user, isVisitor]);
+
     return (
         <Modal
             isOpen={isOpen}
@@ -22,9 +34,20 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             <ModalContent>
                 {(onClose) => (
                     <>
-                        <ModalHeader className="flex flex-col gap-1">Mon Compte</ModalHeader>
+                        <ModalHeader className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                                <span>Mon Compte</span>
+                                {isLocked && (
+                                    <span className="text-[10px] bg-danger/10 text-danger px-2 py-0.5 rounded-full animate-pulse border border-danger/20 font-black uppercase">
+                                        Configuration Requise
+                                    </span>
+                                )}
+                            </div>
+                        </ModalHeader>
                         <ModalBody className="py-6 overflow-y-auto">
-                            <AccountSettings onSaveSuccess={() => onClose()} />
+                            <AccountSettings onSaveSuccess={() => {
+                                if (!isLocked) onClose();
+                            }} />
                         </ModalBody>
                     </>
                 )}

@@ -10,6 +10,7 @@ import { Category } from '@/types/exercise.types';
 import { useMatches } from '@/hooks/use-matches';
 import { useUser } from '@/hooks/use-user';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useSWRConfig } from 'swr';
 
 interface MatchFormProps {
     initialData?: Match;
@@ -24,6 +25,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
     const { createMatch, updateMatch } = useMatches();
     const { user, unlinkClub, updateUser } = useUser();
     const { user: auth0User } = useAuth0();
+    const { mutate } = useSWRConfig();
     const [isSaving, setIsSaving] = useState(false);
 
     // Initialize form data
@@ -170,6 +172,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                 addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.update_success', 'Match mis à jour avec succès'), variant: 'flat', color: 'success' });
             } else {
                 await createMatch(payload as any);
+                // Global mutation to refresh lists
+                mutate(key => typeof key === 'string' && key.startsWith('/api/matches'));
                 addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.create_success', 'Match créé avec succès'), variant: 'flat', color: 'success' });
             }
             if (onSuccess) onSuccess();
@@ -326,6 +330,9 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 }}
                             />
                         </div>
+                        <p className="text-[10px] text-default-400 italic leading-tight px-1">
+                            {t('matchForm.labels.stadium_note', "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement.")}
+                        </p>
                     </div>
 
                     {/* Row 2: Category, Level, Format, Gender */}
@@ -399,6 +406,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         label={t('matchForm.labels.date')}
                         value={formData.match_date}
                         onValueChange={(v) => handleChange('match_date', v)}
+                        min={new Date().toISOString().split('T')[0]}
                         isRequired
                         startContent={
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">

@@ -139,6 +139,56 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
     /**
      * @openapi
+     * /api/me/context:
+     *   get:
+     *     tags:
+     *       - User Management
+     *     summary: Retrieve complete user context (Profile + Notifications)
+     *     description: >
+     *       Aggregates user profile, club association, and notification counts in a single "one-shot" request.
+     *       Designed to minimize KV reads and API calls during initial application load.
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Complete user context.
+     *       404:
+     *         description: User not found.
+     */
+    router.get('/api/me/context', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const sub = payload.sub;
+
+        const user = await userService.getUserByAuth0Sub(sub);
+        if (!user) {
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        let club = null;
+        if (user.club_id) {
+            club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
+        }
+
+        const { MatchService } = await import('../services/match.service');
+        const matchService = new MatchService(env.DB);
+        const notifications = await matchService.getNotificationCounts(user.id);
+
+        return Response.json({
+            success: true,
+            user: { ...user, club },
+            notifications
+        }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+    });
+
+    /**
+     * @openapi
      * /api/users/me:
      *   put:
      *     tags:
@@ -222,7 +272,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *             type: object
      *             required: [siret]
      *             properties:
-     *               siret: { type: string, minLength: 14, maxLength: 14, description: "14-digit SIRET number." }
+     *               siret: { type: string, description: "9-digit SIREN or 14-digit SIRET number." }
      *     responses:
      *       200:
      *         description: Successfully linked. Returns the updated user and club details.
@@ -254,8 +304,8 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
 
         const body: { siret: string } = await request.json();
-        if (!body.siret || body.siret.length !== 14) {
-            return Response.json({ success: false, error: 'SIRET invalide. Il doit contenir 14 chiffres.' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        if (!body.siret || (body.siret.length !== 9 && body.siret.length !== 14)) {
+            return Response.json({ success: false, error: 'Numéro invalide. Il doit contenir 9 (SIREN) ou 14 (SIRET) chiffres.' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         try {

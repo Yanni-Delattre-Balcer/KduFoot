@@ -4,9 +4,11 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { matchService } from '../services/matches';
 import { Match, CreateMatchDto, UpdateMatchDto, MatchFilters, ContactMatchDto } from '../types/match.types';
 import { useCallback } from 'react';
+import { useIdle } from './use-idle';
 
-export function useMatches(filters?: MatchFilters) {
+export function useMatches(filters?: MatchFilters, refreshInterval = 0) {
     const { getAccessTokenSilently } = useAuth0();
+    const isIdle = useIdle();
 
     const fetcher = async (url: string) => {
         let token: string | null = null;
@@ -38,7 +40,7 @@ export function useMatches(filters?: MatchFilters) {
     const key = `/api/matches?${query.toString()}`;
 
     const { data, error, isLoading, mutate } = useSWR(key, fetcher, {
-        refreshInterval: 5000, // Accelerated to 5 seconds for high interactivity
+        refreshInterval: isIdle ? 0 : refreshInterval,
     });
 
     const createMatch = useCallback(async (dto: CreateMatchDto) => {
@@ -73,12 +75,14 @@ export function useMatches(filters?: MatchFilters) {
         updateMatch,
         deleteMatch,
         contactMatch,
-        mutate
+        mutate,
+        isIdle
     };
 }
 
-export function useMatch(id: string | null) {
+export function useMatch(id: string | null, refreshInterval = 0) {
     const { getAccessTokenSilently } = useAuth0();
+    const isIdle = useIdle();
 
     const fetcher = async (url: string) => {
         let token: string | null = null;
@@ -101,7 +105,7 @@ export function useMatch(id: string | null) {
     };
 
     const { data, error, isLoading, mutate } = useSWR(id ? `/api/matches/${id}` : null, fetcher, {
-        refreshInterval: 5000, // Accelerated to 5 seconds
+        refreshInterval: isIdle ? 0 : refreshInterval,
     });
 
     const updateMatch = useCallback(async (dto: UpdateMatchDto) => {
@@ -148,12 +152,14 @@ export function useMatch(id: string | null) {
         deleteMatch,
         contactMatch,
         cancelMatchContact,
-        updateRequestStatus
+        updateRequestStatus,
+        isIdle
     };
 }
 
-export function useIncomingRequests() {
+export function useIncomingRequests(refreshInterval = 0) {
     const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+    const isIdle = useIdle();
 
     const fetcher = async (url: string) => {
         const token = await getAccessTokenSilently();
@@ -165,7 +171,7 @@ export function useIncomingRequests() {
     };
 
     const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/requests' : null, fetcher, {
-        refreshInterval: 5000, // High frequency 5s polling
+        refreshInterval: isIdle ? 0 : refreshInterval,
     });
 
     return {
@@ -173,12 +179,14 @@ export function useIncomingRequests() {
         pendingCount: (data?.requests as any[] || []).filter(r => r.request_status === 'pending').length,
         isLoading,
         isError: error,
-        mutate
+        mutate,
+        isIdle
     };
 }
 
-export function useMyParticipations() {
+export function useMyParticipations(refreshInterval = 0) {
     const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+    const isIdle = useIdle();
 
     const fetcher = async (url: string) => {
         const token = await getAccessTokenSilently();
@@ -190,7 +198,7 @@ export function useMyParticipations() {
     };
 
     const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/participations' : null, fetcher, {
-        refreshInterval: 5000, // High frequency 5s polling
+        refreshInterval: isIdle ? 0 : refreshInterval,
     });
 
     const markAsRead = useCallback(async (matchId: string) => {
@@ -205,16 +213,7 @@ export function useMyParticipations() {
         isLoading,
         isError: error,
         mutate,
-        markAsRead
-    };
-}
-
-export function useNotificationStats() {
-    const { pendingCount: requestsPending, isLoading: isLoadingReq } = useIncomingRequests();
-    const { modifiedCount: participationsModified, isLoading: isLoadingPart } = useMyParticipations();
-
-    return {
-        totalCount: requestsPending + participationsModified,
-        isLoading: isLoadingReq || isLoadingPart
+        markAsRead,
+        isIdle
     };
 }

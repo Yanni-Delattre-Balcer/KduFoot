@@ -687,4 +687,26 @@ export class MatchService {
 
         return await this.getPairings(matchId);
     }
+
+    async getNotificationCounts(userId: string): Promise<{ pendingRequests: number, modifiedParticipations: number }> {
+        // Pending incoming requests (as owner)
+        const pendingRes = await this.db.prepare(`
+            SELECT COUNT(*) as count 
+            FROM match_contacts mc
+            JOIN matches m ON mc.match_id = m.id
+            WHERE m.owner_id = ? AND mc.status = 'pending'
+        `).bind(userId).first<any>();
+
+        // Modified participations (as candidate)
+        const modifiedRes = await this.db.prepare(`
+            SELECT COUNT(*) as count 
+            FROM match_contacts
+            WHERE user_id = ? AND notification_state = 1
+        `).bind(userId).first<any>();
+
+        return {
+            pendingRequests: pendingRes?.count || 0,
+            modifiedParticipations: modifiedRes?.count || 0
+        };
+    }
 }

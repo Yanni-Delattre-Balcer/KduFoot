@@ -1,6 +1,8 @@
 import { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { User } from '@/types/user.types';
+import { isProfileComplete } from '@/utils/profile';
+import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 
 interface UserContextType {
     user: User | null;
@@ -10,6 +12,12 @@ interface UserContextType {
     unlinkClub: () => Promise<void>;
     updateUser: (data: Partial<User>) => Promise<any>;
     refetch: () => Promise<void>;
+    profileComplete: boolean;
+    isLocked: boolean;
+    notifications: {
+        pendingRequests: number;
+        modifiedParticipations: number;
+    };
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -19,18 +27,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
+    const [notifications, setNotifications] = useState({ pendingRequests: 0, modifiedParticipations: 0 });
+    const { isVisitor } = useWelcomeGateway();
+
+    const profileComplete = isProfileComplete(user);
+    const isLocked = !profileComplete && !isVisitor && !!user;
 
     const fetchUser = useCallback(async () => {
         if (!isAuthenticated) return;
         setIsLoading(true);
         try {
             const token = await getAccessTokenSilently();
-            const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/me`, {
+            // Using the batched context endpoint to save KV quotas
+            const res = await fetch(`${import.meta.env.API_BASE_URL}/api/me/context`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (!res.ok) throw new Error('Failed to fetch user');
+            if (!res.ok) throw new Error('Failed to fetch user context');
             const data = await res.json();
-            setUser(data.user || data);
+            setUser(data.user);
+            if (data.notifications) {
+                setNotifications(data.notifications);
+            }
         } catch (e: any) {
             console.error(e);
             setError(e);
@@ -44,6 +61,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             fetchUser();
         } else {
             setUser(null);
+            setNotifications({ pendingRequests: 0, modifiedParticipations: 0 });
         }
     }, [fetchUser, isAuthenticated]);
 
@@ -117,8 +135,28 @@ export function UserProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <UserContext.Provider value={{ user, isLoading, error, linkClub, unlinkClub, updateUser, refetch: fetchUser }}>
+        <UserContext.Provider value={{
+            user,
+            isLoading,
+            error,
+            linkClub,
+            unlinkClub,
+            updateUser,
+            refetch: fetchUser,
+            profileComplete,
+            isLocked,
+            notifications
+        }}>
             {children}
         </UserContext.Provider>
     );
 }
+
+import { useContext } from 'react';
+export const useUser = () => {
+    const context = useContext(UserContext);
+    if (context === undefined) {
+        throw new Error('useUser must be used within a UserProvider');
+    }
+    return context;
+};

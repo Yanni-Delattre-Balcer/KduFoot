@@ -10,9 +10,10 @@ import { buttonGradient } from "./primitives";
 export const WelcomeGateway: React.FC = () => {
     const { login, isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    const { isOpen, closeGateway, setVisitorMode, blockingMessage } = useWelcomeGateway();
+    const { isOpen, closeGateway, setVisitorMode, clearVisitorMode, blockingMessage } = useWelcomeGateway();
 
     const handleRegister = () => {
+        clearVisitorMode();
         if (isAuthenticated) {
             navigate("/dashboard");
             closeGateway();
@@ -23,14 +24,6 @@ export const WelcomeGateway: React.FC = () => {
                 },
             });
         }
-    };
-
-    const handleLogin = () => {
-        login({
-            appState: {
-                returnTo: window.location.pathname,
-            },
-        });
     };
 
     return (
@@ -81,34 +74,30 @@ export const WelcomeGateway: React.FC = () => {
                             </p>
                         </ModalBody>
                         <ModalFooter>
-                            <div className="flex flex-col gap-3 w-full">
+                            <div className="flex flex-col gap-4 w-full">
                                 <Button
-                                    className={`${buttonGradient({ size: "lg" })} w-full font-black text-white bg-linear-to-r from-red-600 to-orange-500 border-none h-14 text-lg shadow-xl shadow-orange-500/20 active:scale-95 transition-transform`}
+                                    className={`${buttonGradient({ size: "lg" })} w-full font-black text-white bg-linear-to-r from-red-600 to-orange-500 border-none h-16 text-xl shadow-2xl shadow-orange-500/30 active:scale-95 transition-transform`}
                                     onPress={handleRegister}
                                 >
-                                    📝 Remplir mon compte Kdufoot
+                                    🚀 Remplir mon compte Kdufoot
                                 </Button>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                                    <Button
-                                        variant="flat"
-                                        color="primary"
-                                        className="font-black h-14 border border-primary/20 bg-primary/10 shadow-lg shadow-primary/5 active:scale-95 transition-transform"
-                                        onPress={handleLogin}
-                                    >
-                                        👋 J'ai déjà un compte
-                                    </Button>
-                                    <Button
-                                        variant="flat"
-                                        className="font-black h-14 border border-default-200 bg-default-100 text-default-600 active:scale-95 transition-transform"
-                                        onPress={setVisitorMode}
-                                    >
-                                        👀 Visiter sans compte
-                                    </Button>
+                                <div className="flex items-center gap-4 py-2">
+                                    <div className="flex-1 h-px bg-default-100"></div>
+                                    <span className="text-[10px] uppercase tracking-[0.3em] text-default-400 font-bold whitespace-nowrap">Ou</span>
+                                    <div className="flex-1 h-px bg-default-100"></div>
                                 </div>
 
-                                <p className="text-[10px] text-default-400 text-center mt-2 italic font-medium">
-                                    La création et la participation nécessitent un profil rempli.
+                                <Button
+                                    variant="light"
+                                    className="font-black h-14 text-default-500 hover:text-default-900 active:scale-95 transition-all uppercase tracking-widest text-xs"
+                                    onPress={setVisitorMode}
+                                >
+                                    👀 Visiter sans compte
+                                </Button>
+
+                                <p className="text-[10px] text-default-400 text-center mt-2 italic font-medium leading-relaxed max-w-[280px] mx-auto">
+                                    Note : La création et la participation nécessitent obligatoirement un profil 100% rempli et certifié.
                                 </p>
                             </div>
                         </ModalFooter>

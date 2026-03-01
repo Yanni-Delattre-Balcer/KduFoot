@@ -13,6 +13,7 @@ export {
   useAuth0Provider,
   withAuth0Authentication,
 } from "./providers/auth0-provider";
+export { UserProvider, useUser } from "./providers/user-provider";
 // export { useDexProvider } from './providers/dex-provider';
 export { AuthenticationProvider, type AuthenticationType } from "./auth-root";
 

@@ -168,6 +168,8 @@
     "schema": "Tactic Diagram"
   },
   "match": {
+    "title": "Friendly Matches",
+    "tournament": "Tournament",
     "create": "Create a friendly match",
     "create_tournament": "Create a friendly tournament",
     "find": "Find a friendly match",
@@ -301,7 +303,8 @@
     "gender": {
       "Masculin": "Male",
       "Féminin": "Female",
-      "Mixte": "Mixed"
+      "Mixte": "Mixed",
+      "Non spécifié": "Not specified"
     },
     "format": {
       "11v11": "11 vs 11",
@@ -368,7 +371,9 @@
       "choose": "Choose",
       "auto_siret": "Automatically filled via SIRET",
       "auto": "Automatically filled",
-      "more_info": "Additional information..."
+      "more_info": "Additional information...",
+      "free": "Free",
+      "stadium_note": "If your registered office address (linked to the SIRET) differs from the meeting place, please specify the exact stadium address in the event notes."
     },
     "link_club": {
       "title": "Link your club (Irreversible Action)",
@@ -377,6 +382,7 @@
       "warning_final": "The club will be permanently associated with your account.",
       "warning_support": "If you need to change your club later, contact support: support.kdufoot@gmail.com",
       "warning_search": "Tip: Search for 'Your club name + SIRET' on the Internet to find it.",
+      "search_help": "To find your number, type on Google: \"SIRET + [Your exact club name]\". Example: \"SIRET RC Lens\".",
       "validate": "Validate and Link the club",
       "support": "In case of subsequent club change, contact support with proof.",
       "linked": "Linked club"
@@ -389,13 +395,13 @@
       "unlink": "Unlink (Admin)"
     },
     "alerts": {
-      "siret_length": "The SIRET must contain exactly 14 digits.",
+      "siret_length": "The number must contain 9 (SIREN) or 14 (SIRET) digits.",
       "link_confirm": "⚠️ WARNING: This action is IRREVERSIBLE.\n\nYour account will be permanently linked to this club.\nFor any subsequent changes, you will need to contact support with proof.\n\nDo you want to continue ?",
       "link_error": "Error linking the club. Check the SIRET.",
       "must_link": "You must first link your club via the SIRET number before creating a match.",
       "contact_required": "⚠️ CONTACT REQUIRED\n\nEmail and phone are essential for players to contact you.",
-      "date_past": "⚠️ INVALID DATE\n\nYou cannot create a match in the past.",
-      "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future."
+      "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future.",
+      "delete_success": "Match successfully deleted!"
     }
   },
   "accountModal": {
@@ -423,7 +429,12 @@
       "publish": "Publish tournament"
     },
     "link_club": "Club link required to organize",
-    "contact_title": "Contact & Additional Info"
+    "contact_title": "Contact & Additional Info",
+    "alerts": {
+      "create_success": "Tournament successfully created!",
+      "update_success": "Tournament successfully updated!",
+      "delete_success": "Tournament successfully deleted!"
+    }
   },
   "pricing": {
     "hero": {
@@ -483,6 +494,8 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Manage your organizations and participations in real time.",
+    "organized_label": "Organizer",
+    "away_label": "Away",
     "tabs": {
       "requests": "Requests Received",
       "organized": "My Organized Matches",
@@ -490,6 +503,16 @@
       "all": "All",
       "matches": "Matches",
       "tournaments": "Tournaments"
+    },
+    "tournament": {
+      "filling": "Tournament filling",
+      "registered_teams": "Registered teams",
+      "waiting_teams": "Waiting for teams..."
+    },
+    "memo": {
+      "title": "📋 My Creation History",
+      "loading": "Loading memo...",
+      "empty": "No events created yet."
     },
     "empty": {
       "requests": "You have no pending requests at the moment.",
@@ -502,12 +525,39 @@
       "new": "New Ad",
       "view": "View ad",
       "accept": "Accept",
-      "refuse": "Refuse"
+      "refuse": "Refuse",
+      "manage_registrations": "Manage registrations",
+      "contact": "Contact"
     },
     "status": {
       "pending": "Pending",
       "accepted": "Accepted",
-      "refused": "Refused"
+      "open": "Open"
+    },
+    "alerts": {
+      "title": "Changes detected",
+      "message": "The match against {{host_club_name}} has been updated.",
+      "warning_desc": "The organizer ({{host_club_name}}) modified the information.",
+      "h2_locked": "Event locked (H-2). Contact participants for any last minute changes.",
+      "matches_count": "{{count}} matches have been modified by the organizer. Please check details.",
+      "mark_as_read": "I understand, mark as read",
+      "verify": "VERIFY"
+    },
+    "labels": {
+      "organizer": "Organizer",
+      "participant": "Participant",
+      "my_club": "My Club",
+      "home_badge": "🏠 At Home",
+      "away_badge": "✈️ Away",
+      "home": "Home",
+      "away": "Away",
+      "confirmed_match": "✅ MATCH CONFIRMED",
+      "view_club_profile": "👤 View club profile",
+      "view_profile": "👤 View profile",
+      "search_match": "Search for a match",
+      "search_tournament": "Search for a tournament",
+      "no_participation_tournament": "You haven't applied for any tournament",
+      "for_event": "For the {{type}} of"
     }
   },
   "adminUsersPage": {
