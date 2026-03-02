@@ -74,9 +74,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         return formatted;
     };
 
-    const handleSiretChange = (v: string) => {
-        setSiret(formatSiret(v));
-    };
 
     // Load face-api models on mount
     useEffect(() => {
@@ -393,8 +390,11 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                             size="sm"
                                             value={siret}
                                             onValueChange={(v) => {
-                                                handleSiretChange(v);
-                                                if (errors.siret) setErrors(prev => ({ ...prev, siret: "" }));
+                                                const cleaned = v.replace(/\s/g, '');
+                                                if (cleaned.length <= 14) {
+                                                    setSiret(v);
+                                                    if (errors.siret) setErrors(prev => ({ ...prev, siret: "" }));
+                                                }
                                             }}
                                             placeholder="123 456 789 00012"
                                             isDisabled={!!dbUser?.club_id}

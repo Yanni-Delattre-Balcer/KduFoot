@@ -1,0 +1,154 @@
+import { Card, CardBody } from '@heroui/card';
+import { Button } from '@heroui/button';
+import { Chip } from "@heroui/chip";
+import { Image } from "@heroui/image";
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
+interface ConfirmedMatchCardProps {
+    match: any;
+    highlighted?: boolean;
+    onMarkAsRead: (matchId: string) => void;
+    formatDate: (date: string) => string;
+    formatTime: (time: string) => string;
+}
+
+export const ConfirmedMatchCard = ({
+    match,
+    highlighted,
+    onMarkAsRead,
+    formatDate,
+    formatTime
+}: ConfirmedMatchCardProps) => {
+    const { t } = useTranslation();
+
+    const isUserHome = match.isUserHome;
+    const opponentClubName = match.opponent_club_name;
+    const opponentClubLogo = match.opponent_club_logo;
+
+    return (
+        <Card
+            id={`card-${match.match_id}`}
+            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md col-span-full ${highlighted ? 'border-danger ring-4 ring-danger/20 animate-pulse' : 'border-success-400/20 bg-success-500/5'
+                } group`}
+        >
+            <CardBody className="p-0">
+                <div className="flex flex-col md:flex-row">
+                    {/* Left Section: Info */}
+                    <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-white/5">
+                        <div className="flex items-start justify-between gap-4 mb-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
+                                    {opponentClubLogo ? (
+                                        <Image src={opponentClubLogo} className="object-contain" />
+                                    ) : (
+                                        <span className="text-white font-black text-2xl">{opponentClubName?.charAt(0)}</span>
+                                    )}
+                                </div>
+                                <div className="min-w-0">
+                                    <h3 className="font-black text-white text-xl leading-tight truncate">{opponentClubName}</h3>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <Chip size="sm" variant="flat" color="success" className="font-black text-[10px] uppercase tracking-wider">
+                                            ⚽ {t('enums.type.match')}
+                                        </Chip>
+                                        <Chip size="sm" variant="flat" color={isUserHome ? 'primary' : 'warning'} className="h-5 text-[9px] uppercase font-black">
+                                            {isUserHome ? t('dashboard.labels.home_badge', '🏠 Domicile') : t('dashboard.labels.away_badge', '✈️ Extérieur')}
+                                        </Chip>
+                                    </div>
+                                </div>
+                            </div>
+                            <Chip size="sm" color="success" variant="flat" className="font-black uppercase text-[10px] py-3">
+                                {t('dashboard.status.accepted')}
+                            </Chip>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
+                                <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
+                            </div>
+                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                                <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
+                            </div>
+                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
+                                <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || match.match_format || '11v11'}</Chip>
+                            </div>
+                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                <p className="text-sm font-bold text-white truncate">{match.opponent_pitch_type || match.pitch_type || '—'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Section: VS Visual & Actions */}
+                    <div className="w-full md:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
+                        <div className="mb-6 flex flex-col items-center">
+                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-4 w-full text-center md:text-left">{t('dashboard.labels.match_opposition', 'Opposition')}</p>
+
+                            <div className="flex items-center justify-center gap-6 w-full">
+                                {/* User Club (Left) */}
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="w-12 h-12 rounded-full border-2 border-orange-500/30 bg-orange-500/10 flex items-center justify-center overflow-hidden">
+                                        {/* Since we don't have user club logo easily here without extra props, we use a generic icon or initial if we had it */}
+                                        <span className="text-orange-500 font-black text-lg">M</span>
+                                    </div>
+                                    <span className="text-[9px] font-bold text-default-400 uppercase">{t('dashboard.labels.my_club', 'Moi')}</span>
+                                </div>
+
+                                <div className="text-xl font-black text-default-300 italic">VS</div>
+
+                                {/* Opponent Club (Right) */}
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="w-12 h-12 rounded-full border-2 border-success-500/30 bg-success-500/10 flex items-center justify-center overflow-hidden">
+                                        {opponentClubLogo ? (
+                                            <Image src={opponentClubLogo} className="w-full h-full object-contain" />
+                                        ) : (
+                                            <span className="text-success-500 font-black text-lg">{opponentClubName?.charAt(0)}</span>
+                                        )}
+                                    </div>
+                                    <span className="text-[9px] font-bold text-default-400 uppercase truncate max-w-[60px]">{opponentClubName}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            {match.notification_state === 1 && (
+                                <Button
+                                    size="sm"
+                                    color="danger"
+                                    className="w-full font-black uppercase text-[10px] h-10 shadow-lg shadow-danger/20"
+                                    onPress={() => onMarkAsRead(match.match_id)}
+                                >
+                                    ⚠️ Voir MODIFICATIONS
+                                </Button>
+                            )}
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="flat"
+                                    className="flex-1 font-bold text-[11px] h-10 bg-white/5 active:scale-95"
+                                    as={Link}
+                                    to={`/matches/${match.match_id}`}
+                                >
+                                    {t('dashboard.controls.view')}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="solid"
+                                    color="success"
+                                    className="flex-1 font-bold text-[11px] h-10 active:scale-95"
+                                    as="a"
+                                    href={`tel:${match.opponent_phone}`}
+                                >
+                                    {t('dashboard.controls.contact', '📞 Contacter')}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </CardBody>
+        </Card>
+    );
+};

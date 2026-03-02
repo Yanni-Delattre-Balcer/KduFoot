@@ -21,6 +21,7 @@ import { addToast } from '@heroui/toast';
 import { ConfirmedTournamentCard } from './components/confirmed-tournament-card';
 import { OrganizedTournamentCard } from './components/organized-tournament-card';
 import { MyOrganizationsMemo } from './components/my-organizations-memo';
+import { ConfirmedMatchCard } from './components/confirmed-match-card';
 
 const formatDate = (dateStr: string) => {
     try {
@@ -58,7 +59,6 @@ const formatTimestampTime = (ts: number) => {
 export default function DashboardPage() {
     const { t } = useTranslation();
     const { getAccessTokenSilently } = useAuth0();
-    const { user: dbUser } = useUser();
 
     // 1. Mes Annonces (Organisateur)
     const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
@@ -770,202 +770,32 @@ export default function DashboardPage() {
                                             <div className="col-span-full flex justify-center py-12"><Spinner color="success" /></div>
                                         ) : allConfirmedMatches.length > 0 ? (
                                             allConfirmedMatches.map((cm, idx) => (
-                                                <Card key={idx} className="overflow-hidden border border-success/20 bg-linear-to-br from-success/5 via-transparent to-emerald-500/5 hover:scale-[1.01] transition-all duration-200 shadow-lg shadow-success/5">
-                                                    <CardBody className="p-0">
-                                                        {/* Top bar */}
-                                                        <div className="h-1.5 w-full bg-linear-to-r from-green-500 via-emerald-400 to-green-500" />
-
-                                                        <div className="p-5 flex flex-col gap-4">
-                                                            {/* MATCH CONFIRMÉ Badge + Domicile/Extérieur */}
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-2">
-                                                                    <Chip size="sm" variant="solid" color="success" className="font-black text-[9px] uppercase shadow-sm">
-                                                                        {t('dashboard.labels.confirmed_match', '✅ MATCH CONFIRMÉ')}
-                                                                    </Chip>
-                                                                    <Chip size="sm" variant="flat" color={cm.isUserHome ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 border-none">
-                                                                        {cm.isUserHome ? t('dashboard.labels.home_badge', '🏠 À Domicile') : t('dashboard.labels.away_badge', "✈️ À l'Extérieur")}
-                                                                    </Chip>
-                                                                </div>
-                                                                <span className="text-[9px] font-bold text-default-400">
-                                                                    {cm._source === 'organizer' ? t('dashboard.labels.organizer', 'Organisateur') : t('dashboard.labels.participant', 'Participant')}
-                                                                </span>
-                                                            </div>
-
-                                                            {/* VS Layout — Home first, Away second (like TV) */}
-                                                            <div className="bg-white/[0.03] rounded-2xl p-4 border border-white/5">
-                                                                <div className="flex items-center gap-2">
-                                                                    {/* HOME Team (left) */}
-                                                                    <div className="flex-1 flex flex-col items-center text-center min-w-0">
-                                                                        <span className="text-[8px] font-bold text-default-500 uppercase tracking-widest mb-1">{t('dashboard.labels.home', 'Domicile')}</span>
-                                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border shrink-0 ${cm.isUserHome ? 'bg-linear-to-br from-orange-500/20 to-amber-500/10 border-orange-500/20' : 'bg-linear-to-br from-green-500/20 to-emerald-500/10 border-green-500/20'}`}>
-                                                                            {cm.isUserHome ? (
-                                                                                dbUser?.club?.logo_url ? (
-                                                                                    <Image src={dbUser.club.logo_url} className="object-contain w-8 h-8" />
-                                                                                ) : (
-                                                                                    <span className="text-orange-400 font-black text-lg">{(dbUser?.club?.name || '?')?.charAt(0)}</span>
-                                                                                )
-                                                                            ) : (
-                                                                                cm.opponent_club_logo ? (
-                                                                                    <Image src={cm.opponent_club_logo} className="object-contain w-8 h-8" />
-                                                                                ) : (
-                                                                                    <span className="text-green-400 font-black text-lg">{cm.opponent_club_name?.charAt(0)}</span>
-                                                                                )
-                                                                            )}
-                                                                        </div>
-                                                                        <p className="text-[9px] font-black text-white mt-1.5 w-full leading-tight line-clamp-2">
-                                                                            {cm.isUserHome ? (dbUser?.club?.name || t('dashboard.labels.my_club', 'Mon Club')) : cm.opponent_club_name}
-                                                                        </p>
-                                                                    </div>
-
-                                                                    {/* VS Badge */}
-                                                                    <div className="shrink-0 flex flex-col items-center">
-                                                                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30">
-                                                                            <span className="text-white font-black text-xs">VS</span>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {/* AWAY Team (right) */}
-                                                                    <div className="flex-1 flex flex-col items-center text-center min-w-0">
-                                                                        <span className="text-[8px] font-bold text-default-500 uppercase tracking-widest mb-1">{t('dashboard.labels.away', 'Extérieur')}</span>
-                                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden border shrink-0 ${!cm.isUserHome ? 'bg-linear-to-br from-orange-500/20 to-amber-500/10 border-orange-500/20' : 'bg-linear-to-br from-green-500/20 to-emerald-500/10 border-green-500/20'}`}>
-                                                                            {!cm.isUserHome ? ( // User is away => user is right side
-                                                                                dbUser?.club?.logo_url ? (
-                                                                                    <Image src={dbUser.club.logo_url} className="object-contain w-8 h-8" />
-                                                                                ) : (
-                                                                                    <span className="text-orange-400 font-black text-lg">{(dbUser?.club?.name || '?')?.charAt(0)}</span>
-                                                                                )
-                                                                            ) : ( // User is home => opponent is right side
-                                                                                cm.opponent_club_logo ? (
-                                                                                    <Image src={cm.opponent_club_logo} className="object-contain w-8 h-8" />
-                                                                                ) : (
-                                                                                    <span className="text-green-400 font-black text-lg">{cm.opponent_club_name?.charAt(0)}</span>
-                                                                                )
-                                                                            )}
-                                                                        </div>
-                                                                        <p className="text-[9px] font-black text-white mt-1.5 w-full leading-tight line-clamp-2">
-                                                                            {!cm.isUserHome ? (dbUser?.club?.name || t('dashboard.labels.my_club', 'Mon Club')) : cm.opponent_club_name}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Category + Level chips */}
-                                                                <div className="flex items-center justify-center gap-1.5 mt-3">
-                                                                    {cm.opponent_category && (
-                                                                        <Chip size="sm" variant="flat" color="success" className="font-bold text-[9px] h-5 px-1.5">
-                                                                            {t(`enums.category.${cm.opponent_category}`)}
-                                                                        </Chip>
-                                                                    )}
-                                                                    {cm.opponent_level && (
-                                                                        <Chip size="sm" variant="dot" color="default" className="font-bold text-[9px] h-5 border-none">
-                                                                            {t(`enums.level.${cm.opponent_level}`)}
-                                                                        </Chip>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Match Date & Location */}
-                                                            <div className="bg-white/[0.03] rounded-xl p-3 border border-white/5">
-                                                                <div className="flex justify-between items-center">
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">📅 Date du match</span>
-                                                                        <span className="text-sm font-black text-white mt-0.5">{formatDate(cm.match_date)} à {formatTime(cm.match_time)}</span>
-                                                                    </div>
-                                                                    {cm.location_city && (
-                                                                        <Chip size="sm" variant="flat" className="bg-white/5 text-default-400 text-[9px] font-bold">
-                                                                            📍 {cm.location_city}
-                                                                        </Chip>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Contact Info — Unlocked */}
-                                                            <div className="bg-white/[0.03] rounded-xl p-4 border border-white/5 space-y-3">
-                                                                <div className="flex items-center gap-2">
-                                                                    <div className="w-5 h-5 rounded-full bg-success/20 flex items-center justify-center">
-                                                                        <span className="text-[10px]">🔓</span>
-                                                                    </div>
-                                                                    <span className="text-[10px] font-black text-success uppercase tracking-wider">Coordonnées débloquées</span>
-                                                                </div>
-
-                                                                {/* Responsable Name */}
-                                                                {(cm.opponent_firstname || cm.opponent_lastname) && (
-                                                                    <div className="flex justify-between items-center text-xs">
-                                                                        <span className="text-default-500 font-bold">👤 Responsable</span>
-                                                                        <span className="text-white font-bold">{cm.opponent_firstname} {cm.opponent_lastname}</span>
-                                                                    </div>
-                                                                )}
-
-                                                                {/* Phone */}
-                                                                {cm.opponent_phone && (
-                                                                    <div className="flex justify-between items-center text-xs">
-                                                                        <span className="text-default-500 font-bold">📞 N° du responsable</span>
-                                                                        <a href={`tel:${cm.opponent_phone}`} className="text-success font-black hover:underline">
-                                                                            {cm.opponent_phone}
-                                                                        </a>
-                                                                    </div>
-                                                                )}
-
-                                                                {/* Email */}
-                                                                {cm.opponent_email && (
-                                                                    <div className="flex justify-between items-center text-xs gap-2">
-                                                                        <span className="text-default-500 font-bold shrink-0">✉️ Email</span>
-                                                                        <a href={`mailto:${cm.opponent_email}`} className="text-primary font-black hover:underline truncate">
-                                                                            {cm.opponent_email}
-                                                                        </a>
-                                                                    </div>
-                                                                )}
-
-                                                                {/* City */}
-                                                                {cm.opponent_city && (
-                                                                    <div className="flex justify-between items-center text-xs">
-                                                                        <span className="text-default-500 font-bold">📍 Ville</span>
-                                                                        <span className="text-white font-bold">{cm.opponent_city}</span>
-                                                                    </div>
-                                                                )}
-
-                                                                {/* Club Colors */}
-                                                                {cm.opponent_club_colors && (
-                                                                    <div className="flex justify-between items-center text-xs">
-                                                                        <span className="text-default-500 font-bold">👕 Couleurs maillots</span>
-                                                                        <span className="text-white font-bold">{cm.opponent_club_colors}</span>
-                                                                    </div>
-                                                                )}
-
-                                                                {/* Address — Google Maps link (Only for AWAY team) */}
-                                                                {!cm.isUserHome && cm.location_address && (
-                                                                    <div className="flex justify-between items-center text-xs gap-2">
-                                                                        <span className="text-default-500 font-bold shrink-0">🏟️ Adresse</span>
-                                                                        <a
-                                                                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(cm.location_address + (cm.location_zip ? ' ' + cm.location_zip : '') + (cm.location_city ? ' ' + cm.location_city : ''))}`}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="text-warning font-black hover:underline truncate"
-                                                                            title="Ouvrir l'itinéraire dans Google Maps"
-                                                                        >
-                                                                            {cm.location_address}{cm.location_zip ? `, ${cm.location_zip}` : ''} 📍
-                                                                        </a>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            <Button size="sm" variant="flat" className="w-full text-[10px] font-bold h-9 bg-success/10 text-success" as={Link} to={`/matches/${cm.match_id}`}>
-                                                                ⚽ Voir les détails du match
-                                                            </Button>
-                                                        </div>
-                                                    </CardBody>
-                                                </Card>
+                                                <ConfirmedMatchCard
+                                                    key={idx}
+                                                    match={cm}
+                                                    highlighted={highlightedCardId === cm.match_id}
+                                                    onMarkAsRead={markAsRead}
+                                                    formatDate={formatDate}
+                                                    formatTime={formatTime}
+                                                />
                                             ))
                                         ) : (
-                                            <div className="col-span-full py-8 text-center space-y-4">
-                                                <div className="w-16 h-16 bg-success/5 rounded-full flex items-center justify-center mx-auto">
-                                                    <span className="text-3xl">⚽</span>
+                                            <div className="col-span-full py-12 flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10">
+                                                <div className="p-4 rounded-2xl bg-white/5 text-default-400 mb-4">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                                                    </svg>
                                                 </div>
-                                                <p className="text-default-400 font-medium whitespace-pre-wrap">
-                                                    Aucun match confirmé pour le moment
-                                                </p>
-                                                <p className="text-[11px] text-default-500">
-                                                    Les matchs apparaîtront ici lorsque des demandes seront acceptées.
-                                                </p>
+                                                <p className="text-default-400 font-bold">{t('dashboard.empty.participations')}</p>
+                                                <Button
+                                                    variant="light"
+                                                    color="primary"
+                                                    className="mt-4 font-bold"
+                                                    as={Link}
+                                                    to="/matches"
+                                                >
+                                                    {t('dashboard.labels.search_match')}
+                                                </Button>
                                             </div>
                                         )}
                                     </div>
@@ -974,7 +804,6 @@ export default function DashboardPage() {
                         </Tabs>
                     </>
                 )}
-
                 <Modal isOpen={isProfileOpen} onOpenChange={onProfileChange} backdrop="blur">
                     <ModalContent className="bg-[#1a1a1c] border border-white/10">
                         {(onClose) => (
@@ -1064,7 +893,7 @@ export default function DashboardPage() {
                 </Modal>
 
                 <AccountModal isOpen={isAccountModalOpen} onOpenChange={onAccountModalChange} />
-            </section>
-        </DefaultLayout>
+            </section >
+        </DefaultLayout >
     );
 }
