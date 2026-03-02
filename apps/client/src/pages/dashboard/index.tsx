@@ -406,9 +406,7 @@ export default function DashboardPage() {
 
                 <div className="relative min-h-[400px]">
                     {(isLocked || isVisitor) && (
-                        <DataWall
-                            message="Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée."
-                        />
+                        <DataWall />
                     )}
                     <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : ""}>
                         {/* Flash Notifications Panel */}

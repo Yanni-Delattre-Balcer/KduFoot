@@ -97,9 +97,7 @@ export default function MatchDetailsPage() {
         <DefaultLayout>
             {(isLocked || isVisitor) ? (
                 <div className="container mx-auto p-6 flex justify-center items-center min-h-[60vh]">
-                    <DataWall
-                        message="Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée."
-                    />
+                    <DataWall />
                 </div>
             ) : (
                 <div className="container mx-auto max-w-7xl p-6 space-y-8 animate-appearance-in pb-24">

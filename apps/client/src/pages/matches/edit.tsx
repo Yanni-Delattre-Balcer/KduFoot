@@ -29,9 +29,7 @@ export default function MatchEditPage() {
         return (
             <DefaultLayout>
                 <div className="container mx-auto p-6 flex justify-center items-center min-h-[60vh]">
-                    <DataWall
-                        message="Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à la création tant que votre fiche MON COMPTE n'est pas 100% complétée."
-                    />
+                    <DataWall />
                 </div>
             </DefaultLayout>
         );
