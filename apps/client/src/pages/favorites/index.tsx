@@ -24,7 +24,7 @@ export default function FavoritesPage() {
     const { matches, isLoading: loadingMatches } = useMatches();
 
     const { isLocked } = useUser();
-    const { isVisitor, openGateway } = useWelcomeGateway();
+    const { isVisitor } = useWelcomeGateway();
 
     // View state for Toggle Buttons (like Matches Page)
     const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');

@@ -11,7 +11,7 @@ import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
 import { Progress } from "@heroui/progress";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import FootballClock from '../../components/football-clock';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { useUser } from '@/hooks/use-user';
@@ -59,7 +59,6 @@ const formatTimestampTime = (ts: number) => {
 
 export default function DashboardPage() {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { getAccessTokenSilently } = useAuth0();
 
     // 1. Mes Annonces (Organisateur)
@@ -81,7 +80,7 @@ export default function DashboardPage() {
     // Modal state for 'Voir le profil'
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
     const { isLocked } = useUser();
-    const { isVisitor, openGateway } = useWelcomeGateway();
+    const { isVisitor } = useWelcomeGateway();
 
     const [selectedTab, setSelectedTab] = useState<any>("requests");
 

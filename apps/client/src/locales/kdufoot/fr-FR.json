@@ -143,8 +143,11 @@
     "empty_exercises_desc": "Ajoutez des exercices à vos favoris pour les retrouver ici.",
     "empty_matches": "Aucun match favori",
     "empty_matches_desc": "Vos matchs likés apparaîtront ici.",
+    "empty_tournaments": "Aucun tournoi favori",
+    "empty_tournaments_desc": "Ajoutez des tournois à vos favoris pour les retrouver ici.",
     "discover_exercises": "Découvrir les exercices",
-    "find_matches": "Trouver un match / tournoi"
+    "find_matches": "Trouver un match / tournoi",
+    "find_tournaments": "Trouver des tournois"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",

@@ -132,8 +132,11 @@
     "empty_exercises_desc": "Add exercises to your favorites to find them here.",
     "empty_matches": "No favorite matches",
     "empty_matches_desc": "Your liked matches will appear here.",
+    "empty_tournaments": "No favorite tournament",
+    "empty_tournaments_desc": "Add tournaments to your favorites to find them here.",
     "discover_exercises": "Discover exercises",
-    "find_matches": "Find a match / tournament"
+    "find_matches": "Find a match / tournament",
+    "find_tournaments": "Find tournaments"
   },
   "myExercises": "My Exercises",
   "mySessions": "My Sessions",
