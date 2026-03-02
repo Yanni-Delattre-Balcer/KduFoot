@@ -33,8 +33,9 @@ export const OrganizedTournamentCard = ({
 
     return (
         <Card
-            className="overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md col-span-full border-purple-400/20 bg-purple-500/5 group"
+            className="overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full border-violet-500/40 bg-zinc-900/90 group"
         >
+            <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
             <CardBody className="p-0">
                 <div className="flex flex-col md:flex-row">
                     {/* Left Section: Info & Progress */}
@@ -49,19 +50,20 @@ export const OrganizedTournamentCard = ({
                                     )}
                                 </div>
                                 <div className="min-w-0">
-                                    <h3 className="font-black text-white text-xl leading-tight truncate">{match.name || t('match.tournament')}</h3>
+                                    <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">TOURNOI</h3>
+                                    <p className="text-white/70 text-sm font-bold uppercase tracking-widest">{match.name || match.club?.name || '??'}</p>
                                     <div className="flex items-center gap-2 mt-1">
                                         <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
                                             🏆 {t('enums.type.tournament')}
                                         </Chip>
-                                        <Chip size="sm" variant="flat" color="primary" className="h-5 text-[9px] uppercase font-black">
-                                            🏠 {t('dashboard.organized_label', 'Organisateur')}
+                                        <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
+                                            {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge', '✈️ Extérieur') : t('dashboard.labels.home_badge', '🏠 Domicile')}
                                         </Chip>
                                     </div>
                                 </div>
                             </div>
-                            <Chip size="sm" color={match.status === 'active' ? 'success' : 'default'} variant="flat" className="font-black uppercase text-[10px] py-3">
-                                {t(`dashboard.status.${match.status}`, match.status)}
+                            <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] py-3 shadow-lg shadow-violet-500/30">
+                                {match.status === 'active' ? '🔍 RECRUTEMENT EN COURS' : t(`dashboard.status.${match.status}`, match.status)}
                             </Chip>
                         </div>
 

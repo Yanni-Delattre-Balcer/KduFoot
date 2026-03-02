@@ -7,10 +7,9 @@ import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Category } from '@/types/exercise.types';
 import { Level, PitchType } from '@/types/match.types';
 import { useUser } from '@/hooks/use-user';
-import { matchService } from '@/services/matches';
-import { useAuth0 } from '@auth0/auth0-react';
 import { addToast } from "@heroui/toast";
 import { useSWRConfig } from 'swr';
+import { useMatches } from '@/hooks/use-matches';
 
 interface TournamentFormProps {
     onSuccess?: () => void;
@@ -21,8 +20,8 @@ const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilis�
 
 export default function TournamentForm({ onSuccess, onCancel }: TournamentFormProps) {
     const { t } = useTranslation();
+    const { createMatch } = useMatches();
     const { user, unlinkClub } = useUser();
-    const { getAccessTokenSilently } = useAuth0();
     const { mutate } = useSWRConfig();
     const [isSaving, setIsSaving] = useState(false);
 
@@ -89,18 +88,24 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
 
         setIsSaving(true);
         try {
-            const token = await getAccessTokenSilently();
-            await matchService.create({
+            const payload = {
                 ...formData,
-                type: 'tournament',
+                type: 'tournament' as const,
                 club_id: user.club_id,
                 max_teams: parseInt(formData.max_teams),
                 registration_fee: parseFloat(formData.registration_fee)
-            }, token);
+            };
+
+            await createMatch(payload as any);
+
+            // Global mutation to refresh lists - be very aggressive with matching
+            await mutate(key => typeof key === 'string' && key.includes('/api/matches'), undefined, { revalidate: true });
+            await mutate(key => typeof key === 'string' && key.includes('/api/tournaments'), undefined, { revalidate: true });
+
+            // Specifically target the dashboard's common key pattern
+            await mutate('/api/matches?ownerId=me&include_past=true', undefined, { revalidate: true });
 
             addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success'), variant: 'flat', color: 'success' });
-            // Global mutation to refresh lists
-            mutate(key => typeof key === 'string' && key.startsWith('/api/matches'));
             if (onSuccess) onSuccess();
         } catch (error: any) {
             const rawMessage = error.message || "";
@@ -315,6 +320,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                         <SelectItem key="Masculin">{t('enums.gender.Masculin')}</SelectItem>
                         <SelectItem key="Féminin">{t('enums.gender.Féminin')}</SelectItem>
                         <SelectItem key="Mixte">{t('enums.gender.Mixte')}</SelectItem>
+                        <SelectItem key="Non spécifié">{t('enums.gender.Non spécifié')}</SelectItem>
                     </Select>
                     <Select
                         label={t('matchForm.labels.pitch_type')}
@@ -357,7 +363,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
 
                     {/* Row 5: Centered Progress Bar */}
                     <div className="md:col-span-4 flex flex-col justify-center space-y-3 mt-4">
-                        <div className="w-[64%] mx-auto flex flex-col space-y-3">
+                        <div className="w-full md:w-[64%] mx-auto flex flex-col space-y-3">
                             <p className="text-sm font-bold text-purple-300 uppercase tracking-tight text-center">
                                 {t('tournamentForm.progress')}: {progress}%
                             </p>

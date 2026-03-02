@@ -23,7 +23,7 @@ const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilis�
 export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFormProps) {
     const { t } = useTranslation();
     const { createMatch, updateMatch } = useMatches();
-    const { user, unlinkClub, updateUser } = useUser();
+    const { user, isLocked, unlinkClub, updateUser } = useUser();
     const { user: auth0User } = useAuth0();
     const { mutate } = useSWRConfig();
     const [isSaving, setIsSaving] = useState(false);
@@ -53,7 +53,11 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         if (initialData) {
             // Extract Gender from notes if present
             const genderMatch = initialData.notes?.match(/Genre: (.*)(\n|$)/);
-            const extractedGender = genderMatch ? genderMatch[1] : 'Masculin';
+            let extractedGender = genderMatch ? genderMatch[1].trim() : 'Masculin';
+            // Strip technical prefix from legacy data
+            if (extractedGender.startsWith('enums.gender.')) {
+                extractedGender = extractedGender.replace('enums.gender.', '');
+            }
             const cleanNotes = initialData.notes?.replace(/Genre: .*(\n|$)/, '').trim() || '';
 
             setGender(extractedGender);
@@ -172,8 +176,9 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                 addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.update_success', 'Match mis à jour avec succès'), variant: 'flat', color: 'success' });
             } else {
                 await createMatch(payload as any);
-                // Global mutation to refresh lists
-                mutate(key => typeof key === 'string' && key.startsWith('/api/matches'));
+                // Global mutation to refresh lists - be very aggressive with matching
+                await mutate(key => typeof key === 'string' && key.includes('/api/matches'), undefined, { revalidate: true });
+                await mutate('/api/matches?ownerId=me&include_past=true', undefined, { revalidate: true });
                 addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.create_success', 'Match créé avec succès'), variant: 'flat', color: 'success' });
             }
             if (onSuccess) onSuccess();
@@ -271,6 +276,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                     >
                                         Aller au profil
                                     </Button>
+
                                 </div>
                             </div>
                         ) : (
@@ -399,6 +405,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         <SelectItem key="Masculin">{t('enums.gender.Masculin')}</SelectItem>
                         <SelectItem key="Féminin">{t('enums.gender.Féminin')}</SelectItem>
                         <SelectItem key="Mixte">{t('enums.gender.Mixte')}</SelectItem>
+                        <SelectItem key="Non spécifié">{t('enums.gender.Non spécifié')}</SelectItem>
                     </Select>
 
                     <Input
@@ -465,7 +472,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
                     {/* Row 4: Centered Progress Bar */}
                     <div className="md:col-span-4 flex flex-col justify-center space-y-3 mt-4">
-                        <div className="w-[64%] mx-auto flex flex-col space-y-3">
+                        <div className="w-full md:w-[64%] mx-auto flex flex-col space-y-3">
                             <p className="text-sm font-bold text-violet-300 uppercase tracking-tight text-center">
                                 {t('matchForm.progress')}: {progress}%
                             </p>
@@ -518,7 +525,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         {t('matchForm.buttons.cancel')}
                     </Button>
                 )}
-                <Button type="submit" color="secondary" className="bg-violet-700 font-bold text-white" isLoading={isSaving} isDisabled={!user?.club_id}>
+                <Button type="submit" color="secondary" className="bg-violet-700 font-bold text-white" isLoading={isSaving} isDisabled={isLocked}>
                     {initialData ? t('matchForm.buttons.update', 'METTRE À JOUR') : t('matchForm.buttons.create', 'CRÉER DÉFINITIVEMENT')}
                 </Button>
             </div>

@@ -43,6 +43,7 @@ import TrainingPage from "@/pages/training";
 import { TrainingProvider } from "@/contexts/training-context";
 import { showVideoAnalysis } from "@/config/site";
 import UsersAndPermissionsPage from "@/pages/admin/users-and-permissions";
+import AccountPage from "@/pages/account";
 
 function App() {
   const { isLoading } = useAuth();
@@ -140,6 +141,10 @@ function App() {
           <Route
             element={<MatchDetailsPage />}
             path="/matches/:id"
+          />
+          <Route
+            element={<AuthenticationGuard component={AccountPage} />}
+            path="/account"
           />
           <Route
             element={<AuthenticationGuard component={UsersAndPermissionsPage} />}

@@ -1,5 +1,6 @@
-import { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useCallback, ReactNode, useMemo, useContext } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import useSWR, { mutate } from 'swr';
 import { User } from '@/types/user.types';
 import { isProfileComplete } from '@/utils/profile';
 import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
@@ -7,7 +8,7 @@ import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 interface UserContextType {
     user: User | null;
     isLoading: boolean;
-    error: Error | null;
+    error: any;
     linkClub: (siret: string) => Promise<any>;
     unlinkClub: () => Promise<void>;
     updateUser: (data: Partial<User>) => Promise<any>;
@@ -22,48 +23,38 @@ interface UserContextType {
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
 
+const CONTEXT_KEY = '/api/me/context';
+
 export function UserProvider({ children }: { children: ReactNode }) {
     const { getAccessTokenSilently, isAuthenticated } = useAuth0();
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
-    const [notifications, setNotifications] = useState({ pendingRequests: 0, modifiedParticipations: 0 });
     const { isVisitor } = useWelcomeGateway();
 
-    const profileComplete = isProfileComplete(user);
-    const isLocked = !profileComplete && !isVisitor && !!user;
-
-    const fetchUser = useCallback(async () => {
-        if (!isAuthenticated) return;
-        setIsLoading(true);
-        try {
-            const token = await getAccessTokenSilently();
-            // Using the batched context endpoint to save KV quotas
-            const res = await fetch(`${import.meta.env.API_BASE_URL}/api/me/context`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!res.ok) throw new Error('Failed to fetch user context');
-            const data = await res.json();
-            setUser(data.user);
-            if (data.notifications) {
-                setNotifications(data.notifications);
-            }
-        } catch (e: any) {
-            console.error(e);
-            setError(e);
-        } finally {
-            setIsLoading(false);
-        }
+    const fetcher = useCallback(async () => {
+        if (!isAuthenticated) return null;
+        const token = await getAccessTokenSilently();
+        const res = await fetch(`${import.meta.env.API_BASE_URL}${CONTEXT_KEY}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('Failed to fetch user context');
+        return res.json();
     }, [isAuthenticated, getAccessTokenSilently]);
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchUser();
-        } else {
-            setUser(null);
-            setNotifications({ pendingRequests: 0, modifiedParticipations: 0 });
+    const { data, error, isLoading } = useSWR(
+        isAuthenticated ? CONTEXT_KEY : null,
+        fetcher,
+        {
+            revalidateOnFocus: false,
+            revalidateOnMount: true,
+            revalidateIfStale: true,
+            shouldRetryOnError: false
         }
-    }, [fetchUser, isAuthenticated]);
+    );
+
+    const user = data?.user || null;
+    const notifications = data?.notifications || { pendingRequests: 0, modifiedParticipations: 0 };
+    const profileComplete = isProfileComplete(user);
+    // Zéro Friction: Lock status depends ONLY on data, not on loading state to avoid UI lag
+    const isLocked = !!user && !isVisitor && !isProfileComplete(user, true);
 
     const linkClub = async (siret: string) => {
         const token = await getAccessTokenSilently();
@@ -83,15 +74,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 const errorData = JSON.parse(errorText);
                 errorMessage = errorData.error || errorMessage;
             } catch (e) {
-                // Not JSON
                 errorMessage = `${errorMessage} (Status: ${res.status})`;
             }
             throw new Error(errorMessage);
         }
 
-        const data = await res.json();
-        setUser(data.user || data);
-        return data;
+        const resData = await res.json();
+        // Trigger a global mutation to refresh all subscribers
+        await mutate(CONTEXT_KEY);
+        return resData;
     };
 
     const unlinkClub = async () => {
@@ -109,8 +100,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             throw new Error(errorData.error || 'Failed to unlink club');
         }
 
-        // Refresh user data
-        await fetchUser();
+        await mutate(CONTEXT_KEY);
     };
 
     const updateUser = async (data: Partial<User>) => {
@@ -130,29 +120,30 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
 
         const resData = await res.json();
-        setUser(resData.user || resData);
+        await mutate(CONTEXT_KEY);
         return resData;
     };
 
+    const value = useMemo(() => ({
+        user,
+        isLoading,
+        error,
+        linkClub,
+        unlinkClub,
+        updateUser,
+        refetch: async () => { await mutate(CONTEXT_KEY); },
+        profileComplete,
+        isLocked,
+        notifications
+    }), [user, isLoading, error, profileComplete, isLocked, notifications, getAccessTokenSilently]);
+
     return (
-        <UserContext.Provider value={{
-            user,
-            isLoading,
-            error,
-            linkClub,
-            unlinkClub,
-            updateUser,
-            refetch: fetchUser,
-            profileComplete,
-            isLocked,
-            notifications
-        }}>
+        <UserContext.Provider value={value}>
             {children}
         </UserContext.Provider>
     );
 }
 
-import { useContext } from 'react';
 export const useUser = () => {
     const context = useContext(UserContext);
     if (context === undefined) {

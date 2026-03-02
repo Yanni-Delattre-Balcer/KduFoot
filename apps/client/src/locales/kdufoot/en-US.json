@@ -171,6 +171,8 @@
     "title": "Friendly Matches",
     "tournament": "Tournament",
     "create": "Create a friendly match",
+    "create_title": "CREATE A MATCH",
+    "edit_title": "UPDATE MATCH",
     "create_tournament": "Create a friendly tournament",
     "find": "Find a friendly match",
     "find_tournament": "Find a friendly tournament",
@@ -498,7 +500,7 @@
     "away_label": "Away",
     "tabs": {
       "requests": "Requests Received",
-      "organized": "My Organized Matches",
+      "organized": "My Organized Matches / Tournaments (My Creations)",
       "participations": "My Participations",
       "all": "All",
       "matches": "Matches",
@@ -508,6 +510,11 @@
       "filling": "Tournament filling",
       "registered_teams": "Registered teams",
       "waiting_teams": "Waiting for teams..."
+    },
+    "match": {
+      "found": "Opponent found",
+      "filled": "Match full",
+      "searching": "Searching for opponent"
     },
     "memo": {
       "title": "📋 My Creation History",
@@ -544,6 +551,7 @@
       "verify": "VERIFY"
     },
     "labels": {
+      "match_opposition": "Match Opposition",
       "organizer": "Organizer",
       "participant": "Participant",
       "my_club": "My Club",

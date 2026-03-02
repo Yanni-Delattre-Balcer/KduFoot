@@ -59,15 +59,32 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
                                     to={`/matches/${event.id}`}
                                     className="flex items-center gap-4 p-3 hover:bg-white/[0.05] transition-colors border-b border-white/5 last:border-0 group"
                                 >
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${event.type === 'tournament' ? 'bg-purple-500/10 text-purple-400' : 'bg-orange-500/10 text-orange-500'}`}>
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-violet-500/10 text-violet-400 shadow-sm shadow-violet-500/20`}>
                                         {event.type === 'tournament' ? '🏆' : '⚽'}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold text-default-500">{formatDate(event.match_date)}</span>
-                                            <span className="text-white font-bold text-xs truncate group-hover:text-amber-400 transition-colors">
-                                                {event.type === 'tournament' ? event.name : `Match vs ${event.club?.name || '??'}`}
+                                            <span className="text-[10px] font-bold text-default-500 shrink-0">
+                                                {formatDate(event.match_date)} —
                                             </span>
+                                            <span className="text-white font-bold text-xs truncate group-hover:text-violet-400 transition-colors uppercase tracking-tight">
+                                                {event.type === 'tournament' ? (event.name || t('match.tournament')) : (event.club?.name || '??')}
+                                            </span>
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                <Chip
+                                                    size="sm"
+                                                    variant="flat"
+                                                    color="secondary"
+                                                    className="h-4 text-[7px] font-black uppercase"
+                                                >
+                                                    {event.type === 'tournament' ? 'TOURNOI' : 'MATCH'}
+                                                </Chip>
+                                                {event.venue && (
+                                                    <span className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded-md ${event.venue === 'Extérieur' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
+                                                        {event.venue === 'Extérieur' ? 'EXT' : 'DOM'}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                     <Chip

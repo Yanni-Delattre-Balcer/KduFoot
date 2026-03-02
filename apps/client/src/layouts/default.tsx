@@ -16,7 +16,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Link } from "@heroui/link";
 import { useTranslation } from "react-i18next";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
@@ -79,7 +78,49 @@ export default function DefaultLayout({
       <main className={`container mx-auto ${maxWidth} px-6 grow pt-16 lg:pt-24 pb-16`}>
         {children}
       </main>
-      <footer className="absolute bottom-0 w-full flex items-center justify-center py-3">
+      <footer className="relative w-full border-t border-default-100 bg-background/80 backdrop-blur-md mt-auto">
+        <div className="container mx-auto px-6 py-8 flex flex-col items-center gap-6">
+          <div className="flex flex-row items-center justify-center gap-4 md:gap-12 w-full">
+            <div className="flex flex-col items-center gap-2 group">
+              <Button
+                as="a"
+                href="mailto:support@kdufoot.com"
+                variant="flat"
+                color="warning"
+                size="md"
+                className="font-black uppercase tracking-tighter text-xs h-10 px-6 shadow-lg shadow-warning/5 border border-warning/10 hover:scale-105 transition-transform"
+                startContent={<span>🛠️</span>}
+              >
+                Besoin d'aide ?
+              </Button>
+              <span className="hidden md:block text-[10px] text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">Bugs, problèmes techniques...</span>
+            </div>
+
+            <div className="h-10 w-px bg-default-200/30"></div>
+
+            <div className="flex flex-col items-center gap-2 group">
+              <Button
+                as="a"
+                href="mailto:contact@kdufoot.com"
+                variant="flat"
+                color="primary"
+                size="md"
+                className="font-black uppercase tracking-tighter text-xs h-10 px-6 shadow-lg shadow-primary/5 border border-primary/10 hover:scale-105 transition-transform"
+                startContent={<span>✉️</span>}
+              >
+                Autres demandes
+              </Button>
+              <span className="hidden md:block text-[10px] text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">Sponsors, publicité, partenariats...</span>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-default-100 w-full text-center">
+            <p className="text-[10px] text-default-400 uppercase tracking-widest font-bold opacity-50">
+              © 2026 KduFoot • Football Intelligent
+            </p>
+          </div>
+        </div>
+
         {isAuthenticated && user && (
           <>
             {/* Floating trigger button — bottom-right on desktop */}
@@ -87,7 +128,7 @@ export default function DefaultLayout({
               <Button
                 variant="flat"
                 size="sm"
-                className="bg-background/60 backdrop-blur-md border border-default-200 shadow-lg px-4"
+                className="bg-background/80 backdrop-blur-xl border border-default-200 shadow-2xl px-4 font-bold text-xs"
                 onPress={() => setIsModalOpen(true)}
               >
                 {t("nav.userPrefix")} {user.name}
@@ -104,17 +145,6 @@ export default function DefaultLayout({
             />
           </>
         )}
-        <Link
-          isExternal
-          className="flex items-center gap-1 text-current"
-          href="https://github.com/sctg-development/vite-react-heroui-auth0-template"
-          title="React template"
-        >
-          <span className="text-default-600">
-            {t("footer.poweredBy")}
-          </span>
-          <p className="text-primary font-bold">React template</p>
-        </Link>
       </footer>
     </div>
   );

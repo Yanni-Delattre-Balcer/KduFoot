@@ -11,6 +11,8 @@ import * as faceapi from "face-api.js";
 import { useTranslation } from "react-i18next";
 import { Category } from "@/types/exercise.types";
 import { Level, PitchType } from "@/types/match.types";
+import { mutate } from "swr";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const CATEGORIES = Object.values(Category);
 const LEVELS = Object.values(Level);
@@ -22,6 +24,9 @@ interface AccountSettingsProps {
 
 export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const from = searchParams.get('from');
     const { user: authUser, getAccessToken } = useAuth();
     const { user: dbUser, updateUser, linkClub, unlinkClub, refetch } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -176,9 +181,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
             await getAccessToken({ cacheMode: 'off' } as any);
             await refetch();
+            await mutate('/api/me/context');
 
             addToast({ title: t('success', 'Succès'), description: t('accountModal.alerts.update_success', 'Profil mis à jour avec succès'), variant: 'flat', color: 'success' });
+
             if (onSaveSuccess) onSaveSuccess();
+
+            // Systematic redirection to 'from' or defaults to '/matches'
+            navigate(from || '/matches');
         } catch (error: any) {
             console.error("Update profile error:", error);
             addToast({ title: t('error.title'), description: error.message || t('accountModal.alerts.update_error', 'Erreur de mise à jour'), variant: 'flat', color: 'danger' });
@@ -199,6 +209,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             await linkClub(cleanSiret);
             await getAccessToken({ cacheMode: 'off' } as any);
             await refetch();
+            await mutate('/api/me/context');
             addToast({ title: t('success'), description: t('accountModal.alerts.club_linked_success', 'Club certifié avec succès'), variant: 'flat', color: 'success' });
         } catch (error: any) {
             addToast({ title: t('error.title'), description: error.message, variant: 'flat', color: 'danger' });
@@ -385,7 +396,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start">
                                     <div className="flex-1 flex flex-col gap-1">
                                         <Input
-                                            label="Numéro de SIRET"
+                                            label="Numéro SIRET (14 chiffres) ou SIREN (9 chiffres)"
                                             variant="bordered"
                                             size="sm"
                                             value={siret}
@@ -451,6 +462,17 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         Pour toute modification ultérieure, vous devrez contacter le support technique.
                                     </p>
                                 </div>
+
+                                <Button
+                                    as="a"
+                                    href="mailto:support@kdufoot.com"
+                                    variant="flat"
+                                    color="warning"
+                                    size="sm"
+                                    className="w-full font-bold text-[11px] h-9"
+                                >
+                                    📩 Demande d'aide
+                                </Button>
                             </div>
 
                             <div className="flex justify-between items-center text-sm pt-2">

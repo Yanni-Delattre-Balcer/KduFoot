@@ -13,7 +13,7 @@ export const matchService = {
     },
 
     create: async (data: CreateMatchDto, token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -34,7 +34,7 @@ export const matchService = {
     },
 
     update: async (id: string, data: UpdateMatchDto, token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${id}`, {
             method: 'PUT',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -55,7 +55,7 @@ export const matchService = {
     },
 
     delete: async (id: string, token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -72,7 +72,7 @@ export const matchService = {
     },
 
     contact: async (id: string, data: ContactMatchDto, token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${id}/contact`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${id}/contact`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -93,7 +93,7 @@ export const matchService = {
     },
 
     getRequests: async (token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/requests`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/requests`, {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -110,7 +110,7 @@ export const matchService = {
     },
 
     getParticipations: async (token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/participations`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/participations`, {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -127,7 +127,7 @@ export const matchService = {
     },
 
     updateRequestStatus: async (matchId: string, userId: string, status: 'accepted' | 'refused', token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${matchId}/requests/${userId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${matchId}/requests/${userId}`, {
             method: 'PATCH',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -148,7 +148,7 @@ export const matchService = {
     },
 
     cancelRequest: async (matchId: string, userId: string, token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${matchId}/requests/${userId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${matchId}/requests/${userId}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -174,7 +174,7 @@ export const matchService = {
     },
 
     generatePairings: async (matchId: string, token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${matchId}/pairings/generate`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${matchId}/pairings/generate`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -186,7 +186,7 @@ export const matchService = {
     },
 
     getPairings: async (matchId: string, token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/${matchId}/pairings`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${matchId}/pairings`, {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -195,7 +195,7 @@ export const matchService = {
     },
 
     updatePairingTime: async (pairingId: string, scheduledTime: string, token: string) => {
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${BASE_URL}/pairings/${pairingId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/pairings/${pairingId}`, {
             method: 'PATCH',
             headers: {
                 Authorization: `Bearer ${token}`,

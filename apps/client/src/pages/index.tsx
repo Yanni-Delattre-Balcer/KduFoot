@@ -11,16 +11,27 @@ import { useTranslation, Trans } from "react-i18next";
 import DefaultLayout from "../layouts/default";
 import FootballClock from "../components/football-clock";
 import { showVideoAnalysis } from "../config/site";
+import { useUser } from "../hooks/use-user";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function IndexPage() {
   const { t } = useTranslation(["kdufoot", "base"]);
+  const { user, profileComplete, isLoading } = useUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && user && profileComplete) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, profileComplete, isLoading, navigate]);
 
   return (
     <DefaultLayout maxWidth="max-w-full">
       <section className="flex flex-col gap-5 w-full px-4">
 
         {/* Hero Section with football field background */}
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-red-600/15 via-orange-500/10 to-red-500/10 border border-red-500/20">
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-purple-600/15 via-violet-500/10 to-indigo-500/10 border border-purple-500/20">
           {/* Grass stripes */}
           <div className="absolute inset-0 opacity-[0.03]" style={{
             backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)',
@@ -35,27 +46,27 @@ export default function IndexPage() {
               <h1 className="text-3xl lg:text-4xl font-bold">
                 <span className="bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)] bg-clip-text text-transparent">Kdufoot</span>
                 <span className="text-default-400 font-normal mx-2">=</span>
-                <span className="bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)] bg-clip-text text-transparent text-2xl lg:text-3xl">{t("homePage.title.highlight")}</span>
+                <span className="bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)] bg-clip-text text-transparent text-2xl lg:text-3xl">{t("kdufoot:homePage.title.highlight")}</span>
               </h1>
               <p className="text-default-500 text-base">
                 {showVideoAnalysis ? (
-                  t("homePage.description")
+                  t("kdufoot:homePage.description")
                 ) : (
                   "Kdufoot vous aide à trouver des matchs amicaux autour de chez vous en quelques clics."
                 )}
               </p>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                 {showVideoAnalysis && (
-                <Link
-                  className={`${buttonStyles({
-                    radius: "full",
-                    variant: "shadow",
-                    size: "lg",
-                  })} bg-linear-to-r from-blue-600 to-violet-600 text-white border-none min-w-[160px]`}
-                  href="/exercises"
-                >
-                  {t("homePage.buttons.exercises")}
-                </Link>
+                  <Link
+                    className={`${buttonStyles({
+                      radius: "full",
+                      variant: "shadow",
+                      size: "lg",
+                    })} bg-linear-to-r from-blue-600 to-violet-600 text-white border-none min-w-[160px]`}
+                    href="/exercises"
+                  >
+                    {t("kdufoot:homePage.buttons.exercises")}
+                  </Link>
                 )}
                 <Link
                   className={`${buttonStyles({
@@ -65,7 +76,7 @@ export default function IndexPage() {
                   })} bg-linear-to-r from-violet-700 to-indigo-800 text-white border-none min-w-[160px]`}
                   href="/matches?type=match"
                 >
-                  {t("homePage.buttons.find_match")}
+                  {t("kdufoot:homePage.buttons.find_match")}
                 </Link>
                 <Link
                   className={`${buttonStyles({
@@ -75,7 +86,7 @@ export default function IndexPage() {
                   })} bg-linear-to-r from-violet-400 to-violet-500 text-white border-none min-w-[160px]`}
                   href="/matches?type=tournament"
                 >
-                  {t("homePage.buttons.find_tournament")}
+                  {t("kdufoot:homePage.buttons.find_tournament")}
                 </Link>
               </div>
             </div>
@@ -90,7 +101,7 @@ export default function IndexPage() {
         {/* À propos - full width */}
         <Card className="border border-default-200 overflow-hidden w-full">
           <CardBody className="p-5 flex flex-col gap-2">
-            <h2 className="text-lg font-bold text-foreground">{t("homePage.about.title")}</h2>
+            <h2 className="text-lg font-bold text-foreground">{t("kdufoot:homePage.about.title")}</h2>
             <p className="text-base text-default-500 leading-relaxed">
               <Trans
                 i18nKey="kdufoot:homePage.about.intro"
@@ -132,8 +143,8 @@ export default function IndexPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                 </svg>
               </div>
-              <h3 className="text-base font-bold">{t("homePage.cards.match.title")}</h3>
-              <p className="text-xs text-default-500">{t("homePage.cards.match.description")}</p>
+              <h3 className="text-base font-bold">{t("kdufoot:homePage.cards.match.title")}</h3>
+              <p className="text-xs text-default-500">{t("kdufoot:homePage.cards.match.description")}</p>
             </CardBody>
           </Card>
 
@@ -145,8 +156,8 @@ export default function IndexPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-5.25c-.621 0-1.125.504-1.125 1.125v3.375m9 0h-9M4.5 10.5 12 3l7.5 7.5M4.5 10.5H18" />
                 </svg>
               </div>
-              <h3 className="text-base font-bold">{t("homePage.cards.tournament.title")}</h3>
-              <p className="text-xs text-default-500">{t("homePage.cards.tournament.description")}</p>
+              <h3 className="text-base font-bold">{t("kdufoot:homePage.cards.tournament.title")}</h3>
+              <p className="text-xs text-default-500">{t("kdufoot:homePage.cards.tournament.description")}</p>
             </CardBody>
           </Card>
         </div>

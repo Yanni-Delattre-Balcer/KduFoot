@@ -9,13 +9,13 @@ import { Button } from '@heroui/button';
 import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
+import { Progress } from "@heroui/progress";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import FootballClock from '../../components/football-clock';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { useUser } from '@/hooks/use-user';
 import { useIncomingRequests, useMyParticipations } from '@/hooks/use-matches';
-import { AccountModal } from '@/authentication/account-modal';
 import DataWall from '@/components/data-wall';
 import { addToast } from '@heroui/toast';
 import { ConfirmedTournamentCard } from './components/confirmed-tournament-card';
@@ -58,10 +58,11 @@ const formatTimestampTime = (ts: number) => {
 
 export default function DashboardPage() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const { getAccessTokenSilently } = useAuth0();
 
     // 1. Mes Annonces (Organisateur)
-    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
+    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true }, 5000);
 
     // 2. Demandes Reçues (Organisateur)
     const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateIncoming, isIdle } = useIncomingRequests(5000);
@@ -78,9 +79,6 @@ export default function DashboardPage() {
 
     // Modal state for 'Voir le profil'
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
-    // Modal state for 'Mon Compte' (Strict Locking)
-    const { isOpen: isAccountModalOpen, onOpen: onAccountModalOpen, onOpenChange: onAccountModalChange } = useDisclosure();
-
     const { isLocked } = useUser();
 
     const [selectedTab, setSelectedTab] = useState<any>("requests");
@@ -407,7 +405,7 @@ export default function DashboardPage() {
 
                 {isLocked ? (
                     <DataWall
-                        onCompleteProfile={onAccountModalOpen}
+                        onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
                         message={isLocked ? "Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée." : undefined}
                     />
                 ) : (
@@ -445,7 +443,7 @@ export default function DashboardPage() {
 
                         <Tabs
                             aria-label="Dashboard Options"
-                            color="warning"
+                            color="secondary"
                             variant="underlined"
                             className="w-full"
                             selectedKey={selectedTab}
@@ -454,7 +452,7 @@ export default function DashboardPage() {
                             }}
                             classNames={{
                                 tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-wrap border-b-0 gap-2",
-                                cursor: "rounded-xl shadow-lg shadow-orange-500/20",
+                                cursor: "rounded-xl shadow-lg shadow-purple-500/20",
                                 tab: "h-auto py-2.5 sm:h-12 uppercase font-black tracking-tight text-[10px] sm:text-xs flex-1 min-w-[max-content] sm:min-w-0 px-3 sm:px-4",
                                 tabContent: "group-data-[selected=true]:text-white whitespace-normal text-center leading-tight"
                             }}
@@ -472,7 +470,7 @@ export default function DashboardPage() {
                                     </div>
                                 }
                             >
-                                <div className="flex flex-col gap-6 pt-6">
+                                <div className="flex flex-col gap-4 pt-2">
                                     {renderSubFilters(requestsSubFilter, setRequestsSubFilter)}
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -608,13 +606,13 @@ export default function DashboardPage() {
                             </Tab>
 
                             <Tab key="organized" title={t('dashboard.tabs.organized')}>
-                                <div className="flex flex-col gap-6 pt-6">
+                                <div className="flex flex-col gap-4 pt-2">
+                                    {renderSubFilters(organizedSubFilter, setOrganizedSubFilter)}
                                     <MyOrganizationsMemo
                                         events={myAnnouncements}
                                         isLoading={isLoadingAnnouncements}
                                         formatDate={formatDate}
                                     />
-                                    {renderSubFilters(organizedSubFilter, setOrganizedSubFilter)}
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {isLoadingAnnouncements ? (
@@ -632,59 +630,121 @@ export default function DashboardPage() {
                                                         formatTime={formatTime}
                                                     />
                                                 ) : (
-                                                    <Card key={match.id} as={Link} to={`/matches/${match.id}`} className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group md:hover:scale-[1.01] active:scale-[0.99]">
-                                                        <CardBody className="p-5 flex flex-col gap-4">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:rotate-6 bg-orange-500/20 text-orange-500">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Z" /></svg>
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{formatDate(match.match_date)}</span>
-                                                                        <Chip size="sm" variant="flat" color={match.venue === 'Domicile' ? 'primary' : 'warning'} className="h-4 text-[8px] uppercase font-black grayscale-[0.5]">
-                                                                            {match.venue === 'Domicile' ? '🏠 Dom' : '✈️ Ext'}
+                                                    <Card key={match.id} className="overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full border-violet-500/40 bg-zinc-900/90 group">
+                                                        <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
+                                                        <CardBody className="p-0">
+                                                            <div className="flex flex-col md:flex-row">
+                                                                <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-white/5">
+                                                                    <div className="flex items-start justify-between gap-4 mb-4">
+                                                                        <div className="flex items-center gap-4">
+                                                                            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
+                                                                                {match.club?.logo_url ? (
+                                                                                    <Image src={match.club.logo_url} className="object-contain" />
+                                                                                ) : (
+                                                                                    <span className="text-white font-black text-2xl">{match.club?.name?.charAt(0)}</span>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="min-w-0">
+                                                                                <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">MATCH</h3>
+                                                                                <p className="text-white/70 text-sm font-bold uppercase tracking-widest">{match.club?.name || '??'}</p>
+                                                                                <div className="flex items-center gap-2 mt-1">
+                                                                                    <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
+                                                                                        ⚽ {t('enums.type.match')}
+                                                                                    </Chip>
+                                                                                    <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
+                                                                                        {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge', '✈️ Extérieur') : t('dashboard.labels.home_badge', '🏠 Domicile')}
+                                                                                    </Chip>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] py-3 shadow-lg shadow-violet-500/30">
+                                                                            {match.status === 'active' ? '🔍 RECHERCHE D\'ADVERSAIRE' : t(`dashboard.status.${match.status}`, match.status)}
                                                                         </Chip>
-                                                                        <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[8px] uppercase font-black">{match.status}</Chip>
                                                                     </div>
-                                                                    <h3 className="font-bold text-white truncate text-base mt-0.5">
-                                                                        vs {match.club?.name || '??'}
-                                                                    </h3>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex gap-2 mt-2">
-                                                                {!isTooLate(match.match_date, match.match_time) ? (
-                                                                    <div className="flex flex-col sm:flex-row gap-2 w-full">
-                                                                        <Button
-                                                                            as={Link}
-                                                                            to={`/matches/${match.id}/edit`}
-                                                                            size="sm"
-                                                                            variant="flat"
-                                                                            className="w-full sm:flex-1 font-bold text-[11px] h-11 bg-amber-500/10 text-amber-500 active:scale-95"
-                                                                            onClick={(e) => e.stopPropagation()}
-                                                                        >
-                                                                            {t('edit', 'Modifier')}
-                                                                        </Button>
-                                                                        <Button
-                                                                            size="sm"
-                                                                            variant="flat"
-                                                                            color="danger"
-                                                                            className="w-full sm:flex-1 h-11 font-bold text-[11px] active:scale-95"
-                                                                            onPress={() => {
-                                                                                handleDeleteMatch(match.id, match.match_date, match.match_time);
+
+                                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                                                                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                                                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
+                                                                            <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
+                                                                        </div>
+                                                                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                                                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                                                                            <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
+                                                                        </div>
+                                                                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                                                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
+                                                                            <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || '11v11'}</Chip>
+                                                                        </div>
+                                                                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                                                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                                                            <p className="text-sm font-bold text-white truncate">{match.pitch_type || '—'}</p>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="space-y-2">
+                                                                        <div className="flex justify-between items-end">
+                                                                            <p className="text-[11px] font-black text-violet-400 uppercase tracking-widest">
+                                                                                {(match.accepted_count || 0) >= 1 ? t('dashboard.match.filled', 'Match complet') : t('dashboard.match.searching', 'Recherche d\'adversaire')}
+                                                                            </p>
+                                                                            <p className="text-xs font-bold text-white">{match.accepted_count || 0} / 1</p>
+                                                                        </div>
+                                                                        <Progress
+                                                                            size="md"
+                                                                            value={(match.accepted_count || 0) >= 1 ? 100 : 0}
+                                                                            color="secondary"
+                                                                            className="max-w-md"
+                                                                            classNames={{
+                                                                                indicator: "bg-linear-to-r from-violet-500 to-indigo-500"
                                                                             }}
-                                                                            onClick={(e) => e.stopPropagation()}
-                                                                            isLoading={isSaving}
-                                                                        >
-                                                                            {t('delete', 'Supprimer')}
-                                                                        </Button>
+                                                                        />
                                                                     </div>
-                                                                ) : (
-                                                                    <div className="flex-1 py-1 text-center border border-dashed border-danger/30 rounded-lg bg-danger/5">
-                                                                        <p className="text-[10px] font-bold text-danger leading-tight uppercase italic px-4">
-                                                                            {t('dashboard.alerts.h2_locked', 'Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute.')}
-                                                                        </p>
+                                                                </div>
+
+                                                                <div className="w-full md:w-80 p-6 flex flex-col justify-end bg-white/[0.02]">
+                                                                    <div className="space-y-3">
+                                                                        {isTooLate(match.match_date, match.match_time) ? (
+                                                                            <div className="py-3 px-4 text-center border border-dashed border-danger/30 rounded-xl bg-danger/5">
+                                                                                <p className="text-[10px] font-black text-danger leading-tight uppercase px-2">
+                                                                                    {t('dashboard.alerts.h2_locked', 'Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute.')}
+                                                                                </p>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="flex flex-col gap-2">
+                                                                                <div className="flex gap-2">
+                                                                                    <Button
+                                                                                        as={Link}
+                                                                                        to={`/matches/${match.id}/edit`}
+                                                                                        size="sm"
+                                                                                        variant="flat"
+                                                                                        className="flex-1 font-bold text-[11px] h-11 bg-amber-500/10 text-amber-500 active:scale-95"
+                                                                                    >
+                                                                                        {t('edit', 'Modifier')}
+                                                                                    </Button>
+                                                                                    <Button
+                                                                                        size="sm"
+                                                                                        variant="flat"
+                                                                                        color="danger"
+                                                                                        className="flex-1 h-11 font-bold text-[11px] active:scale-95"
+                                                                                        onPress={() => handleDeleteMatch(match.id, match.match_date, match.match_time)}
+                                                                                        isLoading={isSaving}
+                                                                                    >
+                                                                                        {t('delete', 'Supprimer')}
+                                                                                    </Button>
+                                                                                </div>
+                                                                                <Button
+                                                                                    as={Link}
+                                                                                    to={`/matches/${match.id}`}
+                                                                                    size="sm"
+                                                                                    variant="solid"
+                                                                                    color="secondary"
+                                                                                    className="w-full font-bold text-[11px] h-10 active:scale-95 shadow-md shadow-secondary/20"
+                                                                                >
+                                                                                    {t('dashboard.controls.manage_registrations', 'Gérer les demandes')}
+                                                                                </Button>
+                                                                            </div>
+                                                                        )}
                                                                     </div>
-                                                                )}
+                                                                </div>
                                                             </div>
                                                         </CardBody>
                                                     </Card>
@@ -708,6 +768,8 @@ export default function DashboardPage() {
                                             </div>
                                         )}
                                     </div>
+
+
                                 </div>
                             </Tab>
 
@@ -724,7 +786,7 @@ export default function DashboardPage() {
                                     </div>
                                 }
                             >
-                                <div className="flex flex-col gap-6 pt-6">
+                                <div className="flex flex-col gap-4 pt-2">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {isLoadingParticipations ? (
                                             <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" /></div>
@@ -764,7 +826,7 @@ export default function DashboardPage() {
                                     </div>
                                 }
                             >
-                                <div className="flex flex-col gap-6 pt-6">
+                                <div className="flex flex-col gap-4 pt-2">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {(isLoadingIncoming || isLoadingParticipations) ? (
                                             <div className="col-span-full flex justify-center py-12"><Spinner color="success" /></div>
@@ -891,9 +953,7 @@ export default function DashboardPage() {
                         )}
                     </ModalContent>
                 </Modal>
-
-                <AccountModal isOpen={isAccountModalOpen} onOpenChange={onAccountModalChange} />
-            </section >
-        </DefaultLayout >
+            </section>
+        </DefaultLayout>
     );
 }

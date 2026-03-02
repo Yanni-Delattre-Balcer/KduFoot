@@ -14,7 +14,7 @@
   "blog": "Blog",
   "about": "About",
   "profile": "Profile",
-  "dashboard": "Dashboard",
+  "dashboard_nav": "Dashboard",
   "projects": "Projects",
   "team": "Team",
   "calendar": "Calendar",
@@ -48,5 +48,19 @@
   "no-permissions": "no permissions",
   "token": "token",
   "user": "user",
-  "success": "Success"
+  "success": "Success",
+  "match": {
+    "create_title": "CREATE A MATCH",
+    "edit_title": "UPDATE MATCH"
+  },
+  "dashboard": {
+    "match": {
+      "found": "Opponent found",
+      "filled": "Match full",
+      "searching": "Searching for opponent"
+    },
+    "labels": {
+      "match_opposition": "Match Opposition"
+    }
+  }
 }

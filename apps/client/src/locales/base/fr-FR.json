@@ -58,6 +58,10 @@
       "update_success": "Match mis à jour avec succès !"
     }
   },
+  "match": {
+    "create_title": "CRÉER UN MATCH",
+    "edit_title": "METTRE À JOUR LE MATCH"
+  },
   "dashboard": {
     "status": {
       "pending": "En attente",
@@ -67,6 +71,14 @@
     "alerts": {
       "title": "Modification détectée",
       "message": "Le match contre {{host_club_name}} a été modifié."
+    },
+    "match": {
+      "found": "Adversaire trouvé",
+      "filled": "Match complet",
+      "searching": "Recherche d'adversaire"
+    },
+    "labels": {
+      "match_opposition": "Opposition Match"
     }
   },
   "tournamentForm": {

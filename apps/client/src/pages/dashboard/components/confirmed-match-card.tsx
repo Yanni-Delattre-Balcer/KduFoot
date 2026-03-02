@@ -2,6 +2,7 @@ import { Card, CardBody } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
+import { Progress } from "@heroui/progress";
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -29,9 +30,10 @@ export const ConfirmedMatchCard = ({
     return (
         <Card
             id={`card-${match.match_id}`}
-            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md col-span-full ${highlighted ? 'border-danger ring-4 ring-danger/20 animate-pulse' : 'border-success-400/20 bg-success-500/5'
+            className={`overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full ${highlighted ? 'border-danger ring-4 ring-danger/20 animate-pulse' : 'border-violet-500/40 bg-zinc-900/90'
                 } group`}
         >
+            <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
             <CardBody className="p-0">
                 <div className="flex flex-col md:flex-row">
                     {/* Left Section: Info */}
@@ -48,7 +50,7 @@ export const ConfirmedMatchCard = ({
                                 <div className="min-w-0">
                                     <h3 className="font-black text-white text-xl leading-tight truncate">{opponentClubName}</h3>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <Chip size="sm" variant="flat" color="success" className="font-black text-[10px] uppercase tracking-wider">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
                                             ⚽ {t('enums.type.match')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color={isUserHome ? 'primary' : 'warning'} className="h-5 text-[9px] uppercase font-black">
@@ -57,12 +59,12 @@ export const ConfirmedMatchCard = ({
                                     </div>
                                 </div>
                             </div>
-                            <Chip size="sm" color="success" variant="flat" className="font-black uppercase text-[10px] py-3">
+                            <Chip size="sm" color="secondary" variant="solid" className="font-black uppercase text-[10px] py-3 shadow-lg shadow-violet-500/30">
                                 {t('dashboard.status.accepted')}
                             </Chip>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
                                 <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
                                 <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
@@ -79,6 +81,22 @@ export const ConfirmedMatchCard = ({
                                 <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
                                 <p className="text-sm font-bold text-white truncate">{match.opponent_pitch_type || match.pitch_type || '—'}</p>
                             </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-end">
+                                <p className="text-[11px] font-black text-violet-400 uppercase tracking-widest">{t('dashboard.match.found', 'Adversaire trouvé')}</p>
+                                <p className="text-xs font-bold text-white">1 / 1</p>
+                            </div>
+                            <Progress
+                                size="md"
+                                value={100}
+                                color="secondary"
+                                className="max-w-md"
+                                classNames={{
+                                    indicator: "bg-linear-to-r from-violet-500 to-indigo-500"
+                                }}
+                            />
                         </div>
                     </div>
 
@@ -136,9 +154,9 @@ export const ConfirmedMatchCard = ({
                                 </Button>
                                 <Button
                                     size="sm"
+                                    color="secondary"
                                     variant="solid"
-                                    color="success"
-                                    className="flex-1 font-bold text-[11px] h-10 active:scale-95"
+                                    className="flex-1 font-bold text-[11px] h-10 active:scale-95 shadow-md shadow-violet-500/20"
                                     as="a"
                                     href={`tel:${match.opponent_phone}`}
                                 >

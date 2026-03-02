@@ -2,25 +2,36 @@ import React from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Image } from "@heroui/image";
-import { useAuth } from "@/authentication";
+import { useAuth, useUser } from "@/authentication";
 import { useNavigate } from "react-router-dom";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { buttonGradient } from "./primitives";
 
 export const WelcomeGateway: React.FC = () => {
     const { login, isAuthenticated } = useAuth();
+    const { profileComplete, isLoading: isUserLoading } = useUser();
     const navigate = useNavigate();
     const { isOpen, closeGateway, setVisitorMode, clearVisitorMode, blockingMessage } = useWelcomeGateway();
 
+    // Silent startup: if profile is 100% complete and no specific blocking message, close and don't show
+    React.useEffect(() => {
+        if (isAuthenticated && !isUserLoading && profileComplete && !blockingMessage && isOpen) {
+            closeGateway();
+        }
+    }, [isAuthenticated, isUserLoading, profileComplete, blockingMessage, isOpen, closeGateway]);
+
+    if (isUserLoading || (profileComplete && !blockingMessage)) return null;
+
     const handleRegister = () => {
         clearVisitorMode();
+        const targetPath = "/account";
         if (isAuthenticated) {
-            navigate("/dashboard");
+            navigate(targetPath);
             closeGateway();
         } else {
             login({
                 appState: {
-                    returnTo: "/dashboard",
+                    returnTo: targetPath,
                 },
             });
         }

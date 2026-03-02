@@ -184,6 +184,8 @@
     "tab_tournaments": "Tournois",
     "tournament": "Tournoi",
     "create": "Créer un Match",
+    "create_title": "CRÉER UN MATCH",
+    "edit_title": "METTRE À JOUR LE MATCH",
     "create_tournament": "Créer un Tournoi",
     "find": "Chercher un Match",
     "find_tournament": "Chercher un Tournoi",
@@ -324,7 +326,7 @@
       "Masculin": "Masculin",
       "Féminin": "Féminin",
       "Mixte": "Mixte",
-      "Non spécifié": "Non spécifié"
+      "Non spécifié": "Mixte"
     },
     "format": {
       "11v11": "11 vs 11",
@@ -537,7 +539,7 @@
     "away_label": "Extérieur",
     "tabs": {
       "requests": "DEMANDES REÇUES",
-      "organized": "MES MATCHS / TOURNOIS ORGANISÉS",
+      "organized": "Mes Matchs / Tournois Organisés (Mes Créations)",
       "participations": "TOURNOIS CONFIRMÉS",
       "confirmed_matches": "MATCHS CONFIRMÉS",
       "all": "Tous",
@@ -551,6 +553,11 @@
       "filling": "Remplissage du tournoi",
       "registered_teams": "Équipes inscrites",
       "waiting_teams": "En attente d'équipes..."
+    },
+    "match": {
+      "found": "Adversaire trouvé",
+      "filled": "Match complet",
+      "searching": "Recherche d'adversaire"
     },
     "memo": {
       "title": "📋 Historique de mes créations",
@@ -601,6 +608,7 @@
       "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
     },
     "labels": {
+      "match_opposition": "Opposition Match",
       "organizer": "Organisateur",
       "participant": "Participant",
       "my_club": "Mon Club",

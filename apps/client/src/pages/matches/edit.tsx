@@ -1,17 +1,42 @@
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '@/layouts/default';
 import { useMatch } from '@/hooks/use-matches';
 import { Spinner } from '@heroui/spinner';
+import { useUser } from '@/hooks/use-user';
+import DataWall from '@/components/data-wall';
 import MatchForm from '@/components/matches/match-form';
+
+import { useSWRConfig } from 'swr';
 
 export default function MatchEditPage() {
     const { id } = useParams<{ id: string }>();
     const isEditing = !!id;
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const { mutate } = useSWRConfig();
 
     const { match, isLoading: isLoadingMatch } = useMatch(id || null);
+    const { isLocked } = useUser();
+
+    // Force revalidation on mount to avoid ghost locking
+    useEffect(() => {
+        mutate('/api/me/context');
+    }, [mutate]);
+
+    if (isLocked) {
+        return (
+            <DefaultLayout>
+                <div className="container mx-auto p-6 flex justify-center items-center min-h-[60vh]">
+                    <DataWall
+                        onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
+                        message="Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à la création tant que votre fiche MON COMPTE n'est pas 100% complétée."
+                    />
+                </div>
+            </DefaultLayout>
+        );
+    }
 
     if (isEditing && isLoadingMatch) {
         return (
@@ -27,10 +52,10 @@ export default function MatchEditPage() {
         <DefaultLayout>
             <div className="max-w-7xl mx-auto px-4 w-full">
                 <h1 className="text-3xl font-bold mb-8 text-violet-300">
-                    {t('match.edit_title', 'METTRE À JOUR LE MATCH')}
+                    {isEditing ? t('match.edit_title', 'METTRE À JOUR LE MATCH') : t('match.create_title', 'CRÉER UN MATCH')}
                 </h1>
 
-                {match && (
+                {(match || !isEditing) && (
                     <MatchForm
                         initialData={match}
                         onSuccess={() => navigate('/matches')}

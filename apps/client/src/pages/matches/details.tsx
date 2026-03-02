@@ -12,7 +12,6 @@ import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Image } from "@heroui/image";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import DataWall from '@/components/data-wall';
-import { AccountModal } from '@/authentication/account-modal';
 
 const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
@@ -26,7 +25,6 @@ export default function MatchDetailsPage() {
     const { user, isLocked } = useUser();
     const { openGateway, isVisitor } = useWelcomeGateway();
     const { match, isLoading, isError, contactMatch, deleteMatch, cancelMatchContact, updateRequestStatus } = useMatch(id || null);
-    const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
     const { isOpen: isCancelOpen, onOpen: onCancelOpen, onOpenChange: onCancelOpenChange } = useDisclosure();
     const [isDeleting, setIsDeleting] = useState(false);
@@ -85,19 +83,24 @@ export default function MatchDetailsPage() {
 
     // Parse Gender from notes if present
     const genderMatch = match.notes?.match(/Genre: (.*)(\n|$)/);
-    let gender = genderMatch ? genderMatch[1].trim() : 'Non spécifié';
+    // Default to 'Mixte' if not specified or explicitly 'Non spécifié'
+    let gender = genderMatch ? genderMatch[1].trim() : 'Mixte';
     // Remove technical prefix if present (e.g. from legacy data or misformatted inputs)
     if (gender.startsWith('enums.gender.')) {
         gender = gender.replace('enums.gender.', '');
     }
+    // Final fallback/normalization
+    if (!gender || gender.trim() === '' || gender === 'Non spécifié') gender = 'Mixte';
     const cleanNotes = match.notes?.replace(/Genre: .*(\n|$)/, '').trim();
 
     return (
         <DefaultLayout>
-            {isLocked ? (
+            {(isLocked || isVisitor) ? (
                 <div className="container mx-auto p-6 flex justify-center items-center min-h-[60vh]">
                     <DataWall
-                        onCompleteProfile={() => setIsAccountModalOpen(true)}
+                        onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
+                        isVisitor={isVisitor}
+                        onLogin={() => openGateway()}
                         message="Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée."
                     />
                 </div>
@@ -550,11 +553,6 @@ export default function MatchDetailsPage() {
                             )}
                         </ModalContent>
                     </Modal>
-
-                    <AccountModal
-                        isOpen={isAccountModalOpen}
-                        onOpenChange={setIsAccountModalOpen}
-                    />
                 </div>
             )}
         </DefaultLayout>
