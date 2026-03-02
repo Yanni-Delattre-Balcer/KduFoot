@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from "@heroui/button";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth, useUser } from "@/authentication";
+import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { Spinner } from "@heroui/spinner";
 
 interface DataWallProps {
@@ -10,7 +11,8 @@ interface DataWallProps {
 
 export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) => {
     const { isAuthenticated, isLoading: isAuthLoading, login } = useAuth();
-    const { isLoading: isProfileLoading, isLocked } = useUser();
+    const { isLoading: isProfileLoading, isLocked, user, profileComplete } = useUser();
+    const { isVisitor } = useWelcomeGateway();
     const location = useLocation();
 
     // ÉTAT A (Chargement Auth0) : Silence total pendant l'initialisation Auth0
@@ -55,8 +57,10 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
         );
     }
 
-    // ÉTAT C (Connecté mais Incomplet) : Alerte profil requis
-    if (isLocked) {
+    // ÉTAT C (Connecté mais Incomplet ou Visiteur avec Incomplet) : Alerte profil requis
+    // isLocked est faux si on est en isVisitor. On doit donc vérifier manuellement si le profil est vraiment complet pour un visiteur authentifié.
+    const isProfileIncompleteVisitor = isVisitor && isAuthenticated && (!user || !profileComplete);
+    if (isLocked || isProfileIncompleteVisitor) {
         return (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 animate-appearance-in bg-black/40 backdrop-blur-[4px] rounded-3xl">
                 <div className="bg-content1 border border-default-200 shadow-2xl rounded-3xl p-8 max-w-md w-full text-center flex flex-col items-center gap-6 relative overflow-hidden">
