@@ -77,17 +77,17 @@ function App() {
           {showVideoAnalysis && (
             <>
               <Route
-                element={<AuthenticationGuard component={ExercisesPage} />}
+                element={<ExercisesPage />}
                 path="/exercises"
               />
               <Route
-                element={<AuthenticationGuard component={TrainingPage} />}
+                element={<TrainingPage />}
                 path="/training"
               />
             </>
           )}
           <Route
-            element={<AuthenticationGuard component={FavoritesPage} />}
+            element={<FavoritesPage />}
             path="/favorites"
           />
           {showVideoAnalysis && (
@@ -107,7 +107,7 @@ function App() {
             </>
           )}
           <Route
-            element={<AuthenticationGuard component={SessionPlannerPage} />}
+            element={<SessionPlannerPage />}
             path="/sessions"
           />
           <Route
@@ -123,7 +123,7 @@ function App() {
             path="/sessions/:id"
           />
           <Route
-            element={<AuthenticationGuard component={DashboardPage} />}
+            element={<DashboardPage />}
             path="/dashboard"
           />
           <Route

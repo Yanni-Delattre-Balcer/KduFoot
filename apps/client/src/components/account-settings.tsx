@@ -143,21 +143,38 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
     const validate = () => {
         const newErrors: Record<string, string> = {};
-        if (!phone || phone.length < 11) newErrors.phone = "Numéro de téléphone requis";
-        if (!category) newErrors.category = "Catégorie requise";
-        if (!level) newErrors.level = "Niveau requis";
-        if (!pitchType) newErrors.pitchType = "Type de terrain requis";
+
+        if (!phone || phone.replace(/\D/g, '').length < 11) {
+            newErrors.phone = "Ce champ est obligatoire (au moins 11 chiffres)";
+        }
+        if (!licenseId || licenseId.trim() === "") {
+            newErrors.licenseId = "Le numéro de licence est obligatoire.";
+        }
+        if (!category) {
+            newErrors.category = "Ce champ est obligatoire (choisissez une catégorie)";
+        }
+        if (!level) {
+            newErrors.level = "Ce champ est obligatoire (choisissez un niveau)";
+        }
+        if (!pitchType) {
+            newErrors.pitchType = "Ce champ est obligatoire (choisissez un terrain)";
+        }
+        if (!clubColors || clubColors.trim() === "") {
+            newErrors.clubColors = "La couleur des maillots est obligatoire.";
+        }
+
         const cleanSiret = siret.replace(/\s/g, '').trim();
         if (!dbUser?.club_id && (!siret || (cleanSiret.length !== 14 && cleanSiret.length !== 9))) {
-            newErrors.siret = t('matchForm.alerts.siret_length', "Numéro SIRET (14 chiffres) ou SIREN (9 chiffres) requis");
+            newErrors.siret = "Numéro SIRET (14 chiffres) ou SIREN (9 chiffres) requis.";
         }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSave = async () => {
         if (!validate()) {
-            addToast({ title: t('error.title'), description: "Veuillez remplir tous les champs obligatoires", variant: 'flat', color: 'danger' });
+            addToast({ title: "Formulaire incomplet", description: "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès.", variant: 'flat', color: 'danger' });
             return;
         }
         setIsSaving(true);
@@ -235,8 +252,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             />
 
             <div className="flex flex-col items-center gap-6">
-                <p className="text-[10px] font-bold text-primary uppercase tracking-widest -mb-4 animate-pulse">
-                    Le mieux à faire c'était de mettre le logo du club
+                <p className="text-[10px] font-extrabold text-danger uppercase tracking-widest -mb-4 animate-pulse-red">
+                    Le mieux est de mettre le logo de votre club
                 </p>
 
                 <div className="relative group cursor-pointer z-10" onClick={handleAvatarClick}>
@@ -296,15 +313,22 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 />
                                 {errors.phone && <p className="text-[10px] text-danger font-bold pl-1">{errors.phone}</p>}
                             </div>
-                            <Input
-                                label="Numéro de licence"
-                                variant="bordered"
-                                size="sm"
-                                value={licenseId}
-                                onValueChange={setLicenseId}
-                                placeholder="Saisir votre numéro"
-                                className="mt-2"
-                            />
+                            <div className="space-y-1">
+                                <Input
+                                    label="Numéro de licence"
+                                    variant="bordered"
+                                    size="sm"
+                                    value={licenseId}
+                                    onValueChange={(v) => {
+                                        setLicenseId(v);
+                                        if (errors.licenseId) setErrors(prev => ({ ...prev, licenseId: "" }));
+                                    }}
+                                    placeholder="Saisir votre numéro"
+                                    isInvalid={!!errors.licenseId}
+                                    isRequired
+                                />
+                                {errors.licenseId && <p className="text-[10px] text-danger font-bold pl-1">{errors.licenseId}</p>}
+                            </div>
                         </div>
                     </div>
 
@@ -374,14 +398,22 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 </Select>
                                 {errors.pitchType && <p className="text-[10px] text-danger font-bold pl-1">{errors.pitchType}</p>}
                             </div>
-                            <Input
-                                label="Couleur des maillots"
-                                variant="bordered"
-                                size="sm"
-                                value={clubColors}
-                                onValueChange={setClubColors}
-                                placeholder="Rouge et Noir..."
-                            />
+                            <div className="space-y-1">
+                                <Input
+                                    label="Couleur des maillots"
+                                    variant="bordered"
+                                    size="sm"
+                                    value={clubColors}
+                                    onValueChange={(v) => {
+                                        setClubColors(v);
+                                        if (errors.clubColors) setErrors(prev => ({ ...prev, clubColors: "" }));
+                                    }}
+                                    placeholder="Rouge et Noir..."
+                                    isInvalid={!!errors.clubColors}
+                                    isRequired
+                                />
+                                {errors.clubColors && <p className="text-[10px] text-danger font-bold pl-1">{errors.clubColors}</p>}
+                            </div>
                         </div>
                     </div>
 
@@ -397,7 +429,11 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start">
                                     <div className="flex-1 flex flex-col gap-1">
                                         <Input
-                                            label="Numéro SIRET (14 chiffres) ou SIREN (9 chiffres)"
+                                            label={
+                                                <span className="animate-pulse-red font-bold text-danger">
+                                                    Numéro SIRET (14 chiffres) ou SIREN (9 chiffres)
+                                                </span>
+                                            }
                                             variant="bordered"
                                             size="sm"
                                             value={siret}

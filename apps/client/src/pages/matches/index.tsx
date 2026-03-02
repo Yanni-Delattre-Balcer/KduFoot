@@ -270,22 +270,25 @@ export default function MatchesPage() {
                 ) : (
                     <div id="results-container" className="flex flex-col gap-6 animate-appearance-in pb-20">
                         {view === 'create' ? (
-                            (isVisitor || isLocked) ? (
-                                <DataWall
-                                    onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
-                                    isVisitor={isVisitor}
-                                    onLogin={() => openGateway()}
-                                    message={isLocked ? "Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.)." : undefined}
-                                />
-                            ) : (
-                                type === 'match' ? (
-                                    <MatchForm onSuccess={handleCreateSuccess} />
-                                ) : (
-                                    <TournamentForm onSuccess={handleCreateSuccess} />
-                                )
-                            )
+                            <div className="relative min-h-[500px]">
+                                {(isVisitor || isLocked) && (
+                                    <DataWall
+                                        onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
+                                        isVisitor={isVisitor}
+                                        onLogin={() => openGateway()}
+                                        message={isLocked ? "Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.)." : undefined}
+                                    />
+                                )}
+                                <div className={(isVisitor || isLocked) ? "opacity-50 blur-[4px] pointer-events-none select-none" : ""}>
+                                    {type === 'match' ? (
+                                        <MatchForm onSuccess={handleCreateSuccess} />
+                                    ) : (
+                                        <TournamentForm onSuccess={handleCreateSuccess} />
+                                    )}
+                                </div>
+                            </div>
                         ) : (
-                            <div className="flex flex-col gap-5">
+                            <div className="flex flex-col gap-5 relative min-h-[500px]">
                                 {(isVisitor || isLocked) && (
                                     <DataWall
                                         onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}

@@ -24,6 +24,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
     const { user, unlinkClub } = useUser();
     const { mutate } = useSWRConfig();
     const [isSaving, setIsSaving] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const [formData, setFormData] = useState({
         name: '',
@@ -64,12 +65,38 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
     }, [user]);
 
     const handleChange = (field: string, value: any) => {
+        if (errors[field]) {
+            setErrors(prev => ({ ...prev, [field]: "" }));
+        }
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!formData.name) newErrors.name = "Le nom du tournoi est obligatoire.";
+        if (!formData.category) newErrors.category = "La catégorie est obligatoire.";
+        if (!formData.level) newErrors.level = "Le niveau est obligatoire.";
+        if (!formData.max_teams) newErrors.max_teams = "Le nombre d'équipes est obligatoire.";
+        if (!formData.match_date) newErrors.match_date = "La date est obligatoire.";
+        if (!formData.match_time) newErrors.match_time = "L'heure de début est obligatoire.";
+        if (!formData.match_end_time) newErrors.match_end_time = "L'heure de fin est obligatoire.";
+        if (!formData.pitch_type) newErrors.pitch_type = "Le type de terrain est obligatoire.";
+        if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = "Un email valide est obligatoire.";
+        if (!formData.phone || formData.phone.replace(/\D/g, '').length < 11) newErrors.phone = "Le téléphone est obligatoire (au moins 11 chiffres).";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validate()) {
+            addToast({ title: "Formulaire incomplet", description: "Veuillez remplir tous les champs obligatoires en rouge.", variant: 'flat', color: 'danger' });
+            return;
+        }
+
         if (!user?.club_id) {
             addToast({ title: t('warning'), description: t('tournamentForm.alerts.must_link'), variant: 'flat', color: 'warning' });
             return;
@@ -269,42 +296,57 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                         </p>
                     </div>
 
-                    <Input
-                        label={t('tournamentForm.labels.name')}
-                        placeholder={t('tournamentForm.labels.name_placeholder')}
-                        value={formData.name}
-                        onValueChange={(v) => handleChange('name', v)}
-                        className="md:col-span-2"
-                        isRequired
-                    />
-                    <Select
-                        label={t('matchForm.labels.category')}
-                        selectedKeys={[formData.category]}
-                        onChange={(e) => handleChange('category', e.target.value)}
-                        isRequired
-                    >
-                        {Object.values(Category).map((cat) => (
-                            <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
-                        ))}
-                    </Select>
-                    <Select
-                        label={t('matchForm.labels.level')}
-                        selectedKeys={[formData.level]}
-                        onChange={(e) => handleChange('level', e.target.value)}
-                        isRequired
-                    >
-                        {Object.values(Level).map((cat) => (
-                            <SelectItem key={cat}>{t(`enums.level.${cat}`)}</SelectItem>
-                        ))}
-                    </Select>
+                    <div className="md:col-span-2 space-y-1">
+                        <Input
+                            label={t('tournamentForm.labels.name')}
+                            placeholder={t('tournamentForm.labels.name_placeholder')}
+                            value={formData.name}
+                            onValueChange={(v) => handleChange('name', v)}
+                            isRequired
+                            isInvalid={!!errors.name}
+                        />
+                        {errors.name && <p className="text-[10px] text-danger font-bold pl-1">{errors.name}</p>}
+                    </div>
+                    <div className="space-y-1">
+                        <Select
+                            label={t('matchForm.labels.category')}
+                            selectedKeys={[formData.category]}
+                            onChange={(e) => handleChange('category', e.target.value)}
+                            isRequired
+                            isInvalid={!!errors.category}
+                        >
+                            {Object.values(Category).map((cat) => (
+                                <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
+                            ))}
+                        </Select>
+                        {errors.category && <p className="text-[10px] text-danger font-bold pl-1">{errors.category}</p>}
+                    </div>
+                    <div className="space-y-1">
+                        <Select
+                            label={t('matchForm.labels.level')}
+                            selectedKeys={[formData.level]}
+                            onChange={(e) => handleChange('level', e.target.value)}
+                            isRequired
+                            isInvalid={!!errors.level}
+                        >
+                            {Object.values(Level).map((cat) => (
+                                <SelectItem key={cat}>{t(`enums.level.${cat}`)}</SelectItem>
+                            ))}
+                        </Select>
+                        {errors.level && <p className="text-[10px] text-danger font-bold pl-1">{errors.level}</p>}
+                    </div>
 
-                    <Input
-                        type="number"
-                        label={t('tournamentForm.labels.max_teams')}
-                        value={formData.max_teams}
-                        onValueChange={(v) => handleChange('max_teams', v)}
-                        isRequired
-                    />
+                    <div className="space-y-1">
+                        <Input
+                            type="number"
+                            label={t('tournamentForm.labels.max_teams')}
+                            value={formData.max_teams}
+                            onValueChange={(v) => handleChange('max_teams', v)}
+                            isRequired
+                            isInvalid={!!errors.max_teams}
+                        />
+                        {errors.max_teams && <p className="text-[10px] text-danger font-bold pl-1">{errors.max_teams}</p>}
+                    </div>
                     <Input
                         type="number"
                         label={t('tournamentForm.labels.fee')}
@@ -322,40 +364,57 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                         <SelectItem key="Mixte">{t('enums.gender.Mixte')}</SelectItem>
                         <SelectItem key="Non spécifié">{t('enums.gender.Non spécifié')}</SelectItem>
                     </Select>
-                    <Select
-                        label={t('matchForm.labels.pitch_type')}
-                        selectedKeys={[formData.pitch_type]}
-                        onChange={(e) => handleChange('pitch_type', e.target.value)}
-                    >
-                        {PITCH_TYPES.map((type) => (
-                            <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
-                        ))}
-                    </Select>
+                    <div className="space-y-1">
+                        <Select
+                            label={t('matchForm.labels.pitch_type')}
+                            selectedKeys={[formData.pitch_type]}
+                            onChange={(e) => handleChange('pitch_type', e.target.value)}
+                            isRequired
+                            isInvalid={!!errors.pitch_type}
+                        >
+                            {PITCH_TYPES.map((type) => (
+                                <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
+                            ))}
+                        </Select>
+                        {errors.pitch_type && <p className="text-[10px] text-danger font-bold pl-1">{errors.pitch_type}</p>}
+                    </div>
 
                     {/* Date and Times section */}
                     <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <Input
-                            type="date"
-                            label={t('tournamentForm.labels.date')}
-                            value={formData.match_date}
-                            onValueChange={(v) => handleChange('match_date', v)}
-                            min={new Date().toISOString().split('T')[0]}
-                            isRequired
-                        />
-                        <Input
-                            type="time"
-                            label={t('tournamentForm.labels.time')}
-                            value={formData.match_time}
-                            onValueChange={(v) => handleChange('match_time', v)}
-                            isRequired
-                        />
-                        <Input
-                            type="time"
-                            label={t('tournamentForm.labels.end_time')}
-                            value={formData.match_end_time}
-                            onValueChange={(v) => handleChange('match_end_time', v)}
-                            isRequired
-                        />
+                        <div className="space-y-1">
+                            <Input
+                                type="date"
+                                label={t('tournamentForm.labels.date')}
+                                value={formData.match_date}
+                                onValueChange={(v) => handleChange('match_date', v)}
+                                min={new Date().toISOString().split('T')[0]}
+                                isRequired
+                                isInvalid={!!errors.match_date}
+                            />
+                            {errors.match_date && <p className="text-[10px] text-danger font-bold pl-1">{errors.match_date}</p>}
+                        </div>
+                        <div className="space-y-1">
+                            <Input
+                                type="time"
+                                label={t('tournamentForm.labels.time')}
+                                value={formData.match_time}
+                                onValueChange={(v) => handleChange('match_time', v)}
+                                isRequired
+                                isInvalid={!!errors.match_time}
+                            />
+                            {errors.match_time && <p className="text-[10px] text-danger font-bold pl-1">{errors.match_time}</p>}
+                        </div>
+                        <div className="space-y-1">
+                            <Input
+                                type="time"
+                                label={t('tournamentForm.labels.end_time')}
+                                value={formData.match_end_time}
+                                onValueChange={(v) => handleChange('match_end_time', v)}
+                                isRequired
+                                isInvalid={!!errors.match_end_time}
+                            />
+                            {errors.match_end_time && <p className="text-[10px] text-danger font-bold pl-1">{errors.match_end_time}</p>}
+                        </div>
                         <div className="hidden md:block"></div>
                     </div>
 
@@ -385,8 +444,14 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
             <Card>
                 <CardHeader className="font-bold bg-default-50">{t('tournamentForm.contact_title')}</CardHeader>
                 <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input label={t('tournamentForm.labels.contact_email')} type="email" value={formData.email} onValueChange={(v) => handleChange('email', v)} isRequired />
-                    <Input label={t('matchForm.labels.phone')} type="tel" value={formData.phone} onValueChange={(v) => handleChange('phone', v)} isRequired />
+                    <div className="space-y-1">
+                        <Input label={t('tournamentForm.labels.contact_email')} type="email" value={formData.email} onValueChange={(v) => handleChange('email', v)} isRequired isInvalid={!!errors.email} />
+                        {errors.email && <p className="text-[10px] text-danger font-bold pl-1">{errors.email}</p>}
+                    </div>
+                    <div className="space-y-1">
+                        <Input label={t('matchForm.labels.phone')} type="tel" value={formData.phone} onValueChange={(v) => handleChange('phone', v)} isRequired isInvalid={!!errors.phone} />
+                        {errors.phone && <p className="text-[10px] text-danger font-bold pl-1">{errors.phone}</p>}
+                    </div>
                     <Textarea label={t('tournamentForm.labels.notes')} placeholder={t('tournamentForm.labels.notes_placeholder')} value={formData.notes} onValueChange={(v) => handleChange('notes', v)} className="md:col-span-2" />
                 </CardBody>
             </Card>

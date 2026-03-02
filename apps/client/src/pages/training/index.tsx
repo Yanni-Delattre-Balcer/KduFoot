@@ -6,10 +6,15 @@ import { Link } from 'react-router-dom';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Chip } from '@heroui/chip';
 import FootballClock from '@/components/football-clock';
+import { useUser } from '@/hooks/use-user';
+import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
+import DataWall from '@/components/data-wall';
 
 export default function TrainingPage() {
     const { t } = useTranslation();
     const { selectedExercises, removeExercise } = useTraining();
+    const { isLocked } = useUser();
+    const { isVisitor, openGateway } = useWelcomeGateway();
 
     return (
         <DefaultLayout maxWidth="max-w-full">
@@ -52,7 +57,18 @@ export default function TrainingPage() {
                     </div>
                 </div>
 
-                {selectedExercises.length === 0 ? (
+                {isLocked || isVisitor ? (
+                    <div className="relative min-h-[400px]">
+                        <DataWall
+                            onCompleteProfile={() => {
+                                // @ts-ignore
+                                window.location.href = '/account?from=' + encodeURIComponent(window.location.pathname);
+                            }}
+                            isVisitor={isVisitor}
+                            onLogin={() => openGateway()}
+                        />
+                    </div>
+                ) : selectedExercises.length === 0 ? (
                     <Card className="border border-green-500/20 bg-[#202221] overflow-hidden">
                         <CardBody className="relative py-16 flex flex-col items-center gap-5 text-center">
                             <div className="p-5 rounded-full bg-green-500/10">

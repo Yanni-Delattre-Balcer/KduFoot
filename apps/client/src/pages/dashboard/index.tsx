@@ -22,6 +22,7 @@ import { ConfirmedTournamentCard } from './components/confirmed-tournament-card'
 import { OrganizedTournamentCard } from './components/organized-tournament-card';
 import { MyOrganizationsMemo } from './components/my-organizations-memo';
 import { ConfirmedMatchCard } from './components/confirmed-match-card';
+import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 
 const formatDate = (dateStr: string) => {
     try {
@@ -80,6 +81,7 @@ export default function DashboardPage() {
     // Modal state for 'Voir le profil'
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
     const { isLocked } = useUser();
+    const { isVisitor, openGateway } = useWelcomeGateway();
 
     const [selectedTab, setSelectedTab] = useState<any>("requests");
 
@@ -403,13 +405,16 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {isLocked ? (
-                    <DataWall
-                        onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
-                        message={isLocked ? "Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée." : undefined}
-                    />
-                ) : (
-                    <>
+                <div className="relative min-h-[400px]">
+                    {(isLocked || isVisitor) && (
+                        <DataWall
+                            onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
+                            isVisitor={isVisitor}
+                            onLogin={() => openGateway()}
+                            message={isLocked ? "Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée." : undefined}
+                        />
+                    )}
+                    <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : ""}>
                         {/* Flash Notifications Panel */}
                         {modifiedParticipations.length > 0 && (
                             <div className="mb-6 animate-appearance-in">
@@ -864,96 +869,94 @@ export default function DashboardPage() {
                                 </div>
                             </Tab>
                         </Tabs>
-                    </>
-                )}
-                <Modal isOpen={isProfileOpen} onOpenChange={onProfileChange} backdrop="blur">
-                    <ModalContent className="bg-[#1a1a1c] border border-white/10">
-                        {(onClose) => (
-                            <>
-                                <ModalHeader className="flex flex-col gap-1 border-b border-white/5 pb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                                            <span className="text-xl">🛡️</span>
+                    </div>
+                </div>
+            </section>
+            <Modal isOpen={isProfileOpen} onOpenChange={onProfileChange} backdrop="blur">
+                <ModalContent className="bg-[#1a1a1c] border border-white/10">
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1 border-b border-white/5 pb-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xl">🛡️</span>
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-black uppercase tracking-tighter text-white">Profil du Club</h3>
+                                    <p className="text-[10px] text-default-400 font-bold uppercase">Informations de contact vérifiées</p>
+                                </div>
+                            </ModalHeader>
+                            <ModalBody className="py-6">
+                                {selectedClubProfile ? (
+                                    <div className="flex flex-col gap-6 animate-appearance-in">
+                                        {/* Header Profil */}
+                                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+                                            <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20">
+                                                {selectedClubProfile.requester_club_logo || selectedClubProfile.host_club_logo ? (
+                                                    <Image src={selectedClubProfile.requester_club_logo || selectedClubProfile.host_club_logo} className="object-contain w-14 h-14" alt="Club Logo" />
+                                                ) : (
+                                                    <span className="text-orange-400 font-black text-4xl">{(selectedClubProfile.requester_club_name || selectedClubProfile.host_club_name)?.charAt(0)}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="text-xl font-black text-white uppercase truncate">{selectedClubProfile.requester_club_name || selectedClubProfile.host_club_name}</h4>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    <Chip size="sm" variant="flat" color="warning" className="font-bold text-[9px] uppercase">{t(`enums.category.${selectedClubProfile.requester_category || selectedClubProfile.category}`)}</Chip>
+                                                    <Chip size="sm" variant="flat" color="primary" className="font-bold text-[9px] uppercase">{t(`enums.level.${selectedClubProfile.requester_level || selectedClubProfile.level}`)}</Chip>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="text-lg font-black uppercase tracking-tighter text-white">Profil du Club</h3>
-                                            <p className="text-[10px] text-default-400 font-bold uppercase">Informations de contact vérifiées</p>
+
+                                        {/* Contact Details */}
+                                        <div className="grid gap-3">
+                                            <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                                <span className="text-[10px] font-black uppercase text-default-400">Responsable</span>
+                                                <span className="text-sm font-bold text-white uppercase">{selectedClubProfile.requester_firstname || selectedClubProfile.host_firstname} {selectedClubProfile.requester_lastname || selectedClubProfile.host_lastname}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                                <span className="text-[10px] font-black uppercase text-default-400">Téléphone</span>
+                                                <a href={`tel:${selectedClubProfile.requester_phone || selectedClubProfile.host_phone}`} className="text-sm font-black text-orange-500 hover:animate-pulse">
+                                                    {selectedClubProfile.requester_phone || selectedClubProfile.host_phone}
+                                                </a>
+                                            </div>
+                                            <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                                <span className="text-[10px] font-black uppercase text-default-400">Email</span>
+                                                <a href={`mailto:${selectedClubProfile.requester_email || selectedClubProfile.host_email}`} className="text-sm font-bold text-primary hover:underline truncate ml-4">
+                                                    {selectedClubProfile.requester_email || selectedClubProfile.host_email}
+                                                </a>
+                                            </div>
+                                            <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                                <span className="text-[10px] font-black uppercase text-default-400">Ville</span>
+                                                <span className="text-sm font-bold text-white uppercase tracking-tight">{selectedClubProfile.requester_city || selectedClubProfile.host_city || selectedClubProfile.location_city}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Metadata box */}
+                                        <div className="mt-2 pt-4 border-t border-white/5 space-y-2">
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-default-500 tracking-tighter uppercase font-bold text-[9px]">Date de la demande</span>
+                                                <span className="text-white font-bold">
+                                                    {selectedClubProfile.contacted_at ? `${formatTimestamp(selectedClubProfile.contacted_at)} à ${formatTimestampTime(selectedClubProfile.contacted_at)}` : 'Inconnue'}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-xs">
+                                                <span className="text-default-500 tracking-tighter uppercase font-bold text-[9px]">Pour le match du</span>
+                                                <span className="text-warning-500 font-black">{formatDate(selectedClubProfile.match_date)} à {formatTime(selectedClubProfile.match_time)}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </ModalHeader>
-                                <ModalBody className="py-6">
-                                    {selectedClubProfile ? (
-                                        <div className="flex flex-col gap-6 animate-appearance-in">
-                                            {/* Header Profil */}
-                                            <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-                                                <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20">
-                                                    {selectedClubProfile.requester_club_logo || selectedClubProfile.host_club_logo ? (
-                                                        <Image src={selectedClubProfile.requester_club_logo || selectedClubProfile.host_club_logo} className="object-contain w-14 h-14" />
-                                                    ) : (
-                                                        <span className="text-orange-400 font-black text-4xl">{(selectedClubProfile.requester_club_name || selectedClubProfile.host_club_name)?.charAt(0)}</span>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="text-xl font-black text-white uppercase truncate">{selectedClubProfile.requester_club_name || selectedClubProfile.host_club_name}</h4>
-                                                    <div className="flex flex-wrap gap-2 mt-2">
-                                                        <Chip size="sm" variant="flat" color="warning" className="font-bold text-[9px] uppercase">{t(`enums.category.${selectedClubProfile.requester_category || selectedClubProfile.category}`)}</Chip>
-                                                        <Chip size="sm" variant="flat" color="primary" className="font-bold text-[9px] uppercase">{t(`enums.level.${selectedClubProfile.requester_level || selectedClubProfile.level}`)}</Chip>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Contact Details */}
-                                            <div className="grid gap-3">
-                                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                    <span className="text-[10px] font-black uppercase text-default-400">Responsable</span>
-                                                    <span className="text-sm font-bold text-white uppercase">{selectedClubProfile.requester_firstname || selectedClubProfile.host_firstname} {selectedClubProfile.requester_lastname || selectedClubProfile.host_lastname}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                    <span className="text-[10px] font-black uppercase text-default-400">Téléphone</span>
-                                                    <a href={`tel:${selectedClubProfile.requester_phone || selectedClubProfile.host_phone}`} className="text-sm font-black text-orange-500 hover:animate-pulse">
-                                                        {selectedClubProfile.requester_phone || selectedClubProfile.host_phone}
-                                                    </a>
-                                                </div>
-                                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                    <span className="text-[10px] font-black uppercase text-default-400">Email</span>
-                                                    <a href={`mailto:${selectedClubProfile.requester_email || selectedClubProfile.host_email}`} className="text-sm font-bold text-primary hover:underline truncate ml-4">
-                                                        {selectedClubProfile.requester_email || selectedClubProfile.host_email}
-                                                    </a>
-                                                </div>
-                                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                    <span className="text-[10px] font-black uppercase text-default-400">Ville</span>
-                                                    <span className="text-sm font-bold text-white uppercase tracking-tight">{selectedClubProfile.requester_city || selectedClubProfile.host_city || selectedClubProfile.location_city}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Metadata box */}
-                                            <div className="mt-2 pt-4 border-t border-white/5 space-y-2">
-                                                <div className="flex justify-between items-center text-xs">
-                                                    <span className="text-default-500 tracking-tighter uppercase font-bold text-[9px]">Date de la demande</span>
-                                                    <span className="text-white font-bold">
-                                                        {selectedClubProfile.contacted_at ? `${formatTimestamp(selectedClubProfile.contacted_at)} à ${formatTimestampTime(selectedClubProfile.contacted_at)}` : 'Inconnue'}
-                                                    </span>
-                                                </div>
-                                                <div className="flex justify-between items-center text-xs">
-                                                    <span className="text-default-500 tracking-tighter uppercase font-bold text-[9px]">Pour le match du</span>
-                                                    <span className="text-warning-500 font-black">{formatDate(selectedClubProfile.match_date)} à {formatTime(selectedClubProfile.match_time)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex justify-center p-8"><Spinner color="warning" /></div>
-                                    )}
-                                </ModalBody>
-                                <ModalFooter className="border-t border-white/5 pt-4">
-                                    <Button color="secondary" variant="flat" onPress={onClose} className="font-black uppercase tracking-tighter w-full h-12">
-                                        Fermer
-                                    </Button>
-                                </ModalFooter>
-                            </>
-                        )}
-                    </ModalContent>
-                </Modal>
-            </section>
+                                ) : (
+                                    <div className="flex justify-center p-8"><Spinner color="warning" /></div>
+                                )}
+                            </ModalBody>
+                            <ModalFooter className="border-t border-white/5 pt-4">
+                                <Button color="secondary" variant="flat" onPress={onClose} className="font-black uppercase tracking-tighter w-full h-12">
+                                    Fermer
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </DefaultLayout>
     );
 }

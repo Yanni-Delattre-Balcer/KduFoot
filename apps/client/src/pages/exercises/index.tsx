@@ -11,6 +11,9 @@ import { Image } from "@heroui/image";
 import { Chip } from "@heroui/chip";
 import { useTraining } from '../../contexts/training-context';
 import FootballClock from '../../components/football-clock';
+import { useUser } from '../../hooks/use-user';
+import { useWelcomeGateway } from '../../contexts/welcome-gateway-context';
+import DataWall from '../../components/data-wall';
 
 export default function ExercisesPage() {
     const { t } = useTranslation();
@@ -18,12 +21,24 @@ export default function ExercisesPage() {
     const { addExercise, removeExercise, selectedExercises } = useTraining();
     const isInTraining = (id: string) => selectedExercises.some(e => e.id === id);
 
+    const { exercises, isError } = useExercises({});
+    const { isLocked } = useUser();
+    const { isVisitor, openGateway } = useWelcomeGateway();
+
     const handleAnalyze = () => {
+        if (isVisitor) {
+            openGateway("Veuillez vous connecter pour analyser une vidéo.");
+            return;
+        }
+        if (isLocked) {
+            // @ts-ignore
+            window.location.href = '/account?from=' + encodeURIComponent(window.location.pathname);
+            return;
+        }
         // TODO: Implement analysis logic
         console.log('Analyze:', videoUrl);
     };
 
-    const { exercises, isError } = useExercises({});
 
     return (
         <DefaultLayout maxWidth="max-w-full">
@@ -118,90 +133,102 @@ export default function ExercisesPage() {
                 </div>
 
                 {/* Exercise List */}
-                <div className="flex flex-col gap-5">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-secondary/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-secondary">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
-                            </svg>
-                        </div>
-                        <h2 className="text-2xl font-bold">{t('myExercises')}</h2>
-                        <Chip size="sm" variant="flat" color="warning" className="font-semibold">{exercises.length}</Chip>
-                    </div>
-
-                    {isError && (
-                        <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">
-                            {t('error.loading_exercises', 'Erreur lors du chargement des exercices')}
-                        </div>
+                <div className="relative min-h-[400px]">
+                    {(isLocked || isVisitor) && (
+                        <DataWall
+                            onCompleteProfile={() => {
+                                // @ts-ignore
+                                window.location.href = '/account?from=' + encodeURIComponent(window.location.pathname);
+                            }}
+                            isVisitor={isVisitor}
+                            onLogin={() => openGateway()}
+                        />
                     )}
+                    <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : "flex flex-col gap-5"}>
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-secondary/10">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-secondary">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold">{t('myExercises')}</h2>
+                            <Chip size="sm" variant="flat" color="warning" className="font-semibold">{exercises.length}</Chip>
+                        </div>
 
-                    {exercises.length === 0 && !isError && (
-                        <Card className="border border-amber-500/20 bg-[#202124]">
-                            <CardBody className="py-8 flex flex-col items-center gap-4 text-center">
-                                <div className="p-4 rounded-full bg-[linear-gradient(to_bottom_right,#f59e0b,#fbbf24)]/10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-amber-500">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                    </svg>
-                                </div>
-                                <p className="text-lg text-default-500">
-                                    {t('exercises.emptyTitle')}
-                                </p>
-                                <p className="text-sm text-default-400">
-                                    {t('exercises.emptySubtitle')}
-                                </p>
-                            </CardBody>
-                        </Card>
-                    )}
+                        {isError && (
+                            <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">
+                                {t('error.loading_exercises', 'Erreur lors du chargement des exercices')}
+                            </div>
+                        )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {exercises.map((exercise) => (
-                            <Card key={exercise.id} className="group hover:shadow-lg hover:shadow-amber-500/10 transition-all bg-[#202124] border border-amber-500/20 hover:border-amber-500/40">
-                                <CardHeader className="pb-0 pt-4 px-4 flex-col items-start gap-1">
-                                    <div className="flex justify-between w-full">
-                                        <Chip size="sm" variant="flat" color="warning" className="font-semibold">{t(`enums.category.${exercise.category}`)}</Chip>
+                        {exercises.length === 0 && !isError && (
+                            <Card className="border border-amber-500/20 bg-[#202124]">
+                                <CardBody className="py-8 flex flex-col items-center gap-4 text-center">
+                                    <div className="p-4 rounded-full bg-[linear-gradient(to_bottom_right,#f59e0b,#fbbf24)]/10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-amber-500">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                                        </svg>
                                     </div>
-                                    <small className="text-default-400">{exercise.themes}</small>
-                                    <h4 className="font-bold text-large group-hover:text-amber-500 transition-colors">{exercise.title}</h4>
-                                </CardHeader>
-                                <CardBody className="overflow-visible py-3">
-                                    <div className="w-full h-40 bg-linear-to-br from-default-50 to-default-100 rounded-xl flex items-center justify-center overflow-hidden">
-                                        {exercise.thumbnail_url ? (
-                                            <Image
-                                                alt="Card background"
-                                                className="object-cover rounded-xl w-full h-full"
-                                                src={exercise.thumbnail_url}
-                                                width={270}
-                                            />
-                                        ) : (
-                                            <div className="flex flex-col items-center gap-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-10 h-10 text-default-200">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
-                                                </svg>
-                                                <span className="text-default-300 text-xs">{t('exercises.noImage')}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p className="mt-3 text-sm text-default-600 line-clamp-3">
-                                        {exercise.synopsis}
+                                    <p className="text-lg text-default-500">
+                                        {t('exercises.emptyTitle')}
+                                    </p>
+                                    <p className="text-sm text-default-400">
+                                        {t('exercises.emptySubtitle')}
                                     </p>
                                 </CardBody>
-                                <CardFooter className="gap-2 px-4 pb-4">
-                                    <Button as={Link} to={`/exercises/${exercise.id}`} size="sm" variant="flat" className="flex-1">
-                                        {t('details', 'Voir détails')}
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        color={isInTraining(exercise.id) ? "danger" : "warning"}
-                                        variant={isInTraining(exercise.id) ? "flat" : "solid"}
-                                        onPress={() => isInTraining(exercise.id) ? removeExercise(exercise.id) : addExercise(exercise)}
-                                        isIconOnly
-                                        className="font-bold text-lg shadow-sm text-white"
-                                    >
-                                        {isInTraining(exercise.id) ? "−" : "+"}
-                                    </Button>
-                                </CardFooter>
                             </Card>
-                        ))}
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {exercises.map((exercise) => (
+                                <Card key={exercise.id} className="group hover:shadow-lg hover:shadow-amber-500/10 transition-all bg-[#202124] border border-amber-500/20 hover:border-amber-500/40">
+                                    <CardHeader className="pb-0 pt-4 px-4 flex-col items-start gap-1">
+                                        <div className="flex justify-between w-full">
+                                            <Chip size="sm" variant="flat" color="warning" className="font-semibold">{t(`enums.category.${exercise.category}`)}</Chip>
+                                        </div>
+                                        <small className="text-default-400">{exercise.themes}</small>
+                                        <h4 className="font-bold text-large group-hover:text-amber-500 transition-colors">{exercise.title}</h4>
+                                    </CardHeader>
+                                    <CardBody className="overflow-visible py-3">
+                                        <div className="w-full h-40 bg-linear-to-br from-default-50 to-default-100 rounded-xl flex items-center justify-center overflow-hidden">
+                                            {exercise.thumbnail_url ? (
+                                                <Image
+                                                    alt="Card background"
+                                                    className="object-cover rounded-xl w-full h-full"
+                                                    src={exercise.thumbnail_url}
+                                                    width={270}
+                                                />
+                                            ) : (
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-10 h-10 text-default-200">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
+                                                    </svg>
+                                                    <span className="text-default-300 text-xs">{t('exercises.noImage')}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <p className="mt-3 text-sm text-default-600 line-clamp-3">
+                                            {exercise.synopsis}
+                                        </p>
+                                    </CardBody>
+                                    <CardFooter className="gap-2 px-4 pb-4">
+                                        <Button as={Link} to={`/exercises/${exercise.id}`} size="sm" variant="flat" className="flex-1">
+                                            {t('details', 'Voir détails')}
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            color={isInTraining(exercise.id) ? "danger" : "warning"}
+                                            variant={isInTraining(exercise.id) ? "flat" : "solid"}
+                                            onPress={() => isInTraining(exercise.id) ? removeExercise(exercise.id) : addExercise(exercise)}
+                                            isIconOnly
+                                            className="font-bold text-lg shadow-sm text-white"
+                                        >
+                                            {isInTraining(exercise.id) ? "−" : "+"}
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
