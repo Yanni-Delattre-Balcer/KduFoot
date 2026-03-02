@@ -115,6 +115,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3'
           command: pages deploy apps/client/dist --project-name=kdufoot --branch=V2 --env-file .env
 
       - name: Deploy
@@ -122,6 +123,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '3'
           workingDirectory: apps/cloudflare-worker
           vars: |
             AUTHENTICATION_PROVIDER_TYPE
