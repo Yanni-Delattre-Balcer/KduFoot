@@ -236,9 +236,11 @@ export const LogoutLink: FC<LogoutLinkProps> = ({
 export const LoginLogoutButton: FC<LogoutButtonProps> = ({
   showButtonIfNotAuthenticated = false,
 }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { t } = useTranslation();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+
+  if (isLoading) return null;
 
   return isAuthenticated ? (
     <div className="flex items-center gap-2">
@@ -272,9 +274,11 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
   text,
   color,
 }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const { t } = useTranslation();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+
+  if (isLoading) return null;
 
   return isAuthenticated ? (
     <div className="flex flex-col gap-2">

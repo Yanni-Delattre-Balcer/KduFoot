@@ -53,8 +53,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const user = data?.user || null;
     const notifications = data?.notifications || { pendingRequests: 0, modifiedParticipations: 0 };
     const profileComplete = isProfileComplete(user);
-    // Zéro Friction: Lock status depends ONLY on data, not on loading state to avoid UI lag
-    const isLocked = !!user && !isVisitor && !isProfileComplete(user, true);
+
+    // SÉCURITÉ RÉACTIVE : Le cadenas est activé par défaut à la connexion (isAuthenticated)
+    // On ne déverrouille QUE si le profil est chargé ET complet, ou si on est en mode Visiteur.
+    const isLocked = isAuthenticated && !isVisitor && (!user || !isProfileComplete(user, true));
 
     const linkClub = async (siret: string) => {
         const token = await getAccessTokenSilently();

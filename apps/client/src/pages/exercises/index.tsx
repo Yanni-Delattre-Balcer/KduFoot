@@ -135,14 +135,7 @@ export default function ExercisesPage() {
                 {/* Exercise List */}
                 <div className="relative min-h-[400px]">
                     {(isLocked || isVisitor) && (
-                        <DataWall
-                            onCompleteProfile={() => {
-                                // @ts-ignore
-                                window.location.href = '/account?from=' + encodeURIComponent(window.location.pathname);
-                            }}
-                            isVisitor={isVisitor}
-                            onLogin={() => openGateway()}
-                        />
+                        <DataWall />
                     )}
                     <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : "flex flex-col gap-5"}>
                         <div className="flex items-center gap-3">

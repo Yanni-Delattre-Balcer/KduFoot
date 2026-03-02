@@ -408,10 +408,7 @@ export default function DashboardPage() {
                 <div className="relative min-h-[400px]">
                     {(isLocked || isVisitor) && (
                         <DataWall
-                            onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
-                            isVisitor={isVisitor}
-                            onLogin={() => openGateway()}
-                            message={isLocked ? "Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée." : undefined}
+                            message="Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée."
                         />
                     )}
                     <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : ""}>

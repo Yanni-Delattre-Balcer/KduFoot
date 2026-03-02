@@ -134,11 +134,7 @@ export default function FavoritesPage() {
 
                 <div className="relative min-h-[400px]">
                     {(isLocked || isVisitor) && (
-                        <DataWall
-                            onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
-                            isVisitor={isVisitor}
-                            onLogin={() => openGateway()}
-                        />
+                        <DataWall />
                     )}
                     <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : "animate-appearance-in"}>
                         {/* Content - Unwrapped */}
