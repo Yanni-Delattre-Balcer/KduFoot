@@ -49,12 +49,12 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
         domain={import.meta.env.AUTH0_DOMAIN}
         cacheLocation="localstorage"
         useRefreshTokens={true}
-        onRedirectCallback={(appState) => {
-          // Redirect to the intended page or current path
+        onRedirectCallback={() => {
+          // Always redirect to the home page after login per user request
           window.history.replaceState(
             {},
             document.title,
-            appState?.returnTo || window.location.pathname
+            "/"
           );
         }}
       >
