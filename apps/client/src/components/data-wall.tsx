@@ -13,12 +13,12 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
     const { isLoading: isProfileLoading, isLocked } = useUser();
     const location = useLocation();
 
-    // 1. Auth0 Loading : Silence total pendant l'initialisation Auth0 pour éviter les flashs
+    // ÉTAT A (Chargement Auth0) : Silence total pendant l'initialisation Auth0
     if (isAuthLoading) {
         return null;
     }
 
-    // 2. Non Connecté : Bouton de connexion directe (Point 2 de la demande)
+    // ÉTAT B (Visiteur Non Connecté) : Alerte de connexion uniquement
     if (!isAuthenticated) {
         return (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 animate-appearance-in bg-black/40 backdrop-blur-[4px] rounded-3xl">
@@ -36,14 +36,14 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
                         className="bg-primary text-white font-black uppercase tracking-tighter w-full rounded-2xl h-14 text-lg shadow-lg shadow-primary/20"
                         size="lg"
                     >
-                        Se connecter à un compte
+                        Se connecter
                     </Button>
                 </div>
             </div>
         );
     }
 
-    // 3. Authentifié mais Profil en cours de chargement : Loader strict (Point 3 de la demande)
+    // ÉTAT A' (Chargement Profil) : Loader pendant que le profil se charge
     if (isProfileLoading) {
         return (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 animate-appearance-in bg-background/30 backdrop-blur-[2px] rounded-3xl">
@@ -55,7 +55,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
         );
     }
 
-    // 4. Profil Incomplet : Cadenas (Point 3 de la demande)
+    // ÉTAT C (Connecté mais Incomplet) : Alerte profil requis
     if (isLocked) {
         return (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 animate-appearance-in bg-black/40 backdrop-blur-[4px] rounded-3xl">
@@ -66,7 +66,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
                         </svg>
                     </div>
                     <p className="text-xl font-bold text-foreground leading-snug">
-                        {customMessage || "Veuillez remplir vos informations de coach pour avoir accès à ces informations-là."}
+                        Veuillez remplir vos informations de coach pour avoir accès à ces informations.
                     </p>
                     <Button
                         as={Link}
@@ -81,6 +81,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
         );
     }
 
+    // ÉTAT D (Connecté et Complet) : On ne retourne rien, contenu libre
     return null;
 };
 

@@ -430,7 +430,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     <div className="flex-1 flex flex-col gap-1">
                                         <Input
                                             label={
-                                                <span className="animate-pulse-red font-bold text-danger">
+                                                <span className="animate-pulse-red font-bold text-danger text-sm md:text-base break-words text-center block w-full">
                                                     Numéro SIRET (14 chiffres) ou SIREN (9 chiffres)
                                                 </span>
                                             }
@@ -447,7 +447,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                             placeholder="123 456 789 00012"
                                             isDisabled={!!dbUser?.club_id}
                                             isInvalid={!!errors.siret}
-                                            className="w-full"
+                                            className="w-full max-w-full"
                                         />
                                         {errors.siret ? (
                                             <p className="text-[10px] text-danger font-bold pl-1 animate-shake">{errors.siret}</p>
