@@ -413,6 +413,12 @@
       "club_linked_success": "Club successfully certified!"
     }
   },
+  "account": {
+    "buttons": {
+      "save_changes": "Save Changes",
+      "save_and_continue": "Save and Continue"
+    }
+  },
   "tournamentForm": {
     "title": "Create a Friendly Tournament",
     "subtitle": "Organize a competition and invite teams.",

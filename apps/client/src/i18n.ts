@@ -76,8 +76,8 @@ i18n
       loadPath: (lng, ns) => {
         let url: URL = new URL("./locales/base/en-US.json", import.meta.url);
 
-        const reqlng = lng[0];
-        const reqns = ns[0];
+        const reqlng = Array.isArray(lng) ? lng[0] : lng;
+        const reqns = Array.isArray(ns) ? ns[0] : ns;
 
         // Vite does not know how to resolve
         // new URL(`./locales/${ns}/${reqlng}.json`, import.meta.url)

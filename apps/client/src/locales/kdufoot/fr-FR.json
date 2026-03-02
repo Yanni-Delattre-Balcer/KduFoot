@@ -449,6 +449,12 @@
       "club_linked_success": "Club certifié avec succès !"
     }
   },
+  "account": {
+    "buttons": {
+      "save_changes": "Enregistrer les modifications",
+      "save_and_continue": "Enregistrer et continuer"
+    }
+  },
   "tournamentForm": {
     "title": "Créer un Tournoi Amical",
     "subtitle": "Organisez une compétition et invitez des équipes.",

@@ -3,7 +3,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@herou
 import { Button } from "@heroui/button";
 import { Image } from "@heroui/image";
 import { useAuth, useUser } from "@/authentication";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { buttonGradient } from "./primitives";
 
@@ -11,6 +11,7 @@ export const WelcomeGateway: React.FC = () => {
     const { login, isAuthenticated } = useAuth();
     const { profileComplete, isLoading: isUserLoading } = useUser();
     const navigate = useNavigate();
+    const location = useLocation();
     const { isOpen, closeGateway, setVisitorMode, clearVisitorMode, blockingMessage } = useWelcomeGateway();
 
     // Silent startup: if profile is 100% complete and no specific blocking message, close and don't show
@@ -24,7 +25,9 @@ export const WelcomeGateway: React.FC = () => {
 
     const handleRegister = () => {
         clearVisitorMode();
-        const targetPath = "/account";
+        const currentPath = location.pathname + location.search;
+        const targetPath = `/account?from=${encodeURIComponent(currentPath)}`;
+
         if (isAuthenticated) {
             navigate(targetPath);
             closeGateway();

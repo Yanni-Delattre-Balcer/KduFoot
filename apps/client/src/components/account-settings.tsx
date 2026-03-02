@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { Category } from "@/types/exercise.types";
 import { Level, PitchType } from "@/types/match.types";
 import { mutate } from "swr";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 
 const CATEGORIES = Object.values(Category);
 const LEVELS = Object.values(Level);
@@ -25,8 +25,9 @@ interface AccountSettingsProps {
 export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const location = useLocation();
     const [searchParams] = useSearchParams();
-    const from = searchParams.get('from');
+    const from = searchParams.get('from') || (location.state as any)?.from;
     const { user: authUser, getAccessToken } = useAuth();
     const { user: dbUser, updateUser, linkClub, unlinkClub, refetch } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -492,9 +493,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                         color="primary"
                         onPress={handleSave}
                         isLoading={isSaving}
-                        className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto"
+                        className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider"
                     >
-                        Enregistrer les modifications
+                        {from ? t('account.buttons.save_and_continue', 'Enregistrer et continuer') : t('account.buttons.save_changes', 'Enregistrer les modifications')}
                     </Button>
                 </div>
             </div>

@@ -62,5 +62,45 @@
     "labels": {
       "match_opposition": "Match Opposition"
     }
+  },
+  "account": {
+    "buttons": {
+      "save_changes": "Save Changes",
+      "save_and_continue": "Save and Continue"
+    }
+  },
+  "homePage": {
+    "title": {
+      "prefix": "Your assistant",
+      "highlight": "Intelligent",
+      "suffix": "for amateur football"
+    },
+    "buttons": {
+      "exercises": "Analyze a video",
+      "sessions": "Find a match / tournament",
+      "find_match": "Find a match",
+      "find_tournament": "Find a tournament"
+    },
+    "description": "Kdufoot offers two tools designed to simplify your daily coaching. Paste a video link and our IA generates detailed exercises adapted for your category. Post or search for friendly matches around you in a few clicks.",
+    "about": {
+      "title": "👋 About",
+      "intro": "<0>Yanni</0>, a cybersecurity student in <1>Networks & Telecommunications at Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
+      "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use exercises.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent around you in just a few clicks.",
+      "footer": "Less searching, more field time."
+    },
+    "cards": {
+      "video": {
+        "title": "🎬 AI Video Analysis",
+        "description": "Paste a video link and our AI generates detailed exercises with synopsis, themes and age category."
+      },
+      "match": {
+        "title": "⚽ Friendly Matches",
+        "description": "Post or search for friendly matches. Filter by category, level, distance and format."
+      },
+      "tournament": {
+        "title": "🏆 Friendly Tournaments",
+        "description": "Organize or participate in tournaments. Ideal to boost your season and meet new clubs."
+      }
+    }
   }
 }
