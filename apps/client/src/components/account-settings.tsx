@@ -34,6 +34,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const [isSaving, setIsSaving] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [licenseId, setLicenseId] = useState("");
+    const [firstname, setFirstname] = useState("");
+    const [lastname, setLastname] = useState("");
     const [level, setLevel] = useState("");
     const [category, setCategory] = useState("");
     const [pitchType, setPitchType] = useState("");
@@ -95,6 +97,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     // Sync properties from dbUser when it loads
     useEffect(() => {
         if (dbUser) {
+            setFirstname(dbUser.firstname || "");
+            setLastname(dbUser.lastname || "");
             setLicenseId(dbUser.license_id || "");
             setLevel(dbUser.level || "");
             setCategory(dbUser.category || "");
@@ -144,6 +148,12 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const validate = () => {
         const newErrors: Record<string, string> = {};
 
+        if (!firstname || firstname.trim() === "") {
+            newErrors.firstname = "Le prénom est obligatoire.";
+        }
+        if (!lastname || lastname.trim() === "") {
+            newErrors.lastname = "Le nom est obligatoire.";
+        }
         if (!phone || phone.replace(/\D/g, '').length < 11) {
             newErrors.phone = "Ce champ est obligatoire (au moins 11 chiffres)";
         }
@@ -188,6 +198,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             }
 
             await updateUser({
+                firstname: firstname.trim(),
+                lastname: lastname.trim(),
                 license_id: licenseId,
                 level,
                 category,
@@ -298,6 +310,38 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 <span className="text-default-500">Email</span>
                                 <span className="font-medium">{authUser.email}</span>
                             </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Input
+                                        label="Prénom"
+                                        variant="bordered"
+                                        size="sm"
+                                        value={firstname}
+                                        onValueChange={(v) => {
+                                            setFirstname(v);
+                                            if (errors.firstname) setErrors(prev => ({ ...prev, firstname: "" }));
+                                        }}
+                                        isInvalid={!!errors.firstname}
+                                        isRequired
+                                    />
+                                    {errors.firstname && <p className="text-[10px] text-danger font-bold pl-1">{errors.firstname}</p>}
+                                </div>
+                                <div className="space-y-1">
+                                    <Input
+                                        label="Nom"
+                                        variant="bordered"
+                                        size="sm"
+                                        value={lastname}
+                                        onValueChange={(v) => {
+                                            setLastname(v);
+                                            if (errors.lastname) setErrors(prev => ({ ...prev, lastname: "" }));
+                                        }}
+                                        isInvalid={!!errors.lastname}
+                                        isRequired
+                                    />
+                                    {errors.lastname && <p className="text-[10px] text-danger font-bold pl-1">{errors.lastname}</p>}
+                                </div>
+                            </div>
                             <div className="space-y-1">
                                 <Input
                                     label="Téléphone"
@@ -310,6 +354,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     }}
                                     placeholder="+33 6 12 34 56 78"
                                     isInvalid={!!errors.phone}
+                                    isRequired
                                 />
                                 {errors.phone && <p className="text-[10px] text-danger font-bold pl-1">{errors.phone}</p>}
                             </div>
