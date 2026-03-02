@@ -29,7 +29,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
                         </svg>
                     </div>
                     <p className="text-xl font-bold text-foreground leading-snug">
-                        Vous devez vous connecter à un compte pour avoir accès à ces informations.
+                        Se connecter à un compte
                     </p>
                     <Button
                         onPress={() => login()}
@@ -66,7 +66,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
                         </svg>
                     </div>
                     <p className="text-xl font-bold text-foreground leading-snug">
-                        Veuillez remplir vos informations de coach pour avoir accès à ces informations.
+                        {customMessage || "Veuillez remplir vos informations de coach pour avoir accès à ces informations."}
                     </p>
                     <Button
                         as={Link}
