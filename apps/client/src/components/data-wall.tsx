@@ -11,16 +11,17 @@ interface DataWallProps {
 
 export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) => {
     const { isAuthenticated, isLoading: isAuthLoading, login } = useAuth();
-    const { isLoading: isProfileLoading, isLocked, user, profileComplete } = useUser();
-    const { isVisitor } = useWelcomeGateway();
+    const { isLoading: isProfileLoading, profileComplete } = useUser();
+    const { isVisitor, setVisitorMode } = useWelcomeGateway(); // Moved setVisitorMode here
     const location = useLocation();
 
-    // ÉTAT A (Chargement Auth0) : Silence total pendant l'initialisation Auth0
+    // 1. ÉTAT CHARGEMENT (Auth0) : Silence total pendant l'initialisation Auth0
     if (isAuthLoading) {
         return null;
     }
 
-    // ÉTAT B (Visiteur Non Connecté) : Panneau de connexion avec 3 options
+    // 2. VISITEUR NON CONNECTÉ : Panneau de connexion avec 3 options
+    // Strictement interdit d'afficher le profil coach ici.
     if (!isAuthenticated) {
         return (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 animate-appearance-in bg-black/40 backdrop-blur-[6px] rounded-3xl">
@@ -80,7 +81,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
         );
     }
 
-    // ÉTAT A' (Chargement Profil) : Loader pendant que le profil se charge
+    // 3. ÉTAT CHARGEMENT PROFIL : Loader pendant que le profil se charge
     if (isProfileLoading) {
         return (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 animate-appearance-in bg-background/30 backdrop-blur-[2px] rounded-3xl">
@@ -92,11 +93,11 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage }) =>
         );
     }
 
-    // ÉTAT C (Connecté mais Incomplet ou Visiteur avec Incomplet) : Alerte profil requis
-    const { setVisitorMode } = useWelcomeGateway();
-    const isProfileIncompleteVisitor = isVisitor && isAuthenticated && (!user || !profileComplete);
+    // 4. CONNECTÉ MAIS PROFIL INCOMPLET : Alerte d'accès restreint
+    // Si on est en mode visiteur, on masque l'alerte centrale mais on garde le flou (le composant retourne null mais le parent floute)
+    if (isAuthenticated && !profileComplete) {
+        if (isVisitor) return null;
 
-    if (isLocked || isProfileIncompleteVisitor) {
         return (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 animate-appearance-in bg-black/40 backdrop-blur-[6px] rounded-3xl">
                 <div className="bg-content1 border border-default-200 shadow-2xl rounded-3xl p-8 max-w-md w-full text-center flex flex-col items-center gap-6 relative overflow-hidden">
