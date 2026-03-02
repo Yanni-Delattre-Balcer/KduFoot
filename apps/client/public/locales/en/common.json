@@ -1,4 +1,255 @@
 {
+  "search": "Search",
+  "twitter": "Twitter",
+  "discord": "Discord",
+  "sponsor": "Sponsor",
+  "github": "GitHub",
+  "switch-to-dark-mode": "Switch to dark mode",
+  "switch-to-light-mode": "Switch to light mode",
+  "vite-heroui": "KduFoot",
+  "make-beautiful-websites-regardless-of-your-design-experience": "Make beautiful websites regardless of your design experience.",
+  "home": "Home",
+  "docs": "Docs",
+  "pricing": {
+    "hero": {
+      "title": "Plans & Pricing",
+      "subtitle": "Flexible solutions for every stage of your season."
+    },
+    "period": " / month",
+    "one_time": "One-time payment",
+    "plans": {
+      "discovery": {
+        "name": "Discovery",
+        "price": "1€",
+        "cta": "Try for 1€",
+        "features": {
+          "0": "1 hour of video analysis",
+          "1": "Full access to AI tools",
+          "2": "One-time offer (1 per account)",
+          "3": "No commitment"
+        }
+      },
+      "starter": {
+        "name": "Rising Star",
+        "price": "19€",
+        "cta": "Choose Rising Star",
+        "features": {
+          "0": "10 hours of video analysis",
+          "1": "Full access to AI tools",
+          "2": "Basic PDF exports",
+          "3": "Standard support"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "39€",
+        "cta": "Choose Pro",
+        "popular": "Popular",
+        "features": {
+          "0": "20 hours of video analysis",
+          "1": "Superior AI (Faster)",
+          "2": "Full PDF exports",
+          "3": "Priority support"
+        }
+      },
+      "elite": {
+        "name": "Elite",
+        "price": "59€",
+        "cta": "Become Elite",
+        "features": {
+          "0": "30 hours of video analysis",
+          "1": "Max AI (Top priority)",
+          "2": "PDF Exports & Editing",
+          "3": "Dedicated 24/7 support"
+        }
+      }
+    }
+  },
+  "blog": "Blog",
+  "about": "About",
+  "profile": "Profile",
+  "dashboard_nav": "Dashboard",
+  "projects": "Projects",
+  "team": "Team",
+  "calendar": "Calendar",
+  "settings": "Settings",
+  "help-and-feedback": "Help & Feedback",
+  "logout": "Logout",
+  "heroui-com-homepage": "heroui.com homepage",
+  "powered-by": "Powered by",
+  "websites-regardless-of-your-design-experience": "websites regardless of your design experience.",
+  "beautiful-fast-and-modern-react-ui-library": "Beautiful, fast and modern React UI library.",
+  "documentation": "Documentation",
+  "get-started-by-editing": "Get started by editing",
+  "make": "Make",
+  "beautiful": "beautiful",
+  "language": "Language",
+  "log-in": "Log in",
+  "log-out": "Logout",
+  "reload": "Reload",
+  "api": "Secured API",
+  "api-answer": "Secured API answer",
+  "log-out-someone": "Log out {{name}}",
+  "cookie-consent": "We use cookies on our website to give you the most relevant experience by remembering your preferences and repeat visits. By clicking <strong className=\"font-semibold\">\"Accept All\"</strong>, you consent to the use of ALL the cookies. Please read our",
+  "cookie-policy": "Cookie Policy.",
+  "accept-all": "Accept All",
+  "reject": "Reject",
+  "cookie-consent-title": "Cookies policy",
+  "error": {
+    "not_found": "Item not found",
+    "save_failed": "Error during save",
+    "loading_sessions": "Error loading training sessions",
+    "loading_matches": "Error loading friendly matches"
+  },
+  "authentication_error": "authentication error",
+  "expiration": "expiration",
+  "permissions": {
+    "quota": {
+      "videos": "Video quota: {{used}}/{{total}}",
+      "sessions": "Sessions: {{used}}/{{total}}",
+      "matches": "Ads: {{used}}/{{total}}"
+    },
+    "upgradeRequired": "Upgrade required",
+    "featureRequiresUpgrade": "This feature requires a higher subscription plan.",
+    "viewPlans": "View plans",
+    "upgrade": "Upgrade to {{plan}} to unlock this feature"
+  },
+  "no-permissions": "no permissions",
+  "token": "token",
+  "user": "user",
+  "success": "Success",
+  "match": {
+    "title": "Friendly Matches",
+    "tournament": "Tournament",
+    "create": "Create a friendly match",
+    "create_title": "CREATE A MATCH",
+    "edit_title": "UPDATE MATCH",
+    "create_tournament": "Create a friendly tournament",
+    "find": "Find a friendly match",
+    "find_tournament": "Find a friendly tournament",
+    "format": "Format",
+    "venue": "Venue",
+    "date": "Date",
+    "time": "Time",
+    "filters": {
+      "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Manage your organizations and participations in real time.",
+    "organized_label": "Organizer",
+    "away_label": "Away",
+    "tabs": {
+      "requests": "Requests Received",
+      "organized": "My Organized Matches / Tournaments (My Creations)",
+      "participations": "My Participations",
+      "all": "All",
+      "matches": "Matches",
+      "tournaments": "Tournaments"
+    },
+    "tournament": {
+      "filling": "Tournament filling",
+      "registered_teams": "Registered teams",
+      "waiting_teams": "Waiting for teams..."
+    },
+    "match": {
+      "found": "Opponent found",
+      "filled": "Match full",
+      "searching": "Searching for opponent"
+    },
+    "memo": {
+      "title": "📋 My Creation History",
+      "loading": "Loading memo...",
+      "empty": "No events created yet."
+    },
+    "empty": {
+      "requests": "You have no pending requests at the moment.",
+      "organized": "You haven't posted any ads.",
+      "participations": "You haven't applied for any matches.",
+      "no_match": "No matches found in this category.",
+      "no_tournament": "No tournaments found in this category."
+    },
+    "controls": {
+      "new": "New Ad",
+      "view": "View ad",
+      "accept": "Accept",
+      "refuse": "Refuse",
+      "manage_registrations": "Manage registrations",
+      "contact": "Contact"
+    },
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "open": "Open"
+    },
+    "alerts": {
+      "title": "Changes detected",
+      "message": "The match against {{host_club_name}} has been updated.",
+      "warning_desc": "The organizer ({{host_club_name}}) modified the information.",
+      "h2_locked": "Event locked (H-2). Contact participants for any last minute changes.",
+      "matches_count": "{{count}} matches have been modified by the organizer. Please check details.",
+      "mark_as_read": "I understand, mark as read",
+      "verify": "VERIFY"
+    },
+    "labels": {
+      "match_opposition": "Match Opposition",
+      "organizer": "Organizer",
+      "participant": "Participant",
+      "my_club": "My Club",
+      "home_badge": "🏠 At Home",
+      "away_badge": "✈️ Away",
+      "home": "Home",
+      "away": "Away",
+      "confirmed_match": "✅ MATCH CONFIRMED",
+      "view_club_profile": "👤 View club profile",
+      "view_profile": "👤 View profile",
+      "search_match": "Search for a match",
+      "search_tournament": "Search for a tournament",
+      "no_participation_tournament": "You haven't applied for any tournament",
+      "for_event": "For the {{type}} of"
+    }
+  },
+  "account": {
+    "buttons": {
+      "save_changes": "Save Changes",
+      "save_and_continue": "Save and Continue"
+    }
+  },
+  "homePage": {
+    "title": {
+      "prefix": "Your",
+      "highlight": "Intelligent",
+      "suffix": "assistant for amateur football"
+    },
+    "buttons": {
+      "exercises": "Analyze a video",
+      "sessions": "Find a match / tournament",
+      "find_match": "Find a match",
+      "find_tournament": "Find a tournament"
+    },
+    "description": "Kdufoot offers two tools designed to simplify your daily coaching life. Paste a video link and our IA generates detailed exercises adapted to your category. Publish or search for friendly matches around you in just a few clicks.",
+    "about": {
+      "title": "👋 About",
+      "intro": "<0>Yanni</0>, cybersecurity student, majoring in <1>Networks & Telecommunications in Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
+      "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use exercises.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in just a few clicks.",
+      "footer": "Less searching, more field time."
+    },
+    "cards": {
+      "video": {
+        "title": "🎬 AI Video Analysis",
+        "description": "Paste a video link and our AI generates detailed exercises with synopsis, themes, and age category."
+      },
+      "match": {
+        "title": "⚽ Friendly Matches",
+        "description": "Publish or search for friendly matches. Filter by category, level, distance, and format."
+      },
+      "tournament": {
+        "title": "🏆 Friendly Tournaments",
+        "description": "Organize or participate in tournaments. Ideal for boosting your season and meeting new clubs."
+      }
+    }
+  },
   "site": {
     "description": "Video analysis and training management platform for football."
   },
@@ -35,45 +286,9 @@
     "name": "KduFoot.com",
     "slogan": "Smart Football"
   },
-  "homePage": {
-    "title": {
-      "prefix": "Your",
-      "highlight": "Intelligent",
-      "suffix": "assistant for amateur football"
-    },
-    "buttons": {
-      "exercises": "Analyze a video",
-      "sessions": "Find a match / tournament",
-      "find_match": "Find a match",
-      "find_tournament": "Find a tournament"
-    },
-    "description": "Kdufoot offers two tools designed to simplify your daily coaching life. Paste a video link and our IA generates detailed exercises adapted to your category. Publish or search for friendly matches around you in just a few clicks.",
-    "about": {
-      "title": "👋 About",
-      "intro": "<0>Yanni</0>, cybersecurity student, majoring in <1>Networks & Telecommunications in Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
-      "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use exercises.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in just a few clicks.",
-      "footer": "Less searching, more field time."
-    },
-    "cards": {
-      "video": {
-        "title": "🎬 AI Video Analysis",
-        "description": "Paste a video link and our AI generates detailed exercises with synopsis, themes, and age category."
-      },
-      "match": {
-        "title": "⚽ Friendly Matches",
-        "description": "Publish or search for friendly matches. Filter by category, level, distance, and format."
-      },
-      "tournament": {
-        "title": "🏆 Friendly Tournaments",
-        "description": "Organize or participate in tournaments. Ideal for boosting your season and meeting new clubs."
-      }
-    }
-  },
   "footer": {
     "poweredBy": "Powered by"
   },
-  "log-out-someone": "Log out {{name}}",
-  "log-in": "Log in",
   "all_f": "All",
   "all_m": "All",
   "search_placeholder": "Search...",
@@ -91,12 +306,6 @@
   "back_to_list": "Back to list",
   "loading": "Loading...",
   "edit": "Edit",
-  "error": {
-    "not_found": "Item not found",
-    "save_failed": "Error during save",
-    "loading_sessions": "Error loading training sessions",
-    "loading_matches": "Error loading friendly matches"
-  },
   "video": {
     "urlPlaceholder": "Paste your YouTube, TikTok, Insta, etc. video link",
     "analyze": "Analyze video",
@@ -167,23 +376,6 @@
     "untitled": "Untitled Exercise",
     "schema": "Tactic Diagram"
   },
-  "match": {
-    "title": "Friendly Matches",
-    "tournament": "Tournament",
-    "create": "Create a friendly match",
-    "create_title": "CREATE A MATCH",
-    "edit_title": "UPDATE MATCH",
-    "create_tournament": "Create a friendly tournament",
-    "find": "Find a friendly match",
-    "find_tournament": "Find a friendly tournament",
-    "format": "Format",
-    "venue": "Venue",
-    "date": "Date",
-    "time": "Time",
-    "filters": {
-      "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
-    }
-  },
   "session": {
     "create": "New session",
     "adapt": "Adapt",
@@ -224,17 +416,6 @@
     "not_scheduled": "Not scheduled",
     "opponent_default": "Opponent",
     "status": "Status"
-  },
-  "permissions": {
-    "quota": {
-      "videos": "Video quota: {{used}}/{{total}}",
-      "sessions": "Sessions: {{used}}/{{total}}",
-      "matches": "Ads: {{used}}/{{total}}"
-    },
-    "upgradeRequired": "Upgrade required",
-    "featureRequiresUpgrade": "This feature requires a higher subscription plan.",
-    "viewPlans": "View plans",
-    "upgrade": "Upgrade to {{plan}} to unlock this feature"
   },
   "badges": {
     "certifiedCoach": "Certified Coach"
@@ -413,12 +594,6 @@
       "club_linked_success": "Club successfully certified!"
     }
   },
-  "account": {
-    "buttons": {
-      "save_changes": "Save Changes",
-      "save_and_continue": "Save and Continue"
-    }
-  },
   "tournamentForm": {
     "title": "Create a Friendly Tournament",
     "subtitle": "Organize a competition and invite teams.",
@@ -442,136 +617,6 @@
       "create_success": "Tournament successfully created!",
       "update_success": "Tournament successfully updated!",
       "delete_success": "Tournament successfully deleted!"
-    }
-  },
-  "pricing": {
-    "hero": {
-      "title": "Plans & Pricing",
-      "subtitle": "Flexible solutions for every stage of your season."
-    },
-    "period": " / month",
-    "one_time": "One-time payment",
-    "plans": {
-      "discovery": {
-        "name": "Discovery",
-        "price": "1€",
-        "cta": "Try for 1€",
-        "features": {
-          "0": "1 hour of video analysis",
-          "1": "Full access to AI tools",
-          "2": "One-time offer (1 per account)",
-          "3": "No commitment"
-        }
-      },
-      "starter": {
-        "name": "Rising Star",
-        "price": "19€",
-        "cta": "Choose Rising Star",
-        "features": {
-          "0": "10 hours of video analysis",
-          "1": "Full access to AI tools",
-          "2": "Basic PDF exports",
-          "3": "Standard support"
-        }
-      },
-      "pro": {
-        "name": "Pro",
-        "price": "39€",
-        "cta": "Choose Pro",
-        "popular": "Popular",
-        "features": {
-          "0": "20 hours of video analysis",
-          "1": "Superior AI (Faster)",
-          "2": "Full PDF exports",
-          "3": "Priority support"
-        }
-      },
-      "elite": {
-        "name": "Elite",
-        "price": "59€",
-        "cta": "Become Elite",
-        "features": {
-          "0": "30 hours of video analysis",
-          "1": "Max AI (Top priority)",
-          "2": "PDF Exports & Editing",
-          "3": "Dedicated 24/7 support"
-        }
-      }
-    }
-  },
-  "dashboard": {
-    "title": "Dashboard",
-    "subtitle": "Manage your organizations and participations in real time.",
-    "organized_label": "Organizer",
-    "away_label": "Away",
-    "tabs": {
-      "requests": "Requests Received",
-      "organized": "My Organized Matches / Tournaments (My Creations)",
-      "participations": "My Participations",
-      "all": "All",
-      "matches": "Matches",
-      "tournaments": "Tournaments"
-    },
-    "tournament": {
-      "filling": "Tournament filling",
-      "registered_teams": "Registered teams",
-      "waiting_teams": "Waiting for teams..."
-    },
-    "match": {
-      "found": "Opponent found",
-      "filled": "Match full",
-      "searching": "Searching for opponent"
-    },
-    "memo": {
-      "title": "📋 My Creation History",
-      "loading": "Loading memo...",
-      "empty": "No events created yet."
-    },
-    "empty": {
-      "requests": "You have no pending requests at the moment.",
-      "organized": "You haven't posted any ads.",
-      "participations": "You haven't applied for any matches.",
-      "no_match": "No matches found in this category.",
-      "no_tournament": "No tournaments found in this category."
-    },
-    "controls": {
-      "new": "New Ad",
-      "view": "View ad",
-      "accept": "Accept",
-      "refuse": "Refuse",
-      "manage_registrations": "Manage registrations",
-      "contact": "Contact"
-    },
-    "status": {
-      "pending": "Pending",
-      "accepted": "Accepted",
-      "open": "Open"
-    },
-    "alerts": {
-      "title": "Changes detected",
-      "message": "The match against {{host_club_name}} has been updated.",
-      "warning_desc": "The organizer ({{host_club_name}}) modified the information.",
-      "h2_locked": "Event locked (H-2). Contact participants for any last minute changes.",
-      "matches_count": "{{count}} matches have been modified by the organizer. Please check details.",
-      "mark_as_read": "I understand, mark as read",
-      "verify": "VERIFY"
-    },
-    "labels": {
-      "match_opposition": "Match Opposition",
-      "organizer": "Organizer",
-      "participant": "Participant",
-      "my_club": "My Club",
-      "home_badge": "🏠 At Home",
-      "away_badge": "✈️ Away",
-      "home": "Home",
-      "away": "Away",
-      "confirmed_match": "✅ MATCH CONFIRMED",
-      "view_club_profile": "👤 View club profile",
-      "view_profile": "👤 View profile",
-      "search_match": "Search for a match",
-      "search_tournament": "Search for a tournament",
-      "no_participation_tournament": "You haven't applied for any tournament",
-      "for_event": "For the {{type}} of"
     }
   },
   "adminUsersPage": {
