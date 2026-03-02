@@ -30,7 +30,6 @@ export default function MatchEditPage() {
             <DefaultLayout>
                 <div className="container mx-auto p-6 flex justify-center items-center min-h-[60vh]">
                     <DataWall
-                        onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
                         message="Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à la création tant que votre fiche MON COMPTE n'est pas 100% complétée."
                     />
                 </div>

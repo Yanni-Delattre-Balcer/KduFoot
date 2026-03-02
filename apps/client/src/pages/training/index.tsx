@@ -14,7 +14,7 @@ export default function TrainingPage() {
     const { t } = useTranslation();
     const { selectedExercises, removeExercise } = useTraining();
     const { isLocked } = useUser();
-    const { isVisitor, openGateway } = useWelcomeGateway();
+    const { isVisitor } = useWelcomeGateway();
 
     return (
         <DefaultLayout maxWidth="max-w-full">
@@ -59,14 +59,7 @@ export default function TrainingPage() {
 
                 {isLocked || isVisitor ? (
                     <div className="relative min-h-[400px]">
-                        <DataWall
-                            onCompleteProfile={() => {
-                                // @ts-ignore
-                                window.location.href = '/account?from=' + encodeURIComponent(window.location.pathname);
-                            }}
-                            isVisitor={isVisitor}
-                            onLogin={() => openGateway()}
-                        />
+                        <DataWall />
                     </div>
                 ) : selectedExercises.length === 0 ? (
                     <Card className="border border-green-500/20 bg-[#202221] overflow-hidden">

@@ -98,9 +98,6 @@ export default function MatchDetailsPage() {
             {(isLocked || isVisitor) ? (
                 <div className="container mx-auto p-6 flex justify-center items-center min-h-[60vh]">
                     <DataWall
-                        onCompleteProfile={() => navigate('/account?from=' + encodeURIComponent(window.location.pathname))}
-                        isVisitor={isVisitor}
-                        onLogin={() => openGateway()}
                         message="Les informations de votre compte ne sont pas remplies. Vous n'avez pas accès à ces informations tant que votre fiche MON COMPTE n'est pas 100% complétée."
                     />
                 </div>

@@ -30,7 +30,7 @@ export default function SessionPlannerPage() {
     const [isLoadingRequests, setIsLoadingRequests] = useState(false);
 
     const { isLocked } = useUser();
-    const { isVisitor, openGateway } = useWelcomeGateway();
+    const { isVisitor } = useWelcomeGateway();
 
     useEffect(() => {
         const fetchRequests = async () => {
@@ -137,14 +137,7 @@ export default function SessionPlannerPage() {
 
                 {isLocked || isVisitor ? (
                     <div className="relative min-h-[400px]">
-                        <DataWall
-                            onCompleteProfile={() => {
-                                // @ts-ignore
-                                window.location.href = '/account?from=' + encodeURIComponent(window.location.pathname);
-                            }}
-                            isVisitor={isVisitor}
-                            onLogin={() => openGateway()}
-                        />
+                        <DataWall />
                     </div>
                 ) : (
                     <div className="animate-appearance-in">

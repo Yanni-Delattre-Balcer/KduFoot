@@ -4,5 +4,7 @@
     "src/locales/kdufoot"
   ],
   "i18n-ally.keystyle": "flat",
-  "i18n-ally.sourceLanguage": "en-US"
+  "i18n-ally.sourceLanguage": "en-US",
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore"
 }

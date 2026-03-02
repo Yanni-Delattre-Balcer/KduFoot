@@ -5,5 +5,12 @@
       "[\"'`]([^\"'`]*).*?[\"'`]"
     ]
   ],
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "css.customData": [
+    ".vscode/tailwind-directives.json"
+  ],
+  "scss.customData": [
+    ".vscode/tailwind-directives.json"
+  ]
 }
