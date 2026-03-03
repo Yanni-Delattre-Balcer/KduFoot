@@ -842,7 +842,9 @@ export default function DashboardPage() {
                                             <Button
                                                 as={Link}
                                                 to="/matches"
-                                                className="bg-purple-700 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded transition-colors w-full sm:w-auto"
+                                                color="secondary"
+                                                variant="flat"
+                                                className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto"
                                             >
                                                 {t('dashboard.labels.search_match', 'Rechercher un match')}
                                             </Button>
