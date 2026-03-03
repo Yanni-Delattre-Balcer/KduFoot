@@ -475,7 +475,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     <div className="flex-1 flex flex-col gap-1">
                                         <Input
                                             label={
-                                                <span className="animate-pulse-red font-bold text-danger text-sm md:text-base whitespace-normal break-words text-center block w-full">
+                                                <span className="animate-pulse-red font-bold text-danger text-xs md:text-sm text-center md:text-left break-words w-full block">
                                                     Numéro SIRET (14 chiffres) ou SIREN (9 chiffres)
                                                 </span>
                                             }
