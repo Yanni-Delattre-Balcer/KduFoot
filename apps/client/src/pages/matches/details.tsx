@@ -22,7 +22,7 @@ export default function MatchDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { user, isLocked } = useUser();
+    const { user } = useUser();
     const { openGateway, isVisitor } = useWelcomeGateway();
     const { match, isLoading, isError, contactMatch, deleteMatch, cancelMatchContact, updateRequestStatus } = useMatch(id || null);
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
