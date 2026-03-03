@@ -580,7 +580,7 @@ export default function MatchesPage() {
                                                             </div>
                                                         )}
                                                         <div className="flex flex-col w-full">
-                                                            <h4 className={`font-bold text-xl text-default-900 group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                                            <h4 className={`font-bold text-xl text-default-900 group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full`}>
                                                                 {isVisitor ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
                                                             </h4>
                                                             <div className="flex items-center gap-2 mb-1">
@@ -594,7 +594,7 @@ export default function MatchesPage() {
                                                                     {match.venue === 'Domicile' ? '🏠 Reçoit' : match.venue === 'Extérieur' ? '🚗 Se déplace' : '📍 Neutre'}
                                                                 </Chip>
                                                             </div>
-                                                            <p className={`text-small text-default-500 font-medium ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                                            <p className={`text-small text-default-500 font-medium`}>
                                                                 {isVisitor ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
                                                             </p>
                                                         </div>

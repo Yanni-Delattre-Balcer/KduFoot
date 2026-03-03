@@ -95,11 +95,7 @@ export default function MatchDetailsPage() {
 
     return (
         <DefaultLayout>
-            {(isLocked || isVisitor) ? (
-                <div className="container mx-auto p-6 flex justify-center items-center min-h-[60vh]">
-                    <DataWall />
-                </div>
-            ) : (
+            <DataWall>
                 <div className="container mx-auto max-w-7xl p-6 space-y-8 animate-appearance-in pb-24">
                     {/* Header with Back Button */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -150,10 +146,10 @@ export default function MatchDetailsPage() {
                                         </Chip>
                                     )}
                                 </div>
-                                <h1 className={`text-3xl font-black text-white leading-tight ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                <h1 className={`text-3xl font-black text-white leading-tight`}>
                                     {isVisitor ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || 'Club'}`)}
                                 </h1>
-                                <p className={`text-default-400 font-medium flex items-center gap-1 ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                <p className={`text-default-400 font-medium flex items-center gap-1`}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                         <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                                     </svg>
@@ -242,7 +238,7 @@ export default function MatchDetailsPage() {
                                             <span className="text-4xl font-black">{match.club?.name?.charAt(0)}</span>
                                         </div>
                                     )}
-                                    <div className={`text-center ${isVisitor ? 'blur-sm select-none' : ''}`}>
+                                    <div className={`text-center`}>
                                         <h3 className="font-black text-xl text-white leading-tight">{isVisitor ? 'CLUB MASQUÉ' : match.club?.name}</h3>
                                         <p className="text-white font-black uppercase mt-1 text-lg">{isVisitor ? 'VILLE MASQUÉE' : match.club?.city}</p>
                                         <p className="text-default-400 text-xs font-medium">({isVisitor ? '00000' : match.club?.zip})</p>
@@ -454,7 +450,7 @@ export default function MatchDetailsPage() {
                                 Liste des clubs intéressés par ce match.
                             </p>
 
-                            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isVisitor ? 'blur-md pointer-events-none grayscale opacity-40 select-none' : ''}`}>
+                            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
                                 {match.contacts && match.contacts.length > 0 ? (
                                     match.contacts.map((contact, index) => (
                                         <Card key={index} className={`border ${contact.status === 'accepted' ? 'border-success/30 bg-success/5' : contact.status === 'refused' ? 'border-danger/20 opacity-60' : 'border-default-200'} bg-[#202022]`}>
@@ -549,7 +545,7 @@ export default function MatchDetailsPage() {
                         </ModalContent>
                     </Modal>
                 </div>
-            )}
+            </DataWall>
         </DefaultLayout>
     );
 }

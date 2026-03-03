@@ -157,10 +157,7 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
           onPress={() => {
             logout({
               logoutParams: {
-                returnTo: new URL(
-                  import.meta.env.BASE_URL || "/",
-                  window.location.origin,
-                ).toString(),
+                returnTo: window.location.origin,
               },
             });
           }}
@@ -214,10 +211,7 @@ export const LogoutLink: FC<LogoutLinkProps> = ({
         onPress={() => {
           logout({
             logoutParams: {
-              returnTo: new URL(
-                import.meta.env.BASE_URL || "/",
-                window.location.origin,
-              ).toString(),
+              returnTo: window.location.origin,
             },
           });
         }}
