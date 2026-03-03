@@ -133,11 +133,8 @@ export default function ExercisesPage() {
                 </div>
 
                 {/* Exercise List */}
-                <div className="relative min-h-[400px]">
-                    {(isLocked || isVisitor) && (
-                        <DataWall />
-                    )}
-                    <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : "flex flex-col gap-5"}>
+                <DataWall>
+                    <div className="flex flex-col gap-5">
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-xl bg-secondary/10">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-secondary">
@@ -223,7 +220,7 @@ export default function ExercisesPage() {
                             ))}
                         </div>
                     </div>
-                </div>
+                </DataWall>
             </section>
 
             {/* Training bar */}

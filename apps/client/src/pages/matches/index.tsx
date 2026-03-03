@@ -32,7 +32,7 @@ export default function MatchesPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [view, setView] = useState<'find' | 'create'>((searchParams.get('view') as 'find' | 'create') || 'find');
     const [type, setType] = useState<'match' | 'tournament'>((searchParams.get('type') as 'match' | 'tournament') || 'match');
-    const { user, isLocked } = useUser();
+    const { user } = useUser();
     // Synchronization de l'URL avec l'état
     useEffect(() => {
         const nextParams = new URLSearchParams(searchParams);
@@ -258,29 +258,16 @@ export default function MatchesPage() {
 
                 <div id="results-container" className="flex flex-col gap-6 animate-appearance-in pb-20">
                     {view === 'create' ? (
-                        <div className="relative min-h-[500px]">
-                            {(isVisitor || isLocked) && (
-                                <DataWall
-                                    message="Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.)."
-                                />
+                        <DataWall message="Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.).">
+                            {type === 'match' ? (
+                                <MatchForm onSuccess={handleCreateSuccess} />
+                            ) : (
+                                <TournamentForm onSuccess={handleCreateSuccess} />
                             )}
-                            <div className={(isVisitor || isLocked) ? "opacity-50 blur-[4px] pointer-events-none select-none" : ""}>
-                                {type === 'match' ? (
-                                    <MatchForm onSuccess={handleCreateSuccess} />
-                                ) : (
-                                    <TournamentForm onSuccess={handleCreateSuccess} />
-                                )}
-                            </div>
-                        </div>
+                        </DataWall>
                     ) : (
-                        <div className="flex flex-col gap-5 relative min-h-[500px]">
-                            {(isVisitor || isLocked) && (
-                                <DataWall
-                                    message="L'accès aux recherches détaillées est réservé aux profils complets."
-                                />
-                            )}
-
-                            <div className={(isVisitor || isLocked) ? "opacity-50 pointer-events-none blur-[2px] select-none" : ""}>
+                        <DataWall message="L'accès aux recherches détaillées est réservé aux profils complets.">
+                            <div className="flex flex-col gap-5">
                                 {/* Filter Section - Coordinated container */}
                                 <Card className={`shadow-lg border ${type === 'match' ? 'shadow-violet-500/5 border-violet-800/50' : 'shadow-fuchsia-500/5 border-fuchsia-500/20'} bg-[#232120] overflow-hidden`}>
                                     <CardHeader className="pb-0 pt-5 px-5 relative">
@@ -679,7 +666,7 @@ export default function MatchesPage() {
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </DataWall>
                     )}
                 </div>
             </section>

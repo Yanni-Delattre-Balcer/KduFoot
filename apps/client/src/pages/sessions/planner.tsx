@@ -16,8 +16,6 @@ import { matchService } from '@/services/matches';
 import { useAuth0 } from '@auth0/auth0-react';
 import { showVideoAnalysis } from '@/config/site';
 
-import { useUser } from '@/hooks/use-user';
-import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 import DataWall from '@/components/data-wall';
 
 export default function SessionPlannerPage() {
@@ -28,9 +26,6 @@ export default function SessionPlannerPage() {
     const { matches, isLoading: isLoadingMatches } = useMatches({ ownerId: 'me', include_past: true });
     const [requests, setRequests] = useState<any[]>([]);
     const [isLoadingRequests, setIsLoadingRequests] = useState(false);
-
-    const { isLocked } = useUser();
-    const { isVisitor } = useWelcomeGateway();
 
     useEffect(() => {
         const fetchRequests = async () => {
@@ -135,11 +130,7 @@ export default function SessionPlannerPage() {
                     </div>
                 </div>
 
-                {isLocked || isVisitor ? (
-                    <div className="relative min-h-[400px]">
-                        <DataWall />
-                    </div>
-                ) : (
+                <DataWall>
                     <div className="animate-appearance-in">
 
                         {view === 'exercises' && (
@@ -358,8 +349,8 @@ export default function SessionPlannerPage() {
                             </div>
                         )}
                     </div>
-                )}
-            </section >
-        </DefaultLayout >
+                </DataWall>
+            </section>
+        </DefaultLayout>
     );
 }

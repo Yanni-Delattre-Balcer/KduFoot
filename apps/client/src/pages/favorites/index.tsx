@@ -13,8 +13,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { Chip } from "@heroui/chip";
 import FootballClock from '../../components/football-clock';
 import { showVideoAnalysis } from "../../config/site";
-import { useUser } from "@/hooks/use-user";
-import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import DataWall from "@/components/data-wall";
 
 export default function FavoritesPage() {
@@ -22,9 +20,6 @@ export default function FavoritesPage() {
     const { favorites } = useFavorites();
     const { exercises, isLoading: loadingEx } = useExercises();
     const { matches, isLoading: loadingMatches } = useMatches();
-
-    const { isLocked } = useUser();
-    const { isVisitor } = useWelcomeGateway();
 
     // View state for Toggle Buttons (like Matches Page)
     const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');
@@ -132,11 +127,8 @@ export default function FavoritesPage() {
                     </div>
                 </div>
 
-                <div className="relative min-h-[400px]">
-                    {(isLocked || isVisitor) && (
-                        <DataWall />
-                    )}
-                    <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : "animate-appearance-in"}>
+                <DataWall>
+                    <div className="animate-appearance-in">
                         {/* Content - Unwrapped */}
                         {view === 'exercises' && (
                             <>
@@ -278,7 +270,7 @@ export default function FavoritesPage() {
                             </>
                         )}
                     </div>
-                </div>
+                </DataWall>
             </section>
         </DefaultLayout >
     );

@@ -404,467 +404,462 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                <div className="relative min-h-[400px]">
-                    {(isLocked || isVisitor) && (
-                        <DataWall />
-                    )}
-                    <div className={(isLocked || isVisitor) ? "opacity-50 blur-[4px] pointer-events-none select-none" : ""}>
-                        {/* Flash Notifications Panel */}
-                        {modifiedParticipations.length > 0 && (
-                            <div className="mb-6 animate-appearance-in">
-                                <Card className="bg-danger/10 border-2 border-danger/30 shadow-xl shadow-danger/10">
-                                    <CardBody className="p-4 flex flex-col sm:flex-row items-center gap-4">
-                                        <div className="flex items-center gap-3 flex-1">
-                                            <div className="p-3 rounded-2xl bg-danger/20 text-danger animate-pulse">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z" /></svg>
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <h4 className="font-black text-danger uppercase tracking-tight text-sm">Action Requise : Modifications Détectées</h4>
-                                                <p className="text-default-400 text-xs">
-                                                    {modifiedParticipations.length} match{modifiedParticipations.length > 1 ? 's ont' : ' a'} été modifié par l'organisateur. Veuillez vérifier les détails.
-                                                </p>
-                                            </div>
+                <DataWall>
+                    {/* Flash Notifications Panel */}
+                    {modifiedParticipations.length > 0 && (
+                        <div className="mb-6 animate-appearance-in">
+                            <Card className="bg-danger/10 border-2 border-danger/30 shadow-xl shadow-danger/10">
+                                <CardBody className="p-4 flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="flex items-center gap-3 flex-1">
+                                        <div className="p-3 rounded-2xl bg-danger/20 text-danger animate-pulse">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z" /></svg>
                                         </div>
-                                        <Button
-                                            color="danger"
-                                            size="sm"
-                                            className="font-bold uppercase text-[10px] px-6"
-                                            onPress={() => {
-                                                setHighlightedCardId(modifiedParticipations[0].match_id);
-                                            }}
-                                        >
-                                            {t('dashboard.alerts.view_changes')}
-                                        </Button>
-                                    </CardBody>
-                                </Card>
-                            </div>
-                        )}
-
-                        <Tabs
-                            aria-label="Dashboard Options"
-                            color="secondary"
-                            variant="underlined"
-                            className="w-full"
-                            selectedKey={selectedTab}
-                            onSelectionChange={(key) => {
-                                setSelectedTab(key);
-                            }}
-                            classNames={{
-                                tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-wrap border-b-0 gap-2",
-                                cursor: "rounded-xl shadow-lg shadow-purple-500/20",
-                                tab: "h-auto py-2.5 sm:h-12 uppercase font-black tracking-tight text-[10px] sm:text-xs flex-1 min-w-[max-content] sm:min-w-0 px-3 sm:px-4",
-                                tabContent: "group-data-[selected=true]:text-white whitespace-normal text-center leading-tight"
-                            }}
-                        >
-                            <Tab
-                                key="requests"
-                                title={
-                                    <div className="flex items-center space-x-2">
-                                        <span>{t('dashboard.tabs.requests')}</span>
-                                        {incomingRequests.filter(r => r.request_status === 'pending').length > 0 && (
-                                            <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1 font-black">
-                                                {incomingRequests.filter(r => r.request_status === 'pending').length}
-                                            </Chip>
-                                        )}
+                                        <div className="flex flex-col">
+                                            <h4 className="font-black text-danger uppercase tracking-tight text-sm">Action Requise : Modifications Détectées</h4>
+                                            <p className="text-default-400 text-xs">
+                                                {modifiedParticipations.length} match{modifiedParticipations.length > 1 ? 's ont' : ' a'} été modifié par l'organisateur. Veuillez vérifier les détails.
+                                            </p>
+                                        </div>
                                     </div>
-                                }
-                            >
-                                <div className="flex flex-col gap-4 pt-2">
-                                    {renderSubFilters(requestsSubFilter, setRequestsSubFilter)}
+                                    <Button
+                                        color="danger"
+                                        size="sm"
+                                        className="font-bold uppercase text-[10px] px-6"
+                                        onPress={() => {
+                                            setHighlightedCardId(modifiedParticipations[0].match_id);
+                                        }}
+                                    >
+                                        {t('dashboard.alerts.view_changes')}
+                                    </Button>
+                                </CardBody>
+                            </Card>
+                        </div>
+                    )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {isLoadingIncoming ? (
-                                            <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
-                                        ) : filteredRequests.length > 0 ? (
-                                            filteredRequests.map((request, idx) => (
-                                                <Card key={idx} className={`overflow-hidden border ${request.request_status === 'accepted' ? 'border-success/30 bg-success/5' : request.request_status === 'refused' ? 'border-danger/20 bg-danger/5' : 'border-orange-500/20 bg-linear-to-br from-orange-500/5 to-transparent'} md:hover:scale-[1.01] transition-all duration-200 shadow-sm hover:shadow-md`}>
-                                                    <CardBody className="p-0">
-                                                        {/* Top accent bar */}
-                                                        <div className={`h-1 w-full ${request.request_status === 'accepted' ? 'bg-success' : request.request_status === 'refused' ? 'bg-danger' : 'bg-linear-to-r from-orange-500 via-amber-400 to-orange-500'}`} />
+                    <Tabs
+                        aria-label="Dashboard Options"
+                        color="secondary"
+                        variant="underlined"
+                        className="w-full"
+                        selectedKey={selectedTab}
+                        onSelectionChange={(key) => {
+                            setSelectedTab(key);
+                        }}
+                        classNames={{
+                            tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-wrap border-b-0 gap-2",
+                            cursor: "rounded-xl shadow-lg shadow-purple-500/20",
+                            tab: "h-auto py-2.5 sm:h-12 uppercase font-black tracking-tight text-[10px] sm:text-xs flex-1 min-w-[max-content] sm:min-w-0 px-3 sm:px-4",
+                            tabContent: "group-data-[selected=true]:text-white whitespace-normal text-center leading-tight"
+                        }}
+                    >
+                        <Tab
+                            key="requests"
+                            title={
+                                <div className="flex items-center space-x-2">
+                                    <span>{t('dashboard.tabs.requests')}</span>
+                                    {incomingRequests.filter(r => r.request_status === 'pending').length > 0 && (
+                                        <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1 font-black">
+                                            {incomingRequests.filter(r => r.request_status === 'pending').length}
+                                        </Chip>
+                                    )}
+                                </div>
+                            }
+                        >
+                            <div className="flex flex-col gap-4 pt-2">
+                                {renderSubFilters(requestsSubFilter, setRequestsSubFilter)}
 
-                                                        <div className="p-5 flex flex-col gap-4">
-                                                            {/* Header: Club info + Status */}
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20 shrink-0">
-                                                                    {request.requester_club_logo ? (
-                                                                        <Image src={request.requester_club_logo} className="object-contain w-10 h-10" />
-                                                                    ) : (
-                                                                        <span className="text-orange-400 font-black text-2xl">{request.requester_club_name?.charAt(0)}</span>
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h3 className="font-black text-white text-sm leading-tight truncate uppercase tracking-tight">{request.requester_club_name}</h3>
-                                                                    <div className="flex items-center gap-1.5 mt-1">
-                                                                        <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase">
-                                                                            {request.match_type === 'tournament' ? '🏆 TOURNOI' : '⚽ MATCH'}
-                                                                        </Chip>
-                                                                        <Chip size="sm" variant="flat" color={(request.match_type === 'tournament' || request.venue === 'Domicile') ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase grayscale-[0.5]">
-                                                                            {(request.match_type === 'tournament' || request.venue === 'Domicile') ? '🏠 Dom' : '✈️ Ext'}
-                                                                        </Chip>
-                                                                        <Chip size="sm" variant="dot" color="default" className="font-bold text-[9px] h-5 border-none">
-                                                                            {request.requester_category ? t(`enums.category.${request.requester_category}`) : (request.match_category ? t(`enums.category.${request.match_category}`) : '—')}
-                                                                        </Chip>
-                                                                    </div>
-                                                                </div>
-                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black uppercase text-[9px] shadow-sm">
-                                                                    {t('dashboard.status.' + request.request_status)}
-                                                                </Chip>
-                                                            </div>
-                                                            {/* Quick Info: Responsable, Ville, Catégorie, Niveau */}
-                                                            <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
-                                                                <div className="flex items-center gap-1 text-[9px] text-default-400">
-                                                                    <span className="text-default-600">👤</span>
-                                                                    <span className="truncate">{request.requester_firstname && request.requester_lastname ? `${request.requester_firstname} ${request.requester_lastname}` : 'Non renseigné'}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1 text-[9px] text-default-400">
-                                                                    <span className="text-default-600">📍</span>
-                                                                    <span className="truncate">{request.requester_city || request.location_city || 'Ville inconnue'}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1 text-[9px] text-default-400">
-                                                                    <span className="text-default-600">🏅</span>
-                                                                    <span>{request.requester_category ? t(`enums.category.${request.requester_category}`) : '—'}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1 text-[9px] text-default-400">
-                                                                    <span className="text-default-600">🛡️</span>
-                                                                    <span>{request.requester_level ? t(`enums.level.${request.requester_level}`) : '—'}</span>
-                                                                </div>
-                                                            </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {isLoadingIncoming ? (
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
+                                    ) : filteredRequests.length > 0 ? (
+                                        filteredRequests.map((request, idx) => (
+                                            <Card key={idx} className={`overflow-hidden border ${request.request_status === 'accepted' ? 'border-success/30 bg-success/5' : request.request_status === 'refused' ? 'border-danger/20 bg-danger/5' : 'border-orange-500/20 bg-linear-to-br from-orange-500/5 to-transparent'} md:hover:scale-[1.01] transition-all duration-200 shadow-sm hover:shadow-md`}>
+                                                <CardBody className="p-0">
+                                                    {/* Top accent bar */}
+                                                    <div className={`h-1 w-full ${request.request_status === 'accepted' ? 'bg-success' : request.request_status === 'refused' ? 'bg-danger' : 'bg-linear-to-r from-orange-500 via-amber-400 to-orange-500'}`} />
 
-                                                            {/* Match info banner */}
-                                                            <div className="bg-white/[0.03] rounded-xl p-3 border border-white/5">
-                                                                <div className="flex justify-between items-center">
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">{t('dashboard.labels.for_event', { type: request.match_type === 'tournament' ? t('enums.type.tournament').toLowerCase() : t('enums.type.match').toLowerCase() })}</span>
-                                                                        <span className="text-sm font-black text-white mt-0.5">{formatDate(request.match_date)} à {formatTime(request.match_time)}</span>
-                                                                    </div>
-                                                                    {request.location_city && (
-                                                                        <Chip size="sm" variant="flat" className="bg-white/5 text-default-400 text-[9px] font-bold">
-                                                                            📍 {request.location_city}
-                                                                        </Chip>
-                                                                    )}
-                                                                </div>
-                                                                {request.message && request.message !== 'Demande de participation envoyée via KduFoot' && (
-                                                                    <p className="text-[11px] text-default-300 italic mt-2 line-clamp-2 border-t border-white/5 pt-2">"{request.message}"</p>
+                                                    <div className="p-5 flex flex-col gap-4">
+                                                        {/* Header: Club info + Status */}
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20 shrink-0">
+                                                                {request.requester_club_logo ? (
+                                                                    <Image src={request.requester_club_logo} className="object-contain w-10 h-10" />
+                                                                ) : (
+                                                                    <span className="text-orange-400 font-black text-2xl">{request.requester_club_name?.charAt(0)}</span>
                                                                 )}
                                                             </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h3 className="font-black text-white text-sm leading-tight truncate uppercase tracking-tight">{request.requester_club_name}</h3>
+                                                                <div className="flex items-center gap-1.5 mt-1">
+                                                                    <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase">
+                                                                        {request.match_type === 'tournament' ? '🏆 TOURNOI' : '⚽ MATCH'}
+                                                                    </Chip>
+                                                                    <Chip size="sm" variant="flat" color={(request.match_type === 'tournament' || request.venue === 'Domicile') ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase grayscale-[0.5]">
+                                                                        {(request.match_type === 'tournament' || request.venue === 'Domicile') ? '🏠 Dom' : '✈️ Ext'}
+                                                                    </Chip>
+                                                                    <Chip size="sm" variant="dot" color="default" className="font-bold text-[9px] h-5 border-none">
+                                                                        {request.requester_category ? t(`enums.category.${request.requester_category}`) : (request.match_category ? t(`enums.category.${request.match_category}`) : '—')}
+                                                                    </Chip>
+                                                                </div>
+                                                            </div>
+                                                            <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black uppercase text-[9px] shadow-sm">
+                                                                {t('dashboard.status.' + request.request_status)}
+                                                            </Chip>
+                                                        </div>
+                                                        {/* Quick Info: Responsable, Ville, Catégorie, Niveau */}
+                                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
+                                                            <div className="flex items-center gap-1 text-[9px] text-default-400">
+                                                                <span className="text-default-600">👤</span>
+                                                                <span className="truncate">{request.requester_firstname && request.requester_lastname ? `${request.requester_firstname} ${request.requester_lastname}` : 'Non renseigné'}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-[9px] text-default-400">
+                                                                <span className="text-default-600">📍</span>
+                                                                <span className="truncate">{request.requester_city || request.location_city || 'Ville inconnue'}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-[9px] text-default-400">
+                                                                <span className="text-default-600">🏅</span>
+                                                                <span>{request.requester_category ? t(`enums.category.${request.requester_category}`) : '—'}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-[9px] text-default-400">
+                                                                <span className="text-default-600">🛡️</span>
+                                                                <span>{request.requester_level ? t(`enums.level.${request.requester_level}`) : '—'}</span>
+                                                            </div>
+                                                        </div>
 
-                                                            {/* Action Buttons */}
-                                                            {request.request_status === 'pending' ? (
-                                                                <div className="flex flex-col gap-2 relative z-20">
-                                                                    <div className="flex flex-col sm:flex-row gap-2">
-                                                                        <Button
-                                                                            size="sm"
-                                                                            color="success"
-                                                                            className="w-full sm:flex-1 font-black uppercase text-[11px] h-12 shadow-md shadow-success/20 active:scale-95"
-                                                                            onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'accepted'); }}
-                                                                        >
-                                                                            ✓ {t('dashboard.controls.accept')}
-                                                                        </Button>
-                                                                        <Button
-                                                                            size="sm"
-                                                                            variant="flat"
-                                                                            color="danger"
-                                                                            className="w-full sm:flex-1 font-black uppercase text-[11px] h-12 active:scale-95"
-                                                                            onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'refused'); }}
-                                                                        >
-                                                                            ✕ {t('dashboard.controls.refuse')}
-                                                                        </Button>
-                                                                    </div>
+                                                        {/* Match info banner */}
+                                                        <div className="bg-white/[0.03] rounded-xl p-3 border border-white/5">
+                                                            <div className="flex justify-between items-center">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">{t('dashboard.labels.for_event', { type: request.match_type === 'tournament' ? t('enums.type.tournament').toLowerCase() : t('enums.type.match').toLowerCase() })}</span>
+                                                                    <span className="text-sm font-black text-white mt-0.5">{formatDate(request.match_date)} à {formatTime(request.match_time)}</span>
+                                                                </div>
+                                                                {request.location_city && (
+                                                                    <Chip size="sm" variant="flat" className="bg-white/5 text-default-400 text-[9px] font-bold">
+                                                                        📍 {request.location_city}
+                                                                    </Chip>
+                                                                )}
+                                                            </div>
+                                                            {request.message && request.message !== 'Demande de participation envoyée via KduFoot' && (
+                                                                <p className="text-[11px] text-default-300 italic mt-2 line-clamp-2 border-t border-white/5 pt-2">"{request.message}"</p>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Action Buttons */}
+                                                        {request.request_status === 'pending' ? (
+                                                            <div className="flex flex-col gap-2 relative z-20">
+                                                                <div className="flex flex-col sm:flex-row gap-2">
                                                                     <Button
                                                                         size="sm"
-                                                                        variant="bordered"
-                                                                        color="secondary"
-                                                                        className="w-full font-bold text-[11px] h-11 border-secondary/30 text-secondary active:scale-95"
-                                                                        onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}
+                                                                        color="success"
+                                                                        className="w-full sm:flex-1 font-black uppercase text-[11px] h-12 shadow-md shadow-success/20 active:scale-95"
+                                                                        onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'accepted'); }}
                                                                     >
-                                                                        {t('dashboard.labels.view_club_profile', '👤 Voir le profil du club')}
+                                                                        ✓ {t('dashboard.controls.accept')}
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="flat"
+                                                                        color="danger"
+                                                                        className="w-full sm:flex-1 font-black uppercase text-[11px] h-12 active:scale-95"
+                                                                        onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'refused'); }}
+                                                                    >
+                                                                        ✕ {t('dashboard.controls.refuse')}
                                                                     </Button>
                                                                 </div>
-                                                            ) : (
-                                                                <div className="flex flex-col sm:flex-row gap-2 w-full relative z-20">
-                                                                    <Button size="sm" variant="flat" className="w-full sm:flex-1 text-[11px] font-bold h-11 active:scale-95" as={Link} to={`/matches/${request.match_id}`} onClick={(e) => e.stopPropagation()}>{t('dashboard.controls.view')}</Button>
-                                                                    <Button size="sm" variant="bordered" color="secondary" className="w-full sm:flex-1 text-[11px] font-bold h-11 border-secondary/30 active:scale-95" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>👤 Voir le profil</Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="bordered"
+                                                                    color="secondary"
+                                                                    className="w-full font-bold text-[11px] h-11 border-secondary/30 text-secondary active:scale-95"
+                                                                    onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}
+                                                                >
+                                                                    {t('dashboard.labels.view_club_profile', '👤 Voir le profil du club')}
+                                                                </Button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex flex-col sm:flex-row gap-2 w-full relative z-20">
+                                                                <Button size="sm" variant="flat" className="w-full sm:flex-1 text-[11px] font-bold h-11 active:scale-95" as={Link} to={`/matches/${request.match_id}`} onClick={(e) => e.stopPropagation()}>{t('dashboard.controls.view')}</Button>
+                                                                <Button size="sm" variant="bordered" color="secondary" className="w-full sm:flex-1 text-[11px] font-bold h-11 border-secondary/30 active:scale-95" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>👤 Voir le profil</Button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </CardBody>
+                                            </Card>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-8 text-center space-y-4">
+                                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-orange-500/20">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                                            </div>
+                                            <p className="text-default-400 font-medium whitespace-pre-wrap">
+                                                {requestsSubFilter === 'all' ? "Vous n'avez aucune demande en attente pour le moment." : requestsSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </Tab>
+
+                        <Tab key="organized" title={t('dashboard.tabs.organized')}>
+                            <div className="flex flex-col gap-4 pt-2">
+                                {renderSubFilters(organizedSubFilter, setOrganizedSubFilter)}
+                                <MyOrganizationsMemo
+                                    events={myAnnouncements}
+                                    isLoading={isLoadingAnnouncements}
+                                    formatDate={formatDate}
+                                />
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {isLoadingAnnouncements ? (
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
+                                    ) : filteredOrganized.length > 0 ? (
+                                        filteredOrganized.map((match) => (
+                                            match.type === 'tournament' ? (
+                                                <OrganizedTournamentCard
+                                                    key={match.id}
+                                                    match={match}
+                                                    isTooLate={isTooLate(match.match_date, match.match_time)}
+                                                    isSaving={isSaving}
+                                                    onDelete={handleDeleteMatch}
+                                                    formatDate={formatDate}
+                                                    formatTime={formatTime}
+                                                />
+                                            ) : (
+                                                <Card key={match.id} className="overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full border-violet-500/40 bg-zinc-900/90 group">
+                                                    <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
+                                                    <CardBody className="p-0">
+                                                        <div className="flex flex-col md:flex-row">
+                                                            <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-white/5">
+                                                                <div className="flex items-start justify-between gap-4 mb-4">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
+                                                                            {match.club?.logo_url ? (
+                                                                                <Image src={match.club.logo_url} className="object-contain" />
+                                                                            ) : (
+                                                                                <span className="text-white font-black text-2xl">{match.club?.name?.charAt(0)}</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="min-w-0">
+                                                                            <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">MATCH</h3>
+                                                                            <p className="text-white/70 text-sm font-bold uppercase tracking-widest">{match.club?.name || '??'}</p>
+                                                                            <div className="flex items-center gap-2 mt-1">
+                                                                                <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
+                                                                                    ⚽ {t('enums.type.match')}
+                                                                                </Chip>
+                                                                                <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
+                                                                                    {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge', '✈️ Extérieur') : t('dashboard.labels.home_badge', '🏠 Domicile')}
+                                                                                </Chip>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] py-3 shadow-lg shadow-violet-500/30">
+                                                                        {match.status === 'active' ? '🔍 RECHERCHE D\'ADVERSAIRE' : t(`dashboard.status.${match.status}`, match.status)}
+                                                                    </Chip>
                                                                 </div>
-                                                            )}
+
+                                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                                                                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                                                        <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
+                                                                        <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
+                                                                    </div>
+                                                                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                                                        <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                                                                        <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
+                                                                    </div>
+                                                                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                                                        <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
+                                                                        <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || '11v11'}</Chip>
+                                                                    </div>
+                                                                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
+                                                                        <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                                                        <p className="text-sm font-bold text-white truncate">{match.pitch_type || '—'}</p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="space-y-2">
+                                                                    <div className="flex justify-between items-end">
+                                                                        <p className="text-[11px] font-black text-violet-400 uppercase tracking-widest">
+                                                                            {(match.accepted_count || 0) >= 1 ? t('dashboard.match.filled', 'Match complet') : t('dashboard.match.searching', 'Recherche d\'adversaire')}
+                                                                        </p>
+                                                                        <p className="text-xs font-bold text-white">{match.accepted_count || 0} / 1</p>
+                                                                    </div>
+                                                                    <Progress
+                                                                        size="md"
+                                                                        value={(match.accepted_count || 0) >= 1 ? 100 : 0}
+                                                                        color="secondary"
+                                                                        className="max-w-md"
+                                                                        classNames={{
+                                                                            indicator: "bg-linear-to-r from-violet-500 to-indigo-500"
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="w-full md:w-80 p-6 flex flex-col justify-end bg-white/[0.02]">
+                                                                <div className="space-y-3">
+                                                                    {isTooLate(match.match_date, match.match_time) ? (
+                                                                        <div className="py-3 px-4 text-center border border-dashed border-danger/30 rounded-xl bg-danger/5">
+                                                                            <p className="text-[10px] font-black text-danger leading-tight uppercase px-2">
+                                                                                {t('dashboard.alerts.h2_locked', 'Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute.')}
+                                                                            </p>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex flex-col gap-2">
+                                                                            <div className="flex gap-2">
+                                                                                <Button
+                                                                                    as={Link}
+                                                                                    to={`/matches/${match.id}/edit`}
+                                                                                    size="sm"
+                                                                                    variant="flat"
+                                                                                    className="flex-1 font-bold text-[11px] h-11 bg-amber-500/10 text-amber-500 active:scale-95"
+                                                                                >
+                                                                                    {t('edit', 'Modifier')}
+                                                                                </Button>
+                                                                                <Button
+                                                                                    size="sm"
+                                                                                    variant="flat"
+                                                                                    color="danger"
+                                                                                    className="flex-1 h-11 font-bold text-[11px] active:scale-95"
+                                                                                    onPress={() => handleDeleteMatch(match.id, match.match_date, match.match_time)}
+                                                                                    isLoading={isSaving}
+                                                                                >
+                                                                                    {t('delete', 'Supprimer')}
+                                                                                </Button>
+                                                                            </div>
+                                                                            <Button
+                                                                                as={Link}
+                                                                                to={`/matches/${match.id}`}
+                                                                                size="sm"
+                                                                                variant="solid"
+                                                                                color="secondary"
+                                                                                className="w-full font-bold text-[11px] h-10 active:scale-95 shadow-md shadow-secondary/20"
+                                                                            >
+                                                                                {t('dashboard.controls.manage_registrations', 'Gérer les demandes')}
+                                                                            </Button>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </CardBody>
                                                 </Card>
-                                            ))
-                                        ) : (
-                                            <div className="col-span-full py-8 text-center space-y-4">
-                                                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-orange-500/20">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                                            )
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-8 text-center space-y-6">
+                                            <p className="text-default-400 font-medium">
+                                                {organizedSubFilter === 'all' ? "Vous n'avez publié aucune annonce" : organizedSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
+                                            </p>
+                                            {organizedSubFilter === 'all' ? (
+                                                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                                                    <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto">{t('dashboard.labels.search_match', 'Rechercher un match')}</Button>
+                                                    <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament', 'Rechercher un tournoi')}</Button>
                                                 </div>
-                                                <p className="text-default-400 font-medium whitespace-pre-wrap">
-                                                    {requestsSubFilter === 'all' ? "Vous n'avez aucune demande en attente pour le moment." : requestsSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </Tab>
-
-                            <Tab key="organized" title={t('dashboard.tabs.organized')}>
-                                <div className="flex flex-col gap-4 pt-2">
-                                    {renderSubFilters(organizedSubFilter, setOrganizedSubFilter)}
-                                    <MyOrganizationsMemo
-                                        events={myAnnouncements}
-                                        isLoading={isLoadingAnnouncements}
-                                        formatDate={formatDate}
-                                    />
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {isLoadingAnnouncements ? (
-                                            <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
-                                        ) : filteredOrganized.length > 0 ? (
-                                            filteredOrganized.map((match) => (
-                                                match.type === 'tournament' ? (
-                                                    <OrganizedTournamentCard
-                                                        key={match.id}
-                                                        match={match}
-                                                        isTooLate={isTooLate(match.match_date, match.match_time)}
-                                                        isSaving={isSaving}
-                                                        onDelete={handleDeleteMatch}
-                                                        formatDate={formatDate}
-                                                        formatTime={formatTime}
-                                                    />
-                                                ) : (
-                                                    <Card key={match.id} className="overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full border-violet-500/40 bg-zinc-900/90 group">
-                                                        <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
-                                                        <CardBody className="p-0">
-                                                            <div className="flex flex-col md:flex-row">
-                                                                <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-white/5">
-                                                                    <div className="flex items-start justify-between gap-4 mb-4">
-                                                                        <div className="flex items-center gap-4">
-                                                                            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
-                                                                                {match.club?.logo_url ? (
-                                                                                    <Image src={match.club.logo_url} className="object-contain" />
-                                                                                ) : (
-                                                                                    <span className="text-white font-black text-2xl">{match.club?.name?.charAt(0)}</span>
-                                                                                )}
-                                                                            </div>
-                                                                            <div className="min-w-0">
-                                                                                <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">MATCH</h3>
-                                                                                <p className="text-white/70 text-sm font-bold uppercase tracking-widest">{match.club?.name || '??'}</p>
-                                                                                <div className="flex items-center gap-2 mt-1">
-                                                                                    <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
-                                                                                        ⚽ {t('enums.type.match')}
-                                                                                    </Chip>
-                                                                                    <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
-                                                                                        {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge', '✈️ Extérieur') : t('dashboard.labels.home_badge', '🏠 Domicile')}
-                                                                                    </Chip>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] py-3 shadow-lg shadow-violet-500/30">
-                                                                            {match.status === 'active' ? '🔍 RECHERCHE D\'ADVERSAIRE' : t(`dashboard.status.${match.status}`, match.status)}
-                                                                        </Chip>
-                                                                    </div>
-
-                                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                                                                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
-                                                                            <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
-                                                                        </div>
-                                                                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
-                                                                            <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
-                                                                        </div>
-                                                                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
-                                                                            <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || '11v11'}</Chip>
-                                                                        </div>
-                                                                        <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
-                                                                            <p className="text-sm font-bold text-white truncate">{match.pitch_type || '—'}</p>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div className="space-y-2">
-                                                                        <div className="flex justify-between items-end">
-                                                                            <p className="text-[11px] font-black text-violet-400 uppercase tracking-widest">
-                                                                                {(match.accepted_count || 0) >= 1 ? t('dashboard.match.filled', 'Match complet') : t('dashboard.match.searching', 'Recherche d\'adversaire')}
-                                                                            </p>
-                                                                            <p className="text-xs font-bold text-white">{match.accepted_count || 0} / 1</p>
-                                                                        </div>
-                                                                        <Progress
-                                                                            size="md"
-                                                                            value={(match.accepted_count || 0) >= 1 ? 100 : 0}
-                                                                            color="secondary"
-                                                                            className="max-w-md"
-                                                                            classNames={{
-                                                                                indicator: "bg-linear-to-r from-violet-500 to-indigo-500"
-                                                                            }}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="w-full md:w-80 p-6 flex flex-col justify-end bg-white/[0.02]">
-                                                                    <div className="space-y-3">
-                                                                        {isTooLate(match.match_date, match.match_time) ? (
-                                                                            <div className="py-3 px-4 text-center border border-dashed border-danger/30 rounded-xl bg-danger/5">
-                                                                                <p className="text-[10px] font-black text-danger leading-tight uppercase px-2">
-                                                                                    {t('dashboard.alerts.h2_locked', 'Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute.')}
-                                                                                </p>
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="flex flex-col gap-2">
-                                                                                <div className="flex gap-2">
-                                                                                    <Button
-                                                                                        as={Link}
-                                                                                        to={`/matches/${match.id}/edit`}
-                                                                                        size="sm"
-                                                                                        variant="flat"
-                                                                                        className="flex-1 font-bold text-[11px] h-11 bg-amber-500/10 text-amber-500 active:scale-95"
-                                                                                    >
-                                                                                        {t('edit', 'Modifier')}
-                                                                                    </Button>
-                                                                                    <Button
-                                                                                        size="sm"
-                                                                                        variant="flat"
-                                                                                        color="danger"
-                                                                                        className="flex-1 h-11 font-bold text-[11px] active:scale-95"
-                                                                                        onPress={() => handleDeleteMatch(match.id, match.match_date, match.match_time)}
-                                                                                        isLoading={isSaving}
-                                                                                    >
-                                                                                        {t('delete', 'Supprimer')}
-                                                                                    </Button>
-                                                                                </div>
-                                                                                <Button
-                                                                                    as={Link}
-                                                                                    to={`/matches/${match.id}`}
-                                                                                    size="sm"
-                                                                                    variant="solid"
-                                                                                    color="secondary"
-                                                                                    className="w-full font-bold text-[11px] h-10 active:scale-95 shadow-md shadow-secondary/20"
-                                                                                >
-                                                                                    {t('dashboard.controls.manage_registrations', 'Gérer les demandes')}
-                                                                                </Button>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </CardBody>
-                                                    </Card>
-                                                )
-                                            ))
-                                        ) : (
-                                            <div className="col-span-full py-8 text-center space-y-6">
-                                                <p className="text-default-400 font-medium">
-                                                    {organizedSubFilter === 'all' ? "Vous n'avez publié aucune annonce" : organizedSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
-                                                </p>
-                                                {organizedSubFilter === 'all' ? (
-                                                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                                                        <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto">{t('dashboard.labels.search_match', 'Rechercher un match')}</Button>
-                                                        <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament', 'Rechercher un tournoi')}</Button>
-                                                    </div>
-                                                ) : (
-                                                    <Button as={Link} to={organizedSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={organizedSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold w-full sm:w-auto ${organizedSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
-                                                        {organizedSubFilter === 'tournament' ? "Rechercher un tournoi" : "Rechercher un match"}
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-
-
-                                </div>
-                            </Tab>
-
-                            <Tab
-                                key="participations"
-                                title={
-                                    <div className="flex items-center space-x-2">
-                                        <span>{t('dashboard.tabs.participations')}</span>
-                                        {allConfirmedTournaments.length > 0 && (
-                                            <Chip size="sm" variant="solid" color="secondary" className="h-5 min-w-5 px-1 font-black">
-                                                {allConfirmedTournaments.length}
-                                            </Chip>
-                                        )}
-                                    </div>
-                                }
-                            >
-                                <div className="flex flex-col gap-4 pt-2">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {isLoadingParticipations ? (
-                                            <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" /></div>
-                                        ) : allConfirmedTournaments.length > 0 ? (
-                                            allConfirmedTournaments.map((part) => (
-                                                <ConfirmedTournamentCard
-                                                    key={part.match_id}
-                                                    participation={part}
-                                                    highlighted={highlightedCardId === part.match_id}
-                                                    onMarkAsRead={markAsRead}
-                                                    formatDate={formatDate}
-                                                    formatTime={formatTime}
-                                                />
-                                            ))
-                                        ) : (
-                                            <div className="col-span-full py-8 text-center space-y-4">
-                                                <p className="text-default-400 font-medium">
-                                                    {t('dashboard.labels.no_participation_tournament', "Vous n'avez postulé à aucun tournoi")}
-                                                </p>
-                                                <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament', 'Rechercher un tournoi')}</Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </Tab>
-
-                            <Tab
-                                key="confirmed_matches"
-                                title={
-                                    <div className="flex items-center space-x-2">
-                                        <span>{t('dashboard.tabs.confirmed_matches')}</span>
-                                        {allConfirmedMatches.length > 0 && (
-                                            <Chip size="sm" variant="solid" color="success" className="h-5 min-w-5 px-1">
-                                                {allConfirmedMatches.length}
-                                            </Chip>
-                                        )}
-                                    </div>
-                                }
-                            >
-                                <div className="flex flex-col gap-4 pt-2">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {(isLoadingIncoming || isLoadingParticipations) ? (
-                                            <div className="col-span-full flex justify-center py-12"><Spinner color="success" /></div>
-                                        ) : allConfirmedMatches.length > 0 ? (
-                                            allConfirmedMatches.map((cm, idx) => (
-                                                <ConfirmedMatchCard
-                                                    key={idx}
-                                                    match={cm}
-                                                    highlighted={highlightedCardId === cm.match_id}
-                                                    onMarkAsRead={markAsRead}
-                                                    formatDate={formatDate}
-                                                    formatTime={formatTime}
-                                                />
-                                            ))
-                                        ) : (
-                                            <div className="col-span-full py-12 flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10">
-                                                <div className="p-4 rounded-2xl bg-white/5 text-default-400 mb-4">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
-                                                    </svg>
-                                                </div>
-                                                <p className="text-default-400 font-bold">{t('dashboard.empty.participations')}</p>
-                                                <Button
-                                                    variant="light"
-                                                    color="primary"
-                                                    className="mt-4 font-bold"
-                                                    as={Link}
-                                                    to="/matches"
-                                                >
-                                                    {t('dashboard.labels.search_match')}
+                                            ) : (
+                                                <Button as={Link} to={organizedSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={organizedSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold w-full sm:w-auto ${organizedSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
+                                                    {organizedSubFilter === 'tournament' ? "Rechercher un tournoi" : "Rechercher un match"}
                                                 </Button>
-                                            </div>
-                                        )}
-                                    </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                            </Tab>
-                        </Tabs>
-                    </div>
-                </div>
+
+
+                            </div>
+                        </Tab>
+
+                        <Tab
+                            key="participations"
+                            title={
+                                <div className="flex items-center space-x-2">
+                                    <span>{t('dashboard.tabs.participations')}</span>
+                                    {allConfirmedTournaments.length > 0 && (
+                                        <Chip size="sm" variant="solid" color="secondary" className="h-5 min-w-5 px-1 font-black">
+                                            {allConfirmedTournaments.length}
+                                        </Chip>
+                                    )}
+                                </div>
+                            }
+                        >
+                            <div className="flex flex-col gap-4 pt-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {isLoadingParticipations ? (
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" /></div>
+                                    ) : allConfirmedTournaments.length > 0 ? (
+                                        allConfirmedTournaments.map((part) => (
+                                            <ConfirmedTournamentCard
+                                                key={part.match_id}
+                                                participation={part}
+                                                highlighted={highlightedCardId === part.match_id}
+                                                onMarkAsRead={markAsRead}
+                                                formatDate={formatDate}
+                                                formatTime={formatTime}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-8 text-center space-y-4">
+                                            <p className="text-default-400 font-medium">
+                                                {t('dashboard.labels.no_participation_tournament', "Vous n'avez postulé à aucun tournoi")}
+                                            </p>
+                                            <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament', 'Rechercher un tournoi')}</Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </Tab>
+
+                        <Tab
+                            key="confirmed_matches"
+                            title={
+                                <div className="flex items-center space-x-2">
+                                    <span>{t('dashboard.tabs.confirmed_matches')}</span>
+                                    {allConfirmedMatches.length > 0 && (
+                                        <Chip size="sm" variant="solid" color="success" className="h-5 min-w-5 px-1">
+                                            {allConfirmedMatches.length}
+                                        </Chip>
+                                    )}
+                                </div>
+                            }
+                        >
+                            <div className="flex flex-col gap-4 pt-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {(isLoadingIncoming || isLoadingParticipations) ? (
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="success" /></div>
+                                    ) : allConfirmedMatches.length > 0 ? (
+                                        allConfirmedMatches.map((cm, idx) => (
+                                            <ConfirmedMatchCard
+                                                key={idx}
+                                                match={cm}
+                                                highlighted={highlightedCardId === cm.match_id}
+                                                onMarkAsRead={markAsRead}
+                                                formatDate={formatDate}
+                                                formatTime={formatTime}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-12 flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10">
+                                            <div className="p-4 rounded-2xl bg-white/5 text-default-400 mb-4">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-default-400 font-bold">{t('dashboard.empty.participations')}</p>
+                                            <Button
+                                                variant="light"
+                                                color="primary"
+                                                className="mt-4 font-bold"
+                                                as={Link}
+                                                to="/matches"
+                                            >
+                                                {t('dashboard.labels.search_match')}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </Tab>
+                    </Tabs>
+                </DataWall>
             </section>
             <Modal isOpen={isProfileOpen} onOpenChange={onProfileChange} backdrop="blur">
                 <ModalContent className="bg-[#1a1a1c] border border-white/10">
