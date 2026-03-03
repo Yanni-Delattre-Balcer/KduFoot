@@ -12,9 +12,12 @@ interface UserContextType {
     linkClub: (siret: string) => Promise<any>;
     unlinkClub: () => Promise<void>;
     updateUser: (data: Partial<User>) => Promise<any>;
+    blockUser: (userId: string, isBlocked: boolean) => Promise<void>;
     refetch: () => Promise<void>;
     profileComplete: boolean;
     isLocked: boolean;
+    isAdmin: boolean;
+    isBlocked: boolean;
     notifications: {
         pendingRequests: number;
         modifiedParticipations: number;
@@ -57,6 +60,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // SÉCURITÉ RÉACTIVE : Le cadenas est activé par défaut à la connexion (isAuthenticated)
     // On ne déverrouille QUE si le profil est chargé ET complet, ou si on est en mode Visiteur.
     const isLocked = isAuthenticated && !isVisitor && (!user || !isProfileComplete(user, true));
+
+    const isAdmin = user?.email === 'yannidelattrebalcer.artois@gmail.com';
+    const isBlocked = !!user?.is_blocked;
 
     const linkClub = async (siret: string) => {
         const token = await getAccessTokenSilently();
@@ -126,6 +132,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return resData;
     };
 
+    const blockUser = async (userId: string, isBlocked: boolean) => {
+        const token = await getAccessTokenSilently();
+        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/admin/users/${userId}/block`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ is_blocked: isBlocked }),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Failed to block user');
+        }
+        await mutate(CONTEXT_KEY);
+    };
+
     const value = useMemo(() => ({
         user,
         isLoading,
@@ -133,14 +157,39 @@ export function UserProvider({ children }: { children: ReactNode }) {
         linkClub,
         unlinkClub,
         updateUser,
+        blockUser,
         refetch: async () => { await mutate(CONTEXT_KEY); },
         profileComplete,
         isLocked,
+        isAdmin,
+        isBlocked,
         notifications
-    }), [user, isLoading, error, profileComplete, isLocked, notifications, getAccessTokenSilently]);
+    }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, notifications, getAccessTokenSilently]);
 
     return (
         <UserContext.Provider value={value}>
+            {isBlocked && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background p-6">
+                    <div className="max-w-md w-full bg-content1 border border-danger-200 shadow-2xl rounded-3xl p-8 text-center flex flex-col items-center gap-6 animate-appearance-in">
+                        <div className="p-4 rounded-full bg-danger-100 text-danger border border-danger-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12">
+                                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">Accès Verrouillé</h1>
+                        <p className="text-default-600 font-medium leading-relaxed">
+                            Vous avez été bloqué temporairement par les gérants de <strong>Kdufoot</strong>.
+                            Veuillez nous contacter par mail pour plus d'informations.
+                        </p>
+                        <a
+                            href="mailto:support@kdufoot.com"
+                            className="text-primary font-bold hover:underline"
+                        >
+                            support@kdufoot.com
+                        </a>
+                    </div>
+                </div>
+            )}
             {children}
         </UserContext.Provider>
     );

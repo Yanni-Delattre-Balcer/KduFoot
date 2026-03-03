@@ -137,6 +137,18 @@ export function useMatch(id: string | null, refreshInterval = 0) {
         mutate();
     }, [id, getAccessTokenSilently, mutate]);
 
+    const adminDeleteMatch = useCallback(async () => {
+        if (!id) return;
+        const token = await getAccessTokenSilently();
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/matches/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Failed to delete match as admin');
+        }
+    }, [id, getAccessTokenSilently]);
     const updateRequestStatus = useCallback(async (userId: string, status: 'accepted' | 'refused') => {
         if (!id) return;
         const token = await getAccessTokenSilently();
@@ -150,6 +162,7 @@ export function useMatch(id: string | null, refreshInterval = 0) {
         isError: error,
         updateMatch,
         deleteMatch,
+        adminDeleteMatch,
         contactMatch,
         cancelMatchContact,
         updateRequestStatus,

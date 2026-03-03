@@ -22,15 +22,18 @@ export default function MatchDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { user, profileComplete } = useUser();
+    const { user, profileComplete, isAdmin, blockUser } = useUser();
     const { isAuthenticated } = useAuth();
     const { openGateway } = useWelcomeGateway();
     const isMasked = !isAuthenticated || !profileComplete;
-    const { match, isLoading, isError, contactMatch, deleteMatch, cancelMatchContact, updateRequestStatus } = useMatch(id || null);
+    const { match, isLoading, isError, contactMatch, deleteMatch, adminDeleteMatch, cancelMatchContact, updateRequestStatus } = useMatch(id || null);
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
     const { isOpen: isCancelOpen, onOpen: onCancelOpen, onOpenChange: onCancelOpenChange } = useDisclosure();
+    const { isOpen: isAdminDeleteOpen, onOpen: onAdminDeleteOpen, onOpenChange: onAdminDeleteOpenChange } = useDisclosure();
     const [isDeleting, setIsDeleting] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
+    const [isAdminDeleting, setIsAdminDeleting] = useState(false);
+    const [isBlocking, setIsBlocking] = useState(false);
 
     if (isLoading) {
         return (
@@ -83,6 +86,36 @@ export default function MatchDetailsPage() {
         }
     };
 
+    const handleAdminDelete = async () => {
+        setIsAdminDeleting(true);
+        try {
+            await adminDeleteMatch();
+            onAdminDeleteOpenChange();
+            navigate('/matches');
+        } catch (error: any) {
+            console.error("Admin delete failed", error);
+            alert(error.message || "Erreur lors de la suppression admin");
+        } finally {
+            setIsAdminDeleting(false);
+        }
+    };
+
+    const handleBlockUser = async () => {
+        if (!match.owner_id) return;
+        if (!confirm("Voulez-vous vraiment BLOQUER cet utilisateur ? Il ne pourra plus accéder au service.")) return;
+
+        setIsBlocking(true);
+        try {
+            await blockUser(match.owner_id, true);
+            alert("Utilisateur bloqué avec succès.");
+        } catch (error: any) {
+            console.error("Blocking failed", error);
+            alert(error.message || "Erreur lors du blocage");
+        } finally {
+            setIsBlocking(false);
+        }
+    };
+
     // Parse Gender from notes if present
     const genderMatch = match.notes?.match(/Genre: (.*)(\n|$)/);
     // Default to 'Mixte' if not specified or explicitly 'Non spécifié'
@@ -130,6 +163,43 @@ export default function MatchDetailsPage() {
                                 } onPress={onDeleteOpen}>
                                     {t('delete')}
                                 </Button>
+                            </div>
+                        )}
+
+                        {isAdmin && user?.id !== match.owner_id && (
+                            <div className="flex flex-col sm:flex-row gap-2 bg-danger/5 p-2 rounded-2xl border border-danger/20 animate-pulse">
+                                <span className="text-[10px] font-bold text-danger uppercase px-2 py-1">Outils Modération (ADMIN)</span>
+                                <div className="flex gap-2">
+                                    <Button
+                                        color="danger"
+                                        size="sm"
+                                        variant="solid"
+                                        className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20"
+                                        startContent={
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                                                <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5 0l.5 8.5a.75.75 0 1 0 1.5 0l-.5-8.5Zm4.335 0a.75.75 0 1 0-1.5 0l-.5 8.5a.75.75 0 1 0 1.5 0l.5-8.5Z" clipRule="evenodd" />
+                                            </svg>
+                                        }
+                                        onPress={onAdminDeleteOpen}
+                                    >
+                                        Supprimer l'annonce
+                                    </Button>
+                                    <Button
+                                        color="danger"
+                                        size="sm"
+                                        variant="bordered"
+                                        className="font-black uppercase tracking-tighter"
+                                        isLoading={isBlocking}
+                                        startContent={
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                                                <path fillRule="evenodd" d="M12 1.5a.75.75 0 0 1 .75.75V4.5a.75.75 0 0 1-1.5 0V2.25A.75.75 0 0 1 12 1.5ZM5.636 4.136a.75.75 0 0 1 1.06 0l1.592 1.591a.75.75 0 0 1-1.061 1.06L5.636 5.197a.75.75 0 0 1 0-1.061Zm12.728 0a.75.75 0 0 1 0 1.06l-1.591 1.592a.75.75 0 0 1-1.06-1.061l1.592-1.591a.75.75 0 0 1 1.06 0ZM12 5.25a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM3 12a.75.75 0 0 1 .75-.75h2.25a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 12Zm15 0a.75.75 0 0 1 .75-.75h2.25a.75.75 0 0 1 0 1.5h-2.25A.75.75 0 0 1 18 12ZM6.697 18.364a.75.75 0 0 1 1.06 0l1.591 1.591a.75.75 0 1 1-1.06 1.061l-1.591-1.592a.75.75 0 0 1 0-1.06Zm10.606 0a.75.75 0 0 1 0 1.06l-1.592 1.591a.75.75 0 1 1-1.06-1.06l1.591-1.592a.75.75 0 0 1 1.06 0ZM12 18.75a.75.75 0 0 1 .75.75V21.75a.75.75 0 0 1-1.5 0V19.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
+                                            </svg>
+                                        }
+                                        onPress={handleBlockUser}
+                                    >
+                                        Bloquer l'utilisateur
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -540,6 +610,31 @@ export default function MatchDetailsPage() {
                                         </Button>
                                         <Button color="danger" onPress={handleDelete} isLoading={isDeleting} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">
                                             Confirmer la suppression
+                                        </Button>
+                                    </ModalFooter>
+                                </>
+                            )}
+                        </ModalContent>
+                    </Modal>
+
+                    {/* Admin Delete Confirmation Modal */}
+                    <Modal isOpen={isAdminDeleteOpen} onOpenChange={onAdminDeleteOpenChange} backdrop="blur">
+                        <ModalContent className="bg-[#1a1a1c] border border-white/10">
+                            {(onClose) => (
+                                <>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Suppression Modérateur (ADMIN)</ModalHeader>
+                                    <ModalBody>
+                                        <p className="text-default-400 font-medium italic">
+                                            ⚠️ Attention : En tant qu'administrateur, vous allez supprimer cette annonce.
+                                            L'action est définitive.
+                                        </p>
+                                    </ModalBody>
+                                    <ModalFooter>
+                                        <Button variant="light" onPress={onClose} className="font-bold">
+                                            Annuler
+                                        </Button>
+                                        <Button color="danger" onPress={handleAdminDelete} isLoading={isAdminDeleting} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">
+                                            Supprimer définitivement
                                         </Button>
                                     </ModalFooter>
                                 </>

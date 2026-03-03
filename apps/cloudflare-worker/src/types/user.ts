@@ -19,6 +19,7 @@ export interface User {
     longitude?: number | null;
     picture?: string | null;
     subscription: 'Free' | 'Pro' | 'Ultime';
+    is_blocked?: boolean;
     created_at: number;
     updated_at: number;
 }

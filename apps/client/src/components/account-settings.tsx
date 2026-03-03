@@ -509,69 +509,72 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
 
                             <div className="flex flex-col gap-2">
-                                <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start">
-                                    <div className="flex-1 flex flex-col gap-1">
-                                        <Input
-                                            label={
-                                                <span className="animate-pulse-red font-bold text-danger text-xs md:text-sm text-center md:text-left break-words w-full block">
-                                                    Numéro SIRET (14 chiffres) ou SIREN (9 chiffres)
-                                                </span>
-                                            }
-                                            variant="bordered"
-                                            size="sm"
-                                            value={siret}
-                                            onValueChange={(v) => {
-                                                const cleaned = v.replace(/\s/g, '');
-                                                if (cleaned.length <= 14) {
-                                                    setSiret(v);
-                                                    if (errors.siret) setErrors(prev => ({ ...prev, siret: "" }));
+                                <div className="flex flex-col gap-3">
+                                    {!dbUser?.club_id && (
+                                        <p className="text-[10px] sm:text-xs text-default-600 font-medium bg-default-100 p-2 rounded-lg leading-relaxed border border-default-200 order-1">
+                                            💡 {t('matchForm.link_club.search_help', "Pour trouver votre numéro, tapez sur Google : \"SIRET + [Nom exact de votre club]\". Exemple : \"SIRET RC Lens\".")}
+                                        </p>
+                                    )}
+                                    <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start order-2">
+                                        <div className="flex-1 flex flex-col gap-1">
+                                            <Input
+                                                label={
+                                                    <span className="animate-pulse-red font-bold text-danger text-xs md:text-sm text-center md:text-left break-words w-full block">
+                                                        Numéro SIRET (14 chiffres) ou SIREN (9 chiffres)
+                                                    </span>
                                                 }
-                                            }}
-                                            placeholder="123 456 789 00012"
-                                            isDisabled={!!dbUser?.club_id}
-                                            isInvalid={!!errors.siret}
-                                            className="w-full max-w-full"
-                                        />
-                                        {errors.siret ? (
-                                            <p className="text-[10px] text-danger font-bold pl-1 animate-shake">{errors.siret}</p>
-                                        ) : (
-                                            <p className="text-[10px] text-default-400 pl-1 leading-relaxed">
-                                                {t('matchForm.link_club.search_help', "Pour trouver votre numéro, tapez sur Google : \"SIRET + [Nom exact de votre club]\". Exemple : \"SIRET RC Lens\".")}
-                                            </p>
-                                        )}
-                                    </div>
-                                    {!dbUser?.club_id ? (
-                                        <Button
-                                            color="primary"
-                                            size="sm"
-                                            className="h-12 font-bold px-4 w-full sm:w-auto"
-                                            onPress={handleLinkSiret}
-                                            isLoading={isSaving}
-                                        >
-                                            VALIDER MON CLUB
-                                        </Button>
-                                    ) : (
-                                        authUser?.email === 'yannidelattrebalcer.artois@gmail.com' && (
-                                            <Button
-                                                color="danger"
-                                                variant="flat"
+                                                variant="bordered"
                                                 size="sm"
-                                                className="h-12 font-bold px-4 w-full sm:w-auto uppercase"
-                                                onPress={async () => {
-                                                    if (confirm("Détacher le club ? (Admin uniquement)")) {
-                                                        try {
-                                                            await unlinkClub();
-                                                            addToast({ title: "Club détaché", color: "success" });
-                                                        } catch (e: any) {
-                                                            addToast({ title: e.message, color: "danger" });
-                                                        }
+                                                value={siret}
+                                                onValueChange={(v) => {
+                                                    const cleaned = v.replace(/\s/g, '');
+                                                    if (cleaned.length <= 14) {
+                                                        setSiret(v);
+                                                        if (errors.siret) setErrors(prev => ({ ...prev, siret: "" }));
                                                     }
                                                 }}
+                                                placeholder="123 456 789 00012"
+                                                isDisabled={!!dbUser?.club_id}
+                                                isInvalid={!!errors.siret}
+                                                className="w-full max-w-full"
+                                            />
+                                            {errors.siret && (
+                                                <p className="text-[10px] text-danger font-bold pl-1 animate-shake">{errors.siret}</p>
+                                            )}
+                                        </div>
+                                        {!dbUser?.club_id ? (
+                                            <Button
+                                                color="primary"
+                                                size="sm"
+                                                className="h-12 font-bold px-4 w-full sm:w-auto"
+                                                onPress={handleLinkSiret}
+                                                isLoading={isSaving}
                                             >
-                                                {t('matchForm.buttons.unlink', 'Détacher (Admin)')}
+                                                VALIDER MON CLUB
                                             </Button>
-                                        )
-                                    )}
+                                        ) : (
+                                            authUser?.email === 'yannidelattrebalcer.artois@gmail.com' && (
+                                                <Button
+                                                    color="danger"
+                                                    variant="flat"
+                                                    size="sm"
+                                                    className="h-12 font-bold px-4 w-full sm:w-auto uppercase"
+                                                    onPress={async () => {
+                                                        if (confirm("Détacher le club ? (Admin uniquement)")) {
+                                                            try {
+                                                                await unlinkClub();
+                                                                addToast({ title: "Club détaché", color: "success" });
+                                                            } catch (e: any) {
+                                                                addToast({ title: e.message, color: "danger" });
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    {t('matchForm.buttons.unlink', 'Détacher (Admin)')}
+                                                </Button>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="p-3 rounded-xl bg-warning/10 border border-warning/20 space-y-2">

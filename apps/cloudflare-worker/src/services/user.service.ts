@@ -80,6 +80,14 @@ export class UserService {
 
         return result || null;
     }
+    async setBlockedStatus(id: string, isBlocked: boolean): Promise<boolean> {
+        const result = await this.db
+            .prepare('UPDATE users SET is_blocked = ? WHERE id = ?')
+            .bind(isBlocked ? 1 : 0, id)
+            .run();
+        return result.success;
+    }
+
     async deleteUser(id: string): Promise<boolean> {
         const result = await this.db
             .prepare('DELETE FROM users WHERE id = ?')
