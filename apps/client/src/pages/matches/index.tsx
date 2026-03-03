@@ -25,14 +25,17 @@ import TournamentForm from '@/components/matches/tournament-form';
 import DataWall from '@/components/data-wall';
 
 import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
+import { useAuth } from '@/authentication';
 
 export default function MatchesPage() {
     const { t, i18n } = useTranslation();
-    const { isVisitor } = useWelcomeGateway();
+    const { } = useWelcomeGateway();
     const [searchParams, setSearchParams] = useSearchParams();
     const [view, setView] = useState<'find' | 'create'>((searchParams.get('view') as 'find' | 'create') || 'find');
     const [type, setType] = useState<'match' | 'tournament'>((searchParams.get('type') as 'match' | 'tournament') || 'match');
-    const { user } = useUser();
+    const { user, profileComplete } = useUser();
+    const { isAuthenticated } = useAuth();
+    const isMasked = !isAuthenticated || !profileComplete;
     // Synchronization de l'URL avec l'état
     useEffect(() => {
         const nextParams = new URLSearchParams(searchParams);
@@ -581,7 +584,7 @@ export default function MatchesPage() {
                                                         )}
                                                         <div className="flex flex-col w-full">
                                                             <h4 className={`font-bold text-xl text-default-900 group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full`}>
-                                                                {isVisitor ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
+                                                                {isMasked ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
                                                             </h4>
                                                             <div className="flex items-center gap-2 mb-1">
                                                                 <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
@@ -595,7 +598,7 @@ export default function MatchesPage() {
                                                                 </Chip>
                                                             </div>
                                                             <p className={`text-small text-default-500 font-medium`}>
-                                                                {isVisitor ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
+                                                                {isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
                                                             </p>
                                                         </div>
                                                     </CardHeader>

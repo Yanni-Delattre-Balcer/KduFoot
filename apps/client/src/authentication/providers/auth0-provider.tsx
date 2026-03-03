@@ -81,6 +81,7 @@ export const useAuth0Provider = (): AuthProvider => {
       },
     };
 
+    sessionStorage.clear();
     auth0Logout(auth0Options);
 
     return Promise.resolve();

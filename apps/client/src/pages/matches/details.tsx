@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '@/layouts/default';
 import { useMatch } from '@/hooks/use-matches';
-import { useUser } from '@/hooks/use-user';
+import { useAuth, useUser } from "@/authentication";
 import { Spinner } from '@heroui/spinner';
 import { Button } from '@heroui/button';
 import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
@@ -22,8 +22,10 @@ export default function MatchDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { user } = useUser();
-    const { openGateway, isVisitor } = useWelcomeGateway();
+    const { user, profileComplete } = useUser();
+    const { isAuthenticated } = useAuth();
+    const { openGateway } = useWelcomeGateway();
+    const isMasked = !isAuthenticated || !profileComplete;
     const { match, isLoading, isError, contactMatch, deleteMatch, cancelMatchContact, updateRequestStatus } = useMatch(id || null);
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
     const { isOpen: isCancelOpen, onOpen: onCancelOpen, onOpenChange: onCancelOpenChange } = useDisclosure();
@@ -147,13 +149,13 @@ export default function MatchDetailsPage() {
                                     )}
                                 </div>
                                 <h1 className={`text-3xl font-black text-white leading-tight`}>
-                                    {isVisitor ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || 'Club'}`)}
+                                    {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || 'Club'}`)}
                                 </h1>
                                 <p className={`text-default-400 font-medium flex items-center gap-1`}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                                         <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                                     </svg>
-                                    {isVisitor ? 'ADRESSE MASQUÉE, VILLE MASQUÉE (00000)' : `${match.location_address || match.club?.address}, ${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
+                                    {isMasked ? 'ADRESSE MASQUÉE, VILLE MASQUÉE (00000)' : `${match.location_address || match.club?.address}, ${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
                                 </p>
                             </CardHeader>
 
@@ -239,9 +241,9 @@ export default function MatchDetailsPage() {
                                         </div>
                                     )}
                                     <div className={`text-center`}>
-                                        <h3 className="font-black text-xl text-white leading-tight">{isVisitor ? 'CLUB MASQUÉ' : match.club?.name}</h3>
-                                        <p className="text-white font-black uppercase mt-1 text-lg">{isVisitor ? 'VILLE MASQUÉE' : match.club?.city}</p>
-                                        <p className="text-default-400 text-xs font-medium">({isVisitor ? '00000' : match.club?.zip})</p>
+                                        <h3 className="font-black text-xl text-white leading-tight">{isMasked ? 'CLUB MASQUÉ' : match.club?.name}</h3>
+                                        <p className="text-white font-black uppercase mt-1 text-lg">{isMasked ? 'VILLE MASQUÉE' : match.club?.city}</p>
+                                        <p className="text-default-400 text-xs font-medium">({isMasked ? '00000' : match.club?.zip})</p>
                                     </div>
                                 </CardBody>
                             </Card>
@@ -289,7 +291,7 @@ export default function MatchDetailsPage() {
                                                                 variant="flat"
                                                                 className="font-black uppercase tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
                                                                 onPress={() => {
-                                                                    if (isVisitor) {
+                                                                    if (isMasked) {
                                                                         openGateway("Veuillez compléter votre profil pour effectuer cette action");
                                                                         return;
                                                                     }
@@ -310,7 +312,7 @@ export default function MatchDetailsPage() {
                                                                 variant="flat"
                                                                 className="font-black uppercase tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
                                                                 onPress={() => {
-                                                                    if (isVisitor) {
+                                                                    if (isMasked) {
                                                                         openGateway("Veuillez compléter votre profil pour effectuer cette action");
                                                                         return;
                                                                     }
@@ -364,7 +366,7 @@ export default function MatchDetailsPage() {
                                                                 color={isProfileIncomplete ? "default" : "primary"}
                                                                 className="w-full font-black uppercase tracking-tighter h-12 shadow-lg"
                                                                 onPress={async () => {
-                                                                    if (isVisitor) {
+                                                                    if (isMasked) {
                                                                         openGateway("Veuillez compléter votre profil pour effectuer cette action");
                                                                         return;
                                                                     }
@@ -383,7 +385,7 @@ export default function MatchDetailsPage() {
                                                                         alert(e.message || "Erreur lors de l'envoi");
                                                                     }
                                                                 }}
-                                                                isDisabled={isProfileIncomplete && !isVisitor}
+                                                                isDisabled={isProfileIncomplete && !isMasked}
                                                             >
                                                                 ENVOYER UNE DEMANDE
                                                             </Button>
