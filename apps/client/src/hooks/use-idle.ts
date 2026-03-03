@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
  * @param timeoutMs Delay in milliseconds before considering the user idle (default 3 minutes).
  * @returns boolean indicating if the user is idle.
  */
-export function useIdle(timeoutMs: number = 180000) {
+export function useIdle(timeoutMs: number = 60000) {
     const [isIdle, setIsIdle] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
