@@ -421,4 +421,51 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
+
+    /**
+     * @openapi
+     * /api/users/me:
+     *   delete:
+     *     tags:
+     *       - User Management
+     *     summary: Delete the current user's account
+     *     description: >
+     *       Permanently deletes the current user's record from the database.
+     *       Associated matches and tournament data created by this user will be deleted via cascade.
+     *       Authentication is required.
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Account successfully deleted.
+     *       401:
+     *         description: Unauthorized.
+     *       404:
+     *         description: User not found.
+     *       500:
+     *         description: Internal error during deletion.
+     */
+    router.delete('/api/users/me', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const sub = payload.sub;
+
+        const user = await userService.getUserByAuth0Sub(sub);
+        if (!user) {
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        try {
+            await userService.deleteUser(user.id);
+            return Response.json({ success: true, message: 'Account deleted' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+    });
 };

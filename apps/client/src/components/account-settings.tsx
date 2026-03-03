@@ -28,7 +28,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const from = searchParams.get('from') || (location.state as any)?.from;
-    const { user: authUser, getAccessToken } = useAuth();
+    const { user: authUser, getAccessToken, logout } = useAuth();
     const { user: dbUser, updateUser, linkClub, unlinkClub, refetch } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +44,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const [siret, setSiret] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isInitialized, setIsInitialized] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const formatPhoneNumber = (value: string) => {
         let raw = value.replace(/\D/g, '');
@@ -96,7 +98,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
     // Sync properties from dbUser when it loads
     useEffect(() => {
-        if (dbUser) {
+        if (dbUser && !isInitialized) {
             setFirstname(dbUser.firstname || "");
             setLastname(dbUser.lastname || "");
             setLicenseId(dbUser.license_id || "");
@@ -106,8 +108,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             setClubColors(dbUser.club_colors || "");
             setPhone(formatPhoneNumber(dbUser.phone || ""));
             setSiret(formatSiret(dbUser.siret || ""));
+            setIsInitialized(true);
         }
-    }, [dbUser]);
+    }, [dbUser, isInitialized]);
 
     if (!authUser) return null;
 
@@ -224,6 +227,41 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             addToast({ title: t('error.title'), description: error.message || t('accountModal.alerts.update_error', 'Erreur de mise à jour'), variant: 'flat', color: 'danger' });
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (!confirm(t('account.confirm_delete', "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?"))) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const token = await getAccessToken({ authorizationParams: { audience: import.meta.env.AUTH0_AUDIENCE } } as any);
+            const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/me`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Erreur lors de la suppression');
+            }
+
+            addToast({ title: t('success'), description: t('account.delete_success', 'Compte supprimé avec succès'), variant: 'flat', color: 'success' });
+
+            await logout({
+                logoutParams: {
+                    returnTo: window.location.origin
+                }
+            });
+        } catch (error: any) {
+            console.error("Delete account error:", error);
+            addToast({ title: t('error.title'), description: error.message || t('account.delete_error', 'Erreur lors de la suppression du compte'), variant: 'flat', color: 'danger' });
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -569,14 +607,26 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </div>
                 </div>
 
-                <div className="w-full flex justify-center mt-6">
+                <div className="w-full flex flex-col sm:flex-row justify-center gap-4 mt-6">
                     <Button
                         color="primary"
                         onPress={handleSave}
                         isLoading={isSaving}
-                        className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider"
+                        isDisabled={isDeleting}
+                        className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider order-2 sm:order-1"
                     >
                         {from ? t('account.buttons.save_and_continue', 'Enregistrer et continuer') : t('account.buttons.save_changes', 'Enregistrer les modifications')}
+                    </Button>
+
+                    <Button
+                        color="danger"
+                        variant="bordered"
+                        onPress={handleDeleteAccount}
+                        isLoading={isDeleting}
+                        isDisabled={isSaving}
+                        className="font-bold px-8 w-full sm:w-auto uppercase tracking-wider order-1 sm:order-2"
+                    >
+                        {t('account.buttons.delete_account', 'Supprimer mon compte')}
                     </Button>
                 </div>
             </div>

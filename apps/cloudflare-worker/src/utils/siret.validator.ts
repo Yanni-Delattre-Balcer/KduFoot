@@ -436,21 +436,8 @@ export function validateClubSiret(ape?: string, clubName?: string): { isValid: b
     }
 
     // 3. Keyword filtering specifically for 94.99Z (Assoc. divers)
-    if (isCode9499) {
-        const nameWords = cleanName.split(/[\s'-]+/);
-
-        const hasKeyword = FOOTBALL_CLUB_KEYWORDS.some(keyword => {
-            const cleanKeyword = keyword.toUpperCase();
-            if (cleanKeyword.length <= 4 && !cleanKeyword.includes(' ')) {
-                return nameWords.includes(cleanKeyword);
-            }
-            return cleanName.includes(cleanKeyword);
-        });
-
-        if (!hasKeyword) {
-            return { isValid: false, reason: "Pour une association (94.99Z), le nom doit contenir un identifiant footballistique reconnu." };
-        }
-    }
-
+    // REVISED: We now allow all club names for 94.99Z, as long as they are not explicitly excluded.
+    // This avoids blocking clubs with atypical names (e.g., "KduFoot") while maintaining sports entity verification via APE.
+    
     return { isValid: true };
 }

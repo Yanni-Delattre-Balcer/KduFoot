@@ -80,4 +80,11 @@ export class UserService {
 
         return result || null;
     }
+    async deleteUser(id: string): Promise<boolean> {
+        const result = await this.db
+            .prepare('DELETE FROM users WHERE id = ?')
+            .bind(id)
+            .run();
+        return result.success;
+    }
 }
