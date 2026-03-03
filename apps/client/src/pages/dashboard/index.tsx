@@ -22,7 +22,6 @@ import { ConfirmedTournamentCard } from './components/confirmed-tournament-card'
 import { OrganizedTournamentCard } from './components/organized-tournament-card';
 import { MyOrganizationsMemo } from './components/my-organizations-memo';
 import { ConfirmedMatchCard } from './components/confirmed-match-card';
-import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 
 const formatDate = (dateStr: string) => {
     try {
@@ -80,7 +79,6 @@ export default function DashboardPage() {
     // Modal state for 'Voir le profil'
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
     const { isLocked } = useUser();
-    const { isVisitor } = useWelcomeGateway();
 
     const [selectedTab, setSelectedTab] = useState<any>("requests");
 
