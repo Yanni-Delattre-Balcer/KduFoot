@@ -26,6 +26,7 @@
 import { JWTPayload } from "jose";
 
 import { checkPermissions } from "../auth0";
+import { Env } from "../types/env";
 
 type RouteHandler = (
 	request: Request & { params: Record<string, string>; user?: any },
@@ -287,12 +288,16 @@ export class Router {
 					request as Request & { params: Record<string, string>; user?: any },
 					env,
 				);
-			} catch (error) {
+			} catch (error: any) {
 				// eslint-disable-next-line no-console
 				console.error("Route handler error:", error);
 
 				return new Response(
-					JSON.stringify({ success: false, error: "Internal server error" }),
+					JSON.stringify({
+						success: false,
+						error: "Internal server error",
+						details: error.message || String(error) // TEMPORAIRE: Pour le débug en production
+					}),
 					{
 						status: 500,
 						headers: { ...this.corsHeaders },
