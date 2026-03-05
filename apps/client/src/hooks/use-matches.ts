@@ -1,14 +1,11 @@
-
 import useSWR from 'swr';
 import { useAuth0 } from '@auth0/auth0-react';
 import { matchService } from '../services/matches';
 import { Match, CreateMatchDto, UpdateMatchDto, MatchFilters, ContactMatchDto } from '../types/match.types';
 import { useCallback } from 'react';
-import { useIdle } from './use-idle';
 
-export function useMatches(filters?: MatchFilters, refreshInterval = 0) {
+export function useMatches(filters?: MatchFilters) {
     const { getAccessTokenSilently } = useAuth0();
-    const isIdle = useIdle();
 
     const fetcher = async (url: string) => {
         let token: string | null = null;
@@ -39,9 +36,7 @@ export function useMatches(filters?: MatchFilters, refreshInterval = 0) {
 
     const key = `/api/matches?${query.toString()}`;
 
-    const { data, error, isLoading, mutate } = useSWR(key, fetcher, {
-        refreshInterval: isIdle ? 0 : refreshInterval,
-    });
+    const { data, error, isLoading, mutate } = useSWR(key, fetcher);
 
     const createMatch = useCallback(async (dto: CreateMatchDto) => {
         const token = await getAccessTokenSilently();
@@ -56,9 +51,22 @@ export function useMatches(filters?: MatchFilters, refreshInterval = 0) {
     }, [getAccessTokenSilently, mutate]);
 
     const deleteMatch = useCallback(async (id: string) => {
+        // Optimistic UI: Remove match from the current cache instantly
+        mutate(
+            (currentData: any) => {
+                if (!currentData || !currentData.matches) return currentData;
+                return {
+                    ...currentData,
+                    matches: currentData.matches.filter((m: Match) => m.id !== id),
+                    total: currentData.total - 1
+                };
+            },
+            false // Do not revalidate immediately
+        );
+
         const token = await getAccessTokenSilently();
         await matchService.delete(id, token);
-        mutate();
+        mutate(); // Revalidate globally after server confirms
     }, [getAccessTokenSilently, mutate]);
 
     const contactMatch = useCallback(async (id: string, dto: ContactMatchDto) => {
@@ -76,13 +84,11 @@ export function useMatches(filters?: MatchFilters, refreshInterval = 0) {
         deleteMatch,
         contactMatch,
         mutate,
-        isIdle
     };
 }
 
-export function useMatch(id: string | null, refreshInterval = 0) {
+export function useMatch(id: string | null) {
     const { getAccessTokenSilently } = useAuth0();
-    const isIdle = useIdle();
 
     const fetcher = async (url: string) => {
         let token: string | null = null;
@@ -104,9 +110,7 @@ export function useMatch(id: string | null, refreshInterval = 0) {
         return response.json();
     };
 
-    const { data, error, isLoading, mutate } = useSWR(id ? `/api/matches/${id}` : null, fetcher, {
-        refreshInterval: isIdle ? 0 : refreshInterval,
-    });
+    const { data, error, isLoading, mutate } = useSWR(id ? `/api/matches/${id}` : null, fetcher);
 
     const updateMatch = useCallback(async (dto: UpdateMatchDto) => {
         if (!id) return;
@@ -166,13 +170,11 @@ export function useMatch(id: string | null, refreshInterval = 0) {
         contactMatch,
         cancelMatchContact,
         updateRequestStatus,
-        isIdle
     };
 }
 
-export function useIncomingRequests(refreshInterval = 0) {
+export function useIncomingRequests() {
     const { getAccessTokenSilently, isAuthenticated } = useAuth0();
-    const isIdle = useIdle();
 
     const fetcher = async (url: string) => {
         const token = await getAccessTokenSilently();
@@ -183,9 +185,7 @@ export function useIncomingRequests(refreshInterval = 0) {
         return response.json();
     };
 
-    const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/requests' : null, fetcher, {
-        refreshInterval: isIdle ? 0 : refreshInterval,
-    });
+    const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/requests' : null, fetcher);
 
     return {
         requests: data?.requests as any[] || [],
@@ -193,13 +193,11 @@ export function useIncomingRequests(refreshInterval = 0) {
         isLoading,
         isError: error,
         mutate,
-        isIdle
     };
 }
 
-export function useMyParticipations(refreshInterval = 0) {
+export function useMyParticipations() {
     const { getAccessTokenSilently, isAuthenticated } = useAuth0();
-    const isIdle = useIdle();
 
     const fetcher = async (url: string) => {
         const token = await getAccessTokenSilently();
@@ -210,9 +208,7 @@ export function useMyParticipations(refreshInterval = 0) {
         return response.json();
     };
 
-    const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/participations' : null, fetcher, {
-        refreshInterval: isIdle ? 0 : refreshInterval,
-    });
+    const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/participations' : null, fetcher);
 
     const markAsRead = useCallback(async (matchId: string) => {
         const token = await getAccessTokenSilently();
@@ -227,6 +223,5 @@ export function useMyParticipations(refreshInterval = 0) {
         isError: error,
         mutate,
         markAsRead,
-        isIdle
     };
 }

@@ -77,7 +77,7 @@ export default function MatchesPage() {
         return f;
     }, [filters, type, radiusKm, user?.club?.latitude, user?.club?.longitude]);
 
-    const { matches, isError, isLoading, mutate, isIdle } = useMatches(effectiveFilters, 5000);
+    const { matches, isError, isLoading, mutate } = useMatches(effectiveFilters);
 
     // Admin: supprimer un match
     const adminDeleteMatch = useCallback(async (matchId: string) => {
@@ -303,16 +303,6 @@ export default function MatchesPage() {
                                                 <h3 className="text-lg font-semibold text-default-900 dark:text-default-100">{t('matchesPage.filters.title')}</h3>
                                                 {activeFilterCount > 0 && (
                                                     <Chip size="sm" color="secondary" variant="flat" className="bg-violet-900/20 text-violet-200 dark:bg-violet-500/20 dark:text-violet-300">{activeFilterCount} {t('matchesPage.filters.active')}</Chip>
-                                                )}
-                                                {isIdle && (
-                                                    <Chip
-                                                        size="sm"
-                                                        variant="flat"
-                                                        className="bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse ml-2"
-                                                        startContent={<span className="text-xs sm:text-sm">🌙</span>}
-                                                    >
-                                                        Mode Économie (Inactif)
-                                                    </Chip>
                                                 )}
                                             </div>
                                             {activeFilterCount > 0 && (

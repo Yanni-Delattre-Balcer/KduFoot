@@ -61,13 +61,13 @@ export default function DashboardPage() {
     const { getAccessTokenSilently } = useAuth0();
 
     // 1. Mes Annonces (Organisateur)
-    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true }, 5000);
+    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
 
     // 2. Demandes Reçues (Organisateur)
-    const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateIncoming, isIdle } = useIncomingRequests(5000);
+    const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateIncoming } = useIncomingRequests();
 
     // 3. Mes Participations (Candidat)
-    const { participations: myParticipations, isLoading: isLoadingParticipations, mutate: mutateParticipations, markAsRead: markAsReadHook } = useMyParticipations(5000);
+    const { participations: myParticipations, isLoading: isLoadingParticipations, mutate: mutateParticipations, markAsRead: markAsReadHook } = useMyParticipations();
 
     // States
     const [requestsSubFilter, setRequestsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
@@ -369,16 +369,6 @@ export default function DashboardPage() {
                             <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-orange-500 to-amber-500">
                                 {t('dashboard.title')}
                             </h1>
-                            {isIdle && (
-                                <Chip
-                                    size="sm"
-                                    variant="flat"
-                                    className="bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse ml-2"
-                                    startContent={<span className="text-xs sm:text-sm">🌙</span>}
-                                >
-                                    Mode Économie (Inactif)
-                                </Chip>
-                            )}
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
                             {t('dashboard.subtitle')}
