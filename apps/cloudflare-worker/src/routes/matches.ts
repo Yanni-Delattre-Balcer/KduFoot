@@ -119,11 +119,11 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const result = await matchService.search(filters, env.GOOGLE_MAPS_API_KEY);
 
         // ==========================================
-        // SAUVEGARDE KV (TTL: 30s pour décharger D1)
+        // SAUVEGARDE KV (TTL: 60s pour décharger D1)
         // ==========================================
         if (env.KV_CACHE && !filters.ownerId) {
-            // TTL 30s : Pendant 30s, les 25000 users liront la valeur KV en cache (0 requête D1)
-            await env.KV_CACHE.put(cacheKey, JSON.stringify(result), { expirationTtl: 30 });
+            // TTL 60s : Pendant 60s, les 25000 users liront la valeur KV en cache (0 requête D1)
+            await env.KV_CACHE.put(cacheKey, JSON.stringify(result), { expirationTtl: 60 });
         }
 
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
