@@ -105,7 +105,27 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             filters.ownerId = currentUserId;
         }
 
+        // ==========================================
+        // OPTIMISATION KV : LECTURE GRATUITE ILLIMITÉE
+        // ==========================================
+        const cacheKey = `matches:search:${url.search}`;
+        if (env.KV_CACHE && !filters.ownerId) {
+            const cachedMatches = await env.KV_CACHE.get(cacheKey, 'json');
+            if (cachedMatches) {
+                return Response.json({ success: true, ...(cachedMatches as any), _source: 'KV' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            }
+        }
+
         const result = await matchService.search(filters, env.GOOGLE_MAPS_API_KEY);
+
+        // ==========================================
+        // SAUVEGARDE KV (TTL: 30s pour décharger D1)
+        // ==========================================
+        if (env.KV_CACHE && !filters.ownerId) {
+            // TTL 30s : Pendant 30s, les 25000 users liront la valeur KV en cache (0 requête D1)
+            await env.KV_CACHE.put(cacheKey, JSON.stringify(result), { expirationTtl: 30 });
+        }
+
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 

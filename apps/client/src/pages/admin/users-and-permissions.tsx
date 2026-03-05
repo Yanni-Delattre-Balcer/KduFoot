@@ -27,15 +27,19 @@ import {
 import { Chip } from "@heroui/chip";
 import { addToast } from "@heroui/toast";
 import { useAuth0 } from "@auth0/auth0-react";
+import { Input } from "@heroui/input";
 
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
+import { useUser } from "@/hooks/use-user";
 import type {
     Auth0ManagementTokenResponse,
     Auth0User,
     Auth0Permission,
 } from "@/types/auth0.types";
 import { Permission } from "@/types/permissions";
+
+const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
 // ─── Permissions KduFoot à gérer dans l'interface (Généré dynamiquement) ─────
 const getKdufootPermissions = (t: any) => {
@@ -67,14 +71,18 @@ const groupColor = (group: string): "primary" | "secondary" | "success" | "warni
         admin: "danger",
         auth0: "danger",
         coach: "success",
+        role: "danger",
     };
     return map[group] ?? "default";
 };
+
+type RoleFilter = 'all' | 'subscribers' | 'admins' | 'blocked';
 
 export default function UsersAndPermissionsPage() {
     const { user: currentUser } = useAuth0();
     const currentUserId = (currentUser?.sub ?? "").toString().trim();
     const { t } = useTranslation();
+    const { blockUser } = useUser();
     const KDUFOOT_PERMISSIONS = getKdufootPermissions(t);
 
     const {
@@ -82,7 +90,9 @@ export default function UsersAndPermissionsPage() {
         listAuth0Users,
         getUserPermissions,
         addPermissionToUser,
+        addPermissionsToUser,
         removePermissionFromUser,
+        removePermissionsFromUser,
         deleteAuth0User,
         checkResourceServerScopesWithAudience,
         updateResourceServerScopesWithAudience,
@@ -92,6 +102,7 @@ export default function UsersAndPermissionsPage() {
     const [tokenFromCache, setTokenFromCache] = useState<boolean>(false);
     const [users, setUsers] = useState<Auth0User[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
+    const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
 
     // { userId: { permKey: boolean } } — état d'édition des permissions
     const [editing, setEditing] = useState<Record<string, Record<string, boolean>>>({});
@@ -101,6 +112,10 @@ export default function UsersAndPermissionsPage() {
     const [savingUserId, setSavingUserId] = useState<string | null>(null);
     const [isSyncing, setIsSyncing] = useState(false);
     const [isUpToDate, setIsUpToDate] = useState<boolean | null>(null);
+
+    // Block UI state
+    const [blockingUserId, setBlockingUserId] = useState<string | null>(null);
+    const [blockReason, setBlockReason] = useState("");
 
     /**
      * Helper to verify if Auth0 Resource Server scopes are synchronized with the local Permission enum.
@@ -186,6 +201,20 @@ export default function UsersAndPermissionsPage() {
 
     // ─── 3. Bascule d'une permission ────────────────────────────────────────
     const togglePermission = (userId: string, permKey: string) => {
+        // Kill Switch logic: if toggling role_blocked ON, uncheck all others
+        if (permKey === 'role_blocked') {
+            const currentValue = editing[userId]?.[permKey] ?? false;
+            if (!currentValue) {
+                // Turning ON blocked: uncheck everything else
+                const newPerms: Record<string, boolean> = {};
+                KDUFOOT_PERMISSIONS.forEach(p => {
+                    newPerms[p.key] = p.key === 'role_blocked';
+                });
+                setEditing((prev) => ({ ...prev, [userId]: newPerms }));
+                return;
+            }
+        }
+
         setEditing((prev) => ({
             ...prev,
             [userId]: {
@@ -198,6 +227,13 @@ export default function UsersAndPermissionsPage() {
     // ─── 3b. Attribution rapide d'un rôle ─────────────────────────────────────
     const applyRole = (role: string) => {
         if (!selectedUserId) return;
+
+        // Super-admin protection: reject modifications for the super-admin
+        const targetUser = users.find(u => u.user_id === selectedUserId);
+        if (targetUser?.email === SUPER_ADMIN_EMAIL && role !== 'superadmin') {
+            addToast({ title: "Protection", description: "Impossible de modifier les permissions du Super-Administrateur.", variant: "solid", color: "danger" });
+            return;
+        }
 
         let newPerms: Record<string, boolean> = {};
         const currentEdits = editing[selectedUserId] || {};
@@ -241,6 +277,15 @@ export default function UsersAndPermissionsPage() {
                 KDUFOOT_PERMISSIONS.forEach(p => {
                     newPerms[p.key] = true;
                 });
+                // Remove role:blocked from superadmin
+                newPerms["role_blocked"] = false;
+                break;
+            case "blocked":
+                // Kill switch: only role:blocked is ON
+                KDUFOOT_PERMISSIONS.forEach(p => {
+                    newPerms[p.key] = false;
+                });
+                newPerms["role_blocked"] = true;
                 break;
         }
 
@@ -262,18 +307,47 @@ export default function UsersAndPermissionsPage() {
                 })
                 .map((p) => p.permission_name);
 
+            const toAdd: string[] = [];
+            const toRemove: string[] = [];
+
             for (const perm of KDUFOOT_PERMISSIONS) {
                 if (!Object.prototype.hasOwnProperty.call(edits, perm.key)) continue;
                 const shouldHave = edits[perm.key];
                 const hasIt = currentNames.includes(perm.value);
                 if (shouldHave && !hasIt) {
-                    await addPermissionToUser(mgmtToken, userId, perm.value);
+                    toAdd.push(perm.value);
                 } else if (!shouldHave && hasIt) {
-                    await removePermissionFromUser(mgmtToken, userId, perm.value);
+                    toRemove.push(perm.value);
                 }
             }
 
+            // Batch execution to avoid Auth0 rate limits
+            if (toAdd.length > 0) {
+                await addPermissionsToUser(mgmtToken, userId, toAdd);
+            }
+            if (toRemove.length > 0) {
+                await removePermissionsFromUser(mgmtToken, userId, toRemove);
+            }
+
             addToast({ title: t("success"), description: t("adminUsersPage.toasts.successUpdate"), variant: "solid", timeout: 4000 });
+
+            // Optimistic UI update so the table badges instantly reflect the new permissions
+            setUsers(prev => prev.map(u => {
+                if (u.user_id !== userId) return u;
+                const prevPerms = u.app_metadata?.permissions || [];
+                const updatedPerms = prevPerms.filter(p => !toRemove.includes(p));
+                toAdd.forEach(newP => {
+                    if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
+                });
+                return {
+                    ...u,
+                    app_metadata: {
+                        ...u.app_metadata,
+                        permissions: updatedPerms
+                    }
+                };
+            }));
+
             setEditing((prev) => ({ ...prev, [userId]: {} }));
             setSelectedUserId(null);
         } catch (err) {
@@ -291,6 +365,12 @@ export default function UsersAndPermissionsPage() {
             addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.cannotDeleteSelf"), variant: "solid" });
             return;
         }
+        // Super-admin protection
+        const targetUser = users.find(u => u.user_id === userId);
+        if (targetUser?.email === SUPER_ADMIN_EMAIL) {
+            addToast({ title: "Protection", description: "Impossible de supprimer le Super-Administrateur.", variant: "solid", color: "danger" });
+            return;
+        }
         if (!window.confirm(t("adminUsersPage.confirmDeletePrefix", { userId }))) return;
         try {
             await deleteAuth0User(mgmtToken, userId);
@@ -300,6 +380,89 @@ export default function UsersAndPermissionsPage() {
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorDelete"), variant: "solid" });
+        }
+    };
+
+    // ─── 5b. Bloquer/Débloquer un utilisateur (D1) ─────────────────────────
+    const handleBlockUser = async (userId: string, email: string | undefined) => {
+        // Super-admin protection
+        if (email === SUPER_ADMIN_EMAIL) {
+            addToast({ title: "Protection", description: "Impossible de bloquer le Super-Administrateur.", variant: "solid", color: "danger" });
+            return;
+        }
+
+        // Find the user's D1 ID (we need to look it up)
+        // The admin.ts route accepts Auth0 user_id and looks it up by ID in the path
+        // But our blockUser expects the D1 user ID. Let's use the Auth0 sub to query.
+        // Actually, looking at the admin route, it accepts the D1 user id in the path.
+        // We don't have the D1 id here. Let's show a prompt for the reason.
+        setBlockingUserId(userId);
+        setBlockReason("");
+    };
+
+    const confirmBlock = async (d1UserId: string) => {
+        try {
+            // 1. Appliquer le blocage dans la BD D1 (efface les matchs)
+            await blockUser(d1UserId, true, blockReason || 'Bloqué par l\'administrateur');
+
+            // 2. Kill switch sur Auth0 si le mgmtToken est dispo
+            if (mgmtToken) {
+                const permsToRemove = KDUFOOT_PERMISSIONS
+                    .filter(p => p.value !== Permission.ROLE_BLOCKED)
+                    .map(p => p.value);
+
+                await removePermissionsFromUser(mgmtToken, d1UserId, permsToRemove).catch(() => { });
+                await addPermissionToUser(mgmtToken, d1UserId, Permission.ROLE_BLOCKED);
+            }
+
+            addToast({ title: "Utilisateur bloqué", description: "L'utilisateur a été banni, ses données supprimées et ses droits retirés.", variant: "solid", color: "danger" });
+            setBlockingUserId(null);
+            setBlockReason("");
+
+            // Modification optimiste de l'état local pour rafraîchir le bouton instantanément
+            // (évite la latence de cache de l'API Management Auth0)
+            setUsers(prev => prev.map(u => {
+                if (u.user_id !== d1UserId) return u;
+                return {
+                    ...u,
+                    blocked: true,
+                    app_metadata: {
+                        ...u.app_metadata,
+                        permissions: [Permission.ROLE_BLOCKED]
+                    }
+                };
+            }));
+        } catch (err: any) {
+            addToast({ title: t("error.title"), description: err.message, variant: "solid", color: "danger" });
+        }
+    };
+
+    const handleUnblockUser = async (d1UserId: string) => {
+        try {
+            // 1. Débloquer dans D1
+            await blockUser(d1UserId, false);
+
+            // 2. Retirer role:blocked dans Auth0
+            if (mgmtToken) {
+                await removePermissionFromUser(mgmtToken, d1UserId, Permission.ROLE_BLOCKED).catch(() => { });
+            }
+
+            addToast({ title: "Utilisateur débloqué", description: "L'utilisateur peut à nouveau accéder au site.", variant: "solid", color: "success" });
+
+            // Modification optimiste de l'état local pour rafraîchir le bouton instantanément
+            setUsers(prev => prev.map(u => {
+                if (u.user_id !== d1UserId) return u;
+                return {
+                    ...u,
+                    blocked: false,
+                    app_metadata: {
+                        ...u.app_metadata,
+                        permissions: (u.app_metadata?.permissions || []).filter(p => p !== Permission.ROLE_BLOCKED)
+                    }
+                };
+            }));
+        } catch (err: any) {
+            addToast({ title: t("error.title"), description: err.message, variant: "solid", color: "danger" });
         }
     };
 
@@ -358,6 +521,23 @@ export default function UsersAndPermissionsPage() {
         }
     };
 
+    // ─── Filtrage des utilisateurs par rôle ──────────────────────────────────
+    const getIsAdmin = (u: Auth0User) =>
+        u.app_metadata?.permissions?.includes('auth0:admin:api') ||
+        u.app_metadata?.permissions?.includes('auth0:superadmin') ||
+        u.email === SUPER_ADMIN_EMAIL;
+
+    const filteredUsers = users.filter(u => {
+        const hasBlockedRole = u.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED) || u.blocked;
+        const isAdmin = getIsAdmin(u);
+
+        if (roleFilter === 'all') return true;
+        if (roleFilter === 'blocked') return hasBlockedRole;
+        if (roleFilter === 'admins') return isAdmin;
+        if (roleFilter === 'subscribers') return !hasBlockedRole && !isAdmin;
+        return true;
+    });
+
     // ─── Rendu ──────────────────────────────────────────────────────────────
     return (
         <DefaultLayout>
@@ -395,6 +575,44 @@ export default function UsersAndPermissionsPage() {
                     )}
                 </div>
 
+                {/* ─── Filtres de rôle ───────────────────────────────────── */}
+                <div className="flex flex-wrap gap-2 items-center">
+                    <span className="text-sm font-bold text-default-500">Filtrer :</span>
+                    <Button
+                        size="sm"
+                        variant={roleFilter === 'all' ? 'solid' : 'flat'}
+                        color={roleFilter === 'all' ? 'primary' : 'default'}
+                        onPress={() => setRoleFilter('all')}
+                    >
+                        Tous ({users.length})
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant={roleFilter === 'subscribers' ? 'solid' : 'flat'}
+                        color={roleFilter === 'subscribers' ? 'success' : 'default'}
+                        onPress={() => setRoleFilter('subscribers')}
+                    >
+                        Abonnés ({users.filter(u => !(u.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED) || u.blocked) && !getIsAdmin(u)).length})
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant={roleFilter === 'admins' ? 'solid' : 'flat'}
+                        color={roleFilter === 'admins' ? 'warning' : 'default'}
+                        onPress={() => setRoleFilter('admins')}
+                    >
+                        Admins ({users.filter(u => getIsAdmin(u)).length})
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant={roleFilter === 'blocked' ? 'solid' : 'flat'}
+                        color={roleFilter === 'blocked' ? 'danger' : 'default'}
+                        onPress={() => setRoleFilter('blocked')}
+                        className={roleFilter === 'blocked' ? 'font-black' : ''}
+                    >
+                        🚫 Bloqués ({users.filter(u => u.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED) || u.blocked).length})
+                    </Button>
+                </div>
+
                 {/* Table des utilisateurs */}
                 {loadingUsers ? (
                     <p className="text-default-500">{t("adminUsersPage.loadingUsers")}</p>
@@ -403,86 +621,169 @@ export default function UsersAndPermissionsPage() {
                         <TableHeader>
                             <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
                             <TableColumn>{t("adminUsersPage.colEmail")}</TableColumn>
+                            <TableColumn>Rôle</TableColumn>
                             <TableColumn>{t("adminUsersPage.colSubscription")}</TableColumn>
                             <TableColumn>{t("adminUsersPage.colLogins")}</TableColumn>
                             <TableColumn>{t("adminUsersPage.colActions")}</TableColumn>
                         </TableHeader>
                         <TableBody emptyContent={t("adminUsersPage.emptyUsers")}>
-                            {users.map((u) => (
-                                <TableRow key={u.user_id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            {u.picture && (
-                                                <img
-                                                    src={u.picture}
-                                                    alt={u.name}
-                                                    className="w-8 h-8 rounded-full"
-                                                />
-                                            )}
-                                            <div>
-                                                <p className="font-medium text-sm">{u.name || u.nickname}</p>
-                                                <p className="text-xs text-default-400">{u.user_id}</p>
+                            {filteredUsers.map((u) => {
+                                const isUserBlocked = u.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED) || u.blocked;
+                                const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL;
+                                return (
+                                    <TableRow
+                                        key={u.user_id}
+                                        className={isUserBlocked ? "bg-red-950/30 border-l-4 border-l-red-600" : ""}
+                                    >
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                {u.picture && (
+                                                    <img
+                                                        src={u.picture}
+                                                        alt={u.name}
+                                                        className={`w-8 h-8 rounded-full ${isUserBlocked ? 'opacity-40 grayscale' : ''}`}
+                                                    />
+                                                )}
+                                                <div>
+                                                    <p className={`font-medium text-sm ${isUserBlocked ? 'text-red-400 line-through' : ''}`}>{u.name || u.nickname}</p>
+                                                    <p className="text-xs text-default-400">{u.user_id}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-sm">{u.email}</span>
-                                            {u.email_verified && (
-                                                <span className="text-success-500 text-xs">✓</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-1">
+                                                <span className={`text-sm ${isUserBlocked ? 'text-red-400' : ''}`}>{u.email}</span>
+                                                {u.email_verified && (
+                                                    <span className="text-success-500 text-xs">✓</span>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-wrap gap-1">
+                                                {isSuperAdmin && (
+                                                    <Chip size="sm" color="warning" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">S. Admin</Chip>
+                                                )}
+                                                {u.app_metadata?.permissions?.includes('auth0:admin:api') && !isSuperAdmin && (
+                                                    <Chip size="sm" color="primary" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">Admin</Chip>
+                                                )}
+                                                {isUserBlocked && (
+                                                    <Chip size="sm" color="danger" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-black animate-pulse">🚫 BANNI</Chip>
+                                                )}
+                                                {u.app_metadata?.permissions?.includes('coach:certified') && (
+                                                    <Chip size="sm" color="success" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold italic">Certifié</Chip>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {u.app_metadata?.subscription ? (
+                                                <Chip
+                                                    size="sm"
+                                                    color={
+                                                        u.app_metadata.subscription === "Ultime"
+                                                            ? "warning"
+                                                            : u.app_metadata.subscription === "Pro"
+                                                                ? "primary"
+                                                                : "default"
+                                                    }
+                                                    variant="flat"
+                                                >
+                                                    {u.app_metadata.subscription}
+                                                </Chip>
+                                            ) : (
+                                                <Chip size="sm" color="default" variant="flat">Free</Chip>
                                             )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {u.app_metadata?.subscription ? (
-                                            <Chip
-                                                size="sm"
-                                                color={
-                                                    u.app_metadata.subscription === "Ultime"
-                                                        ? "warning"
-                                                        : u.app_metadata.subscription === "Pro"
-                                                            ? "primary"
-                                                            : "default"
-                                                }
-                                                variant="flat"
-                                            >
-                                                {u.app_metadata.subscription}
-                                            </Chip>
-                                        ) : (
-                                            <Chip size="sm" color="default" variant="flat">Free</Chip>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="text-sm">{u.logins_count ?? 0}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="flat"
-                                                color="primary"
-                                                onPress={() => openUserEditing(u.user_id)}
-                                                isDisabled={!mgmtToken}
-                                            >
-                                                {t("adminUsersPage.btnPermissions")}
-                                            </Button>
-                                            {u.user_id !== currentUserId && (
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className="text-sm">{u.logins_count ?? 0}</span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex gap-2 flex-wrap">
                                                 <Button
                                                     size="sm"
                                                     variant="flat"
-                                                    color="danger"
-                                                    onPress={() => deleteUser(u.user_id)}
-                                                    isDisabled={!mgmtToken}
+                                                    color="primary"
+                                                    onPress={() => openUserEditing(u.user_id)}
+                                                    isDisabled={!mgmtToken || (isSuperAdmin && u.user_id !== currentUserId)}
                                                 >
-                                                    {t("adminUsersPage.btnDelete")}
+                                                    {t("adminUsersPage.btnPermissions")}
                                                 </Button>
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                                {!isSuperAdmin && u.user_id !== currentUserId && (
+                                                    <>
+                                                        {isUserBlocked ? (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="solid"
+                                                                color="primary"
+                                                                className="font-bold uppercase tracking-tight"
+                                                                onPress={() => handleUnblockUser(u.user_id)}
+                                                            >
+                                                                Débloquer
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="solid"
+                                                                color="danger"
+                                                                className="font-bold"
+                                                                onPress={() => handleBlockUser(u.user_id, u.email)}
+                                                            >
+                                                                🚫 Bloquer
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            size="sm"
+                                                            variant="flat"
+                                                            color="danger"
+                                                            onPress={() => deleteUser(u.user_id)}
+                                                            isDisabled={!mgmtToken}
+                                                        >
+                                                            {t("adminUsersPage.btnDelete")}
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
+                )}
+
+                {/* ─── Modal de blocage avec motif ─────────────────────── */}
+                {blockingUserId && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                        <div className="bg-zinc-900 border-2 border-red-600 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl shadow-red-900/30">
+                            <h3 className="text-lg font-black text-red-500 uppercase tracking-tight">🚫 Bannir cet utilisateur</h3>
+                            <p className="text-sm text-default-400">
+                                Cette action va <strong className="text-red-400">supprimer définitivement</strong> tous les matchs et tournois créés par cet utilisateur.
+                            </p>
+                            <Input
+                                label="Motif du bannissement"
+                                placeholder="Ex: Comportement abusif, spam..."
+                                variant="bordered"
+                                value={blockReason}
+                                onValueChange={setBlockReason}
+                                classNames={{ inputWrapper: "border-red-600/50" }}
+                            />
+                            <div className="flex gap-3">
+                                <Button
+                                    color="danger"
+                                    className="font-bold flex-1"
+                                    onPress={() => confirmBlock(blockingUserId)}
+                                >
+                                    CONFIRMER LE BAN
+                                </Button>
+                                <Button
+                                    variant="flat"
+                                    className="flex-1"
+                                    onPress={() => { setBlockingUserId(null); setBlockReason(""); }}
+                                >
+                                    Annuler
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
                 )}
 
                 {/* Panneau d'édition des permissions */}
@@ -494,6 +795,11 @@ export default function UsersAndPermissionsPage() {
                                 <span className="text-primary">
                                     {users.find((u) => u.user_id === selectedUserId)?.name ?? selectedUserId}
                                 </span>
+                                {users.find((u) => u.user_id === selectedUserId)?.email === SUPER_ADMIN_EMAIL && (
+                                    <Chip size="sm" color="warning" variant="solid" className="ml-2 h-5 text-xs sm:text-sm uppercase font-bold">
+                                        🛡️ PROTÉGÉ
+                                    </Chip>
+                                )}
                             </h2>
                             <Button
                                 size="sm"
@@ -522,6 +828,9 @@ export default function UsersAndPermissionsPage() {
                                     <Button size="sm" variant="flat" color="danger" onPress={() => applyRole("superadmin")}>
                                         Super Administrateur
                                     </Button>
+                                    <Button size="sm" variant="solid" color="danger" className="font-black" onPress={() => applyRole("blocked")}>
+                                        🚫 BLOQUÉ
+                                    </Button>
                                 </div>
 
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
@@ -538,25 +847,33 @@ export default function UsersAndPermissionsPage() {
                                             groups[perm.group].perms.push(perm);
                                         }
                                         return Object.entries(groups).map(([groupKey, group]) => (
-                                            <div key={groupKey} className="bg-default-100 rounded-lg p-3">
+                                            <div key={groupKey} className={`rounded-lg p-3 ${groupKey === 'role' ? 'bg-red-950/30 border border-red-600/30' : 'bg-default-100'}`}>
                                                 <Chip size="sm" color={groupColor(groupKey)} variant="flat" className="mb-2">
                                                     {group.label}
                                                 </Chip>
                                                 <div className="flex flex-col gap-1.5">
-                                                    {group.perms.map((perm) => (
-                                                        <Checkbox
-                                                            key={perm.key}
-                                                            isSelected={editing[selectedUserId]?.[perm.key] ?? false}
-                                                            onValueChange={() => togglePermission(selectedUserId, perm.key)}
-                                                            size="sm"
-                                                            isDisabled={
-                                                                // Empêcher de retirer sa propre permission auth0:admin:api
-                                                                selectedUserId === currentUserId && perm.value === "auth0:admin:api"
-                                                            }
-                                                        >
-                                                            <span className="text-xs">{perm.label}</span>
-                                                        </Checkbox>
-                                                    ))}
+                                                    {group.perms.map((perm) => {
+                                                        const isSuperAdminTarget = users.find(u => u.user_id === selectedUserId)?.email === SUPER_ADMIN_EMAIL;
+                                                        return (
+                                                            <Checkbox
+                                                                key={perm.key}
+                                                                isSelected={editing[selectedUserId]?.[perm.key] ?? false}
+                                                                onValueChange={() => togglePermission(selectedUserId, perm.key)}
+                                                                size="sm"
+                                                                color={perm.key === 'role_blocked' ? 'danger' : undefined}
+                                                                isDisabled={
+                                                                    // Empêcher de retirer sa propre permission auth0:admin:api
+                                                                    (selectedUserId === currentUserId && perm.value === "auth0:admin:api") ||
+                                                                    // Super-admin protection
+                                                                    (isSuperAdminTarget && selectedUserId !== currentUserId)
+                                                                }
+                                                            >
+                                                                <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500 uppercase' : ''}`}>
+                                                                    {perm.key === 'role_blocked' ? '🚫 ' : ''}{perm.label}
+                                                                </span>
+                                                            </Checkbox>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         ));

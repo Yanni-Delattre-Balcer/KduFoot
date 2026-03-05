@@ -453,7 +453,11 @@
     }
   },
   "account": {
+    "confirm_delete": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et supprimera toutes vos données.",
+    "delete_success": "Compte supprimé avec succès.",
+    "delete_error": "Erreur lors de la suppression du compte.",
     "buttons": {
+      "delete_account": "Supprimer mon compte",
       "save_changes": "Enregistrer les modifications",
       "save_and_continue": "Enregistrer et continuer"
     }
@@ -612,6 +616,7 @@
       "view_changes": "Voir les changements",
       "mark_as_read": "J'ai compris, marquer comme lu",
       "verify": "VÉRIFIER",
+      "action_required_short": "Modifications Détectées",
       "attention": "Attention !",
       "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations.",
       "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
@@ -703,7 +708,8 @@
       "share": "Partages",
       "admin": "Administration",
       "auth0": "Administration Auth0",
-      "coach": "Certification"
+      "coach": "Certification",
+      "role": "Sanctions"
     },
     "read_api": "Lire l'API",
     "write_api": "Écrire dans l'API",
@@ -733,7 +739,8 @@
     "admin_analytics": "Statistiques ADM",
     "admin_billing": "Facturation",
     "auth0_admin_api": "Accès API Auth0",
-    "coach_certified": "Coach certifié"
+    "coach_certified": "Coach certifié",
+    "role_blocked": "Banni / Bloqué"
   },
   "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur"
 }

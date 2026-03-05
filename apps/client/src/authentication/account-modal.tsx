@@ -24,7 +24,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             isOpen={isOpen}
             onOpenChange={onOpenChange}
             backdrop="blur"
-            size="md"
+            size="2xl"
             scrollBehavior="inside"
             classNames={{
                 base: "bg-background border border-default-100 mx-2",
@@ -38,7 +38,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                             <div className="flex items-center gap-2">
                                 <span>Mon Compte</span>
                                 {isLocked && (
-                                    <span className="text-[10px] bg-danger/10 text-danger px-2 py-0.5 rounded-full animate-pulse border border-danger/20 font-black uppercase">
+                                    <span className="text-xs sm:text-sm bg-danger/10 text-danger px-2 py-0.5 rounded-full animate-pulse border border-danger/20 font-black uppercase">
                                         Configuration Requise
                                     </span>
                                 )}

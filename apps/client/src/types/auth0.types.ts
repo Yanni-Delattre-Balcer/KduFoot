@@ -14,6 +14,8 @@ export interface Auth0User {
     updated_at: string;
     last_login: string;
     logins_count: number;
+    blocked?: boolean;
+    is_blocked?: boolean;
     app_metadata?: {
         permissions?: string[];
         subscription?: 'Free' | 'Pro' | 'Ultime';

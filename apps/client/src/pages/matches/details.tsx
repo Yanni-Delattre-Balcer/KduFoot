@@ -168,7 +168,7 @@ export default function MatchDetailsPage() {
 
                         {isAdmin && user?.id !== match.owner_id && (
                             <div className="flex flex-col sm:flex-row gap-2 bg-danger/5 p-2 rounded-2xl border border-danger/20 animate-pulse">
-                                <span className="text-[10px] font-bold text-danger uppercase px-2 py-1">Outils Modération (ADMIN)</span>
+                                <span className="text-xs sm:text-sm font-bold text-danger uppercase px-2 py-1">Outils Modération (ADMIN)</span>
                                 <div className="flex gap-2">
                                     <Button
                                         color="danger"
@@ -329,7 +329,7 @@ export default function MatchDetailsPage() {
                                                     <Button
                                                         color="danger"
                                                         variant="flat"
-                                                        className="w-full font-bold text-[10px] h-9"
+                                                        className="w-full font-bold text-xs sm:text-sm h-9"
                                                         onPress={() => {
                                                             const acceptedContact = match.contacts?.find(c => c.status === 'accepted');
                                                             if (confirm("Attention : Vous allez annuler ce duel. L'adversaire sera notifié et l'annonce redeviendra ouverte. Continuer ?")) {
@@ -407,7 +407,7 @@ export default function MatchDetailsPage() {
 
                                                         {isProfileIncomplete && (
                                                             <div className="bg-danger/10 border border-danger/20 p-3 rounded-xl mb-2 animate-appearance-in">
-                                                                <p className="text-danger text-[10px] font-bold text-center uppercase">
+                                                                <p className="text-danger text-xs sm:text-sm font-bold text-center uppercase">
                                                                     {t('profile_incomplete', 'Complète ton profil club pour postuler à ce match')}
                                                                 </p>
                                                             </div>
@@ -480,7 +480,7 @@ export default function MatchDetailsPage() {
                                                     <Button
                                                         color="danger"
                                                         variant="flat"
-                                                        className="w-full font-bold text-[10px] h-9 mt-4"
+                                                        className="w-full font-bold text-xs sm:text-sm h-9 mt-4"
                                                         onPress={() => {
                                                             if (confirm("Voulez-vous vraiment vous désister de ce match confirmé ? L'organisateur sera averti.")) {
                                                                 handleCancelRequest();
@@ -535,12 +535,12 @@ export default function MatchDetailsPage() {
                                                         <div className="flex justify-between items-start">
                                                             <p className="font-bold text-white">{contact.club_name || 'Club intéressé'}</p>
                                                             {contact.status !== 'pending' && (
-                                                                <Chip size="sm" color={contact.status === 'accepted' ? 'success' : 'danger'} variant="flat" className="font-bold uppercase text-[10px]">
+                                                                <Chip size="sm" color={contact.status === 'accepted' ? 'success' : 'danger'} variant="flat" className="font-bold uppercase text-xs sm:text-sm">
                                                                     {contact.status === 'accepted' ? 'Accepté' : 'Refusé'}
                                                                 </Chip>
                                                             )}
                                                         </div>
-                                                        <p className="text-[10px] text-default-500">{new Date(contact.contacted_at).toLocaleDateString()} à {new Date(contact.contacted_at).toLocaleTimeString()}</p>
+                                                        <p className="text-xs sm:text-sm text-default-500">{new Date(contact.contacted_at).toLocaleDateString()} à {new Date(contact.contacted_at).toLocaleTimeString()}</p>
                                                     </div>
                                                 </div>
 

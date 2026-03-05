@@ -64,18 +64,20 @@ export default function DefaultLayout({
   return (
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
       {/* Floating Logo - Independent of Navbar - Responsive */}
-      <div className="fixed top-0 left-4 lg:left-6 z-50 py-1 lg:py-2 pointer-events-none">
+      <div className="fixed top-0 left-3 lg:left-6 z-[60] py-1 lg:py-2 pointer-events-none">
         <a href="/" className="pointer-events-auto block">
           <img
             src="/logo.png"
             alt="KduFoot Logo"
-            className="h-14 lg:h-20 w-auto object-contain"
+            className="h-12 lg:h-20 w-auto object-contain"
           />
         </a>
       </div>
 
       <Navbar />
-      <main className={`container mx-auto ${maxWidth} px-6 grow pt-16 lg:pt-24 pb-16`}>
+      {/* Spacer pour compenser la navbar fixed */}
+      <div className="h-14 lg:h-24 shrink-0" />
+      <main className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}>
         {children}
       </main>
       <footer className="relative w-full border-t border-default-100 bg-background/80 backdrop-blur-md mt-auto">
@@ -93,7 +95,7 @@ export default function DefaultLayout({
               >
                 Besoin d'aide ?
               </Button>
-              <span className="hidden md:block text-[10px] text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">Bugs, problèmes techniques...</span>
+              <span className="hidden md:block text-xs sm:text-sm text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">Bugs, problèmes techniques...</span>
             </div>
 
             <div className="h-10 w-px bg-default-200/30"></div>
@@ -110,12 +112,12 @@ export default function DefaultLayout({
               >
                 Autres demandes
               </Button>
-              <span className="hidden md:block text-[10px] text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">Sponsors, publicité, partenariats...</span>
+              <span className="hidden md:block text-xs sm:text-sm text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">Sponsors, publicité, partenariats...</span>
             </div>
           </div>
 
           <div className="pt-4 border-t border-default-100 w-full text-center">
-            <p className="text-[10px] text-default-400 uppercase tracking-widest font-bold opacity-50">
+            <p className="text-xs sm:text-sm text-default-400 uppercase tracking-widest font-bold opacity-50">
               © 2026 KduFoot • Football Intelligent
             </p>
           </div>

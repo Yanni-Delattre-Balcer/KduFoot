@@ -1,8 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '../../layouts/default';
 import { useMatches } from '../../hooks/use-matches';
 import { useUser } from '../../hooks/use-user';
+import { addToast } from '@heroui/toast';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -33,9 +34,10 @@ export default function MatchesPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [view, setView] = useState<'find' | 'create'>((searchParams.get('view') as 'find' | 'create') || 'find');
     const [type, setType] = useState<'match' | 'tournament'>((searchParams.get('type') as 'match' | 'tournament') || 'match');
-    const { user, profileComplete } = useUser();
-    const { isAuthenticated } = useAuth();
+    const { user, profileComplete, isAdmin } = useUser();
+    const { isAuthenticated, getAccessToken } = useAuth();
     const isMasked = !isAuthenticated || !profileComplete;
+
     // Synchronization de l'URL avec l'état
     useEffect(() => {
         const nextParams = new URLSearchParams(searchParams);
@@ -76,6 +78,23 @@ export default function MatchesPage() {
     }, [filters, type, radiusKm, user?.club?.latitude, user?.club?.longitude]);
 
     const { matches, isError, isLoading, mutate, isIdle } = useMatches(effectiveFilters, 5000);
+
+    // Admin: supprimer un match
+    const adminDeleteMatch = useCallback(async (matchId: string) => {
+        if (!confirm('⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.')) return;
+        try {
+            const token = await getAccessToken({ authorizationParams: { audience: import.meta.env.AUTH0_AUDIENCE } } as any);
+            const res = await fetch(`${import.meta.env.API_BASE_URL}/api/admin/matches/${matchId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!res.ok) throw new Error('Erreur lors de la suppression');
+            addToast({ title: 'Match supprimé', description: 'Le match a été supprimé par l\'administrateur.', variant: 'solid', color: 'success' });
+            mutate();
+        } catch (err: any) {
+            addToast({ title: 'Erreur', description: err.message, variant: 'solid', color: 'danger' });
+        }
+    }, [getAccessToken, mutate]);
 
     const handleFilterChange = (key: keyof MatchFilters, value: string) => {
         setFilters(prev => ({
@@ -238,7 +257,7 @@ export default function MatchesPage() {
                                         </svg>
                                     }
                                 >
-                                    {type === 'match' ? t('match.find') : t('match.find_tournament')}
+                                    {type === 'match' ? t('match.find') : t('match.find_tournament')}{isMasked && ' 🔒'}
                                 </Button>
                                 <Button
                                     size="lg"
@@ -252,7 +271,7 @@ export default function MatchesPage() {
                                         </svg>
                                     }
                                 >
-                                    {type === 'match' ? t('match.create') : t('match.create_tournament')}
+                                    {type === 'match' ? t('match.create') : t('match.create_tournament')}{isMasked && ' 🔒'}
                                 </Button>
                             </div>
                         </div>
@@ -290,7 +309,7 @@ export default function MatchesPage() {
                                                         size="sm"
                                                         variant="flat"
                                                         className="bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse ml-2"
-                                                        startContent={<span className="text-[10px]">🌙</span>}
+                                                        startContent={<span className="text-xs sm:text-sm">🌙</span>}
                                                     >
                                                         Mode Économie (Inactif)
                                                     </Chip>
@@ -536,7 +555,7 @@ export default function MatchesPage() {
                                                             {count > 0 && (
                                                                 <div className="flex flex-wrap justify-center gap-px max-w-[90%]">
                                                                     {Array.from({ length: Math.min(count, 4) }).map((_, bi) => (
-                                                                        <span key={bi} className="text-[10px] leading-none">⚽</span>
+                                                                        <span key={bi} className="text-xs sm:text-sm leading-none">⚽</span>
                                                                     ))}
                                                                     {count > 4 && (
                                                                         <span className="text-[8px] text-violet-400 font-bold">+{count - 4}</span>
@@ -575,7 +594,7 @@ export default function MatchesPage() {
                                                 <Card key={match.id} className={`group hover:shadow-lg transition-all border border-violet-800/50 hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
                                                     <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
                                                         {user?.id === match.owner_id && (
-                                                            <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                            <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-xs sm:text-sm uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                                                     <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
                                                                 </svg>
@@ -622,16 +641,27 @@ export default function MatchesPage() {
 
                                                         {match.distance_km != null && (
                                                             <div className="flex justify-center">
-                                                                <Chip size="sm" variant="flat" color="primary" className="h-5 text-[10px]">
+                                                                <Chip size="sm" variant="flat" color="primary" className="h-5 text-xs sm:text-sm">
                                                                     {match.distance_approximate ? '~' : ''}{match.distance_km} km
                                                                 </Chip>
                                                             </div>
                                                         )}
                                                     </CardBody>
-                                                    <CardFooter className="px-4 pb-4">
-                                                        <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold w-full bg-linear-to-r from-violet-500 to-violet-700 text-white shadow-md shadow-violet-500/20">
+                                                    <CardFooter className="px-4 pb-4 flex gap-2">
+                                                        <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold flex-1 bg-linear-to-r from-violet-500 to-violet-700 text-white shadow-md shadow-violet-500/20">
                                                             DÉTAILS
                                                         </Button>
+                                                        {isAdmin && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="solid"
+                                                                color="danger"
+                                                                className="font-black uppercase tracking-tight shadow-md shadow-red-500/20"
+                                                                onPress={() => adminDeleteMatch(match.id)}
+                                                            >
+                                                                🗑️ SUPPRIMER
+                                                            </Button>
+                                                        )}
                                                     </CardFooter>
                                                 </Card>
                                             ))}

@@ -109,7 +109,7 @@ export const WelcomeGateway: React.FC = () => {
 
                                     <div className="flex items-center gap-3 w-full my-1">
                                         <div className="h-px bg-default-200 flex-1" />
-                                        <span className="text-[10px] font-bold text-default-400 uppercase tracking-widest">ou</span>
+                                        <span className="text-xs sm:text-sm font-bold text-default-400 uppercase tracking-widest">ou</span>
                                         <div className="h-px bg-default-200 flex-1" />
                                     </div>
 
@@ -127,6 +127,14 @@ export const WelcomeGateway: React.FC = () => {
                                         }
                                     >
                                         Continuer avec Google
+                                    </Button>
+
+                                    <Button
+                                        onPress={closeGateway}
+                                        variant="light"
+                                        className="font-black h-10 text-default-500 hover:text-default-900 active:scale-95 transition-all uppercase tracking-widest text-xs"
+                                    >
+                                        Continuer sans compte
                                     </Button>
                                 </div>
                             ) : (

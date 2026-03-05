@@ -44,7 +44,7 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
         <Card className="bg-default-50/5 border border-default-100/10 shadow-sm overflow-hidden mb-8">
             <CardBody className="p-0">
                 <div className="bg-white/[0.03] p-3 border-b border-white/5 flex items-center justify-between">
-                    <h4 className="text-[10px] font-black text-default-400 uppercase tracking-widest flex items-center gap-2">
+                    <h4 className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest flex items-center gap-2">
                         <span>{t('dashboard.memo.title', '📋 Historique de mes créations')}</span>
                         <Chip size="sm" variant="flat" className="h-4 text-[8px] bg-white/5">{events.length}</Chip>
                     </h4>
@@ -64,7 +64,7 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold text-default-500 shrink-0">
+                                            <span className="text-xs sm:text-sm font-bold text-default-500 shrink-0">
                                                 {formatDate(event.match_date)} —
                                             </span>
                                             <span className="text-white font-bold text-xs truncate group-hover:text-violet-400 transition-colors uppercase tracking-tight">

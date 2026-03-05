@@ -20,6 +20,7 @@ export interface User {
     picture?: string | null;
     subscription: 'Free' | 'Pro' | 'Ultime';
     is_blocked?: boolean;
+    block_reason?: string | null;
     created_at: number;
     updated_at: number;
 }

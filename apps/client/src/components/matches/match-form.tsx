@@ -277,7 +277,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                         <h4 className="text-sm font-black text-violet-100 uppercase tracking-tighter">
                                             {t('matchForm.link_club.title')}
                                         </h4>
-                                        <p className="text-[11px] text-violet-200 font-bold leading-tight">
+                                        <p className="text-sm text-violet-200 font-bold leading-tight">
                                             Veuillez renseigner votre SIRET dans votre profil pour publier.
                                         </p>
                                     </div>
@@ -307,7 +307,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-success-900 font-black uppercase tracking-tighter text-[10px]">{t('matchForm.link_club.linked')}</span>
+                                        <span className="text-success-900 font-black uppercase tracking-tighter text-xs sm:text-sm">{t('matchForm.link_club.linked')}</span>
                                         <span className="text-success-700 font-bold text-xl">{user.club?.name}</span>
                                     </div>
                                 </div>
@@ -357,7 +357,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 }}
                             />
                         </div>
-                        <p className="text-[10px] text-default-400 italic leading-tight px-1">
+                        <p className="text-xs sm:text-sm text-default-400 italic leading-tight px-1">
                             {t('matchForm.labels.stadium_note', "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement.")}
                         </p>
                     </div>
@@ -381,7 +381,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.category && <p className="text-[10px] text-danger font-bold pl-1">{errors.category}</p>}
+                        {errors.category && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.category}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -401,7 +401,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 <SelectItem key={cat}>{t(`enums.level.${cat}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.level && <p className="text-[10px] text-danger font-bold pl-1">{errors.level}</p>}
+                        {errors.level && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.level}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -422,7 +422,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             <SelectItem key="5v5">5 vs 5</SelectItem>
                             <SelectItem key="Futsal">Futsal</SelectItem>
                         </Select>
-                        {errors.format && <p className="text-[10px] text-danger font-bold pl-1">{errors.format}</p>}
+                        {errors.format && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.format}</p>}
                     </div>
                     <Select
                         label={t('matchForm.labels.gender')}
@@ -457,7 +457,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 </svg>
                             }
                         />
-                        {errors.match_date && <p className="text-[10px] text-danger font-bold pl-1">{errors.match_date}</p>}
+                        {errors.match_date && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_date}</p>}
                     </div>
                     <div className="space-y-1">
                         <Input
@@ -473,7 +473,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 </svg>
                             }
                         />
-                        {errors.match_time && <p className="text-[10px] text-danger font-bold pl-1">{errors.match_time}</p>}
+                        {errors.match_time && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_time}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -493,7 +493,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             <SelectItem key="Extérieur">{t('matchForm.venue_labels.Extérieur')}</SelectItem>
                             <SelectItem key="Neutre">{t('enums.venue.Neutre')}</SelectItem>
                         </Select>
-                        {errors.venue && <p className="text-[10px] text-danger font-bold pl-1">{errors.venue}</p>}
+                        {errors.venue && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.venue}</p>}
                     </div>
 
                     <div className="space-y-1">
@@ -515,7 +515,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.pitch_type && <p className="text-[10px] text-danger font-bold pl-1">{errors.pitch_type}</p>}
+                        {errors.pitch_type && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.pitch_type}</p>}
                     </div>
 
                     {/* Removed Row 3 since it was moved to Row 1 */}
@@ -553,7 +553,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             isRequired
                             isInvalid={!!errors.email}
                         />
-                        {errors.email && <p className="text-[10px] text-danger font-bold pl-1">{errors.email}</p>}
+                        {errors.email && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.email}</p>}
                     </div>
                     <div className="space-y-1">
                         <Input
@@ -564,7 +564,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             isRequired
                             isInvalid={!!errors.phone}
                         />
-                        {errors.phone && <p className="text-[10px] text-danger font-bold pl-1">{errors.phone}</p>}
+                        {errors.phone && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.phone}</p>}
                     </div>
                     <Textarea
                         label={t('matchForm.labels.notes')}

@@ -302,7 +302,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             />
 
             <div className="flex flex-col items-center gap-6">
-                <p className="text-[10px] font-extrabold text-danger uppercase tracking-widest -mb-4 animate-pulse-red">
+                <p className="text-sm font-extrabold text-danger uppercase tracking-widest -mb-4 animate-pulse-red">
                     Le mieux est de mettre le logo de votre club
                 </p>
 
@@ -327,7 +327,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 </div>
 
                 <div className="text-center w-full">
-                    <h3 className="text-2xl font-bold">{authUser.name}</h3>
+                    <h3 className="text-lg sm:text-2xl font-bold truncate">{authUser.name}</h3>
                     <div className="flex items-center justify-center gap-2 mt-1">
                         <Chip
                             size="sm"
@@ -342,7 +342,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
                 <div className="w-full space-y-8">
                     <div className="space-y-3">
-                        <p className="text-xs font-bold text-default-400 uppercase ml-1">Identité & Contact</p>
+                        <p className="text-sm font-bold text-default-400 uppercase ml-1">Identité & Contact</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-default-500">Email</span>
@@ -362,7 +362,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         isInvalid={!!errors.firstname}
                                         isRequired
                                     />
-                                    {errors.firstname && <p className="text-[10px] text-danger font-bold pl-1">{errors.firstname}</p>}
+                                    {errors.firstname && <p className="text-xs font-bold pl-1">{errors.firstname}</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <Input
@@ -377,7 +377,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         isInvalid={!!errors.lastname}
                                         isRequired
                                     />
-                                    {errors.lastname && <p className="text-[10px] text-danger font-bold pl-1">{errors.lastname}</p>}
+                                    {errors.lastname && <p className="text-xs font-bold pl-1">{errors.lastname}</p>}
                                 </div>
                             </div>
                             <div className="space-y-1">
@@ -394,7 +394,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     isInvalid={!!errors.phone}
                                     isRequired
                                 />
-                                {errors.phone && <p className="text-[10px] text-danger font-bold pl-1">{errors.phone}</p>}
+                                {errors.phone && <p className="text-xs font-bold pl-1">{errors.phone}</p>}
                             </div>
                             <div className="space-y-1">
                                 <Input
@@ -410,13 +410,13 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     isInvalid={!!errors.licenseId}
                                     isRequired
                                 />
-                                {errors.licenseId && <p className="text-[10px] text-danger font-bold pl-1">{errors.licenseId}</p>}
+                                {errors.licenseId && <p className="text-xs font-bold pl-1">{errors.licenseId}</p>}
                             </div>
                         </div>
                     </div>
 
                     <div className="space-y-3">
-                        <p className="text-xs font-bold text-default-400 uppercase ml-1 mt-2">Profil Sportif (Requis pour créer des annonces)</p>
+                        <p className="text-sm font-bold text-default-400 uppercase ml-1 mt-2">Profil Sportif (Requis pour créer des annonces)</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <Select
@@ -437,7 +437,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         </SelectItem>
                                     ))}
                                 </Select>
-                                {errors.category && <p className="text-[10px] text-danger font-bold pl-1">{errors.category}</p>}
+                                {errors.category && <p className="text-xs font-bold pl-1">{errors.category}</p>}
                             </div>
                             <div className="space-y-1">
                                 <Select
@@ -458,7 +458,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         </SelectItem>
                                     ))}
                                 </Select>
-                                {errors.level && <p className="text-[10px] text-danger font-bold pl-1">{errors.level}</p>}
+                                {errors.level && <p className="text-xs font-bold pl-1">{errors.level}</p>}
                             </div>
                             <div className="space-y-1">
                                 <Select
@@ -479,7 +479,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         </SelectItem>
                                     ))}
                                 </Select>
-                                {errors.pitchType && <p className="text-[10px] text-danger font-bold pl-1">{errors.pitchType}</p>}
+                                {errors.pitchType && <p className="text-xs font-bold pl-1">{errors.pitchType}</p>}
                             </div>
                             <div className="space-y-1">
                                 <Input
@@ -495,13 +495,13 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     isInvalid={!!errors.clubColors}
                                     isRequired
                                 />
-                                {errors.clubColors && <p className="text-[10px] text-danger font-bold pl-1">{errors.clubColors}</p>}
+                                {errors.clubColors && <p className="text-xs font-bold pl-1">{errors.clubColors}</p>}
                             </div>
                         </div>
                     </div>
 
                     <div className="space-y-3">
-                        <p className="text-xs font-bold text-default-400 uppercase ml-1 mt-2">Club & Localisation</p>
+                        <p className="text-sm font-bold text-default-400 uppercase ml-1 mt-2">Club & Localisation</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-default-500">Club actuel</span>
@@ -511,7 +511,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             <div className="flex flex-col gap-2">
                                 <div className="flex flex-col gap-3">
                                     {!dbUser?.club_id && (
-                                        <p className="text-[10px] sm:text-xs text-default-600 font-medium bg-default-100 p-2 rounded-lg leading-relaxed border border-default-200 order-1">
+                                        <p className="text-xs sm:text-sm text-default-600 font-medium bg-default-100 p-2 rounded-lg leading-relaxed border border-default-200 order-1">
                                             💡 {t('matchForm.link_club.search_help', "Pour trouver votre numéro, tapez sur Google : \"SIRET + [Nom exact de votre club]\". Exemple : \"SIRET RC Lens\".")}
                                         </p>
                                     )}
@@ -519,8 +519,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         <div className="flex-1 flex flex-col gap-1">
                                             <Input
                                                 label={
-                                                    <span className="animate-pulse-red font-bold text-danger text-xs md:text-sm text-center md:text-left break-words w-full block">
-                                                        Numéro SIRET (14 chiffres) ou SIREN (9 chiffres)
+                                                    <span className="animate-pulse-red font-bold text-danger text-xs sm:text-sm text-center sm:text-left break-words w-full block leading-tight">
+                                                        SIRET (14 chiffres) ou SIREN (9 chiffres)
                                                     </span>
                                                 }
                                                 variant="bordered"
@@ -539,7 +539,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                                 className="w-full max-w-full"
                                             />
                                             {errors.siret && (
-                                                <p className="text-[10px] text-danger font-bold pl-1 animate-shake">{errors.siret}</p>
+                                                <p className="text-xs font-bold pl-1 animate-shake">{errors.siret}</p>
                                             )}
                                         </div>
                                         {!dbUser?.club_id ? (
@@ -578,24 +578,23 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 </div>
 
                                 <div className="p-3 rounded-xl bg-warning/10 border border-warning/20 space-y-2">
-                                    <p className="text-[11px] leading-tight text-warning-700 font-medium">
+                                    <p className="text-sm leading-tight text-warning-700 font-medium">
                                         ⚠️ <strong>Attention :</strong> Une fois le SIRET validé et le club lié à votre compte, cette action est <strong>irréversible</strong>.
                                     </p>
-                                    <p className="text-[10px] leading-tight text-default-500 italic">
+                                    <p className="text-xs sm:text-sm leading-tight text-default-500 italic">
                                         Pour toute modification ultérieure, vous devrez contacter le support technique.
                                     </p>
+                                    <Button
+                                        as="a"
+                                        href="mailto:support@kdufoot.com"
+                                        variant="flat"
+                                        color="warning"
+                                        size="sm"
+                                        className="w-full font-bold text-sm h-10 mt-2"
+                                    >
+                                        📩 Demande d'aide
+                                    </Button>
                                 </div>
-
-                                <Button
-                                    as="a"
-                                    href="mailto:support@kdufoot.com"
-                                    variant="flat"
-                                    color="warning"
-                                    size="sm"
-                                    className="w-full font-bold text-[11px] h-9"
-                                >
-                                    📩 Demande d'aide
-                                </Button>
                             </div>
 
                             <div className="flex justify-between items-center text-sm pt-2">
@@ -610,13 +609,13 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </div>
                 </div>
 
-                <div className="w-full flex flex-col sm:flex-row justify-center gap-4 mt-6">
+                <div className="w-full flex md:w-auto flex-col gap-3 sm:flex-row sm:justify-start mt-8 pt-6 border-t border-white/10">
                     <Button
                         color="primary"
                         onPress={handleSave}
                         isLoading={isSaving}
                         isDisabled={isDeleting}
-                        className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider order-2 sm:order-1"
+                        className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider order-1"
                     >
                         {from ? t('account.buttons.save_and_continue', 'Enregistrer et continuer') : t('account.buttons.save_changes', 'Enregistrer les modifications')}
                     </Button>
@@ -627,7 +626,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                         onPress={handleDeleteAccount}
                         isLoading={isDeleting}
                         isDisabled={isSaving}
-                        className="font-bold px-8 w-full sm:w-auto uppercase tracking-wider order-1 sm:order-2"
+                        className="font-bold px-8 w-full sm:w-auto uppercase tracking-wider order-2 sm:ml-auto"
                     >
                         {t('account.buttons.delete_account', 'Supprimer mon compte')}
                     </Button>

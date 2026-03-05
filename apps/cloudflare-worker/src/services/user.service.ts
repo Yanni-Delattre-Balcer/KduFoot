@@ -80,12 +80,28 @@ export class UserService {
 
         return result || null;
     }
-    async setBlockedStatus(id: string, isBlocked: boolean): Promise<boolean> {
-        const result = await this.db
-            .prepare('UPDATE users SET is_blocked = ? WHERE id = ?')
-            .bind(isBlocked ? 1 : 0, id)
-            .run();
-        return result.success;
+    async setBlockedStatus(id: string, isBlocked: boolean, reason?: string): Promise<boolean> {
+        if (isBlocked) {
+            // 1. Delete all matches owned by this user (cascade: contacts/pairings cleaned by FK)
+            await this.db.prepare('DELETE FROM matches WHERE owner_id = ?').bind(id).run();
+
+            // 2. Delete all match contacts where the blocked user is the requester
+            await this.db.prepare('DELETE FROM match_contacts WHERE user_id = ?').bind(id).run();
+
+            // 3. Block the user and store the reason
+            const result = await this.db
+                .prepare('UPDATE users SET is_blocked = 1, block_reason = ? WHERE id = ?')
+                .bind(reason || 'Aucun motif spécifié', id)
+                .run();
+            return result.success;
+        } else {
+            // Unblock: clear reason
+            const result = await this.db
+                .prepare('UPDATE users SET is_blocked = 0, block_reason = NULL WHERE id = ?')
+                .bind(id)
+                .run();
+            return result.success;
+        }
     }
 
     async deleteUser(id: string): Promise<boolean> {

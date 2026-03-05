@@ -16,6 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useState, useEffect } from "react";
 import { LinkUniversal } from "./link-universal";
 import { clsx } from "@heroui/shared-utils";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -40,6 +41,14 @@ export const Navbar = () => {
   const totalCount = notifications.pendingRequests + notifications.modifiedParticipations;
   const location = useLocation();
   const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
     if (href.startsWith('/matches') && location.pathname === '/matches') {
@@ -69,9 +78,12 @@ export const Navbar = () => {
       maxWidth="full"
       position="sticky"
       isBlurred={false}
-      className="h-16 lg:h-24 top-0 m-0! p-0! border-none shadow-none bg-background"
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
+      className={`h-14 lg:h-24 fixed! top-0 left-0 right-0 m-0! p-0! bg-background z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
+        }`}
       classNames={{
-        wrapper: "max-w-full px-6 h-full relative flex items-center justify-between"
+        wrapper: "max-w-full px-4 lg:px-6 h-full relative flex items-center justify-between"
       }}
     >
       <NavbarContent className="hidden lg:flex gap-4 justify-center w-full" justify="center">
@@ -93,7 +105,7 @@ export const Navbar = () => {
                     size="sm"
                     color="danger"
                     variant="solid"
-                    className="h-4 min-w-[18px] px-1 text-[10px] font-extrabold animate-bounce shadow-lg shadow-danger/40 border border-white/20"
+                    className="h-4 min-w-[18px] px-1 text-xs sm:text-sm font-extrabold animate-bounce shadow-lg shadow-danger/40 border border-white/20"
                   >
                     {totalCount}
                   </Chip>
@@ -112,7 +124,17 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="lg:hidden basis-1 pl-4" justify="end">
-        <NavbarMenuToggle />
+        <NavbarMenuToggle
+          className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
+          srOnlyText="Menu"
+          icon={(isOpen) => (
+            <div className="flex flex-col items-center justify-center gap-[5px] w-6 h-6">
+              <span className={`block h-[3px] w-6 rounded-full bg-foreground transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-[8px]' : ''}`} />
+              <span className={`block h-[3px] w-6 rounded-full bg-foreground transition-all duration-300 ${isOpen ? 'opacity-0 scale-0' : ''}`} />
+              <span className={`block h-[3px] w-6 rounded-full bg-foreground transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-[8px]' : ''}`} />
+            </div>
+          )}
+        />
       </NavbarContent>
 
       <NavbarMenu className="bg-background/95 backdrop-blur-md pt-6 border-t border-default-100">

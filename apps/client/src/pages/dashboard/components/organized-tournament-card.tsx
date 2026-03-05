@@ -53,7 +53,7 @@ export const OrganizedTournamentCard = ({
                                     <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">TOURNOI</h3>
                                     <p className="text-white/70 text-sm font-bold uppercase tracking-widest">{match.name || match.club?.name || '??'}</p>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
                                             🏆 {t('enums.type.tournament')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
@@ -62,33 +62,33 @@ export const OrganizedTournamentCard = ({
                                     </div>
                                 </div>
                             </div>
-                            <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] py-3 shadow-lg shadow-violet-500/30">
+                            <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
                                 {match.status === 'active' ? '🔍 RECRUTEMENT EN COURS' : t(`dashboard.status.${match.status}`, match.status)}
                             </Chip>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
                                 <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
                                 <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
                                 <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || '5x5'}</Chip>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('tournamentForm.labels.fee', 'Frais')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('tournamentForm.labels.fee', 'Frais')}</p>
                                 <p className="text-sm font-bold text-green-400">{match.registration_fee ? `${match.registration_fee}€` : t('matchForm.labels.free', 'Gratuit')}</p>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-end">
-                                <p className="text-[11px] font-black text-purple-400 uppercase tracking-widest">{t('dashboard.tournament.filling', 'Remplissage du tournoi')}</p>
+                                <p className="text-sm font-black text-purple-400 uppercase tracking-widest">{t('dashboard.tournament.filling', 'Remplissage du tournoi')}</p>
                                 <p className="text-xs font-bold text-white">{match.accepted_count || 0} / {match.max_teams || '∞'}</p>
                             </div>
                             <Progress
@@ -106,20 +106,20 @@ export const OrganizedTournamentCard = ({
                     {/* Right Section: Teams & Actions */}
                     <div className="w-full md:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
                         <div className="mb-6">
-                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-3">{t('dashboard.tournament.registered_teams', 'Équipes inscrites')}</p>
+                            <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-3">{t('dashboard.tournament.registered_teams', 'Équipes inscrites')}</p>
                             <div className="flex items-center -space-x-3">
                                 {displayTeams.map((contact: any, i: number) => (
                                     <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]">
-                                        {contact.club_logo ? <Image src={contact.club_logo} /> : <span className="text-[10px] font-black">{contact.club_name?.charAt(0)}</span>}
+                                        {contact.club_logo ? <Image src={contact.club_logo} /> : <span className="text-xs sm:text-sm font-black">{contact.club_name?.charAt(0)}</span>}
                                     </div>
                                 ))}
                                 {remainingTeamsCount > 0 && (
                                     <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-purple-500 flex items-center justify-center z-[1]">
-                                        <span className="text-[10px] font-black text-white">+{remainingTeamsCount}</span>
+                                        <span className="text-xs sm:text-sm font-black text-white">+{remainingTeamsCount}</span>
                                     </div>
                                 )}
                                 {(match.accepted_count === 0) && (
-                                    <p className="text-[11px] text-default-400 italic">{t('dashboard.tournament.waiting_teams', "En attente d'équipes...")}</p>
+                                    <p className="text-sm text-default-400 italic">{t('dashboard.tournament.waiting_teams', "En attente d'équipes...")}</p>
                                 )}
                             </div>
                         </div>
@@ -127,7 +127,7 @@ export const OrganizedTournamentCard = ({
                         <div className="space-y-3">
                             {isTooLate ? (
                                 <div className="py-3 px-4 text-center border border-dashed border-danger/30 rounded-xl bg-danger/5">
-                                    <p className="text-[10px] font-black text-danger leading-tight uppercase px-2">
+                                    <p className="text-xs sm:text-sm font-black text-danger leading-tight uppercase px-2">
                                         {t('dashboard.alerts.h2_locked', 'Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute.')}
                                     </p>
                                 </div>
@@ -139,7 +139,7 @@ export const OrganizedTournamentCard = ({
                                             to={`/matches/${match.id}/edit`}
                                             size="sm"
                                             variant="flat"
-                                            className="flex-1 font-bold text-[11px] h-11 bg-amber-500/10 text-amber-500 active:scale-95"
+                                            className="flex-1 font-bold text-sm h-11 bg-amber-500/10 text-amber-500 active:scale-95"
                                         >
                                             {t('edit', 'Modifier')}
                                         </Button>
@@ -147,7 +147,7 @@ export const OrganizedTournamentCard = ({
                                             size="sm"
                                             variant="flat"
                                             color="danger"
-                                            className="flex-1 h-11 font-bold text-[11px] active:scale-95"
+                                            className="flex-1 h-11 font-bold text-sm active:scale-95"
                                             onPress={() => onDelete(match.id, match.match_date, match.match_time)}
                                             isLoading={isSaving}
                                         >
@@ -160,7 +160,7 @@ export const OrganizedTournamentCard = ({
                                         size="sm"
                                         variant="solid"
                                         color="secondary"
-                                        className="w-full font-bold text-[11px] h-10 active:scale-95 shadow-md shadow-secondary/20"
+                                        className="w-full font-bold text-sm h-10 active:scale-95 shadow-md shadow-secondary/20"
                                     >
                                         {t('dashboard.controls.manage_registrations', 'Gérer les inscriptions')}
                                     </Button>

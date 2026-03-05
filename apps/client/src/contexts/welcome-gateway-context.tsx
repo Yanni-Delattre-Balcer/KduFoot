@@ -14,7 +14,6 @@ interface WelcomeGatewayContextType {
 const WelcomeGatewayContext = createContext<WelcomeGatewayContextType | undefined>(undefined);
 
 const VISITOR_MODE_KEY = "kdufoot-visitor-mode";
-const GATEWAY_SHOWN_KEY = "kdufoot-gateway-shown";
 
 export const WelcomeGatewayProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const { isLoading } = useAuth();
@@ -22,19 +21,11 @@ export const WelcomeGatewayProvider: FC<{ children: ReactNode }> = ({ children }
     const [isVisitor, setIsVisitor] = useState(false);
     const [blockingMessage, setBlockingMessage] = useState<string | null>(null);
 
-    // Initialize state from storage
+    // Initialize visitor state from storage (no auto-open)
     useEffect(() => {
         const savedVisitor = sessionStorage.getItem(VISITOR_MODE_KEY);
-        const gatewayShown = sessionStorage.getItem(GATEWAY_SHOWN_KEY);
-
         if (savedVisitor === "true") {
             setIsVisitor(true);
-        }
-
-        // Systematic display logic: 
-        // Show gateway if it hasn't been shown yet in this session
-        if (!isLoading && !gatewayShown && savedVisitor !== "true") {
-            setIsOpen(true);
         }
     }, [isLoading]);
 
@@ -53,7 +44,6 @@ export const WelcomeGatewayProvider: FC<{ children: ReactNode }> = ({ children }
         setIsOpen(false);
         setBlockingMessage(null);
         sessionStorage.setItem(VISITOR_MODE_KEY, "true");
-        sessionStorage.setItem(GATEWAY_SHOWN_KEY, "true");
     };
 
     const clearVisitorMode = () => {

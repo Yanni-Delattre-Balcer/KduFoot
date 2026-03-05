@@ -50,7 +50,7 @@ export const ConfirmedMatchCard = ({
                                 <div className="min-w-0">
                                     <h3 className="font-black text-white text-xl leading-tight truncate">{opponentClubName}</h3>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
                                             ⚽ {t('enums.type.match')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color={isUserHome ? 'primary' : 'warning'} className="h-5 text-[9px] uppercase font-black">
@@ -59,33 +59,33 @@ export const ConfirmedMatchCard = ({
                                     </div>
                                 </div>
                             </div>
-                            <Chip size="sm" color="secondary" variant="solid" className="font-black uppercase text-[10px] py-3 shadow-lg shadow-violet-500/30">
+                            <Chip size="sm" color="secondary" variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
                                 {t('dashboard.status.accepted')}
                             </Chip>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
                                 <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
                                 <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
                                 <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || match.match_format || '11v11'}</Chip>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
                                 <p className="text-sm font-bold text-white truncate">{match.opponent_pitch_type || match.pitch_type || '—'}</p>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-end">
-                                <p className="text-[11px] font-black text-violet-400 uppercase tracking-widest">{t('dashboard.match.found', 'Adversaire trouvé')}</p>
+                                <p className="text-sm font-black text-violet-400 uppercase tracking-widest">{t('dashboard.match.found', 'Adversaire trouvé')}</p>
                                 <p className="text-xs font-bold text-white">1 / 1</p>
                             </div>
                             <Progress
@@ -103,7 +103,7 @@ export const ConfirmedMatchCard = ({
                     {/* Right Section: VS Visual & Actions */}
                     <div className="w-full md:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
                         <div className="mb-6 flex flex-col items-center">
-                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-4 w-full text-center md:text-left">{t('dashboard.labels.match_opposition', 'Opposition')}</p>
+                            <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-4 w-full text-center md:text-left">{t('dashboard.labels.match_opposition', 'Opposition')}</p>
 
                             <div className="flex items-center justify-center gap-6 w-full">
                                 {/* User Club (Left) */}
@@ -136,7 +136,7 @@ export const ConfirmedMatchCard = ({
                                 <Button
                                     size="sm"
                                     color="danger"
-                                    className="w-full font-black uppercase text-[10px] h-10 shadow-lg shadow-danger/20"
+                                    className="w-full font-black uppercase text-xs sm:text-sm h-10 shadow-lg shadow-danger/20"
                                     onPress={() => onMarkAsRead(match.match_id)}
                                 >
                                     ⚠️ Voir MODIFICATIONS
@@ -146,7 +146,7 @@ export const ConfirmedMatchCard = ({
                                 <Button
                                     size="sm"
                                     variant="flat"
-                                    className="flex-1 font-bold text-[11px] h-10 bg-white/5 active:scale-95"
+                                    className="flex-1 font-bold text-sm h-10 bg-white/5 active:scale-95"
                                     as={Link}
                                     to={`/matches/${match.match_id}`}
                                 >
@@ -156,7 +156,7 @@ export const ConfirmedMatchCard = ({
                                     size="sm"
                                     color="secondary"
                                     variant="solid"
-                                    className="flex-1 font-bold text-[11px] h-10 active:scale-95 shadow-md shadow-violet-500/20"
+                                    className="flex-1 font-bold text-sm h-10 active:scale-95 shadow-md shadow-violet-500/20"
                                     as="a"
                                     href={`tel:${match.opponent_phone}`}
                                 >

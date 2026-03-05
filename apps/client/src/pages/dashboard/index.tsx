@@ -374,7 +374,7 @@ export default function DashboardPage() {
                                     size="sm"
                                     variant="flat"
                                     className="bg-orange-500/10 text-orange-500 border border-orange-500/20 animate-pulse ml-2"
-                                    startContent={<span className="text-[10px]">🌙</span>}
+                                    startContent={<span className="text-xs sm:text-sm">🌙</span>}
                                 >
                                     Mode Économie (Inactif)
                                 </Chip>
@@ -422,7 +422,7 @@ export default function DashboardPage() {
                                     <Button
                                         color="danger"
                                         size="sm"
-                                        className="font-bold uppercase text-[10px] px-6"
+                                        className="font-bold uppercase text-xs sm:text-sm px-6"
                                         onPress={() => {
                                             setHighlightedCardId(modifiedParticipations[0].match_id);
                                         }}
@@ -446,7 +446,7 @@ export default function DashboardPage() {
                         classNames={{
                             tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-wrap border-b-0 gap-2",
                             cursor: "rounded-xl shadow-lg shadow-purple-500/20",
-                            tab: "h-auto py-2.5 sm:h-12 uppercase font-black tracking-tight text-[10px] sm:text-xs flex-1 min-w-[max-content] sm:min-w-0 px-3 sm:px-4",
+                            tab: "h-auto py-2.5 sm:h-12 uppercase font-black tracking-tight text-xs sm:text-sm sm:text-xs flex-1 min-w-[max-content] sm:min-w-0 px-3 sm:px-4",
                             tabContent: "group-data-[selected=true]:text-white whitespace-normal text-center leading-tight"
                         }}
                     >
@@ -455,6 +455,7 @@ export default function DashboardPage() {
                             title={
                                 <div className="flex items-center space-x-2">
                                     <span>{t('dashboard.tabs.requests')}</span>
+                                    {isLocked && <span className="text-default-400">🔒</span>}
                                     {incomingRequests.filter(r => r.request_status === 'pending').length > 0 && (
                                         <Chip size="sm" variant="solid" color="danger" className="h-5 min-w-5 px-1 font-black">
                                             {incomingRequests.filter(r => r.request_status === 'pending').length}
@@ -538,7 +539,7 @@ export default function DashboardPage() {
                                                                 )}
                                                             </div>
                                                             {request.message && request.message !== 'Demande de participation envoyée via KduFoot' && (
-                                                                <p className="text-[11px] text-default-300 italic mt-2 line-clamp-2 border-t border-white/5 pt-2">"{request.message}"</p>
+                                                                <p className="text-sm text-default-300 italic mt-2 line-clamp-2 border-t border-white/5 pt-2">"{request.message}"</p>
                                                             )}
                                                         </div>
 
@@ -549,7 +550,7 @@ export default function DashboardPage() {
                                                                     <Button
                                                                         size="sm"
                                                                         color="success"
-                                                                        className="w-full sm:flex-1 font-black uppercase text-[11px] h-12 shadow-md shadow-success/20 active:scale-95"
+                                                                        className="w-full sm:flex-1 font-black uppercase text-sm h-12 shadow-md shadow-success/20 active:scale-95"
                                                                         onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'accepted'); }}
                                                                     >
                                                                         ✓ {t('dashboard.controls.accept')}
@@ -558,7 +559,7 @@ export default function DashboardPage() {
                                                                         size="sm"
                                                                         variant="flat"
                                                                         color="danger"
-                                                                        className="w-full sm:flex-1 font-black uppercase text-[11px] h-12 active:scale-95"
+                                                                        className="w-full sm:flex-1 font-black uppercase text-sm h-12 active:scale-95"
                                                                         onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'refused'); }}
                                                                     >
                                                                         ✕ {t('dashboard.controls.refuse')}
@@ -568,7 +569,7 @@ export default function DashboardPage() {
                                                                     size="sm"
                                                                     variant="bordered"
                                                                     color="secondary"
-                                                                    className="w-full font-bold text-[11px] h-11 border-secondary/30 text-secondary active:scale-95"
+                                                                    className="w-full font-bold text-sm h-11 border-secondary/30 text-secondary active:scale-95"
                                                                     onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}
                                                                 >
                                                                     {t('dashboard.labels.view_club_profile', '👤 Voir le profil du club')}
@@ -576,8 +577,8 @@ export default function DashboardPage() {
                                                             </div>
                                                         ) : (
                                                             <div className="flex flex-col sm:flex-row gap-2 w-full relative z-20">
-                                                                <Button size="sm" variant="flat" className="w-full sm:flex-1 text-[11px] font-bold h-11 active:scale-95" as={Link} to={`/matches/${request.match_id}`} onClick={(e) => e.stopPropagation()}>{t('dashboard.controls.view')}</Button>
-                                                                <Button size="sm" variant="bordered" color="secondary" className="w-full sm:flex-1 text-[11px] font-bold h-11 border-secondary/30 active:scale-95" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>👤 Voir le profil</Button>
+                                                                <Button size="sm" variant="flat" className="w-full sm:flex-1 text-sm font-bold h-11 active:scale-95" as={Link} to={`/matches/${request.match_id}`} onClick={(e) => e.stopPropagation()}>{t('dashboard.controls.view')}</Button>
+                                                                <Button size="sm" variant="bordered" color="secondary" className="w-full sm:flex-1 text-sm font-bold h-11 border-secondary/30 active:scale-95" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>👤 Voir le profil</Button>
                                                             </div>
                                                         )}
                                                     </div>
@@ -598,7 +599,7 @@ export default function DashboardPage() {
                             </div>
                         </Tab>
 
-                        <Tab key="organized" title={t('dashboard.tabs.organized')}>
+                        <Tab key="organized" title={<div className="flex items-center space-x-2"><span>{t('dashboard.tabs.organized')}</span>{isLocked && <span className="text-default-400">🔒</span>}</div>}>
                             <div className="flex flex-col gap-4 pt-2">
                                 {renderSubFilters(organizedSubFilter, setOrganizedSubFilter)}
                                 <MyOrganizationsMemo
@@ -641,7 +642,7 @@ export default function DashboardPage() {
                                                                             <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">MATCH</h3>
                                                                             <p className="text-white/70 text-sm font-bold uppercase tracking-widest">{match.club?.name || '??'}</p>
                                                                             <div className="flex items-center gap-2 mt-1">
-                                                                                <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
+                                                                                <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
                                                                                     ⚽ {t('enums.type.match')}
                                                                                 </Chip>
                                                                                 <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
@@ -650,33 +651,33 @@ export default function DashboardPage() {
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] py-3 shadow-lg shadow-violet-500/30">
+                                                                    <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
                                                                         {match.status === 'active' ? '🔍 RECHERCHE D\'ADVERSAIRE' : t(`dashboard.status.${match.status}`, match.status)}
                                                                     </Chip>
                                                                 </div>
 
                                                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                                                                     <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                        <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
+                                                                        <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
                                                                         <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
                                                                     </div>
                                                                     <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                        <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                                                                        <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
                                                                         <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
                                                                     </div>
                                                                     <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                        <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
+                                                                        <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
                                                                         <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || '11v11'}</Chip>
                                                                     </div>
                                                                     <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                        <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                                                        <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
                                                                         <p className="text-sm font-bold text-white truncate">{match.pitch_type || '—'}</p>
                                                                     </div>
                                                                 </div>
 
                                                                 <div className="space-y-2">
                                                                     <div className="flex justify-between items-end">
-                                                                        <p className="text-[11px] font-black text-violet-400 uppercase tracking-widest">
+                                                                        <p className="text-sm font-black text-violet-400 uppercase tracking-widest">
                                                                             {(match.accepted_count || 0) >= 1 ? t('dashboard.match.filled', 'Match complet') : t('dashboard.match.searching', 'Recherche d\'adversaire')}
                                                                         </p>
                                                                         <p className="text-xs font-bold text-white">{match.accepted_count || 0} / 1</p>
@@ -697,7 +698,7 @@ export default function DashboardPage() {
                                                                 <div className="space-y-3">
                                                                     {isTooLate(match.match_date, match.match_time) ? (
                                                                         <div className="py-3 px-4 text-center border border-dashed border-danger/30 rounded-xl bg-danger/5">
-                                                                            <p className="text-[10px] font-black text-danger leading-tight uppercase px-2">
+                                                                            <p className="text-xs sm:text-sm font-black text-danger leading-tight uppercase px-2">
                                                                                 {t('dashboard.alerts.h2_locked', 'Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute.')}
                                                                             </p>
                                                                         </div>
@@ -709,7 +710,7 @@ export default function DashboardPage() {
                                                                                     to={`/matches/${match.id}/edit`}
                                                                                     size="sm"
                                                                                     variant="flat"
-                                                                                    className="flex-1 font-bold text-[11px] h-11 bg-amber-500/10 text-amber-500 active:scale-95"
+                                                                                    className="flex-1 font-bold text-sm h-11 bg-amber-500/10 text-amber-500 active:scale-95"
                                                                                 >
                                                                                     {t('edit', 'Modifier')}
                                                                                 </Button>
@@ -717,7 +718,7 @@ export default function DashboardPage() {
                                                                                     size="sm"
                                                                                     variant="flat"
                                                                                     color="danger"
-                                                                                    className="flex-1 h-11 font-bold text-[11px] active:scale-95"
+                                                                                    className="flex-1 h-11 font-bold text-sm active:scale-95"
                                                                                     onPress={() => handleDeleteMatch(match.id, match.match_date, match.match_time)}
                                                                                     isLoading={isSaving}
                                                                                 >
@@ -730,7 +731,7 @@ export default function DashboardPage() {
                                                                                 size="sm"
                                                                                 variant="solid"
                                                                                 color="secondary"
-                                                                                className="w-full font-bold text-[11px] h-10 active:scale-95 shadow-md shadow-secondary/20"
+                                                                                className="w-full font-bold text-sm h-10 active:scale-95 shadow-md shadow-secondary/20"
                                                                             >
                                                                                 {t('dashboard.controls.manage_registrations', 'Gérer les demandes')}
                                                                             </Button>
@@ -750,12 +751,12 @@ export default function DashboardPage() {
                                             </p>
                                             {organizedSubFilter === 'all' ? (
                                                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                                                    <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto">{t('dashboard.labels.search_match', 'Rechercher un match')}</Button>
-                                                    <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament', 'Rechercher un tournoi')}</Button>
+                                                    <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto">{t('dashboard.labels.search_match', 'Rechercher un match')}{isLocked && ' 🔒'}</Button>
+                                                    <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament', 'Rechercher un tournoi')}{isLocked && ' 🔒'}</Button>
                                                 </div>
                                             ) : (
                                                 <Button as={Link} to={organizedSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={organizedSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold w-full sm:w-auto ${organizedSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
-                                                    {organizedSubFilter === 'tournament' ? "Rechercher un tournoi" : "Rechercher un match"}
+                                                    {organizedSubFilter === 'tournament' ? "Rechercher un tournoi" : "Rechercher un match"}{isLocked && ' 🔒'}
                                                 </Button>
                                             )}
                                         </div>
@@ -771,6 +772,7 @@ export default function DashboardPage() {
                             title={
                                 <div className="flex items-center space-x-2">
                                     <span>{t('dashboard.tabs.participations')}</span>
+                                    {isLocked && <span className="text-default-400">🔒</span>}
                                     {allConfirmedTournaments.length > 0 && (
                                         <Chip size="sm" variant="solid" color="secondary" className="h-5 min-w-5 px-1 font-black">
                                             {allConfirmedTournaments.length}
@@ -846,7 +848,7 @@ export default function DashboardPage() {
                                                 variant="flat"
                                                 className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto"
                                             >
-                                                {t('dashboard.labels.search_match', 'Rechercher un match')}
+                                                {t('dashboard.labels.search_match', 'Rechercher un match')}{isLocked && ' 🔒'}
                                             </Button>
                                         </div>
                                     )}
@@ -866,7 +868,7 @@ export default function DashboardPage() {
                                 </div>
                                 <div className="flex-1">
                                     <h3 className="text-lg font-black uppercase tracking-tighter text-white">Profil du Club</h3>
-                                    <p className="text-[10px] text-default-400 font-bold uppercase">Informations de contact vérifiées</p>
+                                    <p className="text-xs sm:text-sm text-default-400 font-bold uppercase">Informations de contact vérifiées</p>
                                 </div>
                             </ModalHeader>
                             <ModalBody className="py-6">
@@ -893,23 +895,23 @@ export default function DashboardPage() {
                                         {/* Contact Details */}
                                         <div className="grid gap-3">
                                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="text-[10px] font-black uppercase text-default-400">Responsable</span>
+                                                <span className="text-xs sm:text-sm font-black uppercase text-default-400">Responsable</span>
                                                 <span className="text-sm font-bold text-white uppercase">{selectedClubProfile.requester_firstname || selectedClubProfile.host_firstname} {selectedClubProfile.requester_lastname || selectedClubProfile.host_lastname}</span>
                                             </div>
                                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="text-[10px] font-black uppercase text-default-400">Téléphone</span>
+                                                <span className="text-xs sm:text-sm font-black uppercase text-default-400">Téléphone</span>
                                                 <a href={`tel:${selectedClubProfile.requester_phone || selectedClubProfile.host_phone}`} className="text-sm font-black text-orange-500 hover:animate-pulse">
                                                     {selectedClubProfile.requester_phone || selectedClubProfile.host_phone}
                                                 </a>
                                             </div>
                                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="text-[10px] font-black uppercase text-default-400">Email</span>
+                                                <span className="text-xs sm:text-sm font-black uppercase text-default-400">Email</span>
                                                 <a href={`mailto:${selectedClubProfile.requester_email || selectedClubProfile.host_email}`} className="text-sm font-bold text-primary hover:underline truncate ml-4">
                                                     {selectedClubProfile.requester_email || selectedClubProfile.host_email}
                                                 </a>
                                             </div>
                                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="text-[10px] font-black uppercase text-default-400">Ville</span>
+                                                <span className="text-xs sm:text-sm font-black uppercase text-default-400">Ville</span>
                                                 <span className="text-sm font-bold text-white uppercase tracking-tight">{selectedClubProfile.requester_city || selectedClubProfile.host_city || selectedClubProfile.location_city}</span>
                                             </div>
                                         </div>

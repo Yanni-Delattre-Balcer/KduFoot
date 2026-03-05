@@ -212,7 +212,7 @@ export default function SessionPlannerPage() {
                                                         </div>
                                                         <div className="flex-1 min-w-0 text-left">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{match.match_date}</span>
+                                                                <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-white/40">{match.match_date}</span>
                                                                 <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] uppercase font-black">{match.status}</Chip>
                                                             </div>
                                                             <h3 className="font-bold text-white truncate text-base">
@@ -268,7 +268,7 @@ export default function SessionPlannerPage() {
                                                                 </div>
                                                                 <div className="flex-1 text-left">
                                                                     <h3 className="font-bold text-white text-sm line-clamp-1">{request.requester_club_name}</h3>
-                                                                    <p className="text-[10px] text-default-500 font-bold uppercase tracking-widest truncate">
+                                                                    <p className="text-xs sm:text-sm text-default-500 font-bold uppercase tracking-widest truncate">
                                                                         {t(`enums.category.${request.category}`)} • {request.match_date}
                                                                     </p>
                                                                 </div>
@@ -279,7 +279,7 @@ export default function SessionPlannerPage() {
 
                                                             {request.request_status === 'pending' && (
                                                                 <div className="flex gap-2">
-                                                                    <Button size="sm" color="success" className="flex-1 font-black uppercase text-[10px] h-8 text-success-950" onPress={async () => {
+                                                                    <Button size="sm" color="success" className="flex-1 font-black uppercase text-xs sm:text-sm h-8 text-success-950" onPress={async () => {
                                                                         if (confirm(t('matchForm.confirm.accept', 'Accepter cette demande ?'))) {
                                                                             try {
                                                                                 const token = await getAccessTokenSilently();
@@ -303,7 +303,7 @@ export default function SessionPlannerPage() {
                                                                             }
                                                                         }
                                                                     }}>Accepter</Button>
-                                                                    <Button size="sm" variant="flat" color="danger" className="flex-1 font-black uppercase text-[10px] h-8" onPress={async () => {
+                                                                    <Button size="sm" variant="flat" color="danger" className="flex-1 font-black uppercase text-xs sm:text-sm h-8" onPress={async () => {
                                                                         if (confirm(t('matchForm.confirm.refuse', 'Refuser cette demande ?'))) {
                                                                             try {
                                                                                 const token = await getAccessTokenSilently();
@@ -330,7 +330,7 @@ export default function SessionPlannerPage() {
                                                                 </div>
                                                             )}
 
-                                                            <Button size="sm" variant="flat" className={`w-full text-[10px] font-bold h-7 ${request.type === 'tournament' ? 'bg-purple-300/10 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`} as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
+                                                            <Button size="sm" variant="flat" className={`w-full text-xs sm:text-sm font-bold h-7 ${request.type === 'tournament' ? 'bg-purple-300/10 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`} as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
                                                         </CardBody>
                                                     </Card>
                                                 ))}

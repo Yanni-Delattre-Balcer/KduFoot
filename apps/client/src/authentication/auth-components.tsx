@@ -454,6 +454,47 @@ export const useSecuredApi = () => {
   };
 
   /**
+   * Add multiple permissions to an Auth0 user
+   * @param mgmtToken Token Auth0 Management API
+   * @param userId Auth0 user ID (ex: auth0|xxx)
+   * @param permissionNames Array of permission names (ex: ['exercises:read', 'admin:users'])
+   */
+  const addPermissionsToUser = async (
+    mgmtToken: string,
+    userId: string,
+    permissionNames: string[],
+  ): Promise<void> => {
+    if (permissionNames.length === 0) return;
+    const apiBase =
+      typeof import.meta !== "undefined" &&
+        (import.meta as any).env?.API_BASE_URL
+        ? (import.meta as any).env.API_BASE_URL
+        : "";
+    const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
+    const encodedId = encodeURIComponent(userId);
+
+    const permissionsPayload = permissionNames.map(name => ({
+      resource_server_identifier: audience,
+      permission_name: name,
+    }));
+
+    const resp = await fetch(
+      `https://${auth0Domain}/api/v2/users/${encodedId}/permissions`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${mgmtToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          permissions: permissionsPayload,
+        }),
+      },
+    );
+    if (!resp.ok) throw new Error(await resp.text());
+  };
+
+  /**
    * Add a permission to a Auth0 user
    * @param mgmtToken Token Auth0 Management API
    * @param userId Auth0 user ID (ex: auth0|xxx)
@@ -486,6 +527,47 @@ export const useSecuredApi = () => {
               permission_name: permissionName,
             },
           ],
+        }),
+      },
+    );
+    if (!resp.ok) throw new Error(await resp.text());
+  };
+
+  /**
+   * Remove multiple permissions from an Auth0 user
+   * @param mgmtToken Token Auth0 Management API
+   * @param userId Auth0 user ID (ex: auth0|xxx)
+   * @param permissionNames Array of permission names
+   */
+  const removePermissionsFromUser = async (
+    mgmtToken: string,
+    userId: string,
+    permissionNames: string[],
+  ): Promise<void> => {
+    if (permissionNames.length === 0) return;
+    const apiBase =
+      typeof import.meta !== "undefined" &&
+        (import.meta as any).env?.API_BASE_URL
+        ? (import.meta as any).env.API_BASE_URL
+        : "";
+    const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
+    const encodedId = encodeURIComponent(userId);
+
+    const permissionsPayload = permissionNames.map(name => ({
+      resource_server_identifier: audience,
+      permission_name: name,
+    }));
+
+    const resp = await fetch(
+      `https://${auth0Domain}/api/v2/users/${encodedId}/permissions`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${mgmtToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          permissions: permissionsPayload,
         }),
       },
     );
@@ -708,7 +790,9 @@ export const useSecuredApi = () => {
     listAuth0Users,
     getUserPermissions,
     addPermissionToUser,
+    addPermissionsToUser,
     removePermissionFromUser,
+    removePermissionsFromUser,
     deleteAuth0User,
     getResourceServers,
     updateResourceServerScopes,

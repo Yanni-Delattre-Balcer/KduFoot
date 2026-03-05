@@ -210,7 +210,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                         <h4 className="text-sm font-black text-purple-100 uppercase tracking-tighter">
                                             {t('matchForm.link_club.title')}
                                         </h4>
-                                        <p className="text-[11px] text-purple-200 font-bold leading-tight">
+                                        <p className="text-sm text-purple-200 font-bold leading-tight">
                                             Veuillez renseigner votre SIRET dans votre profil pour publier.
                                         </p>
                                     </div>
@@ -238,7 +238,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-success-900 font-black uppercase tracking-tighter text-[10px]">{t('matchForm.link_club.linked')}</span>
+                                        <span className="text-success-900 font-black uppercase tracking-tighter text-xs sm:text-sm">{t('matchForm.link_club.linked')}</span>
                                         <span className="text-success-700 font-bold text-xl">{user.club?.name}</span>
                                     </div>
                                 </div>
@@ -291,7 +291,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 }}
                             />
                         </div>
-                        <p className="text-[10px] text-default-400 italic leading-tight px-1 mt-1">
+                        <p className="text-xs sm:text-sm text-default-400 italic leading-tight px-1 mt-1">
                             {t('matchForm.labels.stadium_note', "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement.")}
                         </p>
                     </div>
@@ -305,7 +305,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                             isRequired
                             isInvalid={!!errors.name}
                         />
-                        {errors.name && <p className="text-[10px] text-danger font-bold pl-1">{errors.name}</p>}
+                        {errors.name && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.name}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -319,7 +319,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.category && <p className="text-[10px] text-danger font-bold pl-1">{errors.category}</p>}
+                        {errors.category && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.category}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -333,7 +333,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 <SelectItem key={cat}>{t(`enums.level.${cat}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.level && <p className="text-[10px] text-danger font-bold pl-1">{errors.level}</p>}
+                        {errors.level && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.level}</p>}
                     </div>
 
                     <div className="space-y-1">
@@ -345,7 +345,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                             isRequired
                             isInvalid={!!errors.max_teams}
                         />
-                        {errors.max_teams && <p className="text-[10px] text-danger font-bold pl-1">{errors.max_teams}</p>}
+                        {errors.max_teams && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.max_teams}</p>}
                     </div>
                     <Input
                         type="number"
@@ -376,7 +376,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.pitch_type && <p className="text-[10px] text-danger font-bold pl-1">{errors.pitch_type}</p>}
+                        {errors.pitch_type && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.pitch_type}</p>}
                     </div>
 
                     {/* Date and Times section */}
@@ -391,7 +391,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 isRequired
                                 isInvalid={!!errors.match_date}
                             />
-                            {errors.match_date && <p className="text-[10px] text-danger font-bold pl-1">{errors.match_date}</p>}
+                            {errors.match_date && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_date}</p>}
                         </div>
                         <div className="space-y-1">
                             <Input
@@ -402,7 +402,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 isRequired
                                 isInvalid={!!errors.match_time}
                             />
-                            {errors.match_time && <p className="text-[10px] text-danger font-bold pl-1">{errors.match_time}</p>}
+                            {errors.match_time && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_time}</p>}
                         </div>
                         <div className="space-y-1">
                             <Input
@@ -413,7 +413,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 isRequired
                                 isInvalid={!!errors.match_end_time}
                             />
-                            {errors.match_end_time && <p className="text-[10px] text-danger font-bold pl-1">{errors.match_end_time}</p>}
+                            {errors.match_end_time && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_end_time}</p>}
                         </div>
                         <div className="hidden md:block"></div>
                     </div>
@@ -446,11 +446,11 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                         <Input label={t('tournamentForm.labels.contact_email')} type="email" value={formData.email} onValueChange={(v) => handleChange('email', v)} isRequired isInvalid={!!errors.email} />
-                        {errors.email && <p className="text-[10px] text-danger font-bold pl-1">{errors.email}</p>}
+                        {errors.email && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.email}</p>}
                     </div>
                     <div className="space-y-1">
                         <Input label={t('matchForm.labels.phone')} type="tel" value={formData.phone} onValueChange={(v) => handleChange('phone', v)} isRequired isInvalid={!!errors.phone} />
-                        {errors.phone && <p className="text-[10px] text-danger font-bold pl-1">{errors.phone}</p>}
+                        {errors.phone && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.phone}</p>}
                     </div>
                     <Textarea label={t('tournamentForm.labels.notes')} placeholder={t('tournamentForm.labels.notes_placeholder')} value={formData.notes} onValueChange={(v) => handleChange('notes', v)} className="md:col-span-2" />
                 </CardBody>

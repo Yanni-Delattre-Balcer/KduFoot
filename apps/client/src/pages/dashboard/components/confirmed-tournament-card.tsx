@@ -50,7 +50,7 @@ export const ConfirmedTournamentCard = ({
                                 <div className="min-w-0">
                                     <h3 className="font-black text-white text-xl leading-tight truncate">{part.host_club_name}</h3>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] uppercase tracking-wider">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
                                             🏆 {part.name || 'Tournoi'}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color="warning" className="h-5 text-[9px] uppercase font-black">
@@ -59,33 +59,33 @@ export const ConfirmedTournamentCard = ({
                                     </div>
                                 </div>
                             </div>
-                            <Chip size="sm" color="success" variant="flat" className="font-black uppercase text-[10px] py-3">
+                            <Chip size="sm" color="success" variant="flat" className="font-black uppercase text-xs sm:text-sm py-3">
                                 {t('dashboard.status.accepted')}
                             </Chip>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
                                 <p className="text-sm font-bold text-white">{formatDate(part.match_date)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
                                 <p className="text-sm font-bold text-white">{formatTime(part.match_time)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
                                 <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{part.match_format || '5x5'}</Chip>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-1">{t('tournamentForm.labels.fee', 'Frais')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('tournamentForm.labels.fee', 'Frais')}</p>
                                 <p className="text-sm font-bold text-green-400">{part.entry_fee ? `${part.entry_fee}€` : t('matchForm.labels.free', 'Gratuit')}</p>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-end">
-                                <p className="text-[11px] font-black text-purple-400 uppercase tracking-widest">{t('dashboard.tournament.filling', 'Remplissage du tournoi')}</p>
+                                <p className="text-sm font-black text-purple-400 uppercase tracking-widest">{t('dashboard.tournament.filling', 'Remplissage du tournoi')}</p>
                                 <p className="text-xs font-bold text-white">{part.accepted_count || 0} / {part.max_teams || '∞'}</p>
                             </div>
                             <Progress
@@ -103,20 +103,20 @@ export const ConfirmedTournamentCard = ({
                     {/* Right Section: Teams & Actions */}
                     <div className="w-full md:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
                         <div className="mb-6">
-                            <p className="text-[10px] font-black text-default-400 uppercase tracking-widest mb-3">{t('dashboard.tournament.registered_teams', 'Équipes inscrites')}</p>
+                            <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-3">{t('dashboard.tournament.registered_teams', 'Équipes inscrites')}</p>
                             <div className="flex items-center -space-x-3">
                                 {displayTeams.map((team: any, i: number) => (
                                     <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]">
-                                        {team.logo_url ? <Image src={team.logo_url} /> : <span className="text-[10px] font-black">{team.name?.charAt(0)}</span>}
+                                        {team.logo_url ? <Image src={team.logo_url} /> : <span className="text-xs sm:text-sm font-black">{team.name?.charAt(0)}</span>}
                                     </div>
                                 ))}
                                 {remainingTeamsCount > 0 && (
                                     <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-purple-500 flex items-center justify-center z-[1]">
-                                        <span className="text-[10px] font-black text-white">+{remainingTeamsCount}</span>
+                                        <span className="text-xs sm:text-sm font-black text-white">+{remainingTeamsCount}</span>
                                     </div>
                                 )}
                                 {part.accepted_count === 0 && (
-                                    <p className="text-[11px] text-default-400 italic">{t('dashboard.tournament.waiting_teams', "En attente d'équipes...")}</p>
+                                    <p className="text-sm text-default-400 italic">{t('dashboard.tournament.waiting_teams', "En attente d'équipes...")}</p>
                                 )}
                             </div>
                         </div>
@@ -126,7 +126,7 @@ export const ConfirmedTournamentCard = ({
                                 <Button
                                     size="sm"
                                     color="danger"
-                                    className="w-full font-black uppercase text-[10px] h-10 shadow-lg shadow-danger/20"
+                                    className="w-full font-black uppercase text-xs sm:text-sm h-10 shadow-lg shadow-danger/20"
                                     onPress={() => onMarkAsRead(part.match_id)}
                                 >
                                     ⚠️ Voir MODIFICATIONS
@@ -136,7 +136,7 @@ export const ConfirmedTournamentCard = ({
                                 <Button
                                     size="sm"
                                     variant="flat"
-                                    className="flex-1 font-bold text-[11px] h-10 bg-white/5 active:scale-95"
+                                    className="flex-1 font-bold text-sm h-10 bg-white/5 active:scale-95"
                                     as={Link}
                                     to={`/matches/${part.match_id}`}
                                 >
@@ -146,7 +146,7 @@ export const ConfirmedTournamentCard = ({
                                     size="sm"
                                     variant="solid"
                                     color="secondary"
-                                    className="flex-1 font-bold text-[11px] h-10 active:scale-95"
+                                    className="flex-1 font-bold text-sm h-10 active:scale-95"
                                     as="a"
                                     href={`tel:${part.host_phone}`}
                                 >

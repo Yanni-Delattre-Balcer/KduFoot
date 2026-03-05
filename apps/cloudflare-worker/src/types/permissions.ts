@@ -42,6 +42,9 @@ export enum Permission {
     ADMIN_BILLING = 'admin:billing',
     ADMIN_AUTH0 = 'auth0:admin:api',
     COACH_CERTIFIED = 'coach:certified',
+
+    // Rôle Bloqué
+    ROLE_BLOCKED = 'role:blocked',
 }
 
 export interface PermissionCheck {
