@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '../../layouts/default';
 import { useMatches } from '../../hooks/use-matches';
+import { useSWRConfig } from 'swr';
 import { useUser } from '../../hooks/use-user';
 import { addToast } from '@heroui/toast';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
@@ -110,9 +111,16 @@ export default function MatchesPage() {
 
     const activeFilterCount = Object.values(filters).filter(v => v !== undefined).length + (radiusKm > 0 ? 1 : 0);
 
+    const { mutate: globalMutate } = useSWRConfig();
+
     const handleCreateSuccess = () => {
         setView('find');
-        mutate();
+        // Global invalidation: refresh ALL /api/matches keys (match + tournament views)
+        globalMutate(
+            key => typeof key === 'string' && key.includes('/api/matches'),
+            undefined,
+            { revalidate: true }
+        );
     };
 
     const canUseDistance = !!(user?.club?.latitude && user?.club?.longitude);
