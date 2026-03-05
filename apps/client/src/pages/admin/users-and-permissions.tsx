@@ -89,9 +89,7 @@ export default function UsersAndPermissionsPage() {
         getAuth0ManagementToken,
         listAuth0Users,
         getUserPermissions,
-        addPermissionToUser,
         addPermissionsToUser,
-        removePermissionFromUser,
         removePermissionsFromUser,
         deleteAuth0User,
         checkResourceServerScopesWithAudience,
@@ -406,13 +404,14 @@ export default function UsersAndPermissionsPage() {
             await blockUser(d1UserId, true, blockReason || 'Bloqué par l\'administrateur');
 
             // 2. Kill switch sur Auth0 si le mgmtToken est dispo
+            //    Retirer TOUTES les permissions Auth0 pour couper l'accès API
             if (mgmtToken) {
                 const permsToRemove = KDUFOOT_PERMISSIONS
                     .filter(p => p.value !== Permission.ROLE_BLOCKED)
                     .map(p => p.value);
 
                 await removePermissionsFromUser(mgmtToken, d1UserId, permsToRemove).catch(() => { });
-                await addPermissionToUser(mgmtToken, d1UserId, Permission.ROLE_BLOCKED);
+                // Note: role:blocked n'existe PAS dans Auth0, le blocage est géré uniquement par D1 (is_blocked)
             }
 
             addToast({ title: "Utilisateur bloqué", description: "L'utilisateur a été banni, ses données supprimées et ses droits retirés.", variant: "solid", color: "danger" });
@@ -442,10 +441,8 @@ export default function UsersAndPermissionsPage() {
             // 1. Débloquer dans D1
             await blockUser(d1UserId, false);
 
-            // 2. Retirer role:blocked dans Auth0
-            if (mgmtToken) {
-                await removePermissionFromUser(mgmtToken, d1UserId, Permission.ROLE_BLOCKED).catch(() => { });
-            }
+            // 2. Pas besoin de toucher Auth0 pour role:blocked (n'existe pas dans Auth0)
+            //    Les permissions normales seront re-ajoutées manuellement par l'admin si besoin
 
             addToast({ title: "Utilisateur débloqué", description: "L'utilisateur peut à nouveau accéder au site.", variant: "solid", color: "success" });
 

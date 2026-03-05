@@ -1,4 +1,4 @@
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { useAuth0 } from '@auth0/auth0-react';
 import { matchService } from '../services/matches';
 import { Match, CreateMatchDto, UpdateMatchDto, MatchFilters, ContactMatchDto } from '../types/match.types';
@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 
 export function useMatches(filters?: MatchFilters) {
     const { getAccessTokenSilently } = useAuth0();
+    const { mutate: globalMutate } = useSWRConfig();
 
     const fetcher = async (url: string) => {
         let token: string | null = null;
@@ -41,8 +42,13 @@ export function useMatches(filters?: MatchFilters) {
     const createMatch = useCallback(async (dto: CreateMatchDto) => {
         const token = await getAccessTokenSilently();
         await matchService.create(dto, token);
-        mutate();
-    }, [getAccessTokenSilently, mutate]);
+        // Global invalidation: refresh ALL /api/matches keys (match + tournament + dashboard)
+        globalMutate(
+            key => typeof key === 'string' && key.includes('/api/matches'),
+            undefined,
+            { revalidate: true }
+        );
+    }, [getAccessTokenSilently, globalMutate]);
 
     const updateMatch = useCallback(async (id: string, dto: UpdateMatchDto) => {
         const token = await getAccessTokenSilently();
@@ -66,8 +72,13 @@ export function useMatches(filters?: MatchFilters) {
 
         const token = await getAccessTokenSilently();
         await matchService.delete(id, token);
-        mutate(); // Revalidate globally after server confirms
-    }, [getAccessTokenSilently, mutate]);
+        // Global invalidation: refresh ALL /api/matches keys across all views
+        globalMutate(
+            key => typeof key === 'string' && key.includes('/api/matches'),
+            undefined,
+            { revalidate: true }
+        );
+    }, [getAccessTokenSilently, mutate, globalMutate]);
 
     const contactMatch = useCallback(async (id: string, dto: ContactMatchDto) => {
         const token = await getAccessTokenSilently();

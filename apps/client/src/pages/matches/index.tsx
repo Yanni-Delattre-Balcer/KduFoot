@@ -78,7 +78,8 @@ export default function MatchesPage() {
         return f;
     }, [filters, type, radiusKm, user?.club?.latitude, user?.club?.longitude]);
 
-    const { matches, isError, isLoading, mutate } = useMatches(effectiveFilters);
+    const { matches, isError, isLoading } = useMatches(effectiveFilters);
+    const { mutate: globalMutate } = useSWRConfig();
 
     // Admin: supprimer un match
     const adminDeleteMatch = useCallback(async (matchId: string) => {
@@ -91,11 +92,16 @@ export default function MatchesPage() {
             });
             if (!res.ok) throw new Error('Erreur lors de la suppression');
             addToast({ title: 'Match supprimé', description: 'Le match a été supprimé par l\'administrateur.', variant: 'solid', color: 'success' });
-            mutate();
+            // Global invalidation: refresh ALL /api/matches keys across all views
+            globalMutate(
+                key => typeof key === 'string' && key.includes('/api/matches'),
+                undefined,
+                { revalidate: true }
+            );
         } catch (err: any) {
             addToast({ title: 'Erreur', description: err.message, variant: 'solid', color: 'danger' });
         }
-    }, [getAccessToken, mutate]);
+    }, [getAccessToken, globalMutate]);
 
     const handleFilterChange = (key: keyof MatchFilters, value: string) => {
         setFilters(prev => ({
@@ -110,8 +116,6 @@ export default function MatchesPage() {
     };
 
     const activeFilterCount = Object.values(filters).filter(v => v !== undefined).length + (radiusKm > 0 ? 1 : 0);
-
-    const { mutate: globalMutate } = useSWRConfig();
 
     const handleCreateSuccess = () => {
         setView('find');
