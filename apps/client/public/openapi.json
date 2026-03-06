@@ -82,6 +82,15 @@
         }
       }
     },
+    "/api/ws": {
+      "get": {
+        "tags": [
+          "RealTime"
+        ],
+        "summary": "WebSocket Connection Hub",
+        "description": "Upgrade to a WebSocket connection. Managed by the WEBSOCKET_HUB Durable Object."
+      }
+    },
     "/openapi.json": {
       "get": {
         "tags": [
