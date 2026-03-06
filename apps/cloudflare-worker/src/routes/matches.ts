@@ -5,6 +5,7 @@ import { MatchService } from '../services/match.service';
 import { CreateMatchDto, UpdateMatchDto, ContactMatchDto } from '../types/match';
 import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
+import { broadcastDataChanged } from '../utils/broadcast';
 
 export const setupMatchRoutes = (router: Router, env: Env) => {
     const matchService = new MatchService(env.DB);
@@ -279,6 +280,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         try {
             const match = await matchService.create(dbUser.id, dto);
+            broadcastDataChanged(env);
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -335,6 +337,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         try {
             const match = await matchService.update(params.id, dbUser.id, dto);
             if (!match) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            broadcastDataChanged(env);
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -381,6 +384,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         try {
             const success = await matchService.delete(params.id, dbUser.id);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            broadcastDataChanged(env);
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -444,6 +448,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         try {
             const success = await matchService.contact(params.id, dbUser.id, dto);
+            broadcastDataChanged(env);
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -506,6 +511,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         try {
             const success = await matchService.updateRequestStatus(params.matchId, params.userId, dbUser.id, body.status);
+            broadcastDataChanged(env);
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -554,6 +560,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         try {
             const success = await matchService.deleteContact(params.matchId, params.userId, dbUser.id);
+            broadcastDataChanged(env);
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

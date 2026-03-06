@@ -1,5 +1,5 @@
 
-import { D1Database, R2Bucket, KVNamespace } from '@cloudflare/workers-types';
+import { D1Database, R2Bucket, KVNamespace, DurableObjectNamespace } from '@cloudflare/workers-types';
 
 /**
  * The Env interface defines all the external resources and configurations
@@ -11,6 +11,7 @@ export interface Env {
     VIDEOS_BUCKET: R2Bucket; // Object Storage (like Amazon S3)
     THUMBNAILS_BUCKET: R2Bucket;
     KV_CACHE: KVNamespace; // Fast global Key-Value storage
+    WEBSOCKET_HUB: DurableObjectNamespace; // WebSockets tracking & broadcasting
     RATE_LIMITER: any; // Limits the number of requests to prevent abuse
 
     // Environment variables

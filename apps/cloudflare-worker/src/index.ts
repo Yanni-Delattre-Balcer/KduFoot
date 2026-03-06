@@ -23,15 +23,18 @@
  */
 import { Router } from "./routes/router";
 import { setupRoutes } from "./routes";
+import { Env } from "./types/env";
+
+export { WebSocketHub } from "./durable_objects/WebSocketHub";
 
 // NOTE: We now use a small Router class to organize routes and permission checks.
 
 export default {
-	async fetch(request: Request, env: Env): Promise<Response> {
+	async fetch(request: Request, env: any): Promise<Response> {
 		const router = new Router(env);
 
-		setupRoutes(router, env as unknown as import("./types/env").Env);
+		setupRoutes(router, env as import("./types/env").Env);
 
 		return await router.handleRequest(request, env);
 	},
-} satisfies ExportedHandler<Env>;
+} satisfies ExportedHandler<any>;

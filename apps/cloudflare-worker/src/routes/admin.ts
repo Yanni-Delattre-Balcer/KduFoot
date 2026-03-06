@@ -5,6 +5,7 @@ import { UserService } from '../services/user.service';
 import { MatchService } from '../services/match.service';
 import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
+import { broadcastDataChanged } from '../utils/broadcast';
 
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
@@ -148,6 +149,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
 
         try {
             await userService.setBlockedStatus(d1Id, body.is_blocked, body.block_reason);
+            broadcastDataChanged(env);
             return Response.json({ success: true, message: `User ${body.is_blocked ? 'blocked' : 'unblocked'}` }, { headers: router.corsHeaders });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });

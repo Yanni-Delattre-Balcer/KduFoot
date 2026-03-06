@@ -306,6 +306,22 @@ export const setupRoutes = (router: Router, env: Env) => {
 		 */
 		"",
 	);
+
+	/**
+	 * @openapi
+	 * /api/ws:
+	 *   get:
+	 *     tags:
+	 *       - RealTime
+	 *     summary: WebSocket Connection Hub
+	 *     description: Upgrade to a WebSocket connection. Managed by the WEBSOCKET_HUB Durable Object.
+	 */
+	router.get("/api/ws", async (request: any): Promise<any> => {
+		const id = env.WEBSOCKET_HUB.idFromName("global-hub");
+		const hub = env.WEBSOCKET_HUB.get(id) as any;
+		return hub.fetch(request as any) as any;
+	});
+
 	// Sub-section of routes for different domains (users, clubs, etc.)
 	setupUserRoutes(router, env);
 	setupClubRoutes(router, env);
