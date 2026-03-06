@@ -63,7 +63,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
     router.delete('/api/admin/matches/<id>', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: router.corsHeaders });
         }
 
         if (!await checkAdmin(request)) {
@@ -81,6 +81,29 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
     });
 
     /**
+     * GET /api/admin/users/blocked
+     * Returns an array of objects { auth0_sub, block_reason } for all users blocked in D1.
+     */
+    router.get('/api/admin/users/blocked', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: router.corsHeaders });
+        }
+
+        if (!await checkAdmin(request)) {
+            return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+        }
+
+        try {
+            const blockedUsers = await env.DB.prepare('SELECT auth0_sub, block_reason FROM users WHERE is_blocked = 1').all<{ auth0_sub: string, block_reason: string | null }>();
+            const subs = blockedUsers.results?.map(u => ({ auth0_sub: u.auth0_sub, block_reason: u.block_reason })) || [];
+            return Response.json({ success: true, blockedSubs: subs }, { headers: router.corsHeaders });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
+        }
+    });
+
+    /**
      * PATCH /api/admin/users/<id>/block
      * Admin only route to block/unblock a user.
      * Accepts { is_blocked: boolean, block_reason?: string }
@@ -91,7 +114,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
     router.patch('/api/admin/users/<id>/block', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: router.corsHeaders });
         }
 
         if (!await checkAdmin(request)) {

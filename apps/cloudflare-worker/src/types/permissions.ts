@@ -50,6 +50,7 @@ export enum Permission {
 export interface PermissionCheck {
     hasPermission: boolean;
     reason?: string;
+    statusCode?: number;
     quota?: QuotaInfo;
 }
 

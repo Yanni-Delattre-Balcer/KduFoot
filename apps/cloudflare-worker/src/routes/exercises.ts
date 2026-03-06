@@ -67,7 +67,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
          */
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_READ);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const url = new URL(request.url);
@@ -122,7 +122,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_READ);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
         }
 
         const exercise = await exerciseService.getById(params.id);
@@ -172,7 +172,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
     router.post('/api/exercises', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_CREATE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -238,7 +238,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_UPDATE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -291,7 +291,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_DELETE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
         }
 
         const authHeader = request.headers.get('Authorization')!;

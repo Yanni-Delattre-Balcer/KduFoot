@@ -16,6 +16,7 @@ export interface Auth0User {
     logins_count: number;
     blocked?: boolean;
     is_blocked?: boolean;
+    block_reason?: string | null;
     app_metadata?: {
         permissions?: string[];
         subscription?: 'Free' | 'Pro' | 'Ultime';

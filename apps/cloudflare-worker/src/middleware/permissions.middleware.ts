@@ -28,7 +28,22 @@ export async function checkPermission(
     const { access, payload } = await checkPermissions(token, [permission], env);
 
     if (!access) {
-        return { hasPermission: false, reason: 'Permission refusée' };
+        return { hasPermission: false, reason: 'Permission refusée', statusCode: 401 };
+    }
+
+    /**
+     * D1 Verification:
+     * Check if the user is blocked in the database.
+     */
+    if (payload?.sub) {
+        try {
+            const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ is_blocked: number, block_reason: string }>();
+            if (dbUser && dbUser.is_blocked === 1) {
+                return { hasPermission: false, reason: dbUser.block_reason || 'Utilisateur bloqué', statusCode: 403 };
+            }
+        } catch (error) {
+            console.error('Error checking blocked status:', error);
+        }
     }
 
     /**

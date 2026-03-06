@@ -637,6 +637,27 @@ export const useSecuredApi = () => {
   };
 
   /**
+   * Fetches the list of blocked users (their Auth0 subs and block reasons) from our backend D1 database.
+   * This is necessary because D1 `is_blocked=1` is the single source of truth for blocking.
+   */
+  const getD1BlockedUsers = async (): Promise<{ auth0_sub: string, block_reason: string | null }[]> => {
+    const apiBase =
+      typeof import.meta !== "undefined" &&
+        (import.meta as any).env?.API_BASE_URL
+        ? (import.meta as any).env.API_BASE_URL
+        : "";
+    try {
+      const data = await getJson(`${apiBase}/api/admin/users/blocked`);
+      if (data && data.success && Array.isArray(data.blockedSubs)) {
+        return data.blockedSubs;
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  };
+
+  /**
    * Get the list of Resource Servers (APIs) configured in Auth0
    * @param mgmtToken Token Auth0 Management API
    */
@@ -799,6 +820,7 @@ export const useSecuredApi = () => {
     getResourceServerScopes,
     getResourcesServerScopesWithAudience,
     updateResourceServerScopesWithAudience,
+    getD1BlockedUsers,
     checkResourceServerScopes,
     checkResourceServerScopesWithAudience,
   };

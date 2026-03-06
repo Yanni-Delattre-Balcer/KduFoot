@@ -36,6 +36,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const res = await fetch(`${import.meta.env.API_BASE_URL}${CONTEXT_KEY}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (res.status === 403) {
+            const errData = await res.json().catch(() => ({}));
+            const err = new Error('403_FORBIDDEN');
+            (err as any).reason = errData.error || 'Aucun motif spécifié';
+            throw err;
+        }
+
         if (!res.ok) throw new Error('Failed to fetch user context');
         return res.json();
     }, [isAuthenticated, getAccessTokenSilently]);
@@ -55,11 +63,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const notifications = data?.notifications || { pendingRequests: 0, modifiedParticipations: 0 };
     const profileComplete = isProfileComplete(user);
 
+    const isBlocked = !!user?.is_blocked || error?.message === '403_FORBIDDEN';
+
     // SÉCURITÉ : Connecté + profil incomplet = verrouillé (le DataWall est le gardien)
-    const isLocked = isAuthenticated && (!user || !isProfileComplete(user, true));
+    const isLocked = isAuthenticated && (!user || !isProfileComplete(user, true)) && !isBlocked;
 
     const isAdmin = user?.email === 'yannidelattrebalcer.artois@gmail.com';
-    const isBlocked = !!user?.is_blocked;
 
     const linkClub = async (siret: string) => {
         const token = await getAccessTokenSilently();
@@ -163,9 +172,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
         notifications
     }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, notifications, getAccessTokenSilently]);
 
-    return (
-        <UserContext.Provider value={value}>
-            {isBlocked && (
+    if (isLoading && isAuthenticated) {
+        return (
+            <UserContext.Provider value={value}>
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black">
+                    <div className="w-10 h-10 border-4 border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
+                </div>
+            </UserContext.Provider>
+        );
+    }
+
+    if (isBlocked) {
+        return (
+            <UserContext.Provider value={value}>
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black p-4 sm:p-6">
                     <div className="max-w-lg w-full bg-zinc-900 border-2 border-red-600 shadow-2xl shadow-red-900/40 rounded-3xl p-6 sm:p-10 text-center flex flex-col items-center gap-5 animate-appearance-in">
                         {/* Icon */}
@@ -184,7 +203,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
                         <div className="w-full bg-red-950/40 border border-red-800/40 rounded-2xl p-4">
                             <p className="text-xs sm:text-sm font-bold text-red-400/60 uppercase tracking-widest mb-1">Motif du bannissement</p>
                             <p className="text-sm sm:text-base font-semibold text-white/90 leading-relaxed">
-                                {user?.block_reason || 'Aucun motif spécifié'}
+                                {user?.block_reason || (error as any)?.reason || 'Aucun motif spécifié'}
                             </p>
                         </div>
 
@@ -213,7 +232,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
                         <p className="text-xs sm:text-sm text-white/20 mt-2">support@kdufoot.com</p>
                     </div>
                 </div>
-            )}
+            </UserContext.Provider>
+        );
+    }
+
+    return (
+        <UserContext.Provider value={value}>
             {children}
         </UserContext.Provider>
     );

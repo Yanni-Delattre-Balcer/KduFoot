@@ -60,7 +60,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.post('/api/users/sync', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const body: any = await request.json();
@@ -116,7 +116,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.get('/api/users/me', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -158,7 +158,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.get('/api/me/context', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -226,7 +226,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.put('/api/users/me', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -286,7 +286,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.post('/api/users/link-club', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -394,7 +394,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.post('/api/users/unlink-club', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -448,7 +448,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     router.delete('/api/users/me', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;

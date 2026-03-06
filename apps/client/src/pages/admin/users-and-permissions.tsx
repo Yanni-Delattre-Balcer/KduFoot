@@ -94,6 +94,7 @@ export default function UsersAndPermissionsPage() {
         deleteAuth0User,
         checkResourceServerScopesWithAudience,
         updateResourceServerScopesWithAudience,
+        getD1BlockedUsers,
     } = useSecuredApi();
 
     const [mgmtToken, setMgmtToken] = useState<string | null>(null);
@@ -149,10 +150,34 @@ export default function UsersAndPermissionsPage() {
                     // Trigger sync check
                     checkSyncStatus(tokenResp.access_token);
 
-                    // Charger la liste des utilisateurs
+                    // Charger la liste des utilisateurs de Auth0 et la fusionner avec la D1
                     try {
-                        const u = await listAuth0Users(tokenResp.access_token);
-                        setUsers(u ?? []);
+                        const [u, blockedIds] = await Promise.all([
+                            listAuth0Users(tokenResp.access_token),
+                            getD1BlockedUsers()
+                        ]);
+
+                        // Merge the D1 blocked status and Auth0 data
+                        const mergedUsers = (u ?? []).map(user => {
+                            const blockData = blockedIds.find(b => b.auth0_sub === user.user_id);
+                            if (blockData) {
+                                return {
+                                    ...user,
+                                    blocked: true,
+                                    block_reason: blockData.block_reason,
+                                    app_metadata: {
+                                        ...user.app_metadata,
+                                        permissions: [
+                                            ...(user.app_metadata?.permissions || []),
+                                            Permission.ROLE_BLOCKED
+                                        ]
+                                    }
+                                };
+                            }
+                            return user;
+                        });
+
+                        setUsers(mergedUsers);
                     } catch (err) {
                         console.error("Erreur chargement utilisateurs:", err);
                         addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
@@ -188,6 +213,12 @@ export default function UsersAndPermissionsPage() {
             for (const perm of KDUFOOT_PERMISSIONS) {
                 permState[perm.key] = permNames.includes(perm.value);
             }
+
+            // Force role_blocked based on our D1 truth instead of Auth0
+            const userInList = users.find(u => u.user_id === userId);
+            permState['role_blocked'] = !!userInList?.blocked;
+            setBlockReason(userInList?.block_reason || "");
+
             setEditing((prev) => ({ ...prev, [userId]: permState }));
         } catch (err) {
             console.error("Erreur chargement permissions:", err);
@@ -202,6 +233,7 @@ export default function UsersAndPermissionsPage() {
         // Kill Switch logic: if toggling role_blocked ON, uncheck all others
         if (permKey === 'role_blocked') {
             const currentValue = editing[userId]?.[permKey] ?? false;
+
             if (!currentValue) {
                 // Turning ON blocked: uncheck everything else
                 const newPerms: Record<string, boolean> = {};
@@ -209,6 +241,7 @@ export default function UsersAndPermissionsPage() {
                     newPerms[p.key] = p.key === 'role_blocked';
                 });
                 setEditing((prev) => ({ ...prev, [userId]: newPerms }));
+
                 return;
             }
         }
@@ -308,14 +341,36 @@ export default function UsersAndPermissionsPage() {
             const toAdd: string[] = [];
             const toRemove: string[] = [];
 
+            let handleBlockLogic = false;
+            let targetBlockState = false;
+
             for (const perm of KDUFOOT_PERMISSIONS) {
                 if (!Object.prototype.hasOwnProperty.call(edits, perm.key)) continue;
                 const shouldHave = edits[perm.key];
                 const hasIt = currentNames.includes(perm.value);
+
+                if (perm.key === 'role_blocked') {
+                    const userWasBlocked = !!users.find(u => u.user_id === userId)?.blocked;
+                    if (shouldHave !== userWasBlocked) {
+                        handleBlockLogic = true;
+                        targetBlockState = shouldHave;
+                    }
+                    continue; // Skip adding role:blocked to Auth0
+                }
+
                 if (shouldHave && !hasIt) {
                     toAdd.push(perm.value);
                 } else if (!shouldHave && hasIt) {
                     toRemove.push(perm.value);
+                }
+            }
+
+            // Execute D1 Blocking Logic
+            if (handleBlockLogic) {
+                if (targetBlockState) {
+                    await blockUser(userId, true, blockReason || undefined);
+                } else {
+                    await blockUser(userId, false);
                 }
             }
 
@@ -333,12 +388,28 @@ export default function UsersAndPermissionsPage() {
             setUsers(prev => prev.map(u => {
                 if (u.user_id !== userId) return u;
                 const prevPerms = u.app_metadata?.permissions || [];
-                const updatedPerms = prevPerms.filter(p => !toRemove.includes(p));
+                let updatedPerms = prevPerms.filter(p => !toRemove.includes(p));
                 toAdd.forEach(newP => {
                     if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
                 });
+
+                // Handle optimistic UI for block state
+                let newBlockedState = u.blocked;
+                let newBlockReason = u.block_reason;
+                if (handleBlockLogic) {
+                    newBlockedState = targetBlockState;
+                    newBlockReason = targetBlockState ? blockReason : null;
+                    if (targetBlockState && !updatedPerms.includes(Permission.ROLE_BLOCKED)) {
+                        updatedPerms.push(Permission.ROLE_BLOCKED);
+                    } else if (!targetBlockState) {
+                        updatedPerms = updatedPerms.filter(p => p !== Permission.ROLE_BLOCKED);
+                    }
+                }
+
                 return {
                     ...u,
+                    blocked: newBlockedState,
+                    block_reason: newBlockReason,
                     app_metadata: {
                         ...u.app_metadata,
                         permissions: updatedPerms
@@ -401,7 +472,7 @@ export default function UsersAndPermissionsPage() {
     const confirmBlock = async (d1UserId: string) => {
         try {
             // 1. Appliquer le blocage dans la BD D1 (efface les matchs)
-            await blockUser(d1UserId, true, blockReason || 'Bloqué par l\'administrateur');
+            await blockUser(d1UserId, true, blockReason || undefined);
 
             // 2. Kill switch sur Auth0 si le mgmtToken est dispo
             //    Retirer TOUTES les permissions Auth0 pour couper l'accès API
@@ -416,7 +487,13 @@ export default function UsersAndPermissionsPage() {
 
             addToast({ title: "Utilisateur bloqué", description: "L'utilisateur a été banni, ses données supprimées et ses droits retirés.", variant: "solid", color: "danger" });
             setBlockingUserId(null);
-            setBlockReason("");
+
+            // Force update editing state if the pane is open
+            const newPerms: Record<string, boolean> = {};
+            KDUFOOT_PERMISSIONS.forEach(p => {
+                newPerms[p.key] = p.key === 'role_blocked';
+            });
+            setEditing(prev => ({ ...prev, [d1UserId]: newPerms }));
 
             // Modification optimiste de l'état local pour rafraîchir le bouton instantanément
             // (évite la latence de cache de l'API Management Auth0)
@@ -425,12 +502,15 @@ export default function UsersAndPermissionsPage() {
                 return {
                     ...u,
                     blocked: true,
+                    block_reason: blockReason || undefined,
                     app_metadata: {
                         ...u.app_metadata,
                         permissions: [Permission.ROLE_BLOCKED]
                     }
                 };
             }));
+
+            setBlockReason("");
         } catch (err: any) {
             addToast({ title: t("error.title"), description: err.message, variant: "solid", color: "danger" });
         }
@@ -441,10 +521,35 @@ export default function UsersAndPermissionsPage() {
             // 1. Débloquer dans D1
             await blockUser(d1UserId, false);
 
-            // 2. Pas besoin de toucher Auth0 pour role:blocked (n'existe pas dans Auth0)
-            //    Les permissions normales seront re-ajoutées manuellement par l'admin si besoin
+            // 2. Restaurer les permissions de base Auth0 (Abonné Free)
+            if (mgmtToken) {
+                const freePerms = [
+                    Permission.READ_API,
+                    Permission.WRITE_API,
+                    Permission.EXERCISES_READ,
+                    Permission.MATCHES_CREATE,
+                    Permission.MATCHES_CONTACT
+                ];
+                await addPermissionsToUser(mgmtToken, d1UserId, freePerms).catch((err) => console.error("Erreur réattribution perms Auth0:", err));
+            }
 
-            addToast({ title: "Utilisateur débloqué", description: "L'utilisateur peut à nouveau accéder au site.", variant: "solid", color: "success" });
+            addToast({ title: "Utilisateur débloqué", description: "L'utilisateur a retrouvé ses droits d'Abonné (Free).", variant: "solid", color: "success" });
+
+            // Force update editing state if the pane is open
+            const newPerms: Record<string, boolean> = {};
+            const freePermValues = [
+                Permission.READ_API,
+                Permission.WRITE_API,
+                Permission.EXERCISES_READ,
+                Permission.MATCHES_CREATE,
+                Permission.MATCHES_CONTACT
+            ];
+            KDUFOOT_PERMISSIONS.forEach(p => {
+                newPerms[p.key] = freePermValues.includes(p.value as Permission);
+            });
+            setEditing(prev => ({ ...prev, [d1UserId]: newPerms }));
+            // Set reason to empty
+            if (selectedUserId === d1UserId) setBlockReason("");
 
             // Modification optimiste de l'état local pour rafraîchir le bouton instantanément
             setUsers(prev => prev.map(u => {
@@ -454,7 +559,13 @@ export default function UsersAndPermissionsPage() {
                     blocked: false,
                     app_metadata: {
                         ...u.app_metadata,
-                        permissions: (u.app_metadata?.permissions || []).filter(p => p !== Permission.ROLE_BLOCKED)
+                        permissions: [
+                            Permission.READ_API,
+                            Permission.WRITE_API,
+                            Permission.EXERCISES_READ,
+                            Permission.MATCHES_CREATE,
+                            Permission.MATCHES_CONTACT
+                        ]
                     }
                 };
             }));
@@ -638,6 +749,7 @@ export default function UsersAndPermissionsPage() {
                                                     <img
                                                         src={u.picture}
                                                         alt={u.name}
+                                                        referrerPolicy="no-referrer"
                                                         className={`w-8 h-8 rounded-full ${isUserBlocked ? 'opacity-40 grayscale' : ''}`}
                                                     />
                                                 )}
@@ -768,6 +880,7 @@ export default function UsersAndPermissionsPage() {
                                     color="danger"
                                     className="font-bold flex-1"
                                     onPress={() => confirmBlock(blockingUserId)}
+                                    isDisabled={blockReason.trim().length < 3}
                                 >
                                     CONFIRMER LE BAN
                                 </Button>
@@ -852,23 +965,40 @@ export default function UsersAndPermissionsPage() {
                                                     {group.perms.map((perm) => {
                                                         const isSuperAdminTarget = users.find(u => u.user_id === selectedUserId)?.email === SUPER_ADMIN_EMAIL;
                                                         return (
-                                                            <Checkbox
-                                                                key={perm.key}
-                                                                isSelected={editing[selectedUserId]?.[perm.key] ?? false}
-                                                                onValueChange={() => togglePermission(selectedUserId, perm.key)}
-                                                                size="sm"
-                                                                color={perm.key === 'role_blocked' ? 'danger' : undefined}
-                                                                isDisabled={
-                                                                    // Empêcher de retirer sa propre permission auth0:admin:api
-                                                                    (selectedUserId === currentUserId && perm.value === "auth0:admin:api") ||
-                                                                    // Super-admin protection
-                                                                    (isSuperAdminTarget && selectedUserId !== currentUserId)
-                                                                }
-                                                            >
-                                                                <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500 uppercase' : ''}`}>
-                                                                    {perm.key === 'role_blocked' ? '🚫 ' : ''}{perm.label}
-                                                                </span>
-                                                            </Checkbox>
+                                                            <div key={perm.key} className="flex flex-col gap-2">
+                                                                <Checkbox
+                                                                    isSelected={editing[selectedUserId]?.[perm.key] ?? false}
+                                                                    onValueChange={() => togglePermission(selectedUserId, perm.key)}
+                                                                    size="sm"
+                                                                    color={perm.key === 'role_blocked' ? 'danger' : undefined}
+                                                                    isDisabled={
+                                                                        // Empêcher de retirer sa propre permission auth0:admin:api
+                                                                        (selectedUserId === currentUserId && perm.value === "auth0:admin:api") ||
+                                                                        // Super-admin protection
+                                                                        (isSuperAdminTarget && selectedUserId !== currentUserId)
+                                                                    }
+                                                                >
+                                                                    <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500 uppercase' : ''}`}>
+                                                                        {perm.key === 'role_blocked' ? '🚫 ' : ''}{perm.label}
+                                                                    </span>
+                                                                </Checkbox>
+
+                                                                {/* Reason input when block is active */}
+                                                                {perm.key === 'role_blocked' && (editing[selectedUserId]?.[perm.key] ?? false) && (
+                                                                    <div className="pl-6 pb-2 animate-appearance-in">
+                                                                        <Input
+                                                                            size="sm"
+                                                                            label="Motif du bannissement"
+                                                                            placeholder="Saisissez un motif pour l'utilisateur"
+                                                                            variant="flat"
+                                                                            color="danger"
+                                                                            value={blockReason}
+                                                                            onValueChange={setBlockReason}
+                                                                            classNames={{ inputWrapper: "bg-danger-50" }}
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         );
                                                     })}
                                                 </div>
@@ -882,7 +1012,10 @@ export default function UsersAndPermissionsPage() {
                                         color="primary"
                                         onPress={() => savePermissions(selectedUserId)}
                                         isLoading={savingUserId === selectedUserId}
-                                        isDisabled={Object.keys(editing[selectedUserId] ?? {}).length === 0}
+                                        isDisabled={
+                                            Object.keys(editing[selectedUserId] ?? {}).length === 0 ||
+                                            (editing[selectedUserId]?.['role_blocked'] && blockReason.trim().length < 3)
+                                        }
                                     >
                                         {t("adminUsersPage.modalBtnSave")}
                                     </Button>

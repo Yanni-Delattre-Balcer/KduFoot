@@ -54,7 +54,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         // Using READ_API for list for now, or SESSIONS_CREATE if it implies managing them.
         // Let's stick to READ_API for basic access, and maybe ensure it's their own data via userId filter.
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -115,7 +115,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
         }
 
         const result = await sessionService.getById(params.id);
@@ -168,7 +168,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
     router.post('/api/sessions', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.SESSIONS_CREATE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -231,7 +231,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         // Strictly speaking, updating is "managing".
         const permissionCheck = await checkPermission(request, env, Permission.SESSIONS_CREATE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -282,7 +282,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.SESSIONS_CREATE); // Assuming delete is part of management
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403 });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
         }
 
         const authHeader = request.headers.get('Authorization')!;

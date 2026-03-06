@@ -60,7 +60,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
     router.get('/api/matches', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const url = new URL(request.url);
@@ -146,7 +146,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
     router.get('/api/matches/requests', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -178,7 +178,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
     router.get('/api/matches/participations', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CONTACT);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -219,7 +219,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const match = await matchService.getById(params.id);
@@ -264,7 +264,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
     router.post('/api/matches', async (request: Request) => {
         const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -319,7 +319,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE); // Owner/Admin
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -367,7 +367,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -421,7 +421,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CONTACT);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -488,7 +488,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { matchId: string, userId: string };
         const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -541,7 +541,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { matchId: string, userId: string };
         const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CONTACT);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
@@ -583,7 +583,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const params = (request as any).params as { id: string };
         const permissionCheck = await checkPermission(request, env, Permission.READ_API);
         if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const authHeader = request.headers.get('Authorization')!;
