@@ -116,9 +116,9 @@ export default function DefaultLayout({
             </div>
           </div>
 
-          <div className="pt-4 border-t border-default-100 w-full text-center">
+          <div className="pt-4 pb-12 sm:pb-0 border-t border-default-100 w-full text-center">
             <p className="text-xs sm:text-sm text-default-400 uppercase tracking-widest font-bold opacity-50">
-              © 2026 KduFoot • Football Intelligent
+              © 2026 KduFoot
             </p>
           </div>
         </div>

@@ -43,15 +43,13 @@ export default function IndexPage() {
             {/* Left: Title & CTA */}
             <div className="flex-1 flex flex-col items-center md:items-start gap-3 text-center md:text-left">
               <h1 className="text-3xl lg:text-4xl font-bold">
-                <span className="bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)] bg-clip-text text-transparent">Kdufoot</span>
-                <span className="text-default-400 font-normal mx-2">=</span>
-                <span className="bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)] bg-clip-text text-transparent text-2xl lg:text-3xl">{t("homePage.title.highlight")}</span>
+                <span className="text-white">Kdufoot</span>
               </h1>
               <p className="text-default-500 text-base">
                 {showVideoAnalysis ? (
                   t("homePage.description")
                 ) : (
-                  "Kdufoot vous aide à trouver des matchs amicaux autour de chez vous en quelques clics."
+                  "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics."
                 )}
               </p>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
@@ -123,11 +121,11 @@ export default function IndexPage() {
               </p>
             ) : (
               <p className="text-base text-default-500 leading-relaxed">
-                ⚽ <strong className="text-violet-500">Matchs & Tournois amicaux</strong> — Trouvez un adversaire autour de chez vous en quelques clics.
+                ⚽ <strong className="text-violet-500">Matchs & Tournois amicaux</strong> — Trouvez ou publiez vos propres matchs et tournois autour de chez vous.
               </p>
             )}
-            <p className="text-sm text-default-400 italic">
-              {t("homePage.about.footer")}
+            <p className="text-sm text-default-400 italic mt-2">
+              Moins de recherche, plus de terrain.&nbsp;⚽
             </p>
           </CardBody>
         </Card>

@@ -75,6 +75,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
 
         try {
             await env.DB.prepare('DELETE FROM matches WHERE id = ?').bind(params.id).run();
+            broadcastDataChanged(env);
             return Response.json({ success: true, message: 'Match deleted by admin' }, { headers: router.corsHeaders });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });

@@ -29,9 +29,7 @@ export default function IndexPage() {
                 </svg>
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-                <span className="bg-clip-text text-transparent bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)]">Kdufoot</span>
-                <span className="text-default-400 font-normal mx-2">=</span>
-                <span className="bg-clip-text text-transparent bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)]">Football Amateur Intelligent</span>
+                <span className="text-white">Kdufoot</span>
               </h1>
             </div>
             <p className="text-default-500 text-base">

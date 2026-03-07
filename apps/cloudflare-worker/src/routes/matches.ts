@@ -602,6 +602,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         }
 
         await matchService.markNotificationsAsRead(params.id, dbUser.id);
+        broadcastDataChanged(env);
         return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
@@ -668,6 +669,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const { scheduled_time } = await request.json() as { scheduled_time: string };
         try {
             await matchService.updatePairingTime(params.pairingId, dbUser.id, scheduled_time);
+            broadcastDataChanged(env);
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -703,6 +705,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         try {
             const pairings = await matchService.generatePairings(params.id, dbUser.id);
+            broadcastDataChanged(env);
             return Response.json({ success: true, pairings }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

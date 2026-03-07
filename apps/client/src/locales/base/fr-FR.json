@@ -110,12 +110,12 @@
       "find_match": "Trouver un match",
       "find_tournament": "Trouver un tournoi"
     },
-    "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics.",
+    "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux et des tournois autour de chez vous en quelques clics.",
     "about": {
       "title": "👋 À propos",
       "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1>. J'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
-      "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez un adversaire autour de chez vous en quelques clics.",
-      "footer": "Moins de recherche, plus de terrain."
+      "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez ou publiez vos rencontres autour de chez vous.",
+      "footer": "Moins de recherche, plus de terrain.\u00A0⚽"
     },
     "cards": {
       "video": {
