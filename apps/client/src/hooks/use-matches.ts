@@ -41,20 +41,36 @@ export function useMatches(filters?: MatchFilters) {
 
     const createMatch = useCallback(async (dto: CreateMatchDto) => {
         const token = await getAccessTokenSilently();
-        await matchService.create(dto, token);
-        // Global invalidation: refresh ALL /api/matches keys (match + tournament + dashboard)
+
+        // Optimistic UI update: Wait for DB insertion then mutate globally instantly
+        const newMatch = await matchService.create(dto, token);
+
+        mutate(
+            (currentData: any) => {
+                if (!currentData || !currentData.matches) return currentData;
+                return {
+                    ...currentData,
+                    matches: [newMatch, ...currentData.matches],
+                    total: currentData.total + 1
+                };
+            },
+            false // Do not immediately send a GET request behind since we just added it
+        );
+
+        // Global invalidation: refresh ALL /api/matches keys (match + tournament + dashboard) globally
         globalMutate(
-            key => typeof key === 'string' && key.includes('/api/matches'),
+            () => true, // invalidate all SWR caches just in case to make sure side effects (dashboards) catch it
             undefined,
             { revalidate: true }
         );
-    }, [getAccessTokenSilently, globalMutate]);
+    }, [getAccessTokenSilently, globalMutate, mutate]);
 
     const updateMatch = useCallback(async (id: string, dto: UpdateMatchDto) => {
         const token = await getAccessTokenSilently();
         await matchService.update(id, dto, token);
         mutate();
-    }, [getAccessTokenSilently, mutate]);
+        globalMutate(() => true, undefined, { revalidate: true });
+    }, [getAccessTokenSilently, mutate, globalMutate]);
 
     const deleteMatch = useCallback(async (id: string) => {
         // Optimistic UI: Remove match from the current cache instantly
@@ -74,7 +90,7 @@ export function useMatches(filters?: MatchFilters) {
         await matchService.delete(id, token);
         // Global invalidation: refresh ALL /api/matches keys across all views
         globalMutate(
-            key => typeof key === 'string' && key.includes('/api/matches'),
+            () => true,
             undefined,
             { revalidate: true }
         );

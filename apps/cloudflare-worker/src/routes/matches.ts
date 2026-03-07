@@ -107,25 +107,29 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         }
 
         // ==========================================
-        // OPTIMISATION KV : LECTURE GRATUITE ILLIMITÉE
+        // OPTIMISATION KV : LECTURE GRATUITE ILLIMITÉE (DISABLED FOR REAL-TIME SYNC)
         // ==========================================
         const cacheKey = `matches:search:${url.search}`;
+        /*
         if (env.KV_CACHE && !filters.ownerId) {
             const cachedMatches = await env.KV_CACHE.get(cacheKey, 'json');
             if (cachedMatches) {
                 return Response.json({ success: true, ...(cachedMatches as any), _source: 'KV' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             }
         }
+        */
 
         const result = await matchService.search(filters, env.GOOGLE_MAPS_API_KEY);
 
         // ==========================================
-        // SAUVEGARDE KV (TTL: 60s pour décharger D1)
+        // SAUVEGARDE KV (TTL: 60s pour décharger D1) (DISABLED FOR REAL-TIME SYNC)
         // ==========================================
+        /*
         if (env.KV_CACHE && !filters.ownerId) {
             // TTL 60s : Pendant 60s, les 25000 users liront la valeur KV en cache (0 requête D1)
             await env.KV_CACHE.put(cacheKey, JSON.stringify(result), { expirationTtl: 60 });
         }
+        */
 
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });

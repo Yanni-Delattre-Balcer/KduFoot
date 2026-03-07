@@ -1,5 +1,5 @@
 
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { useAuth0 } from '@auth0/auth0-react';
 import { sessionService } from '../services/sessions';
 import { TrainingSession, CreateSessionDto, UpdateSessionDto, SessionFilters } from '../types/session.types';
@@ -35,6 +35,7 @@ export function useSessions(filters?: SessionFilters) {
     const key = `/api/sessions?${query.toString()}`;
 
     const { data, error, isLoading, mutate } = useSWR(key, fetcher);
+    const { mutate: globalMutate } = useSWRConfig();
 
     /**
      * createSession, updateSession, and deleteSession are wrapped in 'useCallback'.
@@ -45,7 +46,9 @@ export function useSessions(filters?: SessionFilters) {
         const token = await getAccessTokenSilently();
         await sessionService.create(dto, token);
         mutate(); // Tells SWR to refresh the data after a change
-    }, [getAccessTokenSilently, mutate]);
+        // Global invalidation just in case
+        globalMutate(() => true, undefined, { revalidate: true });
+    }, [getAccessTokenSilently, mutate, globalMutate]);
 
     const updateSession = useCallback(async (id: string, dto: UpdateSessionDto) => {
         const token = await getAccessTokenSilently();

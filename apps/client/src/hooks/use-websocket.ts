@@ -25,7 +25,7 @@ export function useWebSocketSync() {
             ws.onmessage = (event) => {
                 if (event.data === 'DATA_CHANGED') {
                     console.log('[WebSocket] Received DATA_CHANGED, revalidating cache...');
-                    // This revalidates all active SWR mounts
+                    // Use a filter to match all keys and revalidate them
                     mutate(() => true, undefined, { revalidate: true });
                 }
             };
