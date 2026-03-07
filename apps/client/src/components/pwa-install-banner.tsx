@@ -13,13 +13,12 @@ export const PwaInstallBanner = () => {
     useEffect(() => {
         // Show banner only for authenticated users who haven't installed yet and haven't dismissed
         if (isAuthenticated && !isStandalone && !isDismissed) {
-            // Immediate visibility on load
-            const timer = setTimeout(() => {
-                if (deferredPrompt || isIOS) {
-                    setIsVisible(true);
-                }
-            }, 500);
-            return () => clearTimeout(timer);
+            // Immediate reaction to deferredPrompt or iOS detection
+            if (deferredPrompt || isIOS) {
+                setIsVisible(true);
+            }
+        } else {
+            setIsVisible(false);
         }
     }, [isAuthenticated, isStandalone, deferredPrompt, isIOS, isDismissed]);
 
