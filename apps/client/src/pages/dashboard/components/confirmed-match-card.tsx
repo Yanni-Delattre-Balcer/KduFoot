@@ -35,9 +35,9 @@ export const ConfirmedMatchCard = ({
         >
             <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
             <CardBody className="p-0">
-                <div className="flex flex-col lg:flex-row">
+                <div className="flex flex-col 2xl:flex-row">
                     {/* Left Section: Info */}
-                    <div className="flex-1 p-6 border-b lg:border-b-0 lg:border-r border-white/5">
+                    <div className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5">
                         <div className="flex items-start justify-between gap-4 mb-4">
                             <div className="flex items-center gap-4">
                                 <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
@@ -103,7 +103,7 @@ export const ConfirmedMatchCard = ({
                     </div>
 
                     {/* Right Section: VS Visual & Actions */}
-                    <div className="w-full lg:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
+                    <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
                         <div className="mb-6 flex flex-col items-center">
                             <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-4 w-full text-center md:text-left">{t('dashboard.labels.match_opposition')}</p>
 

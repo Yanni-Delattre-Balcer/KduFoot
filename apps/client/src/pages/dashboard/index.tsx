@@ -461,7 +461,7 @@ export default function DashboardPage() {
                             <div className="flex flex-col gap-4 pt-2">
                                 {renderSubFilters(requestsSubFilter, setRequestsSubFilter)}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {isLoadingIncoming ? (
                                         <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
                                     ) : filteredRequests.length > 0 ? (
@@ -602,7 +602,7 @@ export default function DashboardPage() {
                                     formatDate={formatDate}
                                 />
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {isLoadingAnnouncements ? (
                                         <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
                                     ) : filteredOrganized.length > 0 ? (
@@ -778,7 +778,7 @@ export default function DashboardPage() {
                             }
                         >
                             <div className="flex flex-col gap-4 pt-2">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {isLoadingParticipations ? (
                                         <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" /></div>
                                     ) : allConfirmedTournaments.length > 0 ? (
@@ -818,7 +818,7 @@ export default function DashboardPage() {
                             }
                         >
                             <div className="flex flex-col gap-4 pt-2">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {(isLoadingIncoming || isLoadingParticipations) ? (
                                         <div className="col-span-full flex justify-center py-12"><Spinner color="success" /></div>
                                     ) : allConfirmedMatches.length > 0 ? (
