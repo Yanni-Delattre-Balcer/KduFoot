@@ -8,7 +8,6 @@ import { Category } from '@/types/exercise.types';
 import { Level, PitchType } from '@/types/match.types';
 import { useUser } from '@/hooks/use-user';
 import { addToast } from "@heroui/toast";
-import { useSWRConfig } from 'swr';
 import { useMatches } from '@/hooks/use-matches';
 
 interface TournamentFormProps {

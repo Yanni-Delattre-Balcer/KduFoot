@@ -10,7 +10,6 @@ import { Category } from '@/types/exercise.types';
 import { useMatches } from '@/hooks/use-matches';
 import { useUser } from '@/hooks/use-user';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useSWRConfig } from 'swr';
 
 interface MatchFormProps {
     initialData?: Match;
