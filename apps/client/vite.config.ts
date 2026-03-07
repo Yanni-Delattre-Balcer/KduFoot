@@ -168,6 +168,18 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          // Exclude Auth0 callback URLs and API routes from service worker navigation handling
+          navigateFallback: 'index.html',
+          navigateFallbackDenylist: [
+            /^\/api/,                    // API routes
+            /\?code=/,                   // Auth0 authorization code callback
+            /\?state=/,                  // Auth0 state parameter
+            /\?error=/,                  // Auth0 error callback
+            /^\/callback/,              // Explicit callback routes
+            /^\/logout/,                // Logout routes
+          ],
+          skipWaiting: true,
+          clientsClaim: true,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -182,6 +194,16 @@ export default defineConfig(({ mode }) => {
                   statuses: [0, 200]
                 }
               }
+            },
+            {
+              // Never cache Auth0 domain requests
+              urlPattern: /^https:\/\/.*\.auth0\.com\/.*/i,
+              handler: 'NetworkOnly',
+            },
+            {
+              // Never cache API requests
+              urlPattern: /^.*\/api\/.*/i,
+              handler: 'NetworkOnly',
             }
           ]
         }
