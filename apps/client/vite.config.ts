@@ -139,8 +139,8 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo.png'],
         manifest: {
-          name: 'KDUFOOT',
-          short_name: 'KDUFOOT',
+          name: 'Kdufoot',
+          short_name: 'Kdufoot',
           description: 'Organisez et Trouvez des Matchs Amicaux & Tournois de Football',
           theme_color: '#000000',
           background_color: '#000000',

@@ -16,8 +16,8 @@ export function usePWAInstall() {
     const [isDismissed, setIsDismissed] = useState(false);
 
     useEffect(() => {
-        // Check local storage for dismissal
-        const dismissed = localStorage.getItem('kdufoot-pwa-dismissed') === 'true';
+        // Check session storage for dismissal
+        const dismissed = sessionStorage.getItem('kdufoot-pwa-dismissed') === 'true';
         setIsDismissed(dismissed);
 
         // Find if already installed
@@ -27,9 +27,9 @@ export function usePWAInstall() {
 
         setIsStandalone(isStandaloneMatch);
 
-        // Detect iOS Safari (specifically not Chrome on iOS)
+        // Detect iOS Safari (specifically not Chrome/Firefox on iOS)
         const userAgent = window.navigator.userAgent.toLowerCase();
-        const ios = /iphone|ipad|ipod/.test(userAgent) && !/chrome|crios/.test(userAgent);
+        const ios = /iphone|ipad|ipod/.test(userAgent) && !/chrome|crios|fxios/.test(userAgent);
         setIsIOS(ios);
 
         const handler = (e: Event) => {
@@ -50,7 +50,7 @@ export function usePWAInstall() {
         console.log(`[PWA] User response to the install prompt: ${outcome}`);
 
         if (outcome === 'accepted') {
-            localStorage.setItem('kdufoot-pwa-dismissed', 'true');
+            localStorage.setItem('kdufoot-pwa-installed', 'true');
             setIsDismissed(true);
         }
 
@@ -58,13 +58,13 @@ export function usePWAInstall() {
     };
 
     const dismissPrompt = () => {
-        localStorage.setItem('kdufoot-pwa-dismissed', 'true');
+        sessionStorage.setItem('kdufoot-pwa-dismissed', 'true');
         setIsDismissed(true);
     };
 
     return {
         deferredPrompt,
-        isStandalone,
+        isStandalone: isStandalone || localStorage.getItem('kdufoot-pwa-installed') === 'true',
         isIOS,
         isDismissed,
         installPWA,
