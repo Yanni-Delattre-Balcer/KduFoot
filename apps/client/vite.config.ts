@@ -168,16 +168,10 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-          // Exclude Auth0 callback URLs and API routes from service worker navigation handling
-          navigateFallback: 'index.html',
-          navigateFallbackDenylist: [
-            /^\/api/,                    // API routes
-            /\?code=/,                   // Auth0 authorization code callback
-            /\?state=/,                  // Auth0 state parameter
-            /\?error=/,                  // Auth0 error callback
-            /^\/callback/,              // Explicit callback routes
-            /^\/logout/,                // Logout routes
-          ],
+          // Do NOT precache index.html — Safari throws "response served by service worker
+          // has redirections" when the SW serves a cached HTML that was originally fetched
+          // through a redirect. Let navigation requests always go to the network.
+          globIgnores: ['**/index.html'],
           skipWaiting: true,
           clientsClaim: true,
           runtimeCaching: [
