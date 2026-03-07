@@ -267,6 +267,24 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
     const progress = calculateProgress();
 
+    interface ClubOption {
+        id: string;
+        name: string;
+        description: string;
+    }
+
+    const availableClubs: ClubOption[] = user ? [
+        { id: user.club?.id || 'primary', name: user.club?.name || 'Club Principal', description: 'Club Principal' },
+        ...(user.additional_sirets || []).map(siret => {
+            const clubInfo = user.additional_clubs?.find(c => c.siret === siret);
+            return {
+                id: clubInfo?.id || siret,
+                name: clubInfo?.name || siret,
+                description: 'Club Secondaire'
+            };
+        })
+    ] : [];
+
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-appearance-in">
             <Card className="shadow-medium border-violet-800/20 bg-violet-900/10">
@@ -354,20 +372,13 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                                     selectionMode="single"
                                                     color="success"
                                                     variant="flat"
+                                                    items={availableClubs}
                                                 >
-                                                    <DropdownItem key={user.club?.id || 'primary'} description="Club Principal">
-                                                        <span className="font-bold">{user.club?.name || 'Club Principal'}</span>
-                                                    </DropdownItem>
-                                                    {user.additional_sirets.map(siret => {
-                                                        const clubInfo = user.additional_clubs?.find(c => c.siret === siret);
-                                                        const clubName = clubInfo?.name || siret;
-                                                        const clubId = clubInfo?.id || siret;
-                                                        return (
-                                                            <DropdownItem key={clubId} description="Club Secondaire">
-                                                                <span className="font-bold">{clubName}</span>
-                                                            </DropdownItem>
-                                                        );
-                                                    })}
+                                                    {(item: ClubOption) => (
+                                                        <DropdownItem key={item.id} description={item.description}>
+                                                            <span className="font-bold">{item.name}</span>
+                                                        </DropdownItem>
+                                                    )}
                                                 </DropdownMenu>
                                             </Dropdown>
                                         ) : (
