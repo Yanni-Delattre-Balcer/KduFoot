@@ -1,13 +1,25 @@
 import { useEffect, useRef } from 'react';
 import { useSWRConfig } from 'swr';
 
-export function useWebSocketSync() {
+export function useWebSocketSync(enabled: boolean = true) {
     const { mutate } = useSWRConfig();
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const retryCountRef = useRef(0);
 
     useEffect(() => {
+        if (!enabled) {
+            if (wsRef.current) {
+                wsRef.current.close();
+                wsRef.current = null;
+            }
+            if (reconnectTimeoutRef.current) {
+                clearTimeout(reconnectTimeoutRef.current);
+                reconnectTimeoutRef.current = null;
+            }
+            return;
+        }
+
         function connect() {
             if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
@@ -63,5 +75,5 @@ export function useWebSocketSync() {
                 wsRef.current.close();
             }
         };
-    }, [mutate]);
+    }, [mutate, enabled]);
 }

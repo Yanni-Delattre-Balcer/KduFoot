@@ -129,7 +129,9 @@ export default function UsersAndPermissionsPage() {
     const [siretData, setSiretData] = useState<{
         primary_siret: string | null,
         primary_name?: string | null,
-        additional_sirets: { siret: string, name: string }[]
+        additional_sirets: { siret: string, name: string }[],
+        block_count?: number,
+        siret_change_count?: number
     } | null>(null);
     const [newSiret, setNewSiret] = useState("");
     const [forceSiret, setForceSiret] = useState(false);
@@ -563,7 +565,9 @@ export default function UsersAndPermissionsPage() {
                 setSiretData({
                     primary_siret: data.primary_siret,
                     primary_name: data.primary_name,
-                    additional_sirets: data.additional_sirets || []
+                    additional_sirets: data.additional_sirets || [],
+                    block_count: data.block_count || 0,
+                    siret_change_count: data.siret_change_count || 0
                 });
                 setAdminStadiumAddress(data.stadium_address || "");
                 setAdminBlockCount(data.block_count || 0);
@@ -977,41 +981,59 @@ export default function UsersAndPermissionsPage() {
                 )}
 
                 {/* ─── Modal de blocage avec motif ─────────────────────── */}
-                {blockingUserId && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                        <div className="bg-zinc-900 border-2 border-red-600 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl shadow-red-900/30">
-                            <h3 className="text-lg font-black text-red-500 uppercase tracking-tight">🚫 Bannir cet utilisateur</h3>
-                            <p className="text-sm text-default-400">
-                                Cette action va <strong className="text-red-400">supprimer définitivement</strong> tous les matchs et tournois créés par cet utilisateur.
-                            </p>
-                            <Input
-                                label="Motif du bannissement"
-                                placeholder="Ex: Comportement abusif, spam..."
-                                variant="bordered"
-                                value={blockReason}
-                                onValueChange={setBlockReason}
-                                classNames={{ inputWrapper: "border-red-600/50" }}
-                            />
-                            <div className="flex gap-3">
-                                <Button
-                                    color="danger"
-                                    className="font-bold flex-1"
-                                    onPress={() => confirmBlock(blockingUserId)}
-                                    isDisabled={blockReason.trim().length < 3}
-                                >
-                                    CONFIRMER LE BAN
-                                </Button>
-                                <Button
-                                    variant="flat"
-                                    className="flex-1"
-                                    onPress={() => { setBlockingUserId(null); setBlockReason(""); }}
-                                >
-                                    Annuler
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <Modal
+                    isOpen={!!blockingUserId}
+                    onOpenChange={(open) => { if (!open) { setBlockingUserId(null); setBlockReason(""); } }}
+                    classNames={{
+                        base: "bg-zinc-900 border-2 border-red-600 shadow-2xl shadow-red-900/40",
+                        backdrop: "bg-black/80 backdrop-blur-md"
+                    }}
+                    placement="center"
+                    backdrop="blur"
+                >
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1">
+                                    <h3 className="text-lg font-black text-red-500 uppercase tracking-tight flex items-center gap-2">
+                                        🚫 Bannir cet utilisateur
+                                    </h3>
+                                </ModalHeader>
+                                <ModalBody>
+                                    <p className="text-sm text-default-400 font-medium leading-relaxed">
+                                        Cette action va <strong className="text-red-400">supprimer définitivement</strong> tous les matchs et tournois créés par cet utilisateur.
+                                    </p>
+                                    <Input
+                                        label="Motif du bannissement"
+                                        placeholder="Ex: Comportement abusif, spam..."
+                                        variant="bordered"
+                                        value={blockReason}
+                                        onValueChange={setBlockReason}
+                                        classNames={{ inputWrapper: "border-red-600/50 h-12" }}
+                                        autoFocus
+                                    />
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button
+                                        variant="flat"
+                                        onPress={onClose}
+                                        className="font-bold"
+                                    >
+                                        Annuler
+                                    </Button>
+                                    <Button
+                                        color="danger"
+                                        className="font-black uppercase tracking-widest"
+                                        onPress={() => confirmBlock(blockingUserId!)}
+                                        isDisabled={blockReason.trim().length < 3}
+                                    >
+                                        CONFIRMER LE BAN
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                </Modal>
 
                 {/* Panneau d'édition du profil (Modal) */}
                 <Modal

@@ -20,7 +20,6 @@ import { Route, Routes } from "react-router-dom";
 import { SiteLoading } from "./components/site-loading";
 import { AuthenticationGuard, useAuth, UserSync } from "./authentication";
 import { PageNotFound } from "./pages/404";
-import { useWebSocketSync } from "./hooks/use-websocket";
 
 
 import IndexPage from "@/pages/index";
@@ -46,10 +45,6 @@ import { showVideoAnalysis } from "@/config/site";
 import UsersAndPermissionsPage from "@/pages/admin/users-and-permissions";
 import AccountPage from "@/pages/account";
 
-function WebSocketSync() {
-  useWebSocketSync();
-  return null;
-}
 
 function App() {
   const { isLoading } = useAuth();
@@ -62,7 +57,6 @@ function App() {
     <Suspense fallback={<SiteLoading />}>
       <TrainingProvider>
         <UserSync />
-        <WebSocketSync />
         <Routes>
           <Route element={<IndexPage />} path="/" />
           <Route

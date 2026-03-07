@@ -3,6 +3,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import useSWR, { mutate } from 'swr';
 import { User } from '@/types/user.types';
 import { isProfileComplete } from '@/utils/profile';
+import { useWebSocketSync } from '@/hooks/use-websocket';
 
 interface UserContextType {
     user: User | null;
@@ -29,6 +30,8 @@ const CONTEXT_KEY = '/api/me/context';
 
 export function UserProvider({ children }: { children: ReactNode }) {
     const { getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
+
+    useWebSocketSync(isAuthenticated);
 
     const fetcher = useCallback(async () => {
         if (!isAuthenticated) return null;
