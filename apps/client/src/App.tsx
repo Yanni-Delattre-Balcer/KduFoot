@@ -20,6 +20,7 @@ import { Route, Routes } from "react-router-dom";
 import { SiteLoading } from "./components/site-loading";
 import { AuthenticationGuard, useAuth, UserSync } from "./authentication";
 import { PageNotFound } from "./pages/404";
+import { PwaInstallBanner } from "./components/pwa-install-banner";
 
 
 import IndexPage from "@/pages/index";
@@ -57,6 +58,7 @@ function App() {
     <Suspense fallback={<SiteLoading />}>
       <TrainingProvider>
         <UserSync />
+        <PwaInstallBanner />
         <Routes>
           <Route element={<IndexPage />} path="/" />
           <Route
