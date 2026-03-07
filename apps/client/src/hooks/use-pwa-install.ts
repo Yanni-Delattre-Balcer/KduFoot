@@ -16,19 +16,9 @@ export function usePWAInstall() {
     const [isDismissed, setIsDismissed] = useState(false);
 
     useEffect(() => {
-        // Check local storage for dismissal (7-day rule for non-intrusive UX)
-        const dismissalTime = localStorage.getItem('kdufoot-pwa-dismissed-at');
-        if (dismissalTime) {
-            const dismissedAt = parseInt(dismissalTime, 10);
-            const now = Date.now();
-            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-
-            if (now - dismissedAt < sevenDaysInMs) {
-                setIsDismissed(true);
-            } else {
-                localStorage.removeItem('kdufoot-pwa-dismissed-at');
-            }
-        }
+        // Check local storage for PERMANENT dismissal
+        const dismissed = localStorage.getItem('kdufoot-pwa-dismissed') === 'true';
+        setIsDismissed(dismissed);
 
         // Find if already installed
         const isStandaloneMatch = window.matchMedia('(display-mode: standalone)').matches
@@ -59,6 +49,7 @@ export function usePWAInstall() {
 
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
+            localStorage.setItem('kdufoot-pwa-dismissed', 'true');
             localStorage.setItem('kdufoot-pwa-installed', 'true');
             setIsDismissed(true);
         }
@@ -67,7 +58,7 @@ export function usePWAInstall() {
     };
 
     const dismissPrompt = () => {
-        localStorage.setItem('kdufoot-pwa-dismissed-at', Date.now().toString());
+        localStorage.setItem('kdufoot-pwa-dismissed', 'true');
         setIsDismissed(true);
     };
 

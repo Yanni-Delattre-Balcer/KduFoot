@@ -64,10 +64,10 @@ export const PwaInstallBanner = () => {
 
                             <div className="space-y-2">
                                 <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic leading-none">
-                                    Installer l'application <span className="text-primary italic">Kdufoot</span>
+                                    Installer <span className="text-primary italic">Kdufoot</span>
                                 </h3>
                                 <p className="text-sm text-zinc-400 font-medium px-4">
-                                    Installez Kdufoot pour une expérience fluide et des notifications en temps réel.
+                                    Profitez d'une expérience fluide et de notifications en temps réel directement sur votre écran.
                                 </p>
                             </div>
 
@@ -78,7 +78,7 @@ export const PwaInstallBanner = () => {
                                     className="font-black h-14 text-sm uppercase tracking-widest shadow-xl shadow-primary/20 w-full"
                                     onPress={handleInstallClick}
                                 >
-                                    INSTALLER MAINTENANT
+                                    INSTALLER L'APPLICATION
                                 </Button>
                                 <button
                                     onClick={handleDismiss}
@@ -95,7 +95,7 @@ export const PwaInstallBanner = () => {
             {/* iOS Specific Hint Popup */}
             {showIOSHint && (
                 <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in" onClick={() => setShowIOSHint(false)}>
-                    <Card className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-6 space-y-7 shadow-[0_0_100px_rgba(var(--heroui-primary-rgb),0.2)] relative" onClick={e => e.stopPropagation()}>
+                    <Card className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-6 space-y-6 shadow-[0_0_100px_rgba(var(--heroui-primary-rgb),0.2)] relative" onClick={e => e.stopPropagation()}>
                         <button
                             onClick={handleDismiss}
                             className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
@@ -110,27 +110,45 @@ export const PwaInstallBanner = () => {
                                 <img src="/apple-touch-icon.png" alt="Kdufoot" className="w-full h-full object-contain" />
                             </div>
                             <div className="space-y-1">
-                                <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">Kdufoot Mobile</h2>
-                                <p className="text-xs text-primary font-black uppercase tracking-[0.2em]">Installation Express</p>
+                                <h2 className="text-2xl font-black text-white tracking-tighter italic leading-tight">Kdufoot Mobile</h2>
+                                <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">Guide d'installation</p>
                             </div>
                         </div>
 
-                        <div className="space-y-5 px-2">
-                            <div className="flex items-center gap-5 bg-white/5 p-4 rounded-[1.5rem] border border-white/10 group transition-all hover:bg-white/[0.07]">
-                                <div className="bg-blue-500/10 rounded-2xl p-3 border border-blue-500/20 group-hover:bg-blue-500/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 text-blue-400">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
-                                    </svg>
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                    <span className="text-primary font-black text-xs">1</span>
                                 </div>
-                                <p className="text-sm text-zinc-100 font-medium leading-snug">1. Appuyez sur le bouton <span className="text-blue-400 font-bold">Partager</span> en bas de Safari.</p>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Connectez-vous à votre compte sur <span className="text-white font-bold">Safari</span>.</p>
                             </div>
-                            <div className="flex items-center gap-5 bg-white/5 p-4 rounded-[1.5rem] border border-white/10 group transition-all hover:bg-white/[0.07]">
-                                <div className="bg-white/10 rounded-2xl p-3 border border-white/10 group-hover:bg-primary/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 text-white group-hover:text-primary transition-colors">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                    </svg>
+
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                    <span className="text-primary font-black text-xs">2</span>
                                 </div>
-                                <p className="text-sm text-zinc-100 font-medium leading-snug">2. Sélectionnez <span className="text-white font-bold whitespace-nowrap">Sur l'écran d'accueil</span> dans la liste.</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur <span className="text-blue-400 font-bold italic">Partager</span></p>
+                                    <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-blue-400">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                    <span className="text-primary font-black text-xs">3</span>
+                                </div>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur <span className="text-white font-bold italic">"Sur l'écran d'accueil"</span>.</p>
+                            </div>
+
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                    <span className="text-primary font-black text-xs">4</span>
+                                </div>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Validez pour installer l'application sur votre iPhone.</p>
                             </div>
                         </div>
 
