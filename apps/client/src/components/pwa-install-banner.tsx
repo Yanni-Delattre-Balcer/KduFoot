@@ -10,6 +10,16 @@ export const PwaInstallBanner = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [showIOSHint, setShowIOSHint] = useState(false);
 
+    // Lock background scroll when iOS guide is open
+    useEffect(() => {
+        if (showIOSHint) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [showIOSHint]);
+
     useEffect(() => {
         // React immediately to state changes (login, readiness, dismissal)
         const readyToPrompt = !!deferredPrompt || (isIOS && !isStandalone);
@@ -101,8 +111,8 @@ export const PwaInstallBanner = () => {
 
             {/* iOS Specific Hint Popup */}
             {showIOSHint && (
-                <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in" onClick={() => setShowIOSHint(false)}>
-                    <Card className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-6 space-y-6 shadow-[0_0_100px_rgba(var(--heroui-primary-rgb),0.2)] relative" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in overflow-y-auto overscroll-contain" onClick={() => { setShowIOSHint(false); handleDismissSession(); }}>
+                    <Card className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-6 space-y-6 shadow-[0_0_100px_rgba(var(--heroui-primary-rgb),0.2)] relative my-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex flex-col items-center text-center gap-4">
                             <div className="w-20 h-20 rounded-3xl bg-black border-2 border-primary/40 p-2 shadow-2xl shadow-primary/20 shadow-inner">
                                 <img src="/apple-touch-icon.png" alt="Kdufoot" className="w-full h-full object-contain" />
@@ -168,7 +178,7 @@ export const PwaInstallBanner = () => {
                             <Button
                                 color="primary"
                                 className="w-full font-black uppercase tracking-widest h-12 text-sm shadow-xl shadow-primary/20"
-                                onPress={() => setShowIOSHint(false)}
+                                onPress={() => { setShowIOSHint(false); handleDismissSession(); }}
                             >
                                 C'EST COMPRIS !
                             </Button>

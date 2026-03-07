@@ -51,12 +51,12 @@
       "find_match": "Trouver un match",
       "find_tournament": "Trouver un tournoi"
     },
-    "description": "Kdufoot vous propose deux outils conçus pour simplifier votre quotidien d'éducateur. Collez un lien vidéo et notre IA génère des exercices détaillés adaptés à votre catégorie. Publiez ou recherchez des matchs amicaux autour de chez vous en quelques clics.",
+    "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
-      "title": "👋 À propos",
-      "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1>. J'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
-      "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez un adversaire autour de chez vous en quelques clics.",
-      "footer": "Moins de recherche, plus de terrain."
+      "title": "👋 À propos du projet",
+      "intro": "Je suis **Yanni**, étudiant passionné de football et de développement web. Kdufoot est né d'un constat simple : en tant qu'éducateur dans un club amateur, il est souvent difficile de trouver des exercices adaptés et d'organiser des matchs amicaux avec d'autres clubs.",
+      "features": "J'ai donc créé cette plateforme pour répondre à ces besoins. Le premier outil — **l'analyse vidéo par IA** — permet de coller un lien YouTube, TikTok ou Instagram et d'obtenir automatiquement des exercices structurés avec synopsis, thèmes et catégorie d'âge. Le second — **les matchs et tournois amicaux** — permet de publier ou rechercher des rencontres entre clubs, en filtrant par catégorie, niveau, format et distance.",
+      "footer": "Mon objectif : simplifier le quotidien des éducateurs et rendre le football amateur plus accessible et mieux organisé. 🎯⚽"
     },
     "cards": {
       "video": {
@@ -143,8 +143,11 @@
     "empty_exercises_desc": "Ajoutez des exercices à vos favoris pour les retrouver ici.",
     "empty_matches": "Aucun match favori",
     "empty_matches_desc": "Vos matchs likés apparaîtront ici.",
+    "empty_tournaments": "Aucun tournoi favori",
+    "empty_tournaments_desc": "Ajoutez des tournois à vos favoris pour les retrouver ici.",
     "discover_exercises": "Découvrir les exercices",
-    "find_matches": "Trouver un match / tournoi"
+    "find_matches": "Trouver un match / tournoi",
+    "find_tournaments": "Trouver des tournois"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",
@@ -320,7 +323,7 @@
       "Synthétique": "Synthétique",
       "Hybride": "Hybride",
       "Stabilisé": "Stabilisé",
-      "Indoor": "Indoor"
+      "Indoor": "Toutes surfaces"
     },
     "gender": {
       "Masculin": "Masculin",
@@ -450,10 +453,76 @@
     }
   },
   "account": {
+    "avatar": {
+      "recommendation": "Le mieux est de mettre le logo de votre club",
+      "no_face": "Aucun visage détecté, mais l'upload continue.",
+      "analyzing": "Analyse...",
+      "change": "Changer"
+    },
+    "subscription": {
+      "free": "Abonnement {{plan}}",
+      "free_account": "Compte Gratuit"
+    },
+    "sections": {
+      "identity": "Identité & Contact",
+      "sports_profile": "Profil Sportif (Requis pour créer des annonces)",
+      "club_location": "Club & Localisation"
+    },
+    "fields": {
+      "firstname": "Prénom",
+      "lastname": "Nom",
+      "phone": "Téléphone",
+      "license": "Numéro de licence",
+      "license_placeholder": "Saisir votre numéro",
+      "hq_address": "Adresse du Siège (Officielle)",
+      "stadium_address": "Adresse du Stade (Obligatoire pour l'accès)",
+      "stadium_placeholder": "Ex : Complexe Sportif, 12 rue des Fleurs",
+      "stadium_locked": "L'adresse du stade est verrouillée. Contactez le support pour toute modification.",
+      "stadium_warning": "Attention : cette adresse est indispensable pour guider les joueurs lors des matchs.",
+      "category": "Catégorie",
+      "level": "Niveau",
+      "pitch": "Terrain habituel",
+      "colors": "Couleur des maillots",
+      "colors_placeholder": "Rouge et Noir...",
+      "current_club": "Club actuel",
+      "no_club": "Aucun club lié",
+      "main_club": "Club Principal",
+      "city": "Ville",
+      "dept": "Département",
+      "other_clubs": "Mes autres clubs rattachés",
+      "nameless_club": "Club sans nom"
+    },
+    "errors": {
+      "firstname_required": "Le prénom est obligatoire.",
+      "lastname_required": "Le nom est obligatoire.",
+      "phone_required": "Ce champ est obligatoire (au moins 11 chiffres)",
+      "license_required": "Le numéro de licence est obligatoire.",
+      "category_required": "Ce champ est obligatoire (choisissez une catégorie)",
+      "level_required": "Ce champ est obligatoire (choisissez un niveau)",
+      "pitch_required": "Ce champ est obligatoire (choisissez un terrain)",
+      "stadium_required": "L'adresse du stade est obligatoire.",
+      "siret_required": "Numéro SIRET (14 chiffres) ou SIREN (9 chiffres) requis.",
+      "form_incomplete": "Formulaire incomplet",
+      "form_incomplete_desc": "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès."
+    },
+    "support": {
+      "title": "Besoin d'aide avec votre club ?",
+      "description": "Si vous ne trouvez pas votre club, si vous entraînez dans deux clubs différents, ou si vous changez de club : veuillez contacter notre support technique."
+    },
+    "siret": {
+      "warning_title": "Attention : Une fois le SIRET validé et le club lié à votre compte, cette action est irréversible.",
+      "warning_desc": "Pour toute modification ultérieure, vous devrez contacter le support technique."
+    },
     "buttons": {
       "save_changes": "Enregistrer les modifications",
-      "save_and_continue": "Enregistrer et continuer"
-    }
+      "save_and_continue": "Enregistrer et continuer",
+      "delete_account": "Supprimer mon compte",
+      "validate_club": "VALIDER MON CLUB",
+      "contact_support": "📩 CONTACTER LE SUPPORT"
+    },
+    "confirm_delete": "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?",
+    "delete_success": "Compte supprimé avec succès",
+    "delete_error": "Erreur lors de la suppression du compte"
   },
   "tournamentForm": {
     "title": "Créer un Tournoi Amical",
@@ -543,14 +612,35 @@
     "subtitle": "Gérez vos organisations et vos participations en temps réel.",
     "organized_label": "Organisateur",
     "away_label": "Extérieur",
+    "sections": {
+      "locked_title": "Configuration Obligatoire",
+      "locked_desc": "Votre profil n'est pas encore complet. Pour garantir la sécurité de la plateforme, l'accès au Dashboard est suspendu tant que vos informations ne sont pas 100% validées.",
+      "modifications_title": "Action Requise : Modifications Détectées",
+      "modifications_desc": "{{count}} match{{plural}} été modifié par l'organisateur. Veuillez vérifier les détails."
+    },
     "tabs": {
       "requests": "DEMANDES REÇUES",
-      "organized": "Mes Matchs / Tournois Organisés (Mes Créations)",
+      "organized": "Mes Matchs / Tournois Organisés",
       "participations": "TOURNOIS CONFIRMÉS",
       "confirmed_matches": "MATCHS CONFIRMÉS",
       "all": "Tous",
       "matches": "Matchs",
       "tournaments": "Tournois"
+    },
+    "labels": {
+      "for_event": "Pour votre {{type}}",
+      "view_club_profile": "👤 Voir le profil du club",
+      "search_match": "Rechercher un match",
+      "search_tournament": "Rechercher un tournoi",
+      "home_badge": "🏠 Domicile",
+      "away_badge": "✈️ Extérieur",
+      "match_opposition": "Opposition",
+      "my_club": "Moi",
+      "no_participation_tournament": "Vous n'avez postulé à aucun tournoi",
+      "no_participation_match": "Vous n'avez postulé à aucun match",
+      "view_profile": "👤 Voir le profil",
+      "manage_registrations": "Gérer les demandes",
+      "view_changes": "⚠️ Voir MODIFICATIONS"
     },
     "tournament": {
       "pairings": "Confrontations",
@@ -575,20 +665,41 @@
       "organized": "Vous n'avez publié aucune annonce.",
       "participations": "Vous n'avez postulé à aucun match.",
       "no_match": "Aucun match trouvé dans cette catégorie.",
-      "no_tournament": "Aucun tournoi trouvé dans cette catégorie."
+      "no_tournament": "Aucun tournoi trouvé dans cette catégorie.",
+      "no_requests": "Vous n'avez aucune demande en attente pour le moment.",
+      "no_organized": "Vous n'avez publié aucune annonce."
+    },
+    "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
+    "toasts": {
+      "delete_success": "Annonce supprimée avec succès"
+    },
+    "profile_modal": {
+      "title": "Profil du Club",
+      "subtitle": "Informations de contact vérifiées",
+      "manager": "Responsable",
+      "phone": "Téléphone",
+      "email": "Email",
+      "city": "Ville",
+      "request_date": "Date de la demande",
+      "for_match_on": "Pour le match du",
+      "unknown": "Inconnue",
+      "close": "Fermer"
     },
     "controls": {
-      "new": "Nouvelle Annonce",
-      "view": "Voir l'annonce",
       "accept": "Accepter",
       "refuse": "Refuser",
-      "manage_registrations": "Gérer les inscriptions",
-      "contact": "Contacter"
+      "view": "Détails",
+      "manage_registrations": "Gérer les demandes",
+      "contact": "📞 Contacter",
+      "itinerary": "📍 Itinéraire",
+      "new": "Nouvelle Annonce"
     },
     "status": {
+      "accepted": "Accepté",
+      "refused": "Refusé",
       "pending": "En attente",
-      "accepted": "Acceptée",
-      "refused": "Refusée",
+      "searching": "🔍 RECHERCHE D'ADVERSAIRE",
+      "active": "🔍 RECHERCHE D'ADVERSAIRE",
       "completed": "Terminé",
       "full": "Complet",
       "open": "Ouvert"
@@ -609,27 +720,16 @@
       "view_changes": "Voir les changements",
       "mark_as_read": "J'ai compris, marquer comme lu",
       "verify": "VÉRIFIER",
+      "action_required_short": "Modifications Détectées",
       "attention": "Attention !",
       "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations.",
       "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
-    },
-    "labels": {
-      "match_opposition": "Opposition Match",
-      "organizer": "Organisateur",
-      "participant": "Participant",
-      "my_club": "Mon Club",
-      "home_badge": "🏠 À Domicile",
-      "away_badge": "✈️ À l'Extérieur",
-      "home": "Domicile",
-      "away": "Extérieur",
-      "confirmed_match": "✅ MATCH CONFIRMÉ",
-      "view_club_profile": "👤 Voir le profil du club",
-      "view_profile": "👤 Voir le profil",
-      "search_match": "Rechercher un match",
-      "search_tournament": "Rechercher un tournoi",
-      "no_participation_tournament": "Vous n'avez postulé à aucun tournoi",
-      "for_event": "Pour le {{type}} du"
     }
+  },
+  "common": {
+    "not_provided": "Non renseigné",
+    "unknown_city": "Ville inconnue",
+    "unknown_date": "Date inconnue"
   },
   "adminUsersPage": {
     "pageTitle": "Gestion des utilisateurs et permissions",
@@ -700,7 +800,8 @@
       "share": "Partages",
       "admin": "Administration",
       "auth0": "Administration Auth0",
-      "coach": "Certification"
+      "coach": "Certification",
+      "role": "Sanctions"
     },
     "read_api": "Lire l'API",
     "write_api": "Écrire dans l'API",
@@ -730,7 +831,8 @@
     "admin_analytics": "Statistiques ADM",
     "admin_billing": "Facturation",
     "auth0_admin_api": "Accès API Auth0",
-    "coach_certified": "Coach certifié"
+    "coach_certified": "Coach certifié",
+    "role_blocked": "Banni / Bloqué"
   },
   "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur"
 }
