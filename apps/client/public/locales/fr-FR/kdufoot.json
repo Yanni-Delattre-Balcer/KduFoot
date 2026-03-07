@@ -54,7 +54,7 @@
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
       "title": "👋 À propos",
-      "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1>. J'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
+      "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1> — j'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
       "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez un adversaire autour de chez vous en quelques clics.",
       "footer": "Moins de recherche, plus de terrain."
     },
@@ -475,7 +475,7 @@
       "license": "Numéro de licence",
       "license_placeholder": "Saisir votre numéro",
       "hq_address": "Adresse du Siège (Officielle)",
-      "stadium_address": "Adresse du Stade (Obligatoire pour l'accès)",
+      "stadium_address": "Adresse du Stade (Obligatoire)",
       "stadium_placeholder": "Ex : Complexe Sportif, 12 rue des Fleurs",
       "stadium_locked": "L'adresse du stade est verrouillée. Contactez le support pour toute modification.",
       "stadium_warning": "Attention : cette adresse est indispensable pour guider les joueurs lors des matchs.",
@@ -506,8 +506,8 @@
       "form_incomplete_desc": "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès."
     },
     "support": {
-      "title": "Besoin d'aide avec votre club ?",
-      "description": "Si vous ne trouvez pas votre club, si vous entraînez dans deux clubs différents, ou si vous changez de club : veuillez contacter notre support technique."
+      "title": "Besoin d'aide ?",
+      "description": "Si vous ne trouvez pas votre club, si vous entraînez dans deux clubs différents, ou si vous changez de club, contactez notre support. Pour toute autre question (inscription, connexion, fonctionnement du site…), n'hésitez pas à nous écrire également."
     },
     "siret": {
       "warning_title": "Attention : Une fois le SIRET validé et le club lié à votre compte, cette action est irréversible.",

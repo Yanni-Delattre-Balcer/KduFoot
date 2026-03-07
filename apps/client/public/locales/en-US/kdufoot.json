@@ -50,7 +50,7 @@
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
     "about": {
       "title": "👋 About",
-      "intro": "<0>Yanni</0>, cybersecurity student, <1>Networks & Telecommunications in Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
+      "intro": "<0>Yanni</0>, cybersecurity student, <1>Networks & Telecommunications in Béthune</1> — I created Kdufoot to help football coaches <2>save time</2>.",
       "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use drills.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in a few clicks.",
       "footer": "Less searching, more playing."
     },
@@ -439,7 +439,7 @@
       "license": "License Number",
       "license_placeholder": "Enter your number",
       "hq_address": "HQ Address (Official)",
-      "stadium_address": "Stadium Address (Required for access)",
+      "stadium_address": "Stadium Address (Required)",
       "stadium_placeholder": "E.g.: Sports Complex, 12 Flower St",
       "stadium_locked": "Stadium address is locked. Contact support for any changes.",
       "stadium_warning": "Warning: this address is essential for guiding players during matches.",
@@ -470,8 +470,8 @@
       "form_incomplete_desc": "Please fill in all mandatory fields in red to maintain or activate your access."
     },
     "support": {
-      "title": "Need help with your club?",
-      "description": "If you cannot find your club, if you coach in two different clubs, or if you change clubs: please contact our technical support."
+      "title": "Need help?",
+      "description": "If you cannot find your club, if you coach in two different clubs, or if you change clubs, contact our support. For any other questions (registration, login, how the site works…), feel free to write to us as well."
     },
     "siret": {
       "warning_title": "Warning: Once the SIRET is validated and the club is linked to your account, this action is irreversible.",
