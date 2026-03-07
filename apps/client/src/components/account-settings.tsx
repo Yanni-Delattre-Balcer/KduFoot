@@ -424,7 +424,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     isDisabled
                                     classNames={{
                                         inputWrapper: "bg-default-200/30",
-                                        label: "font-bold text-default-500"
+                                        label: "font-bold text-default-500 whitespace-nowrap"
                                     }}
                                 />
                             </div>
@@ -445,7 +445,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     description={dbUser?.stadium_address ? t('account.fields.stadium_locked') : t('account.fields.stadium_warning')}
                                     classNames={{
                                         description: "text-[10px] text-primary-500 font-medium",
-                                        label: "font-black text-primary"
+                                        label: "font-black text-primary whitespace-nowrap"
                                     }}
                                 />
                                 {errors.stadiumAddress && <p className="text-xs text-danger font-bold pl-1">{errors.stadiumAddress}</p>}
@@ -670,7 +670,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                             color="danger"
                                             variant="shadow"
                                             size="lg"
-                                            className="w-full font-black uppercase text-lg h-14 shadow-red-500/40 tracking-widest animate-pulse"
+                                            className="w-full font-black uppercase text-xs sm:text-sm h-12 sm:h-14 shadow-red-500/40 tracking-wider sm:tracking-widest animate-pulse"
                                         >
                                             {t('account.buttons.contact_support')}
                                         </Button>

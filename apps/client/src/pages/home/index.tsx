@@ -6,7 +6,7 @@
 import { Link } from "@heroui/link";
 import { button as buttonStyles } from "@heroui/theme";
 import { Card, CardBody } from "@heroui/card";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 
 import DefaultLayout from "../../layouts/default";
 
@@ -66,12 +66,25 @@ export default function IndexPage() {
           <CardBody className="p-6 flex flex-col items-center text-center lg:items-start lg:text-left gap-3">
             <h2 className="text-lg font-bold text-foreground">{t("homePage.about.title")}</h2>
             <p className="text-sm text-default-500 leading-relaxed">
-              {t("homePage.about.intro")}
+              <Trans
+                i18nKey="homePage.about.intro"
+                components={[
+                  <strong className="text-white font-bold" />,
+                  <a href="https://www.iut-bethune.univ-artois.fr/formations/but-reseaux-et-telecommunications/" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline hover:text-primary-400 transition-colors" />,
+                  <span className="text-primary font-bold" />
+                ]}
+              />
             </p>
             <p className="text-sm text-default-500 leading-relaxed">
-              {t("homePage.about.features")}
+              <Trans
+                i18nKey="homePage.about.features"
+                components={[
+                  <strong className="text-white font-semibold" />,
+                  <strong className="text-white font-semibold" />
+                ]}
+              />
             </p>
-            <p className="text-sm text-default-500 leading-relaxed">
+            <p className="text-sm text-default-500 leading-relaxed font-semibold">
               {t("homePage.about.footer")}
             </p>
           </CardBody>

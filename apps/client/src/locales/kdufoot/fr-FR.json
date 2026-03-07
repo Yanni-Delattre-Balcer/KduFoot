@@ -53,10 +53,10 @@
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
-      "title": "👋 À propos du projet",
-      "intro": "Je suis **Yanni**, étudiant passionné de football et de développement web. Kdufoot est né d'un constat simple : en tant qu'éducateur dans un club amateur, il est souvent difficile de trouver des exercices adaptés et d'organiser des matchs amicaux avec d'autres clubs.",
-      "features": "J'ai donc créé cette plateforme pour répondre à ces besoins. Le premier outil — **l'analyse vidéo par IA** — permet de coller un lien YouTube, TikTok ou Instagram et d'obtenir automatiquement des exercices structurés avec synopsis, thèmes et catégorie d'âge. Le second — **les matchs et tournois amicaux** — permet de publier ou rechercher des rencontres entre clubs, en filtrant par catégorie, niveau, format et distance.",
-      "footer": "Mon objectif : simplifier le quotidien des éducateurs et rendre le football amateur plus accessible et mieux organisé. 🎯⚽"
+      "title": "👋 À propos",
+      "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1>. J'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
+      "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez un adversaire autour de chez vous en quelques clics.",
+      "footer": "Moins de recherche, plus de terrain."
     },
     "cards": {
       "video": {

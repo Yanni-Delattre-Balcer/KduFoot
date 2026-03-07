@@ -49,10 +49,10 @@
     },
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
     "about": {
-      "title": "👋 About the Project",
-      "intro": "I am **Yanni**, a student passionate about football and web development. Kdufoot was born from a simple observation: as a coach in an amateur club, it is often difficult to find suitable exercises and organize friendly matches with other clubs.",
-      "features": "So I created this platform to meet these needs. The first tool — **AI video analysis** — allows you to paste a YouTube, TikTok, or Instagram link and automatically get structured exercises with synopsis, themes, and age category. The second — **friendly matches and tournaments** — allows you to publish or search for matches between clubs, filtering by category, level, format, and distance.",
-      "footer": "My goal: to simplify the daily life of coaches and make amateur football more accessible and better organized. 🎯⚽"
+      "title": "👋 About",
+      "intro": "<0>Yanni</0>, cybersecurity student, <1>Networks & Telecommunications in Béthune</1>. I created Kdufoot to help football coaches <2>save time</2>.",
+      "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use drills.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in a few clicks.",
+      "footer": "Less searching, more playing."
     },
     "cards": {
       "video": {
