@@ -144,11 +144,23 @@ export const ConfirmedTournamentCard = ({
                                 </Button>
                                 <Button
                                     size="sm"
+                                    variant="flat"
+                                    color="primary"
+                                    className="flex-1 font-black text-[10px] uppercase h-10 active:scale-95 shadow-sm"
+                                    as="a"
+                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${part.opponent_stadium_address || part.location_address || part.host_stadium_address}, ${part.opponent_city || part.location_city || part.host_city}`)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    📍 Itinéraire
+                                </Button>
+                                <Button
+                                    size="sm"
                                     variant="solid"
                                     color="secondary"
                                     className="flex-1 font-bold text-sm h-10 active:scale-95"
                                     as="a"
-                                    href={`tel:${part.host_phone}`}
+                                    href={`tel:${part.host_phone || part.opponent_phone}`}
                                 >
                                     {t('dashboard.controls.contact', '📞 Contacter')}
                                 </Button>

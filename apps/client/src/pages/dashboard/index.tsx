@@ -270,6 +270,8 @@ export default function DashboardPage() {
             opponent_email: r.requester_email,
             opponent_club_colors: r.requester_club_colors,
             opponent_pitch_type: r.requester_pitch_type,
+            opponent_stadium_address: r.requester_stadium_address,
+            opponent_club_address: r.requester_club_address,
             // If organizer created match as 'home', organizer plays at home
             isUserHome: r.match_type === 'tournament' || r.venue === 'Domicile',
             max_teams: r.match_max_teams,
@@ -295,6 +297,7 @@ export default function DashboardPage() {
             opponent_email: p.host_email,
             opponent_club_colors: p.host_club_colors,
             opponent_pitch_type: null,
+            opponent_stadium_address: p.host_stadium_address,
             // If organizer created match as 'away', organizer plays away, so participant plays at home.
             // For tournaments, participant is always Away.
             isUserHome: p.match_type === 'tournament' ? false : p.venue === 'Extérieur',

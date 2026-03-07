@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/button';
 import { Input, Textarea } from '@heroui/input';
 import { Select, SelectItem } from "@heroui/select";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Category } from '@/types/exercise.types';
 import { Level, PitchType } from '@/types/match.types';
@@ -55,7 +56,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 club_id: prev.club_id || user.club?.id || '',
                 email: user.email || prev.email || '',
                 phone: user.phone || prev.phone || '',
-                location_address: prev.club_id === user.club?.id ? user.club?.address || '' : prev.location_address || '',
+                location_address: prev.club_id === user.club?.id ? user.stadium_address || user.club?.address || '' : prev.location_address || '',
                 location_zip: prev.club_id === user.club?.id ? user.club?.zip || '' : prev.location_zip || '',
                 location_city: prev.club_id === user.club?.id ? user.club?.city || '' : prev.location_city || '',
                 category: user.category as Category || prev.category,
@@ -76,11 +77,12 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                     location_zip: user.club?.zip || ''
                 }));
             } else {
+                const addClub = user.additional_clubs?.find(c => c.id === formData.club_id);
                 setFormData(prev => ({
                     ...prev,
-                    location_address: 'Non renseigné (SIRET Secondaire)',
-                    location_city: '',
-                    location_zip: ''
+                    location_address: addClub?.stadium_address || addClub?.address || '',
+                    location_city: addClub?.city || '',
+                    location_zip: addClub?.zip || ''
                 }));
             }
         }
@@ -255,25 +257,48 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                     <div className="flex flex-col w-full">
                                         <span className="text-success-900 font-black uppercase tracking-tighter text-xs sm:text-sm">{t('matchForm.link_club.linked')}</span>
                                         {Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0 ? (
-                                            <Select
-                                                size="sm"
-                                                variant="underlined"
-                                                color="success"
-                                                className="w-full font-bold mt-1"
-                                                selectedKeys={formData.club_id ? [formData.club_id] : []}
-                                                onChange={(e) => handleChange('club_id', e.target.value)}
-                                            >
-                                                {[
-                                                    <SelectItem key={user.club?.id || 'primary'}>
-                                                        {user.club?.name || 'Club Principal'}
-                                                    </SelectItem>,
-                                                    ...user.additional_sirets.map(siret => (
-                                                        <SelectItem key={siret}>
-                                                            {siret} (SIRET Secondaire)
-                                                        </SelectItem>
-                                                    ))
-                                                ]}
-                                            </Select>
+                                            <Dropdown>
+                                                <DropdownTrigger>
+                                                    <Button
+                                                        className="w-full justify-between mt-2 h-auto py-2"
+                                                        color="success"
+                                                        variant="flat"
+                                                        endContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6 shrink-0"><path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>}
+                                                        size="lg"
+                                                    >
+                                                        <div className="flex flex-col items-start truncate overflow-hidden">
+                                                            <span className="font-extrabold truncate w-full text-left text-base uppercase">
+                                                                {formData.club_id === user.club?.id || !formData.club_id
+                                                                    ? user.club?.name || 'Club Principal'
+                                                                    : user.additional_clubs?.find(c => c.id === formData.club_id)?.name || formData.club_id}
+                                                            </span>
+                                                            <span className="text-xs font-semibold opacity-80">Changer de club 👇</span>
+                                                        </div>
+                                                    </Button>
+                                                </DropdownTrigger>
+                                                <DropdownMenu
+                                                    aria-label="Sélection du club"
+                                                    onAction={(key) => handleChange('club_id', key as string)}
+                                                    selectedKeys={[formData.club_id || user.club?.id || 'primary']}
+                                                    selectionMode="single"
+                                                    color="success"
+                                                    variant="flat"
+                                                >
+                                                    <DropdownItem key={user.club?.id || 'primary'} description="Club Principal">
+                                                        <span className="font-bold">{user.club?.name || 'Club Principal'}</span>
+                                                    </DropdownItem>
+                                                    {user.additional_sirets.map(siret => {
+                                                        const clubInfo = user.additional_clubs?.find(c => c.siret === siret);
+                                                        const clubName = clubInfo?.name || siret;
+                                                        const clubId = clubInfo?.id || siret;
+                                                        return (
+                                                            <DropdownItem key={clubId} description="Club Secondaire">
+                                                                <span className="font-bold">{clubName}</span>
+                                                            </DropdownItem>
+                                                        );
+                                                    })}
+                                                </DropdownMenu>
+                                            </Dropdown>
                                         ) : (
                                             <span className="text-success-700 font-bold text-xl">{user.club?.name}</span>
                                         )}
@@ -296,16 +321,32 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                     </div>
 
                     <div className="md:col-span-2 flex flex-col gap-3 justify-center">
-                        <Input
-                            label={t('matchForm.labels.address')}
-                            placeholder={t('matchForm.labels.auto_siret')}
-                            value={formData.location_address}
-                            isDisabled
-                            classNames={{
-                                inputWrapper: "bg-default-100! text-default-500",
-                                label: "text-default-500 font-bold"
-                            }}
-                        />
+                        <div className="relative">
+                            <Input
+                                label={t('matchForm.labels.address')}
+                                placeholder={t('matchForm.labels.auto_siret')}
+                                value={formData.location_address}
+                                isDisabled
+                                classNames={{
+                                    inputWrapper: "bg-default-100! text-default-500",
+                                    label: "text-default-500 font-bold"
+                                }}
+                            />
+                            {formData.location_address && (
+                                <div className="absolute top-2 right-2">
+                                    {(formData.club_id === user?.club?.id && user?.stadium_address && formData.location_address === user.stadium_address) ||
+                                        (formData.club_id !== user?.club?.id && user?.additional_clubs?.find(c => c.id === formData.club_id)?.stadium_address === formData.location_address) ? (
+                                        <div className="bg-success text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 animate-pulse">
+                                            <span>🏟️ STADE</span>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-warning text-black text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 opacity-80">
+                                            <span>🏢 SIÈGE</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         <div className="grid grid-cols-2 gap-3">
                             <Input
                                 label={t('matchForm.labels.zip')}
@@ -328,8 +369,14 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 }}
                             />
                         </div>
-                        <p className="text-xs sm:text-sm text-default-400 italic leading-tight px-1 mt-1">
-                            {t('matchForm.labels.stadium_note', "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement.")}
+                        <p className="text-[11px] sm:text-xs text-default-400 italic leading-tight px-1 mt-1">
+                            {(!user?.stadium_address && formData.club_id === user?.club?.id) ? (
+                                <span className="text-warning-500 font-bold">
+                                    ⚠️ Vous utilisez l'adresse du siège. Remplissez l'adresse de votre stade dans "Mon Compte" pour ne plus avoir à la saisir.
+                                </span>
+                            ) : (
+                                t('matchForm.labels.stadium_note', "L'adresse est récupérée automatiquement. Pour la modifier, rendez-vous dans les paramètres de votre compte.")
+                            )}
                         </p>
                     </div>
 

@@ -504,9 +504,9 @@ export class MatchService {
                    u_req.firstname as requester_firstname, u_req.lastname as requester_lastname,
                    u_req.club_colors as requester_club_colors, u_req.category as requester_category,
                    u_req.level as requester_level, u_req.pitch_type as requester_pitch_type,
-                   u_req.phone as requester_phone, u_req.email as requester_email,
+                   u_req.phone as requester_phone, u_req.email as requester_email, u_req.stadium_address as requester_stadium_address,
                    c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
-                   c_req.city as requester_city,
+                   c_req.city as requester_city, c_req.address as requester_club_address,
                    mc.status as request_status,
                    COALESCE(mc.notification_state, 0) as notification_state
             FROM match_contacts mc
@@ -528,7 +528,7 @@ export class MatchService {
                    m.venue, m.location_city, m.location_address, m.location_zip, m.max_teams as match_max_teams,
                    (SELECT COUNT(*) FROM match_contacts mc2 WHERE mc2.match_id = m.id AND mc2.status = 'accepted') as accepted_count,
                    c_host.name as host_club_name, c_host.logo_url as host_club_logo, c_host.city as host_city,
-                   u_host.firstname as host_firstname, u_host.lastname as host_lastname, u_host.club_colors as host_club_colors, u_host.category as host_category, u_host.level as host_level,
+                   u_host.firstname as host_firstname, u_host.lastname as host_lastname, u_host.club_colors as host_club_colors, u_host.category as host_category, u_host.level as host_level, u_host.stadium_address as host_stadium_address,
                    m.email as host_email, m.phone as host_phone,
                    c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
                    u_req.phone as requester_phone, u_req.email as requester_email,

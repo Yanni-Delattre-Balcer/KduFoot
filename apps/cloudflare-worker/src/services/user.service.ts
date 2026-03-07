@@ -32,11 +32,13 @@ export class UserService {
         if (!user) return null;
         if (typeof user.additional_sirets === 'string') {
             try {
-                user.additional_sirets = JSON.parse(user.additional_sirets);
+                let parsed = JSON.parse(user.additional_sirets);
+                if (typeof parsed === 'string') parsed = JSON.parse(parsed); // Auto-heal double-stringified corruption
+                user.additional_sirets = Array.isArray(parsed) ? parsed : [];
             } catch (e) {
                 user.additional_sirets = [];
             }
-        } else if (!user.additional_sirets) {
+        } else if (!Array.isArray(user.additional_sirets)) {
             user.additional_sirets = [];
         }
         return user as User;

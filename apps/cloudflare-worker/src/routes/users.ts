@@ -134,7 +134,44 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
         }
 
-        return Response.json({ success: true, user: { ...user, club } }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        let additional_clubs: any[] = [];
+        if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
+            additional_clubs = await Promise.all(user.additional_sirets.map(async (item: any) => {
+                const siret = typeof item === 'string' ? item : item.siret;
+                const stadium_address = typeof item === 'object' ? item.stadium_address : null;
+
+                const dbClub = await env.DB.prepare('SELECT id, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(siret).first<{ id: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number }>();
+                if (dbClub) return { id: dbClub.id, siret, name: dbClub.name, city: dbClub.city, zip: dbClub.zip, address: dbClub.address, latitude: dbClub.latitude, longitude: dbClub.longitude, stadium_address };
+
+                try {
+                    const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
+                    const r = await fetch(`${SIRET_API_URL}?q=${siret}&page=1&per_page=1`);
+                    if (r.ok) {
+                        const d: any = await r.json();
+                        if (d.results && d.results.length > 0) {
+                            const rData = d.results[0];
+                            const newId = crypto.randomUUID();
+                            const name = rData.nom_complet || siret;
+                            const city = rData.siege?.libelle_commune || '';
+                            const zip = rData.siege?.code_postal || '';
+                            const address = rData.siege?.adresse || '';
+                            const lat = rData.siege?.latitude ? parseFloat(rData.siege.latitude) : null;
+                            const lng = rData.siege?.longitude ? parseFloat(rData.siege.longitude) : null;
+
+                            await env.DB.prepare(
+                                'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())'
+                            ).bind(newId, siret, name, city, address, zip, lat, lng).run();
+
+                            return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address };
+                        }
+                    }
+                } catch (e) { }
+
+                return { id: siret, siret, name: siret, stadium_address }; // Fallback to siret as ID if API fails
+            }));
+        }
+
+        return Response.json({ success: true, user: { ...user, club, additional_clubs } }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
 
     /**
@@ -176,13 +213,50 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
         }
 
+        let additional_clubs: any[] = [];
+        if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
+            additional_clubs = await Promise.all(user.additional_sirets.map(async (item: any) => {
+                const siret = typeof item === 'string' ? item : item.siret;
+                const stadium_address = typeof item === 'object' ? item.stadium_address : null;
+
+                const dbClub = await env.DB.prepare('SELECT id, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(siret).first<{ id: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number }>();
+                if (dbClub) return { id: dbClub.id, siret, name: dbClub.name, city: dbClub.city, zip: dbClub.zip, address: dbClub.address, latitude: dbClub.latitude, longitude: dbClub.longitude, stadium_address };
+
+                try {
+                    const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
+                    const r = await fetch(`${SIRET_API_URL}?q=${siret}&page=1&per_page=1`);
+                    if (r.ok) {
+                        const d: any = await r.json();
+                        if (d.results && d.results.length > 0) {
+                            const rData = d.results[0];
+                            const newId = crypto.randomUUID();
+                            const name = rData.nom_complet || siret;
+                            const city = rData.siege?.libelle_commune || '';
+                            const zip = rData.siege?.code_postal || '';
+                            const address = rData.siege?.adresse || '';
+                            const lat = rData.siege?.latitude ? parseFloat(rData.siege.latitude) : null;
+                            const lng = rData.siege?.longitude ? parseFloat(rData.siege.longitude) : null;
+
+                            await env.DB.prepare(
+                                'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())'
+                            ).bind(newId, siret, name, city, address, zip, lat, lng).run();
+
+                            return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address };
+                        }
+                    }
+                } catch (e) { }
+
+                return { id: siret, siret, name: siret, stadium_address }; // Fallback to siret as ID if API fails
+            }));
+        }
+
         const { MatchService } = await import('../services/match.service');
         const matchService = new MatchService(env.DB);
         const notifications = await matchService.getNotificationCounts(user.id);
 
         return Response.json({
             success: true,
-            user: { ...user, club },
+            user: { ...user, club, additional_clubs },
             notifications
         }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     });
@@ -240,7 +314,17 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
 
         const body: UpdateUserDto = await request.json();
+
+        // Safety: regular users cannot change their subscription or admin counters
         delete body.subscription;
+        delete (body as any).block_count;
+        delete (body as any).siret_change_count;
+
+        // Stadium Address Locking: If already set in DB, don't allow user to overwrite it
+        if (user.stadium_address && body.stadium_address && user.stadium_address !== body.stadium_address) {
+            // Silently ignore or we could return an error. Let's ignore it to match implementation plan's "ignore it in request body"
+            delete body.stadium_address;
+        }
 
         try {
             const updated = await userService.updateUser(user.id, body);

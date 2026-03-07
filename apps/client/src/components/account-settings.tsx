@@ -42,6 +42,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const [clubColors, setClubColors] = useState("");
     const [phone, setPhone] = useState("");
     const [siret, setSiret] = useState("");
+    const [stadiumAddress, setStadiumAddress] = useState("");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isInitialized, setIsInitialized] = useState(false);
@@ -108,6 +109,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             setClubColors(dbUser.club_colors || "");
             setPhone(formatPhoneNumber(dbUser.phone || ""));
             setSiret(formatSiret(dbUser.siret || ""));
+            setStadiumAddress(dbUser.stadium_address || "");
             setIsInitialized(true);
         }
     }, [dbUser, isInitialized]);
@@ -172,8 +174,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         if (!pitchType) {
             newErrors.pitchType = "Ce champ est obligatoire (choisissez un terrain)";
         }
-        if (!clubColors || clubColors.trim() === "") {
-            newErrors.clubColors = "La couleur des maillots est obligatoire.";
+        if (!stadiumAddress || stadiumAddress.trim() === "") {
+            newErrors.stadiumAddress = "L'adresse du stade est obligatoire.";
         }
 
         const cleanSiret = siret.replace(/\s/g, '').trim();
@@ -209,6 +211,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 pitch_type: pitchType,
                 club_colors: clubColors,
                 phone: phone,
+                stadium_address: stadiumAddress,
                 picture: previewUrl || dbUser?.picture || authUser.picture
             });
 
@@ -412,6 +415,41 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 />
                                 {errors.licenseId && <p className="text-xs font-bold pl-1">{errors.licenseId}</p>}
                             </div>
+                            <div className="space-y-1">
+                                <Input
+                                    label="Adresse du Siège (Officielle)"
+                                    variant="flat"
+                                    size="sm"
+                                    value={dbUser?.club?.address || "--"}
+                                    isDisabled
+                                    classNames={{
+                                        inputWrapper: "bg-default-200/30",
+                                        label: "font-bold text-default-500"
+                                    }}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Input
+                                    label="Adresse du Stade (Obligatoire pour l'accès)"
+                                    variant="bordered"
+                                    size="sm"
+                                    value={stadiumAddress}
+                                    onValueChange={(v) => {
+                                        setStadiumAddress(v);
+                                        if (errors.stadiumAddress) setErrors(prev => ({ ...prev, stadiumAddress: "" }));
+                                    }}
+                                    placeholder="Ex: Complexe Sportif, 12 rue des Fleurs"
+                                    isDisabled={!!dbUser?.stadium_address}
+                                    isInvalid={!!errors.stadiumAddress}
+                                    isRequired
+                                    description={dbUser?.stadium_address ? "L'adresse du stade est verrouillée. Contactez le support pour toute modification." : "Attention : cette adresse est indispensable pour guider les joueurs lors des matchs."}
+                                    classNames={{
+                                        description: "text-[10px] text-primary-500 font-medium",
+                                        label: "font-black text-primary"
+                                    }}
+                                />
+                                {errors.stadiumAddress && <p className="text-xs text-danger font-bold pl-1">{errors.stadiumAddress}</p>}
+                            </div>
                         </div>
                     </div>
 
@@ -578,6 +616,12 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     </div>
                                 </div>
 
+                                {dbUser?.club_id && (
+                                    <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2 mb-2">
+                                        <span className="text-default-500">Club Principal</span>
+                                        <span className="font-bold text-primary">{dbUser?.club?.name}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-default-500">Ville</span>
                                     <span className="font-medium">{dbUser?.club?.city || dbUser?.location || "Non renseigné"}</span>
@@ -586,6 +630,30 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     <span className="text-default-500">Département</span>
                                     <span className="font-medium">{getDept(dbUser?.club?.zip) || "--"}</span>
                                 </div>
+
+                                {dbUser?.additional_clubs && dbUser.additional_clubs.length > 0 && (
+                                    <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
+                                        <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-1">Mes autres clubs rattachés</p>
+                                        {dbUser.additional_clubs.map((s: any, idx: number) => (
+                                            <div key={idx} className="bg-white/5 p-3 rounded-xl border border-white/5 flex flex-col gap-1">
+                                                <div className="flex justify-between items-start">
+                                                    <span className="text-xs font-bold text-white truncate max-w-[70%]">{s.name || "Club sans nom"}</span>
+                                                    <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 rounded">{formatSiret(s.siret)}</span>
+                                                </div>
+                                                <div className="flex gap-2 text-[10px] text-default-500 uppercase font-medium">
+                                                    <span>{s.city}</span>
+                                                    <span>•</span>
+                                                    <span>{getDept(s.zip)}</span>
+                                                </div>
+                                                {s.stadium_address && (
+                                                    <div className="text-[10px] text-primary/80 font-bold mt-1">
+                                                        🏟️ {s.stadium_address}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                                 {dbUser?.club_id ? (
                                     <div className="mt-6 p-6 bg-red-900/20 border-2 border-red-500/50 rounded-2xl text-center shadow-2xl shadow-red-900/20">

@@ -164,6 +164,37 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
     });
 
     /**
+     * PATCH /api/admin/users/<id>
+     * Full profile update reserved for Admins.
+     * Can update stadium_address, counters, etc.
+     */
+    router.patch('/api/admin/users/<id>', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
+        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+
+        const params = (request as any).params as { id: string };
+        let id = decodeURIComponent(params.id);
+
+        let targetUser = id.includes('|')
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            : await userService.getUserById(id);
+
+        if (!targetUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
+
+        const body: any = await request.json();
+        const d1Id = (targetUser as any).id as string;
+
+        try {
+            const updated = await userService.updateUser(d1Id, body);
+            await broadcastDataChanged(env);
+            return Response.json({ success: true, user: updated }, { headers: router.corsHeaders });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
+        }
+    });
+
+    /**
      * POST /api/admin/users/<id>/additional-sirets
      */
     router.post('/api/admin/users/<id>/additional-sirets', async (request: Request) => {
@@ -216,9 +247,17 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
         }
 
         const d1Id = (targetUser as any).id as string;
-        let sirets: string[] = Array.isArray((targetUser as any).additional_sirets)
-            ? (targetUser as any).additional_sirets
-            : [];
+        let siretsStr = (targetUser as any).additional_sirets;
+        let sirets: string[] = [];
+        if (typeof siretsStr === 'string') {
+            try {
+                let parsed = JSON.parse(siretsStr);
+                if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+                if (Array.isArray(parsed)) sirets = parsed;
+            } catch (e) { sirets = []; }
+        } else if (Array.isArray(siretsStr)) {
+            sirets = siretsStr;
+        }
         if (!sirets.includes(body.siret)) {
             sirets.push(body.siret);
             // Increment siret_change_count
@@ -376,9 +415,17 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
         if (!targetUser) return Response.json({ success: false, error: 'User not found in D1' }, { status: 404, headers: router.corsHeaders });
 
         const d1Id = (targetUser as any).id as string;
-        let sirets: string[] = Array.isArray((targetUser as any).additional_sirets)
-            ? (targetUser as any).additional_sirets
-            : [];
+        let siretsStr = (targetUser as any).additional_sirets;
+        let sirets: string[] = [];
+        if (typeof siretsStr === 'string') {
+            try {
+                let parsed = JSON.parse(siretsStr);
+                if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+                if (Array.isArray(parsed)) sirets = parsed;
+            } catch (e) { sirets = []; }
+        } else if (Array.isArray(siretsStr)) {
+            sirets = siretsStr;
+        }
         sirets = sirets.filter(s => s !== params.siret);
 
         await env.DB.prepare('UPDATE users SET additional_sirets = ?, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?').bind(JSON.stringify(sirets), d1Id).run();
@@ -419,20 +466,30 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
                 success: true,
                 primary_siret: null,
                 primary_name: null,
+                stadium_address: null,
                 additional_sirets: [],
                 block_count: 0,
                 siret_change_count: 0
             }, { headers: router.corsHeaders });
         }
 
-        let additional_sirets: string[] = Array.isArray((targetUser as any).additional_sirets)
-            ? (targetUser as any).additional_sirets
-            : [];
+        const user = (targetUser as any);
+        let siretsStr = user.additional_sirets;
+        let additional_sirets_raw: any[] = [];
+        if (typeof siretsStr === 'string') {
+            try {
+                let parsed = JSON.parse(siretsStr);
+                if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+                if (Array.isArray(parsed)) additional_sirets_raw = parsed;
+            } catch (e) { additional_sirets_raw = []; }
+        } else if (Array.isArray(siretsStr)) {
+            additional_sirets_raw = siretsStr;
+        }
 
         // Fetch names for all SIRETs
         const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
 
-        const primary_siret = (targetUser as any).siret;
+        const primary_siret = user.siret;
         let primary_name = null;
         if (primary_siret) {
             try {
@@ -444,24 +501,34 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
             } catch (e) { }
         }
 
-        const additionalWithNames = await Promise.all(additional_sirets.map(async (s) => {
+        const additionalWithNames = await Promise.all(additional_sirets_raw.map(async (s) => {
+            const currentSiret = typeof s === 'string' ? s : s.siret;
+            const currentStadium = typeof s === 'object' ? s.stadium_address : null;
             try {
-                const r = await fetch(`${SIRET_API_URL}?q=${s}&page=1&per_page=1`);
+                const r = await fetch(`${SIRET_API_URL}?q=${currentSiret}&page=1&per_page=1`);
                 if (r.ok) {
                     const d: any = await r.json();
-                    return { siret: s, name: d.results?.[0]?.nom_complet || s };
+                    return {
+                        siret: currentSiret,
+                        name: d.results?.[0]?.nom_complet || currentSiret,
+                        city: d.results?.[0]?.siege?.libelle_commune || '',
+                        zip: d.results?.[0]?.siege?.code_postal || '',
+                        address: d.results?.[0]?.siege?.adresse || '',
+                        stadium_address: currentStadium
+                    };
                 }
             } catch (e) { }
-            return { siret: s, name: s };
+            return { siret: currentSiret, name: currentSiret, stadium_address: currentStadium };
         }));
 
         return Response.json({
             success: true,
             primary_siret,
             primary_name,
+            stadium_address: user.stadium_address,
             additional_sirets: additionalWithNames,
-            block_count: (targetUser as any).block_count || 0,
-            siret_change_count: (targetUser as any).siret_change_count || 0
+            block_count: user.block_count || 0,
+            siret_change_count: user.siret_change_count || 0
         }, { headers: router.corsHeaders });
     });
 };

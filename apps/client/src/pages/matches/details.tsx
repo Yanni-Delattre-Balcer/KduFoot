@@ -221,12 +221,30 @@ export default function MatchDetailsPage() {
                                 <h1 className={`text-3xl font-black text-white leading-tight`}>
                                     {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || 'Club'}`)}
                                 </h1>
-                                <p className={`text-default-400 font-medium flex items-center gap-1`}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                                        <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                                    </svg>
-                                    {isMasked ? 'ADRESSE MASQUÉE, VILLE MASQUÉE (00000)' : `${match.location_address || match.club?.address}, ${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
-                                </p>
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <p className={`text-default-400 font-medium flex items-center gap-1`}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                                            <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                                        </svg>
+                                        {isMasked ? 'ADRESSE MASQUÉE, VILLE MASQUÉE (00000)' : `${match.location_address || match.club?.address}, ${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
+                                    </p>
+                                    {!isMasked && (
+                                        <Button
+                                            size="sm"
+                                            variant="flat"
+                                            color="primary"
+                                            className="h-7 text-[10px] font-black uppercase px-2 shadow-sm"
+                                            as="a"
+                                            href={match.club?.latitude && match.club?.longitude && (!match.location_address || match.location_address === match.club.address)
+                                                ? `https://www.google.com/maps/dir/?api=1&destination=${match.club.latitude},${match.club.longitude}`
+                                                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${match.location_address || match.club?.address}, ${match.location_city || match.club?.city}`)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            📍 Itinéraire
+                                        </Button>
+                                    )}
+                                </div>
                             </CardHeader>
 
                             <CardBody className="p-6 gap-6">

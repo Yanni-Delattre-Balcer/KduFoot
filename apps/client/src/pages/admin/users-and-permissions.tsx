@@ -134,6 +134,10 @@ export default function UsersAndPermissionsPage() {
     const [newSiret, setNewSiret] = useState("");
     const [forceSiret, setForceSiret] = useState(false);
     const [siretLoading, setSiretLoading] = useState(false);
+    const [adminStadiumAddress, setAdminStadiumAddress] = useState("");
+    const [adminBlockCount, setAdminBlockCount] = useState<number>(0);
+    const [adminSiretChangeCount, setAdminSiretChangeCount] = useState<number>(0);
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
 
     const formatSiret = (value: string) => {
         let raw = value.replace(/\D/g, '');
@@ -561,6 +565,9 @@ export default function UsersAndPermissionsPage() {
                     primary_name: data.primary_name,
                     additional_sirets: data.additional_sirets || []
                 });
+                setAdminStadiumAddress(data.stadium_address || "");
+                setAdminBlockCount(data.block_count || 0);
+                setAdminSiretChangeCount(data.siret_change_count || 0);
             } else {
                 setSiretData(null);
             }
@@ -568,6 +575,36 @@ export default function UsersAndPermissionsPage() {
             setSiretData(null);
         }
         setSiretLoading(false);
+    };
+
+    const handleUpdateUserProfile = async () => {
+        if (!selectedUserId) return;
+        setIsSavingProfile(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    stadium_address: adminStadiumAddress,
+                    block_count: Number(adminBlockCount),
+                    siret_change_count: Number(adminSiretChangeCount)
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                addToast({ title: "Succès", description: "Profil administrateur mis à jour sur D1.", color: "success" });
+            } else {
+                addToast({ title: "Erreur", description: data.error || "Échec de la mise à jour.", color: "danger" });
+            }
+        } catch (err: any) {
+            addToast({ title: "Erreur", description: err.message || "Erreur réseau.", color: "danger" });
+        } finally {
+            setIsSavingProfile(false);
+        }
     };
 
     const handleAddSiret = async () => {
@@ -1202,6 +1239,55 @@ export default function UsersAndPermissionsPage() {
                                                     ) : (
                                                         <p className="text-sm text-default-500">Erreur lors du chargement des SIRETs.</p>
                                                     )}
+                                                </div>
+
+                                                {/* Super-Pouvoirs Admin: Stadium & Counters */}
+                                                <div className="flex flex-col gap-4 p-4 bg-primary/5 border border-primary/20 rounded-2xl shadow-inner">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-lg">⚙️</span>
+                                                        <h3 className="text-sm font-black text-primary uppercase tracking-wider">Super-Pouvoirs Admin (D1 Direct)</h3>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="md:col-span-2">
+                                                            <Input
+                                                                label="Adresse Physique du Stade"
+                                                                placeholder="Complexe Sportif, 123 Rue de la Victoire"
+                                                                size="sm"
+                                                                variant="bordered"
+                                                                value={adminStadiumAddress}
+                                                                onValueChange={setAdminStadiumAddress}
+                                                                description="Écrase le verrouillage utilisateur. Sert d'adresse par défaut pour les matchs."
+                                                            />
+                                                        </div>
+                                                        <Input
+                                                            type="number"
+                                                            label="Compteur de Bannissements"
+                                                            size="sm"
+                                                            variant="bordered"
+                                                            value={adminBlockCount?.toString()}
+                                                            onValueChange={(v) => setAdminBlockCount(Number(v))}
+                                                        />
+                                                        <Input
+                                                            type="number"
+                                                            label="Changements de SIRET"
+                                                            size="sm"
+                                                            variant="bordered"
+                                                            value={adminSiretChangeCount?.toString()}
+                                                            onValueChange={(v) => setAdminSiretChangeCount(Number(v))}
+                                                        />
+                                                    </div>
+
+                                                    <Button
+                                                        color="primary"
+                                                        variant="shadow"
+                                                        size="sm"
+                                                        className="font-black uppercase tracking-widest h-10 mt-1 shadow-primary/20"
+                                                        onPress={handleUpdateUserProfile}
+                                                        isLoading={isSavingProfile}
+                                                    >
+                                                        💾 Enregistrer les modifications D1
+                                                    </Button>
                                                 </div>
 
                                                 {/* Actions Destructives */}

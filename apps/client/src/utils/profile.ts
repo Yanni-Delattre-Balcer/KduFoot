@@ -11,11 +11,11 @@ export const isProfileComplete = (user: User | null, lenient: boolean = false): 
     const hasFullPersonalInfo = !!user.firstname && !!user.lastname && !!user.phone && !!user.license_id;
 
     // Configuration Sportive
-    const hasFullSportsProfile = !!user.category && !!user.level && !!user.pitch_type && !!user.club_colors;
+    const hasFullSportsProfile = !!user.category && !!user.level && !!user.pitch_type && !!user.club_colors && !!user.stadium_address;
 
     if (lenient) {
-        // En mode souple, on débloque le dashboard si les infos de base et club sont là
-        return hasFullClub && hasFullPersonalInfo;
+        // En mode souple, on débloque le dashboard si les infos de base, club et stade sont là
+        return hasFullClub && hasFullPersonalInfo && !!user.stadium_address;
     }
 
     return hasFullClub && hasFullPersonalInfo && hasFullSportsProfile;
