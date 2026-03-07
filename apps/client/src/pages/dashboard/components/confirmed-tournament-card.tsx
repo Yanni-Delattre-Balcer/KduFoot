@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 interface ConfirmedTournamentCardProps {
     participation: any;
     highlighted?: boolean;
+    isTimeChanged?: boolean;
     onMarkAsRead: (matchId: string) => void;
     formatDate: (date: string) => string;
     formatTime: (time: string) => string;
@@ -17,6 +18,7 @@ interface ConfirmedTournamentCardProps {
 export const ConfirmedTournamentCard = ({
     participation: part,
     highlighted,
+    isTimeChanged,
     onMarkAsRead,
     formatDate,
     formatTime
@@ -66,13 +68,13 @@ export const ConfirmedTournamentCard = ({
                             </Chip>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
                                 <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
                                 <p className="text-sm font-bold text-white">{formatDate(part.match_date)}</p>
                             </div>
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                            <div className={`rounded-xl p-3 border transition-colors ${isTimeChanged ? 'bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isTimeChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.time', 'Heure')}</p>
                                 <p className="text-sm font-bold text-white">{formatTime(part.match_time)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
@@ -82,6 +84,10 @@ export const ConfirmedTournamentCard = ({
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
                                 <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('tournamentForm.labels.fee', 'Frais')}</p>
                                 <p className="text-sm font-bold text-green-400">{part.entry_fee ? `${part.entry_fee}€` : t('matchForm.labels.free', 'Gratuit')}</p>
+                            </div>
+                            <div className="bg-white/5 rounded-xl p-3 border border-white/5 col-span-2 sm:col-span-1">
+                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                <p className="text-sm font-bold text-white truncate">{part.match_pitch_type || part.opponent_pitch_type || part.pitch_type ? t(`enums.pitch.${part.match_pitch_type || part.opponent_pitch_type || part.pitch_type}`) : '—'}</p>
                             </div>
                         </div>
 

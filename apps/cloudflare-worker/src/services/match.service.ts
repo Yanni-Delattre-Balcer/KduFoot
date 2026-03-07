@@ -508,7 +508,8 @@ export class MatchService {
                    c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
                    c_req.city as requester_city, c_req.address as requester_club_address,
                    mc.status as request_status,
-                   COALESCE(mc.notification_state, 0) as notification_state
+                   COALESCE(mc.notification_state, 0) as notification_state,
+                   m.pitch_type as host_pitch_type
             FROM match_contacts mc
             JOIN matches m ON mc.match_id = m.id
             JOIN users u_req ON mc.user_id = u_req.id
@@ -534,7 +535,8 @@ export class MatchService {
                    u_req.phone as requester_phone, u_req.email as requester_email,
                    u_req.level as requester_level, u_req.category as requester_category, u_req.club_colors as requester_club_colors, u_req.pitch_type as requester_pitch_type,
                    mc.status as request_status,
-                   COALESCE(mc.notification_state, 0) as notification_state
+                   COALESCE(mc.notification_state, 0) as notification_state,
+                   m.pitch_type as match_pitch_type
             FROM match_contacts mc
             JOIN matches m ON mc.match_id = m.id
             JOIN clubs c_host ON m.club_id = c_host.id

@@ -82,6 +82,35 @@ export default function DashboardPage() {
 
     const [selectedTab, setSelectedTab] = useState<any>("requests");
 
+    // Track last seen times to detect specific changes
+    const [knownTimes, setKnownTimes] = useState<Record<string, string>>(() => {
+        try {
+            const saved = localStorage.getItem('kdufoot_known_match_times');
+            return saved ? JSON.parse(saved) : {};
+        } catch { return {}; }
+    });
+
+    const updateKnownTimes = (participations: any[]) => {
+        const newKnown = { ...knownTimes };
+        let changed = false;
+        participations.forEach(p => {
+            if (p.notification_state === 0 && newKnown[p.match_id] !== p.match_time) {
+                newKnown[p.match_id] = p.match_time;
+                changed = true;
+            }
+        });
+        if (changed) {
+            setKnownTimes(newKnown);
+            localStorage.setItem('kdufoot_known_match_times', JSON.stringify(newKnown));
+        }
+    };
+
+    useEffect(() => {
+        if (myParticipations) {
+            updateKnownTimes(myParticipations);
+        }
+    }, [myParticipations]);
+
     useEffect(() => {
         if (isLocked) {
             setSelectedTab("requests"); // Default tab when unlocked later
@@ -170,6 +199,24 @@ export default function DashboardPage() {
                 description: errorMessage,
                 color: "danger"
             });
+        }
+    };
+
+    const markAllAsRead = async () => {
+        setIsSaving(true);
+        try {
+            for (const p of modifiedParticipations) {
+                await markAsReadHook(p.match_id);
+            }
+            addToast({
+                title: t('success'),
+                description: t('dashboard.toasts.all_read_success', "Toutes les modifications ont été validées"),
+                color: "success"
+            });
+        } catch (e) {
+            console.error("Failed to mark all as read", e);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -269,8 +316,8 @@ export default function DashboardPage() {
             opponent_lastname: r.requester_lastname,
             opponent_phone: r.requester_phone,
             opponent_email: r.requester_email,
+            opponent_pitch_type: r.requester_pitch_type || r.host_pitch_type,
             opponent_club_colors: r.requester_club_colors,
-            opponent_pitch_type: r.requester_pitch_type,
             opponent_stadium_address: r.requester_stadium_address,
             opponent_club_address: r.requester_club_address,
             // If organizer created match as 'home', organizer plays at home
@@ -296,8 +343,8 @@ export default function DashboardPage() {
             opponent_lastname: p.host_lastname,
             opponent_phone: p.host_phone,
             opponent_email: p.host_email,
+            opponent_pitch_type: p.match_pitch_type || p.host_pitch_type,
             opponent_club_colors: p.host_club_colors,
-            opponent_pitch_type: null,
             opponent_stadium_address: p.host_stadium_address,
             // If organizer created match as 'away', organizer plays away, so participant plays at home.
             // For tournaments, participant is always Away.
@@ -413,16 +460,28 @@ export default function DashboardPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <Button
-                                        color="danger"
-                                        size="sm"
-                                        className="font-bold uppercase text-xs sm:text-sm px-6"
-                                        onPress={() => {
-                                            setHighlightedCardId(modifiedParticipations[0].match_id);
-                                        }}
-                                    >
-                                        {t('dashboard.alerts.view_changes')}
-                                    </Button>
+                                    <div className="flex flex-wrap gap-2">
+                                        <Button
+                                            color="danger"
+                                            size="sm"
+                                            className="font-bold uppercase text-xs sm:text-sm px-6"
+                                            onPress={() => {
+                                                setHighlightedCardId(modifiedParticipations[0].match_id);
+                                            }}
+                                        >
+                                            {t('dashboard.alerts.view_changes')}
+                                        </Button>
+                                        <Button
+                                            color="success"
+                                            variant="flat"
+                                            size="sm"
+                                            className="font-bold uppercase text-xs sm:text-sm px-6 bg-success/20 text-success"
+                                            onPress={markAllAsRead}
+                                            isLoading={isSaving}
+                                        >
+                                            {t('dashboard.controls.mark_all_read', "TOUT VALIDER")}
+                                        </Button>
+                                    </div>
                                 </CardBody>
                             </Card>
                         </div>
@@ -787,6 +846,7 @@ export default function DashboardPage() {
                                                 key={part.match_id}
                                                 participation={part}
                                                 highlighted={highlightedCardId === part.match_id}
+                                                isTimeChanged={!!(part.notification_state === 1 && knownTimes[part.match_id] && knownTimes[part.match_id] !== part.match_time)}
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
                                                 formatTime={formatTime}
@@ -827,6 +887,7 @@ export default function DashboardPage() {
                                                 key={idx}
                                                 match={cm}
                                                 highlighted={highlightedCardId === cm.match_id}
+                                                isTimeChanged={!!(cm.notification_state === 1 && knownTimes[cm.match_id] && knownTimes[cm.match_id] !== cm.match_time)}
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
                                                 formatTime={formatTime}

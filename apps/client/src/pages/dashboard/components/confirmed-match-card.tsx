@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 interface ConfirmedMatchCardProps {
     match: any;
     highlighted?: boolean;
+    isTimeChanged?: boolean;
     onMarkAsRead: (matchId: string) => void;
     formatDate: (date: string) => string;
     formatTime: (time: string) => string;
@@ -17,6 +18,7 @@ interface ConfirmedMatchCardProps {
 export const ConfirmedMatchCard = ({
     match,
     highlighted,
+    isTimeChanged,
     onMarkAsRead,
     formatDate,
     formatTime
@@ -71,8 +73,8 @@ export const ConfirmedMatchCard = ({
                                 <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
                                 <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
                             </div>
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                            <div className={`rounded-xl p-3 border transition-colors ${isTimeChanged ? 'bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isTimeChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.time', 'Heure')}</p>
                                 <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
@@ -81,7 +83,7 @@ export const ConfirmedMatchCard = ({
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
                                 <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
-                                <p className="text-sm font-bold text-white break-words">{match.opponent_pitch_type || match.pitch_type || '—'}</p>
+                                <p className="text-sm font-bold text-white break-words">{match.opponent_pitch_type || match.pitch_type ? t(`enums.pitch.${match.opponent_pitch_type || match.pitch_type}`) : '—'}</p>
                             </div>
                         </div>
 
