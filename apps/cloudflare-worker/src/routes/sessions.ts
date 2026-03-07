@@ -184,7 +184,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
 
         try {
             const session = await sessionService.create(dbUser.id, dto);
-            broadcastDataChanged(env);
+            await broadcastDataChanged(env);
             return Response.json({ success: true, session }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -250,7 +250,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
             const success = await sessionService.update(params.id, dbUser.id, dto);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
 
-            broadcastDataChanged(env);
+            await broadcastDataChanged(env);
             // Return updated (would need fetch, but for efficiency just success)
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
@@ -299,7 +299,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         try {
             const success = await sessionService.delete(params.id, dbUser.id);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            broadcastDataChanged(env);
+            await broadcastDataChanged(env);
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

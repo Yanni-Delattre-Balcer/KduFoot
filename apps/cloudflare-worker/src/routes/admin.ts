@@ -75,7 +75,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
 
         try {
             await env.DB.prepare('DELETE FROM matches WHERE id = ?').bind(params.id).run();
-            broadcastDataChanged(env);
+            await broadcastDataChanged(env);
             return Response.json({ success: true, message: 'Match deleted by admin' }, { headers: router.corsHeaders });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
@@ -150,7 +150,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
 
         try {
             await userService.setBlockedStatus(d1Id, body.is_blocked, body.block_reason);
-            broadcastDataChanged(env);
+            await broadcastDataChanged(env);
             return Response.json({ success: true, message: `User ${body.is_blocked ? 'blocked' : 'unblocked'}` }, { headers: router.corsHeaders });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });

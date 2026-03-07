@@ -25,7 +25,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
     const { createMatch, updateMatch } = useMatches();
     const { user, isLocked, unlinkClub, updateUser } = useUser();
     const { user: auth0User } = useAuth0();
-    const { mutate } = useSWRConfig();
+
     const [isSaving, setIsSaving] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -197,9 +197,6 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                 addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.update_success', 'Match mis à jour avec succès'), variant: 'flat', color: 'success' });
             } else {
                 await createMatch(payload as any);
-                // Global mutation to refresh lists - be very aggressive with matching
-                await mutate(key => typeof key === 'string' && key.includes('/api/matches'), undefined, { revalidate: true });
-                await mutate('/api/matches?ownerId=me&include_past=true', undefined, { revalidate: true });
                 addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.create_success', 'Match créé avec succès'), variant: 'flat', color: 'success' });
             }
             if (onSuccess) onSuccess();

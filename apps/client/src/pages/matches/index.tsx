@@ -119,12 +119,7 @@ export default function MatchesPage() {
 
     const handleCreateSuccess = () => {
         setView('find');
-        // Global invalidation: refresh ALL /api/matches keys (match + tournament views)
-        globalMutate(
-            key => typeof key === 'string' && key.includes('/api/matches'),
-            undefined,
-            { revalidate: true }
-        );
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const canUseDistance = !!(user?.club?.latitude && user?.club?.longitude);

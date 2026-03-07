@@ -9,10 +9,8 @@ export async function broadcastDataChanged(env: Env) {
             method: "POST",
             body: "DATA_CHANGED"
         });
-        // We use waitUntil or just await it if we are still inside the request context
-        // In most Cloudflare routing, we don't have direct access to ctx.waitUntil here easily unless passed down,
-        // so we fire and forget, catching errors silently to not break the main response flow.
-        hub.fetch(request as any).catch(() => { });
+        // Wait for the DO to process the broadcast so CF doesn't kill the worker
+        await hub.fetch(request as any).catch(() => { });
     } catch (e) {
         console.error("Failed to trigger broadcast", e);
     }

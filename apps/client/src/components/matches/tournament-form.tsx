@@ -22,7 +22,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
     const { t } = useTranslation();
     const { createMatch } = useMatches();
     const { user, unlinkClub } = useUser();
-    const { mutate } = useSWRConfig();
+
     const [isSaving, setIsSaving] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -124,13 +124,6 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
             };
 
             await createMatch(payload as any);
-
-            // Global mutation to refresh lists - be very aggressive with matching
-            await mutate(key => typeof key === 'string' && key.includes('/api/matches'), undefined, { revalidate: true });
-            await mutate(key => typeof key === 'string' && key.includes('/api/tournaments'), undefined, { revalidate: true });
-
-            // Specifically target the dashboard's common key pattern
-            await mutate('/api/matches?ownerId=me&include_past=true', undefined, { revalidate: true });
 
             addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success'), variant: 'flat', color: 'success' });
             if (onSuccess) onSuccess();
