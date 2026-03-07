@@ -35,9 +35,9 @@ export const ConfirmedTournamentCard = ({
                 } group`}
         >
             <CardBody className="p-0">
-                <div className="flex flex-col md:flex-row">
+                <div className="flex flex-col lg:flex-row">
                     {/* Left Section: Info & Progress */}
-                    <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-white/5">
+                    <div className="flex-1 p-6 border-b lg:border-b-0 lg:border-r border-white/5">
                         <div className="flex items-start justify-between gap-4 mb-4">
                             <div className="flex items-center gap-4">
                                 <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
@@ -103,7 +103,7 @@ export const ConfirmedTournamentCard = ({
                     </div>
 
                     {/* Right Section: Teams & Actions */}
-                    <div className="w-full md:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
+                    <div className="w-full lg:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
                         <div className="mb-6">
                             <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-3">{t('dashboard.tournament.registered_teams', 'Équipes inscrites')}</p>
                             <div className="flex items-center -space-x-3">

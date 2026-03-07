@@ -28,8 +28,7 @@
       "accessToken": "Access Token (Bearer)",
       "loading": "Chargement..."
     },
-    "find_match": "Trouver/créer un match",
-    "find_tournament": "Trouver/créer un tournoi"
+    "find_match": "Trouver/créer un match / tournoi"
   },
   "auth": {
     "logout": "Se déconnecter",
