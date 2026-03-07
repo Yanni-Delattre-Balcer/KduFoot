@@ -51,10 +51,10 @@ export const ConfirmedTournamentCard = ({
                                     <h3 className="font-black text-white text-xl leading-tight truncate">{part.host_club_name}</h3>
                                     <div className="flex items-center gap-2 mt-1">
                                         <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
-                                            🏆 {part.name || 'Tournoi'}
+                                            🏆 {part.name || t('enums.type.tournament')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color="warning" className="h-5 text-[9px] uppercase font-black">
-                                            ✈️ {t('dashboard.away_label', 'Extérieur')}
+                                            ✈️ {t('dashboard.away_label')}
                                         </Chip>
                                     </div>
                                 </div>
@@ -129,7 +129,7 @@ export const ConfirmedTournamentCard = ({
                                     className="w-full font-black uppercase text-xs sm:text-sm h-10 shadow-lg shadow-danger/20"
                                     onPress={() => onMarkAsRead(part.match_id)}
                                 >
-                                    ⚠️ Voir MODIFICATIONS
+                                    {t('dashboard.labels.view_changes')}
                                 </Button>
                             )}
                             <div className="flex gap-2">
@@ -152,7 +152,7 @@ export const ConfirmedTournamentCard = ({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    📍 Itinéraire
+                                    {t('dashboard.controls.itinerary')}
                                 </Button>
                                 <Button
                                     size="sm"
@@ -162,7 +162,7 @@ export const ConfirmedTournamentCard = ({
                                     as="a"
                                     href={`tel:${part.host_phone || part.opponent_phone}`}
                                 >
-                                    {t('dashboard.controls.contact', '📞 Contacter')}
+                                    {t('dashboard.controls.contact')}
                                 </Button>
                             </div>
                         </div>

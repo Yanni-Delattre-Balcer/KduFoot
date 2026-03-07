@@ -16,7 +16,7 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 
 const CATEGORIES = Object.values(Category);
 const LEVELS = Object.values(Level);
-const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Indoor'];
+const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Toutes surfaces'];
 
 interface AccountSettingsProps {
     onSaveSuccess?: () => void;
@@ -130,7 +130,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions());
 
             if (detections.length === 0) {
-                console.warn("Aucun visage détecté, mais l'upload continue.");
+                console.warn(t('account.avatar.no_face'));
             }
 
             const reader = new FileReader();
@@ -154,33 +154,33 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         const newErrors: Record<string, string> = {};
 
         if (!firstname || firstname.trim() === "") {
-            newErrors.firstname = "Le prénom est obligatoire.";
+            newErrors.firstname = t('account.errors.firstname_required');
         }
         if (!lastname || lastname.trim() === "") {
-            newErrors.lastname = "Le nom est obligatoire.";
+            newErrors.lastname = t('account.errors.lastname_required');
         }
         if (!phone || phone.replace(/\D/g, '').length < 11) {
-            newErrors.phone = "Ce champ est obligatoire (au moins 11 chiffres)";
+            newErrors.phone = t('account.errors.phone_required');
         }
         if (!licenseId || licenseId.trim() === "") {
-            newErrors.licenseId = "Le numéro de licence est obligatoire.";
+            newErrors.licenseId = t('account.errors.license_required');
         }
         if (!category) {
-            newErrors.category = "Ce champ est obligatoire (choisissez une catégorie)";
+            newErrors.category = t('account.errors.category_required');
         }
         if (!level) {
-            newErrors.level = "Ce champ est obligatoire (choisissez un niveau)";
+            newErrors.level = t('account.errors.level_required');
         }
         if (!pitchType) {
-            newErrors.pitchType = "Ce champ est obligatoire (choisissez un terrain)";
+            newErrors.pitchType = t('account.errors.pitch_required');
         }
         if (!stadiumAddress || stadiumAddress.trim() === "") {
-            newErrors.stadiumAddress = "L'adresse du stade est obligatoire.";
+            newErrors.stadiumAddress = t('account.errors.stadium_required');
         }
 
         const cleanSiret = siret.replace(/\s/g, '').trim();
         if (!dbUser?.club_id && (!siret || (cleanSiret.length !== 14 && cleanSiret.length !== 9))) {
-            newErrors.siret = "Numéro SIRET (14 chiffres) ou SIREN (9 chiffres) requis.";
+            newErrors.siret = t('account.errors.siret_required');
         }
 
         setErrors(newErrors);
@@ -189,7 +189,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
     const handleSave = async () => {
         if (!validate()) {
-            addToast({ title: "Formulaire incomplet", description: "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès.", variant: 'flat', color: 'danger' });
+            addToast({ title: t('account.errors.form_incomplete'), description: t('account.errors.form_incomplete_desc'), variant: 'flat', color: 'danger' });
             return;
         }
         setIsSaving(true);
@@ -234,7 +234,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     };
 
     const handleDeleteAccount = async () => {
-        if (!confirm(t('account.confirm_delete', "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?"))) {
+        if (!confirm(t('account.confirm_delete'))) {
             return;
         }
 
@@ -253,7 +253,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 throw new Error(errorData.error || 'Erreur lors de la suppression');
             }
 
-            addToast({ title: t('success'), description: t('account.delete_success', 'Compte supprimé avec succès'), variant: 'flat', color: 'success' });
+            addToast({ title: t('success'), description: t('account.delete_success'), variant: 'flat', color: 'success' });
 
             await logout({
                 logoutParams: {
@@ -306,7 +306,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
             <div className="flex flex-col items-center gap-6">
                 <p className="text-sm font-extrabold text-danger uppercase tracking-widest -mb-4 animate-pulse-red">
-                    Le mieux est de mettre le logo de votre club
+                    {t('account.avatar.recommendation')}
                 </p>
 
                 <div className="relative group cursor-pointer z-10" onClick={handleAvatarClick}>
@@ -325,7 +325,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                         )}
                     </div>
                     <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-15">
-                        <span className="text-white text-xs font-bold">{isAnalyzing ? 'Analyse...' : 'Changer'}</span>
+                        <span className="text-white text-xs font-bold">{isAnalyzing ? t('account.avatar.analyzing') : t('account.avatar.change')}</span>
                     </div>
                 </div>
 
@@ -338,14 +338,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             variant="flat"
                             className="font-black px-4 uppercase tracking-tighter"
                         >
-                            {dbUser?.subscription ? `Abonnement ${dbUser.subscription}` : 'Compte Gratuit'}
+                            {dbUser?.subscription ? t('account.subscription.free', { plan: dbUser.subscription }) : t('account.subscription.free_account')}
                         </Chip>
                     </div>
                 </div>
 
                 <div className="w-full space-y-8">
                     <div className="space-y-3">
-                        <p className="text-sm font-bold text-default-400 uppercase ml-1">Identité & Contact</p>
+                        <p className="text-sm font-bold text-default-400 uppercase ml-1">{t('account.sections.identity')}</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-default-500">Email</span>
@@ -354,7 +354,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1">
                                     <Input
-                                        label="Prénom"
+                                        label={t('account.fields.firstname')}
                                         variant="bordered"
                                         size="sm"
                                         value={firstname}
@@ -369,7 +369,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 </div>
                                 <div className="space-y-1">
                                     <Input
-                                        label="Nom"
+                                        label={t('account.fields.lastname')}
                                         variant="bordered"
                                         size="sm"
                                         value={lastname}
@@ -385,7 +385,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Input
-                                    label="Téléphone"
+                                    label={t('account.fields.phone')}
                                     variant="bordered"
                                     size="sm"
                                     value={phone}
@@ -401,7 +401,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Input
-                                    label="Numéro de licence"
+                                    label={t('account.fields.license')}
                                     variant="bordered"
                                     size="sm"
                                     value={licenseId}
@@ -409,7 +409,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         setLicenseId(v);
                                         if (errors.licenseId) setErrors(prev => ({ ...prev, licenseId: "" }));
                                     }}
-                                    placeholder="Saisir votre numéro"
+                                    placeholder={t('account.fields.license_placeholder')}
                                     isInvalid={!!errors.licenseId}
                                     isRequired
                                 />
@@ -417,7 +417,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Input
-                                    label="Adresse du Siège (Officielle)"
+                                    label={t('account.fields.hq_address')}
                                     variant="flat"
                                     size="sm"
                                     value={dbUser?.club?.address || "--"}
@@ -430,7 +430,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Input
-                                    label="Adresse du Stade (Obligatoire pour l'accès)"
+                                    label={t('account.fields.stadium_address')}
                                     variant="bordered"
                                     size="sm"
                                     value={stadiumAddress}
@@ -438,11 +438,11 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         setStadiumAddress(v);
                                         if (errors.stadiumAddress) setErrors(prev => ({ ...prev, stadiumAddress: "" }));
                                     }}
-                                    placeholder="Ex: Complexe Sportif, 12 rue des Fleurs"
+                                    placeholder={t('account.fields.stadium_placeholder')}
                                     isDisabled={!!dbUser?.stadium_address}
                                     isInvalid={!!errors.stadiumAddress}
                                     isRequired
-                                    description={dbUser?.stadium_address ? "L'adresse du stade est verrouillée. Contactez le support pour toute modification." : "Attention : cette adresse est indispensable pour guider les joueurs lors des matchs."}
+                                    description={dbUser?.stadium_address ? t('account.fields.stadium_locked') : t('account.fields.stadium_warning')}
                                     classNames={{
                                         description: "text-[10px] text-primary-500 font-medium",
                                         label: "font-black text-primary"
@@ -454,11 +454,11 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </div>
 
                     <div className="space-y-3">
-                        <p className="text-sm font-bold text-default-400 uppercase ml-1 mt-2">Profil Sportif (Requis pour créer des annonces)</p>
+                        <p className="text-sm font-bold text-default-400 uppercase ml-1 mt-2">{t('account.sections.sports_profile')}</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <Select
-                                    label="Catégorie"
+                                    label={t('account.fields.category')}
                                     variant="bordered"
                                     size="sm"
                                     selectedKeys={category ? [category] : []}
@@ -466,7 +466,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         setCategory(e.target.value);
                                         if (errors.category) setErrors(prev => ({ ...prev, category: "" }));
                                     }}
-                                    placeholder="Choisir..."
+                                    placeholder={t('common.choose', 'Choisir...')}
                                     isInvalid={!!errors.category}
                                 >
                                     {CATEGORIES.map((cat) => (
@@ -479,7 +479,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Select
-                                    label="Niveau"
+                                    label={t('account.fields.level')}
                                     variant="bordered"
                                     size="sm"
                                     selectedKeys={level ? [level] : []}
@@ -487,7 +487,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         setLevel(e.target.value);
                                         if (errors.level) setErrors(prev => ({ ...prev, level: "" }));
                                     }}
-                                    placeholder="Choisir..."
+                                    placeholder={t('common.choose', 'Choisir...')}
                                     isInvalid={!!errors.level}
                                 >
                                     {LEVELS.map((lvl) => (
@@ -500,7 +500,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Select
-                                    label="Terrain habituel"
+                                    label={t('account.fields.pitch')}
                                     variant="bordered"
                                     size="sm"
                                     selectedKeys={pitchType ? [pitchType] : []}
@@ -508,7 +508,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         setPitchType(e.target.value);
                                         if (errors.pitchType) setErrors(prev => ({ ...prev, pitchType: "" }));
                                     }}
-                                    placeholder="Choisir..."
+                                    placeholder={t('common.choose', 'Choisir...')}
                                     isInvalid={!!errors.pitchType}
                                 >
                                     {PITCH_TYPES.map((type) => (
@@ -521,7 +521,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Input
-                                    label="Couleur des maillots"
+                                    label={t('account.fields.colors')}
                                     variant="bordered"
                                     size="sm"
                                     value={clubColors}
@@ -529,7 +529,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         setClubColors(v);
                                         if (errors.clubColors) setErrors(prev => ({ ...prev, clubColors: "" }));
                                     }}
-                                    placeholder="Rouge et Noir..."
+                                    placeholder={t('account.fields.colors_placeholder')}
                                     isInvalid={!!errors.clubColors}
                                     isRequired
                                 />
@@ -539,11 +539,11 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </div>
 
                     <div className="space-y-3">
-                        <p className="text-sm font-bold text-default-400 uppercase ml-1 mt-2">Club & Localisation</p>
+                        <p className="text-sm font-bold text-default-400 uppercase ml-1 mt-2">{t('account.sections.club_location')}</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
                             <div className="flex justify-between items-center text-sm">
-                                <span className="text-default-500">Club actuel</span>
-                                <span className="font-bold text-primary">{dbUser?.club?.name || "Aucun club lié"}</span>
+                                <span className="text-default-500">{t('account.fields.current_club')}</span>
+                                <span className="font-bold text-primary">{dbUser?.club?.name || t('account.fields.no_club')}</span>
                             </div>
 
                             <div className="flex flex-col gap-2">
@@ -589,7 +589,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                                 onPress={handleLinkSiret}
                                                 isLoading={isSaving}
                                             >
-                                                VALIDER MON CLUB
+                                                {t('account.buttons.validate_club')}
                                             </Button>
                                         ) : (
                                             authUser?.email === 'yannidelattrebalcer.artois@gmail.com' && (
@@ -618,26 +618,26 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
                                 {dbUser?.club_id && (
                                     <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2 mb-2">
-                                        <span className="text-default-500">Club Principal</span>
+                                        <span className="text-default-500">{t('account.fields.main_club')}</span>
                                         <span className="font-bold text-primary">{dbUser?.club?.name}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-default-500">Ville</span>
+                                    <span className="text-default-500">{t('account.fields.city')}</span>
                                     <span className="font-medium">{dbUser?.club?.city || dbUser?.location || "Non renseigné"}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-default-500">Département</span>
+                                    <span className="text-default-500">{t('account.fields.dept')}</span>
                                     <span className="font-medium">{getDept(dbUser?.club?.zip) || "--"}</span>
                                 </div>
 
                                 {dbUser?.additional_clubs && dbUser.additional_clubs.length > 0 && (
                                     <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
-                                        <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-1">Mes autres clubs rattachés</p>
+                                        <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-1">{t('account.fields.other_clubs')}</p>
                                         {dbUser.additional_clubs.map((s: any, idx: number) => (
                                             <div key={idx} className="bg-white/5 p-3 rounded-xl border border-white/5 flex flex-col gap-1">
                                                 <div className="flex justify-between items-start">
-                                                    <span className="text-xs font-bold text-white truncate max-w-[70%]">{s.name || "Club sans nom"}</span>
+                                                    <span className="text-xs font-bold text-white truncate max-w-[70%]">{s.name || t('account.fields.nameless_club')}</span>
                                                     <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 rounded">{formatSiret(s.siret)}</span>
                                                 </div>
                                                 <div className="flex gap-2 text-[10px] text-default-500 uppercase font-medium">
@@ -658,10 +658,10 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 {dbUser?.club_id ? (
                                     <div className="mt-6 p-6 bg-red-900/20 border-2 border-red-500/50 rounded-2xl text-center shadow-2xl shadow-red-900/20">
                                         <p className="text-xl font-black text-red-500 uppercase tracking-tight mb-2">
-                                            Besoin d'aide avec votre club ?
+                                            {t('account.support.title')}
                                         </p>
                                         <p className="text-base font-bold text-white mb-6">
-                                            Si vous ne trouvez pas votre club, si vous entraînez dans deux clubs différents, ou si vous changez de club : veuillez contacter notre support technique.
+                                            {t('account.support.description')}
                                         </p>
 
                                         <Button
@@ -672,16 +672,16 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                             size="lg"
                                             className="w-full font-black uppercase text-lg h-14 shadow-red-500/40 tracking-widest animate-pulse"
                                         >
-                                            📩 CONTACTER LE SUPPORT
+                                            {t('account.buttons.contact_support')}
                                         </Button>
                                     </div>
                                 ) : (
                                     <div className="mt-4 p-3 rounded-xl bg-warning/10 border border-warning/20 space-y-2">
                                         <p className="text-sm leading-tight text-warning-700 font-medium">
-                                            ⚠️ <strong>Attention :</strong> Une fois le SIRET validé et le club lié à votre compte, cette action est <strong>irréversible</strong>.
+                                            ⚠️ <strong>{t('warning')} :</strong> {t('account.siret.warning_title')}
                                         </p>
                                         <p className="text-xs sm:text-sm leading-tight text-default-500 italic">
-                                            Pour toute modification ultérieure, vous devrez contacter le support technique.
+                                            {t('account.siret.warning_desc')}
                                         </p>
                                     </div>
                                 )}
@@ -698,7 +698,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                         isDisabled={isDeleting}
                         className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider order-1"
                     >
-                        {from ? t('account.buttons.save_and_continue', 'Enregistrer et continuer') : t('account.buttons.save_changes', 'Enregistrer les modifications')}
+                        {from ? t('account.buttons.save_and_continue') : t('account.buttons.save_changes')}
                     </Button>
 
                     <Button
@@ -709,7 +709,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                         isDisabled={isSaving}
                         className="font-bold px-8 w-full sm:w-auto uppercase tracking-wider order-2 sm:ml-auto"
                     >
-                        {t('account.buttons.delete_account', 'Supprimer mon compte')}
+                        {t('account.buttons.delete_account')}
                     </Button>
                 </div>
             </div>

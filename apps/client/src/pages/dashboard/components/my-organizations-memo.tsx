@@ -77,11 +77,11 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
                                                     color="secondary"
                                                     className="h-4 text-[7px] font-black uppercase"
                                                 >
-                                                    {event.type === 'tournament' ? 'TOURNOI' : 'MATCH'}
+                                                    {event.type === 'tournament' ? t('enums.type.tournament').toUpperCase() : t('enums.type.match').toUpperCase()}
                                                 </Chip>
                                                 {event.venue && (
                                                     <span className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded-md ${event.venue === 'Extérieur' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
-                                                        {event.venue === 'Extérieur' ? 'EXT' : 'DOM'}
+                                                        {event.venue === 'Extérieur' ? t('dashboard.labels.away_badge') : t('dashboard.labels.home_badge')}
                                                     </span>
                                                 )}
                                             </div>

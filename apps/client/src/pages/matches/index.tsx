@@ -19,7 +19,7 @@ import { Format, PitchType, Venue, MatchFilters, Level } from '../../types/match
 const CATEGORIES = Object.values(Category);
 const LEVELS = Object.values(Level);
 const FORMATS: Format[] = ['11v11', '8v8', '5v5', 'Futsal'];
-const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Indoor'];
+const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Toutes surfaces'];
 const VENUES: Venue[] = ['Domicile', 'Extérieur', 'Neutre'];
 
 import MatchForm from '@/components/matches/match-form';
@@ -51,7 +51,7 @@ export default function MatchesPage() {
     useEffect(() => {
         const scrollTs = searchParams.get('scroll_ts');
         if (scrollTs) {
-            const element = document.getElementById('results-container');
+            const element = document.getElementById('results-list');
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
@@ -106,7 +106,7 @@ export default function MatchesPage() {
     const handleFilterChange = (key: keyof MatchFilters, value: string) => {
         setFilters(prev => ({
             ...prev,
-            [key]: value || undefined
+            [key]: (value === 'Toutes surfaces' || !value) ? undefined : value
         }));
     };
 
@@ -259,7 +259,7 @@ export default function MatchesPage() {
                                     onPress={() => {
                                         setView('find');
                                         setTimeout(() => {
-                                            document.getElementById('results-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            document.getElementById('results-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                         }, 100);
                                     }}
                                     className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'find' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200"}`}
@@ -278,7 +278,7 @@ export default function MatchesPage() {
                                     onPress={() => {
                                         setView('create');
                                         setTimeout(() => {
-                                            document.getElementById('results-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            document.getElementById('results-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                         }, 100);
                                     }}
                                     className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200"}`}
@@ -596,7 +596,7 @@ export default function MatchesPage() {
                                             </div>
                                         )}
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div id="results-list" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                             {filteredMatches.map((match) => (
                                                 <Card key={match.id} className={`group hover:shadow-lg transition-all border border-violet-800/50 hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
                                                     <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">

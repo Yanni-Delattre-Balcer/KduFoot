@@ -18,7 +18,7 @@ interface MatchFormProps {
     onCancel?: () => void;
 }
 
-const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Indoor'];
+const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Toutes surfaces'];
 
 export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFormProps) {
     const { t } = useTranslation();

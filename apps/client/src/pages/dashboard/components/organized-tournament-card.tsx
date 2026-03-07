@@ -50,20 +50,20 @@ export const OrganizedTournamentCard = ({
                                     )}
                                 </div>
                                 <div className="min-w-0">
-                                    <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">TOURNOI</h3>
+                                    <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">{t('enums.type.tournament').toUpperCase()}</h3>
                                     <p className="text-white/70 text-sm font-bold uppercase tracking-widest">{match.name || match.club?.name || '??'}</p>
                                     <div className="flex items-center gap-2 mt-1">
                                         <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
                                             🏆 {t('enums.type.tournament')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
-                                            {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge', '✈️ Extérieur') : t('dashboard.labels.home_badge', '🏠 Domicile')}
+                                            {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge') : t('dashboard.labels.home_badge')}
                                         </Chip>
                                     </div>
                                 </div>
                             </div>
                             <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
-                                {match.status === 'active' ? '🔍 RECRUTEMENT EN COURS' : t(`dashboard.status.${match.status}`, match.status)}
+                                {match.status === 'active' ? t('dashboard.status.searching') : t(`dashboard.status.${match.status}`, match.status)}
                             </Chip>
                         </div>
 
@@ -128,7 +128,7 @@ export const OrganizedTournamentCard = ({
                             {isTooLate ? (
                                 <div className="py-3 px-4 text-center border border-dashed border-danger/30 rounded-xl bg-danger/5">
                                     <p className="text-xs sm:text-sm font-black text-danger leading-tight uppercase px-2">
-                                        {t('dashboard.alerts.h2_locked', 'Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute.')}
+                                        {t('dashboard.alerts.h2_locked')}
                                     </p>
                                 </div>
                             ) : (
@@ -141,7 +141,7 @@ export const OrganizedTournamentCard = ({
                                             variant="flat"
                                             className="flex-1 font-bold text-sm h-11 bg-amber-500/10 text-amber-500 active:scale-95"
                                         >
-                                            {t('edit', 'Modifier')}
+                                            {t('edit')}
                                         </Button>
                                         <Button
                                             size="sm"
@@ -151,7 +151,7 @@ export const OrganizedTournamentCard = ({
                                             onPress={() => onDelete(match.id, match.match_date, match.match_time)}
                                             isLoading={isSaving}
                                         >
-                                            {t('delete', 'Supprimer')}
+                                            {t('delete')}
                                         </Button>
                                     </div>
                                     <Button
@@ -162,7 +162,7 @@ export const OrganizedTournamentCard = ({
                                         color="secondary"
                                         className="w-full font-bold text-sm h-10 active:scale-95 shadow-md shadow-secondary/20"
                                     >
-                                        {t('dashboard.controls.manage_registrations', 'Gérer les inscriptions')}
+                                        {t('dashboard.controls.manage_registrations')}
                                     </Button>
                                 </div>
                             )}

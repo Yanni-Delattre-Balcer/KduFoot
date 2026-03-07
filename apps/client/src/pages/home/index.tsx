@@ -33,7 +33,7 @@ export default function IndexPage() {
               </h1>
             </div>
             <p className="text-default-500 text-base">
-              Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.
+              {t("homePage.description")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
               <Link
@@ -63,22 +63,16 @@ export default function IndexPage() {
 
         {/* Présentation personnelle */}
         <Card className="border border-default-200 bg-content1 overflow-hidden">
-          <CardBody className="p-6 flex flex-col gap-3">
-            <h2 className="text-lg font-bold text-foreground">👋 À propos du projet</h2>
+          <CardBody className="p-6 flex flex-col items-center text-center sm:items-start sm:text-left gap-3">
+            <h2 className="text-lg font-bold text-foreground">{t("homePage.about.title")}</h2>
             <p className="text-sm text-default-500 leading-relaxed">
-              Je suis <strong className="text-foreground">Yanni</strong>, étudiant passionné de football et de développement web.
-              Kdufoot est né d'un constat simple : en tant qu'éducateur dans un club amateur, il est souvent difficile
-              de trouver des exercices adaptés et d'organiser des matchs amicaux avec d'autres clubs.
+              {t("homePage.about.intro")}
             </p>
             <p className="text-sm text-default-500 leading-relaxed">
-              J'ai donc créé cette plateforme pour répondre à ces besoins.
-              Le premier outil — <strong className="text-primary">l'analyse vidéo par IA</strong> — permet de coller
-              un lien YouTube, TikTok ou Instagram et d'obtenir automatiquement des exercices structurés avec synopsis,
-              thèmes et catégorie d'âge. Le second — <strong className="text-red-500">les matchs et tournois amicaux</strong> — permet
-              de publier ou rechercher des rencontres entre clubs, en filtrant par catégorie, niveau, format et distance.
+              {t("homePage.about.features")}
             </p>
             <p className="text-sm text-default-500 leading-relaxed">
-              Mon objectif : simplifier le quotidien des éducateurs et rendre le football amateur plus accessible et mieux organisé. 🎯⚽
+              {t("homePage.about.footer")}
             </p>
           </CardBody>
         </Card>

@@ -16,7 +16,7 @@ interface TournamentFormProps {
     onCancel?: () => void;
 }
 
-const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Indoor'];
+const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Toutes surfaces'];
 
 export default function TournamentForm({ onSuccess, onCancel }: TournamentFormProps) {
     const { t } = useTranslation();

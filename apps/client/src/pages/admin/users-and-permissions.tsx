@@ -26,6 +26,7 @@ import {
 } from "@heroui/table";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Chip } from "@heroui/chip";
+import { Card } from "@heroui/card";
 import { addToast } from "@heroui/toast";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Input } from "@heroui/input";
@@ -867,117 +868,178 @@ export default function UsersAndPermissionsPage() {
                     </Button>
                 </div>
 
-                {/* Table des utilisateurs */}
+                {/* Table des utilisateurs (Desktop) / Cartes (Mobile) */}
                 {loadingUsers ? (
                     <p className="text-default-500">{t("adminUsersPage.loadingUsers")}</p>
                 ) : (
-                    <Table
-                        aria-label="Utilisateurs Auth0"
-                        selectionMode="none"
-                        classNames={{
-                            base: "dark",
-                            wrapper: "bg-zinc-900 border border-white/10",
-                            th: "bg-zinc-800 text-default-400"
-                        }}
-                    >
-                        <TableHeader>
-                            <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
-                            <TableColumn>{t("adminUsersPage.colEmail")}</TableColumn>
-                            <TableColumn>Rôle</TableColumn>
-                            <TableColumn>{t("adminUsersPage.colSubscription")}</TableColumn>
-                            <TableColumn>{t("adminUsersPage.colLogins")}</TableColumn>
-                            <TableColumn>{t("adminUsersPage.colActions")}</TableColumn>
-                        </TableHeader>
-                        <TableBody emptyContent={t("adminUsersPage.emptyUsers")}>
+                    <>
+                        {/* Mobile View: Cards */}
+                        <div className="flex sm:hidden flex-col gap-4">
                             {filteredUsers.map((u) => {
                                 const isUserBlocked = u.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED) || u.blocked;
                                 const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL;
                                 return (
-                                    <TableRow
+                                    <Card
                                         key={u.user_id}
-                                        className={isUserBlocked ? "bg-red-950/30 border-l-4 border-l-red-600" : ""}
+                                        className={`bg-zinc-900 border border-white/10 p-4 ${isUserBlocked ? "border-l-4 border-l-red-600 bg-red-950/20" : ""}`}
                                     >
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
+                                        <div className="flex items-start justify-between gap-3 mb-4">
+                                            <div className="flex items-center gap-3">
                                                 {u.picture && (
                                                     <img
                                                         src={u.picture}
                                                         alt={u.name}
                                                         referrerPolicy="no-referrer"
-                                                        className={`w-8 h-8 rounded-full ${isUserBlocked ? 'opacity-40 grayscale' : ''}`}
+                                                        className={`w-12 h-12 rounded-full border-2 border-white/5 ${isUserBlocked ? 'opacity-40 grayscale' : ''}`}
                                                     />
                                                 )}
-                                                <div>
-                                                    <p className={`font-medium text-sm ${isUserBlocked ? 'text-red-400 line-through' : ''}`}>{u.name || u.nickname}</p>
-                                                    <p className="text-xs text-default-400">{u.user_id}</p>
+                                                <div className="min-w-0">
+                                                    <p className={`font-black text-base truncate ${isUserBlocked ? 'text-red-400 line-through' : 'text-white'}`}>
+                                                        {u.name || u.nickname}
+                                                    </p>
+                                                    <p className="text-xs text-default-400 truncate">{u.email}</p>
                                                 </div>
                                             </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-1">
-                                                <span className={`text-sm ${isUserBlocked ? 'text-red-400' : ''}`}>{u.email}</span>
-                                                {u.email_verified && (
-                                                    <span className="text-success-500 text-xs">✓</span>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-wrap gap-1">
+                                            <div className="flex flex-col items-end gap-1">
                                                 {isSuperAdmin && (
-                                                    <Chip size="sm" color="warning" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">S. Admin</Chip>
-                                                )}
-                                                {u.app_metadata?.permissions?.includes('auth0:admin:api') && !isSuperAdmin && (
-                                                    <Chip size="sm" color="primary" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">Admin</Chip>
+                                                    <Chip size="sm" color="warning" variant="solid" className="h-5 text-[10px] uppercase font-bold">Base Admin</Chip>
                                                 )}
                                                 {isUserBlocked && (
-                                                    <Chip size="sm" color="danger" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-black animate-pulse">🚫 BANNI</Chip>
+                                                    <Chip size="sm" color="danger" variant="solid" className="h-5 text-[10px] uppercase font-black">🚫 BANNI</Chip>
                                                 )}
-                                                {u.app_metadata?.permissions?.includes('coach:certified') && (
-                                                    <Chip size="sm" color="success" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold italic">Certifié</Chip>
+                                                {!isUserBlocked && !isSuperAdmin && (
+                                                    <Chip size="sm" color="success" variant="flat" className="h-5 text-[10px] uppercase font-bold">ACTIF</Chip>
                                                 )}
                                             </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {u.app_metadata?.subscription ? (
-                                                <Chip
-                                                    size="sm"
-                                                    color={
-                                                        u.app_metadata.subscription === "Ultime"
-                                                            ? "warning"
-                                                            : u.app_metadata.subscription === "Pro"
-                                                                ? "primary"
-                                                                : "default"
-                                                    }
-                                                    variant="flat"
-                                                >
-                                                    {u.app_metadata.subscription}
-                                                </Chip>
-                                            ) : (
-                                                <Chip size="sm" color="default" variant="flat">Free</Chip>
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className="text-sm">{u.logins_count ?? 0}</span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex justify-center w-full">
-                                                <Button
-                                                    size="sm"
-                                                    variant="solid"
-                                                    color="primary"
-                                                    onPress={() => openUserEditing(u.user_id)}
-                                                    isDisabled={!mgmtToken || (isSuperAdmin && u.user_id !== currentUserId)}
-                                                    className="font-bold px-6"
-                                                >
-                                                    Voir le Profil
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
+                                        </div>
+
+                                        <Button
+                                            size="lg"
+                                            variant="shadow"
+                                            color="primary"
+                                            onPress={() => openUserEditing(u.user_id)}
+                                            isDisabled={!mgmtToken || (isSuperAdmin && u.user_id !== currentUserId)}
+                                            className="font-black w-full h-12 uppercase tracking-widest text-sm shadow-primary/20"
+                                        >
+                                            Voir le Profil
+                                        </Button>
+                                    </Card>
                                 );
                             })}
-                        </TableBody>
-                    </Table>
+                            {filteredUsers.length === 0 && (
+                                <p className="text-center py-10 text-default-400 italic">{t("adminUsersPage.emptyUsers")}</p>
+                            )}
+                        </div>
+
+                        {/* Desktop View: Table */}
+                        <Table
+                            aria-label="Utilisateurs Auth0"
+                            selectionMode="none"
+                            classNames={{
+                                base: "hidden sm:flex dark",
+                                wrapper: "bg-zinc-900 border border-white/10",
+                                th: "bg-zinc-800 text-default-400"
+                            }}
+                        >
+                            <TableHeader>
+                                <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
+                                <TableColumn>{t("adminUsersPage.colEmail")}</TableColumn>
+                                <TableColumn>Rôle</TableColumn>
+                                <TableColumn>{t("adminUsersPage.colSubscription")}</TableColumn>
+                                <TableColumn>{t("adminUsersPage.colLogins")}</TableColumn>
+                                <TableColumn>{t("adminUsersPage.colActions")}</TableColumn>
+                            </TableHeader>
+                            <TableBody emptyContent={t("adminUsersPage.emptyUsers")}>
+                                {filteredUsers.map((u) => {
+                                    const isUserBlocked = u.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED) || u.blocked;
+                                    const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL;
+                                    return (
+                                        <TableRow
+                                            key={u.user_id}
+                                            className={isUserBlocked ? "bg-red-950/30 border-l-4 border-l-red-600" : ""}
+                                        >
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    {u.picture && (
+                                                        <img
+                                                            src={u.picture}
+                                                            alt={u.name}
+                                                            referrerPolicy="no-referrer"
+                                                            className={`w-8 h-8 rounded-full ${isUserBlocked ? 'opacity-40 grayscale' : ''}`}
+                                                        />
+                                                    )}
+                                                    <div>
+                                                        <p className={`font-medium text-sm ${isUserBlocked ? 'text-red-400 line-through' : ''}`}>{u.name || u.nickname}</p>
+                                                        <p className="text-xs text-default-400">{u.user_id}</p>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-1">
+                                                    <span className={`text-sm ${isUserBlocked ? 'text-red-400' : ''}`}>{u.email}</span>
+                                                    {u.email_verified && (
+                                                        <span className="text-success-500 text-xs">✓</span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {isSuperAdmin && (
+                                                        <Chip size="sm" color="warning" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">S. Admin</Chip>
+                                                    )}
+                                                    {u.app_metadata?.permissions?.includes('auth0:admin:api') && !isSuperAdmin && (
+                                                        <Chip size="sm" color="primary" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">Admin</Chip>
+                                                    )}
+                                                    {isUserBlocked && (
+                                                        <Chip size="sm" color="danger" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-black animate-pulse">🚫 BANNI</Chip>
+                                                    )}
+                                                    {u.app_metadata?.permissions?.includes('coach:certified') && (
+                                                        <Chip size="sm" color="success" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold italic">Certifié</Chip>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {u.app_metadata?.subscription ? (
+                                                    <Chip
+                                                        size="sm"
+                                                        color={
+                                                            u.app_metadata.subscription === "Ultime"
+                                                                ? "warning"
+                                                                : u.app_metadata.subscription === "Pro"
+                                                                    ? "primary"
+                                                                    : "default"
+                                                        }
+                                                        variant="flat"
+                                                    >
+                                                        {u.app_metadata.subscription}
+                                                    </Chip>
+                                                ) : (
+                                                    <Chip size="sm" color="default" variant="flat">Free</Chip>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                <span className="text-sm">{u.logins_count ?? 0}</span>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex justify-center w-full">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="solid"
+                                                        color="primary"
+                                                        onPress={() => openUserEditing(u.user_id)}
+                                                        isDisabled={!mgmtToken || (isSuperAdmin && u.user_id !== currentUserId)}
+                                                        className="font-bold px-6"
+                                                    >
+                                                        Voir le Profil
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </>
                 )}
 
                 {/* ─── Modal de blocage avec motif ─────────────────────── */}
@@ -985,7 +1047,7 @@ export default function UsersAndPermissionsPage() {
                     isOpen={!!blockingUserId}
                     onOpenChange={(open) => { if (!open) { setBlockingUserId(null); setBlockReason(""); } }}
                     classNames={{
-                        base: "bg-zinc-900 border-2 border-red-600 shadow-2xl shadow-red-900/40",
+                        base: "bg-zinc-900 border-2 border-red-600 shadow-2xl shadow-red-900/40 w-full sm:max-w-md",
                         backdrop: "bg-black/80 backdrop-blur-md"
                     }}
                     placement="center"
@@ -1049,7 +1111,10 @@ export default function UsersAndPermissionsPage() {
                     }}
                     size="4xl"
                     scrollBehavior="inside"
-                    classNames={{ base: "bg-zinc-900 border border-white/10" }}
+                    classNames={{
+                        base: "bg-zinc-900 border border-white/10 m-0 sm:m-auto w-full h-full sm:h-auto max-w-none sm:max-w-4xl rounded-none sm:rounded-3xl",
+                        wrapper: "p-0 sm:p-4"
+                    }}
                 >
                     <ModalContent>
                         {() => {

@@ -13,12 +13,18 @@ export function usePWAInstall() {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [isStandalone, setIsStandalone] = useState(false);
     const [isIOS, setIsIOS] = useState(false);
-    const [isDismissed, setIsDismissed] = useState(false);
+    const [isPermanentlyDismissed, setIsPermanentlyDismissed] = useState(false);
+    const [isSessionDismissed, setIsSessionDismissed] = useState(false);
 
     useEffect(() => {
-        // Check local storage for PERMANENT dismissal
-        const dismissed = localStorage.getItem('kdufoot-pwa-dismissed') === 'true';
-        setIsDismissed(dismissed);
+        // Check local storage for PERMANENT dismissal (Je l'ai déjà)
+        const permanentlyDismissed = localStorage.getItem('kdufoot-pwa-installed') === 'true'
+            || localStorage.getItem('kdufoot-pwa-permanent-dismiss') === 'true';
+        setIsPermanentlyDismissed(permanentlyDismissed);
+
+        // Check session storage for SESSION dismissal (Plus tard)
+        const sessionDismissed = sessionStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
+        setIsSessionDismissed(sessionDismissed);
 
         // Find if already installed
         const isStandaloneMatch = window.matchMedia('(display-mode: standalone)').matches
@@ -49,26 +55,31 @@ export function usePWAInstall() {
 
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-            localStorage.setItem('kdufoot-pwa-dismissed', 'true');
             localStorage.setItem('kdufoot-pwa-installed', 'true');
-            setIsDismissed(true);
+            setIsPermanentlyDismissed(true);
         }
 
         setDeferredPrompt(null);
     };
 
-    const dismissPrompt = () => {
-        localStorage.setItem('kdufoot-pwa-dismissed', 'true');
-        setIsDismissed(true);
+    const dismissPrompt = (permanent: boolean) => {
+        if (permanent) {
+            localStorage.setItem('kdufoot-pwa-permanent-dismiss', 'true');
+            setIsPermanentlyDismissed(true);
+        } else {
+            sessionStorage.setItem('kdufoot-pwa-session-dismiss', 'true');
+            setIsSessionDismissed(true);
+        }
     };
 
     return {
         deferredPrompt,
         isStandalone: isStandalone || localStorage.getItem('kdufoot-pwa-installed') === 'true',
         isIOS,
-        isDismissed,
+        isPermanentlyDismissed,
+        isSessionDismissed,
         installPWA,
         dismissPrompt,
-        canInstall: (!!deferredPrompt || (isIOS && !isStandalone)) && !isDismissed
+        canInstall: (!!deferredPrompt || (isIOS && !isStandalone)) && !isPermanentlyDismissed && !isSessionDismissed
     };
 }

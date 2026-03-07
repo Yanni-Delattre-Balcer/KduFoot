@@ -54,7 +54,7 @@ export const ConfirmedMatchCard = ({
                                             ⚽ {t('enums.type.match')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color={isUserHome ? 'primary' : 'warning'} className="h-5 text-[9px] uppercase font-black">
-                                            {isUserHome ? t('dashboard.labels.home_badge', '🏠 Domicile') : t('dashboard.labels.away_badge', '✈️ Extérieur')}
+                                            {isUserHome ? t('dashboard.labels.home_badge') : t('dashboard.labels.away_badge')}
                                         </Chip>
                                     </div>
                                 </div>
@@ -85,7 +85,7 @@ export const ConfirmedMatchCard = ({
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-end">
-                                <p className="text-sm font-black text-violet-400 uppercase tracking-widest">{t('dashboard.match.found', 'Adversaire trouvé')}</p>
+                                <p className="text-sm font-black text-violet-400 uppercase tracking-widest">{t('dashboard.match.found')}</p>
                                 <p className="text-xs font-bold text-white">1 / 1</p>
                             </div>
                             <Progress
@@ -103,7 +103,7 @@ export const ConfirmedMatchCard = ({
                     {/* Right Section: VS Visual & Actions */}
                     <div className="w-full md:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
                         <div className="mb-6 flex flex-col items-center">
-                            <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-4 w-full text-center md:text-left">{t('dashboard.labels.match_opposition', 'Opposition')}</p>
+                            <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-4 w-full text-center md:text-left">{t('dashboard.labels.match_opposition')}</p>
 
                             <div className="flex items-center justify-center gap-6 w-full">
                                 {/* User Club (Left) */}
@@ -112,7 +112,7 @@ export const ConfirmedMatchCard = ({
                                         {/* Since we don't have user club logo easily here without extra props, we use a generic icon or initial if we had it */}
                                         <span className="text-orange-500 font-black text-lg">M</span>
                                     </div>
-                                    <span className="text-[9px] font-bold text-default-400 uppercase">{t('dashboard.labels.my_club', 'Moi')}</span>
+                                    <span className="text-[9px] font-bold text-default-400 uppercase">{t('dashboard.labels.my_club')}</span>
                                 </div>
 
                                 <div className="text-xl font-black text-default-300 italic">VS</div>
@@ -139,7 +139,7 @@ export const ConfirmedMatchCard = ({
                                     className="w-full font-black uppercase text-xs sm:text-sm h-10 shadow-lg shadow-danger/20"
                                     onPress={() => onMarkAsRead(match.match_id)}
                                 >
-                                    ⚠️ Voir MODIFICATIONS
+                                    {t('dashboard.labels.view_changes')}
                                 </Button>
                             )}
                             <div className="flex gap-2">
@@ -162,7 +162,7 @@ export const ConfirmedMatchCard = ({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    📍 Itinéraire
+                                    {t('dashboard.controls.itinerary')}
                                 </Button>
                                 <Button
                                     size="sm"
@@ -172,7 +172,7 @@ export const ConfirmedMatchCard = ({
                                     as="a"
                                     href={`tel:${match.opponent_phone}`}
                                 >
-                                    {t('dashboard.controls.contact', '📞 Contacter')}
+                                    {t('dashboard.controls.contact')}
                                 </Button>
                             </div>
                         </div>

@@ -56,7 +56,7 @@ export interface TournamentPairing {
 
 export type Format = '11v11' | '8v8' | '5v5' | 'Futsal';
 export type Venue = 'Domicile' | 'Extérieur' | 'Neutre';
-export type PitchType = 'Herbe' | 'Synthétique' | 'Hybride' | 'Stabilisé' | 'Indoor';
+export type PitchType = 'Herbe' | 'Synthétique' | 'Hybride' | 'Stabilisé' | 'Toutes surfaces';
 export enum Level {
     LIGUE_1 = 'Ligue 1',
     LIGUE_2 = 'Ligue 2',

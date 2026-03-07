@@ -5,24 +5,23 @@ import { usePWAInstall } from '@/hooks/use-pwa-install';
 import { useAuth0 } from '@auth0/auth0-react';
 
 export const PwaInstallBanner = () => {
-    const { deferredPrompt, isStandalone, isIOS, isDismissed, installPWA, dismissPrompt } = usePWAInstall();
-    const { isAuthenticated } = useAuth0();
+    const { deferredPrompt, isStandalone, isIOS, isPermanentlyDismissed, isSessionDismissed, installPWA, dismissPrompt } = usePWAInstall();
+    const { isAuthenticated, isLoading } = useAuth0();
     const [isVisible, setIsVisible] = useState(false);
     const [showIOSHint, setShowIOSHint] = useState(false);
 
     useEffect(() => {
-        // Show banner only for authenticated users who haven't installed yet and haven't dismissed
-        // React immediately to state changes (login, readiness)
+        // React immediately to state changes (login, readiness, dismissal)
         const readyToPrompt = !!deferredPrompt || (isIOS && !isStandalone);
 
-        if (isAuthenticated && readyToPrompt && !isDismissed && !isStandalone) {
+        if (!isLoading && isAuthenticated && readyToPrompt && !isPermanentlyDismissed && !isSessionDismissed && !isStandalone) {
             setIsVisible(true);
         } else {
             setIsVisible(false);
         }
-    }, [isAuthenticated, isStandalone, deferredPrompt, isIOS, isDismissed]);
+    }, [isAuthenticated, isLoading, isStandalone, deferredPrompt, isIOS, isPermanentlyDismissed, isSessionDismissed]);
 
-    if (!isVisible || isStandalone || isDismissed) return null;
+    if (!isVisible) return null;
 
     const handleInstallClick = () => {
         if (isIOS) {
@@ -32,8 +31,13 @@ export const PwaInstallBanner = () => {
         }
     };
 
-    const handleDismiss = () => {
-        dismissPrompt();
+    const handleDismissSession = () => {
+        dismissPrompt(false);
+        setIsVisible(false);
+    };
+
+    const handleDismissPermanent = () => {
+        dismissPrompt(true);
         setIsVisible(false);
     };
 
@@ -42,19 +46,9 @@ export const PwaInstallBanner = () => {
             {/* Standard Install Banner (Android/PC) */}
             {!showIOSHint && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-appearance-in sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[420px]">
-                    <div className="absolute inset-0 sm:hidden" onClick={handleDismiss} />
+                    <div className="absolute inset-0 sm:hidden" onClick={handleDismissSession} />
                     <Card className="bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-0 overflow-hidden relative w-full">
                         <div className="h-1.5 w-full bg-gradient-to-r from-primary via-primary/50 to-primary" />
-
-                        {/* Close button */}
-                        <button
-                            onClick={handleDismiss}
-                            className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                        </button>
 
                         <div className="p-6 sm:p-8 flex flex-col items-center text-center gap-6">
                             <div className="bg-black rounded-[2rem] p-4 border border-white/10 shadow-2xl relative group">
@@ -64,28 +58,41 @@ export const PwaInstallBanner = () => {
 
                             <div className="space-y-2">
                                 <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic leading-none">
-                                    Installer <span className="text-primary italic">Kdufoot</span>
+                                    Installer Kdufoot
                                 </h3>
                                 <p className="text-sm text-zinc-400 font-medium px-4">
-                                    Profitez d'une expérience fluide et de notifications en temps réel directement sur votre écran.
+                                    Installez l'application mobile pour une expérience fluide et des notifications sportives en temps réel.
                                 </p>
                             </div>
 
-                            <div className="flex flex-col w-full gap-3 mt-2">
+                            <div className="flex flex-col w-full gap-2 mt-2">
                                 <Button
                                     size="lg"
                                     color="primary"
-                                    className="font-black h-14 text-sm uppercase tracking-widest shadow-xl shadow-primary/20 w-full"
+                                    className="font-black h-12 text-sm uppercase tracking-widest shadow-xl shadow-primary/20 w-full"
                                     onPress={handleInstallClick}
                                 >
-                                    INSTALLER L'APPLICATION
+                                    INSTALLER
                                 </Button>
-                                <button
-                                    onClick={handleDismiss}
-                                    className="text-xs font-bold text-zinc-500 uppercase tracking-widest hover:text-white transition-colors py-2"
-                                >
-                                    Plus tard
-                                </button>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
+                                        className="font-bold text-[10px] uppercase tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
+                                        onPress={handleDismissSession}
+                                    >
+                                        PLUS TARD
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
+                                        className="font-bold text-[10px] uppercase tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
+                                        onPress={handleDismissPermanent}
+                                    >
+                                        JE L'AI DÉJÀ
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </Card>
@@ -96,15 +103,6 @@ export const PwaInstallBanner = () => {
             {showIOSHint && (
                 <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in" onClick={() => setShowIOSHint(false)}>
                     <Card className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-6 space-y-6 shadow-[0_0_100px_rgba(var(--heroui-primary-rgb),0.2)] relative" onClick={e => e.stopPropagation()}>
-                        <button
-                            onClick={handleDismiss}
-                            className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-
                         <div className="flex flex-col items-center text-center gap-4">
                             <div className="w-20 h-20 rounded-3xl bg-black border-2 border-primary/40 p-2 shadow-2xl shadow-primary/20 shadow-inner">
                                 <img src="/apple-touch-icon.png" alt="Kdufoot" className="w-full h-full object-contain" />
@@ -166,13 +164,23 @@ export const PwaInstallBanner = () => {
                             </div>
                         </div>
 
-                        <Button
-                            color="primary"
-                            className="w-full font-black uppercase tracking-widest h-14 text-sm shadow-xl shadow-primary/20"
-                            onPress={() => setShowIOSHint(false)}
-                        >
-                            C'EST COMPRIS !
-                        </Button>
+                        <div className="flex flex-col gap-2">
+                            <Button
+                                color="primary"
+                                className="w-full font-black uppercase tracking-widest h-12 text-sm shadow-xl shadow-primary/20"
+                                onPress={() => setShowIOSHint(false)}
+                            >
+                                C'EST COMPRIS !
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="flat"
+                                className="font-bold text-[10px] uppercase tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
+                                onPress={handleDismissPermanent}
+                            >
+                                JE L'AI DÉJÀ INSTALLÉE
+                            </Button>
+                        </div>
                     </Card>
                 </div>
             )}
