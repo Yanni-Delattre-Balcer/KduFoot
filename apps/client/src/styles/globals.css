@@ -28,6 +28,7 @@
   --animate-pulse-red: pulse-red 2s ease-in-out infinite;
 
   @keyframes pulse-red {
+
     0%,
     100% {
       opacity: 1;
@@ -48,7 +49,8 @@
     --safe-area-top: env(safe-area-inset-top);
   }
 
+  /* We don't apply padding-top to body directly as it breaks fixed elements like Navbar */
   body {
-    padding-top: var(--safe-area-top, 0px);
+    padding-top: 0;
   }
 }

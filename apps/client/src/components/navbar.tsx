@@ -80,10 +80,10 @@ export const Navbar = () => {
       isBlurred={false}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className={`h-14 lg:h-24 fixed! top-0 left-0 right-0 m-0! p-0! bg-background z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
+      className={`fixed! top-0 left-0 right-0 m-0! p-0! bg-background z-50 transition-all duration-300 pt-[env(safe-area-inset-top)] ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
         }`}
       classNames={{
-        wrapper: "max-w-full px-4 lg:px-6 h-full relative flex items-center justify-between"
+        wrapper: "max-w-full px-4 lg:px-6 h-14 lg:h-24 relative flex items-center justify-between"
       }}
     >
       <NavbarContent className="hidden lg:flex gap-4 justify-center w-full" justify="center">

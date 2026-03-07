@@ -12,11 +12,11 @@ export const PwaInstallBanner = () => {
 
     useEffect(() => {
         // Show banner only for authenticated users who haven't installed yet and haven't dismissed
-        if (isAuthenticated && !isStandalone && !isDismissed) {
-            // Immediate reaction to deferredPrompt or iOS detection
-            if (deferredPrompt || isIOS) {
-                setIsVisible(true);
-            }
+        // React immediately to state changes (login, readiness)
+        const readyToPrompt = !!deferredPrompt || (isIOS && !isStandalone);
+
+        if (isAuthenticated && readyToPrompt && !isDismissed && !isStandalone) {
+            setIsVisible(true);
         } else {
             setIsVisible(false);
         }
@@ -116,19 +116,26 @@ export const PwaInstallBanner = () => {
                         </div>
 
                         <div className="space-y-3">
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
                                     <span className="text-primary font-black text-xs">1</span>
                                 </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Connectez-vous à votre compte sur <span className="text-white font-bold">Safari</span>.</p>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Connectez-vous sur <span className="text-white font-bold">Safari</span>.</p>
                             </div>
 
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
                                     <span className="text-primary font-black text-xs">2</span>
                                 </div>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Appuyez sur <span className="text-white font-bold">Options</span> (en bas à droite).</p>
+                            </div>
+
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                    <span className="text-primary font-black text-xs">3</span>
+                                </div>
                                 <div className="flex items-center gap-2">
-                                    <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur <span className="text-blue-400 font-bold italic">Partager</span></p>
+                                    <p className="text-xs text-zinc-300 font-medium leading-relaxed">Puis sur <span className="text-blue-400 font-bold italic">Partager</span></p>
                                     <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-blue-400">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
@@ -137,18 +144,25 @@ export const PwaInstallBanner = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                    <span className="text-primary font-black text-xs">3</span>
-                                </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur <span className="text-white font-bold italic">"Sur l'écran d'accueil"</span>.</p>
-                            </div>
-
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
                                     <span className="text-primary font-black text-xs">4</span>
                                 </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Validez pour installer l'application sur votre iPhone.</p>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur <span className="text-white font-bold">"En savoir plus"</span> (3e ligne).</p>
+                            </div>
+
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                    <span className="text-primary font-black text-xs">5</span>
+                                </div>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Trouvez <span className="text-white font-bold italic">"Sur l'écran d'accueil"</span>.</p>
+                            </div>
+
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                    <span className="text-primary font-black text-xs">6</span>
+                                </div>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Sélectionnez-le puis faites <span className="text-white font-bold">"Ajouter"</span>.</p>
                             </div>
                         </div>
 
