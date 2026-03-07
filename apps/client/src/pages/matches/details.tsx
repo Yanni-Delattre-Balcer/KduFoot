@@ -343,19 +343,22 @@ export default function MatchDetailsPage() {
                                         <div className="text-center space-y-3">
                                             {match.contacts?.some(c => c.status === 'accepted') ? (
                                                 <div className="bg-success-500/10 border border-success-500/20 p-4 rounded-xl space-y-3 mb-2 animate-appearance-in">
-                                                    <p className="text-success font-black text-center uppercase text-sm tracking-tighter">Match Confirmé ✅</p>
+                                                    <p className="text-success font-black text-center uppercase text-sm tracking-tighter">
+                                                        {match.type === 'tournament' ? 'Tournoi' : 'Match'} Confirmé ✅
+                                                    </p>
                                                     <Button
                                                         color="danger"
                                                         variant="flat"
                                                         className="w-full font-bold text-xs sm:text-sm h-9"
                                                         onPress={() => {
                                                             const acceptedContact = match.contacts?.find(c => c.status === 'accepted');
-                                                            if (confirm("Attention : Vous allez annuler ce duel. L'adversaire sera notifié et l'annonce redeviendra ouverte. Continuer ?")) {
+                                                            const entityName = match.type === 'tournament' ? 'ce tournoi' : 'ce duel';
+                                                            if (confirm(`Attention : Vous allez annuler ${entityName}. L'adversaire sera notifié et l'annonce redeviendra ouverte. Continuer ?`)) {
                                                                 if (acceptedContact) updateRequestStatus(acceptedContact.user_id, 'refused');
                                                             }
                                                         }}
                                                     >
-                                                        Annuler le duel
+                                                        {match.type === 'tournament' ? 'Annuler le tournoi' : 'Annuler le duel'}
                                                     </Button>
                                                 </div>
                                             ) : (
@@ -484,8 +487,8 @@ export default function MatchDetailsPage() {
 
                                             {match.contacts?.find(c => c.user_id === user?.id)?.status === 'accepted' && (
                                                 <div className="mt-4 p-4 bg-success-500/10 border border-success-500/20 rounded-xl space-y-3 animate-appearance-in">
-                                                    <p className="text-success font-black text-center uppercase text-sm tracking-tighter flex items-center justify-center gap-2">
-                                                        Duel Confirmé ! ✅
+                                                    <p className="text-success font-black text-center uppercase text-sm tracking-tighter">
+                                                        {match.type === 'tournament' ? 'Tournoi' : 'Duel'} Confirmé ! ✅
                                                     </p>
                                                     <div className="pt-2 border-t border-success-500/10 space-y-2">
                                                         <div className="flex items-center gap-2 text-white text-sm">
@@ -500,12 +503,13 @@ export default function MatchDetailsPage() {
                                                         variant="flat"
                                                         className="w-full font-bold text-xs sm:text-sm h-9 mt-4"
                                                         onPress={() => {
-                                                            if (confirm("Voulez-vous vraiment vous désister de ce match confirmé ? L'organisateur sera averti.")) {
+                                                            const entityName = match.type === 'tournament' ? 'ce tournoi' : 'ce match';
+                                                            if (confirm(`Voulez-vous vraiment vous désister de ${entityName} confirmé ? L'organisateur sera averti.`)) {
                                                                 handleCancelRequest();
                                                             }
                                                         }}
                                                     >
-                                                        Se désister du match
+                                                        {match.type === 'tournament' ? 'Se désister du tournoi' : 'Se désister du match'}
                                                     </Button>
                                                 </div>
                                             )}
@@ -542,32 +546,42 @@ export default function MatchDetailsPage() {
 
                             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
                                 {match.contacts && match.contacts.length > 0 ? (
-                                    match.contacts.map((contact, index) => (
-                                        <Card key={index} className={`border ${contact.status === 'accepted' ? 'border-success/30 bg-success/5' : contact.status === 'refused' ? 'border-danger/20 opacity-60' : 'border-default-200'} bg-[#202022]`}>
-                                            <CardBody className="flex flex-col gap-4 p-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-full bg-linear-to-br ${contact.status === 'accepted' ? 'from-success to-emerald-600' : 'from-orange-400 to-amber-500'} flex items-center justify-center text-white font-bold shadow-md`}>
-                                                        {contact.club_name?.charAt(0) || '?'}
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <div className="flex justify-between items-start">
-                                                            <p className="font-bold text-white">{contact.club_name || 'Club intéressé'}</p>
-                                                            {contact.status !== 'pending' && (
-                                                                <Chip size="sm" color={contact.status === 'accepted' ? 'success' : 'danger'} variant="flat" className="font-bold uppercase text-xs sm:text-sm">
-                                                                    {contact.status === 'accepted' ? 'Accepté' : 'Refusé'}
-                                                                </Chip>
-                                                            )}
+                                    match.contacts.map((contact, index) => {
+                                        const isActionable = user?.id === match.owner_id && contact.message === "Demande de participation envoyée via KduFoot";
+                                        return (
+                                            <Card
+                                                key={index}
+                                                isPressable={isActionable}
+                                                onPress={() => isActionable && navigate('/dashboard')}
+                                                className={`border ${contact.status === 'accepted' ? 'border-success/30 bg-success/5' : contact.status === 'refused' ? 'border-danger/20 opacity-60' : 'border-default-200'} bg-[#202022] ${isActionable ? 'hover:scale-105 hover:border-primary/50 transition-all cursor-pointer' : ''}`}
+                                            >
+                                                <CardBody className="flex flex-col gap-4 p-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-10 h-10 rounded-full bg-linear-to-br ${contact.status === 'accepted' ? 'from-success to-emerald-600' : 'from-orange-400 to-amber-500'} flex items-center justify-center text-white font-bold shadow-md`}>
+                                                            {contact.club_name?.charAt(0) || '?'}
                                                         </div>
-                                                        <p className="text-xs sm:text-sm text-default-500">{new Date(contact.contacted_at).toLocaleDateString()} à {new Date(contact.contacted_at).toLocaleTimeString()}</p>
+                                                        <div className="flex-1">
+                                                            <div className="flex justify-between items-start">
+                                                                <p className="font-bold text-white leading-tight">{contact.club_name || 'Club intéressé'}</p>
+                                                                {contact.status !== 'pending' ? (
+                                                                    <Chip size="sm" color={contact.status === 'accepted' ? 'success' : 'danger'} variant="flat" className="font-bold uppercase text-xs sm:text-sm">
+                                                                        {contact.status === 'accepted' ? 'Accepté' : 'Refusé'}
+                                                                    </Chip>
+                                                                ) : isActionable && (
+                                                                    <Chip size="sm" color="primary" variant="flat" className="font-bold uppercase text-[10px]">Voir la demande</Chip>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-xs sm:text-sm text-default-500">{new Date(contact.contacted_at).toLocaleDateString()} à {new Date(contact.contacted_at).toLocaleTimeString()}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                {contact.status === 'accepted' && (
-                                                    <p className="text-xs text-success-400 font-medium text-center bg-success/10 py-1 rounded-lg">Équipe officiellement inscrite</p>
-                                                )}
-                                            </CardBody>
-                                        </Card>
-                                    ))
+                                                    {contact.status === 'accepted' && (
+                                                        <p className="text-xs text-success-400 font-medium text-center bg-success/10 py-1 rounded-lg">Équipe officiellement inscrite</p>
+                                                    )}
+                                                </CardBody>
+                                            </Card>
+                                        )
+                                    })
                                 ) : (
                                     <div className="col-span-full py-12 flex flex-col items-center justify-center bg-[#202022] rounded-3xl border border-dashed border-default-100/10">
                                         <div className="p-4 rounded-2xl bg-default-100/5 mb-4 opacity-20">

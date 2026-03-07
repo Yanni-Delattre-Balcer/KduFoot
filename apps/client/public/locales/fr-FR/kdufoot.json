@@ -13,7 +13,7 @@
     "favorites": "Favoris",
     "sessions": "Historique Match / Tournoi / Exercice",
     "sessions_public": "Historique Match / Tournoi",
-    "matches": "Trouver un match / tournoi",
+    "matches": "Trouver/créer un match / tournoi",
     "dashboard": "Tableau de Bord",
     "pricing": "Tarifs",
     "remerciements": "Remerciements",
@@ -27,7 +27,9 @@
       "noExpiry": "Aucune expiration trouvée",
       "accessToken": "Access Token (Bearer)",
       "loading": "Chargement..."
-    }
+    },
+    "find_match": "Trouver/créer un match",
+    "find_tournament": "Trouver/créer un tournoi"
   },
   "auth": {
     "logout": "Se déconnecter",
@@ -47,9 +49,9 @@
     },
     "buttons": {
       "exercises": "Analyser une vidéo",
-      "sessions": "Trouver un match / tournoi",
-      "find_match": "Trouver un match",
-      "find_tournament": "Trouver un tournoi"
+      "sessions": "Trouver/créer un match / tournoi",
+      "find_match": "Trouver/créer un match",
+      "find_tournament": "Trouver/créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
@@ -291,8 +293,7 @@
       "U20": "U20",
       "Seniors": "Séniors",
       "Vétérans": "Vétérans",
-      "Loisir": "Loisir",
-      "Séniors": "Séniors"
+      "Loisir": "Loisir"
     },
     "level": {
       "Débutant": "Débutant",
@@ -315,23 +316,22 @@
       "Autre": "Autre"
     },
     "venue": {
-      "Domicile": "🏠 Domicile (Nous recevons)",
-      "Extérieur": "🚗 Extérieur (Nous nous déplaçons)",
-      "Neutre": "📍 Terrain neutre"
+      "Domicile": "Cherche à domicile",
+      "Extérieur": "Cherche à l'extérieur",
+      "Neutre": "Neutre"
     },
     "pitch": {
       "Herbe": "Herbe",
       "Synthétique": "Synthétique",
       "Hybride": "Hybride",
       "Stabilisé": "Stabilisé",
-      "Indoor": "Toutes surfaces",
-      "Toutes surfaces": "Toutes surfaces"
+      "Indoor": "Indoor"
     },
     "gender": {
       "Masculin": "Masculin",
       "Féminin": "Féminin",
       "Mixte": "Mixte",
-      "Non spécifié": "Non spécifié"
+      "Non spécifié": "Mixte"
     },
     "format": {
       "11v11": "11 vs 11",
@@ -444,7 +444,9 @@
     },
     "confirm": {
       "accept": "Accepter cette demande ?",
-      "refuse": "Refuser cette demande ?"
+      "refuse": "Refuser cette demande ?",
+      "accepted": "Souhaitez-vous vraiment accepter cette équipe ?",
+      "refused": "Souhaitez-vous vraiment refuser cette équipe ?"
     }
   },
   "accountModal": {

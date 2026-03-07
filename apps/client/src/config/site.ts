@@ -40,8 +40,12 @@ export const siteConfig = () => {
       href: "/sessions",
     },
     {
-      label: i18next.t("nav.matches"),
+      label: i18next.t("nav.find_match"),
       href: "/matches",
+    },
+    {
+      label: i18next.t("nav.find_tournament"),
+      href: "/matches?type=tournament",
     },
     {
       label: i18next.t("nav.pricing"),

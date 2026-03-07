@@ -33,7 +33,7 @@ export const OrganizedTournamentCard = ({
 
     return (
         <Card
-            className="overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full border-violet-500/40 bg-zinc-900/90 group"
+            className="overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 border-violet-500/40 bg-zinc-900/90 group"
         >
             <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
             <CardBody className="p-0">
@@ -49,11 +49,13 @@ export const OrganizedTournamentCard = ({
                                         <span className="text-white font-black text-2xl">{match.club?.name?.charAt(0)}</span>
                                     )}
                                 </div>
-                                <div className="min-w-0">
-                                    <h3 className="font-black text-violet-400 text-3xl leading-tight truncate uppercase tracking-tighter group-hover:text-violet-300 transition-colors">{t('enums.type.tournament').toUpperCase()}</h3>
-                                    <p className="text-white/70 text-sm font-bold uppercase tracking-widest">{match.name || match.club?.name || '??'}</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="font-black text-violet-400 text-2xl sm:text-3xl leading-tight uppercase tracking-tighter group-hover:text-violet-300 transition-colors break-words">
+                                        {t('enums.type.tournament').toUpperCase()}
+                                    </h3>
+                                    <p className="text-white/70 text-sm font-bold uppercase tracking-widest break-words">{match.name || match.club?.name || '??'}</p>
+                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] sm:text-xs uppercase tracking-wider h-auto py-0.5">
                                             🏆 {t('enums.type.tournament')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">

@@ -1,4 +1,5 @@
 {
+  "success": "Success",
   "site": {
     "description": "Video analysis and training management platform for football."
   },
@@ -23,7 +24,9 @@
       "noExpiry": "No expiry found",
       "accessToken": "Access Token (Bearer)",
       "loading": "Loading..."
-    }
+    },
+    "find_match": "Find/create a match",
+    "find_tournament": "Find/create a tournament"
   },
   "auth": {
     "logout": "Log out",
@@ -294,23 +297,22 @@
       "Autre": "Other"
     },
     "venue": {
-      "Domicile": "🏠 Home (We host)",
-      "Extérieur": "🚗 Away (We travel)",
-      "Neutre": "📍 Neutral ground"
+      "Domicile": "Looking for home",
+      "Extérieur": "Looking for away",
+      "Neutre": "Neutral"
     },
     "pitch": {
       "Herbe": "Grass",
       "Synthétique": "Artificial",
       "Hybride": "Hybrid",
       "Stabilisé": "Stabilized",
-      "Indoor": "All surfaces",
-      "Toutes surfaces": "All surfaces"
+      "Indoor": "Indoor"
     },
     "gender": {
       "Masculin": "Male",
       "Féminin": "Female",
       "Mixte": "Mixed",
-      "Non spécifié": "Not specified"
+      "Non spécifié": "Mixed"
     },
     "format": {
       "11v11": "11 vs 11",
@@ -371,6 +373,7 @@
       "address": "Stadium Address",
       "zip": "Zip code",
       "city": "City",
+      "at": "at",
       "email": "Contact Email",
       "phone": "Phone",
       "notes": "Notes / Instructions",
@@ -408,6 +411,10 @@
       "contact_required": "⚠️ CONTACT REQUIRED\n\nEmail and phone are essential for players to contact you.",
       "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future.",
       "delete_success": "Match successfully deleted!"
+    },
+    "confirm": {
+      "accepted": "Do you really want to accept this team?",
+      "refused": "Do you really want to refuse this team?"
     }
   },
   "accountModal": {

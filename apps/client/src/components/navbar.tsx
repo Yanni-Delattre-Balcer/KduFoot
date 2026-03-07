@@ -67,7 +67,7 @@ export const Navbar = () => {
     if (href === '/training') return `${base} bg-[linear-gradient(to_right,#14532d,#22c55e,#14532d)]`;
     if (href === '/favorites') return `${base} bg-[linear-gradient(to_right,#164e63,#22d3ee,#164e63)]`;
     if (href === '/sessions') return `${base} bg-[linear-gradient(to_right,#1e3a8a,#3b82f6,#1e3a8a)]`;
-    if (href === '/matches') return `${base} bg-[linear-gradient(to_right,#5b21b6,#a78bfa,#5b21b6)]`;
+    if (href.startsWith('/matches')) return `${base} bg-[linear-gradient(to_right,#5b21b6,#a78bfa,#5b21b6)]`;
     if (href === '/pricing') return `${base} bg-[linear-gradient(to_right,#86198f,#f0abfc,#86198f)]`;
     if (href === '/remerciements') return `${base} bg-[linear-gradient(to_right,#115e59,#2dd4bf,#115e59)]`;
     return "text-foreground font-bold";

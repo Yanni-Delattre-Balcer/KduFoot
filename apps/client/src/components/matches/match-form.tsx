@@ -82,7 +82,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
             setFormData(prev => ({
                 ...prev,
                 club_id: prev.club_id || user.club?.id,
-                location_address: prev.club_id === user.club?.id ? user.stadium_address || user.club?.address || prev.location_address || '' : prev.location_address,
+                location_address: prev.club_id === user.club?.id ? user.stadium_address || prev.location_address || '' : prev.location_address,
                 location_city: prev.club_id === user.club?.id ? user.club?.city || prev.location_city || '' : prev.location_city,
                 location_zip: prev.club_id === user.club?.id ? user.club?.zip || prev.location_zip || '' : prev.location_zip,
                 email: user.email || prev.email || '',
@@ -100,7 +100,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
             if (formData.club_id === user.club?.id) {
                 setFormData(prev => ({
                     ...prev,
-                    location_address: user.stadium_address || user.club?.address || prev.location_address || '',
+                    location_address: user.stadium_address || prev.location_address || '',
                     location_city: user.club?.city || prev.location_city || '',
                     location_zip: user.club?.zip || prev.location_zip || ''
                 }));
@@ -108,7 +108,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                 const addClub = user.additional_clubs?.find(c => c.id === formData.club_id);
                 setFormData(prev => ({
                     ...prev,
-                    location_address: addClub?.stadium_address || addClub?.address || '',
+                    location_address: addClub?.stadium_address || '',
                     location_city: addClub?.city || '',
                     location_zip: addClub?.zip || ''
                 }));
@@ -338,30 +338,30 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex flex-col justify-center gap-4 shadow-sm h-full">
+                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex flex-col justify-center gap-4 shadow-sm min-h-[140px]">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2.5 bg-success-100 rounded-full text-success-600">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
                                     </div>
-                                    <div className="flex flex-col w-full">
+                                    <div className="flex flex-col flex-1 min-w-0">
                                         <span className="text-success-900 font-black uppercase tracking-tighter text-xs sm:text-sm">{t('matchForm.link_club.linked')}</span>
                                         {Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0 ? (
                                             <Dropdown>
                                                 <DropdownTrigger>
                                                     <Button
-                                                        className="w-full justify-between mt-2 h-auto py-2"
+                                                        className="w-full justify-between mt-2 h-auto py-2 whitespace-normal text-wrap"
                                                         color="success"
                                                         variant="flat"
                                                         endContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6 shrink-0"><path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>}
                                                         size="lg"
                                                     >
-                                                        <div className="flex flex-col items-start truncate overflow-hidden flex-1 min-w-0">
-                                                            <span className="font-extrabold truncate w-full text-left text-base uppercase">
+                                                        <div className="flex flex-col items-start flex-1 min-w-0 py-1">
+                                                            <span className="font-extrabold text-left text-sm sm:text-base uppercase leading-tight line-clamp-2">
                                                                 {formData.club_id === user.club?.id || !formData.club_id
                                                                     ? user.club?.name || 'Club Principal'
                                                                     : user.additional_clubs?.find(c => c.id === formData.club_id)?.name || formData.club_id}
                                                             </span>
-                                                            <span className="text-xs font-semibold opacity-80">Changer de club 👇</span>
+                                                            <span className="text-[10px] font-semibold opacity-80">Changer de club 👇</span>
                                                         </div>
                                                     </Button>
                                                 </DropdownTrigger>

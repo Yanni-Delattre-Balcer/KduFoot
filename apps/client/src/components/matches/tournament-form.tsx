@@ -56,7 +56,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 club_id: prev.club_id || user.club?.id || '',
                 email: user.email || prev.email || '',
                 phone: user.phone || prev.phone || '',
-                location_address: prev.club_id === user.club?.id ? user.stadium_address || user.club?.address || '' : prev.location_address || '',
+                location_address: prev.club_id === user.club?.id ? user.stadium_address || prev.location_address || '' : prev.location_address || '',
                 location_zip: prev.club_id === user.club?.id ? user.club?.zip || '' : prev.location_zip || '',
                 location_city: prev.club_id === user.club?.id ? user.club?.city || '' : prev.location_city || '',
                 category: user.category as Category || prev.category,
@@ -80,7 +80,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 const addClub = user.additional_clubs?.find(c => c.id === formData.club_id);
                 setFormData(prev => ({
                     ...prev,
-                    location_address: addClub?.stadium_address || addClub?.address || '',
+                    location_address: addClub?.stadium_address || '',
                     location_city: addClub?.city || '',
                     location_zip: addClub?.zip || ''
                 }));

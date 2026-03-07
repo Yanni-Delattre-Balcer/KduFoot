@@ -31,7 +31,7 @@ export const ConfirmedTournamentCard = ({
     return (
         <Card
             id={`card-${part.match_id}`}
-            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md col-span-full ${highlighted ? 'border-danger ring-4 ring-danger/20 animate-pulse' : 'border-purple-400/20 bg-purple-500/5'
+            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md ${highlighted ? 'border-danger ring-4 ring-danger/20 animate-pulse' : 'border-purple-400/20 bg-purple-500/5'
                 } group`}
         >
             <CardBody className="p-0">
@@ -47,10 +47,12 @@ export const ConfirmedTournamentCard = ({
                                         <span className="text-white font-black text-2xl">{part.host_club_name?.charAt(0)}</span>
                                     )}
                                 </div>
-                                <div className="min-w-0">
-                                    <h3 className="font-black text-white text-xl leading-tight truncate">{part.host_club_name}</h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="font-black text-white text-lg sm:text-xl leading-tight">
+                                        {part.host_club_name}
+                                    </h3>
+                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                             🏆 {part.name || t('enums.type.tournament')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color="warning" className="h-5 text-[9px] uppercase font-black">

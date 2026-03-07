@@ -55,7 +55,17 @@ export default function IndexPage() {
                 })}
                 href="/matches"
               >
-                {t("homePage.buttons.sessions")}
+                {t("homePage.buttons.find_match")}
+              </Link>
+              <Link
+                className={buttonStyles({
+                  variant: "bordered",
+                  radius: "full",
+                  size: "lg",
+                })}
+                href="/matches"
+              >
+                {t("homePage.buttons.find_tournament")}
               </Link>
             </div>
           </div>

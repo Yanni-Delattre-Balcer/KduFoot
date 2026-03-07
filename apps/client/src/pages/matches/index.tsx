@@ -20,7 +20,7 @@ const CATEGORIES = Object.values(Category);
 const LEVELS = Object.values(Level);
 const FORMATS: Format[] = ['11v11', '8v8', '5v5', 'Futsal'];
 const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Toutes surfaces'];
-const VENUES: Venue[] = ['Domicile', 'Extérieur', 'Neutre'];
+const VENUES: Venue[] = ['Domicile', 'Extérieur'];
 
 import MatchForm from '@/components/matches/match-form';
 import TournamentForm from '@/components/matches/tournament-form';
@@ -612,15 +612,25 @@ export default function MatchesPage() {
                                                             <h4 className={`font-bold text-xl text-default-900 group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full`}>
                                                                 {isMasked ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
                                                             </h4>
+                                                            {match.type === 'tournament' && match.name && (
+                                                                <h5 className="font-bold text-sm text-fuchsia-400 group-hover:text-fuchsia-300 transition-colors uppercase truncate w-full pb-1">
+                                                                    {match.name}
+                                                                </h5>
+                                                            )}
                                                             <div className="flex items-center gap-2 mb-1">
                                                                 <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
                                                                     {match.type === 'tournament' ? '🏆' : '⚽'} {t(`enums.type.${match.type}`)}
                                                                 </Chip>
+                                                                {match.type === 'tournament' && match.registration_fee !== undefined && match.registration_fee !== null && (
+                                                                    <Chip size="sm" variant="flat" color="success" className="h-4 text-[9px] uppercase font-bold">
+                                                                        {match.registration_fee > 0 ? `${match.registration_fee} €` : 'Gratuit'}
+                                                                    </Chip>
+                                                                )}
                                                                 <Chip size="sm" variant="flat" color="warning" className="h-4 text-[9px] uppercase font-bold">
                                                                     {t(`enums.category.${match.category}`)}
                                                                 </Chip>
                                                                 <Chip size="sm" variant="flat" color="secondary" className="h-4 text-[9px] uppercase font-bold">
-                                                                    {match.venue === 'Domicile' ? '🏠 Reçoit' : match.venue === 'Extérieur' ? '🚗 Se déplace' : '📍 Neutre'}
+                                                                    {match.venue === 'Domicile' ? '🏠 Reçoit' : '🚗 Se déplace'}
                                                                 </Chip>
                                                             </div>
                                                             <p className={`text-small text-default-500 font-medium`}>

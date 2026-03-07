@@ -47,8 +47,10 @@ export const ConfirmedMatchCard = ({
                                         <span className="text-white font-black text-2xl">{opponentClubName?.charAt(0)}</span>
                                     )}
                                 </div>
-                                <div className="min-w-0">
-                                    <h3 className="font-black text-white text-xl leading-tight truncate">{opponentClubName}</h3>
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
+                                        {opponentClubName}
+                                    </h3>
                                     <div className="flex items-center gap-2 mt-1">
                                         <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
                                             ⚽ {t('enums.type.match')}
@@ -79,7 +81,7 @@ export const ConfirmedMatchCard = ({
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
                                 <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
-                                <p className="text-sm font-bold text-white truncate">{match.opponent_pitch_type || match.pitch_type || '—'}</p>
+                                <p className="text-sm font-bold text-white break-words">{match.opponent_pitch_type || match.pitch_type || '—'}</p>
                             </div>
                         </div>
 

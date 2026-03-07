@@ -177,6 +177,43 @@ export default function UsersAndPermissionsPage() {
         }
     };
 
+    const loadUsers = async (token: string) => {
+        setLoadingUsers(true);
+        try {
+            const [u, blockedIds] = await Promise.all([
+                listAuth0Users(token),
+                getD1BlockedUsers()
+            ]);
+
+            // Merge the D1 blocked status and Auth0 data
+            const mergedUsers = (u ?? []).map(user => {
+                const blockData = blockedIds.find(b => b.auth0_sub === user.user_id);
+                if (blockData) {
+                    return {
+                        ...user,
+                        blocked: true,
+                        block_reason: blockData.block_reason,
+                        app_metadata: {
+                            ...user.app_metadata,
+                            permissions: [
+                                ...(user.app_metadata?.permissions || []),
+                                Permission.ROLE_BLOCKED
+                            ]
+                        }
+                    };
+                }
+                return user;
+            });
+
+            setUsers(mergedUsers);
+        } catch (err) {
+            console.error("Erreur chargement utilisateurs:", err);
+            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
+
     // ─── 1. Chargement du token Management API ──────────────────────────────
     useEffect(() => {
         getAuth0ManagementToken()
@@ -189,47 +226,18 @@ export default function UsersAndPermissionsPage() {
                     // Trigger sync check
                     checkSyncStatus(tokenResp.access_token);
 
-                    // Charger la liste des utilisateurs de Auth0 et la fusionner avec la D1
-                    try {
-                        const [u, blockedIds] = await Promise.all([
-                            listAuth0Users(tokenResp.access_token),
-                            getD1BlockedUsers()
-                        ]);
-
-                        // Merge the D1 blocked status and Auth0 data
-                        const mergedUsers = (u ?? []).map(user => {
-                            const blockData = blockedIds.find(b => b.auth0_sub === user.user_id);
-                            if (blockData) {
-                                return {
-                                    ...user,
-                                    blocked: true,
-                                    block_reason: blockData.block_reason,
-                                    app_metadata: {
-                                        ...user.app_metadata,
-                                        permissions: [
-                                            ...(user.app_metadata?.permissions || []),
-                                            Permission.ROLE_BLOCKED
-                                        ]
-                                    }
-                                };
-                            }
-                            return user;
-                        });
-
-                        setUsers(mergedUsers);
-                    } catch (err) {
-                        console.error("Erreur chargement utilisateurs:", err);
-                        addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
-                    }
+                    // Charger la liste des utilisateurs
+                    loadUsers(tokenResp.access_token);
                 } else {
                     addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
+                    setLoadingUsers(false);
                 }
             })
             .catch((err) => {
                 console.error("Erreur token Management:", err);
                 addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
-            })
-            .finally(() => setLoadingUsers(false));
+                setLoadingUsers(false);
+            });
     }, []);
 
     // ─── 2. Ouverture du panneau d'édition d'un utilisateur ─────────────────
@@ -463,6 +471,9 @@ export default function UsersAndPermissionsPage() {
 
             setEditing((prev) => ({ ...prev, [userId]: {} }));
             setSelectedUserId(null);
+
+            // Silent refresh
+            if (mgmtToken) loadUsers(mgmtToken);
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("error-updating-user"), variant: "solid" });
@@ -502,6 +513,9 @@ export default function UsersAndPermissionsPage() {
             setUsers((prev) => prev.filter((u) => u.user_id !== userId));
             if (selectedUserId === userId) setSelectedUserId(null);
             addToast({ title: t("success"), description: t("adminUsersPage.toasts.successDelete"), variant: "solid" });
+
+            // Silent refresh
+            if (mgmtToken) loadUsers(mgmtToken);
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorDelete"), variant: "solid" });
@@ -561,6 +575,9 @@ export default function UsersAndPermissionsPage() {
                 };
             }));
 
+            // Silent refresh
+            if (mgmtToken) loadUsers(mgmtToken);
+
         } catch (err: any) {
             addToast({ title: "Erreur", description: err.message, color: "danger" });
         }
@@ -614,6 +631,8 @@ export default function UsersAndPermissionsPage() {
             const data = await res.json();
             if (data.success) {
                 addToast({ title: "Succès", description: "Profil administrateur mis à jour sur D1.", color: "success" });
+                // Silent refresh
+                if (mgmtToken) loadUsers(mgmtToken);
             } else {
                 addToast({ title: "Erreur", description: data.error || "Échec de la mise à jour.", color: "danger" });
             }
@@ -728,6 +747,9 @@ export default function UsersAndPermissionsPage() {
                     }
                 };
             }));
+
+            // Silent refresh
+            if (mgmtToken) loadUsers(mgmtToken);
         } catch (err: any) {
             addToast({ title: "Erreur", description: err.message, variant: "solid", color: "danger" });
         }

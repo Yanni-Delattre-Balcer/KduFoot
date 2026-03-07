@@ -636,9 +636,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-1">{t('account.fields.other_clubs')}</p>
                                         {dbUser.additional_clubs.map((s: any, idx: number) => (
                                             <div key={idx} className="bg-white/5 p-3 rounded-xl border border-white/5 flex flex-col gap-1">
-                                                <div className="flex justify-between items-start">
-                                                    <span className="text-xs font-bold text-white truncate max-w-[70%]">{s.name || t('account.fields.nameless_club')}</span>
-                                                    <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 rounded">{formatSiret(s.siret)}</span>
+                                                <div className="flex justify-between items-start gap-2 w-full overflow-hidden">
+                                                    <span className="text-xs font-bold text-white truncate flex-1 min-w-0">{s.name || t('account.fields.nameless_club')}</span>
+                                                    <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 rounded shrink-0">{formatSiret(s.siret)}</span>
                                                 </div>
                                                 <div className="flex gap-2 text-[10px] text-default-500 uppercase font-medium">
                                                     <span>{s.city}</span>
