@@ -132,11 +132,12 @@ export const ConfirmedTournamentCard = ({
                                     {t('dashboard.labels.view_changes')}
                                 </Button>
                             )}
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                     size="sm"
+                                    color="default"
                                     variant="flat"
-                                    className="flex-1 font-bold text-sm h-10 bg-white/5 active:scale-95"
+                                    className="w-full sm:flex-1 font-bold text-sm h-10 active:scale-95 bg-white/5"
                                     as={Link}
                                     to={`/matches/${part.match_id}`}
                                 >
@@ -144,9 +145,9 @@ export const ConfirmedTournamentCard = ({
                                 </Button>
                                 <Button
                                     size="sm"
-                                    variant="flat"
                                     color="primary"
-                                    className="flex-1 font-black text-[10px] uppercase h-10 active:scale-95 shadow-sm"
+                                    variant="flat"
+                                    className="w-full sm:flex-1 font-black text-[10px] uppercase h-10 active:scale-95 shadow-sm"
                                     as="a"
                                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${part.opponent_stadium_address || part.location_address || part.host_stadium_address}, ${part.opponent_city || part.location_city || part.host_city}`)}`}
                                     target="_blank"
@@ -158,7 +159,7 @@ export const ConfirmedTournamentCard = ({
                                     size="sm"
                                     variant="solid"
                                     color="secondary"
-                                    className="flex-1 font-bold text-sm h-10 active:scale-95"
+                                    className="w-full sm:flex-1 font-bold text-sm h-10 active:scale-95"
                                     as="a"
                                     href={`tel:${part.host_phone || part.opponent_phone}`}
                                 >

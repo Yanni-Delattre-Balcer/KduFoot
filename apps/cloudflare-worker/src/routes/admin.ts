@@ -83,6 +83,38 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
     });
 
     /**
+     * DELETE /api/admin/users/<id>
+     * Admin only route to delete a user's account from D1 and trigger real-time sync.
+     */
+    router.delete('/api/admin/users/<id>', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
+        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+
+        const params = (request as any).params as { id: string };
+        let id = decodeURIComponent(params.id);
+
+        let targetUser = id.includes('|')
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            : await userService.getUserById(id);
+
+        if (!targetUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
+
+        if ((targetUser as any).email === SUPER_ADMIN_EMAIL) {
+            return Response.json({ success: false, error: 'Impossible de supprimer le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
+        }
+
+        const d1Id = (targetUser as any).id as string;
+        try {
+            await userService.deleteUser(d1Id);
+            await broadcastDataChanged(env);
+            return Response.json({ success: true, message: 'User deleted from D1' }, { headers: router.corsHeaders });
+        } catch (e: any) {
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
+        }
+    });
+
+    /**
      * GET /api/admin/users/blocked
      * Returns an array of objects { auth0_sub, block_reason } for all users blocked in D1.
      */
@@ -263,6 +295,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
             // Increment siret_change_count
             await env.DB.prepare('UPDATE users SET additional_sirets = ?, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?')
                 .bind(JSON.stringify(sirets), d1Id).run();
+            await broadcastDataChanged(env);
         }
 
         // Return updated list with names for immediate UI update
@@ -371,6 +404,8 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
         await env.DB.prepare('UPDATE users SET siret = ?, club_id = ?, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?')
             .bind(body.siret, clubId, d1Id).run();
 
+        await broadcastDataChanged(env);
+
         return Response.json({ success: true, club_name: clubName }, { headers: router.corsHeaders });
     });
 
@@ -393,6 +428,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
 
         const d1Id = (targetUser as any).id as string;
         await env.DB.prepare('UPDATE users SET siret = NULL, club_id = NULL, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?').bind(d1Id).run();
+        await broadcastDataChanged(env);
 
         return Response.json({ success: true }, { headers: router.corsHeaders });
     });
@@ -429,6 +465,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
         sirets = sirets.filter(s => s !== params.siret);
 
         await env.DB.prepare('UPDATE users SET additional_sirets = ?, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?').bind(JSON.stringify(sirets), d1Id).run();
+        await broadcastDataChanged(env);
 
         // Return updated list with names for consistent UI
         const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';

@@ -142,11 +142,11 @@ export const ConfirmedMatchCard = ({
                                     {t('dashboard.labels.view_changes')}
                                 </Button>
                             )}
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                     size="sm"
                                     variant="flat"
-                                    className="flex-1 font-bold text-sm h-10 bg-white/5 active:scale-95"
+                                    className="w-full sm:flex-1 font-bold text-sm h-10 bg-white/5 active:scale-95"
                                     as={Link}
                                     to={`/matches/${match.match_id}`}
                                 >
@@ -156,7 +156,7 @@ export const ConfirmedMatchCard = ({
                                     size="sm"
                                     variant="flat"
                                     color="primary"
-                                    className="flex-1 font-black text-[10px] uppercase h-10 active:scale-95 shadow-sm"
+                                    className="w-full sm:flex-1 font-black text-[10px] uppercase h-10 active:scale-95 shadow-sm"
                                     as="a"
                                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${(!match.isUserHome && match.opponent_stadium_address) ? match.opponent_stadium_address : match.location_address}, ${(!match.isUserHome && match.opponent_city) ? match.opponent_city : match.location_city}`)}`}
                                     target="_blank"
@@ -168,7 +168,7 @@ export const ConfirmedMatchCard = ({
                                     size="sm"
                                     color="secondary"
                                     variant="solid"
-                                    className="flex-1 font-bold text-sm h-10 active:scale-95 shadow-md shadow-violet-500/20"
+                                    className="w-full sm:flex-1 font-bold text-sm h-10 active:scale-95 shadow-md shadow-violet-500/20"
                                     as="a"
                                     href={`tel:${match.opponent_phone}`}
                                 >

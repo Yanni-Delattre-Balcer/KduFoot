@@ -486,6 +486,18 @@ export default function UsersAndPermissionsPage() {
         }
         if (!window.confirm(t("adminUsersPage.confirmDeletePrefix", { userId }))) return;
         try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(userId)}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || "Failed to delete from D1");
+            }
+
             await deleteAuth0User(mgmtToken, userId);
             setUsers((prev) => prev.filter((u) => u.user_id !== userId));
             if (selectedUserId === userId) setSelectedUserId(null);

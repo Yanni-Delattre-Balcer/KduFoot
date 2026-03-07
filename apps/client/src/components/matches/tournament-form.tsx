@@ -284,7 +284,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                                         endContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6 shrink-0"><path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>}
                                                         size="lg"
                                                     >
-                                                        <div className="flex flex-col items-start truncate overflow-hidden">
+                                                        <div className="flex flex-col items-start truncate overflow-hidden flex-1 min-w-0">
                                                             <span className="font-extrabold truncate w-full text-left text-base uppercase">
                                                                 {formData.club_id === user.club?.id || !formData.club_id
                                                                     ? user.club?.name || 'Club Principal'

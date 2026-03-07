@@ -6,6 +6,7 @@ import { CreateUserDto, UpdateUserDto } from '../types/user';
 import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
 import { validateClubSiret } from '../utils/siret.validator';
+import { broadcastDataChanged } from '../utils/broadcast';
 
 export const setupUserRoutes = (router: Router, env: Env) => {
     const userService = new UserService(env.DB);
@@ -500,6 +501,8 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             await env.DB.prepare(
                 'UPDATE users SET club_id = NULL, siret = NULL, location = NULL, stadium_address = NULL WHERE id = ?'
             ).bind(user.id).run();
+
+            await broadcastDataChanged(env);
 
             return Response.json({ success: true, message: 'Club détaché avec succès.' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {

@@ -294,16 +294,17 @@
       "Autre": "Other"
     },
     "venue": {
-      "Domicile": "Home",
-      "Extérieur": "Away",
-      "Neutre": "Neutral"
+      "Domicile": "🏠 Home (We host)",
+      "Extérieur": "🚗 Away (We travel)",
+      "Neutre": "📍 Neutral ground"
     },
     "pitch": {
       "Herbe": "Grass",
       "Synthétique": "Artificial",
       "Hybride": "Hybrid",
       "Stabilisé": "Stabilized",
-      "Indoor": "All surfaces"
+      "Indoor": "All surfaces",
+      "Toutes surfaces": "All surfaces"
     },
     "gender": {
       "Masculin": "Male",

@@ -13,7 +13,7 @@
     "favorites": "Favoris",
     "sessions": "Historique Match / Tournoi / Exercice",
     "sessions_public": "Historique Match / Tournoi",
-    "matches": "Trouver un match / tournoi",
+    "matches": "Trouver/créer un match / tournoi",
     "dashboard": "Tableau de Bord",
     "pricing": "Tarifs",
     "remerciements": "Remerciements",
@@ -47,9 +47,9 @@
     },
     "buttons": {
       "exercises": "Analyser une vidéo",
-      "sessions": "Trouver un match / tournoi",
-      "find_match": "Trouver un match",
-      "find_tournament": "Trouver un tournoi"
+      "sessions": "Trouver/créer un match / tournoi",
+      "find_match": "Trouver/créer un match",
+      "find_tournament": "Trouver/créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
@@ -291,7 +291,8 @@
       "U20": "U20",
       "Seniors": "Séniors",
       "Vétérans": "Vétérans",
-      "Loisir": "Loisir"
+      "Loisir": "Loisir",
+      "Séniors": "Séniors"
     },
     "level": {
       "Débutant": "Débutant",
@@ -314,22 +315,23 @@
       "Autre": "Autre"
     },
     "venue": {
-      "Domicile": "Cherche à domicile",
-      "Extérieur": "Cherche à l'extérieur",
-      "Neutre": "Neutre"
+      "Domicile": "🏠 Domicile (Nous recevons)",
+      "Extérieur": "🚗 Extérieur (Nous nous déplaçons)",
+      "Neutre": "📍 Terrain neutre"
     },
     "pitch": {
       "Herbe": "Herbe",
       "Synthétique": "Synthétique",
       "Hybride": "Hybride",
       "Stabilisé": "Stabilisé",
-      "Indoor": "Toutes surfaces"
+      "Indoor": "Toutes surfaces",
+      "Toutes surfaces": "Toutes surfaces"
     },
     "gender": {
       "Masculin": "Masculin",
       "Féminin": "Féminin",
       "Mixte": "Mixte",
-      "Non spécifié": "Mixte"
+      "Non spécifié": "Non spécifié"
     },
     "format": {
       "11v11": "11 vs 11",
