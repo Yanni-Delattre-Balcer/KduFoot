@@ -47,7 +47,11 @@ export function useSessions(filters?: SessionFilters) {
         await sessionService.create(dto, token);
         mutate(); // Tells SWR to refresh the data after a change
         // Global invalidation just in case
-        globalMutate(() => true, undefined, { revalidate: true });
+        globalMutate(
+            (key) => typeof key === 'string' && key.startsWith('/api/'),
+            (currentData: any) => currentData,
+            { revalidate: true }
+        );
     }, [getAccessTokenSilently, mutate, globalMutate]);
 
     const updateSession = useCallback(async (id: string, dto: UpdateSessionDto) => {

@@ -17,7 +17,7 @@ export class UserService {
             .prepare('SELECT * FROM users WHERE auth0_sub = ?')
             .bind(sub)
             .first<User>();
-        return result || null;
+        return this.parseUser(result);
     }
 
     async getUserById(id: string): Promise<User | null> {
@@ -25,7 +25,21 @@ export class UserService {
             .prepare('SELECT * FROM users WHERE id = ?')
             .bind(id)
             .first<User>();
-        return result || null;
+        return this.parseUser(result);
+    }
+
+    private parseUser(user: any): User | null {
+        if (!user) return null;
+        if (typeof user.additional_sirets === 'string') {
+            try {
+                user.additional_sirets = JSON.parse(user.additional_sirets);
+            } catch (e) {
+                user.additional_sirets = [];
+            }
+        } else if (!user.additional_sirets) {
+            user.additional_sirets = [];
+        }
+        return user as User;
     }
 
     async createOrUpdateUser(dto: CreateUserDto): Promise<User> {
@@ -33,13 +47,11 @@ export class UserService {
 
         if (existing) {
             // Update basic info on login if needed (e.g. email change? mainly updated_at)
-            // For now, we just return the existing user to be safe, or maybe update last login time if we tracked it.
-            // Let's just update `updated_at`.
             const updated = await this.db
                 .prepare('UPDATE users SET updated_at = unixepoch() WHERE id = ? RETURNING *')
                 .bind(existing.id)
                 .first<User>();
-            return updated!;
+            return this.parseUser(updated)!;
         }
 
         // Create new user
@@ -55,7 +67,7 @@ export class UserService {
             .bind(id, dto.auth0_sub, dto.email, dto.firstname, dto.lastname)
             .first<User>();
 
-        return result!;
+        return this.parseUser(result)!;
     }
 
     async updateUser(id: string, dto: UpdateUserDto): Promise<User | null> {
@@ -78,7 +90,7 @@ export class UserService {
             .bind(...values, id)
             .first<User>();
 
-        return result || null;
+        return this.parseUser(result);
     }
     async setBlockedStatus(id: string, isBlocked: boolean, reason?: string): Promise<boolean> {
         if (isBlocked) {

@@ -21,6 +21,9 @@ export interface User {
     subscription: 'Free' | 'Pro' | 'Ultime';
     is_blocked?: boolean;
     block_reason?: string | null;
+    additional_sirets?: string | null;
+    block_count: number;
+    siret_change_count: number;
     created_at: number;
     updated_at: number;
 }
@@ -50,4 +53,6 @@ export interface UpdateUserDto {
     longitude?: number;
     picture?: string;
     subscription?: 'Free' | 'Pro' | 'Ultime';
+    block_count?: number;
+    siret_change_count?: number;
 }

@@ -2,9 +2,16 @@ import DefaultLayout from "@/layouts/default";
 import { AccountSettings } from "@/components/account-settings";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { useTranslation } from "react-i18next";
+import { useUser } from "@/authentication/providers/user-provider";
 
 export default function AccountPage() {
     const { t } = useTranslation();
+    const { user } = useUser();
+
+    let hasMultipleClubs = false;
+    if (Array.isArray(user?.additional_sirets) && user.additional_sirets.length > 0) {
+        hasMultipleClubs = true;
+    }
 
     return (
         <DefaultLayout>
@@ -16,6 +23,14 @@ export default function AccountPage() {
                     <p className="text-default-500 font-medium">
                         Gérez vos informations personnelles et les détails de votre club certifié.
                     </p>
+                    {hasMultipleClubs && (
+                        <div className="mt-4 p-4 bg-warning-50/10 border border-warning-500/30 rounded-xl flex items-start gap-3 animate-appearance-in shadow-lg shadow-warning-500/5">
+                            <span className="text-warning-500 text-xl font-black flex-shrink-0 animate-pulse">💡</span>
+                            <p className="text-sm font-semibold text-warning-200 leading-relaxed">
+                                Vous gérez actuellement plusieurs clubs. Pour toute modification sur votre club principal, veuillez contacter le support.
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <Card className="border border-default-100 bg-[#18181b] shadow-xl w-full">

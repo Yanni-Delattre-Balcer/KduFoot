@@ -358,6 +358,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                 siret: body.siret,
                 location: clubCity,
                 stadium_address: clubAddress,
+                siret_change_count: (user.siret_change_count || 0) + 1,
             });
 
             return Response.json({

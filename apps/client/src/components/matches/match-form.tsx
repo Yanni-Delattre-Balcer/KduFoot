@@ -80,10 +80,10 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         } else if (user) {
             setFormData(prev => ({
                 ...prev,
-                club_id: user.club?.id || prev.club_id,
-                location_address: user.club?.address || prev.location_address || '',
-                location_city: user.club?.city || prev.location_city || '',
-                location_zip: user.club?.zip || prev.location_zip || '',
+                club_id: prev.club_id || user.club?.id,
+                location_address: prev.club_id === user.club?.id ? user.club?.address || prev.location_address || '' : prev.location_address,
+                location_city: prev.club_id === user.club?.id ? user.club?.city || prev.location_city || '' : prev.location_city,
+                location_zip: prev.club_id === user.club?.id ? user.club?.zip || prev.location_zip || '' : prev.location_zip,
                 email: user.email || prev.email || '',
                 phone: user.phone || prev.phone || '',
                 category: user.category as Category || prev.category,
@@ -92,6 +92,27 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
             }));
         }
     }, [initialData, user]);
+
+    // Update address details when club_id changes
+    useEffect(() => {
+        if (!initialData && user && formData.club_id) {
+            if (formData.club_id === user.club?.id) {
+                setFormData(prev => ({
+                    ...prev,
+                    location_address: user.club?.address || prev.location_address || '',
+                    location_city: user.club?.city || prev.location_city || '',
+                    location_zip: user.club?.zip || prev.location_zip || ''
+                }));
+            } else {
+                setFormData(prev => ({
+                    ...prev,
+                    location_address: 'Non renseigné (SIRET Secondaire)',
+                    location_city: '',
+                    location_zip: ''
+                }));
+            }
+        }
+    }, [formData.club_id, user, initialData]);
 
     const formatPhoneNumber = (value: string) => {
         // Build formatted value
@@ -297,14 +318,36 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex items-center justify-between gap-4 shadow-sm h-full">
+                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex flex-col justify-center gap-4 shadow-sm h-full">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2.5 bg-success-100 rounded-full text-success-600">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
                                     </div>
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col w-full">
                                         <span className="text-success-900 font-black uppercase tracking-tighter text-xs sm:text-sm">{t('matchForm.link_club.linked')}</span>
-                                        <span className="text-success-700 font-bold text-xl">{user.club?.name}</span>
+                                        {Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0 ? (
+                                            <Select
+                                                size="sm"
+                                                variant="underlined"
+                                                color="success"
+                                                className="w-full font-bold mt-1"
+                                                selectedKeys={formData.club_id ? [formData.club_id] : []}
+                                                onChange={(e) => handleChange('club_id', e.target.value)}
+                                            >
+                                                {[
+                                                    <SelectItem key={user.club?.id || 'primary'}>
+                                                        {user.club?.name || 'Club Principal'}
+                                                    </SelectItem>,
+                                                    ...user.additional_sirets.map(siret => (
+                                                        <SelectItem key={siret}>
+                                                            {siret} (SIRET Secondaire)
+                                                        </SelectItem>
+                                                    ))
+                                                ]}
+                                            </Select>
+                                        ) : (
+                                            <span className="text-success-700 font-bold text-xl">{user.club?.name}</span>
+                                        )}
                                     </div>
                                 </div>
                                 {auth0User?.email === 'yannidelattrebalcer.artois@gmail.com' && (

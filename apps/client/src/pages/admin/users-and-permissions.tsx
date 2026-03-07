@@ -24,6 +24,7 @@ import {
     TableRow,
     TableCell,
 } from "@heroui/table";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Chip } from "@heroui/chip";
 import { addToast } from "@heroui/toast";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -47,12 +48,21 @@ const getKdufootPermissions = (t: any) => {
         const value = val as string;
         const key = value.replace(/:/g, "_");
         const group = value.split(":")[0];
+
+        let label = t(`permission.${key}`);
+        let groupLabel = t(`permission.group.${group}`);
+
+        if (value === 'role:blocked') {
+            label = "Bloquer l'accès complet";
+            groupLabel = "Sanction Admin";
+        }
+
         return {
             key,
-            label: t(`permission.${key}`),
+            label,
             value,
             group,
-            groupLabel: t(`permission.group.${group}`),
+            groupLabel,
         };
     });
 };
@@ -79,7 +89,7 @@ const groupColor = (group: string): "primary" | "secondary" | "success" | "warni
 type RoleFilter = 'all' | 'subscribers' | 'admins' | 'blocked';
 
 export default function UsersAndPermissionsPage() {
-    const { user: currentUser } = useAuth0();
+    const { user: currentUser, getAccessTokenSilently } = useAuth0();
     const currentUserId = (currentUser?.sub ?? "").toString().trim();
     const { t } = useTranslation();
     const { blockUser } = useUser();
@@ -112,9 +122,31 @@ export default function UsersAndPermissionsPage() {
     const [isSyncing, setIsSyncing] = useState(false);
     const [isUpToDate, setIsUpToDate] = useState<boolean | null>(null);
 
-    // Block UI state
     const [blockingUserId, setBlockingUserId] = useState<string | null>(null);
     const [blockReason, setBlockReason] = useState("");
+
+    // SIRET UI states
+    const [siretData, setSiretData] = useState<{
+        primary_siret: string | null,
+        primary_name?: string | null,
+        additional_sirets: { siret: string, name: string }[]
+    } | null>(null);
+    const [newSiret, setNewSiret] = useState("");
+    const [forceSiret, setForceSiret] = useState(false);
+    const [siretLoading, setSiretLoading] = useState(false);
+
+    const formatSiret = (value: string) => {
+        let raw = value.replace(/\D/g, '');
+        if (raw.length > 14) raw = raw.substring(0, 14);
+
+        // Format: XXX XXX XXX XXXXX
+        let formatted = '';
+        for (let i = 0; i < raw.length; i++) {
+            if (i === 3 || i === 6 || i === 9) formatted += ' ';
+            formatted += raw[i];
+        }
+        return formatted;
+    };
 
     /**
      * Helper to verify if Auth0 Resource Server scopes are synchronized with the local Permission enum.
@@ -198,6 +230,11 @@ export default function UsersAndPermissionsPage() {
         if (!mgmtToken) return;
         setSelectedUserId(userId);
         setModalLoading(true);
+        // Reset SIRET states for the new user
+        setSiretData(null);
+        setNewSiret("");
+        setForceSiret(false);
+        loadSirets(userId);
         try {
             const perms: Auth0Permission[] = await getUserPermissions(mgmtToken, userId);
             const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? "";
@@ -471,23 +508,19 @@ export default function UsersAndPermissionsPage() {
 
     const confirmBlock = async (d1UserId: string) => {
         try {
-            // 1. Appliquer le blocage dans la BD D1 (efface les matchs)
-            await blockUser(d1UserId, true, blockReason || undefined);
+            await blockUser(d1UserId, true, blockReason);
 
-            // 2. Kill switch sur Auth0 si le mgmtToken est dispo
-            //    Retirer TOUTES les permissions Auth0 pour couper l'accès API
             if (mgmtToken) {
                 const permsToRemove = KDUFOOT_PERMISSIONS
                     .filter(p => p.value !== Permission.ROLE_BLOCKED)
                     .map(p => p.value);
 
                 await removePermissionsFromUser(mgmtToken, d1UserId, permsToRemove).catch(() => { });
-                // Note: role:blocked n'existe PAS dans Auth0, le blocage est géré uniquement par D1 (is_blocked)
             }
 
-            addToast({ title: "Utilisateur bloqué", description: "L'utilisateur a été banni, ses données supprimées et ses droits retirés.", variant: "solid", color: "danger" });
             setBlockingUserId(null);
-
+            setBlockReason("");
+            addToast({ title: "Utilisateur banni", description: "L'utilisateur et ses matchs ont été supprimés.", color: "danger" });
             // Force update editing state if the pane is open
             const newPerms: Record<string, boolean> = {};
             KDUFOOT_PERMISSIONS.forEach(p => {
@@ -496,7 +529,6 @@ export default function UsersAndPermissionsPage() {
             setEditing(prev => ({ ...prev, [d1UserId]: newPerms }));
 
             // Modification optimiste de l'état local pour rafraîchir le bouton instantanément
-            // (évite la latence de cache de l'API Management Auth0)
             setUsers(prev => prev.map(u => {
                 if (u.user_id !== d1UserId) return u;
                 return {
@@ -510,10 +542,83 @@ export default function UsersAndPermissionsPage() {
                 };
             }));
 
-            setBlockReason("");
         } catch (err: any) {
-            addToast({ title: t("error.title"), description: err.message, variant: "solid", color: "danger" });
+            addToast({ title: "Erreur", description: err.message, color: "danger" });
         }
+    };
+
+    const loadSirets = async (userId: string) => {
+        setSiretLoading(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(userId)}/sirets`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setSiretData({
+                    primary_siret: data.primary_siret,
+                    primary_name: data.primary_name,
+                    additional_sirets: data.additional_sirets || []
+                });
+            } else {
+                setSiretData(null);
+            }
+        } catch {
+            setSiretData(null);
+        }
+        setSiretLoading(false);
+    };
+
+    const handleAddSiret = async () => {
+        const cleanSiret = newSiret.replace(/\s/g, '').trim();
+        if (!selectedUserId || !cleanSiret || cleanSiret === "") return;
+        setSiretLoading(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/additional-sirets`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ siret: cleanSiret, force: forceSiret })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setSiretData(prev => prev ? { ...prev, additional_sirets: data.additional_sirets } : null);
+                setNewSiret("");
+                setForceSiret(false);
+                addToast({ title: "Succès", description: `SIRET ${forceSiret ? '(forcé) ' : ''}ajouté.`, color: "success" });
+            } else {
+                addToast({ title: "Erreur", description: data.error || "Échec de l'ajout.", color: "danger" });
+            }
+        } catch {
+            addToast({ title: "Erreur", description: "Erreur réseau.", color: "danger" });
+        }
+        setSiretLoading(false);
+    };
+
+    const handleRemoveSiret = async (siretToRemove: string) => {
+        if (!selectedUserId) return;
+        setSiretLoading(true);
+        try {
+            const token = await getAccessTokenSilently();
+            const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/additional-sirets/${siretToRemove}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setSiretData(prev => prev ? { ...prev, additional_sirets: data.additional_sirets } : null);
+                addToast({ title: "Succès", description: "SIRET détaché.", color: "success" });
+            } else {
+                addToast({ title: "Erreur", description: data.error || "Échec de la suppression.", color: "danger" });
+            }
+        } catch {
+            addToast({ title: "Erreur", description: "Erreur réseau.", color: "danger" });
+        }
+        setSiretLoading(false);
     };
 
     const handleUnblockUser = async (d1UserId: string) => {
@@ -570,7 +675,7 @@ export default function UsersAndPermissionsPage() {
                 };
             }));
         } catch (err: any) {
-            addToast({ title: t("error.title"), description: err.message, variant: "solid", color: "danger" });
+            addToast({ title: "Erreur", description: err.message, variant: "solid", color: "danger" });
         }
     };
 
@@ -725,7 +830,15 @@ export default function UsersAndPermissionsPage() {
                 {loadingUsers ? (
                     <p className="text-default-500">{t("adminUsersPage.loadingUsers")}</p>
                 ) : (
-                    <Table aria-label="Utilisateurs Auth0" selectionMode="none">
+                    <Table
+                        aria-label="Utilisateurs Auth0"
+                        selectionMode="none"
+                        classNames={{
+                            base: "dark",
+                            wrapper: "bg-zinc-900 border border-white/10",
+                            th: "bg-zinc-800 text-default-400"
+                        }}
+                    >
                         <TableHeader>
                             <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
                             <TableColumn>{t("adminUsersPage.colEmail")}</TableColumn>
@@ -806,50 +919,17 @@ export default function UsersAndPermissionsPage() {
                                             <span className="text-sm">{u.logins_count ?? 0}</span>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="flex gap-2 flex-wrap">
+                                            <div className="flex justify-center w-full">
                                                 <Button
                                                     size="sm"
-                                                    variant="flat"
+                                                    variant="solid"
                                                     color="primary"
                                                     onPress={() => openUserEditing(u.user_id)}
                                                     isDisabled={!mgmtToken || (isSuperAdmin && u.user_id !== currentUserId)}
+                                                    className="font-bold px-6"
                                                 >
-                                                    {t("adminUsersPage.btnPermissions")}
+                                                    Voir le Profil
                                                 </Button>
-                                                {!isSuperAdmin && u.user_id !== currentUserId && (
-                                                    <>
-                                                        {isUserBlocked ? (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="solid"
-                                                                color="primary"
-                                                                className="font-bold uppercase tracking-tight"
-                                                                onPress={() => handleUnblockUser(u.user_id)}
-                                                            >
-                                                                Débloquer
-                                                            </Button>
-                                                        ) : (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="solid"
-                                                                color="danger"
-                                                                className="font-bold"
-                                                                onPress={() => handleBlockUser(u.user_id, u.email)}
-                                                            >
-                                                                🚫 Bloquer
-                                                            </Button>
-                                                        )}
-                                                        <Button
-                                                            size="sm"
-                                                            variant="flat"
-                                                            color="danger"
-                                                            onPress={() => deleteUser(u.user_id)}
-                                                            isDisabled={!mgmtToken}
-                                                        >
-                                                            {t("adminUsersPage.btnDelete")}
-                                                        </Button>
-                                                    </>
-                                                )}
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -896,140 +976,413 @@ export default function UsersAndPermissionsPage() {
                     </div>
                 )}
 
-                {/* Panneau d'édition des permissions */}
-                {selectedUserId && (
-                    <div className="mt-6 p-6 border border-default-200 rounded-xl bg-default-50">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold">
-                                {t("adminUsersPage.modalTitlePrefix")}{" "}
-                                <span className="text-primary">
-                                    {users.find((u) => u.user_id === selectedUserId)?.name ?? selectedUserId}
-                                </span>
-                                {users.find((u) => u.user_id === selectedUserId)?.email === SUPER_ADMIN_EMAIL && (
-                                    <Chip size="sm" color="warning" variant="solid" className="ml-2 h-5 text-xs sm:text-sm uppercase font-bold">
-                                        🛡️ PROTÉGÉ
-                                    </Chip>
-                                )}
-                            </h2>
-                            <Button
-                                size="sm"
-                                variant="light"
-                                onPress={() => { setSelectedUserId(null); setEditing((prev) => ({ ...prev, [selectedUserId]: {} })); }}
-                            >
-                                {t("adminUsersPage.modalBtnClose")}
-                            </Button>
-                        </div>
+                {/* Panneau d'édition du profil (Modal) */}
+                <Modal
+                    isOpen={!!selectedUserId}
+                    onClose={() => {
+                        if (selectedUserId) {
+                            setEditing((prev) => ({ ...prev, [selectedUserId]: {} }));
+                        }
+                        setSelectedUserId(null);
+                        setSiretData(null);
+                        setNewSiret("");
+                        setForceSiret(false);
+                    }}
+                    size="4xl"
+                    scrollBehavior="inside"
+                    classNames={{ base: "bg-zinc-900 border border-white/10" }}
+                >
+                    <ModalContent>
+                        {() => {
+                            const targetUser = users.find((u) => u.user_id === selectedUserId);
 
-                        {modalLoading ? (
-                            <p className="text-default-500">{t("adminUsersPage.modalLoadingPerms")}</p>
-                        ) : (
-                            <>
-                                <div className="mb-4 flex flex-wrap gap-2 items-center">
-                                    <span className="text-sm font-medium">Attribution rapide :</span>
-                                    <Button size="sm" variant="flat" color="default" onPress={() => applyRole("free")}>
-                                        Abonné Free
-                                    </Button>
-                                    <Button size="sm" variant="flat" color="warning" onPress={() => applyRole("premium")}>
-                                        Abonné Premium
-                                    </Button>
-                                    <Button size="sm" variant="flat" color="secondary" onPress={() => applyRole("admin")}>
-                                        Administrateur
-                                    </Button>
-                                    <Button size="sm" variant="flat" color="danger" onPress={() => applyRole("superadmin")}>
-                                        Super Administrateur
-                                    </Button>
-                                    <Button size="sm" variant="solid" color="danger" className="font-black" onPress={() => applyRole("blocked")}>
-                                        🚫 BLOQUÉ
-                                    </Button>
-                                </div>
-
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
-                                    {(() => {
-                                        // Regrouper par catégorie
-                                        const groups: Record<string, { label: string; perms: typeof KDUFOOT_PERMISSIONS }> = {};
-                                        for (const perm of KDUFOOT_PERMISSIONS) {
-                                            if (!groups[perm.group]) {
-                                                groups[perm.group] = {
-                                                    label: perm.groupLabel,
-                                                    perms: [],
-                                                };
-                                            }
-                                            groups[perm.group].perms.push(perm);
-                                        }
-                                        return Object.entries(groups).map(([groupKey, group]) => (
-                                            <div key={groupKey} className={`rounded-lg p-3 ${groupKey === 'role' ? 'bg-red-950/30 border border-red-600/30' : 'bg-default-100'}`}>
-                                                <Chip size="sm" color={groupColor(groupKey)} variant="flat" className="mb-2">
-                                                    {group.label}
+                            return (
+                                <>
+                                    <ModalHeader className="flex flex-col gap-1 border-b border-white/5 pb-4">
+                                        <h2 className="text-xl font-bold flex items-center gap-2">
+                                            {t("adminUsersPage.modalTitlePrefix")}{" "}
+                                            <span className="text-primary text-2xl ml-1">
+                                                {targetUser?.name ?? selectedUserId}
+                                            </span>
+                                            {targetUser?.email === SUPER_ADMIN_EMAIL && (
+                                                <Chip size="sm" color="warning" variant="solid" className="ml-2 h-5 text-xs sm:text-sm uppercase font-bold">
+                                                    🛡️ PROTÉGÉ
                                                 </Chip>
-                                                <div className="flex flex-col gap-1.5">
-                                                    {group.perms.map((perm) => {
-                                                        const isSuperAdminTarget = users.find(u => u.user_id === selectedUserId)?.email === SUPER_ADMIN_EMAIL;
-                                                        return (
-                                                            <div key={perm.key} className="flex flex-col gap-2">
-                                                                <Checkbox
-                                                                    isSelected={editing[selectedUserId]?.[perm.key] ?? false}
-                                                                    onValueChange={() => togglePermission(selectedUserId, perm.key)}
-                                                                    size="sm"
-                                                                    color={perm.key === 'role_blocked' ? 'danger' : undefined}
-                                                                    isDisabled={
-                                                                        // Empêcher de retirer sa propre permission auth0:admin:api
-                                                                        (selectedUserId === currentUserId && perm.value === "auth0:admin:api") ||
-                                                                        // Super-admin protection
-                                                                        (isSuperAdminTarget && selectedUserId !== currentUserId)
-                                                                    }
-                                                                >
-                                                                    <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500 uppercase' : ''}`}>
-                                                                        {perm.key === 'role_blocked' ? '🚫 ' : ''}{perm.label}
-                                                                    </span>
-                                                                </Checkbox>
-
-                                                                {/* Reason input when block is active */}
-                                                                {perm.key === 'role_blocked' && (editing[selectedUserId]?.[perm.key] ?? false) && (
-                                                                    <div className="pl-6 pb-2 animate-appearance-in">
-                                                                        <Input
-                                                                            size="sm"
-                                                                            label="Motif du bannissement"
-                                                                            placeholder="Saisissez un motif pour l'utilisateur"
-                                                                            variant="flat"
-                                                                            color="danger"
-                                                                            value={blockReason}
-                                                                            onValueChange={setBlockReason}
-                                                                            classNames={{ inputWrapper: "bg-danger-50" }}
-                                                                        />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
+                                            )}
+                                        </h2>
+                                    </ModalHeader>
+                                    <ModalBody className="py-6 space-y-6">
+                                        {/* Statistiques de suivi */}
+                                        {!modalLoading && siretData && (
+                                            <div className="flex gap-4 mb-2">
+                                                <div className="flex-1 p-3 rounded-xl bg-zinc-800/50 border border-white/5 text-center">
+                                                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest mb-1">Nombre de Bannissements</p>
+                                                    <p className="text-2xl font-black text-red-500">{(siretData as any).block_count || 0}</p>
+                                                </div>
+                                                <div className="flex-1 p-3 rounded-xl bg-zinc-800/50 border border-white/5 text-center">
+                                                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest mb-1">Modifications SIRET</p>
+                                                    <p className="text-2xl font-black text-primary">{(siretData as any).siret_change_count || 0}</p>
                                                 </div>
                                             </div>
-                                        ));
-                                    })()}
-                                </div>
+                                        )}
 
-                                <div className="flex gap-3">
-                                    <Button
-                                        color="primary"
-                                        onPress={() => savePermissions(selectedUserId)}
-                                        isLoading={savingUserId === selectedUserId}
-                                        isDisabled={
-                                            Object.keys(editing[selectedUserId] ?? {}).length === 0 ||
-                                            (editing[selectedUserId]?.['role_blocked'] && blockReason.trim().length < 3)
-                                        }
-                                    >
-                                        {t("adminUsersPage.modalBtnSave")}
-                                    </Button>
-                                    <Button
-                                        variant="flat"
-                                        onPress={() => { setSelectedUserId(null); setEditing((prev) => ({ ...prev, [selectedUserId]: {} })); }}
-                                    >
-                                        {t("adminUsersPage.modalBtnCancel")}
-                                    </Button>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                )}
+                                        {modalLoading ? (
+                                            <p className="text-default-500">{t("adminUsersPage.modalLoadingPerms")}</p>
+                                        ) : (
+                                            <>
+                                                {/* Gestion des SIRETs */}
+                                                <div className="mb-6 p-4 border border-white/10 rounded-xl bg-zinc-800/50 shadow-sm mt-4">
+                                                    <div className="flex justify-between items-center mb-3">
+                                                        <h3 className="text-md font-bold text-white flex items-center gap-2">
+                                                            🏢 Gestion des SIRETs (Multi-clubs)
+                                                        </h3>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="flat"
+                                                            onPress={() => selectedUserId && loadSirets(selectedUserId)}
+                                                            isLoading={siretLoading}
+                                                            isDisabled={!selectedUserId}
+                                                        >
+                                                            Actualiser
+                                                        </Button>
+                                                    </div>
+
+                                                    {siretLoading ? (
+                                                        <p className="text-default-500 text-sm">Chargement des SIRETs...</p>
+                                                    ) : siretData ? (
+                                                        <div className="flex flex-col gap-3">
+                                                            {/* Primary Siret */}
+                                                            {siretData.primary_siret ? (
+                                                                <div className="flex items-center justify-between bg-zinc-900 border border-primary/20 p-3 rounded-lg shadow-sm">
+                                                                    <div className="flex-1 min-w-0 mr-3">
+                                                                        <span className="text-[10px] font-black text-primary uppercase tracking-tighter">Club Principal</span>
+                                                                        <p className="text-sm font-bold text-white truncate">
+                                                                            {siretData.primary_name || siretData.primary_siret}
+                                                                        </p>
+                                                                        <p className="text-[10px] text-zinc-500 font-mono">{siretData.primary_siret}</p>
+                                                                    </div>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        color="danger"
+                                                                        variant="flat"
+                                                                        className="font-bold shrink-0"
+                                                                        onPress={async () => {
+                                                                            if (confirm("⚠️ Êtes-vous sûr de vouloir détacher le SIRET principal ? L'utilisateur n'aura plus de club lié et devra en choisir un nouveau.")) {
+                                                                                setSiretLoading(true);
+                                                                                try {
+                                                                                    const token = await getAccessTokenSilently();
+                                                                                    const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${selectedUserId}/primary-siret`, {
+                                                                                        method: 'DELETE',
+                                                                                        headers: { Authorization: `Bearer ${token}` }
+                                                                                    });
+                                                                                    if (res.ok) {
+                                                                                        addToast({ title: "SIRET détaché", color: "success" });
+                                                                                        if (selectedUserId) loadSirets(selectedUserId);
+                                                                                    }
+                                                                                } finally {
+                                                                                    setSiretLoading(false);
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        Détacher
+                                                                    </Button>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="p-3 border border-dashed border-white/10 rounded-lg text-center bg-zinc-800/20">
+                                                                    <p className="text-xs text-default-400 uppercase font-bold italic">Aucun club principal lié</p>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Additional Sirets */}
+                                                            <div className="flex flex-col gap-2 mt-2">
+                                                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter">Clubs Secondaires</span>
+                                                                {siretData.additional_sirets && siretData.additional_sirets.length > 0 ? (
+                                                                    siretData.additional_sirets.map((item: any) => (
+                                                                        <div key={item.siret} className="flex items-center justify-between bg-zinc-900/50 border border-zinc-800 p-2 rounded-lg">
+                                                                            <div className="flex-1 min-w-0 mr-2">
+                                                                                <p className="text-sm font-bold text-zinc-300 truncate">{item.name}</p>
+                                                                                <p className="text-[9px] text-zinc-600 font-mono">{item.siret}</p>
+                                                                            </div>
+                                                                            <Button
+                                                                                size="sm"
+                                                                                color="danger"
+                                                                                variant="flat"
+                                                                                className="shrink-0 scale-90 origin-right"
+                                                                                onPress={() => handleRemoveSiret(item.siret)}
+                                                                            >
+                                                                                Détacher
+                                                                            </Button>
+                                                                        </div>
+                                                                    ))
+                                                                ) : (
+                                                                    <p className="text-xs text-default-400 italic px-1">Aucun club secondaire</p>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Add Siret */}
+                                                            <div className="flex flex-col gap-3 mt-4 p-3 bg-zinc-900/40 rounded-xl border border-white/5">
+                                                                <div className="flex justify-between items-center mb-1">
+                                                                    <p className="text-xs font-bold text-blue-400 uppercase px-1">
+                                                                        ➕ Ajouter un SIRET/SIREN
+                                                                    </p>
+                                                                    <Checkbox
+                                                                        size="sm"
+                                                                        isSelected={forceSiret}
+                                                                        onValueChange={setForceSiret}
+                                                                        classNames={{ label: "text-xs font-bold text-warning-500 uppercase" }}
+                                                                    >
+                                                                        Forcer (Toute entreprise)
+                                                                    </Checkbox>
+                                                                </div>
+                                                                <div className="flex gap-2 items-end">
+                                                                    <Input
+                                                                        label="Nouveau SIRET/SIREN"
+                                                                        placeholder="Ex: 123 456 789 (9) ou 123 456 789 00012 (14)"
+                                                                        size="sm"
+                                                                        variant="bordered"
+                                                                        value={newSiret}
+                                                                        onValueChange={(v) => setNewSiret(formatSiret(v))}
+                                                                        maxLength={18}
+                                                                        errorMessage={newSiret && (newSiret.replace(/\s/g, '').length !== 14 && newSiret.replace(/\s/g, '').length !== 9) ? "9 ou 14 chiffres requis" : ""}
+                                                                        isInvalid={newSiret.length > 0 && (newSiret.replace(/\s/g, '').length !== 14 && newSiret.replace(/\s/g, '').length !== 9)}
+                                                                    />
+                                                                    <div className="flex flex-col gap-2">
+                                                                        <Button
+                                                                            color="primary"
+                                                                            size="sm"
+                                                                            onPress={handleAddSiret}
+                                                                            isDisabled={(newSiret.replace(/\s/g, '').length !== 14 && newSiret.replace(/\s/g, '').length !== 9) || siretLoading}
+                                                                            isLoading={siretLoading}
+                                                                            className="font-bold min-w-[120px]"
+                                                                        >
+                                                                            En additionnel
+                                                                        </Button>
+                                                                        <Button
+                                                                            color="warning"
+                                                                            size="sm"
+                                                                            variant="shadow"
+                                                                            onPress={async () => {
+                                                                                if (!selectedUserId) return;
+                                                                                const cleanSiret = newSiret.replace(/\s/g, '').trim();
+                                                                                setSiretLoading(true);
+                                                                                try {
+                                                                                    const token = await getAccessTokenSilently();
+                                                                                    const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${selectedUserId}/primary-siret`, {
+                                                                                        method: 'POST',
+                                                                                        headers: {
+                                                                                            "Content-Type": "application/json",
+                                                                                            Authorization: `Bearer ${token}`
+                                                                                        },
+                                                                                        body: JSON.stringify({ siret: cleanSiret, force: forceSiret })
+                                                                                    });
+                                                                                    if (res.ok) {
+                                                                                        addToast({ title: "Club Principal mis à jour", color: "success" });
+                                                                                        setNewSiret("");
+                                                                                        setForceSiret(false);
+                                                                                        loadSirets(selectedUserId);
+                                                                                    } else {
+                                                                                        const d = await res.json();
+                                                                                        addToast({ title: "Erreur", description: d.error, color: "danger" });
+                                                                                    }
+                                                                                } finally {
+                                                                                    setSiretLoading(false);
+                                                                                }
+                                                                            }}
+                                                                            isDisabled={(newSiret.replace(/\s/g, '').length !== 14 && newSiret.replace(/\s/g, '').length !== 9) || siretLoading}
+                                                                            isLoading={siretLoading}
+                                                                            className="font-bold min-w-[120px]"
+                                                                        >
+                                                                            En Principal
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-default-500">Erreur lors du chargement des SIRETs.</p>
+                                                    )}
+                                                </div>
+
+                                                {/* Actions Destructives */}
+                                                {(() => {
+                                                    const targetUser = users.find(u => u.user_id === selectedUserId);
+                                                    const isSuperAdminTarget = targetUser?.email === SUPER_ADMIN_EMAIL;
+                                                    const isTargetBlocked = targetUser?.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED) || targetUser?.blocked;
+
+                                                    if (!isSuperAdminTarget && selectedUserId !== currentUserId) {
+                                                        return (
+                                                            <div className="mb-6 p-4 border border-danger-500/30 rounded-xl bg-danger-500/10">
+                                                                <h3 className="text-md font-bold text-danger-500 mb-3 flex items-center gap-2">
+                                                                    🛡️ Sécurité & Compte
+                                                                </h3>
+                                                                <div className="flex flex-col sm:flex-row gap-3">
+                                                                    {isTargetBlocked ? (
+                                                                        <Button
+                                                                            size="md"
+                                                                            variant="solid"
+                                                                            color="primary"
+                                                                            className="font-bold uppercase tracking-tight flex-1"
+                                                                            onPress={() => handleUnblockUser(selectedUserId as string)}
+                                                                        >
+                                                                            Débloquer l'utilisateur
+                                                                        </Button>
+                                                                    ) : (
+                                                                        <Button
+                                                                            size="md"
+                                                                            variant="solid"
+                                                                            color="danger"
+                                                                            className="font-bold flex-1"
+                                                                            onPress={() => handleBlockUser(selectedUserId as string, targetUser?.email || '')}
+                                                                        >
+                                                                            🚫 Bloquer l'utilisateur
+                                                                        </Button>
+                                                                    )}
+                                                                    <Button
+                                                                        size="md"
+                                                                        variant="flat"
+                                                                        color="danger"
+                                                                        className="flex-1"
+                                                                        onPress={() => deleteUser(selectedUserId as string)}
+                                                                        isDisabled={!mgmtToken}
+                                                                    >
+                                                                        Supprimer le compte
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
+
+                                                <div className="p-4 bg-zinc-800/50 rounded-xl border border-white/5 space-y-4">
+                                                    <h3 className="text-md font-bold text-white mb-2 flex items-center gap-2">
+                                                        🔑 Permissions de l'utilisateur
+                                                    </h3>
+
+                                                    <div className="mb-4 flex flex-wrap gap-2 items-center">
+                                                        <span className="text-sm font-medium text-default-400">Attribution rapide :</span>
+                                                        <Button size="sm" variant="flat" color="default" onPress={() => applyRole("free")}>
+                                                            Abonné Free
+                                                        </Button>
+                                                        <Button size="sm" variant="flat" color="warning" onPress={() => applyRole("premium")}>
+                                                            Abonné Premium
+                                                        </Button>
+                                                        <Button size="sm" variant="flat" color="secondary" onPress={() => applyRole("admin")}>
+                                                            Administrateur
+                                                        </Button>
+                                                        <Button size="sm" variant="flat" color="danger" onPress={() => applyRole("superadmin")}>
+                                                            Super Administrateur
+                                                        </Button>
+                                                        <Button size="sm" variant="solid" color="danger" className="font-black" onPress={() => applyRole("blocked")}>
+                                                            🚫 BLOQUÉ
+                                                        </Button>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                                        {(() => {
+                                                            // Regrouper par catégorie
+                                                            const groups: Record<string, { label: string; perms: typeof KDUFOOT_PERMISSIONS }> = {};
+                                                            for (const perm of KDUFOOT_PERMISSIONS) {
+                                                                if (!groups[perm.group]) {
+                                                                    groups[perm.group] = {
+                                                                        label: perm.groupLabel,
+                                                                        perms: [],
+                                                                    };
+                                                                }
+                                                                groups[perm.group].perms.push(perm);
+                                                            }
+                                                            return Object.entries(groups).map(([groupKey, group]) => (
+                                                                <div key={groupKey} className={`rounded-lg p-3 ${groupKey === 'role' ? 'bg-red-950/30 border border-red-600/30' : 'bg-zinc-900 border border-white/10'}`}>
+                                                                    <Chip size="sm" color={groupColor(groupKey)} variant="flat" className="mb-2">
+                                                                        {group.label}
+                                                                    </Chip>
+                                                                    <div className="flex flex-col gap-1.5">
+                                                                        {group.perms.map((perm) => {
+                                                                            const isSuperAdminTarget = users.find(u => u.user_id === selectedUserId)?.email === SUPER_ADMIN_EMAIL;
+                                                                            return (
+                                                                                <div key={perm.key} className="flex flex-col gap-2">
+                                                                                    <Checkbox
+                                                                                        isSelected={editing[selectedUserId ?? '']?.[perm.key] ?? false}
+                                                                                        onValueChange={() => togglePermission(selectedUserId as string, perm.key)}
+                                                                                        size="sm"
+                                                                                        color={perm.key === 'role_blocked' ? 'danger' : undefined}
+                                                                                        isDisabled={
+                                                                                            // Empêcher de retirer sa propre permission auth0:admin:api
+                                                                                            (selectedUserId === currentUserId && perm.value === "auth0:admin:api") ||
+                                                                                            // Super-admin protection
+                                                                                            (isSuperAdminTarget && selectedUserId !== currentUserId)
+                                                                                        }
+                                                                                    >
+                                                                                        <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500 uppercase' : 'text-default-300'}`}>
+                                                                                            {perm.key === 'role_blocked' ? '🚫 ' : ''}{perm.label}
+                                                                                        </span>
+                                                                                    </Checkbox>
+
+                                                                                    {/* Reason input when block is active */}
+                                                                                    {perm.key === 'role_blocked' && (editing[selectedUserId ?? '']?.[perm.key] ?? false) && (
+                                                                                        <div className="pl-6 pb-2 animate-appearance-in">
+                                                                                            <Input
+                                                                                                size="sm"
+                                                                                                label="Motif du bannissement"
+                                                                                                placeholder="Saisissez un motif pour l'utilisateur"
+                                                                                                variant="flat"
+                                                                                                color="danger"
+                                                                                                value={blockReason}
+                                                                                                onValueChange={setBlockReason}
+                                                                                                classNames={{ inputWrapper: "bg-danger-900/40 text-red-100" }}
+                                                                                            />
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </div>
+                                                            ));
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </ModalBody>
+                                    <ModalFooter className="border-t border-white/5">
+                                        <Button
+                                            variant="flat"
+                                            size="lg"
+                                            className="font-semibold text-default-600 bg-white/5"
+                                            onPress={() => {
+                                                if (selectedUserId) {
+                                                    setEditing((prev) => ({ ...prev, [selectedUserId]: {} }));
+                                                }
+                                                setSelectedUserId(null);
+                                                setSiretData(null);
+                                                setNewSiret("");
+                                                setForceSiret(false);
+                                            }}
+                                        >
+                                            Fermer le profil
+                                        </Button>
+                                        <Button
+                                            color="primary"
+                                            size="lg"
+                                            className="font-bold shadow-lg shadow-primary-500/30 ml-3"
+                                            onPress={() => savePermissions(selectedUserId as string)}
+                                            isLoading={savingUserId === selectedUserId}
+                                            isDisabled={
+                                                modalLoading ||
+                                                Object.keys(editing[selectedUserId ?? ''] ?? {}).length === 0 ||
+                                                (editing[selectedUserId ?? '']?.['role_blocked'] && blockReason.trim().length < 3)
+                                            }
+                                        >
+                                            Sauvegarder les modifications
+                                        </Button>
+                                    </ModalFooter>
+                                </>
+                            );
+                        }}
+                    </ModalContent >
+                </Modal>
             </section>
         </DefaultLayout>
     );

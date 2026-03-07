@@ -76,9 +76,6 @@ export class ClubService {
         const cached = await this.env.KV_CACHE.get<Club[]>(cacheKey, 'json');
         if (cached) return cached;
 
-        // Search by city using postal code if possible or just query
-        // The API is smart enough with general query
-        // Can also use separate params if we had structured data
         const results = await this.searchClubs(city);
 
         await this.env.KV_CACHE.put(cacheKey, JSON.stringify(results), {
@@ -86,5 +83,39 @@ export class ClubService {
         });
 
         return results;
+    }
+
+    async validateSiret(siret: string): Promise<{ isValid: boolean; clubName?: string; error?: string }> {
+        try {
+            const params = new URLSearchParams({
+                q: siret,
+                mtm_campaign: 'kdufoot-worker',
+                per_page: '1'
+            });
+
+            const response = await fetch(`${this.env.SIRET_API_URL}?${params}`);
+            if (!response.ok) return { isValid: false, error: "Impossible de contacter l'API SIRET." };
+
+            const data: any = await response.json();
+            if (!data.results || data.results.length === 0) {
+                return { isValid: false, error: "SIRET non trouvé." };
+            }
+
+            const r = data.results[0];
+            const clubName = r.nom_complet;
+            const ape = r.activite_principale;
+
+            const { validateClubSiret } = await import('../utils/siret.validator');
+            const validation = validateClubSiret(ape, clubName);
+
+            if (!validation.isValid) {
+                return { isValid: false, error: validation.reason, clubName };
+            }
+
+            return { isValid: true, clubName };
+        } catch (error) {
+            console.error('Error validating SIRET:', error);
+            return { isValid: false, error: "Erreur lors de la validation du SIRET." };
+        }
     }
 }

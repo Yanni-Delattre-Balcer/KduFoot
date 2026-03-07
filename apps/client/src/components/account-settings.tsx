@@ -578,33 +578,45 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     </div>
                                 </div>
 
-                                <div className="p-3 rounded-xl bg-warning/10 border border-warning/20 space-y-2">
-                                    <p className="text-sm leading-tight text-warning-700 font-medium">
-                                        ⚠️ <strong>Attention :</strong> Une fois le SIRET validé et le club lié à votre compte, cette action est <strong>irréversible</strong>.
-                                    </p>
-                                    <p className="text-xs sm:text-sm leading-tight text-default-500 italic">
-                                        Pour toute modification ultérieure, vous devrez contacter le support technique.
-                                    </p>
-                                    <Button
-                                        as="a"
-                                        href="mailto:support@kdufoot.com"
-                                        variant="flat"
-                                        color="warning"
-                                        size="sm"
-                                        className="w-full font-bold text-sm h-10 mt-2"
-                                    >
-                                        📩 Demande d'aide
-                                    </Button>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-default-500">Ville</span>
+                                    <span className="font-medium">{dbUser?.club?.city || dbUser?.location || "Non renseigné"}</span>
                                 </div>
-                            </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-default-500">Département</span>
+                                    <span className="font-medium">{getDept(dbUser?.club?.zip) || "--"}</span>
+                                </div>
 
-                            <div className="flex justify-between items-center text-sm pt-2">
-                                <span className="text-default-500">Ville</span>
-                                <span className="font-medium">{dbUser?.club?.city || dbUser?.location || "Non renseigné"}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-default-500">Département</span>
-                                <span className="font-medium">{getDept(dbUser?.club?.zip) || "--"}</span>
+                                {dbUser?.club_id ? (
+                                    <div className="mt-6 p-6 bg-red-900/20 border-2 border-red-500/50 rounded-2xl text-center shadow-2xl shadow-red-900/20">
+                                        <p className="text-xl font-black text-red-500 uppercase tracking-tight mb-2">
+                                            Besoin d'aide avec votre club ?
+                                        </p>
+                                        <p className="text-base font-bold text-white mb-6">
+                                            Si vous ne trouvez pas votre club, si vous entraînez dans deux clubs différents, ou si vous changez de club : veuillez contacter notre support technique.
+                                        </p>
+
+                                        <Button
+                                            as="a"
+                                            href="mailto:support@kdufoot.com"
+                                            color="danger"
+                                            variant="shadow"
+                                            size="lg"
+                                            className="w-full font-black uppercase text-lg h-14 shadow-red-500/40 tracking-widest animate-pulse"
+                                        >
+                                            📩 CONTACTER LE SUPPORT
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 p-3 rounded-xl bg-warning/10 border border-warning/20 space-y-2">
+                                        <p className="text-sm leading-tight text-warning-700 font-medium">
+                                            ⚠️ <strong>Attention :</strong> Une fois le SIRET validé et le club lié à votre compte, cette action est <strong>irréversible</strong>.
+                                        </p>
+                                        <p className="text-xs sm:text-sm leading-tight text-default-500 italic">
+                                            Pour toute modification ultérieure, vous devrez contacter le support technique.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

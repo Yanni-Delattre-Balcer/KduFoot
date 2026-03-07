@@ -20,6 +20,7 @@ export interface User {
     subscription: 'Free' | 'Pro' | 'Ultime';
     is_blocked?: boolean;
     block_reason?: string | null;
+    additional_sirets?: string[] | null;
     created_at: number;
     updated_at: number;
     club?: Club; // Computed/Joined field if needed

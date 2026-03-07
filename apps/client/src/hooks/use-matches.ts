@@ -57,10 +57,10 @@ export function useMatches(filters?: MatchFilters) {
             false // Do not immediately send a GET request behind since we just added it
         );
 
-        // Global invalidation: refresh ALL /api/matches keys (match + tournament + dashboard) globally
+        // Global invalidation: refresh ALL /api keys
         globalMutate(
-            () => true, // invalidate all SWR caches just in case to make sure side effects (dashboards) catch it
-            undefined,
+            (key) => typeof key === 'string' && key.startsWith('/api/'),
+            (currentData: any) => currentData,
             { revalidate: true }
         );
     }, [getAccessTokenSilently, globalMutate, mutate]);
@@ -69,7 +69,7 @@ export function useMatches(filters?: MatchFilters) {
         const token = await getAccessTokenSilently();
         await matchService.update(id, dto, token);
         mutate();
-        globalMutate(() => true, undefined, { revalidate: true });
+        globalMutate((key) => typeof key === 'string' && key.startsWith('/api/'), (currentData: any) => currentData, { revalidate: true });
     }, [getAccessTokenSilently, mutate, globalMutate]);
 
     const deleteMatch = useCallback(async (id: string) => {
@@ -90,8 +90,8 @@ export function useMatches(filters?: MatchFilters) {
         await matchService.delete(id, token);
         // Global invalidation: refresh ALL /api/matches keys across all views
         globalMutate(
-            () => true,
-            undefined,
+            (key) => typeof key === 'string' && key.startsWith('/api/'),
+            (currentData: any) => currentData,
             { revalidate: true }
         );
     }, [getAccessTokenSilently, mutate, globalMutate]);

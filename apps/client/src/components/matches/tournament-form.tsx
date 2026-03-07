@@ -42,7 +42,8 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
         pitch_type: 'Herbe' as PitchType,
         location_address: '',
         location_zip: '',
-        location_city: ''
+        location_city: '',
+        club_id: ''
     });
 
     const [gender, setGender] = useState<string>('Masculin');
@@ -51,17 +52,39 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
         if (user) {
             setFormData(prev => ({
                 ...prev,
+                club_id: prev.club_id || user.club?.id || '',
                 email: user.email || prev.email || '',
                 phone: user.phone || prev.phone || '',
-                location_address: user.club?.address || '',
-                location_zip: user.club?.zip || '',
-                location_city: user.club?.city || '',
+                location_address: prev.club_id === user.club?.id ? user.club?.address || '' : prev.location_address || '',
+                location_zip: prev.club_id === user.club?.id ? user.club?.zip || '' : prev.location_zip || '',
+                location_city: prev.club_id === user.club?.id ? user.club?.city || '' : prev.location_city || '',
                 category: user.category as Category || prev.category,
                 level: user.level as Level || prev.level,
                 pitch_type: user.pitch_type as PitchType || prev.pitch_type
             }));
         }
     }, [user]);
+
+    // Update address details when club_id changes
+    useEffect(() => {
+        if (user && formData.club_id) {
+            if (formData.club_id === user.club?.id) {
+                setFormData(prev => ({
+                    ...prev,
+                    location_address: user.club?.address || '',
+                    location_city: user.club?.city || '',
+                    location_zip: user.club?.zip || ''
+                }));
+            } else {
+                setFormData(prev => ({
+                    ...prev,
+                    location_address: 'Non renseigné (SIRET Secondaire)',
+                    location_city: '',
+                    location_zip: ''
+                }));
+            }
+        }
+    }, [formData.club_id, user]);
 
     const handleChange = (field: string, value: any) => {
         if (errors[field]) {
@@ -117,7 +140,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
             const payload = {
                 ...formData,
                 type: 'tournament' as const,
-                club_id: user.club_id,
+                club_id: formData.club_id || user.club_id,
                 max_teams: parseInt(formData.max_teams),
                 registration_fee: parseFloat(formData.registration_fee)
             };
@@ -224,14 +247,36 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 </div>
                             </div>
                         ) : (
-                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex items-center justify-between gap-4 shadow-sm h-full">
+                            <div className="p-5 bg-success-50 border-2 border-success-200 rounded-2xl flex flex-col justify-center gap-4 shadow-sm h-full">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2.5 bg-success-100 rounded-full text-success-600">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
                                     </div>
-                                    <div className="flex flex-col">
+                                    <div className="flex flex-col w-full">
                                         <span className="text-success-900 font-black uppercase tracking-tighter text-xs sm:text-sm">{t('matchForm.link_club.linked')}</span>
-                                        <span className="text-success-700 font-bold text-xl">{user.club?.name}</span>
+                                        {Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0 ? (
+                                            <Select
+                                                size="sm"
+                                                variant="underlined"
+                                                color="success"
+                                                className="w-full font-bold mt-1"
+                                                selectedKeys={formData.club_id ? [formData.club_id] : []}
+                                                onChange={(e) => handleChange('club_id', e.target.value)}
+                                            >
+                                                {[
+                                                    <SelectItem key={user.club?.id || 'primary'}>
+                                                        {user.club?.name || 'Club Principal'}
+                                                    </SelectItem>,
+                                                    ...user.additional_sirets.map(siret => (
+                                                        <SelectItem key={siret}>
+                                                            {siret} (SIRET Secondaire)
+                                                        </SelectItem>
+                                                    ))
+                                                ]}
+                                            </Select>
+                                        ) : (
+                                            <span className="text-success-700 font-bold text-xl">{user.club?.name}</span>
+                                        )}
                                     </div>
                                 </div>
                                 {user?.email === 'yannidelattrebalcer.artois@gmail.com' && (

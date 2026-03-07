@@ -11,8 +11,8 @@ export function useWebSocketSync() {
         function connect() {
             if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-            const apiUrl = import.meta.env.VITE_API_URL || window.location.origin;
-            const wsUrl = apiUrl.replace(/^http/, 'ws') + '/api/ws';
+            const apiUrl = import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL || window.location.origin;
+            const wsUrl = apiUrl.replace(/^http/, 'ws').replace(/\/+$/, '') + '/api/ws';
 
             const ws = new WebSocket(wsUrl);
             wsRef.current = ws;
@@ -25,8 +25,12 @@ export function useWebSocketSync() {
             ws.onmessage = (event) => {
                 if (event.data === 'DATA_CHANGED') {
                     console.log('[WebSocket] Received DATA_CHANGED, revalidating cache...');
-                    // Use a filter to match all keys and revalidate them
-                    mutate(() => true, undefined, { revalidate: true });
+                    // Match keys that are strings and belong to the API namespace
+                    mutate(
+                        (key) => typeof key === 'string' && key.startsWith('/api/'),
+                        (currentData: any) => currentData,
+                        { revalidate: true }
+                    );
                 }
             };
 
