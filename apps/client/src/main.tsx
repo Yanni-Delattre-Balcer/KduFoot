@@ -19,6 +19,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { registerSW } from 'virtual:pwa-register';
 
 import App from "./App.tsx";
 import "./i18n";
@@ -29,19 +30,6 @@ import { CookieConsent } from "./components/cookie-consent.tsx";
 import { AuthenticationProvider } from "./authentication";
 import { UserProvider } from "./authentication/providers/user-provider";
 import { WelcomeGatewayProvider } from "./contexts/welcome-gateway-context.tsx";
-import { registerSW } from 'virtual:pwa-register';
-
-// Register service worker for PWA support
-if ('serviceWorker' in navigator) {
-  registerSW({
-    onNeedRefresh() {
-      console.log('[PWA] New content available, please refresh.');
-    },
-    onOfflineReady() {
-      console.log('[PWA] App ready to work offline');
-    },
-  });
-}
 
 // Request persistent storage to prevent browsers from clearing PWA data
 if (navigator.storage && navigator.storage.persist) {
@@ -51,6 +39,20 @@ if (navigator.storage && navigator.storage.persist) {
     } else {
       console.log("[Storage] Persistence not granted");
     }
+  });
+}
+
+// Register Service Worker for PWA support
+if (import.meta.env.PROD) {
+  registerSW({
+    onNeedRefresh() {
+      if (confirm('Une nouvelle version est disponible. Mettre à jour ?')) {
+        window.location.reload();
+      }
+    },
+    onOfflineReady() {
+      console.log('Application prête pour une utilisation hors ligne.');
+    },
   });
 }
 

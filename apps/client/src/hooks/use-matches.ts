@@ -191,7 +191,7 @@ export function useMatch(id: string | null) {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` }
         });
-        await handleResponse(res);
+        return handleResponse(res);
     }, [id, getAccessTokenSilently]);
     const updateRequestStatus = useCallback(async (userId: string, status: 'accepted' | 'refused') => {
         if (!id) return;

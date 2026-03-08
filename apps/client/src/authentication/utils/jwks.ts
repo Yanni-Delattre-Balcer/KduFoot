@@ -4,6 +4,7 @@
  */
 // JWKS cache utility for template
 import { createLocalJWKSet } from "jose";
+import { handleResponse } from "@/services/api";
 
 const DEFAULT_TTL_S = Number(import.meta.env.AUTH0_CACHE_DURATION_S ?? 300);
 const STORAGE_KEY = (domain: string) => `jwks:${domain}`;
@@ -14,12 +15,11 @@ let inFlightFetches = new Map<
   Promise<ReturnType<typeof createLocalJWKSet>>
 >();
 
-import { handleResponse } from "@/services/api";
-
 async function fetchJwksJson(domain: string) {
   const resp = await fetch(`https://${domain}/.well-known/jwks.json`, {
     headers: { Accept: "application/json, application/jwk-set+json" },
   });
+
   return await handleResponse(resp);
 }
 

@@ -4,13 +4,12 @@ import { useCallback } from 'react';
 
 interface UseFetchOptions extends RequestInit {
     skip?: boolean;
-    body?: any; // Added body to options for JSON.stringify
 }
 
 export function useFetch() {
     const { getAccessTokenSilently } = useAuth0();
 
-    const request = useCallback(async <T>(url: string, options: UseFetchOptions = {}): Promise<T> => {
+    const request = useCallback(async <T>(endpoint: string, options: UseFetchOptions = {}): Promise<T> => {
         try {
             const token = await getAccessTokenSilently();
             const headers = {
@@ -19,16 +18,15 @@ export function useFetch() {
                 ...options.headers,
             };
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
-                method: options.method || 'GET',
+            const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+                ...options,
                 headers,
-                body: options.body ? JSON.stringify(options.body) : undefined,
             });
 
             return handleResponse(response);
-        } catch (err: any) {
-            console.error(`API Request failed: ${url}`, err);
-            throw err;
+        } catch (error) {
+            console.error(`API Request failed: ${endpoint}`, error);
+            throw error;
         }
     }, [getAccessTokenSilently]);
 

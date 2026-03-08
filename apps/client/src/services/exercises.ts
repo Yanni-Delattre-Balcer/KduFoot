@@ -1,3 +1,5 @@
+
+
 import { CreateExerciseDto, UpdateExerciseDto, ExerciseFilters } from '../types/exercise.types';
 import { handleResponse } from './api';
 
@@ -9,6 +11,12 @@ export const exerciseService = {
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== undefined) query.append(key, String(value));
         });
+        // We pass a dummy function for token since api helper expects a getAccessTokenSilently function
+        // Refactor api.ts to accept token directly or function? 
+        // Let's refactor api.ts to be more flexible or just pass a wrapper.
+        // Actually, hook will handle token retrieval. Service should probably take the fetcher or token.
+        // For SWR, the fetcher receives the URL.
+        // Let's keep service simple: it returns the URL for SWR or executes the request for mutations.
         return `${BASE_URL}?${query.toString()}`;
     },
 

@@ -7,7 +7,6 @@
 
 import { UserManager, User, WebStorageStateStore, Log } from "oidc-client-ts";
 import { useEffect, useState } from "react";
-import { handleResponse } from "@/services/api";
 import { JWTPayload, jwtVerify, createRemoteJWKSet } from "jose";
 
 import {
@@ -18,6 +17,8 @@ import {
   LoginOptions,
   AuthProviderConfig,
 } from "./auth-provider";
+
+import { handleResponse } from "@/services/api";
 
 /**
  * Dex implementation of the AuthProvider interface using oidc-client-ts
@@ -356,12 +357,6 @@ export const useDexProvider = (
         },
       });
 
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error ${response.status}: ${response.statusText}`,
-        );
-      }
-
       return await handleResponse(response);
     } catch (error) {
       console.error("Error fetching JSON:", error);
@@ -386,12 +381,6 @@ export const useDexProvider = (
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error ${response.status}: ${response.statusText}`,
-        );
-      }
-
       return await handleResponse(response);
     } catch (error) {
       console.error("Error posting JSON:", error);
@@ -414,12 +403,6 @@ export const useDexProvider = (
           "Content-Type": "application/json",
         },
       });
-
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error ${response.status}: ${response.statusText}`,
-        );
-      }
 
       return await handleResponse(response);
     } catch (error) {
@@ -444,12 +427,6 @@ export const useDexProvider = (
         },
         body: JSON.stringify(data),
       });
-
-      if (!response.ok) {
-        throw new Error(
-          `HTTP error ${response.status}: ${response.statusText}`,
-        );
-      }
 
       return await handleResponse(response);
     } catch (error) {
