@@ -280,19 +280,32 @@ export class MatchService {
         apiKey: string
     ): Promise<Map<number, number>> {
         const distanceMap = new Map<number, number>();
-        if (!destinations.length || !apiKey || apiKey === 'YOUR_GOOGLE_MAPS_API_KEY_HERE') return distanceMap;
+        const validApiKey = apiKey && apiKey !== 'undefined' && apiKey !== 'null' && apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE';
+        if (!destinations.length || !validApiKey) {
+            if (!validApiKey && destinations.length > 0) {
+                console.warn("Google Maps API Key is missing or invalid. Falling back to Haversine distances.");
+            }
+            return distanceMap;
+        }
 
         // Google Distance Matrix accepts max 25 destinations per request
         const batchSize = 25;
         for (let i = 0; i < destinations.length; i += batchSize) {
             const batch = destinations.slice(i, i + batchSize);
             const destStr = batch.map(d => `${d.lat},${d.lng}`).join('|');
-            const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${originLat},${originLng}&destinations=${destStr}&key=${apiKey}&units=metric`;
+            const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${originLat},${originLng}&destinations=${encodeURIComponent(destStr)}&key=${apiKey}&units=metric&mode=driving`;
 
             try {
                 const res = await fetch(url);
-                if (!res.ok) continue;
+                if (!res.ok) {
+                    console.error(`Google Distance Matrix API error: ${res.status}`);
+                    continue;
+                }
                 const data = await res.json() as any;
+                if (data.status === 'OVER_QUERY_LIMIT') {
+                    console.warn("Google Maps API quota exceeded.");
+                    break;
+                }
                 if (data.rows?.[0]?.elements) {
                     data.rows[0].elements.forEach((el: any, j: number) => {
                         if (el.status === 'OK' && el.distance) {
@@ -300,8 +313,8 @@ export class MatchService {
                         }
                     });
                 }
-            } catch (e) {
-                console.error('Google Distance Matrix error:', e);
+            } catch (error) {
+                console.error("Error fetching Google distances:", error);
             }
         }
         return distanceMap;

@@ -21,9 +21,10 @@ export default function MatchEditPage() {
     const { match, isLoading: isLoadingMatch } = useMatch(id || null);
     const { isLocked } = useUser();
 
-    // Force revalidation on mount to avoid ghost locking
+    // Force revalidation on mount and scroll to top
     useEffect(() => {
         mutate('/api/me/context');
+        window.scrollTo(0, 0);
     }, [mutate]);
 
     if (isLocked) {

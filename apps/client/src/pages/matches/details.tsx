@@ -238,7 +238,7 @@ export default function MatchDetailsPage() {
                                             as="a"
                                             href={(match.club?.latitude && match.club?.longitude && (!match.location_address || match.location_address === match.club.address))
                                                 ? `https://www.google.com/maps/dir/?api=1&destination=${match.club.latitude},${match.club.longitude}`
-                                                : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${match.location_address || match.club?.address || ''}, ${match.location_city || match.club?.city || ''}`)}`}
+                                                : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${match.location_address || match.club?.address || ''}, ${match.location_city || match.club?.city || ''}`.trim().replace(/^,/, '').trim())}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >

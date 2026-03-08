@@ -179,6 +179,24 @@ export const useAuth0Provider = (): AuthProvider => {
             },
           });
 
+          if (!apiResponse.ok) {
+            const errorText = await apiResponse.text().catch(() => "");
+            let errorJson: any = {};
+            try {
+              if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+                errorJson = JSON.parse(errorText);
+              }
+            } catch (e) {
+              // Ignore parse error
+            }
+            throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+          }
+
+          const contentType = apiResponse.headers.get("Content-Type");
+          if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Invalid response format: Expected JSON");
+          }
+
           return await apiResponse.json();
         })();
 
@@ -220,6 +238,22 @@ export const useAuth0Provider = (): AuthProvider => {
           body: JSON.stringify(data),
         });
 
+        if (!apiResponse.ok) {
+          const errorText = await apiResponse.text().catch(() => "");
+          let errorJson: any = {};
+          try {
+            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+              errorJson = JSON.parse(errorText);
+            }
+          } catch (e) { /* ignore */ }
+          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+        }
+
+        const contentType = apiResponse.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response format: Expected JSON");
+        }
+
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -242,6 +276,22 @@ export const useAuth0Provider = (): AuthProvider => {
             "Content-Type": "application/json",
           },
         });
+
+        if (!apiResponse.ok) {
+          const errorText = await apiResponse.text().catch(() => "");
+          let errorJson: any = {};
+          try {
+            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+              errorJson = JSON.parse(errorText);
+            }
+          } catch (e) { /* ignore */ }
+          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+        }
+
+        const contentType = apiResponse.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response format: Expected JSON");
+        }
 
         return await apiResponse.json();
       } catch (error) {
@@ -266,6 +316,22 @@ export const useAuth0Provider = (): AuthProvider => {
           },
           body: JSON.stringify(data),
         });
+
+        if (!apiResponse.ok) {
+          const errorText = await apiResponse.text().catch(() => "");
+          let errorJson: any = {};
+          try {
+            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+              errorJson = JSON.parse(errorText);
+            }
+          } catch (e) { /* ignore */ }
+          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+        }
+
+        const contentType = apiResponse.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response format: Expected JSON");
+        }
 
         return await apiResponse.json();
       } catch (error) {
