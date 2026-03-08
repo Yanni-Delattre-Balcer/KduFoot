@@ -6,7 +6,7 @@ import { useAuth } from '@/authentication/providers/use-auth';
 
 export const PwaInstallBanner = () => {
     const { deferredPrompt, isStandalone, isIOS, isPermanentlyDismissed, isSessionDismissed, installPWA, dismissPrompt } = usePWAInstall();
-    const { isLoading } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
     const [isVisible, setIsVisible] = useState(false);
     const [showIOSHint, setShowIOSHint] = useState(false);
 
@@ -22,7 +22,7 @@ export const PwaInstallBanner = () => {
 
     useEffect(() => {
         // Strict visibility logic
-        if (isLoading || isStandalone || isPermanentlyDismissed || isSessionDismissed) {
+        if (isLoading || !isAuthenticated || isStandalone || isPermanentlyDismissed || isSessionDismissed) {
             setIsVisible(false);
             return;
         }
@@ -31,7 +31,7 @@ export const PwaInstallBanner = () => {
         const readyToPrompt = !!deferredPrompt || isIOS;
         setIsVisible(readyToPrompt);
 
-    }, [isLoading, isStandalone, deferredPrompt, isIOS, isPermanentlyDismissed, isSessionDismissed]);
+    }, [isAuthenticated, isLoading, isStandalone, deferredPrompt, isIOS, isPermanentlyDismissed, isSessionDismissed]);
 
     if (!isVisible) return null;
 
