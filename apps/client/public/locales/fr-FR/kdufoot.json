@@ -730,6 +730,7 @@
     }
   },
   "common": {
+    "choose": "Choisir",
     "not_provided": "Non renseigné",
     "unknown_city": "Ville inconnue",
     "unknown_date": "Date inconnue"
@@ -890,5 +891,9 @@
     "coach_certified": "Coach certifié",
     "role_blocked": "Banni / Bloqué"
   },
-  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur"
+  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur",
+  "connectivity": {
+    "offline": "Vous êtes hors ligne. Vérifiez votre connexion.",
+    "reconnecting": "Connexion instable, mise à jour en cours..."
+  }
 }

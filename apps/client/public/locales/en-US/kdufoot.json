@@ -672,6 +672,7 @@
     }
   },
   "common": {
+    "choose": "Choose",
     "not_provided": "Not provided",
     "unknown_city": "Unknown city",
     "unknown_date": "Unknown date"
@@ -832,5 +833,9 @@
     "coach_certified": "Certified coach",
     "role_blocked": "Banned / Blocked"
   },
-  "error-updating-user": "Error updating user"
+  "error-updating-user": "Error updating user",
+  "connectivity": {
+    "offline": "You are offline. Please check your connection.",
+    "reconnecting": "Unstable connection, updating..."
+  }
 }

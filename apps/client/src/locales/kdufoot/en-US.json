@@ -672,6 +672,7 @@
     }
   },
   "common": {
+    "choose": "Choose",
     "not_provided": "Not provided",
     "unknown_city": "Unknown city",
     "unknown_date": "Unknown date"
