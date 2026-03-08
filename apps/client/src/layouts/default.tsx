@@ -24,6 +24,7 @@ import { jwtVerify, JWTPayload } from "jose";
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
 import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
+import { ConnectivityStatus } from "@/components/connectivity-status";
 
 export default function DefaultLayout({
   children,
@@ -75,8 +76,9 @@ export default function DefaultLayout({
       </div>
 
       <Navbar />
-      {/* Spacer pour compenser la navbar fixed */}
-      <div className="h-14 lg:h-24 shrink-0" />
+      <ConnectivityStatus />
+      {/* Spacer pour compenser la navbar fixed, avec prise en compte de la Safe Area iOS */}
+      <div className="h-14 lg:h-24 shrink-0 pt-[env(safe-area-inset-top)]" />
       <main className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}>
         {children}
       </main>

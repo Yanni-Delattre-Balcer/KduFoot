@@ -1,9 +1,9 @@
-import { createContext, useCallback, ReactNode, useMemo, useContext } from 'react';
+import { createContext, useCallback, ReactNode, useMemo, useContext, useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import useSWR, { mutate } from 'swr';
 import { User } from '@/types/user.types';
 import { isProfileComplete } from '@/utils/profile';
-import { useWebSocketSync } from '@/hooks/use-websocket';
+import { useWebSocketSync, WebSocketStatus } from '@/hooks/use-websocket';
 
 interface UserContextType {
     user: User | null;
@@ -18,6 +18,8 @@ interface UserContextType {
     isLocked: boolean;
     isAdmin: boolean;
     isBlocked: boolean;
+    isOnline: boolean;
+    syncStatus: WebSocketStatus;
     notifications: {
         pendingRequests: number;
         modifiedParticipations: number;
@@ -30,8 +32,20 @@ const CONTEXT_KEY = '/api/me/context';
 
 export function UserProvider({ children }: { children: ReactNode }) {
     const { getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-    useWebSocketSync(isAuthenticated);
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+
+    const { status: syncStatus } = useWebSocketSync(isAuthenticated);
 
     const fetcher = useCallback(async () => {
         if (!isAuthenticated) return null;
@@ -172,8 +186,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         isLocked,
         isAdmin,
         isBlocked,
+        isOnline,
+        syncStatus,
         notifications
-    }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, notifications, getAccessTokenSilently]);
+    }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, isOnline, syncStatus, notifications, getAccessTokenSilently]);
 
     if (isLoading && isAuthenticated) {
         return (

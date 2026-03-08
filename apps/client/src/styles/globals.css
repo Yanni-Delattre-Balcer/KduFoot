@@ -26,6 +26,7 @@
   }
 
   --animate-pulse-red: pulse-red 2s ease-in-out infinite;
+  --animate-bounce-in: bounce-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   @keyframes pulse-red {
 
@@ -39,6 +40,18 @@
       opacity: 0.7;
       color: #f54180;
       /* Danger/Red color */
+    }
+  }
+
+  @keyframes bounce-in {
+    0% {
+      transform: translateY(100px) translateX(-50%) scale(0.3);
+      opacity: 0;
+    }
+
+    100% {
+      transform: translateY(0) translateX(-50%) scale(1);
+      opacity: 1;
     }
   }
 }

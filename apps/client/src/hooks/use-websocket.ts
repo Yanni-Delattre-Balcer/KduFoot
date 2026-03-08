@@ -1,8 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSWRConfig } from 'swr';
+
+export type WebSocketStatus = 'connected' | 'connecting' | 'disconnected';
 
 export function useWebSocketSync(enabled: boolean = true) {
     const { mutate } = useSWRConfig();
+    const [status, setStatus] = useState<WebSocketStatus>(enabled ? 'connecting' : 'disconnected');
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const retryCountRef = useRef(0);
@@ -17,12 +20,14 @@ export function useWebSocketSync(enabled: boolean = true) {
                 clearTimeout(reconnectTimeoutRef.current);
                 reconnectTimeoutRef.current = null;
             }
+            setStatus('disconnected');
             return;
         }
 
         function connect() {
             if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
+            setStatus('connecting');
             const apiUrl = import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL || window.location.origin;
             const wsUrl = apiUrl.replace(/^http/, 'ws').replace(/\/+$/, '') + '/api/ws';
 
@@ -31,6 +36,7 @@ export function useWebSocketSync(enabled: boolean = true) {
 
             ws.onopen = () => {
                 console.log('[WebSocket] Connected to hub');
+                setStatus('connected');
                 retryCountRef.current = 0; // Reset backoff on successful connection
             };
 
@@ -48,6 +54,7 @@ export function useWebSocketSync(enabled: boolean = true) {
 
             ws.onclose = () => {
                 console.log('[WebSocket] Disconnected');
+                setStatus('connecting');
                 scheduleReconnect();
             };
 
@@ -76,4 +83,6 @@ export function useWebSocketSync(enabled: boolean = true) {
             }
         };
     }, [mutate, enabled]);
+
+    return { status };
 }

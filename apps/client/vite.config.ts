@@ -168,10 +168,10 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-          // Do NOT precache index.html — Safari throws "response served by service worker
-          // has redirections" when the SW serves a cached HTML that was originally fetched
-          // through a redirect. Let navigation requests always go to the network.
-          globIgnores: ['**/index.html'],
+          // Precache index.html to avoid "non-precached-url" error in Workbox
+          // and ensure offline support for SPA.
+          navigateFallback: 'index.html',
+          navigateFallbackAllowlist: [/^(?!\/(api|_auth0)).*$/],
           skipWaiting: true,
           clientsClaim: true,
           runtimeCaching: [

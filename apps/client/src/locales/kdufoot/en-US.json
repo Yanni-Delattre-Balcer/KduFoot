@@ -832,5 +832,9 @@
     "coach_certified": "Certified coach",
     "role_blocked": "Banned / Blocked"
   },
-  "error-updating-user": "Error updating user"
+  "error-updating-user": "Error updating user",
+  "connectivity": {
+    "offline": "You are offline. Please check your connection.",
+    "reconnecting": "Unstable connection, updating..."
+  }
 }
