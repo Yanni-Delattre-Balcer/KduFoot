@@ -11,6 +11,7 @@ import {
 } from "@auth0/auth0-react";
 import React, { JSX, useCallback, useMemo, useRef } from "react";
 import { JWTPayload, jwtVerify } from "jose";
+import { addToast } from "@heroui/toast";
 
 import {
   AuthProvider,
@@ -58,7 +59,12 @@ export const useAuth0Provider = (): AuthProvider => {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error getting access token:", error);
-
+      addToast({
+        title: "Session expirée",
+        description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
+        variant: 'flat',
+        color: 'danger'
+      });
       return null;
     }
   };

@@ -383,10 +383,10 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                         <p className="text-[11px] sm:text-xs text-default-400 italic leading-tight px-1 mt-1">
                             {(!user?.stadium_address && formData.club_id === user?.club?.id) ? (
                                 <span className="text-warning-500 font-bold">
-                                    ⚠️ Vous utilisez l'adresse du siège. Remplissez l'adresse de votre stade dans "Mon Compte" pour ne plus avoir à la saisir.
+                                    ⚠️ Vous utilisez l'adresse du siège. Vous pouvez la modifier ici ou la définir dans "Mon Compte".
                                 </span>
                             ) : (
-                                t('matchForm.labels.stadium_note', "L'adresse est récupérée automatiquement. Pour la modifier, rendez-vous dans les paramètres de votre compte.")
+                                "L'adresse est récupérée automatiquement, mais vous pouvez la personnaliser pour ce tournoi."
                             )}
                         </p>
                     </div>

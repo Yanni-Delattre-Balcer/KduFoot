@@ -632,6 +632,9 @@ export default function MatchesPage() {
                                                                 <Chip size="sm" variant="flat" color="secondary" className="h-4 text-[9px] uppercase font-bold">
                                                                     {match.venue === 'Domicile' ? '🏠 Reçoit' : '🚗 Se déplace'}
                                                                 </Chip>
+                                                                <Chip size="sm" variant="flat" color="primary" className="h-4 text-[9px] uppercase font-bold">
+                                                                    🏟️ {t(`enums.pitch.${match.pitch_type}`)}
+                                                                </Chip>
                                                             </div>
                                                             <p className={`text-small text-default-500 font-medium`}>
                                                                 {isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
