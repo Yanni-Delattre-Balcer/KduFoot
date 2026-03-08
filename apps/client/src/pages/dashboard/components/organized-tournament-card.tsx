@@ -12,6 +12,7 @@ interface OrganizedTournamentCardProps {
     isTooLate: boolean;
     isSaving: boolean;
     onDelete: (id: string, date: string, time: string) => void;
+    onCloseRegistrations: (id: string) => void;
     formatDate: (date: string) => string;
     formatTime: (time: string) => string;
 }
@@ -21,6 +22,7 @@ export const OrganizedTournamentCard = ({
     isTooLate,
     isSaving,
     onDelete,
+    onCloseRegistrations,
     formatDate,
     formatTime
 }: OrganizedTournamentCardProps) => {
@@ -54,19 +56,21 @@ export const OrganizedTournamentCard = ({
                                         {t('enums.type.tournament').toUpperCase()}
                                     </h3>
                                     <p className="text-white/70 text-sm font-bold uppercase tracking-widest break-words">{match.name || match.club?.name || '??'}</p>
-                                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] sm:text-xs uppercase tracking-wider h-auto py-0.5">
+                                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                             🏆 {t('enums.type.tournament')}
                                         </Chip>
-                                        <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
+                                        <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black shrink-0">
                                             {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge') : t('dashboard.labels.home_badge')}
                                         </Chip>
                                     </div>
                                 </div>
                             </div>
-                            <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
-                                {match.status === 'active' ? t('dashboard.status.searching') : t(`dashboard.status.${match.status}`, match.status)}
-                            </Chip>
+                            <div className="flex justify-end lg:w-48 shrink-0">
+                                <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
+                                    {match.status === 'active' ? t('dashboard.status.searching') : t(`dashboard.status.${match.status}`, match.status)}
+                                </Chip>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
@@ -135,13 +139,13 @@ export const OrganizedTournamentCard = ({
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-2">
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-wrap gap-2">
                                         <Button
                                             as={Link}
                                             to={`/matches/${match.id}/edit`}
                                             size="sm"
                                             variant="flat"
-                                            className="flex-1 font-bold text-sm h-11 bg-amber-500/10 text-amber-500 active:scale-95"
+                                            className="flex-1 min-w-[100px] font-bold text-sm h-11 bg-amber-500/10 text-amber-500 active:scale-95"
                                         >
                                             {t('edit')}
                                         </Button>
@@ -149,7 +153,7 @@ export const OrganizedTournamentCard = ({
                                             size="sm"
                                             variant="flat"
                                             color="danger"
-                                            className="flex-1 h-11 font-bold text-sm active:scale-95"
+                                            className="flex-1 min-w-[100px] h-11 font-bold text-sm active:scale-95"
                                             onPress={() => onDelete(match.id, match.match_date, match.match_time)}
                                             isLoading={isSaving}
                                         >
@@ -157,12 +161,21 @@ export const OrganizedTournamentCard = ({
                                         </Button>
                                     </div>
                                     <Button
+                                        size="sm"
+                                        variant="solid"
+                                        color={match.status === 'found' ? "default" : "secondary"}
+                                        className="w-full font-bold text-sm h-10 active:scale-95 shadow-md shadow-secondary/20"
+                                        onPress={() => match.status !== 'found' && onCloseRegistrations(match.id)}
+                                        isDisabled={match.status === 'found' || isSaving}
+                                    >
+                                        {match.status === 'found' ? t('dashboard.tournament.registrations_closed', 'Inscriptions closes') : t('dashboard.tournament.close_registrations', 'Fermer les inscriptions')}
+                                    </Button>
+                                    <Button
                                         as={Link}
                                         to={`/matches/${match.id}`}
                                         size="sm"
-                                        variant="solid"
-                                        color="secondary"
-                                        className="w-full font-bold text-sm h-10 active:scale-95 shadow-md shadow-secondary/20"
+                                        variant="flat"
+                                        className="w-full font-bold text-sm h-10 active:scale-95 border border-white/10"
                                     >
                                         {t('dashboard.controls.manage_registrations')}
                                     </Button>

@@ -61,7 +61,7 @@ export default function DashboardPage() {
     const { getAccessTokenSilently } = useAuth0();
 
     // 1. Mes Annonces (Organisateur)
-    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
+    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements, closeRegistrations } = useMatches({ ownerId: 'me', include_past: true });
 
     // 2. Demandes Reçues (Organisateur)
     const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateIncoming } = useIncomingRequests();
@@ -275,6 +275,26 @@ export default function DashboardPage() {
         }
     };
 
+    const handleCloseRegistrations = async (id: string) => {
+        setIsSaving(true);
+        try {
+            await closeRegistrations(id);
+            addToast({
+                title: t('success'),
+                description: "Les inscriptions sont désormais closes.",
+                color: "success"
+            });
+        } catch (err: any) {
+            addToast({
+                title: t('error.title'),
+                description: err.message || "Erreur lors de la fermeture des inscriptions",
+                color: "danger"
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     // Filtered lists
     const filteredRequests = (incomingRequests || []).filter(r => {
         // Auto-masquage des demandes pour matchs passés
@@ -469,7 +489,7 @@ export default function DashboardPage() {
                                                 setHighlightedCardId(modifiedParticipations[0].match_id);
                                             }}
                                         >
-                                            {t('dashboard.alerts.view_changes')}
+                                            {t('dashboard.alerts.view_changes', 'J\'ai vu la modification')}
                                         </Button>
                                         <Button
                                             color="success"
@@ -541,9 +561,9 @@ export default function DashboardPage() {
                                                                 )}
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <h3 className="font-black text-white text-sm leading-tight truncate uppercase tracking-tight">{request.requester_club_name}</h3>
-                                                                <div className="flex items-center gap-1.5 mt-1">
-                                                                    <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase">
+                                                                <h3 className="font-black text-white text-sm leading-tight break-words uppercase tracking-tight">{request.requester_club_name}</h3>
+                                                                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                                                    <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-auto py-0.5 px-1.5 uppercase shrink-0">
                                                                         {request.match_type === 'tournament' ? '🏆 ' + t('enums.type.tournament').toUpperCase() : '⚽ ' + t('enums.type.match').toUpperCase()}
                                                                     </Chip>
                                                                     <Chip size="sm" variant="flat" color={(request.match_type === 'tournament' || request.venue === 'Domicile') ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase grayscale-[0.5]">
@@ -554,9 +574,11 @@ export default function DashboardPage() {
                                                                     </Chip>
                                                                 </div>
                                                             </div>
-                                                            <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black uppercase text-[9px] shadow-sm">
-                                                                {t('dashboard.status.' + request.request_status)}
-                                                            </Chip>
+                                                            <div className="flex justify-end lg:w-24 shrink-0">
+                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black uppercase text-[9px] shadow-sm">
+                                                                    {t('dashboard.status.' + request.request_status)}
+                                                                </Chip>
+                                                            </div>
                                                         </div>
                                                         {/* Quick Info: Responsable, Ville, Catégorie, Niveau */}
                                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
@@ -673,6 +695,7 @@ export default function DashboardPage() {
                                                     isTooLate={isTooLate(match.match_date, match.match_time)}
                                                     isSaving={isSaving}
                                                     onDelete={handleDeleteMatch}
+                                                    onCloseRegistrations={handleCloseRegistrations}
                                                     formatDate={formatDate}
                                                     formatTime={formatTime}
                                                 />
@@ -759,13 +782,13 @@ export default function DashboardPage() {
                                                                         </div>
                                                                     ) : (
                                                                         <div className="flex flex-col gap-2">
-                                                                            <div className="flex gap-2">
+                                                                            <div className="flex flex-wrap gap-2">
                                                                                 <Button
                                                                                     as={Link}
                                                                                     to={`/matches/${match.id}/edit`}
                                                                                     size="sm"
                                                                                     variant="flat"
-                                                                                    className="flex-1 font-bold text-sm h-11 bg-amber-500/10 text-amber-500 active:scale-95"
+                                                                                    className="flex-1 min-w-[100px] font-bold text-sm h-11 bg-amber-500/10 text-amber-500 active:scale-95"
                                                                                 >
                                                                                     {t('edit')}
                                                                                 </Button>
@@ -773,7 +796,7 @@ export default function DashboardPage() {
                                                                                     size="sm"
                                                                                     variant="flat"
                                                                                     color="danger"
-                                                                                    className="flex-1 h-11 font-bold text-sm active:scale-95"
+                                                                                    className="flex-1 min-w-[100px] h-11 font-bold text-sm active:scale-95"
                                                                                     onPress={() => handleDeleteMatch(match.id, match.match_date, match.match_time)}
                                                                                     isLoading={isSaving}
                                                                                 >

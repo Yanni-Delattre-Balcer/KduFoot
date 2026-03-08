@@ -205,5 +205,22 @@ export const matchService = {
         });
         if (!response.ok) throw new Error('Failed to update pairing');
         return response.json();
+    },
+
+    closeRegistrations: async (id: string, token: string) => {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/${id}/close-registrations`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                throw new Error(errorJson.error || errorJson.message || errorText);
+            } catch {
+                throw new Error(errorText);
+            }
+        }
+        return response.json();
     }
 };

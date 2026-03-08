@@ -398,6 +398,53 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
     /**
      * @openapi
+     * /api/matches/{id}/close-registrations:
+     *   put:
+     *     tags:
+     *       - Matches
+     *     summary: Manually close tournament registrations
+     *     description: Updates tournament status to 'found'. Only the owner can perform this.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: Tournament registrations closed successfully.
+     *       403:
+     *         description: Forbidden - Not the owner.
+     */
+    router.put('/api/matches/<id>/close-registrations', async (request: Request) => {
+        const params = (request as any).params as { id: string };
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const authHeader = request.headers.get('Authorization')!;
+        const token = authHeader.substring(7);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        if (!dbUser) {
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        try {
+            const match = await matchService.closeRegistrations(params.id, dbUser.id);
+            if (!match) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            await broadcastDataChanged(env);
+            return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: any) {
+            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+    });
+
+    /**
+     * @openapi
      * /api/matches/{id}/contact:
      *   post:
      *     tags:

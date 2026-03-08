@@ -50,22 +50,29 @@ export const ConfirmedTournamentCard = ({
                                     )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="font-black text-white text-lg sm:text-xl leading-tight">
+                                    <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
                                         {part.host_club_name}
                                     </h3>
-                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    <div className="flex flex-wrap items-center gap-2 mt-2">
                                         <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                             🏆 {part.name || t('enums.type.tournament')}
                                         </Chip>
-                                        <Chip size="sm" variant="flat" color="warning" className="h-5 text-[9px] uppercase font-black">
+                                        <Chip size="sm" variant="flat" color="warning" className="h-5 text-[9px] uppercase font-black shrink-0">
                                             ✈️ {t('dashboard.away_label')}
                                         </Chip>
                                     </div>
                                 </div>
                             </div>
-                            <Chip size="sm" color="success" variant="flat" className="font-black uppercase text-xs sm:text-sm py-3">
-                                {t('dashboard.status.accepted')}
-                            </Chip>
+                            <div className="flex justify-end lg:w-48 shrink-0 flex-col gap-2">
+                                <Chip size="sm" color="success" variant="flat" className="font-black uppercase text-xs sm:text-sm py-3 w-full">
+                                    {t('dashboard.status.accepted')}
+                                </Chip>
+                                {isTimeChanged && (
+                                    <Button size="sm" color="danger" variant="flat" onPress={() => onMarkAsRead(part.match_id)} className="font-bold text-[10px] w-full mt-1">
+                                        J'AI VU LA MODIFICATION
+                                    </Button>
+                                )}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">

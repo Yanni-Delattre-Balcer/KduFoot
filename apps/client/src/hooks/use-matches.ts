@@ -101,6 +101,22 @@ export function useMatches(filters?: MatchFilters) {
         await matchService.contact(id, dto, token);
     }, [getAccessTokenSilently]);
 
+    const closeRegistrations = useCallback(async (id: string) => {
+        const token = await getAccessTokenSilently();
+        await matchService.closeRegistrations(id, token);
+        mutate(
+            (currentData: any) => {
+                if (!currentData || !currentData.matches) return currentData;
+                return {
+                    ...currentData,
+                    matches: currentData.matches.map((m: Match) => m.id === id ? { ...m, status: 'found' } : m),
+                };
+            },
+            false
+        );
+        globalMutate((key) => typeof key === 'string' && key.startsWith('/api/'), (currentData: any) => currentData, { revalidate: true });
+    }, [getAccessTokenSilently, mutate, globalMutate]);
+
     return {
         matches: data?.matches as Match[] || [],
         total: data?.total as number || 0,
@@ -110,6 +126,7 @@ export function useMatches(filters?: MatchFilters) {
         updateMatch,
         deleteMatch,
         contactMatch,
+        closeRegistrations,
         mutate,
     };
 }

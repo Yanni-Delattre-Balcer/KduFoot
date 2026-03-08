@@ -103,6 +103,24 @@ export class MatchService {
         return true;
     }
 
+    async closeRegistrations(id: string, userId: string): Promise<Match | null> {
+        const existing = await this.getById(id);
+        if (!existing) return null;
+        if (existing.owner_id !== userId) throw new Error('Unauthorized');
+        if (existing.type !== 'tournament') throw new Error('Seuls les tournois peuvent être fermés manuellement');
+
+        // Sécurité H-2 : Verrouillage si le match commence dans moins de 2h
+        if (this.isTooLateToModify(existing.match_date, existing.match_time)) {
+            throw new Error('TOO_LATE_TO_MODIFY');
+        }
+
+        await this.db.prepare(
+            'UPDATE matches SET status = "found", updated_at = ? WHERE id = ?'
+        ).bind(Math.floor(Date.now() / 1000), id).run();
+
+        return this.getById(id);
+    }
+
     async getById(id: string): Promise<Match | null> {
         const result = await this.db.prepare(`
             SELECT m.*, 
@@ -388,10 +406,10 @@ export class MatchService {
             query += " AND (m.match_date > DATE('now') OR (m.match_date = DATE('now') AND m.match_time >= TIME('now')))";
         }
 
-        // Logic for Tournament Visibility: Stay active until max_teams is reached
+        // Logic for Tournament Visibility: Stay active until max_teams is reached OR status is manually set to 'found'
         // Only for tournaments
         if (!filters.ownerId && filters.type !== 'match') {
-            query += ` AND (m.type != 'tournament' OR m.status = 'active' OR (m.type = 'tournament' AND m.max_teams IS NOT NULL AND (SELECT COUNT(*) FROM match_contacts mc2 WHERE mc2.match_id = m.id AND mc2.status = 'accepted') < m.max_teams))`;
+            query += ` AND (m.type != 'tournament' OR m.status = 'active' OR (m.type = 'tournament' AND m.status = 'active' AND m.max_teams IS NOT NULL AND (SELECT COUNT(*) FROM match_contacts mc2 WHERE mc2.match_id = m.id AND mc2.status = 'accepted') < m.max_teams))`;
         }
 
         // Haversine bounding box pre-filter (30% wider than requested radius to account for road vs straight-line)

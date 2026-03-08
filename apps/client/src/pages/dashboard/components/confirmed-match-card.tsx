@@ -53,19 +53,26 @@ export const ConfirmedMatchCard = ({
                                     <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
                                         {opponentClubName}
                                     </h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider">
+                                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                             ⚽ {t('enums.type.match')}
                                         </Chip>
-                                        <Chip size="sm" variant="flat" color={isUserHome ? 'primary' : 'warning'} className="h-5 text-[9px] uppercase font-black">
+                                        <Chip size="sm" variant="flat" color={isUserHome ? 'primary' : 'warning'} className="h-5 text-[9px] uppercase font-black shrink-0">
                                             {isUserHome ? t('dashboard.labels.home_badge') : t('dashboard.labels.away_badge')}
                                         </Chip>
                                     </div>
                                 </div>
                             </div>
-                            <Chip size="sm" color="secondary" variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
-                                {t('dashboard.status.accepted')}
-                            </Chip>
+                            <div className="flex justify-end lg:w-48 shrink-0 flex-col gap-2">
+                                <Chip size="sm" color="secondary" variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30 w-full">
+                                    {t('dashboard.status.accepted')}
+                                </Chip>
+                                {isTimeChanged && (
+                                    <Button size="sm" color="danger" variant="flat" onPress={() => onMarkAsRead(match.match_id)} className="font-bold text-[10px] w-full mt-1">
+                                        J'AI VU LA MODIFICATION
+                                    </Button>
+                                )}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
