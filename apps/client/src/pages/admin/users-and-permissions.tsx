@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useState, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { Button } from "@heroui/button";
 import { Checkbox } from "@heroui/checkbox";
 import {
@@ -528,7 +528,7 @@ export default function UsersAndPermissionsPage() {
         // Super-admin protection
         const targetUser = users.find(u => u.user_id === userId);
         if (targetUser?.email === SUPER_ADMIN_EMAIL) {
-            addToast({ title: "Protection", description: "Impossible de supprimer le Super-Administrateur.", variant: "solid", color: "danger" });
+            addToast({ title: t("warning"), description: t("adminUsersPage.toasts.protectionSuperAdmin"), variant: "solid", color: "danger" });
             return;
         }
         if (!window.confirm(t("adminUsersPage.confirmDeletePrefix", { userId }))) return;
@@ -562,7 +562,7 @@ export default function UsersAndPermissionsPage() {
     const handleBlockUser = async (userId: string, email: string | undefined) => {
         // Super-admin protection
         if (email === SUPER_ADMIN_EMAIL) {
-            addToast({ title: "Protection", description: "Impossible de bloquer le Super-Administrateur.", variant: "solid", color: "danger" });
+            addToast({ title: t("warning"), description: t("adminUsersPage.toasts.protectionSuperAdmin"), variant: "solid", color: "danger" });
             return;
         }
 
@@ -1128,7 +1128,10 @@ export default function UsersAndPermissionsPage() {
                                 </ModalHeader>
                                 <ModalBody>
                                     <p className="text-sm text-default-400 font-medium leading-relaxed">
-                                        {t("adminUsersPage.modalBanDescription")}
+                                        <Trans
+                                            i18nKey="adminUsersPage.modalBanDescription"
+                                            components={[<span className="font-bold text-red-500" />]}
+                                        />
                                     </p>
                                     <Input
                                         label={t("adminUsersPage.modalBanReasonLabel")}
@@ -1256,7 +1259,7 @@ export default function UsersAndPermissionsPage() {
                                                                         variant="flat"
                                                                         className="font-bold shrink-0"
                                                                         onPress={async () => {
-                                                                            if (confirm("⚠️ Êtes-vous sûr de vouloir détacher le SIRET principal ? L'utilisateur n'aura plus de club lié et devra en choisir un nouveau.")) {
+                                                                            if (confirm(t("adminUsersPage.confirmDetachPrimary"))) {
                                                                                 setSiretLoading(true);
                                                                                 try {
                                                                                     const token = await getAccessTokenSilently();
@@ -1265,7 +1268,7 @@ export default function UsersAndPermissionsPage() {
                                                                                         headers: { Authorization: `Bearer ${token}` }
                                                                                     });
                                                                                     if (res.ok) {
-                                                                                        addToast({ title: "SIRET détaché", color: "success" });
+                                                                                        addToast({ title: t("adminUsersPage.toasts.siretDetached"), color: "success" });
                                                                                         if (selectedUserId) loadSirets(selectedUserId);
                                                                                     }
                                                                                 } finally {
@@ -1366,13 +1369,13 @@ export default function UsersAndPermissionsPage() {
                                                                                         body: JSON.stringify({ siret: cleanSiret, force: forceSiret })
                                                                                     });
                                                                                     if (res.ok) {
-                                                                                        addToast({ title: "Club Principal mis à jour", color: "success" });
+                                                                                        addToast({ title: t("adminUsersPage.toasts.siretPrimaryUpdated"), color: "success" });
                                                                                         setNewSiret("");
                                                                                         setForceSiret(false);
                                                                                         loadSirets(selectedUserId);
                                                                                     } else {
                                                                                         const d = await res.json();
-                                                                                        addToast({ title: "Erreur", description: d.error, color: "danger" });
+                                                                                        addToast({ title: t("error.title"), description: d.error || t("adminUsersPage.toasts.errorUpdate"), color: "danger" });
                                                                                     }
                                                                                 } finally {
                                                                                     setSiretLoading(false);

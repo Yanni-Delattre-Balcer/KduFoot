@@ -758,8 +758,12 @@
       "errorDelete": "Error deleting user",
       "syncSuccess": "Auth0 permissions synced",
       "syncError": "Auth0 sync error",
-      "noResourceServer": "Auth0 API not found for audience"
-    }
+      "noResourceServer": "Auth0 API not found for audience",
+      "protectionSuperAdmin": "Cannot modify the Super-Administrator.",
+      "siretDetached": "SIRET successfully detached",
+      "siretPrimaryUpdated": "Primary Club updated"
+    },
+    "confirmDetachPrimary": "⚠️ Are you sure you want to detach the primary SIRET? The user will no longer have a linked club and will need to choose a new one."
   },
   "thank-you": {
     "title": "Acknowledgments",

@@ -816,8 +816,12 @@
       "errorDelete": "Erreur lors de la suppression de l'utilisateur",
       "syncSuccess": "Permissions Auth0 synchronisées",
       "syncError": "Erreur synchronisation Auth0",
-      "noResourceServer": "API Auth0 non trouvée pour l'audience"
-    }
+      "noResourceServer": "API Auth0 non trouvée pour l'audience",
+      "protectionSuperAdmin": "Impossible de modifier le Super-Administrateur.",
+      "siretDetached": "SIRET détaché avec succès",
+      "siretPrimaryUpdated": "Club Principal mis à jour"
+    },
+    "confirmDetachPrimary": "⚠️ Êtes-vous sûr de vouloir détacher le SIRET principal ? L'utilisateur n'aura plus de club lié et devra en choisir un nouveau."
   },
   "thank-you": {
     "title": "Remerciements",
