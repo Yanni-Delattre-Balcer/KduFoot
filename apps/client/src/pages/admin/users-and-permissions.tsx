@@ -12,8 +12,9 @@
  *     → lister les utilisateurs, leurs permissions, ajouter/supprimer des permissions
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
 import { Button } from "@heroui/button";
 import { Checkbox } from "@heroui/checkbox";
 import {
@@ -110,8 +111,35 @@ export default function UsersAndPermissionsPage() {
 
     const [mgmtToken, setMgmtToken] = useState<string | null>(null);
     const [tokenFromCache, setTokenFromCache] = useState<boolean>(false);
-    const [users, setUsers] = useState<Auth0User[]>([]);
-    const [loadingUsers, setLoadingUsers] = useState(true);
+
+    // SWR Fetcher: Combines Auth0 users and D1 blocked users
+    const fetcher = useCallback(async ([_key, token]: [string, string]) => {
+        if (!token) return [];
+        const [u, blockedIds] = await Promise.all([
+            listAuth0Users(token),
+            getD1BlockedUsers()
+        ]);
+
+        return (u ?? []).map(user => {
+            const blockData = blockedIds.find(b => b.auth0_sub === user.user_id);
+            return {
+                ...user,
+                blocked: !!blockData,
+                is_blocked: !!blockData,
+                block_reason: blockData?.block_reason || null,
+            };
+        });
+    }, [listAuth0Users, getD1BlockedUsers]);
+
+    const { data: users = [], isLoading: loadingUsers, mutate: mutateUsers } = useSWR(
+        mgmtToken ? ['/api/admin/users', mgmtToken] : null,
+        fetcher,
+        {
+            revalidateOnFocus: false,
+            revalidateIfStale: true
+        }
+    );
+
     const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
 
     // { userId: { permKey: boolean } } — état d'édition des permissions
@@ -177,41 +205,9 @@ export default function UsersAndPermissionsPage() {
         }
     };
 
-    const loadUsers = async (token: string) => {
-        setLoadingUsers(true);
-        try {
-            const [u, blockedIds] = await Promise.all([
-                listAuth0Users(token),
-                getD1BlockedUsers()
-            ]);
-
-            // Merge the D1 blocked status and Auth0 data
-            const mergedUsers = (u ?? []).map(user => {
-                const blockData = blockedIds.find(b => b.auth0_sub === user.user_id);
-                if (blockData) {
-                    return {
-                        ...user,
-                        blocked: true,
-                        block_reason: blockData.block_reason,
-                        app_metadata: {
-                            ...user.app_metadata,
-                            permissions: [
-                                ...(user.app_metadata?.permissions || []),
-                                Permission.ROLE_BLOCKED
-                            ]
-                        }
-                    };
-                }
-                return user;
-            });
-
-            setUsers(mergedUsers);
-        } catch (err) {
-            console.error("Erreur chargement utilisateurs:", err);
-            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
-        } finally {
-            setLoadingUsers(false);
-        }
+    const loadUsers = async () => {
+        // Trigger SWR revalidation
+        await mutateUsers();
     };
 
     // ─── 1. Chargement du token Management API ──────────────────────────────
@@ -227,16 +223,14 @@ export default function UsersAndPermissionsPage() {
                     checkSyncStatus(tokenResp.access_token);
 
                     // Charger la liste des utilisateurs
-                    loadUsers(tokenResp.access_token);
+                    loadUsers();
                 } else {
                     addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
-                    setLoadingUsers(false);
                 }
             })
             .catch((err) => {
                 console.error("Erreur token Management:", err);
                 addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
-                setLoadingUsers(false);
             });
     }, []);
 
@@ -273,8 +267,8 @@ export default function UsersAndPermissionsPage() {
 
             setEditing((prev) => ({ ...prev, [userId]: permState }));
         } catch (err) {
-            console.error("Erreur chargement permissions:", err);
-            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingPerms"), variant: "solid" });
+            console.error("Erreur chargement utilisateurs:", err);
+            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
         } finally {
             setModalLoading(false);
         }
@@ -436,44 +430,48 @@ export default function UsersAndPermissionsPage() {
 
             addToast({ title: t("success"), description: t("adminUsersPage.toasts.successUpdate"), variant: "solid", timeout: 4000 });
 
-            // Optimistic UI update so the table badges instantly reflect the new permissions
-            setUsers(prev => prev.map(u => {
-                if (u.user_id !== userId) return u;
-                const prevPerms = u.app_metadata?.permissions || [];
-                let updatedPerms = prevPerms.filter(p => !toRemove.includes(p));
-                toAdd.forEach(newP => {
-                    if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
-                });
+            // Optimistic SWR update
+            await mutateUsers(
+                users.map(u => {
+                    if (u.user_id !== userId) return u;
+                    const prevPerms = u.app_metadata?.permissions || [];
+                    let updatedPerms = prevPerms.filter(p => !toRemove.includes(p));
+                    toAdd.forEach(newP => {
+                        if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
+                    });
 
-                // Handle optimistic UI for block state
-                let newBlockedState = u.blocked;
-                let newBlockReason = u.block_reason;
-                if (handleBlockLogic) {
-                    newBlockedState = targetBlockState;
-                    newBlockReason = targetBlockState ? blockReason : null;
-                    if (targetBlockState && !updatedPerms.includes(Permission.ROLE_BLOCKED)) {
-                        updatedPerms.push(Permission.ROLE_BLOCKED);
-                    } else if (!targetBlockState) {
-                        updatedPerms = updatedPerms.filter(p => p !== Permission.ROLE_BLOCKED);
-                    }
-                }
+                    let newIsBlocked = u.is_blocked || u.blocked || false;
+                    let newBlockReason = u.block_reason || null;
 
-                return {
-                    ...u,
-                    blocked: newBlockedState,
-                    block_reason: newBlockReason,
-                    app_metadata: {
-                        ...u.app_metadata,
-                        permissions: updatedPerms
+                    if (handleBlockLogic) {
+                        newIsBlocked = targetBlockState;
+                        newBlockReason = targetBlockState ? blockReason : null;
+                        if (targetBlockState && !updatedPerms.includes(Permission.ROLE_BLOCKED)) {
+                            updatedPerms.push(Permission.ROLE_BLOCKED);
+                        } else if (!targetBlockState) {
+                            updatedPerms = updatedPerms.filter(p => p !== Permission.ROLE_BLOCKED);
+                        }
                     }
-                };
-            }));
+
+                    return {
+                        ...u,
+                        blocked: newIsBlocked,
+                        is_blocked: newIsBlocked,
+                        block_reason: newBlockReason,
+                        app_metadata: {
+                            ...u.app_metadata,
+                            permissions: updatedPerms
+                        }
+                    };
+                }),
+                false
+            );
 
             setEditing((prev) => ({ ...prev, [userId]: {} }));
             setSelectedUserId(null);
 
-            // Silent refresh
-            if (mgmtToken) loadUsers(mgmtToken);
+            // Revalidate SWR
+            mutateUsers();
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("error-updating-user"), variant: "solid" });
@@ -510,12 +508,18 @@ export default function UsersAndPermissionsPage() {
             }
 
             await deleteAuth0User(mgmtToken, userId);
-            setUsers((prev) => prev.filter((u) => u.user_id !== userId));
+
+            // Optimistic SWR update
+            await mutateUsers(
+                users.filter((u) => u.user_id !== userId),
+                false
+            );
+
             if (selectedUserId === userId) setSelectedUserId(null);
             addToast({ title: t("success"), description: t("adminUsersPage.toasts.successDelete"), variant: "solid" });
 
-            // Silent refresh
-            if (mgmtToken) loadUsers(mgmtToken);
+            // Revalidate SWR
+            mutateUsers();
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorDelete"), variant: "solid" });
@@ -554,31 +558,31 @@ export default function UsersAndPermissionsPage() {
             if (onClose) onClose();
             setBlockingUserId(null);
             setBlockReason("");
-            addToast({ title: "Utilisateur banni", description: "L'utilisateur et ses matchs ont été supprimés.", color: "danger" });
 
-            // Force update editing state if the pane is open
-            const newPerms: Record<string, boolean> = {};
-            KDUFOOT_PERMISSIONS.forEach(p => {
-                newPerms[p.key] = p.key === 'role_blocked';
-            });
-            setEditing(prev => ({ ...prev, [d1UserId]: newPerms }));
-
-            // Modification optimiste de l'état local pour rafraîchir le bouton instantanément
-            setUsers(prev => prev.map(u => {
-                if (u.user_id !== d1UserId) return u;
-                return {
-                    ...u,
-                    blocked: true,
-                    block_reason: blockReason || undefined,
-                    app_metadata: {
-                        ...u.app_metadata,
-                        permissions: [Permission.ROLE_BLOCKED]
+            // Optimistic SWR update
+            await mutateUsers(
+                users.map(u => {
+                    if (u.user_id !== d1UserId) return u;
+                    const updatedPerms = [...(u.app_metadata?.permissions || [])];
+                    if (!updatedPerms.includes(Permission.ROLE_BLOCKED)) {
+                        updatedPerms.push(Permission.ROLE_BLOCKED);
                     }
-                };
-            }));
+                    return {
+                        ...u,
+                        blocked: true,
+                        is_blocked: true,
+                        block_reason: blockReason,
+                        app_metadata: {
+                            ...u.app_metadata,
+                            permissions: updatedPerms
+                        }
+                    };
+                }),
+                false
+            );
 
-            // Silent refresh
-            if (mgmtToken) loadUsers(mgmtToken);
+            // Revalidate SWR
+            mutateUsers();
 
         } catch (err: any) {
             addToast({ title: "Erreur", description: err.message, color: "danger" });
@@ -634,7 +638,7 @@ export default function UsersAndPermissionsPage() {
             if (data.success) {
                 addToast({ title: "Succès", description: "Profil administrateur mis à jour sur D1.", color: "success" });
                 // Silent refresh
-                if (mgmtToken) loadUsers(mgmtToken);
+                loadUsers();
             } else {
                 addToast({ title: "Erreur", description: data.error || "Échec de la mise à jour.", color: "danger" });
             }
@@ -726,25 +730,28 @@ export default function UsersAndPermissionsPage() {
             // Set reason to empty
             if (selectedUserId === d1UserId) setBlockReason("");
 
-            // Modification optimiste de l'état local pour rafraîchir le bouton instantanément
-            setUsers(prev => prev.map(u => {
-                if (u.user_id !== d1UserId) return u;
-                // Filtrer la permission bloquée des permissions existantes
-                const updatedPerms = (u.app_metadata?.permissions || []).filter(p => p !== Permission.ROLE_BLOCKED);
+            // Optimistic SWR update
+            await mutateUsers(
+                users.map(u => {
+                    if (u.user_id !== d1UserId) return u;
+                    const updatedPerms = (u.app_metadata?.permissions || []).filter(p => p !== Permission.ROLE_BLOCKED);
 
-                return {
-                    ...u,
-                    blocked: false,
-                    block_reason: null,
-                    app_metadata: {
-                        ...u.app_metadata,
-                        permissions: updatedPerms
-                    }
-                };
-            }));
+                    return {
+                        ...u,
+                        blocked: false,
+                        is_blocked: false,
+                        block_reason: null,
+                        app_metadata: {
+                            ...u.app_metadata,
+                            permissions: updatedPerms
+                        }
+                    };
+                }),
+                false
+            );
 
-            // Silent refresh
-            if (mgmtToken) loadUsers(mgmtToken);
+            // Revalidate SWR
+            mutateUsers();
         } catch (err: any) {
             addToast({ title: "Erreur", description: err.message, variant: "solid", color: "danger" });
         }
