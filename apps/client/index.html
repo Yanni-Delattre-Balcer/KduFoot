@@ -15,6 +15,15 @@
   <meta name="apple-mobile-web-app-title" content="Kdufoot">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+
+  <script>
+    window.deferredPWAInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      window.deferredPWAInstallPrompt = e;
+    });
+  </script>
+
   <title>Kdufoot — Organisez et Trouvez des Matchs Amicaux & Tournois</title>
 
   <meta name="description"

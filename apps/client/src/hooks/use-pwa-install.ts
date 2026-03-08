@@ -38,10 +38,17 @@ export function usePWAInstall() {
         const ios = /iphone|ipad|ipod/.test(userAgent) && !/chrome|crios|fxios/.test(userAgent);
         setIsIOS(ios);
 
+        // Quick check if the event already fired before React mounted
+        if ((window as any).deferredPWAInstallPrompt) {
+            console.log('[PWA] Used pre-captured beforeinstallprompt');
+            setDeferredPrompt((window as any).deferredPWAInstallPrompt);
+        }
+
         const handler = (e: Event) => {
             e.preventDefault();
             console.log('[PWA] beforeinstallprompt fired');
             setDeferredPrompt(e as BeforeInstallPromptEvent);
+            (window as any).deferredPWAInstallPrompt = e;
         };
 
         window.addEventListener('beforeinstallprompt', handler);

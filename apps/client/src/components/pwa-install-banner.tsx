@@ -9,16 +9,17 @@ export const PwaInstallBanner = () => {
     const { isAuthenticated, isLoading } = useAuth();
     const [isVisible, setIsVisible] = useState(false);
     const [showIOSHint, setShowIOSHint] = useState(false);
+    const [showPCHint, setShowPCHint] = useState(false);
 
-    // Lock background scroll when iOS guide is open
+    // Lock background scroll when a hint is open
     useEffect(() => {
-        if (showIOSHint) {
+        if (showIOSHint || showPCHint) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
         }
         return () => { document.body.style.overflow = ''; };
-    }, [showIOSHint]);
+    }, [showIOSHint, showPCHint]);
 
     useEffect(() => {
         // Strict visibility logic
@@ -27,19 +28,21 @@ export const PwaInstallBanner = () => {
             return;
         }
 
-        // Show if we have a native prompt OR we are on iOS Safari (where native prompt isn't supported)
-        const readyToPrompt = !!deferredPrompt || isIOS;
-        setIsVisible(readyToPrompt);
+        // Show systematically if not standalone and not dismissed
+        setIsVisible(true);
 
-    }, [isAuthenticated, isLoading, isStandalone, deferredPrompt, isIOS, isPermanentlyDismissed, isSessionDismissed]);
+    }, [isAuthenticated, isLoading, isStandalone, isPermanentlyDismissed, isSessionDismissed]);
 
     if (!isVisible) return null;
 
     const handleInstallClick = () => {
         if (isIOS) {
             setShowIOSHint(true);
-        } else {
+        } else if (deferredPrompt) {
             installPWA();
+        } else {
+            // Unlikely to happen normally but covers Chrome heuristic cooldowns
+            setShowPCHint(true);
         }
     };
 
@@ -186,6 +189,35 @@ export const PwaInstallBanner = () => {
                                 JE L'AI DÉJÀ INSTALLÉE
                             </Button>
                         </div>
+                    </Card>
+                </div>
+            )}
+
+            {/* PC/Android General Hint Popup (If native prompt is blocked) */}
+            {showPCHint && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in" onClick={() => { setShowPCHint(false); handleDismissSession(); }}>
+                    <Card className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-8 space-y-6 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                        <div className="flex flex-col items-center text-center gap-4">
+                            <h2 className="text-xl font-black text-white italic">Comment l'installer ?</h2>
+                            <p className="text-sm text-zinc-400 font-medium">L'installation automatique est bloquée par votre navigateur actuel.</p>
+                        </div>
+
+                        <div className="bg-white/5 border border-white/10 p-4 rounded-xl space-y-3">
+                            <p className="text-sm text-zinc-300">
+                                Pour installer Kdufoot, cliquez sur l'icône <span className="font-bold text-white">Installer l'application</span> (qui ressemble souvent à un écran d'ordinateur ou à un plus ➕) située <span className="text-primary font-bold">à tout moment à droite de votre barre d'adresse en haut de la fenêtre.</span>
+                            </p>
+                            <p className="text-sm text-zinc-300">
+                                Sur Android Chrome, cherchez <span className="font-bold text-white">"Ajouter à l'écran d'accueil"</span> dans le menu du navigateur (les 3 petits points verticaux).
+                            </p>
+                        </div>
+
+                        <Button
+                            color="primary"
+                            className="w-full font-black uppercase tracking-widest h-12 text-sm"
+                            onPress={() => { setShowPCHint(false); handleDismissSession(); }}
+                        >
+                            J'AI COMPRIS
+                        </Button>
                     </Card>
                 </div>
             )}
