@@ -448,6 +448,7 @@
       "license_placeholder": "Enter your number",
       "hq_address": "HQ Address (Official)",
       "stadium_address": "Stadium Address (Required)",
+      "stadium_address_for": "Stadium Address ({{club}})",
       "stadium_placeholder": "E.g.: Sports Complex, 12 Flower St",
       "stadium_locked": "Stadium address is locked. Contact support for any changes.",
       "stadium_warning": "Warning: this address is essential for guiding players during matches.",

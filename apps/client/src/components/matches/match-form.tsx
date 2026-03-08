@@ -174,10 +174,24 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         e.preventDefault();
 
         if (!validate()) {
-            addToast({ title: "Formulaire incomplet", description: "Veuillez remplir tous les champs obligatoires en rouge.", variant: 'flat', color: 'danger' });
+            const firstErrorKey = Object.keys(errors)[0];
+            addToast({
+                title: "Formulaire incomplet",
+                description: "Veuillez remplir tous les champs obligatoires en rouge.",
+                variant: 'flat',
+                color: 'danger',
+                endContent: firstErrorKey ? (
+                    <Button size="sm" variant="flat" color="danger" onPress={() => {
+                        const el = document.getElementById(`err-${firstErrorKey}`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}>
+                        Voir l'erreur
+                    </Button>
+                ) : undefined
+            });
+            window.scrollTo(0, 0);
             return;
         }
-
         if (!user?.club_id) {
             addToast({ title: t('warning', 'Attention'), description: t('matchForm.alerts.must_link', 'Veuillez lier votre club avant de créer un match'), variant: 'flat', color: 'warning' });
             return;
@@ -275,11 +289,12 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
     const availableClubs: ClubOption[] = user ? [
         { id: user.club?.id || 'primary', name: user.club?.name || 'Club Principal', description: 'Club Principal' },
-        ...(user.additional_sirets || []).map(siret => {
-            const clubInfo = user.additional_clubs?.find(c => c.siret === siret);
+        ...(user.additional_sirets || []).map(item => {
+            const s = typeof item === 'string' ? item : item.siret;
+            const clubInfo = user.additional_clubs?.find(c => c.siret === s);
             return {
-                id: clubInfo?.id || siret,
-                name: clubInfo?.name || siret,
+                id: clubInfo?.id || s,
+                name: clubInfo?.name || s,
                 description: 'Club Secondaire'
             };
         })
@@ -478,7 +493,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.category && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.category}</p>}
+                        {errors.category && <p id="err-category" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.category}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -498,7 +513,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 <SelectItem key={cat}>{t(`enums.level.${cat}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.level && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.level}</p>}
+                        {errors.level && <p id="err-level" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.level}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -519,7 +534,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             <SelectItem key="5v5">5 vs 5</SelectItem>
                             <SelectItem key="Futsal">Futsal</SelectItem>
                         </Select>
-                        {errors.format && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.format}</p>}
+                        {errors.format && <p id="err-format" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.format}</p>}
                     </div>
                     <Select
                         label={t('matchForm.labels.gender')}
@@ -553,7 +568,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 </svg>
                             }
                         />
-                        {errors.match_date && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_date}</p>}
+                        {errors.match_date && <p id="err-match_date" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_date}</p>}
                     </div>
                     <div className="space-y-1">
                         <Input
@@ -569,7 +584,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 </svg>
                             }
                         />
-                        {errors.match_time && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_time}</p>}
+                        {errors.match_time && <p id="id-match_time" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_time}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select

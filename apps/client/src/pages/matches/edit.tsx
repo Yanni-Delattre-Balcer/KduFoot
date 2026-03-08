@@ -7,6 +7,7 @@ import { Spinner } from '@heroui/spinner';
 import { useUser } from '@/hooks/use-user';
 import DataWall from '@/components/data-wall';
 import MatchForm from '@/components/matches/match-form';
+import TournamentForm from '@/components/matches/tournament-form';
 
 import { useSWRConfig } from 'swr';
 
@@ -53,11 +54,21 @@ export default function MatchEditPage() {
                 </h1>
 
                 {(match || !isEditing) && (
-                    <MatchForm
-                        initialData={match}
-                        onSuccess={() => navigate('/matches')}
-                        onCancel={() => navigate('/matches')}
-                    />
+                    <>
+                        {(!isEditing || match?.type === 'match') ? (
+                            <MatchForm
+                                initialData={match}
+                                onSuccess={() => navigate('/matches')}
+                                onCancel={() => navigate('/matches')}
+                            />
+                        ) : (
+                            <TournamentForm
+                                initialData={match}
+                                onSuccess={() => navigate('/matches')}
+                                onCancel={() => navigate('/matches')}
+                            />
+                        )}
+                    </>
                 )}
             </div>
         </DefaultLayout>

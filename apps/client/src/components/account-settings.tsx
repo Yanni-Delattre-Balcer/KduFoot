@@ -43,6 +43,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const [phone, setPhone] = useState("");
     const [siret, setSiret] = useState("");
     const [stadiumAddress, setStadiumAddress] = useState("");
+    const [additionalStadiumAddresses, setAdditionalStadiumAddresses] = useState<Record<string, string>>({});
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isInitialized, setIsInitialized] = useState(false);
@@ -110,6 +111,16 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             setPhone(formatPhoneNumber(dbUser.phone || ""));
             setSiret(formatSiret(dbUser.siret || ""));
             setStadiumAddress(dbUser.stadium_address || "");
+
+            // Initialize additional stadium addresses
+            const addAddr: Record<string, string> = {};
+            (dbUser.additional_sirets || []).forEach(item => {
+                const siret = typeof item === 'string' ? item : item.siret;
+                const addr = typeof item === 'object' ? item.stadium_address : "";
+                addAddr[siret] = addr || "";
+            });
+            setAdditionalStadiumAddresses(addAddr);
+
             setIsInitialized(true);
         }
     }, [dbUser, isInitialized]);
@@ -212,6 +223,13 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 club_colors: clubColors,
                 phone: phone,
                 stadium_address: stadiumAddress,
+                additional_sirets: (dbUser?.additional_sirets || []).map(item => {
+                    const siret = typeof item === 'string' ? item : item.siret;
+                    return {
+                        siret,
+                        stadium_address: additionalStadiumAddresses[siret] || ""
+                    };
+                }),
                 picture: previewUrl || dbUser?.picture || authUser.picture
             });
 
@@ -631,24 +649,39 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 </div>
 
                                 {dbUser?.additional_clubs && dbUser.additional_clubs.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
+                                    <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
                                         <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-1">{t('account.fields.other_clubs')}</p>
                                         {dbUser.additional_clubs.map((s: any, idx: number) => (
-                                            <div key={idx} className="bg-white/5 p-3 rounded-xl border border-white/5 flex flex-col gap-1">
+                                            <div key={idx} className="bg-white/5 p-4 rounded-xl border border-white/10 flex flex-col gap-3">
                                                 <div className="flex justify-between items-start gap-2 w-full overflow-hidden">
-                                                    <span className="text-xs font-bold text-white truncate flex-1 min-w-0">{s.name || t('account.fields.nameless_club')}</span>
-                                                    <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 rounded shrink-0">{formatSiret(s.siret)}</span>
-                                                </div>
-                                                <div className="flex gap-2 text-[10px] text-default-500 uppercase font-medium">
-                                                    <span>{s.city}</span>
-                                                    <span>•</span>
-                                                    <span>{getDept(s.zip)}</span>
-                                                </div>
-                                                {s.stadium_address && (
-                                                    <div className="text-[10px] text-primary/80 font-bold mt-1">
-                                                        🏟️ {s.stadium_address}
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-xs font-black text-white truncate">{s.name || t('account.fields.nameless_club')}</span>
+                                                        <div className="flex gap-2 text-[10px] text-default-500 uppercase font-bold mt-0.5">
+                                                            <span>{s.city}</span>
+                                                            <span>•</span>
+                                                            <span>{getDept(s.zip)}</span>
+                                                        </div>
                                                     </div>
-                                                )}
+                                                    <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 py-0.5 rounded shrink-0 border border-white/5">{formatSiret(s.siret)}</span>
+                                                </div>
+
+                                                <div className="space-y-1.5">
+                                                    <Input
+                                                        label={t('account.fields.stadium_address_for', { club: s.name })}
+                                                        placeholder={t('account.fields.stadium_placeholder')}
+                                                        variant="bordered"
+                                                        size="sm"
+                                                        value={additionalStadiumAddresses[s.siret] || ""}
+                                                        onValueChange={(v) => {
+                                                            setAdditionalStadiumAddresses(prev => ({ ...prev, [s.siret]: v }));
+                                                        }}
+                                                        classNames={{
+                                                            label: "text-[10px] font-bold text-primary-400 uppercase tracking-tight",
+                                                            input: "text-xs",
+                                                            inputWrapper: "h-9 min-h-9"
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

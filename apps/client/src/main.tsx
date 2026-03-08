@@ -30,6 +30,17 @@ import { AuthenticationProvider } from "./authentication";
 import { UserProvider } from "./authentication/providers/user-provider";
 import { WelcomeGatewayProvider } from "./contexts/welcome-gateway-context.tsx";
 
+// Request persistent storage to prevent browsers from clearing PWA data
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().then((persistent) => {
+    if (persistent) {
+      console.log("[Storage] Persistence granted");
+    } else {
+      console.log("[Storage] Persistence not granted");
+    }
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>

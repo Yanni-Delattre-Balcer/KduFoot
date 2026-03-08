@@ -12,16 +12,17 @@ import { addToast } from "@heroui/toast";
 import { useMatches } from '@/hooks/use-matches';
 
 interface TournamentFormProps {
+    initialData?: any;
     onSuccess?: () => void;
     onCancel?: () => void;
 }
 
 const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Toutes surfaces'];
 
-export default function TournamentForm({ onSuccess, onCancel }: TournamentFormProps) {
+export default function TournamentForm({ initialData, onSuccess, onCancel }: TournamentFormProps) {
     const { t } = useTranslation();
-    const { createMatch } = useMatches();
-    const { user, unlinkClub } = useUser();
+    const { createMatch, updateMatch } = useMatches();
+    const { user, unlinkClub, updateUser } = useUser();
 
     const [isSaving, setIsSaving] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -50,7 +51,38 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
     const [gender, setGender] = useState<string>('Masculin');
 
     useEffect(() => {
-        if (user) {
+        if (initialData) {
+            // Extract Gender from notes if present
+            const genderMatch = initialData.notes?.match(/Genre: (.*)(\n|$)/);
+            let extractedGender = genderMatch ? genderMatch[1].trim() : 'Masculin';
+            if (extractedGender.startsWith('enums.gender.')) {
+                extractedGender = extractedGender.replace('enums.gender.', '');
+            }
+            const cleanNotes = initialData.notes?.replace(/Genre: .*(\n|$)/, '').trim() || '';
+
+            setGender(extractedGender);
+            setFormData({
+                name: initialData.name || '',
+                category: initialData.category,
+                level: initialData.level,
+                format: initialData.format,
+                venue: initialData.venue,
+                max_teams: initialData.max_teams?.toString() || '16',
+                registration_fee: initialData.registration_fee?.toString() || '0',
+                match_date: initialData.match_date,
+                match_time: initialData.match_time,
+                match_end_time: initialData.match_end_time || '11:00',
+                email: initialData.email,
+                phone: initialData.phone,
+                notes: cleanNotes,
+                club_id: initialData.club_id || '',
+                location_address: initialData.location_address || '',
+                location_zip: initialData.location_zip || '',
+                location_city: initialData.location_city || '',
+                pitch_type: initialData.pitch_type || 'Herbe'
+            });
+            window.scrollTo(0, 0);
+        } else if (user) {
             setFormData(prev => ({
                 ...prev,
                 club_id: prev.club_id || user.club?.id || '',
@@ -64,11 +96,11 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 pitch_type: user.pitch_type as PitchType || prev.pitch_type
             }));
         }
-    }, [user]);
+    }, [user, initialData]);
 
     // Update address details when club_id changes
     useEffect(() => {
-        if (user && formData.club_id) {
+        if (!initialData && user && formData.club_id) {
             if (formData.club_id === user.club?.id) {
                 setFormData(prev => ({
                     ...prev,
@@ -86,13 +118,35 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 }));
             }
         }
-    }, [formData.club_id, user]);
+    }, [formData.club_id, user, initialData]);
+
+    const formatPhoneNumber = (value: string) => {
+        let raw = value.replace(/\D/g, '');
+        if (raw.length > 0 && !raw.startsWith('33')) {
+            if (raw.startsWith('0')) raw = '33' + raw.substring(1);
+            else raw = '33' + raw;
+        }
+        if (raw.length > 11) raw = raw.substring(0, 11);
+        let formatted = '';
+        if (raw.length > 0) formatted += '+';
+        if (raw.length > 0) formatted += raw.substring(0, 2);
+        if (raw.length > 2) formatted += ' ' + raw.substring(2, 3);
+        if (raw.length > 3) formatted += ' ' + raw.substring(3, 5);
+        if (raw.length > 5) formatted += ' ' + raw.substring(5, 7);
+        if (raw.length > 7) formatted += ' ' + raw.substring(7, 9);
+        if (raw.length > 9) formatted += ' ' + raw.substring(9, 11);
+        return formatted;
+    };
 
     const handleChange = (field: string, value: any) => {
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: "" }));
         }
-        setFormData(prev => ({ ...prev, [field]: value }));
+        if (field === 'phone') {
+            setFormData(prev => ({ ...prev, [field]: formatPhoneNumber(value) }));
+        } else {
+            setFormData(prev => ({ ...prev, [field]: value }));
+        }
     };
 
     const validate = () => {
@@ -112,12 +166,26 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
         return Object.keys(newErrors).length === 0;
     };
 
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!validate()) {
-            addToast({ title: "Formulaire incomplet", description: "Veuillez remplir tous les champs obligatoires en rouge.", variant: 'flat', color: 'danger' });
+            const firstErrorKey = Object.keys(errors)[0];
+            addToast({
+                title: "Formulaire incomplet",
+                description: "Veuillez remplir tous les champs obligatoires en rouge.",
+                variant: 'flat',
+                color: 'danger',
+                endContent: firstErrorKey ? (
+                    <Button size="sm" variant="flat" color="danger" onPress={() => {
+                        const el = document.getElementById(`err-${firstErrorKey}`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}>
+                        Voir l'erreur
+                    </Button>
+                ) : undefined
+            });
+            window.scrollTo(0, 0);
             return;
         }
 
@@ -126,7 +194,6 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
             return;
         }
 
-        // SECURITY: Date Validation
         const now = new Date();
         const selectedDate = new Date(formData.match_date!);
         const [hours, minutes] = (formData.match_time || '00:00').split(':').map(Number);
@@ -139,17 +206,28 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
 
         setIsSaving(true);
         try {
+            // Sync phone to profile
+            if (user && formData.phone && user.phone !== formData.phone) {
+                updateUser({ phone: formData.phone }).catch(e => console.error("Auto-sync phone error:", e));
+            }
+
             const payload = {
                 ...formData,
                 type: 'tournament' as const,
                 club_id: formData.club_id || user.club_id,
                 max_teams: parseInt(formData.max_teams),
-                registration_fee: parseFloat(formData.registration_fee)
+                registration_fee: parseFloat(formData.registration_fee),
+                notes: `Genre: ${gender}\n${formData.notes || ''}`.trim()
             };
 
-            await createMatch(payload as any);
+            if (initialData?.id) {
+                await updateMatch(initialData.id, payload as any);
+                addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.update_success', 'Tournoi mis à jour avec succès'), variant: 'flat', color: 'success' });
+            } else {
+                await createMatch(payload as any);
+                addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success', 'Tournoi créé avec succès'), variant: 'flat', color: 'success' });
+            }
 
-            addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success'), variant: 'flat', color: 'success' });
             if (onSuccess) onSuccess();
         } catch (error: any) {
             const rawMessage = error.message || "";
@@ -171,6 +249,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 variant: 'flat',
                 color: 'danger'
             });
+            window.scrollTo(0, 0);
         } finally {
             setIsSaving(false);
         }
@@ -204,11 +283,12 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
 
     const availableClubs: ClubOption[] = user ? [
         { id: user.club?.id || 'primary', name: user.club?.name || 'Club Principal', description: 'Club Principal' },
-        ...(user.additional_sirets || []).map(siret => {
-            const clubInfo = user.additional_clubs?.find(c => c.siret === siret);
+        ...(user.additional_sirets || []).map(item => {
+            const s = typeof item === 'string' ? item : item.siret;
+            const clubInfo = user.additional_clubs?.find(c => c.siret === s);
             return {
-                id: clubInfo?.id || siret,
-                name: clubInfo?.name || siret,
+                id: clubInfo?.id || s,
+                name: clubInfo?.name || s,
                 description: 'Club Secondaire'
             };
         })
@@ -400,7 +480,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                             isRequired
                             isInvalid={!!errors.name}
                         />
-                        {errors.name && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.name}</p>}
+                        {errors.name && <p id="err-name" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.name}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -414,7 +494,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.category && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.category}</p>}
+                        {errors.category && <p id="err-category" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.category}</p>}
                     </div>
                     <div className="space-y-1">
                         <Select
@@ -428,7 +508,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 <SelectItem key={cat}>{t(`enums.level.${cat}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.level && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.level}</p>}
+                        {errors.level && <p id="err-level" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.level}</p>}
                     </div>
 
                     <div className="space-y-1">
@@ -440,7 +520,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                             isRequired
                             isInvalid={!!errors.max_teams}
                         />
-                        {errors.max_teams && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.max_teams}</p>}
+                        {errors.max_teams && <p id="err-max_teams" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.max_teams}</p>}
                     </div>
                     <Input
                         type="number"
@@ -470,7 +550,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
                             ))}
                         </Select>
-                        {errors.pitch_type && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.pitch_type}</p>}
+                        {errors.pitch_type && <p id="err-pitch_type" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.pitch_type}</p>}
                     </div>
 
                     {/* Date and Times section */}
@@ -485,7 +565,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 isRequired
                                 isInvalid={!!errors.match_date}
                             />
-                            {errors.match_date && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_date}</p>}
+                            {errors.match_date && <p id="err-match_date" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_date}</p>}
                         </div>
                         <div className="space-y-1">
                             <Input
@@ -496,7 +576,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 isRequired
                                 isInvalid={!!errors.match_time}
                             />
-                            {errors.match_time && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_time}</p>}
+                            {errors.match_time && <p id="err-match_time" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_time}</p>}
                         </div>
                         <div className="space-y-1">
                             <Input
@@ -507,7 +587,7 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 isRequired
                                 isInvalid={!!errors.match_end_time}
                             />
-                            {errors.match_end_time && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_end_time}</p>}
+                            {errors.match_end_time && <p id="err-match_end_time" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.match_end_time}</p>}
                         </div>
                         <div className="hidden md:block"></div>
                     </div>
@@ -540,11 +620,11 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                 <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                         <Input label={t('tournamentForm.labels.contact_email')} type="email" value={formData.email} onValueChange={(v) => handleChange('email', v)} isRequired isInvalid={!!errors.email} />
-                        {errors.email && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.email}</p>}
+                        {errors.email && <p id="err-email" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.email}</p>}
                     </div>
                     <div className="space-y-1">
                         <Input label={t('matchForm.labels.phone')} type="tel" value={formData.phone} onValueChange={(v) => handleChange('phone', v)} isRequired isInvalid={!!errors.phone} />
-                        {errors.phone && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.phone}</p>}
+                        {errors.phone && <p id="err-phone" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.phone}</p>}
                     </div>
                     <Textarea label={t('tournamentForm.labels.notes')} placeholder={t('tournamentForm.labels.notes_placeholder')} value={formData.notes} onValueChange={(v) => handleChange('notes', v)} className="md:col-span-2" />
                 </CardBody>

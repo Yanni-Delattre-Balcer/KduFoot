@@ -56,9 +56,23 @@ export const useAuth0Provider = (): AuthProvider => {
       });
 
       return token;
-    } catch (error) {
+    } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error("Error getting access token:", error);
+
+      // If the error indicates we need to re-authenticate (e.g. missing refresh token, login required)
+      // we force a redirect to login.
+      const errorMessage = error?.message?.toLowerCase() || "";
+      if (
+        errorMessage.includes("login_required") ||
+        errorMessage.includes("missing refresh token") ||
+        errorMessage.includes("consent_required")
+      ) {
+        console.warn("Terminal authentication error detected. Redirecting to login...");
+        login();
+        return null;
+      }
+
       addToast({
         title: "Session expirée",
         description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",

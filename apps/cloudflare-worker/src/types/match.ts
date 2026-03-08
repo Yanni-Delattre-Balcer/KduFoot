@@ -93,7 +93,7 @@ export interface MatchContact {
     club_name?: string;
     message: string;
     contacted_at: string;
-    status: 'pending' | 'accepted' | 'refused';
+    status: 'pending' | 'accepted' | 'refused' | 'withdrawn';
     notification_state?: number; // 0: none, 1: modified, 2: cancelled
     cancellation_reason?: string;
 }

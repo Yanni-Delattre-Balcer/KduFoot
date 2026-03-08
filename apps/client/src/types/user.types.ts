@@ -20,7 +20,7 @@ export interface User {
     subscription: 'Free' | 'Pro' | 'Ultime';
     is_blocked?: boolean;
     block_reason?: string | null;
-    additional_sirets?: string[] | null;
+    additional_sirets?: (string | { siret: string; stadium_address?: string | null })[] | null;
     additional_clubs?: { id: string; siret: string; name: string; address?: string; city?: string; zip?: string; latitude?: number | null; longitude?: number | null; stadium_address?: string | null }[] | null;
     created_at: number;
     updated_at: number;

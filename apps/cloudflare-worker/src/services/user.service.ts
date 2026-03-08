@@ -82,7 +82,13 @@ export class UserService {
         if (keys.length === 0) return this.getUserById(id);
 
         const setClause = keys.map((key) => `${key} = ?`).join(', ');
-        const values = keys.map((key) => dto[key]);
+        const values = keys.map((key) => {
+            const val = dto[key];
+            if (key === 'additional_sirets' && typeof val === 'object' && val !== null) {
+                return JSON.stringify(val);
+            }
+            return val;
+        });
 
         // Add updated_at
         const query = `UPDATE users SET ${setClause}, updated_at = unixepoch() WHERE id = ? RETURNING *`;

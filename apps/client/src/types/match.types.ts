@@ -81,7 +81,7 @@ export interface MatchContact {
     club_name?: string;
     message: string;
     contacted_at: string;
-    status: 'pending' | 'accepted' | 'refused';
+    status: 'pending' | 'accepted' | 'refused' | 'withdrawn';
 }
 
 export interface Club {

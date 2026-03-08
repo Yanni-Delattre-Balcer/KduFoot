@@ -137,7 +137,7 @@ export default defineConfig(({ mode }) => {
       githubPagesSpa(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo.png'],
+        includeAssets: ['index.html', 'favicon.ico', 'apple-touch-icon.png', 'logo.png'],
         manifest: {
           name: 'Kdufoot',
           short_name: 'Kdufoot',
@@ -151,23 +151,25 @@ export default defineConfig(({ mode }) => {
             {
               src: 'android-chrome-192x192.png',
               sizes: '192x192',
-              type: 'image/png'
-            },
-            {
-              src: 'android-chrome-512x512.png',
-              sizes: '512x512',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any'
             },
             {
               src: 'android-chrome-512x512.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
+            },
+            {
+              src: 'android-chrome-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
             }
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          globPatterns: ['index.html', '**/*.{js,css,ico,png,svg,woff2}'],
           // Precache index.html to avoid "non-precached-url" error in Workbox
           // and ensure offline support for SPA.
           navigateFallback: 'index.html',

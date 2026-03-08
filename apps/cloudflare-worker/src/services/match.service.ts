@@ -616,26 +616,32 @@ export class MatchService {
     }
 
     async deleteContact(matchId: string, userId: string, requesterId: string): Promise<boolean> {
-        // Find the match to check ownership
         const match = await this.getById(matchId);
         if (!match) throw new Error('Match not found');
 
-        // Check if the requester is either the match owner OR the contact user itself
         if (match.owner_id !== requesterId && userId !== requesterId) {
             throw new Error('Unauthorized to cancel this contact');
         }
 
-        // Check if we are deleting an 'accepted' contact
         const contact = await this.db.prepare(
-            'SELECT status FROM match_contacts WHERE match_id = ? AND user_id = ?'
+            'SELECT status, message FROM match_contacts WHERE match_id = ? AND user_id = ?'
         ).bind(matchId, userId).first<any>();
+        if (!contact) return true;
 
-        await this.db.prepare(
-            'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
-        ).bind(matchId, userId).run();
+        // If the user is withdrawing themselves
+        if (userId === requesterId) {
+            const withdrawalMsg = `[DÉSISTEMENT AUTOMATIQUE] L'équipe s'est désistée. Message original: ${contact.message || 'Aucun'}`;
+            await this.db.prepare(
+                'UPDATE match_contacts SET status = "withdrawn", message = ?, notification_state = 2, updated_at = unixepoch() WHERE match_id = ? AND user_id = ?'
+            ).bind(withdrawalMsg, matchId, userId).run();
+        } else {
+            // Organizer is deleting/refusing definitively
+            await this.db.prepare(
+                'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
+            ).bind(matchId, userId).run();
+        }
 
-        // If it was accepted, we might need to reopen the match
-        if (contact?.status === 'accepted') {
+        if (contact.status === 'accepted') {
             const acceptedCountResult = await this.db.prepare(
                 'SELECT COUNT(*) as count FROM match_contacts WHERE match_id = ? AND status = "accepted"'
             ).bind(matchId).first<any>();

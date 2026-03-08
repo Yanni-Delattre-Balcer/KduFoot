@@ -204,6 +204,13 @@ export function useMatch(id: string | null) {
         mutate();
     }, [id, getAccessTokenSilently, mutate]);
 
+    const closeRegistrations = useCallback(async () => {
+        if (!id) return;
+        const token = await getAccessTokenSilently();
+        await matchService.closeRegistrations(id, token);
+        mutate();
+    }, [id, getAccessTokenSilently, mutate]);
+
     return {
         match: data?.match as Match,
         isLoading,
@@ -214,6 +221,7 @@ export function useMatch(id: string | null) {
         contactMatch,
         cancelMatchContact,
         updateRequestStatus,
+        closeRegistrations,
     };
 }
 

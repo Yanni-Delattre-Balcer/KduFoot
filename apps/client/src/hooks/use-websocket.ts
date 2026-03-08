@@ -34,6 +34,13 @@ export function useWebSocketSync(enabled: boolean = true) {
             const ws = new WebSocket(wsUrl);
             wsRef.current = ws;
 
+            const heartbeatInterval = setInterval(() => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    console.log('[WebSocket] Sending heartbeat ping');
+                    ws.send('ping');
+                }
+            }, 30000); // 30 seconds
+
             ws.onopen = () => {
                 console.log('[WebSocket] Connected to hub');
                 setStatus('connected');
@@ -41,6 +48,11 @@ export function useWebSocketSync(enabled: boolean = true) {
             };
 
             ws.onmessage = (event) => {
+                if (event.data === 'pong') {
+                    console.log('[WebSocket] Received heartbeat pong');
+                    return;
+                }
+
                 if (event.data === 'DATA_CHANGED') {
                     console.log('[WebSocket] Received DATA_CHANGED, revalidating cache...');
                     // Match keys that are strings and belong to the API namespace
@@ -54,12 +66,14 @@ export function useWebSocketSync(enabled: boolean = true) {
 
             ws.onclose = () => {
                 console.log('[WebSocket] Disconnected');
+                clearInterval(heartbeatInterval);
                 setStatus('connecting');
                 scheduleReconnect();
             };
 
             ws.onerror = (error) => {
                 console.error('[WebSocket] Error:', error);
+                clearInterval(heartbeatInterval);
                 ws.close(); // Triggers onclose -> scheduleReconnect
             };
         }

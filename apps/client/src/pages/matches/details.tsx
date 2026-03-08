@@ -12,6 +12,7 @@ import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Image } from "@heroui/image";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import DataWall from '@/components/data-wall';
+import { addToast } from '@heroui/toast';
 
 const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
@@ -26,7 +27,7 @@ export default function MatchDetailsPage() {
     const { isAuthenticated } = useAuth();
     const { openGateway } = useWelcomeGateway();
     const isMasked = !isAuthenticated || !profileComplete;
-    const { match, isLoading, isError, contactMatch, deleteMatch, adminDeleteMatch, cancelMatchContact, updateRequestStatus } = useMatch(id || null);
+    const { match, isLoading, isError, contactMatch, deleteMatch, adminDeleteMatch, cancelMatchContact, updateRequestStatus, closeRegistrations } = useMatch(id || null);
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
     const { isOpen: isCancelOpen, onOpen: onCancelOpen, onOpenChange: onCancelOpenChange } = useDisclosure();
     const { isOpen: isAdminDeleteOpen, onOpen: onAdminDeleteOpen, onOpenChange: onAdminDeleteOpenChange } = useDisclosure();
@@ -107,10 +108,10 @@ export default function MatchDetailsPage() {
         setIsBlocking(true);
         try {
             await blockUser(match.owner_id, true);
-            alert("Utilisateur bloqué avec succès.");
+            addToast({ title: "Succès", description: "Utilisateur bloqué avec succès", variant: 'flat', color: 'success' });
         } catch (error: any) {
             console.error("Blocking failed", error);
-            alert(error.message || "Erreur lors du blocage");
+            addToast({ title: "Erreur", description: error.message || "Erreur lors du blocage", variant: 'flat', color: 'danger' });
         } finally {
             setIsBlocking(false);
         }
@@ -235,9 +236,9 @@ export default function MatchDetailsPage() {
                                             color="primary"
                                             className="h-7 text-[10px] font-black uppercase px-2 shadow-sm"
                                             as="a"
-                                            href={match.club?.latitude && match.club?.longitude && (!match.location_address || match.location_address === match.club.address)
+                                            href={(match.club?.latitude && match.club?.longitude && (!match.location_address || match.location_address === match.club.address))
                                                 ? `https://www.google.com/maps/dir/?api=1&destination=${match.club.latitude},${match.club.longitude}`
-                                                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${match.location_address || match.club?.address}, ${match.location_city || match.club?.city}`)}`}
+                                                : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${match.location_address || match.club?.address || ''}, ${match.location_city || match.club?.city || ''}`)}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >
@@ -367,6 +368,25 @@ export default function MatchDetailsPage() {
                                             <Button color="primary" variant="flat" className="w-full font-black uppercase tracking-tighter" as={Link} to={`/matches/${id}/edit`}>
                                                 Modifier l'annonce
                                             </Button>
+                                            {match.type === 'tournament' && match.status === 'active' && (
+                                                <Button
+                                                    color="success"
+                                                    variant="solid"
+                                                    className="w-full font-black uppercase tracking-tighter"
+                                                    onPress={async () => {
+                                                        if (confirm("Voulez-vous clôturer manuellement les inscriptions pour ce tournoi ?")) {
+                                                            try {
+                                                                await closeRegistrations();
+                                                                addToast({ title: "Inscriptions closes", description: "Le tournoi est désormais complet.", variant: 'flat', color: 'success' });
+                                                            } catch (e: any) {
+                                                                addToast({ title: "Erreur", description: "Impossible de clôturer", variant: 'flat', color: 'danger' });
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    Clôturer les inscriptions
+                                                </Button>
+                                            )}
                                         </div>
                                     ) : (
                                         <>
@@ -471,14 +491,14 @@ export default function MatchDetailsPage() {
                                                                     }
                                                                     try {
                                                                         await contactMatch({ message: "Demande de participation envoyée via KduFoot" });
-                                                                        alert("Demande envoyée avec succès !");
+                                                                        addToast({ title: "Succès", description: "Demande envoyée avec succès !", variant: 'flat', color: 'success' });
                                                                     } catch (e: any) {
-                                                                        alert(e.message || "Erreur lors de l'envoi");
+                                                                        addToast({ title: "Erreur", description: e.message || "Erreur lors de l'envoi", variant: 'flat', color: 'danger' });
                                                                     }
                                                                 }}
                                                                 isDisabled={isProfileIncomplete && !isMasked}
                                                             >
-                                                                ENVOYER UNE DEMANDE
+                                                                {match.type === 'tournament' ? 'POSTULER AU TOURNOI' : 'ENVOYER UNE DEMANDE'}
                                                             </Button>
                                                         )}
                                                     </>
@@ -553,7 +573,7 @@ export default function MatchDetailsPage() {
                                                 key={index}
                                                 isPressable={isActionable}
                                                 onPress={() => isActionable && navigate('/dashboard')}
-                                                className={`border ${contact.status === 'accepted' ? 'border-success/30 bg-success/5' : contact.status === 'refused' ? 'border-danger/20 opacity-60' : 'border-default-200'} bg-[#202022] ${isActionable ? 'hover:scale-105 hover:border-primary/50 transition-all cursor-pointer' : ''}`}
+                                                className={`border ${contact.status === 'accepted' ? 'border-success/30 bg-success/5' : contact.status === 'refused' ? 'border-danger/20 opacity-60' : contact.status === 'withdrawn' ? 'border-default-200 opacity-50 grayscale' : 'border-default-200'} bg-[#202022] ${isActionable ? 'hover:scale-105 hover:border-primary/50 transition-all cursor-pointer' : ''}`}
                                             >
                                                 <CardBody className="flex flex-col gap-4 p-4">
                                                     <div className="flex items-center gap-3">
@@ -564,8 +584,8 @@ export default function MatchDetailsPage() {
                                                             <div className="flex justify-between items-start">
                                                                 <p className="font-bold text-white leading-tight">{contact.club_name || 'Club intéressé'}</p>
                                                                 {contact.status !== 'pending' ? (
-                                                                    <Chip size="sm" color={contact.status === 'accepted' ? 'success' : 'danger'} variant="flat" className="font-bold uppercase text-xs sm:text-sm">
-                                                                        {contact.status === 'accepted' ? 'Accepté' : 'Refusé'}
+                                                                    <Chip size="sm" color={contact.status === 'accepted' ? 'success' : contact.status === 'refused' ? 'danger' : 'default'} variant="flat" className="font-bold uppercase text-xs sm:text-sm">
+                                                                        {contact.status === 'accepted' ? 'Accepté' : contact.status === 'refused' ? 'Refusé' : 'Désisté'}
                                                                     </Chip>
                                                                 ) : isActionable && (
                                                                     <Chip size="sm" color="primary" variant="flat" className="font-bold uppercase text-[10px]">Voir la demande</Chip>
@@ -577,6 +597,11 @@ export default function MatchDetailsPage() {
 
                                                     {contact.status === 'accepted' && (
                                                         <p className="text-xs text-success-400 font-medium text-center bg-success/10 py-1 rounded-lg">Équipe officiellement inscrite</p>
+                                                    )}
+                                                    {contact.status === 'withdrawn' && (
+                                                        <p className="text-[10px] text-default-400 italic bg-default-100/10 p-2 rounded-lg leading-tight">
+                                                            {contact.message}
+                                                        </p>
                                                     )}
                                                 </CardBody>
                                             </Card>
