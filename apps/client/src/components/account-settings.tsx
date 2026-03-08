@@ -90,10 +90,15 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     // Load face-api models on mount
     useEffect(() => {
         const loadModels = async () => {
-            const MODEL_URL = import.meta.env.VITE_FACEAPI_MODELS_URL;
-            await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-            ]);
+            try {
+                const MODEL_URL = import.meta.env.VITE_FACEAPI_MODELS_URL;
+                if (!MODEL_URL) return;
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                ]);
+            } catch (error) {
+                console.warn("Failed to load face-api models:", error);
+            }
         };
         loadModels();
     }, []);

@@ -134,7 +134,6 @@ export default defineConfig(({ mode }) => {
       react(),
       tsconfigPaths(),
       tailwindcss(),
-      githubPagesSpa(),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['index.html', 'favicon.ico', 'apple-touch-icon.png', 'logo.png'],
@@ -202,8 +201,12 @@ export default defineConfig(({ mode }) => {
               handler: 'NetworkOnly',
             }
           ]
+        },
+        devOptions: {
+          enabled: true
         }
-      })
+      }),
+      githubPagesSpa()
     ],
     build: {
       assetsInlineLimit: 1024,
