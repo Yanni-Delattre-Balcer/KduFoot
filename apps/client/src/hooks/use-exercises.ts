@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { exerciseService } from '../services/exercises';
 import { Exercise, CreateExerciseDto, UpdateExerciseDto, ExerciseFilters } from '../types/exercise.types';
 import { useCallback } from 'react';
+import { handleResponse } from '@/services/api';
 
 export function useExercises(filters?: ExerciseFilters) {
     const { getAccessTokenSilently } = useAuth0();
@@ -13,8 +14,7 @@ export function useExercises(filters?: ExerciseFilters) {
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error('Failed to fetch exercises');
-        return response.json();
+        return handleResponse(response);
     };
 
     const query = new URLSearchParams();
@@ -65,8 +65,7 @@ export function useExercise(id: string | null) {
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error('Failed to fetch exercise');
-        return response.json();
+        return handleResponse(response);
     };
 
     const { data, error, isLoading } = useSWR(id ? `/api/exercises/${id}` : null, fetcher);

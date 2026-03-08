@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { sessionService } from '../services/sessions';
 import { TrainingSession, CreateSessionDto, UpdateSessionDto, SessionFilters } from '../types/session.types';
 import { useCallback } from 'react';
+import { handleResponse } from '@/services/api';
 
 export function useSessions(filters?: SessionFilters) {
     const { getAccessTokenSilently } = useAuth0();
@@ -21,8 +22,7 @@ export function useSessions(filters?: SessionFilters) {
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error('Failed to fetch sessions');
-        return response.json();
+        return handleResponse(response);
     };
 
     const query = new URLSearchParams();
@@ -85,8 +85,7 @@ export function useSession(id: string | null) {
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error('Failed to fetch session');
-        return response.json();
+        return handleResponse(response);
     };
 
     const { data, error, isLoading } = useSWR(id ? `/api/sessions/${id}` : null, fetcher);

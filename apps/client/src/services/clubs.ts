@@ -1,26 +1,18 @@
 
-import { Club } from '@/types/match.types';
+import { handleResponse } from './api';
 
 const BASE_URL = '/api/clubs';
 
 export const clubService = {
-    search: async (query: string): Promise<Club[]> => {
+    search: async (query: string) => {
         if (!query || query.length < 3) return [];
 
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/search?q=${encodeURIComponent(query)}`);
-
-            if (!response.ok) {
-                // Return empty if failure to not break UI
-                console.error('Failed to search clubs');
-                return [];
-            }
-
-            const data = await response.json();
-            return data.clubs || [];
+            return handleResponse(response);
         } catch (error) {
-            console.error('Club search error:', error);
-            return [];
+            console.error('Error searching clubs:', error);
+            throw error;
         }
     }
 };

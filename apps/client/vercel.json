@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/((?!assets/|locales/|android-|apple-|favicon|manifest.webmanifest|logo.png|sctg-logo.png|robots.txt|sitemap.xml).*)",
+      "source": "/manifest.webmanifest",
+      "destination": "/manifest.webmanifest"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/"
     }
   ]

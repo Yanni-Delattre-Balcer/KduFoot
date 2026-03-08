@@ -1,14 +1,16 @@
 import { useAuth0 } from '@auth0/auth0-react';
+import { handleResponse } from '@/services/api';
 import { useCallback } from 'react';
 
 interface UseFetchOptions extends RequestInit {
     skip?: boolean;
+    body?: any; // Added body to options for JSON.stringify
 }
 
 export function useFetch() {
     const { getAccessTokenSilently } = useAuth0();
 
-    const request = useCallback(async <T>(endpoint: string, options: UseFetchOptions = {}): Promise<T> => {
+    const request = useCallback(async <T>(url: string, options: UseFetchOptions = {}): Promise<T> => {
         try {
             const token = await getAccessTokenSilently();
             const headers = {
@@ -17,20 +19,16 @@ export function useFetch() {
                 ...options.headers,
             };
 
-            const response = await fetch(`${import.meta.env.API_BASE_URL}${endpoint}`, {
-                ...options,
+            const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
+                method: options.method || 'GET',
                 headers,
+                body: options.body ? JSON.stringify(options.body) : undefined,
             });
 
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                throw new Error(error.message || `Request failed with status ${response.status}`);
-            }
-
-            return response.json();
-        } catch (error) {
-            console.error(`API Request failed: ${endpoint}`, error);
-            throw error;
+            return handleResponse(response);
+        } catch (err: any) {
+            console.error(`API Request failed: ${url}`, err);
+            throw err;
         }
     }, [getAccessTokenSilently]);
 

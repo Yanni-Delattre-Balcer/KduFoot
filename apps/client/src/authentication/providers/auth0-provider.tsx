@@ -12,6 +12,7 @@ import {
 import React, { JSX, useCallback, useMemo, useRef } from "react";
 import { JWTPayload, jwtVerify } from "jose";
 import { addToast } from "@heroui/toast";
+import { handleResponse } from "@/services/api";
 
 import {
   AuthProvider,
@@ -68,21 +69,21 @@ export const useAuth0Provider = (): AuthProvider => {
         errorMessage.includes("missing refresh token") ||
         errorMessage.includes("consent_required") ||
         errorMessage.includes("invalid_grant") ||
-        error?.error === "login_required" ||
-        error?.error === "mfa_required"
+        error?.error === "login_required"
       ) {
         console.warn("Terminal authentication error detected. Redirecting to login...", error);
         login();
-        return null;
+        // Throwing will stop the execution flow in getJson/postJson callers
+        throw new Error("Re-authentication required");
       }
 
       addToast({
         title: "Session expirée",
-        description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
+        description: "Veuillez vous déconnecter et vous reconnecter s'il vous plaît",
         variant: 'flat',
         color: 'danger'
       });
-      return null;
+      throw error;
     }
   };
 
@@ -182,25 +183,7 @@ export const useAuth0Provider = (): AuthProvider => {
             },
           });
 
-          if (!apiResponse.ok) {
-            const errorText = await apiResponse.text().catch(() => "");
-            let errorJson: any = {};
-            try {
-              if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
-                errorJson = JSON.parse(errorText);
-              }
-            } catch (e) {
-              // Ignore parse error
-            }
-            throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
-          }
-
-          const contentType = apiResponse.headers.get("Content-Type");
-          if (!contentType || !contentType.includes("application/json")) {
-            throw new Error("Invalid response format: Expected JSON");
-          }
-
-          return await apiResponse.json();
+          return await handleResponse(apiResponse);
         })();
 
         // store the in-flight promise to dedupe concurrent calls
@@ -228,7 +211,7 @@ export const useAuth0Provider = (): AuthProvider => {
   );
 
   const postJson = useCallback(
-    async (url: string, data: any): Promise<any> => {
+    async (url: string, body: any): Promise<any> => {
       try {
         const accessToken = await getAccessToken();
 
@@ -238,26 +221,10 @@ export const useAuth0Provider = (): AuthProvider => {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(body),
         });
 
-        if (!apiResponse.ok) {
-          const errorText = await apiResponse.text().catch(() => "");
-          let errorJson: any = {};
-          try {
-            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
-              errorJson = JSON.parse(errorText);
-            }
-          } catch (e) { /* ignore */ }
-          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
-        }
-
-        const contentType = apiResponse.headers.get("Content-Type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Invalid response format: Expected JSON");
-        }
-
-        return await apiResponse.json();
+        return await handleResponse(apiResponse);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error("Error posting JSON:", error);
@@ -280,23 +247,7 @@ export const useAuth0Provider = (): AuthProvider => {
           },
         });
 
-        if (!apiResponse.ok) {
-          const errorText = await apiResponse.text().catch(() => "");
-          let errorJson: any = {};
-          try {
-            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
-              errorJson = JSON.parse(errorText);
-            }
-          } catch (e) { /* ignore */ }
-          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
-        }
-
-        const contentType = apiResponse.headers.get("Content-Type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Invalid response format: Expected JSON");
-        }
-
-        return await apiResponse.json();
+        return await handleResponse(apiResponse);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error("Error deleting JSON:", error);
@@ -307,7 +258,7 @@ export const useAuth0Provider = (): AuthProvider => {
   );
 
   const putJson = useCallback(
-    async (url: string, data: any): Promise<any> => {
+    async (url: string, body: any): Promise<any> => {
       try {
         const accessToken = await getAccessToken();
 
@@ -317,26 +268,10 @@ export const useAuth0Provider = (): AuthProvider => {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: JSON.stringify(body),
         });
 
-        if (!apiResponse.ok) {
-          const errorText = await apiResponse.text().catch(() => "");
-          let errorJson: any = {};
-          try {
-            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
-              errorJson = JSON.parse(errorText);
-            }
-          } catch (e) { /* ignore */ }
-          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
-        }
-
-        const contentType = apiResponse.headers.get("Content-Type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Invalid response format: Expected JSON");
-        }
-
-        return await apiResponse.json();
+        return await handleResponse(apiResponse);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error("Error putting JSON:", error);

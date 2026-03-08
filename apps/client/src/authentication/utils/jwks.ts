@@ -14,14 +14,13 @@ let inFlightFetches = new Map<
   Promise<ReturnType<typeof createLocalJWKSet>>
 >();
 
+import { handleResponse } from "@/services/api";
+
 async function fetchJwksJson(domain: string) {
   const resp = await fetch(`https://${domain}/.well-known/jwks.json`, {
     headers: { Accept: "application/json, application/jwk-set+json" },
   });
-
-  if (!resp.ok) throw new Error(`Failed to fetch jwks.json: ${resp.status}`);
-
-  return (await resp.json()) as any;
+  return await handleResponse(resp);
 }
 
 export async function getLocalJwkSet(domain: string) {

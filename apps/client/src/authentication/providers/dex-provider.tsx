@@ -7,6 +7,7 @@
 
 import { UserManager, User, WebStorageStateStore, Log } from "oidc-client-ts";
 import { useEffect, useState } from "react";
+import { handleResponse } from "@/services/api";
 import { JWTPayload, jwtVerify, createRemoteJWKSet } from "jose";
 
 import {
@@ -195,8 +196,8 @@ export const useDexProvider = (
     return () => {
       userManager.events.removeUserLoaded(addUserSignedIn);
       userManager.events.removeUserUnloaded(addUserSignedOut);
-      userManager.events.removeAccessTokenExpiring(() => {});
-      userManager.events.removeAccessTokenExpired(() => {});
+      userManager.events.removeAccessTokenExpiring(() => { });
+      userManager.events.removeAccessTokenExpired(() => { });
     };
   }, [userManager]);
 
@@ -361,7 +362,7 @@ export const useDexProvider = (
         );
       }
 
-      return await response.json();
+      return await handleResponse(response);
     } catch (error) {
       console.error("Error fetching JSON:", error);
       throw error;
@@ -391,7 +392,7 @@ export const useDexProvider = (
         );
       }
 
-      return await response.json();
+      return await handleResponse(response);
     } catch (error) {
       console.error("Error posting JSON:", error);
       throw error;
@@ -420,7 +421,7 @@ export const useDexProvider = (
         );
       }
 
-      return await response.json();
+      return await handleResponse(response);
     } catch (error) {
       console.error("Error deleting JSON:", error);
       throw error;
@@ -450,7 +451,7 @@ export const useDexProvider = (
         );
       }
 
-      return await response.json();
+      return await handleResponse(response);
     } catch (error) {
       console.error("Error putting JSON:", error);
       throw error;
@@ -460,11 +461,11 @@ export const useDexProvider = (
   // Map OIDC user to common AuthUser format
   const authUser: AuthUser | null = user
     ? {
-        name: user.profile.name,
-        nickname: user.profile.nickname || user.profile.preferred_username,
-        email: user.profile.email,
-        ...user.profile,
-      }
+      name: user.profile.name,
+      nickname: user.profile.nickname || user.profile.preferred_username,
+      email: user.profile.email,
+      ...user.profile,
+    }
     : null;
 
   return {

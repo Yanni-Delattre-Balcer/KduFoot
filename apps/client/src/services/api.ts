@@ -7,7 +7,7 @@ export const getAuthHeaders = async (getAccessTokenSilently: () => Promise<strin
     };
 };
 
-const handleResponse = async (response: Response) => {
+export const handleResponse = async (response: Response) => {
     if (!response.ok) {
         const errorText = await response.text().catch(() => "");
         throw new Error(errorText || `HTTP error! status: ${response.status}`);
@@ -22,12 +22,12 @@ const handleResponse = async (response: Response) => {
 export const api = {
     get: async (url: string, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, { headers });
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, { headers });
         return handleResponse(response);
     },
     post: async (url: string, body: any, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             method: 'POST',
             headers,
             body: JSON.stringify(body),
@@ -36,7 +36,7 @@ export const api = {
     },
     put: async (url: string, body: any, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             method: 'PUT',
             headers,
             body: JSON.stringify(body),
@@ -45,7 +45,7 @@ export const api = {
     },
     delete: async (url: string, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
-        const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             method: 'DELETE',
             headers,
         });
