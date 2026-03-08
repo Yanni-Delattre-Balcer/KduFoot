@@ -22,7 +22,6 @@ import {
   withAuthentication,
 } from "./providers/use-auth";
 import { AccountModal } from "./account-modal";
-import { handleResponse } from "@/services/api";
 
 /**
  * Renders the user's profile name with a tooltip showing their username.
@@ -428,7 +427,17 @@ export const useSecuredApi = () => {
       },
     );
 
-    return handleResponse(resp);
+    if (!resp.ok) {
+      const errorText = await resp.text().catch(() => "");
+      throw new Error(errorText || `Auth0 API error: ${resp.status}`);
+    }
+
+    const contentType = resp.headers.get("Content-Type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Invalid response format from Auth0: Expected JSON");
+    }
+
+    return resp.json();
   };
 
   /**
@@ -450,7 +459,8 @@ export const useSecuredApi = () => {
         },
       },
     );
-    return handleResponse(resp);
+    if (!resp.ok) throw new Error(await resp.text());
+    return resp.json();
   };
 
   /**
@@ -669,7 +679,8 @@ export const useSecuredApi = () => {
         "Content-Type": "application/json",
       },
     });
-    return handleResponse(resp);
+    if (!resp.ok) throw new Error(await resp.text());
+    return resp.json();
   };
 
   /**
@@ -720,7 +731,8 @@ export const useSecuredApi = () => {
         },
       },
     );
-    const data = await handleResponse(resp);
+    if (!resp.ok) throw new Error(await resp.text());
+    const data = await resp.json();
     return data.scopes ?? [];
   };
 

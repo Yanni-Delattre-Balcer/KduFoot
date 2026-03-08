@@ -3,7 +3,6 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { matchService } from '../services/matches';
 import { Match, CreateMatchDto, UpdateMatchDto, MatchFilters, ContactMatchDto } from '../types/match.types';
 import { useCallback } from 'react';
-import { handleResponse } from '@/services/api';
 
 export function useMatches(filters?: MatchFilters) {
     const { getAccessTokenSilently } = useAuth0();
@@ -25,7 +24,8 @@ export function useMatches(filters?: MatchFilters) {
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers,
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error('Failed to fetch matches');
+        return response.json();
     };
 
     const query = new URLSearchParams();
@@ -150,7 +150,8 @@ export function useMatch(id: string | null) {
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers,
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error('Failed to fetch match');
+        return response.json();
     };
 
     const { data, error, isLoading, mutate } = useSWR(id ? `/api/matches/${id}` : null, fetcher);
@@ -191,7 +192,10 @@ export function useMatch(id: string | null) {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` }
         });
-        return handleResponse(res);
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Failed to delete match as admin');
+        }
     }, [id, getAccessTokenSilently]);
     const updateRequestStatus = useCallback(async (userId: string, status: 'accepted' | 'refused') => {
         if (!id) return;
@@ -229,7 +233,8 @@ export function useIncomingRequests() {
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error('Failed to fetch requests');
+        return response.json();
     };
 
     const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/requests' : null, fetcher);
@@ -251,7 +256,8 @@ export function useMyParticipations() {
         const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error('Failed to fetch participations');
+        return response.json();
     };
 
     const { data, error, isLoading, mutate } = useSWR(isAuthenticated ? '/api/matches/participations' : null, fetcher);

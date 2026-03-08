@@ -1,7 +1,6 @@
 
 
 import { CreateExerciseDto, UpdateExerciseDto, ExerciseFilters } from '../types/exercise.types';
-import { handleResponse } from './api';
 
 const BASE_URL = '/api/exercises';
 
@@ -29,7 +28,8 @@ export const exerciseService = {
             },
             body: JSON.stringify(data),
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
     },
 
     update: async (id: string, data: UpdateExerciseDto, token: string) => {
@@ -41,7 +41,8 @@ export const exerciseService = {
             },
             body: JSON.stringify(data),
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
     },
 
     delete: async (id: string, token: string) => {
@@ -49,6 +50,7 @@ export const exerciseService = {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
     }
 };

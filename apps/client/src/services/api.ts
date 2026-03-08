@@ -7,7 +7,7 @@ export const getAuthHeaders = async (getAccessTokenSilently: () => Promise<strin
     };
 };
 
-export const handleResponse = async (response: Response) => {
+const handleResponse = async (response: Response) => {
     if (!response.ok) {
         const errorText = await response.text().catch(() => "");
         throw new Error(errorText || `HTTP error! status: ${response.status}`);

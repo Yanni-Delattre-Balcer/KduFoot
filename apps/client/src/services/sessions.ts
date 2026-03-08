@@ -1,6 +1,5 @@
 
 import { CreateSessionDto, UpdateSessionDto, SessionFilters } from '../types/session.types';
-import { handleResponse } from './api';
 
 const BASE_URL = '/api/sessions';
 
@@ -22,7 +21,8 @@ export const sessionService = {
             },
             body: JSON.stringify(data),
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
     },
 
     update: async (id: string, data: UpdateSessionDto, token: string) => {
@@ -34,7 +34,8 @@ export const sessionService = {
             },
             body: JSON.stringify(data),
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
     },
 
     delete: async (id: string, token: string) => {
@@ -42,6 +43,7 @@ export const sessionService = {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         });
-        return handleResponse(response);
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
     }
 };

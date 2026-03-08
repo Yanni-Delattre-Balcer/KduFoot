@@ -18,8 +18,6 @@ import {
   AuthProviderConfig,
 } from "./auth-provider";
 
-import { handleResponse } from "@/services/api";
-
 /**
  * Dex implementation of the AuthProvider interface using oidc-client-ts
  */
@@ -357,7 +355,13 @@ export const useDexProvider = (
         },
       });
 
-      return await handleResponse(response);
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("Error fetching JSON:", error);
       throw error;
@@ -381,7 +385,13 @@ export const useDexProvider = (
         body: JSON.stringify(data),
       });
 
-      return await handleResponse(response);
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("Error posting JSON:", error);
       throw error;
@@ -404,7 +414,13 @@ export const useDexProvider = (
         },
       });
 
-      return await handleResponse(response);
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("Error deleting JSON:", error);
       throw error;
@@ -428,7 +444,13 @@ export const useDexProvider = (
         body: JSON.stringify(data),
       });
 
-      return await handleResponse(response);
+      if (!response.ok) {
+        throw new Error(
+          `HTTP error ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("Error putting JSON:", error);
       throw error;

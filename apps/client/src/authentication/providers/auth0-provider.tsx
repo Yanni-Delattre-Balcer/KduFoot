@@ -63,24 +63,19 @@ export const useAuth0Provider = (): AuthProvider => {
       // If the error indicates we need to re-authenticate (e.g. missing refresh token, login required)
       // we force a redirect to login.
       const errorMessage = error?.message?.toLowerCase() || "";
-      const isTerminalError =
+      if (
         errorMessage.includes("login_required") ||
         errorMessage.includes("missing refresh token") ||
-        errorMessage.includes("consent_required") ||
-        errorMessage.includes("invalid-token") ||
-        error?.error === "login_required" ||
-        error?.error === "mfa_required";
-
-      if (isTerminalError) {
+        errorMessage.includes("consent_required")
+      ) {
         console.warn("Terminal authentication error detected. Redirecting to login...");
         login();
         return null;
       }
 
-      // Non-terminal errors might be transient, but we still notify the user
       addToast({
         title: "Session expirée",
-        description: "Veuillez vous reconnecter pour continuer.",
+        description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
         variant: 'flat',
         color: 'danger'
       });

@@ -1,5 +1,4 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { handleResponse } from '@/services/api';
 import { useCallback } from 'react';
 
 interface UseFetchOptions extends RequestInit {
@@ -18,12 +17,17 @@ export function useFetch() {
                 ...options.headers,
             };
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+            const response = await fetch(`${import.meta.env.API_BASE_URL}${endpoint}`, {
                 ...options,
                 headers,
             });
 
-            return handleResponse(response);
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || `Request failed with status ${response.status}`);
+            }
+
+            return response.json();
         } catch (error) {
             console.error(`API Request failed: ${endpoint}`, error);
             throw error;

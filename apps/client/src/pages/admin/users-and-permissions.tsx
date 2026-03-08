@@ -40,7 +40,6 @@ import type {
     Auth0Permission,
 } from "@/types/auth0.types";
 import { Permission } from "@/types/permissions";
-import { handleResponse } from "@/services/api";
 
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
@@ -629,7 +628,7 @@ export default function UsersAndPermissionsPage() {
             const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(userId)}/sirets`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const data = await handleResponse(res);
+            const data = await res.json();
             if (data.success) {
                 setSiretData({
                     primary_siret: data.primary_siret,

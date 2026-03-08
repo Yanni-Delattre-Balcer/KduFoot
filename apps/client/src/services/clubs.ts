@@ -1,5 +1,5 @@
+
 import { Club } from '@/types/match.types';
-import { handleResponse } from './api';
 
 const BASE_URL = '/api/clubs';
 
@@ -10,10 +10,17 @@ export const clubService = {
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/search?q=${encodeURIComponent(query)}`);
 
-            return handleResponse(response);
+            if (!response.ok) {
+                // Return empty if failure to not break UI
+                console.error('Failed to search clubs');
+                return [];
+            }
+
+            const data = await response.json();
+            return data.clubs || [];
         } catch (error) {
             console.error('Club search error:', error);
-            throw error;
+            return [];
         }
     }
 };
