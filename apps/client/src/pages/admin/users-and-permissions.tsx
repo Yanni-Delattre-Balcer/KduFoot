@@ -539,7 +539,7 @@ export default function UsersAndPermissionsPage() {
         setBlockReason("");
     };
 
-    const confirmBlock = async (d1UserId: string) => {
+    const confirmBlock = async (d1UserId: string, onClose?: () => void) => {
         try {
             await blockUser(d1UserId, true, blockReason);
 
@@ -551,9 +551,11 @@ export default function UsersAndPermissionsPage() {
                 await removePermissionsFromUser(mgmtToken, d1UserId, permsToRemove).catch(() => { });
             }
 
+            if (onClose) onClose();
             setBlockingUserId(null);
             setBlockReason("");
             addToast({ title: "Utilisateur banni", description: "L'utilisateur et ses matchs ont été supprimés.", color: "danger" });
+
             // Force update editing state if the pane is open
             const newPerms: Record<string, boolean> = {};
             KDUFOOT_PERMISSIONS.forEach(p => {
@@ -1120,7 +1122,7 @@ export default function UsersAndPermissionsPage() {
                                     <Button
                                         color="danger"
                                         className="font-black uppercase tracking-widest"
-                                        onPress={() => confirmBlock(blockingUserId!)}
+                                        onPress={() => confirmBlock(blockingUserId!, onClose)}
                                         isDisabled={blockReason.trim().length < 3}
                                     >
                                         CONFIRMER LE BAN
