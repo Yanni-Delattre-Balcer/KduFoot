@@ -172,7 +172,7 @@ export default defineConfig(({ mode }) => {
           // Precache index.html to avoid "non-precached-url" error in Workbox
           // and ensure offline support for SPA.
           navigateFallback: 'index.html',
-          navigateFallbackAllowlist: [/^(?!\/(api|_auth0|manifest\.webmanifest)).*$/],
+          navigateFallbackDenylist: [/^\/api\//, /^\/_auth0\//, /code=/, /state=/, /error=/],
           skipWaiting: true,
           clientsClaim: true,
           runtimeCaching: [
