@@ -517,11 +517,10 @@ export default function DashboardPage() {
                             setSelectedTab(key);
                         }}
                         classNames={{
-                            base: "w-full overflow-x-auto no-scrollbar",
-                            tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-nowrap border-b-0 gap-2 min-w-max sm:min-w-0",
+                            tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-col sm:flex-row border-b-0 gap-2",
                             cursor: "rounded-xl shadow-lg shadow-purple-500/20",
-                            tab: "h-auto py-2 sm:h-12 uppercase font-black tracking-tighter sm:tracking-tight text-[10px] sm:text-sm flex-1 min-w-[max-content] sm:min-w-0 px-2 sm:px-4",
-                            tabContent: "group-data-[selected=true]:text-white whitespace-nowrap text-center leading-tight"
+                            tab: "h-auto py-3 sm:h-12 uppercase font-black tracking-tight text-[11px] sm:text-sm flex-1 min-w-full sm:min-w-0 px-3 sm:px-4",
+                            tabContent: "group-data-[selected=true]:text-white whitespace-normal text-center leading-tight overflow-hidden"
                         }}
                     >
                         <Tab
