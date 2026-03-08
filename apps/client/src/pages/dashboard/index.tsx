@@ -517,10 +517,11 @@ export default function DashboardPage() {
                             setSelectedTab(key);
                         }}
                         classNames={{
-                            tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-wrap border-b-0 gap-2",
+                            base: "w-full overflow-x-auto no-scrollbar",
+                            tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-nowrap border-b-0 gap-2 min-w-max sm:min-w-0",
                             cursor: "rounded-xl shadow-lg shadow-purple-500/20",
-                            tab: "h-auto py-2.5 sm:h-12 uppercase font-black tracking-tight text-xs sm:text-sm sm:text-xs flex-1 min-w-[max-content] sm:min-w-0 px-3 sm:px-4",
-                            tabContent: "group-data-[selected=true]:text-white whitespace-normal text-center leading-tight"
+                            tab: "h-auto py-2 sm:h-12 uppercase font-black tracking-tighter sm:tracking-tight text-[10px] sm:text-sm flex-1 min-w-[max-content] sm:min-w-0 px-2 sm:px-4",
+                            tabContent: "group-data-[selected=true]:text-white whitespace-nowrap text-center leading-tight"
                         }}
                     >
                         <Tab
@@ -552,30 +553,32 @@ export default function DashboardPage() {
 
                                                     <div className="p-5 flex flex-col gap-4">
                                                         {/* Header: Club info + Status */}
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20 shrink-0">
-                                                                {request.requester_club_logo ? (
-                                                                    <Image src={request.requester_club_logo} className="object-contain w-10 h-10" />
-                                                                ) : (
-                                                                    <span className="text-orange-400 font-black text-2xl">{request.requester_club_name?.charAt(0)}</span>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h3 className="font-black text-white text-sm leading-tight break-words uppercase tracking-tight">{request.requester_club_name}</h3>
-                                                                <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                                                                    <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-auto py-0.5 px-1.5 uppercase shrink-0">
-                                                                        {request.match_type === 'tournament' ? '🏆 ' + t('enums.type.tournament').toUpperCase() : '⚽ ' + t('enums.type.match').toUpperCase()}
-                                                                    </Chip>
-                                                                    <Chip size="sm" variant="flat" color={(request.match_type === 'tournament' || request.venue === 'Domicile') ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase grayscale-[0.5]">
-                                                                        {(request.match_type === 'tournament' || request.venue === 'Domicile') ? t('dashboard.labels.home_badge') : t('dashboard.labels.away_badge')}
-                                                                    </Chip>
-                                                                    <Chip size="sm" variant="dot" color="default" className="font-bold text-[9px] h-5 border-none">
-                                                                        {request.requester_category ? t(`enums.category.${request.requester_category}`) : (request.match_category ? t(`enums.category.${request.match_category}`) : '—')}
-                                                                    </Chip>
+                                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                                                <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20 shrink-0">
+                                                                    {request.requester_club_logo ? (
+                                                                        <Image src={request.requester_club_logo} className="object-contain w-10 h-10" />
+                                                                    ) : (
+                                                                        <span className="text-orange-400 font-black text-2xl">{request.requester_club_name?.charAt(0)}</span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h3 className="font-black text-white text-sm leading-tight break-words uppercase tracking-tight">{request.requester_club_name}</h3>
+                                                                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                                                        <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-auto py-0.5 px-1.5 uppercase shrink-0">
+                                                                            {request.match_type === 'tournament' ? '🏆 ' + t('enums.type.tournament').toUpperCase() : '⚽ ' + t('enums.type.match').toUpperCase()}
+                                                                        </Chip>
+                                                                        <Chip size="sm" variant="flat" color={(request.match_type === 'tournament' || request.venue === 'Domicile') ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase grayscale-[0.5]">
+                                                                            {(request.match_type === 'tournament' || request.venue === 'Domicile') ? t('dashboard.labels.home_badge') : t('dashboard.labels.away_badge')}
+                                                                        </Chip>
+                                                                        <Chip size="sm" variant="dot" color="default" className="font-bold text-[9px] h-5 border-none">
+                                                                            {request.requester_category ? t(`enums.category.${request.requester_category}`) : (request.match_category ? t(`enums.category.${request.match_category}`) : '—')}
+                                                                        </Chip>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex justify-end lg:w-24 shrink-0">
-                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black uppercase text-[9px] shadow-sm">
+                                                            <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[120px] shrink-0">
+                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black uppercase text-[9px] shadow-sm whitespace-nowrap">
                                                                     {t('dashboard.status.' + request.request_status)}
                                                                 </Chip>
                                                             </div>
@@ -705,8 +708,8 @@ export default function DashboardPage() {
                                                     <CardBody className="p-0">
                                                         <div className="flex flex-col md:flex-row">
                                                             <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-white/5">
-                                                                <div className="flex items-start justify-between gap-4 mb-4">
-                                                                    <div className="flex items-center gap-4">
+                                                                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
+                                                                    <div className="flex items-center gap-4 w-full sm:w-auto">
                                                                         <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
                                                                             {match.club?.logo_url ? (
                                                                                 <Image src={match.club.logo_url} className="object-contain" />
@@ -718,20 +721,22 @@ export default function DashboardPage() {
                                                                             <h3 className="font-black text-violet-400 text-xl sm:text-2xl leading-tight uppercase tracking-tighter group-hover:text-violet-300 transition-colors break-words">
                                                                                 {t('enums.type.match').toUpperCase()}
                                                                             </h3>
-                                                                            <p className="text-white/70 text-sm font-bold uppercase tracking-widest break-words">{match.club?.name || '??'}</p>
+                                                                            <p className="text-white/70 text-xs sm:text-sm font-bold uppercase tracking-widest break-words leading-tight">{match.club?.name || '??'}</p>
                                                                             <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                                                <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] sm:text-xs uppercase tracking-wider h-auto py-0.5">
+                                                                                <Chip size="sm" variant="flat" color="secondary" className="font-black text-[9px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                                                                     ⚽ {t('enums.type.match')}
                                                                                 </Chip>
-                                                                                <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black">
+                                                                                <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black shrink-0">
                                                                                     {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge') : t('dashboard.labels.home_badge')}
                                                                                 </Chip>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
-                                                                        {match.status === 'active' ? '🔍 RECHERCHE D\'ADVERSAIRE' : t(`dashboard.status.${match.status}`, match.status)}
-                                                                    </Chip>
+                                                                    <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[200px] shrink-0">
+                                                                        <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] sm:text-sm py-3 shadow-lg shadow-violet-500/30 whitespace-normal text-center h-auto min-h-8">
+                                                                            {match.status === 'active' ? '🔍 RECHERCHE D\'ADVERSAIRE' : t(`dashboard.status.${match.status}`, match.status)}
+                                                                        </Chip>
+                                                                    </div>
                                                                 </div>
 
                                                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">

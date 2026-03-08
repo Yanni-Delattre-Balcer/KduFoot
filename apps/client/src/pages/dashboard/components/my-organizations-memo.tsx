@@ -57,25 +57,27 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
                                 <Link
                                     key={event.id}
                                     to={`/matches/${event.id}`}
-                                    className="flex items-center gap-4 p-3 hover:bg-white/[0.05] transition-colors border-b border-white/5 last:border-0 group"
+                                    className="flex items-center gap-3 sm:gap-4 p-3 hover:bg-white/[0.05] transition-colors border-b border-white/5 last:border-0 group"
                                 >
                                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-violet-500/10 text-violet-400 shadow-sm shadow-violet-500/20`}>
                                         {event.type === 'tournament' ? '🏆' : '⚽'}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs sm:text-sm font-bold text-default-500 shrink-0">
-                                                {formatDate(event.match_date)} —
-                                            </span>
-                                            <span className="text-white font-bold text-xs truncate group-hover:text-violet-400 transition-colors uppercase tracking-tight">
-                                                {event.type === 'tournament' ? (event.name || t('match.tournament')) : (event.club?.name || '??')}
-                                            </span>
-                                            <div className="flex items-center gap-1 shrink-0">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                            <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                                                <span className="text-[10px] sm:text-xs font-bold text-default-500 shrink-0">
+                                                    {formatDate(event.match_date)}
+                                                </span>
+                                                <span className="text-white font-bold text-[11px] sm:text-xs truncate group-hover:text-violet-400 transition-colors uppercase tracking-tight">
+                                                    {event.type === 'tournament' ? (event.name || t('match.tournament')) : (event.club?.name || '??')}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-1 shrink-0">
                                                 <Chip
                                                     size="sm"
                                                     variant="flat"
                                                     color="secondary"
-                                                    className="h-4 text-[7px] font-black uppercase"
+                                                    className="h-3.5 sm:h-4 text-[7px] font-black uppercase"
                                                 >
                                                     {event.type === 'tournament' ? t('enums.type.tournament').toUpperCase() : t('enums.type.match').toUpperCase()}
                                                 </Chip>
@@ -87,18 +89,20 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
                                             </div>
                                         </div>
                                     </div>
-                                    <Chip
-                                        size="sm"
-                                        variant="flat"
-                                        color={status.color}
-                                        className="h-5 text-[9px] font-black uppercase"
-                                    >
-                                        {status.label}
-                                    </Chip>
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-default-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                                        </svg>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <Chip
+                                            size="sm"
+                                            variant="flat"
+                                            color={status.color}
+                                            className="h-5 text-[9px] font-black uppercase hidden 2xs:flex"
+                                        >
+                                            {status.label}
+                                        </Chip>
+                                        <div className="opacity-0 lg:group-hover:opacity-100 transition-opacity text-default-400 shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                            </svg>
+                                        </div>
                                     </div>
                                 </Link>
                             );

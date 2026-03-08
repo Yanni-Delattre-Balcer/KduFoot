@@ -439,10 +439,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         if (errors.stadiumAddress) setErrors(prev => ({ ...prev, stadiumAddress: "" }));
                                     }}
                                     placeholder={t('account.fields.stadium_placeholder')}
-                                    isDisabled={!!dbUser?.stadium_address}
                                     isInvalid={!!errors.stadiumAddress}
                                     isRequired
-                                    description={dbUser?.stadium_address ? t('account.fields.stadium_locked') : t('account.fields.stadium_warning')}
+                                    description={t('account.fields.stadium_warning')}
                                     classNames={{
                                         description: "text-[10px] text-primary-500 font-medium",
                                         label: "font-black text-primary whitespace-nowrap"

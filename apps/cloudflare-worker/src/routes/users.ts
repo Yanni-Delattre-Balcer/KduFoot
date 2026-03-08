@@ -321,12 +321,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         delete (body as any).block_count;
         delete (body as any).siret_change_count;
 
-        // Stadium Address Locking: If already set in DB, don't allow user to overwrite it
-        if (user.stadium_address && body.stadium_address && user.stadium_address !== body.stadium_address) {
-            // Silently ignore or we could return an error. Let's ignore it to match implementation plan's "ignore it in request body"
-            delete body.stadium_address;
-        }
-
         try {
             const updated = await userService.updateUser(user.id, body);
             return Response.json({ success: true, user: updated }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

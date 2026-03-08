@@ -42,8 +42,8 @@ export const OrganizedTournamentCard = ({
                 <div className="flex flex-col 2xl:flex-row">
                     {/* Left Section: Info & Progress */}
                     <div className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5">
-                        <div className="flex items-start justify-between gap-4 mb-4">
-                            <div className="flex items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
+                            <div className="flex items-center gap-4 w-full sm:w-auto">
                                 <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
                                     {match.club?.logo_url ? (
                                         <Image src={match.club.logo_url} className="object-contain" />
@@ -52,12 +52,12 @@ export const OrganizedTournamentCard = ({
                                     )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="font-black text-violet-400 text-2xl sm:text-3xl leading-tight uppercase tracking-tighter group-hover:text-violet-300 transition-colors break-words">
+                                    <h3 className="font-black text-violet-400 text-xl sm:text-2xl lg:text-3xl leading-tight uppercase tracking-tighter group-hover:text-violet-300 transition-colors break-words">
                                         {t('enums.type.tournament').toUpperCase()}
                                     </h3>
-                                    <p className="text-white/70 text-sm font-bold uppercase tracking-widest break-words">{match.name || match.club?.name || '??'}</p>
+                                    <p className="text-white/70 text-xs sm:text-sm font-bold uppercase tracking-widest break-words leading-tight">{match.name || match.club?.name || '??'}</p>
                                     <div className="flex flex-wrap items-center gap-2 mt-2">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[9px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                             🏆 {t('enums.type.tournament')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black shrink-0">
@@ -66,8 +66,8 @@ export const OrganizedTournamentCard = ({
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex justify-end lg:w-48 shrink-0">
-                                <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30">
+                            <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[200px] shrink-0">
+                                <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] sm:text-sm py-3 shadow-lg shadow-violet-500/30 whitespace-normal text-center h-auto min-h-8">
                                     {match.status === 'active' ? t('dashboard.status.searching') : t(`dashboard.status.${match.status}`, match.status)}
                                 </Chip>
                             </div>

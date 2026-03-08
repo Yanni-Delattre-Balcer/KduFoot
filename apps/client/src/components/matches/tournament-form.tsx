@@ -337,10 +337,10 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                                 label={t('matchForm.labels.address')}
                                 placeholder={t('matchForm.labels.auto_siret')}
                                 value={formData.location_address}
-                                isDisabled
+                                onValueChange={(v) => handleChange('location_address', v)}
+                                variant="bordered"
                                 classNames={{
-                                    inputWrapper: "bg-default-100! text-default-500",
-                                    label: "text-default-500 font-bold"
+                                    label: "text-primary font-bold"
                                 }}
                             />
                             {formData.location_address && (
@@ -457,7 +457,6 @@ export default function TournamentForm({ onSuccess, onCancel }: TournamentFormPr
                         <SelectItem key="Masculin">{t('enums.gender.Masculin')}</SelectItem>
                         <SelectItem key="Féminin">{t('enums.gender.Féminin')}</SelectItem>
                         <SelectItem key="Mixte">{t('enums.gender.Mixte')}</SelectItem>
-                        <SelectItem key="Non spécifié">{t('enums.gender.Non spécifié')}</SelectItem>
                     </Select>
                     <div className="space-y-1">
                         <Select
