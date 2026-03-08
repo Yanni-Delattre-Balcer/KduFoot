@@ -66,9 +66,12 @@ export const useAuth0Provider = (): AuthProvider => {
       if (
         errorMessage.includes("login_required") ||
         errorMessage.includes("missing refresh token") ||
-        errorMessage.includes("consent_required")
+        errorMessage.includes("consent_required") ||
+        errorMessage.includes("invalid_grant") ||
+        error?.error === "login_required" ||
+        error?.error === "mfa_required"
       ) {
-        console.warn("Terminal authentication error detected. Redirecting to login...");
+        console.warn("Terminal authentication error detected. Redirecting to login...", error);
         login();
         return null;
       }

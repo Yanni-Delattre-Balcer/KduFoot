@@ -29,6 +29,19 @@ import { CookieConsent } from "./components/cookie-consent.tsx";
 import { AuthenticationProvider } from "./authentication";
 import { UserProvider } from "./authentication/providers/user-provider";
 import { WelcomeGatewayProvider } from "./contexts/welcome-gateway-context.tsx";
+import { registerSW } from 'virtual:pwa-register';
+
+// Register service worker for PWA support
+if ('serviceWorker' in navigator) {
+  registerSW({
+    onNeedRefresh() {
+      console.log('[PWA] New content available, please refresh.');
+    },
+    onOfflineReady() {
+      console.log('[PWA] App ready to work offline');
+    },
+  });
+}
 
 // Request persistent storage to prevent browsers from clearing PWA data
 if (navigator.storage && navigator.storage.persist) {

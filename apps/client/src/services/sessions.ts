@@ -3,6 +3,23 @@ import { CreateSessionDto, UpdateSessionDto, SessionFilters } from '../types/ses
 
 const BASE_URL = '/api/sessions';
 
+const handleResponse = async (response: Response) => {
+    if (!response.ok) {
+        const errorText = await response.text();
+        try {
+            const errorJson = JSON.parse(errorText);
+            throw new Error(errorJson.error || errorJson.message || errorText);
+        } catch {
+            throw new Error(errorText || `HTTP error! status: ${response.status}`);
+        }
+    }
+    const contentType = response.headers.get("Content-Type");
+    if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid response format: Expected JSON");
+    }
+    return response.json();
+};
+
 export const sessionService = {
     getAll: (filters: SessionFilters) => {
         const query = new URLSearchParams();
@@ -21,8 +38,7 @@ export const sessionService = {
             },
             body: JSON.stringify(data),
         });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        return handleResponse(response);
     },
 
     update: async (id: string, data: UpdateSessionDto, token: string) => {
@@ -34,8 +50,7 @@ export const sessionService = {
             },
             body: JSON.stringify(data),
         });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        return handleResponse(response);
     },
 
     delete: async (id: string, token: string) => {
@@ -43,7 +58,6 @@ export const sessionService = {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        return handleResponse(response);
     }
 };

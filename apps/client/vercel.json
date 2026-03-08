@@ -1,5 +1,8 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/((?!assets/|locales/|android-|apple-|favicon|manifest.webmanifest|logo.png|sctg-logo.png|robots.txt|sitemap.xml).*)",
+      "destination": "/"
+    }
   ]
 }

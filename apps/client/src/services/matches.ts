@@ -1,7 +1,23 @@
-
 import { CreateMatchDto, UpdateMatchDto, MatchFilters, ContactMatchDto } from '../types/match.types';
 
 const BASE_URL = '/api/matches';
+
+const handleResponse = async (response: Response) => {
+    if (!response.ok) {
+        const errorText = await response.text();
+        try {
+            const errorJson = JSON.parse(errorText);
+            throw new Error(errorJson.error || errorJson.message || errorText);
+        } catch {
+            throw new Error(errorText || `HTTP error! status: ${response.status}`);
+        }
+    }
+    const contentType = response.headers.get("Content-Type");
+    if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid response format: Expected JSON");
+    }
+    return response.json();
+};
 
 export const matchService = {
     getAll: (filters: MatchFilters) => {
@@ -21,16 +37,7 @@ export const matchService = {
             },
             body: JSON.stringify(data),
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     update: async (id: string, data: UpdateMatchDto, token: string) => {
@@ -42,16 +49,7 @@ export const matchService = {
             },
             body: JSON.stringify(data),
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     delete: async (id: string, token: string) => {
@@ -59,16 +57,7 @@ export const matchService = {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     contact: async (id: string, data: ContactMatchDto, token: string) => {
@@ -80,16 +69,7 @@ export const matchService = {
             },
             body: JSON.stringify(data),
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     getRequests: async (token: string) => {
@@ -97,16 +77,7 @@ export const matchService = {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     getParticipations: async (token: string) => {
@@ -114,16 +85,7 @@ export const matchService = {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     updateRequestStatus: async (matchId: string, userId: string, status: 'accepted' | 'refused', token: string) => {
@@ -135,16 +97,7 @@ export const matchService = {
             },
             body: JSON.stringify({ status }),
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     cancelRequest: async (matchId: string, userId: string, token: string) => {
@@ -152,16 +105,7 @@ export const matchService = {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     markNotificationsAsRead: async (matchId: string, token: string) => {
@@ -169,8 +113,7 @@ export const matchService = {
             method: 'PATCH',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error('Failed to mark notification as read');
-        return response.json();
+        return handleResponse(response);
     },
 
     generatePairings: async (matchId: string, token: string) => {
@@ -178,11 +121,7 @@ export const matchService = {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText);
-        }
-        return response.json();
+        return handleResponse(response);
     },
 
     getPairings: async (matchId: string, token: string) => {
@@ -190,8 +129,7 @@ export const matchService = {
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error('Failed to fetch pairings');
-        return response.json();
+        return handleResponse(response);
     },
 
     updatePairingTime: async (pairingId: string, scheduledTime: string, token: string) => {
@@ -203,8 +141,7 @@ export const matchService = {
             },
             body: JSON.stringify({ scheduled_time: scheduledTime }),
         });
-        if (!response.ok) throw new Error('Failed to update pairing');
-        return response.json();
+        return handleResponse(response);
     },
 
     closeRegistrations: async (id: string, token: string) => {
@@ -212,15 +149,6 @@ export const matchService = {
             method: 'PUT',
             headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) {
-            const errorText = await response.text();
-            try {
-                const errorJson = JSON.parse(errorText);
-                throw new Error(errorJson.error || errorJson.message || errorText);
-            } catch {
-                throw new Error(errorText);
-            }
-        }
-        return response.json();
+        return handleResponse(response);
     }
 };
