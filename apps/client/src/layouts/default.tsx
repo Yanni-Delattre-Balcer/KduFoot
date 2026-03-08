@@ -95,7 +95,7 @@ export default function DefaultLayout({
               >
                 Besoin d'aide ?
               </Button>
-              <span className="hidden md:block text-xs sm:text-sm text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">Bugs, problèmes techniques...</span>
+              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">Bugs, problèmes techniques...</span>
             </div>
 
             <div className="h-10 w-px bg-default-200/30"></div>
@@ -112,7 +112,7 @@ export default function DefaultLayout({
               >
                 Autres demandes
               </Button>
-              <span className="hidden md:block text-xs sm:text-sm text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">Sponsors, publicité, partenariats...</span>
+              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">Sponsors, publicité, partenariats...</span>
             </div>
           </div>
 

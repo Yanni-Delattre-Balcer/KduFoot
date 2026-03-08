@@ -716,36 +716,29 @@ export default function UsersAndPermissionsPage() {
             addToast({ title: "Utilisateur débloqué", description: "L'utilisateur a retrouvé ses droits d'Abonné (Free).", variant: "solid", color: "success" });
 
             // Force update editing state if the pane is open
-            const newPerms: Record<string, boolean> = {};
-            const freePermValues = [
-                Permission.READ_API,
-                Permission.WRITE_API,
-                Permission.EXERCISES_READ,
-                Permission.MATCHES_CREATE,
-                Permission.MATCHES_CONTACT
-            ];
-            KDUFOOT_PERMISSIONS.forEach(p => {
-                newPerms[p.key] = freePermValues.includes(p.value as Permission);
+            setEditing(prev => {
+                const userEdits = { ...(prev[d1UserId] || {}) };
+                // Remove the blocked role from edits as it's now handled
+                delete userEdits['role_blocked'];
+                return { ...prev, [d1UserId]: userEdits };
             });
-            setEditing(prev => ({ ...prev, [d1UserId]: newPerms }));
+
             // Set reason to empty
             if (selectedUserId === d1UserId) setBlockReason("");
 
             // Modification optimiste de l'état local pour rafraîchir le bouton instantanément
             setUsers(prev => prev.map(u => {
                 if (u.user_id !== d1UserId) return u;
+                // Filtrer la permission bloquée des permissions existantes
+                const updatedPerms = (u.app_metadata?.permissions || []).filter(p => p !== Permission.ROLE_BLOCKED);
+
                 return {
                     ...u,
                     blocked: false,
+                    block_reason: null,
                     app_metadata: {
                         ...u.app_metadata,
-                        permissions: [
-                            Permission.READ_API,
-                            Permission.WRITE_API,
-                            Permission.EXERCISES_READ,
-                            Permission.MATCHES_CREATE,
-                            Permission.MATCHES_CONTACT
-                        ]
+                        permissions: updatedPerms
                     }
                 };
             }));
