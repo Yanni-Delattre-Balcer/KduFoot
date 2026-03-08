@@ -39,7 +39,31 @@ export const useAuth0Provider = (): AuthProvider => {
     logout: auth0Logout,
   } = useAuth0();
 
-  const getAccessToken = async (
+  const login = useCallback(async (options?: LoginOptions): Promise<void> => {
+    return loginWithRedirect(options as RedirectLoginOptions);
+  }, [loginWithRedirect]);
+
+  const logout = useCallback(async (options?: LogoutOptions): Promise<void> => {
+    const auth0Options: Auth0LogoutOptions = {
+      ...options,
+      logoutParams: {
+        returnTo:
+          options?.logoutParams?.returnTo ||
+          new URL(
+            import.meta.env.BASE_URL || "/",
+            window.location.origin,
+          ).toString(),
+        ...options?.logoutParams,
+      },
+    };
+
+    sessionStorage.clear();
+    auth0Logout(auth0Options);
+
+    return Promise.resolve();
+  }, [auth0Logout]);
+
+  const getAccessToken = useCallback(async (
     options?: TokenOptions,
   ): Promise<string | null> => {
     try {
@@ -81,31 +105,7 @@ export const useAuth0Provider = (): AuthProvider => {
       });
       return null;
     }
-  };
-
-  const login = async (options?: LoginOptions): Promise<void> => {
-    return loginWithRedirect(options as RedirectLoginOptions);
-  };
-
-  const logout = async (options?: LogoutOptions): Promise<void> => {
-    const auth0Options: Auth0LogoutOptions = {
-      ...options,
-      logoutParams: {
-        returnTo:
-          options?.logoutParams?.returnTo ||
-          new URL(
-            import.meta.env.BASE_URL || "/",
-            window.location.origin,
-          ).toString(),
-        ...options?.logoutParams,
-      },
-    };
-
-    sessionStorage.clear();
-    auth0Logout(auth0Options);
-
-    return Promise.resolve();
-  };
+  }, [getAccessTokenSilently, login]);
 
   // In-memory cache for permission checks keyed by `${permission}:${accessToken}`
   const permissionCheckCache = useMemo(() => new Map<string, boolean>(), []);

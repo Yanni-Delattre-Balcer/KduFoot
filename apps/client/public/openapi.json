@@ -881,6 +881,39 @@
         }
       }
     },
+    "/api/matches/{id}/close-registrations": {
+      "put": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Manually close tournament registrations",
+        "description": "Updates tournament status to 'found'. Only the owner can perform this.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tournament registrations closed successfully."
+          },
+          "403": {
+            "description": "Forbidden - Not the owner."
+          }
+        }
+      }
+    },
     "/api/matches/{id}/contact": {
       "post": {
         "tags": [
