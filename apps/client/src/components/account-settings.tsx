@@ -28,7 +28,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const from = searchParams.get('from') || (location.state as any)?.from;
-    const { user: authUser, getAccessToken, logout } = useAuth();
+    const { user: authUser, getAccessToken, logout, deleteJson } = useAuth();
     const { user: dbUser, updateUser, linkClub, unlinkClub, refetch } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -258,21 +258,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
         setIsDeleting(true);
         try {
-            const token = await getAccessToken({ authorizationParams: { audience: import.meta.env.AUTH0_AUDIENCE } } as any);
-            const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/me`, {
-                method: 'DELETE',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Erreur lors de la suppression');
-            }
-
+            await deleteJson(`${import.meta.env.API_BASE_URL}/api/users/me`);
             addToast({ title: t('success'), description: t('account.delete_success'), variant: 'flat', color: 'success' });
-
             await logout({
                 logoutParams: {
                     returnTo: window.location.origin

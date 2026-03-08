@@ -17,9 +17,8 @@ export function usePWAInstall() {
     const [isSessionDismissed, setIsSessionDismissed] = useState(false);
 
     useEffect(() => {
-        // Check local storage for PERMANENT dismissal (Je l'ai déjà)
-        const permanentlyDismissed = localStorage.getItem('kdufoot-pwa-installed') === 'true'
-            || localStorage.getItem('kdufoot-pwa-permanent-dismiss') === 'true';
+        // Check local storage for PERMANENT dismissal
+        const permanentlyDismissed = localStorage.getItem('kdufoot-pwa-permanent-dismiss') === 'true';
         setIsPermanentlyDismissed(permanentlyDismissed);
 
         // Check session storage for SESSION dismissal (Plus tard)
@@ -29,7 +28,8 @@ export function usePWAInstall() {
         // Find if already installed
         const isStandaloneMatch = window.matchMedia('(display-mode: standalone)').matches
             || (window.navigator as any).standalone
-            || document.referrer.includes('android-app://');
+            || document.referrer.includes('android-app://')
+            || localStorage.getItem('kdufoot-pwa-installed') === 'true';
 
         setIsStandalone(isStandaloneMatch);
 
@@ -56,6 +56,7 @@ export function usePWAInstall() {
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
             localStorage.setItem('kdufoot-pwa-installed', 'true');
+            setIsStandalone(true);
             setIsPermanentlyDismissed(true);
         }
 
@@ -74,12 +75,12 @@ export function usePWAInstall() {
 
     return {
         deferredPrompt,
-        isStandalone: isStandalone || localStorage.getItem('kdufoot-pwa-installed') === 'true',
+        isStandalone,
         isIOS,
         isPermanentlyDismissed,
         isSessionDismissed,
         installPWA,
         dismissPrompt,
-        canInstall: (!!deferredPrompt || (isIOS && !isStandalone)) && !isPermanentlyDismissed && !isSessionDismissed
+        canInstall: (!!deferredPrompt || (isIOS && !isStandalone)) && !isPermanentlyDismissed && !isSessionDismissed && !isStandalone
     };
 }

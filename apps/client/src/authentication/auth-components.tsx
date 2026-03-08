@@ -426,7 +426,17 @@ export const useSecuredApi = () => {
         },
       },
     );
-    if (!resp.ok) throw new Error(await resp.text());
+
+    if (!resp.ok) {
+      const errorText = await resp.text().catch(() => "");
+      throw new Error(errorText || `Auth0 API error: ${resp.status}`);
+    }
+
+    const contentType = resp.headers.get("Content-Type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Invalid response format from Auth0: Expected JSON");
+    }
+
     return resp.json();
   };
 

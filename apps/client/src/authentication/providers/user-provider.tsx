@@ -1,9 +1,9 @@
 import { createContext, useCallback, ReactNode, useMemo, useContext, useState, useEffect } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
 import useSWR, { mutate } from 'swr';
 import { User } from '@/types/user.types';
 import { isProfileComplete } from '@/utils/profile';
 import { useWebSocketSync, WebSocketStatus } from '@/hooks/use-websocket';
+import { useAuth } from './use-auth';
 
 interface UserContextType {
     user: User | null;
@@ -31,7 +31,7 @@ export const UserContext = createContext<UserContextType | undefined>(undefined)
 const CONTEXT_KEY = '/api/me/context';
 
 export function UserProvider({ children }: { children: ReactNode }) {
-    const { getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
+    const { getJson, postJson, putJson, isAuthenticated, logout } = useAuth();
     const [isOnline, setIsOnline] = useState(navigator.onLine);
 
     useEffect(() => {
@@ -49,21 +49,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const fetcher = useCallback(async () => {
         if (!isAuthenticated) return null;
-        const token = await getAccessTokenSilently();
-        const res = await fetch(`${import.meta.env.API_BASE_URL}${CONTEXT_KEY}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.status === 403) {
-            const errData = await res.json().catch(() => ({}));
-            const err = new Error('403_FORBIDDEN');
-            (err as any).reason = errData.error || 'Aucun motif spécifié';
-            throw err;
+        try {
+            return await getJson(`${import.meta.env.API_BASE_URL}${CONTEXT_KEY}`);
+        } catch (error: any) {
+            if (error.message.includes('403')) {
+                const err = new Error('403_FORBIDDEN');
+                (err as any).reason = error.message;
+                throw err;
+            }
+            throw error;
         }
-
-        if (!res.ok) throw new Error('Failed to fetch user context');
-        return res.json();
-    }, [isAuthenticated, getAccessTokenSilently]);
+    }, [isAuthenticated, getJson]);
 
     const { data, error, isLoading } = useSWR(
         isAuthenticated ? CONTEXT_KEY : null,
@@ -88,88 +84,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const isAdmin = user?.email === 'yannidelattrebalcer.artois@gmail.com';
 
     const linkClub = async (siret: string) => {
-        const token = await getAccessTokenSilently();
-        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/link-club`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ siret }),
-        });
-
-        if (!res.ok) {
-            const errorText = await res.text().catch(() => '');
-            let errorMessage = 'Failed to link club';
-            try {
-                const errorData = JSON.parse(errorText);
-                errorMessage = errorData.error || errorMessage;
-            } catch (e) {
-                errorMessage = `${errorMessage} (Status: ${res.status})`;
-            }
-            throw new Error(errorMessage);
-        }
-
-        const resData = await res.json();
-        // Trigger a global mutation to refresh all subscribers
+        const resData = await postJson(`${import.meta.env.API_BASE_URL}/api/users/link-club`, { siret });
         await mutate(CONTEXT_KEY);
         return resData;
     };
 
     const unlinkClub = async () => {
-        const token = await getAccessTokenSilently();
-        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/unlink-club`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Failed to unlink club');
-        }
-
+        await postJson(`${import.meta.env.API_BASE_URL}/api/users/unlink-club`, {});
         await mutate(CONTEXT_KEY);
     };
 
     const updateUser = async (data: Partial<User>) => {
-        const token = await getAccessTokenSilently();
-        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/users/me`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(data),
-        });
-
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Failed to update user');
-        }
-
-        const resData = await res.json();
+        const resData = await putJson(`${import.meta.env.API_BASE_URL}/api/users/me`, data);
         await mutate(CONTEXT_KEY);
         return resData;
     };
 
     const blockUser = async (userId: string, isBlocked: boolean, reason?: string) => {
-        const token = await getAccessTokenSilently();
-        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/admin/users/${userId}/block`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ is_blocked: isBlocked, block_reason: reason }),
-        });
-
-        if (!res.ok) {
-            const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Failed to block user');
-        }
+        await postJson(`${import.meta.env.API_BASE_URL}/api/admin/users/${userId}/block`, { is_blocked: isBlocked, block_reason: reason });
         await mutate(CONTEXT_KEY);
     };
 
@@ -189,7 +121,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         isOnline,
         syncStatus,
         notifications
-    }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, isOnline, syncStatus, notifications, getAccessTokenSilently]);
+    }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, isOnline, syncStatus, notifications, logout]);
 
     if (isLoading && isAuthenticated) {
         return (

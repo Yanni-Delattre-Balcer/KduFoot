@@ -7,12 +7,23 @@ export const getAuthHeaders = async (getAccessTokenSilently: () => Promise<strin
     };
 };
 
+const handleResponse = async (response: Response) => {
+    if (!response.ok) {
+        const errorText = await response.text().catch(() => "");
+        throw new Error(errorText || `HTTP error! status: ${response.status}`);
+    }
+    const contentType = response.headers.get("Content-Type");
+    if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid response format: Expected JSON");
+    }
+    return response.json();
+};
+
 export const api = {
     get: async (url: string, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
         const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, { headers });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        return handleResponse(response);
     },
     post: async (url: string, body: any, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
@@ -21,8 +32,7 @@ export const api = {
             headers,
             body: JSON.stringify(body),
         });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        return handleResponse(response);
     },
     put: async (url: string, body: any, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
@@ -31,8 +41,7 @@ export const api = {
             headers,
             body: JSON.stringify(body),
         });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        return handleResponse(response);
     },
     delete: async (url: string, getAccessTokenSilently: () => Promise<string>) => {
         const headers = await getAuthHeaders(getAccessTokenSilently);
@@ -40,7 +49,6 @@ export const api = {
             method: 'DELETE',
             headers,
         });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json(); // or true
+        return handleResponse(response);
     }
 };
