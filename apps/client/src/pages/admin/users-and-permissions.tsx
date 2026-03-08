@@ -1417,7 +1417,8 @@ export default function UsersAndPermissionsPage() {
                                                 {(() => {
                                                     const targetUser = users.find(u => u.user_id === selectedUserId);
                                                     const isSuperAdminTarget = targetUser?.email === SUPER_ADMIN_EMAIL;
-                                                    const isTargetBlocked = targetUser?.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED) || targetUser?.blocked;
+                                                    // Ensure we check both D1 'blocked' flag and the Permission.ROLE_BLOCKED in app_metadata
+                                                    const isTargetBlocked = targetUser?.blocked || targetUser?.app_metadata?.permissions?.includes(Permission.ROLE_BLOCKED);
 
                                                     if (!isSuperAdminTarget && selectedUserId !== currentUserId) {
                                                         return (
@@ -1528,21 +1529,7 @@ export default function UsersAndPermissionsPage() {
                                                                                         </span>
                                                                                     </Checkbox>
 
-                                                                                    {/* Reason input when block is active */}
-                                                                                    {perm.key === 'role_blocked' && (editing[selectedUserId ?? '']?.[perm.key] ?? false) && (
-                                                                                        <div className="pl-6 pb-2 animate-appearance-in">
-                                                                                            <Input
-                                                                                                size="sm"
-                                                                                                label="Motif du bannissement"
-                                                                                                placeholder="Saisissez un motif pour l'utilisateur"
-                                                                                                variant="flat"
-                                                                                                color="danger"
-                                                                                                value={blockReason}
-                                                                                                onValueChange={setBlockReason}
-                                                                                                classNames={{ inputWrapper: "bg-danger-900/40 text-red-100" }}
-                                                                                            />
-                                                                                        </div>
-                                                                                    )}
+                                                                                    {/* Reason input when block is active - REMOVED redundant input here because it's already handled in the confirm modal */}
                                                                                 </div>
                                                                             );
                                                                         })}
