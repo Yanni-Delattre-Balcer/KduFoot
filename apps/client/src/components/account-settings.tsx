@@ -29,7 +29,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const [searchParams] = useSearchParams();
     const from = searchParams.get('from') || (location.state as any)?.from;
     const { user: authUser, getAccessToken, logout } = useAuth();
-    const { user: dbUser, updateUser, linkClub, unlinkClub, refetch } = useUser();
+    const { user: dbUser, updateUser, linkClub, unlinkClub, refetch, isAdmin } = useUser();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -431,7 +431,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             <div className="space-y-1">
                                 <Input
                                     label={t('account.fields.stadium_address')}
-                                    variant="bordered"
+                                    variant={stadiumAddress && !isAdmin ? "flat" : "bordered"}
                                     size="sm"
                                     value={stadiumAddress}
                                     onValueChange={(v) => {
@@ -441,10 +441,12 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     placeholder={t('account.fields.stadium_placeholder')}
                                     isInvalid={!!errors.stadiumAddress}
                                     isRequired
-                                    description={t('account.fields.stadium_warning')}
+                                    isDisabled={!!stadiumAddress && !isAdmin}
+                                    description={stadiumAddress && !isAdmin ? t('account.fields.stadium_locked') : t('account.fields.stadium_warning')}
                                     classNames={{
-                                        description: "text-[10px] text-primary-500 font-medium",
-                                        label: "font-black text-primary whitespace-nowrap"
+                                        description: `text-[10px] ${stadiumAddress && !isAdmin ? "text-danger-500" : "text-primary-500"} font-medium`,
+                                        label: "font-black text-primary whitespace-nowrap",
+                                        inputWrapper: stadiumAddress && !isAdmin ? "bg-default-200/30" : ""
                                     }}
                                 />
                                 {errors.stadiumAddress && <p className="text-xs text-danger font-bold pl-1">{errors.stadiumAddress}</p>}

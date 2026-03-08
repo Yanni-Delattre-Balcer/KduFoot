@@ -508,8 +508,8 @@ export default function UsersAndPermissionsPage() {
             setEditing((prev) => ({ ...prev, [userId]: {} }));
             setSelectedUserId(null);
 
-            // Silent refresh
-            if (mgmtToken) loadUsers(mgmtToken, true);
+            // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
+            if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("error-updating-user"), variant: "solid" });
@@ -550,8 +550,8 @@ export default function UsersAndPermissionsPage() {
             if (selectedUserId === userId) setSelectedUserId(null);
             addToast({ title: t("success"), description: t("adminUsersPage.toasts.successDelete"), variant: "solid" });
 
-            // Silent refresh
-            if (mgmtToken) loadUsers(mgmtToken, true);
+            // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
+            if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorDelete"), variant: "solid" });
@@ -613,8 +613,8 @@ export default function UsersAndPermissionsPage() {
             setBlockReason("");
             addToast({ title: "Utilisateur banni", description: "L'utilisateur et ses matchs ont été supprimés.", color: "danger" });
 
-            // Silent refresh
-            if (mgmtToken) loadUsers(mgmtToken, true);
+            // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
+            if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
 
         } catch (err: any) {
             addToast({ title: "Erreur", description: err.message, color: "danger" });
@@ -669,8 +669,8 @@ export default function UsersAndPermissionsPage() {
             const data = await res.json();
             if (data.success) {
                 addToast({ title: "Succès", description: "Profil administrateur mis à jour sur D1.", color: "success" });
-                // Silent refresh
-                if (mgmtToken) loadUsers(mgmtToken, true);
+                // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
+                if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
             } else {
                 addToast({ title: "Erreur", description: data.error || "Échec de la mise à jour.", color: "danger" });
             }
@@ -779,8 +779,8 @@ export default function UsersAndPermissionsPage() {
             // Set reason to empty
             if (selectedUserId === d1UserId) setBlockReason("");
 
-            // Silent refresh
-            if (mgmtToken) loadUsers(mgmtToken, true);
+            // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
+            if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
         } catch (err: any) {
             addToast({ title: "Erreur", description: err.message, variant: "solid", color: "danger" });
         }
