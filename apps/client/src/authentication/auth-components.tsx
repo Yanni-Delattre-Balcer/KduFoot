@@ -640,14 +640,15 @@ export const useSecuredApi = () => {
    * Fetches the list of blocked users (their Auth0 subs and block reasons) from our backend D1 database.
    * This is necessary because D1 `is_blocked=1` is the single source of truth for blocking.
    */
-  const getD1BlockedUsers = async (): Promise<{ auth0_sub: string, block_reason: string | null }[]> => {
+  const getD1BlockedUsers = async (skipCache: boolean = false): Promise<{ auth0_sub: string, block_reason: string | null }[]> => {
     const apiBase =
       typeof import.meta !== "undefined" &&
         (import.meta as any).env?.API_BASE_URL
         ? (import.meta as any).env.API_BASE_URL
         : "";
     try {
-      const data = await getJson(`${apiBase}/api/admin/users/blocked`);
+      const url = skipCache ? `${apiBase}/api/admin/users/blocked?t=${Date.now()}` : `${apiBase}/api/admin/users/blocked`;
+      const data = await getJson(url);
       if (data && data.success && Array.isArray(data.blockedSubs)) {
         return data.blockedSubs;
       }

@@ -47,6 +47,9 @@
   :root {
     /* Handle iOS safe area (notches/pill) */
     --safe-area-top: env(safe-area-inset-top);
+    --safe-area-bottom: env(safe-area-inset-bottom);
+    --safe-area-left: env(safe-area-inset-left);
+    --safe-area-right: env(safe-area-inset-right);
   }
 
   /* We don't apply padding-top to body directly as it breaks fixed elements like Navbar */

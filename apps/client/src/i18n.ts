@@ -62,6 +62,7 @@ i18n
       availableLanguages.find((lang) => lang.isDefault)?.code ||
       fallbackLng,
     fallbackLng: fallbackLng,
+    debug: false,
 
     ns: ["base", "kdufoot", "common"],
     defaultNS: "kdufoot",

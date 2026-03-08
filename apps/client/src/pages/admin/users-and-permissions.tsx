@@ -12,9 +12,8 @@
  *     → lister les utilisateurs, leurs permissions, ajouter/supprimer des permissions
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import useSWR from "swr";
 import { Button } from "@heroui/button";
 import { Checkbox } from "@heroui/checkbox";
 import {
@@ -53,11 +52,6 @@ const getKdufootPermissions = (t: any) => {
 
         let label = t(`permission.${key}`);
         let groupLabel = t(`permission.group.${group}`);
-
-        if (value === 'role:blocked') {
-            label = "Bloquer l'accès complet";
-            groupLabel = "Sanction Admin";
-        }
 
         return {
             key,
@@ -111,35 +105,8 @@ export default function UsersAndPermissionsPage() {
 
     const [mgmtToken, setMgmtToken] = useState<string | null>(null);
     const [tokenFromCache, setTokenFromCache] = useState<boolean>(false);
-
-    // SWR Fetcher: Combines Auth0 users and D1 blocked users
-    const fetcher = useCallback(async ([_key, token]: [string, string]) => {
-        if (!token) return [];
-        const [u, blockedIds] = await Promise.all([
-            listAuth0Users(token),
-            getD1BlockedUsers()
-        ]);
-
-        return (u ?? []).map(user => {
-            const blockData = blockedIds.find(b => b.auth0_sub === user.user_id);
-            return {
-                ...user,
-                blocked: !!blockData,
-                is_blocked: !!blockData,
-                block_reason: blockData?.block_reason || null,
-            };
-        });
-    }, [listAuth0Users, getD1BlockedUsers]);
-
-    const { data: users = [], isLoading: loadingUsers, mutate: mutateUsers } = useSWR(
-        mgmtToken ? ['/api/admin/users', mgmtToken] : null,
-        fetcher,
-        {
-            revalidateOnFocus: false,
-            revalidateIfStale: true
-        }
-    );
-
+    const [users, setUsers] = useState<Auth0User[]>([]);
+    const [loadingUsers, setLoadingUsers] = useState(true);
     const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
 
     // { userId: { permKey: boolean } } — état d'édition des permissions
@@ -169,6 +136,9 @@ export default function UsersAndPermissionsPage() {
     const [adminBlockCount, setAdminBlockCount] = useState<number>(0);
     const [adminSiretChangeCount, setAdminSiretChangeCount] = useState<number>(0);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+    // Race condition protection for loadUsers
+    const lastRequestTimestamp = useRef<number>(0);
 
     const formatSiret = (value: string) => {
         let raw = value.replace(/\D/g, '');
@@ -205,9 +175,79 @@ export default function UsersAndPermissionsPage() {
         }
     };
 
-    const loadUsers = async () => {
-        // Trigger SWR revalidation
-        await mutateUsers();
+    const loadUsers = async (token: string, silent: boolean = false) => {
+        if (!silent) setLoadingUsers(true);
+        const requestTimestamp = Date.now();
+        lastRequestTimestamp.current = requestTimestamp;
+
+        try {
+            console.log(`[Admin] loadUsers #${requestTimestamp} called (silent=${silent})`);
+            const [u, blockedIds] = await Promise.all([
+                listAuth0Users(token),
+                // Add a cache-buster to ensure we get fresh data from D1
+                getD1BlockedUsers(true)
+            ]);
+
+            // If a newer request has started, ignore this one
+            if (lastRequestTimestamp.current !== requestTimestamp) {
+                console.log(`[Admin] loadUsers #${requestTimestamp} ignored (newer request in flight)`);
+                return;
+            }
+
+            console.log(`[Admin] loadUsers #${requestTimestamp} fetched ${u?.length || 0} users from Auth0 and ${blockedIds?.length || 0} blocked from D1`);
+
+            // Merge the D1 blocked status and Auth0 data
+            const mergedUsers = (u ?? []).map(user => {
+                const blockData = blockedIds.find(b => b.auth0_sub === user.user_id);
+
+                // FORCE consistency: D1 (blockedIds) is our immediate Source of Truth.
+                // Auth0 metadata is eventually consistent and can be stale for a few seconds.
+                if (blockData) {
+                    const currentPerms = user.app_metadata?.permissions || [];
+                    const hasBlockedPerm = currentPerms.includes(Permission.ROLE_BLOCKED);
+
+                    // Log if we find a mismatch
+                    if (!hasBlockedPerm) {
+                        console.log(`[Admin] User ${user.email} is blocked in D1 but MISSING permission in Auth0 (Correcting UI)`);
+                    }
+
+                    return {
+                        ...user,
+                        blocked: true,
+                        block_reason: blockData.block_reason,
+                        app_metadata: {
+                            ...user.app_metadata,
+                            permissions: hasBlockedPerm ? currentPerms : [...currentPerms, Permission.ROLE_BLOCKED]
+                        }
+                    };
+                } else {
+                    // Not in D1 = Not blocked. Filter out any stale Auth0 block permissions.
+                    const currentPerms = user.app_metadata?.permissions || [];
+                    const hasStalePerm = currentPerms.includes(Permission.ROLE_BLOCKED);
+
+                    if (hasStalePerm) {
+                        console.log(`[Admin] User ${user.email} is NOT blocked in D1 but HAS stale permission in Auth0 (Correcting UI)`);
+                    }
+
+                    return {
+                        ...user,
+                        blocked: false,
+                        block_reason: null,
+                        app_metadata: {
+                            ...user.app_metadata,
+                            permissions: currentPerms.filter(p => p !== Permission.ROLE_BLOCKED)
+                        }
+                    };
+                }
+            });
+
+            setUsers(mergedUsers);
+        } catch (err) {
+            console.error("Erreur chargement utilisateurs:", err);
+            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
+        } finally {
+            setLoadingUsers(false);
+        }
     };
 
     // ─── 1. Chargement du token Management API ──────────────────────────────
@@ -223,14 +263,16 @@ export default function UsersAndPermissionsPage() {
                     checkSyncStatus(tokenResp.access_token);
 
                     // Charger la liste des utilisateurs
-                    loadUsers();
+                    loadUsers(tokenResp.access_token);
                 } else {
                     addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
+                    setLoadingUsers(false);
                 }
             })
             .catch((err) => {
                 console.error("Erreur token Management:", err);
                 addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.noManagementToken"), variant: "solid" });
+                setLoadingUsers(false);
             });
     }, []);
 
@@ -267,8 +309,8 @@ export default function UsersAndPermissionsPage() {
 
             setEditing((prev) => ({ ...prev, [userId]: permState }));
         } catch (err) {
-            console.error("Erreur chargement utilisateurs:", err);
-            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingUsers"), variant: "solid" });
+            console.error("Erreur chargement permissions:", err);
+            addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorLoadingPerms"), variant: "solid" });
         } finally {
             setModalLoading(false);
         }
@@ -430,48 +472,44 @@ export default function UsersAndPermissionsPage() {
 
             addToast({ title: t("success"), description: t("adminUsersPage.toasts.successUpdate"), variant: "solid", timeout: 4000 });
 
-            // Optimistic SWR update
-            await mutateUsers(
-                users.map(u => {
-                    if (u.user_id !== userId) return u;
-                    const prevPerms = u.app_metadata?.permissions || [];
-                    let updatedPerms = prevPerms.filter(p => !toRemove.includes(p));
-                    toAdd.forEach(newP => {
-                        if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
-                    });
+            // Optimistic UI update so the table badges instantly reflect the new permissions
+            setUsers(prev => prev.map(u => {
+                if (u.user_id !== userId) return u;
+                const prevPerms = u.app_metadata?.permissions || [];
+                let updatedPerms = prevPerms.filter(p => !toRemove.includes(p));
+                toAdd.forEach(newP => {
+                    if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
+                });
 
-                    let newIsBlocked = u.is_blocked || u.blocked || false;
-                    let newBlockReason = u.block_reason || null;
-
-                    if (handleBlockLogic) {
-                        newIsBlocked = targetBlockState;
-                        newBlockReason = targetBlockState ? blockReason : null;
-                        if (targetBlockState && !updatedPerms.includes(Permission.ROLE_BLOCKED)) {
-                            updatedPerms.push(Permission.ROLE_BLOCKED);
-                        } else if (!targetBlockState) {
-                            updatedPerms = updatedPerms.filter(p => p !== Permission.ROLE_BLOCKED);
-                        }
+                // Handle optimistic UI for block state
+                let newBlockedState = u.blocked;
+                let newBlockReason = u.block_reason;
+                if (handleBlockLogic) {
+                    newBlockedState = targetBlockState;
+                    newBlockReason = targetBlockState ? blockReason : null;
+                    if (targetBlockState && !updatedPerms.includes(Permission.ROLE_BLOCKED)) {
+                        updatedPerms.push(Permission.ROLE_BLOCKED);
+                    } else if (!targetBlockState) {
+                        updatedPerms = updatedPerms.filter(p => p !== Permission.ROLE_BLOCKED);
                     }
+                }
 
-                    return {
-                        ...u,
-                        blocked: newIsBlocked,
-                        is_blocked: newIsBlocked,
-                        block_reason: newBlockReason,
-                        app_metadata: {
-                            ...u.app_metadata,
-                            permissions: updatedPerms
-                        }
-                    };
-                }),
-                false
-            );
+                return {
+                    ...u,
+                    blocked: newBlockedState,
+                    block_reason: newBlockReason,
+                    app_metadata: {
+                        ...u.app_metadata,
+                        permissions: updatedPerms
+                    }
+                };
+            }));
 
             setEditing((prev) => ({ ...prev, [userId]: {} }));
             setSelectedUserId(null);
 
-            // Revalidate SWR
-            mutateUsers();
+            // Silent refresh
+            if (mgmtToken) loadUsers(mgmtToken, true);
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("error-updating-user"), variant: "solid" });
@@ -508,18 +546,12 @@ export default function UsersAndPermissionsPage() {
             }
 
             await deleteAuth0User(mgmtToken, userId);
-
-            // Optimistic SWR update
-            await mutateUsers(
-                users.filter((u) => u.user_id !== userId),
-                false
-            );
-
+            setUsers((prev) => prev.filter((u) => u.user_id !== userId));
             if (selectedUserId === userId) setSelectedUserId(null);
             addToast({ title: t("success"), description: t("adminUsersPage.toasts.successDelete"), variant: "solid" });
 
-            // Revalidate SWR
-            mutateUsers();
+            // Silent refresh
+            if (mgmtToken) loadUsers(mgmtToken, true);
         } catch (err) {
             console.error(err);
             addToast({ title: t("error.title"), description: t("adminUsersPage.toasts.errorDelete"), variant: "solid" });
@@ -545,6 +577,27 @@ export default function UsersAndPermissionsPage() {
 
     const confirmBlock = async (d1UserId: string, onClose?: () => void) => {
         try {
+            // Modification optimiste de l'état local pour rafraîchir le bouton instantanément (MOVED TO FRONT)
+            setUsers(prev => prev.map(u => {
+                if (u.user_id !== d1UserId) return u;
+                return {
+                    ...u,
+                    blocked: true,
+                    block_reason: blockReason || undefined,
+                    app_metadata: {
+                        ...u.app_metadata,
+                        permissions: [Permission.ROLE_BLOCKED]
+                    }
+                };
+            }));
+
+            // Force update editing state if the pane is open (MOVED TO FRONT)
+            const newPerms: Record<string, boolean> = {};
+            KDUFOOT_PERMISSIONS.forEach(p => {
+                newPerms[p.key] = p.key === 'role_blocked';
+            });
+            setEditing(prev => ({ ...prev, [d1UserId]: newPerms }));
+
             await blockUser(d1UserId, true, blockReason);
 
             if (mgmtToken) {
@@ -558,31 +611,10 @@ export default function UsersAndPermissionsPage() {
             if (onClose) onClose();
             setBlockingUserId(null);
             setBlockReason("");
+            addToast({ title: "Utilisateur banni", description: "L'utilisateur et ses matchs ont été supprimés.", color: "danger" });
 
-            // Optimistic SWR update
-            await mutateUsers(
-                users.map(u => {
-                    if (u.user_id !== d1UserId) return u;
-                    const updatedPerms = [...(u.app_metadata?.permissions || [])];
-                    if (!updatedPerms.includes(Permission.ROLE_BLOCKED)) {
-                        updatedPerms.push(Permission.ROLE_BLOCKED);
-                    }
-                    return {
-                        ...u,
-                        blocked: true,
-                        is_blocked: true,
-                        block_reason: blockReason,
-                        app_metadata: {
-                            ...u.app_metadata,
-                            permissions: updatedPerms
-                        }
-                    };
-                }),
-                false
-            );
-
-            // Revalidate SWR
-            mutateUsers();
+            // Silent refresh
+            if (mgmtToken) loadUsers(mgmtToken, true);
 
         } catch (err: any) {
             addToast({ title: "Erreur", description: err.message, color: "danger" });
@@ -638,7 +670,7 @@ export default function UsersAndPermissionsPage() {
             if (data.success) {
                 addToast({ title: "Succès", description: "Profil administrateur mis à jour sur D1.", color: "success" });
                 // Silent refresh
-                loadUsers();
+                if (mgmtToken) loadUsers(mgmtToken, true);
             } else {
                 addToast({ title: "Erreur", description: data.error || "Échec de la mise à jour.", color: "danger" });
             }
@@ -702,6 +734,31 @@ export default function UsersAndPermissionsPage() {
 
     const handleUnblockUser = async (d1UserId: string) => {
         try {
+            // Modification optimiste de l'état local pour rafraîchir le bouton instantanément (MOVED TO FRONT)
+            setUsers(prev => prev.map(u => {
+                if (u.user_id !== d1UserId) return u;
+                // Filtrer la permission bloquée des permissions existantes
+                const updatedPerms = (u.app_metadata?.permissions || []).filter(p => p !== Permission.ROLE_BLOCKED);
+
+                return {
+                    ...u,
+                    blocked: false,
+                    block_reason: null,
+                    app_metadata: {
+                        ...u.app_metadata,
+                        permissions: updatedPerms
+                    }
+                };
+            }));
+
+            // Force update editing state if the pane is open (MOVED TO FRONT)
+            setEditing(prev => {
+                const userEdits = { ...(prev[d1UserId] || {}) };
+                // Remove the blocked role from edits as it's now handled
+                delete userEdits['role_blocked'];
+                return { ...prev, [d1UserId]: userEdits };
+            });
+
             // 1. Débloquer dans D1
             await blockUser(d1UserId, false);
 
@@ -719,39 +776,11 @@ export default function UsersAndPermissionsPage() {
 
             addToast({ title: "Utilisateur débloqué", description: "L'utilisateur a retrouvé ses droits d'Abonné (Free).", variant: "solid", color: "success" });
 
-            // Force update editing state if the pane is open
-            setEditing(prev => {
-                const userEdits = { ...(prev[d1UserId] || {}) };
-                // Remove the blocked role from edits as it's now handled
-                delete userEdits['role_blocked'];
-                return { ...prev, [d1UserId]: userEdits };
-            });
-
             // Set reason to empty
             if (selectedUserId === d1UserId) setBlockReason("");
 
-            // Optimistic SWR update
-            await mutateUsers(
-                users.map(u => {
-                    if (u.user_id !== d1UserId) return u;
-                    const updatedPerms = (u.app_metadata?.permissions || []).filter(p => p !== Permission.ROLE_BLOCKED);
-
-                    return {
-                        ...u,
-                        blocked: false,
-                        is_blocked: false,
-                        block_reason: null,
-                        app_metadata: {
-                            ...u.app_metadata,
-                            permissions: updatedPerms
-                        }
-                    };
-                }),
-                false
-            );
-
-            // Revalidate SWR
-            mutateUsers();
+            // Silent refresh
+            if (mgmtToken) loadUsers(mgmtToken, true);
         } catch (err: any) {
             addToast({ title: "Erreur", description: err.message, variant: "solid", color: "danger" });
         }
@@ -969,7 +998,7 @@ export default function UsersAndPermissionsPage() {
 
                         {/* Desktop View: Table */}
                         <Table
-                            aria-label="Utilisateurs Auth0"
+                            aria-label={t("adminUsersPage.pageTitle")}
                             selectionMode="none"
                             classNames={{
                                 base: "hidden sm:flex dark",
@@ -980,7 +1009,7 @@ export default function UsersAndPermissionsPage() {
                             <TableHeader>
                                 <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
                                 <TableColumn>{t("adminUsersPage.colEmail")}</TableColumn>
-                                <TableColumn>Rôle</TableColumn>
+                                <TableColumn>{t("adminUsersPage.colRole")}</TableColumn>
                                 <TableColumn>{t("adminUsersPage.colSubscription")}</TableColumn>
                                 <TableColumn>{t("adminUsersPage.colLogins")}</TableColumn>
                                 <TableColumn>{t("adminUsersPage.colActions")}</TableColumn>
@@ -1021,16 +1050,16 @@ export default function UsersAndPermissionsPage() {
                                             <TableCell>
                                                 <div className="flex flex-wrap gap-1">
                                                     {isSuperAdmin && (
-                                                        <Chip size="sm" color="warning" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">S. Admin</Chip>
+                                                        <Chip size="sm" color="warning" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">{t("adminUsersPage.statusSuperAdmin")}</Chip>
                                                     )}
                                                     {u.app_metadata?.permissions?.includes('auth0:admin:api') && !isSuperAdmin && (
-                                                        <Chip size="sm" color="primary" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">Admin</Chip>
+                                                        <Chip size="sm" color="primary" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">{t("adminUsersPage.statusAdmin")}</Chip>
                                                     )}
                                                     {isUserBlocked && (
-                                                        <Chip size="sm" color="danger" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-black animate-pulse">🚫 BANNI</Chip>
+                                                        <Chip size="sm" color="danger" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-black animate-pulse">{t("adminUsersPage.statusBanned")}</Chip>
                                                     )}
                                                     {u.app_metadata?.permissions?.includes('coach:certified') && (
-                                                        <Chip size="sm" color="success" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold italic">Certifié</Chip>
+                                                        <Chip size="sm" color="success" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold italic">{t("adminUsersPage.statusCertified")}</Chip>
                                                     )}
                                                 </div>
                                             </TableCell>
@@ -1066,7 +1095,7 @@ export default function UsersAndPermissionsPage() {
                                                         isDisabled={!mgmtToken || (isSuperAdmin && u.user_id !== currentUserId)}
                                                         className="font-bold px-6"
                                                     >
-                                                        Voir le Profil
+                                                        {t("adminUsersPage.btnViewProfile")}
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -1094,16 +1123,16 @@ export default function UsersAndPermissionsPage() {
                             <>
                                 <ModalHeader className="flex flex-col gap-1">
                                     <h3 className="text-lg font-black text-red-500 uppercase tracking-tight flex items-center gap-2">
-                                        🚫 Bannir cet utilisateur
+                                        {t("adminUsersPage.modalBanTitle")}
                                     </h3>
                                 </ModalHeader>
                                 <ModalBody>
                                     <p className="text-sm text-default-400 font-medium leading-relaxed">
-                                        Cette action va <strong className="text-red-400">supprimer définitivement</strong> tous les matchs et tournois créés par cet utilisateur.
+                                        {t("adminUsersPage.modalBanDescription")}
                                     </p>
                                     <Input
-                                        label="Motif du bannissement"
-                                        placeholder="Ex: Comportement abusif, spam..."
+                                        label={t("adminUsersPage.modalBanReasonLabel")}
+                                        placeholder={t("adminUsersPage.modalBanReasonPlaceholder")}
                                         variant="bordered"
                                         value={blockReason}
                                         onValueChange={setBlockReason}
@@ -1117,7 +1146,7 @@ export default function UsersAndPermissionsPage() {
                                         onPress={onClose}
                                         className="font-bold"
                                     >
-                                        Annuler
+                                        {t("adminUsersPage.modalBtnCancel")}
                                     </Button>
                                     <Button
                                         color="danger"
@@ -1125,7 +1154,7 @@ export default function UsersAndPermissionsPage() {
                                         onPress={() => confirmBlock(blockingUserId!, onClose)}
                                         isDisabled={blockReason.trim().length < 3}
                                     >
-                                        CONFIRMER LE BAN
+                                        {t("adminUsersPage.modalBanConfirm")}
                                     </Button>
                                 </ModalFooter>
                             </>
@@ -1166,7 +1195,7 @@ export default function UsersAndPermissionsPage() {
                                             </span>
                                             {targetUser?.email === SUPER_ADMIN_EMAIL && (
                                                 <Chip size="sm" color="warning" variant="solid" className="ml-2 h-5 text-xs sm:text-sm uppercase font-bold">
-                                                    🛡️ PROTÉGÉ
+                                                    {t("adminUsersPage.modalProtected")}
                                                 </Chip>
                                             )}
                                         </h2>
@@ -1176,11 +1205,11 @@ export default function UsersAndPermissionsPage() {
                                         {!modalLoading && siretData && (
                                             <div className="flex gap-4 mb-2">
                                                 <div className="flex-1 p-3 rounded-xl bg-zinc-800/50 border border-white/5 text-center">
-                                                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest mb-1">Nombre de Bannissements</p>
+                                                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest mb-1">{t("adminUsersPage.statBans")}</p>
                                                     <p className="text-2xl font-black text-red-500">{(siretData as any).block_count || 0}</p>
                                                 </div>
                                                 <div className="flex-1 p-3 rounded-xl bg-zinc-800/50 border border-white/5 text-center">
-                                                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest mb-1">Modifications SIRET</p>
+                                                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest mb-1">{t("adminUsersPage.statSiretChanges")}</p>
                                                     <p className="text-2xl font-black text-primary">{(siretData as any).siret_change_count || 0}</p>
                                                 </div>
                                             </div>
@@ -1194,7 +1223,7 @@ export default function UsersAndPermissionsPage() {
                                                 <div className="mb-6 p-4 border border-white/10 rounded-xl bg-zinc-800/50 shadow-sm mt-4">
                                                     <div className="flex justify-between items-center mb-3">
                                                         <h3 className="text-md font-bold text-white flex items-center gap-2">
-                                                            🏢 Gestion des SIRETs (Multi-clubs)
+                                                            {t("adminUsersPage.siretSectionTitle")}
                                                         </h3>
                                                         <Button
                                                             size="sm"
@@ -1203,19 +1232,19 @@ export default function UsersAndPermissionsPage() {
                                                             isLoading={siretLoading}
                                                             isDisabled={!selectedUserId}
                                                         >
-                                                            Actualiser
+                                                            {t("adminUsersPage.btnRefresh")}
                                                         </Button>
                                                     </div>
 
                                                     {siretLoading ? (
-                                                        <p className="text-default-500 text-sm">Chargement des SIRETs...</p>
+                                                        <p className="text-default-500 text-sm">{t("adminUsersPage.loadingSirets")}</p>
                                                     ) : siretData ? (
                                                         <div className="flex flex-col gap-3">
                                                             {/* Primary Siret */}
                                                             {siretData.primary_siret ? (
                                                                 <div className="flex items-center justify-between bg-zinc-900 border border-primary/20 p-3 rounded-lg shadow-sm">
                                                                     <div className="flex-1 min-w-0 mr-3">
-                                                                        <span className="text-[10px] font-black text-primary uppercase tracking-tighter">Club Principal</span>
+                                                                        <span className="text-[10px] font-black text-primary uppercase tracking-tighter">{t("adminUsersPage.primaryClub")}</span>
                                                                         <p className="text-sm font-bold text-white truncate">
                                                                             {siretData.primary_name || siretData.primary_siret}
                                                                         </p>
@@ -1245,18 +1274,18 @@ export default function UsersAndPermissionsPage() {
                                                                             }
                                                                         }}
                                                                     >
-                                                                        Détacher
+                                                                        {t("adminUsersPage.btnDetach")}
                                                                     </Button>
                                                                 </div>
                                                             ) : (
                                                                 <div className="p-3 border border-dashed border-white/10 rounded-lg text-center bg-zinc-800/20">
-                                                                    <p className="text-xs text-default-400 uppercase font-bold italic">Aucun club principal lié</p>
+                                                                    <p className="text-xs text-default-400 uppercase font-bold italic">{t("adminUsersPage.noPrimaryClub")}</p>
                                                                 </div>
                                                             )}
 
                                                             {/* Additional Sirets */}
                                                             <div className="flex flex-col gap-2 mt-2">
-                                                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter">Clubs Secondaires</span>
+                                                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter">{t("adminUsersPage.secondaryClubs")}</span>
                                                                 {siretData.additional_sirets && siretData.additional_sirets.length > 0 ? (
                                                                     siretData.additional_sirets.map((item: any) => (
                                                                         <div key={item.siret} className="flex items-center justify-between bg-zinc-900/50 border border-zinc-800 p-2 rounded-lg">
@@ -1271,12 +1300,12 @@ export default function UsersAndPermissionsPage() {
                                                                                 className="shrink-0 scale-90 origin-right"
                                                                                 onPress={() => handleRemoveSiret(item.siret)}
                                                                             >
-                                                                                Détacher
+                                                                                {t("adminUsersPage.btnDetach")}
                                                                             </Button>
                                                                         </div>
                                                                     ))
                                                                 ) : (
-                                                                    <p className="text-xs text-default-400 italic px-1">Aucun club secondaire</p>
+                                                                    <p className="text-xs text-default-400 italic px-1">{t("adminUsersPage.noSecondaryClubs")}</p>
                                                                 )}
                                                             </div>
 
@@ -1284,7 +1313,7 @@ export default function UsersAndPermissionsPage() {
                                                             <div className="flex flex-col gap-3 mt-4 p-3 bg-zinc-900/40 rounded-xl border border-white/5">
                                                                 <div className="flex justify-between items-center mb-1">
                                                                     <p className="text-xs font-bold text-blue-400 uppercase px-1">
-                                                                        ➕ Ajouter un SIRET/SIREN
+                                                                        {t("adminUsersPage.addSiretTitle")}
                                                                     </p>
                                                                     <Checkbox
                                                                         size="sm"
@@ -1292,19 +1321,19 @@ export default function UsersAndPermissionsPage() {
                                                                         onValueChange={setForceSiret}
                                                                         classNames={{ label: "text-xs font-bold text-warning-500 uppercase" }}
                                                                     >
-                                                                        Forcer (Toute entreprise)
+                                                                        {t("adminUsersPage.forceSiret")}
                                                                     </Checkbox>
                                                                 </div>
                                                                 <div className="flex gap-2 items-end">
                                                                     <Input
-                                                                        label="Nouveau SIRET/SIREN"
-                                                                        placeholder="Ex: 123 456 789 (9) ou 123 456 789 00012 (14)"
+                                                                        label={t("adminUsersPage.primaryClub")}
+                                                                        placeholder={t("adminUsersPage.siretPlaceholder")}
                                                                         size="sm"
                                                                         variant="bordered"
                                                                         value={newSiret}
                                                                         onValueChange={(v) => setNewSiret(formatSiret(v))}
                                                                         maxLength={18}
-                                                                        errorMessage={newSiret && (newSiret.replace(/\s/g, '').length !== 14 && newSiret.replace(/\s/g, '').length !== 9) ? "9 ou 14 chiffres requis" : ""}
+                                                                        errorMessage={newSiret && (newSiret.replace(/\s/g, '').length !== 14 && newSiret.replace(/\s/g, '').length !== 9) ? t("adminUsersPage.siretError") : ""}
                                                                         isInvalid={newSiret.length > 0 && (newSiret.replace(/\s/g, '').length !== 14 && newSiret.replace(/\s/g, '').length !== 9)}
                                                                     />
                                                                     <div className="flex flex-col gap-2">
@@ -1316,7 +1345,7 @@ export default function UsersAndPermissionsPage() {
                                                                             isLoading={siretLoading}
                                                                             className="font-bold min-w-[120px]"
                                                                         >
-                                                                            En additionnel
+                                                                            {t("adminUsersPage.btnAddAdditional")}
                                                                         </Button>
                                                                         <Button
                                                                             color="warning"
@@ -1353,14 +1382,14 @@ export default function UsersAndPermissionsPage() {
                                                                             isLoading={siretLoading}
                                                                             className="font-bold min-w-[120px]"
                                                                         >
-                                                                            En Principal
+                                                                            {t("adminUsersPage.btnAddPrimary")}
                                                                         </Button>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <p className="text-sm text-default-500">Erreur lors du chargement des SIRETs.</p>
+                                                        <p className="text-sm text-default-500">{t("adminUsersPage.loadSiretsError")}</p>
                                                     )}
                                                 </div>
 
@@ -1368,24 +1397,24 @@ export default function UsersAndPermissionsPage() {
                                                 <div className="flex flex-col gap-4 p-4 bg-primary/5 border border-primary/20 rounded-2xl shadow-inner">
                                                     <div className="flex items-center gap-2 mb-1">
                                                         <span className="text-lg">⚙️</span>
-                                                        <h3 className="text-sm font-black text-primary uppercase tracking-wider">Super-Pouvoirs Admin (D1 Direct)</h3>
+                                                        <h3 className="text-sm font-black text-primary uppercase tracking-wider">{t("adminUsersPage.superPowersTitle")}</h3>
                                                     </div>
 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <div className="md:col-span-2">
                                                             <Input
-                                                                label="Adresse Physique du Stade"
-                                                                placeholder="Complexe Sportif, 123 Rue de la Victoire"
+                                                                label={t("adminUsersPage.stadiumAddressLabel")}
+                                                                placeholder={t("adminUsersPage.stadiumAddressPlaceholder")}
                                                                 size="sm"
                                                                 variant="bordered"
                                                                 value={adminStadiumAddress}
                                                                 onValueChange={setAdminStadiumAddress}
-                                                                description="Écrase le verrouillage utilisateur. Sert d'adresse par défaut pour les matchs."
+                                                                description={t("adminUsersPage.stadiumAddressDesc")}
                                                             />
                                                         </div>
                                                         <Input
                                                             type="number"
-                                                            label="Compteur de Bannissements"
+                                                            label={t("adminUsersPage.blockCountLabel")}
                                                             size="sm"
                                                             variant="bordered"
                                                             value={adminBlockCount?.toString()}
@@ -1393,7 +1422,7 @@ export default function UsersAndPermissionsPage() {
                                                         />
                                                         <Input
                                                             type="number"
-                                                            label="Changements de SIRET"
+                                                            label={t("adminUsersPage.siretChangeCountLabel")}
                                                             size="sm"
                                                             variant="bordered"
                                                             value={adminSiretChangeCount?.toString()}
@@ -1409,7 +1438,7 @@ export default function UsersAndPermissionsPage() {
                                                         onPress={handleUpdateUserProfile}
                                                         isLoading={isSavingProfile}
                                                     >
-                                                        💾 Enregistrer les modifications D1
+                                                        {t("adminUsersPage.btnSaveD1")}
                                                     </Button>
                                                 </div>
 
@@ -1424,7 +1453,7 @@ export default function UsersAndPermissionsPage() {
                                                         return (
                                                             <div className="mb-6 p-4 border border-danger-500/30 rounded-xl bg-danger-500/10">
                                                                 <h3 className="text-md font-bold text-danger-500 mb-3 flex items-center gap-2">
-                                                                    🛡️ Sécurité & Compte
+                                                                    {t("adminUsersPage.securitySectionTitle")}
                                                                 </h3>
                                                                 <div className="flex flex-col sm:flex-row gap-3">
                                                                     {isTargetBlocked ? (
@@ -1435,7 +1464,7 @@ export default function UsersAndPermissionsPage() {
                                                                             className="font-bold uppercase tracking-tight flex-1"
                                                                             onPress={() => handleUnblockUser(selectedUserId as string)}
                                                                         >
-                                                                            Débloquer l'utilisateur
+                                                                            {t("adminUsersPage.btnUnblock")}
                                                                         </Button>
                                                                     ) : (
                                                                         <Button
@@ -1445,7 +1474,7 @@ export default function UsersAndPermissionsPage() {
                                                                             className="font-bold flex-1"
                                                                             onPress={() => handleBlockUser(selectedUserId as string, targetUser?.email || '')}
                                                                         >
-                                                                            🚫 Bloquer l'utilisateur
+                                                                            {t("adminUsersPage.btnBlock")}
                                                                         </Button>
                                                                     )}
                                                                     <Button
@@ -1456,7 +1485,7 @@ export default function UsersAndPermissionsPage() {
                                                                         onPress={() => deleteUser(selectedUserId as string)}
                                                                         isDisabled={!mgmtToken}
                                                                     >
-                                                                        Supprimer le compte
+                                                                        {t("adminUsersPage.btnDeleteAccount")}
                                                                     </Button>
                                                                 </div>
                                                             </div>
@@ -1467,25 +1496,25 @@ export default function UsersAndPermissionsPage() {
 
                                                 <div className="p-4 bg-zinc-800/50 rounded-xl border border-white/5 space-y-4">
                                                     <h3 className="text-md font-bold text-white mb-2 flex items-center gap-2">
-                                                        🔑 Permissions de l'utilisateur
+                                                        {t("adminUsersPage.permissionsSectionTitle")}
                                                     </h3>
 
                                                     <div className="mb-4 flex flex-wrap gap-2 items-center">
-                                                        <span className="text-sm font-medium text-default-400">Attribution rapide :</span>
+                                                        <span className="text-sm font-medium text-default-400">{t("adminUsersPage.quickAssignLabel")}</span>
                                                         <Button size="sm" variant="flat" color="default" onPress={() => applyRole("free")}>
-                                                            Abonné Free
+                                                            {t("adminUsersPage.roleFree")}
                                                         </Button>
                                                         <Button size="sm" variant="flat" color="warning" onPress={() => applyRole("premium")}>
-                                                            Abonné Premium
+                                                            {t("adminUsersPage.rolePremium")}
                                                         </Button>
                                                         <Button size="sm" variant="flat" color="secondary" onPress={() => applyRole("admin")}>
-                                                            Administrateur
+                                                            {t("adminUsersPage.roleAdmin")}
                                                         </Button>
                                                         <Button size="sm" variant="flat" color="danger" onPress={() => applyRole("superadmin")}>
-                                                            Super Administrateur
+                                                            {t("adminUsersPage.roleSuperAdmin")}
                                                         </Button>
                                                         <Button size="sm" variant="solid" color="danger" className="font-black" onPress={() => applyRole("blocked")}>
-                                                            🚫 BLOQUÉ
+                                                            {t("adminUsersPage.roleBlocked")}
                                                         </Button>
                                                     </div>
 
@@ -1510,13 +1539,16 @@ export default function UsersAndPermissionsPage() {
                                                                     <div className="flex flex-col gap-1.5">
                                                                         {group.perms.map((perm) => {
                                                                             const isSuperAdminTarget = users.find(u => u.user_id === selectedUserId)?.email === SUPER_ADMIN_EMAIL;
+                                                                            const targetUser = users.find(u => u.user_id === selectedUserId);
+                                                                            const isDirty = (editing[selectedUserId ?? '']?.[perm.key] ?? false) !== (targetUser?.app_metadata?.permissions?.includes(perm.value) ?? false);
+
                                                                             return (
                                                                                 <div key={perm.key} className="flex flex-col gap-2">
                                                                                     <Checkbox
                                                                                         isSelected={editing[selectedUserId ?? '']?.[perm.key] ?? false}
                                                                                         onValueChange={() => togglePermission(selectedUserId as string, perm.key)}
                                                                                         size="sm"
-                                                                                        color={perm.key === 'role_blocked' ? 'danger' : undefined}
+                                                                                        color={perm.key === 'role_blocked' ? 'danger' : isDirty ? 'success' : undefined}
                                                                                         isDisabled={
                                                                                             // Empêcher de retirer sa propre permission auth0:admin:api
                                                                                             (selectedUserId === currentUserId && perm.value === "auth0:admin:api") ||
@@ -1524,8 +1556,8 @@ export default function UsersAndPermissionsPage() {
                                                                                             (isSuperAdminTarget && selectedUserId !== currentUserId)
                                                                                         }
                                                                                     >
-                                                                                        <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500 uppercase' : 'text-default-300'}`}>
-                                                                                            {perm.key === 'role_blocked' ? '🚫 ' : ''}{perm.label}
+                                                                                        <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500 uppercase' : isDirty ? 'text-red-500 font-bold animate-pulse' : 'text-default-300'}`}>
+                                                                                            {perm.key === 'role_blocked' ? '🚫 ' : ''}{perm.label} {isDirty && "•"}
                                                                                         </span>
                                                                                     </Checkbox>
 
@@ -1557,7 +1589,7 @@ export default function UsersAndPermissionsPage() {
                                                 setForceSiret(false);
                                             }}
                                         >
-                                            Fermer le profil
+                                            {t("adminUsersPage.modalBtnCloseProfile")}
                                         </Button>
                                         <Button
                                             color="primary"
@@ -1571,7 +1603,7 @@ export default function UsersAndPermissionsPage() {
                                                 (editing[selectedUserId ?? '']?.['role_blocked'] && blockReason.trim().length < 3)
                                             }
                                         >
-                                            Sauvegarder les modifications
+                                            {t("adminUsersPage.modalBtnSaveModifications")}
                                         </Button>
                                     </ModalFooter>
                                 </>
