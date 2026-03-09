@@ -24,6 +24,10 @@ export const UserSync = () => {
                     // Reset to allow retry? Or maybe use React Query logic later.
                     syncedRef.current = null;
                 });
+        } else if (!isAuthenticated) {
+            // Clear PWA session dismissal on logout so it reappears next time
+            localStorage.removeItem('kdufoot-pwa-session-dismiss');
+            syncedRef.current = null;
         }
     }, [isAuthenticated, user, postJson]);
 

@@ -56,7 +56,7 @@ export function useWebSocketSync(enabled: boolean = true, userId?: string) {
                     console.log('[WebSocket] Received DATA_CHANGED, revalidating cache...');
                     mutate(
                         (key) => typeof key === 'string' && key.startsWith('/api/'),
-                        (currentData: any) => currentData,
+                        undefined,
                         { revalidate: true }
                     );
                     return;

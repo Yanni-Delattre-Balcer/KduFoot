@@ -21,8 +21,8 @@ export function usePWAInstall() {
         const permanentlyDismissed = localStorage.getItem('kdufoot-pwa-permanent-dismiss') === 'true';
         setIsPermanentlyDismissed(permanentlyDismissed);
 
-        // Check session storage for SESSION dismissal (Plus tard)
-        const sessionDismissed = sessionStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
+        // Check local storage for SESSION dismissal (Share across tabs)
+        const sessionDismissed = localStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
         setIsSessionDismissed(sessionDismissed);
 
         // Find if already installed
@@ -52,7 +52,21 @@ export function usePWAInstall() {
         };
 
         window.addEventListener('beforeinstallprompt', handler);
-        return () => window.removeEventListener('beforeinstallprompt', handler);
+
+        // Sync dismissal across tabs
+        const storageHandler = (e: StorageEvent) => {
+            if (e.key === 'kdufoot-pwa-session-dismiss') {
+                setIsSessionDismissed(e.newValue === 'true');
+            } else if (e.key === 'kdufoot-pwa-permanent-dismiss') {
+                setIsPermanentlyDismissed(e.newValue === 'true');
+            }
+        };
+        window.addEventListener('storage', storageHandler);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handler);
+            window.removeEventListener('storage', storageHandler);
+        };
     }, []);
 
     const installPWA = async () => {
@@ -75,7 +89,7 @@ export function usePWAInstall() {
             localStorage.setItem('kdufoot-pwa-permanent-dismiss', 'true');
             setIsPermanentlyDismissed(true);
         } else {
-            sessionStorage.setItem('kdufoot-pwa-session-dismiss', 'true');
+            localStorage.setItem('kdufoot-pwa-session-dismiss', 'true');
             setIsSessionDismissed(true);
         }
     };

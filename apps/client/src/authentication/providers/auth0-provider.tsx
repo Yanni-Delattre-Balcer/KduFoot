@@ -264,6 +264,46 @@ export const useAuth0Provider = (): AuthProvider => {
     [getAccessToken],
   );
 
+  const patchJson = useCallback(
+    async (url: string, data: any): Promise<any> => {
+      try {
+        const accessToken = await getAccessToken();
+
+        const apiResponse = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (!apiResponse.ok) {
+          const errorText = await apiResponse.text().catch(() => "");
+          let errorJson: any = {};
+          try {
+            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+              errorJson = JSON.parse(errorText);
+            }
+          } catch (e) { /* ignore */ }
+          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+        }
+
+        const contentType = apiResponse.headers.get("Content-Type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response format: Expected JSON");
+        }
+
+        return await apiResponse.json();
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error patching JSON:", error);
+        throw error;
+      }
+    },
+    [getAccessToken],
+  );
+
   const deleteJson = useCallback(
     async (url: string): Promise<any> => {
       try {
@@ -356,6 +396,7 @@ export const useAuth0Provider = (): AuthProvider => {
       getJson,
       postJson,
       putJson,
+      patchJson,
       deleteJson,
     }),
     [
@@ -369,6 +410,7 @@ export const useAuth0Provider = (): AuthProvider => {
       getJson,
       postJson,
       putJson,
+      patchJson,
       deleteJson,
     ],
   );

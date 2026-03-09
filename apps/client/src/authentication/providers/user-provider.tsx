@@ -31,7 +31,7 @@ export const UserContext = createContext<UserContextType | undefined>(undefined)
 const CONTEXT_KEY = '/api/me/context';
 
 export function UserProvider({ children }: { children: ReactNode }) {
-    const { getJson, postJson, putJson, isAuthenticated, logout } = useAuth();
+    const { getJson, postJson, putJson, patchJson, isAuthenticated, logout } = useAuth();
     const [isOnline, setIsOnline] = useState(navigator.onLine);
 
     useEffect(() => {
@@ -103,7 +103,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     };
 
     const blockUser = async (userId: string, isBlocked: boolean, reason?: string) => {
-        await postJson(`${import.meta.env.API_BASE_URL}/api/admin/users/${userId}/block`, { is_blocked: isBlocked, block_reason: reason });
+        await patchJson(`${import.meta.env.API_BASE_URL}/api/admin/users/${userId}/block`, { is_blocked: isBlocked, block_reason: reason });
         await mutate(CONTEXT_KEY);
     };
 
