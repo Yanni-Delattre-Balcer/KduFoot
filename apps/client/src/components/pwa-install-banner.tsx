@@ -5,7 +5,7 @@ import { usePWAInstall } from '@/hooks/use-pwa-install';
 import { useAuth } from '@/authentication/providers/use-auth';
 
 export const PwaInstallBanner = () => {
-    const { deferredPrompt, isStandalone, isIOS, isPermanentlyDismissed, installPWA, dismissPrompt } = usePWAInstall();
+    const { deferredPrompt, isStandalone, isIOS, isPermanentlyDismissed, isSessionDismissed, installPWA, dismissPrompt } = usePWAInstall();
     const { isAuthenticated, isLoading } = useAuth();
     const [isVisible, setIsVisible] = useState(false);
     const [showIOSHint, setShowIOSHint] = useState(false);
@@ -22,16 +22,20 @@ export const PwaInstallBanner = () => {
     }, [showIOSHint, showPCHint]);
 
     useEffect(() => {
-        // Strict visibility logic
-        if (isLoading || !isAuthenticated || isStandalone || isPermanentlyDismissed) {
+        // Strict visibility logic:
+        // - Don't show while loading or if not authenticated
+        // - Don't show if already installed (standalone)
+        // - Don't show if permanently dismissed ("Je l'ai déjà")
+        // - Don't show if session-dismissed ("Plus tard") — resets on next login
+        if (isLoading || !isAuthenticated || isStandalone || isPermanentlyDismissed || isSessionDismissed) {
             setIsVisible(false);
             return;
         }
 
-        // Show systematically if not standalone and not dismissed permanently
+        // Show only when authenticated and not dismissed in any way
         setIsVisible(true);
 
-    }, [isAuthenticated, isLoading, isStandalone, isPermanentlyDismissed]);
+    }, [isAuthenticated, isLoading, isStandalone, isPermanentlyDismissed, isSessionDismissed]);
 
     if (!isVisible) return null;
 

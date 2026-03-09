@@ -2,7 +2,7 @@ import { createContext, useCallback, ReactNode, useMemo, useContext, useState, u
 import useSWR, { mutate } from 'swr';
 import { User } from '@/types/user.types';
 import { isProfileComplete } from '@/utils/profile';
-import { useWebSocketSync, WebSocketStatus } from '@/hooks/use-websocket';
+import { useWebSocketSync, WebSocketStatus, BanStatus } from '@/hooks/use-websocket';
 import { useAuth } from './use-auth';
 
 interface UserContextType {
@@ -33,6 +33,7 @@ const CONTEXT_KEY = '/api/me/context';
 export function UserProvider({ children }: { children: ReactNode }) {
     const { getJson, postJson, putJson, patchJson, isAuthenticated, logout } = useAuth();
     const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [localBanOverride, setLocalBanOverride] = useState<BanStatus | null>(null);
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
@@ -54,7 +55,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
         } catch (error: any) {
             if (error.message.includes('403')) {
                 const err = new Error('403_FORBIDDEN');
-                (err as any).reason = error.message;
+                // Attempt to extract reason if error message starts with our prefix
+                const prefix = "Votre compte a été suspendu pour le motif suivant : ";
+                if (error.message.startsWith(prefix)) {
+                    (err as any).reason = error.message.replace(prefix, "");
+                } else {
+                    (err as any).reason = error.message;
+                }
                 throw err;
             }
             throw error;
@@ -76,9 +83,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const notifications = data?.notifications || { pendingRequests: 0, modifiedParticipations: 0 };
     const profileComplete = isProfileComplete(user);
 
-    const { status: syncStatus } = useWebSocketSync(isAuthenticated, user?.id);
+    const { status: syncStatus } = useWebSocketSync(isAuthenticated, user?.id, (status) => {
+        console.log('[UserProvider] Ban status change detected:', status);
+        setLocalBanOverride(status);
+    });
 
-    const isBlocked = !!user?.is_blocked || error?.message === '403_FORBIDDEN';
+    const isBlocked = localBanOverride?.isBanned || !!user?.is_blocked || error?.message === '403_FORBIDDEN';
 
     // SÉCURITÉ : Connecté + profil incomplet = verrouillé (le DataWall est le gardien)
     const isLocked = isAuthenticated && (!user || !isProfileComplete(user, true)) && !isBlocked;
@@ -149,14 +159,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
                         {/* Title */}
                         <h1 className="text-xl sm:text-2xl font-black text-red-500 uppercase tracking-tight leading-tight">
-                            VOUS AVEZ ÉTÉ BANNI PAR L'ADMINISTRATEUR KDUFOOT
+                            VOTRE COMPTE A ÉTÉ SUSPENDU PAR L'ADMINISTRATEUR KDUFOOT
                         </h1>
 
                         {/* Motif */}
                         <div className="w-full bg-red-950/40 border border-red-800/40 rounded-2xl p-4">
-                            <p className="text-xs sm:text-sm font-bold text-red-400/60 uppercase tracking-widest mb-1">Motif du bannissement</p>
+                            <p className="text-xs sm:text-sm font-bold text-red-400/60 uppercase tracking-widest mb-1">
+                                Votre compte a été suspendu pour le motif suivant :
+                            </p>
                             <p className="text-sm sm:text-base font-semibold text-white/90 leading-relaxed">
-                                {user?.block_reason || (error as any)?.reason || 'Aucun motif spécifié'}
+                                {localBanOverride?.reason || user?.block_reason || (error as any)?.reason || 'Aucun motif spécifié'}
                             </p>
                         </div>
 

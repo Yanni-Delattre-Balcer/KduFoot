@@ -4,7 +4,12 @@ import { addToast } from "@heroui/toast";
 
 export type WebSocketStatus = 'connected' | 'connecting' | 'disconnected';
 
-export function useWebSocketSync(enabled: boolean = true, userId?: string) {
+export interface BanStatus {
+    isBanned: boolean;
+    reason?: string;
+}
+
+export function useWebSocketSync(enabled: boolean = true, userId?: string, onBanStatusChange?: (status: BanStatus) => void) {
     const { mutate } = useSWRConfig();
     const [status, setStatus] = useState<WebSocketStatus>(enabled ? 'connecting' : 'disconnected');
     const wsRef = useRef<WebSocket | null>(null);
@@ -119,14 +124,24 @@ export function useWebSocketSync(enabled: boolean = true, userId?: string) {
                                 title = 'Compte Bloqué';
                                 // Force instant revalidation of user context to show block screen
                                 mutate('/api/me/context');
+                                if (onBanStatusChange) {
+                                    onBanStatusChange({ isBanned: true, reason: payload.data?.reason || payload.message });
+                                }
                                 break;
                             case 'USER_UNBANNED':
                                 color = 'success';
                                 title = 'Compte Débloqué';
                                 // Force instant revalidation so blocked screen disappears
                                 mutate('/api/me/context');
+                                if (onBanStatusChange) {
+                                    onBanStatusChange({ isBanned: false });
+                                }
                                 break;
                         }
+
+                        // Don't show toast for banning/unbanning if we handle it via global state
+                        // to avoid overlapping UI, or just show it anyway for visibility.
+                        // The user asked for "instant interception", so we show the screen.
 
                         addToast({
                             title,

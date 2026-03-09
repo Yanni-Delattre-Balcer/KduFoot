@@ -194,8 +194,9 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
                 notificationType: body.is_blocked ? 'USER_BANNED' : 'USER_UNBANNED',
                 targetUserId: (targetUser as any).auth0_sub,
                 message: body.is_blocked
-                    ? `Votre compte a été bloqué. Motif : ${body.block_reason || 'Non spécifié'}`
-                    : 'Votre compte a été débloqué. Vous pouvez à nouveau utiliser la plateforme.',
+                    ? (body.block_reason || 'Aucun motif spécifié')
+                    : 'Votre compte a été débloqué.',
+                data: { reason: body.block_reason }
             });
             return Response.json({ success: true, message: `User ${body.is_blocked ? 'blocked' : 'unblocked'}` }, { headers: router.corsHeaders });
         } catch (e: any) {

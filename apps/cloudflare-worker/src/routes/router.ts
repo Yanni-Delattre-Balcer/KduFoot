@@ -279,6 +279,32 @@ export class Router {
 				}
 
 				(request as any).user = payload;
+
+				// GLOBAL GUARD: Check if user is blocked in the D1 database
+				const userId = payload.sub;
+				if (userId) {
+					try {
+						const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(userId).first();
+						if (dbUser && (dbUser as any).is_blocked) {
+							return new Response(
+								JSON.stringify({
+									success: false,
+									error: "Votre compte a été suspendu pour le motif suivant : " + ((dbUser as any).block_reason || "Aucun motif spécifié"),
+									reason: (dbUser as any).block_reason || "Aucun motif spécifié",
+									is_blocked: true
+								}),
+								{
+									status: 403,
+									headers: { ...this.corsHeaders },
+								},
+							);
+						}
+					} catch (e) {
+						// eslint-disable-next-line no-console
+						console.error("Failed to check block status:", e);
+						// Continue if DB check fails to avoid total lockout on DB transient issues
+					}
+				}
 			}
 
 			(request as any).params = match;
