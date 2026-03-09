@@ -171,7 +171,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         notifications
     }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, isOnline, syncStatus, notifications, logout]);
 
-    if (isLoading && isAuthenticated && !isBlocked) {
+    if (isLoading && isAuthenticated && !isBlocked && !user) {
         return (
             <UserContext.Provider value={value}>
                 <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black">

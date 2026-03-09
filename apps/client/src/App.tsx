@@ -61,7 +61,7 @@ function App() {
   // On bloque le rendu si on attend l'auth. 
   // Si on est authentifié, on exige d'avoir un profil 'user' chargé AVANT de montrer le site.
   // Cela empêche d'afficher le Dashboard si la requête context échoue (401/403).
-  if (authLoading || (isAuthenticated && (userLoading || !user))) {
+  if (authLoading || (isAuthenticated && userLoading && !user)) {
     return <SiteLoading />;
   }
 

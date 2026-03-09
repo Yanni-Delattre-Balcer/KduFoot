@@ -47,16 +47,16 @@ export default function MatchesPage() {
         setSearchParams(nextParams, { replace: true });
     }, [view, type, setSearchParams]);
 
-    // Smooth scroll logic
-    useEffect(() => {
-        const scrollTs = searchParams.get('scroll_ts');
-        if (scrollTs) {
-            const element = document.getElementById('results-list');
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-    }, [searchParams]);
+    // Smooth scroll logic removed to prevent jumps during WebSocket updates
+    // useEffect(() => {
+    //     const scrollTs = searchParams.get('scroll_ts');
+    //     if (scrollTs) {
+    //         const element = document.getElementById('results-list');
+    //         if (element) {
+    //             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //         }
+    //     }
+    // }, [searchParams]);
 
     const [displayMode, setDisplayMode] = useState<'list' | 'calendar'>('list');
     const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -257,9 +257,6 @@ export default function MatchesPage() {
                                     color={view === 'find' ? (type === 'match' ? "secondary" : "default") : "default"}
                                     onPress={() => {
                                         setView('find');
-                                        setTimeout(() => {
-                                            document.getElementById('results-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                        }, 100);
                                     }}
                                     className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'find' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200"}`}
                                     startContent={
@@ -276,9 +273,6 @@ export default function MatchesPage() {
                                     color={view === 'create' ? (type === 'match' ? "secondary" : "default") : "default"}
                                     onPress={() => {
                                         setView('create');
-                                        setTimeout(() => {
-                                            document.getElementById('results-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                        }, 100);
                                     }}
                                     className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200"}`}
                                     startContent={
@@ -686,7 +680,7 @@ export default function MatchesPage() {
                                             ))}
                                         </div>
 
-                                        {isLoading && (
+                                        {isLoading && filteredMatches.length === 0 && (
                                             <div className="flex justify-center py-20">
                                                 <Spinner color="secondary" size="lg" />
                                             </div>
