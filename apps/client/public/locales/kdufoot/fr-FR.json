@@ -479,6 +479,7 @@
       "license_placeholder": "Saisir votre numéro",
       "hq_address": "Adresse du Siège (Officielle)",
       "stadium_address": "Adresse du Stade (Obligatoire)",
+      "stadium_address_for": "Adresse du Stade ({{club}})",
       "stadium_placeholder": "Ex : Complexe Sportif, 12 rue des Fleurs",
       "stadium_locked": "L'adresse du stade est verrouillée. Contactez le support pour toute modification.",
       "stadium_warning": "Attention : cette adresse est indispensable pour guider les joueurs lors des matchs.",
@@ -674,7 +675,8 @@
     },
     "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
     "toasts": {
-      "delete_success": "Annonce supprimée avec succès"
+      "delete_success": "Annonce supprimée avec succès",
+      "all_read_success": "Toutes les modifications ont été validées"
     },
     "profile_modal": {
       "title": "Profil du Club",
@@ -695,7 +697,9 @@
       "manage_registrations": "Gérer les demandes",
       "contact": "📞 Contacter",
       "itinerary": "📍 Itinéraire",
-      "new": "Nouvelle Annonce"
+      "new": "Nouvelle Annonce",
+      "view_changes": "VOIR LES CHANGEMENTS",
+      "mark_all_read": "TOUT VALIDER"
     },
     "status": {
       "accepted": "Accepté",

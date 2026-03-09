@@ -23,7 +23,9 @@ export type NotificationType =
     | 'MATCH_CANCELLED'
     | 'NEW_APPLICANT'
     | 'TEAM_WITHDRAWAL'
-    | 'NEW_MATCH_NEARBY';
+    | 'NEW_MATCH_NEARBY'
+    | 'USER_BANNED'
+    | 'USER_UNBANNED';
 
 export interface NotificationPayload {
     type: 'NOTIFICATION';

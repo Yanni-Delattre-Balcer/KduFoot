@@ -675,7 +675,8 @@
     },
     "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
     "toasts": {
-      "delete_success": "Annonce supprimée avec succès"
+      "delete_success": "Annonce supprimée avec succès",
+      "all_read_success": "Toutes les modifications ont été validées"
     },
     "profile_modal": {
       "title": "Profil du Club",
@@ -696,7 +697,9 @@
       "manage_registrations": "Gérer les demandes",
       "contact": "📞 Contacter",
       "itinerary": "📍 Itinéraire",
-      "new": "Nouvelle Annonce"
+      "new": "Nouvelle Annonce",
+      "view_changes": "VOIR LES CHANGEMENTS",
+      "mark_all_read": "TOUT VALIDER"
     },
     "status": {
       "accepted": "Accepté",

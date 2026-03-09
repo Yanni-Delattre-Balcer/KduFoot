@@ -33,7 +33,7 @@ export const ConfirmedTournamentCard = ({
     return (
         <Card
             id={`card-${part.match_id}`}
-            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md ${highlighted ? 'border-danger ring-4 ring-danger/20 animate-pulse' : 'border-purple-400/20 bg-purple-500/5'
+            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md ${highlighted ? 'border-danger ring-4 ring-danger/30 shadow-danger/20' : 'border-purple-400/20 bg-purple-500/5'
                 } group`}
         >
             <CardBody className="p-0">
@@ -67,34 +67,34 @@ export const ConfirmedTournamentCard = ({
                                 <Chip size="sm" color="success" variant="flat" className="font-black uppercase text-xs sm:text-sm py-3 w-full">
                                     {t('dashboard.status.accepted')}
                                 </Chip>
-                                {isTimeChanged && (
-                                    <Button size="sm" color="danger" variant="flat" onPress={() => onMarkAsRead(part.match_id)} className="font-bold text-[10px] w-full mt-1">
-                                        J'AI VU LA MODIFICATION
+                                {(highlighted || isTimeChanged) && (
+                                    <Button size="sm" color="danger" variant="flat" onPress={() => onMarkAsRead(part.match_id)} className="font-bold text-[10px] w-full mt-1 animate-pulse">
+                                        ✓ J'AI VU LES CHANGEMENTS
                                     </Button>
                                 )}
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
-                                <p className="text-sm font-bold text-white">{formatDate(part.match_date)}</p>
+                            <div className={`rounded-xl p-3 border transition-colors ${highlighted ? 'bg-danger/10 border-danger/40' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${highlighted ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.date', 'Date')}</p>
+                                <p className={`text-sm font-bold ${highlighted ? 'text-danger' : 'text-white'}`}>{formatDate(part.match_date)}</p>
                             </div>
-                            <div className={`rounded-xl p-3 border transition-colors ${isTimeChanged ? 'bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isTimeChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.time', 'Heure')}</p>
-                                <p className="text-sm font-bold text-white">{formatTime(part.match_time)}</p>
+                            <div className={`rounded-xl p-3 border transition-colors ${(highlighted || isTimeChanged) ? 'bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${(highlighted || isTimeChanged) ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.time', 'Heure')}</p>
+                                <p className={`text-sm font-bold ${(highlighted || isTimeChanged) ? 'text-danger' : 'text-white'}`}>{formatTime(part.match_time)}</p>
                             </div>
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
-                                <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{part.match_format || '5x5'}</Chip>
+                            <div className={`rounded-xl p-3 border transition-colors ${highlighted ? 'bg-danger/10 border-danger/40' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${highlighted ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.format', 'Format')}</p>
+                                <Chip size="sm" variant="dot" color={highlighted ? 'danger' : 'primary'} className="font-black text-xs border-none p-0">{part.match_format || '5x5'}</Chip>
                             </div>
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('tournamentForm.labels.fee', 'Frais')}</p>
-                                <p className="text-sm font-bold text-green-400">{part.entry_fee ? `${part.entry_fee}€` : t('matchForm.labels.free', 'Gratuit')}</p>
+                            <div className={`rounded-xl p-3 border transition-colors ${highlighted ? 'bg-danger/10 border-danger/40' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${highlighted ? 'text-danger' : 'text-default-400'}`}>{t('tournamentForm.labels.fee', 'Frais')}</p>
+                                <p className={`text-sm font-bold ${highlighted ? 'text-danger' : 'text-green-400'}`}>{part.entry_fee ? `${part.entry_fee}€` : t('matchForm.labels.free', 'Gratuit')}</p>
                             </div>
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5 col-span-2 sm:col-span-1">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
-                                <p className="text-sm font-bold text-white truncate">{part.match_pitch_type || part.opponent_pitch_type || part.pitch_type ? t(`enums.pitch.${part.match_pitch_type || part.opponent_pitch_type || part.pitch_type}`) : '—'}</p>
+                            <div className={`rounded-xl p-3 border transition-colors col-span-2 sm:col-span-1 ${highlighted ? 'bg-danger/10 border-danger/40' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${highlighted ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                <p className={`text-sm font-bold truncate ${highlighted ? 'text-danger' : 'text-white'}`}>{part.match_pitch_type || part.opponent_pitch_type || part.pitch_type ? t(`enums.pitch.${part.match_pitch_type || part.opponent_pitch_type || part.pitch_type}`) : '—'}</p>
                             </div>
                         </div>
 

@@ -114,6 +114,18 @@ export function useWebSocketSync(enabled: boolean = true, userId?: string) {
                                 color = 'primary';
                                 title = 'Nouveau Match à proximité';
                                 break;
+                            case 'USER_BANNED':
+                                color = 'danger';
+                                title = 'Compte Bloqué';
+                                // Force instant revalidation of user context to show block screen
+                                mutate('/api/me/context');
+                                break;
+                            case 'USER_UNBANNED':
+                                color = 'success';
+                                title = 'Compte Débloqué';
+                                // Force instant revalidation so blocked screen disappears
+                                mutate('/api/me/context');
+                                break;
                         }
 
                         addToast({

@@ -73,6 +73,7 @@ export default function DashboardPage() {
     const [requestsSubFilter, setRequestsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
     const [organizedSubFilter, setOrganizedSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
     const [highlightedCardId, setHighlightedCardIdState] = useState<string | null>(null);
+    const [showChanges, setShowChanges] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [selectedClubProfile, setSelectedClubProfile] = useState<any>(null);
 
@@ -136,12 +137,17 @@ export default function DashboardPage() {
     }, [myParticipations, t]);
 
     const setHighlightedCardId = (id: string) => {
-        const element = document.getElementById(`card-${id}`);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setHighlightedCardIdState(id);
-            setTimeout(() => setHighlightedCardIdState(null), 3000);
-        }
+        setHighlightedCardIdState(id);
+        setShowChanges(true);
+        // Wait a tick for React to render (e.g. tab switch) then scroll
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                const element = document.getElementById(`card-${id}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 150);
+        });
     };
 
     // Sécurité H-2 : Verrouillage uniquement dans les 2h AVANT le match
@@ -223,6 +229,20 @@ export default function DashboardPage() {
     const markAsRead = async (matchId: string) => {
         try {
             await markAsReadHook(matchId);
+            // Update knownTimes so change is no longer detected
+            const p = (myParticipations || []).find(p => p.match_id === matchId);
+            if (p) {
+                setKnownTimes(prev => {
+                    const next = { ...prev, [matchId]: p.match_time };
+                    localStorage.setItem('kdufoot_known_match_times', JSON.stringify(next));
+                    return next;
+                });
+            }
+            // Clear highlight if this was the highlighted card
+            if (highlightedCardId === matchId) {
+                setHighlightedCardIdState(null);
+                setShowChanges(false);
+            }
         } catch (e) {
             console.error("Failed to mark as read", e);
         }
@@ -378,6 +398,10 @@ export default function DashboardPage() {
 
     // Notification summary for the "Flash" panel
     const modifiedParticipations = (myParticipations || []).filter(p => p.notification_state === 1);
+    const modifiedMatchIds = new Set(modifiedParticipations.filter(p => p.match_type === 'match').map(p => p.match_id));
+    const modifiedTournamentIds = new Set(modifiedParticipations.filter(p => p.match_type === 'tournament').map(p => p.match_id));
+    const modifiedMatchCount = modifiedMatchIds.size;
+    const modifiedTournamentCount = modifiedTournamentIds.size;
 
     const renderSubFilters = (current: 'all' | 'match' | 'tournament', onChange: (v: 'all' | 'match' | 'tournament') => void) => (
         <div className="flex gap-2 p-1 rounded-xl bg-default-100/50 w-fit">
@@ -486,10 +510,17 @@ export default function DashboardPage() {
                                             size="sm"
                                             className="font-bold uppercase text-xs sm:text-sm px-6"
                                             onPress={() => {
-                                                setHighlightedCardId(modifiedParticipations[0].match_id);
+                                                const first = modifiedParticipations[0];
+                                                // Switch to the correct tab
+                                                if (first.match_type === 'tournament') {
+                                                    setSelectedTab('participations');
+                                                } else {
+                                                    setSelectedTab('confirmed_matches');
+                                                }
+                                                setHighlightedCardId(first.match_id);
                                             }}
                                         >
-                                            {t('dashboard.alerts.view_changes', 'J\'ai vu la modification')}
+                                            {t('dashboard.controls.view_changes', 'VOIR LES CHANGEMENTS')}
                                         </Button>
                                         <Button
                                             color="success"
@@ -860,6 +891,14 @@ export default function DashboardPage() {
                                             {allConfirmedTournaments.length}
                                         </Chip>
                                     )}
+                                    {modifiedTournamentCount > 0 && (
+                                        <span className="relative flex h-5 min-w-5">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"></span>
+                                            <Chip size="sm" variant="solid" color="danger" className="relative h-5 min-w-5 px-1 font-black">
+                                                {modifiedTournamentCount}
+                                            </Chip>
+                                        </span>
+                                    )}
                                 </div>
                             }
                         >
@@ -872,7 +911,7 @@ export default function DashboardPage() {
                                             <ConfirmedTournamentCard
                                                 key={part.match_id}
                                                 participation={part}
-                                                highlighted={highlightedCardId === part.match_id}
+                                                highlighted={highlightedCardId === part.match_id && showChanges}
                                                 isTimeChanged={!!(part.notification_state === 1 && knownTimes[part.match_id] && knownTimes[part.match_id] !== part.match_time)}
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
@@ -901,6 +940,14 @@ export default function DashboardPage() {
                                             {allConfirmedMatches.length}
                                         </Chip>
                                     )}
+                                    {modifiedMatchCount > 0 && (
+                                        <span className="relative flex h-5 min-w-5">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"></span>
+                                            <Chip size="sm" variant="solid" color="danger" className="relative h-5 min-w-5 px-1 font-black">
+                                                {modifiedMatchCount}
+                                            </Chip>
+                                        </span>
+                                    )}
                                 </div>
                             }
                         >
@@ -913,7 +960,7 @@ export default function DashboardPage() {
                                             <ConfirmedMatchCard
                                                 key={idx}
                                                 match={cm}
-                                                highlighted={highlightedCardId === cm.match_id}
+                                                highlighted={highlightedCardId === cm.match_id && showChanges}
                                                 isTimeChanged={!!(cm.notification_state === 1 && knownTimes[cm.match_id] && knownTimes[cm.match_id] !== cm.match_time)}
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}

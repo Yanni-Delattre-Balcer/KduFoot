@@ -5,7 +5,7 @@ import { UserService } from '../services/user.service';
 import { MatchService } from '../services/match.service';
 import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
-import { broadcastDataChanged } from '../utils/broadcast';
+import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast';
 
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
@@ -189,6 +189,14 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
             }
 
             await broadcastDataChanged(env);
+            await broadcastNotification(env, {
+                type: 'NOTIFICATION',
+                notificationType: body.is_blocked ? 'USER_BANNED' : 'USER_UNBANNED',
+                targetUserId: (targetUser as any).auth0_sub,
+                message: body.is_blocked
+                    ? `Votre compte a été bloqué. Motif : ${body.block_reason || 'Non spécifié'}`
+                    : 'Votre compte a été débloqué. Vous pouvez à nouveau utiliser la plateforme.',
+            });
             return Response.json({ success: true, message: `User ${body.is_blocked ? 'blocked' : 'unblocked'}` }, { headers: router.corsHeaders });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
