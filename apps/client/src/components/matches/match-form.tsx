@@ -189,7 +189,6 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     </Button>
                 ) : undefined
             });
-            window.scrollTo(0, 0);
             return;
         }
         if (!user?.club_id) {

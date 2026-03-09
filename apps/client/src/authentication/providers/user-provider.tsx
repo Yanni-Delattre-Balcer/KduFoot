@@ -102,12 +102,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
         }
     }, [isAuthenticated, getAccessToken]);
 
-    const isBlocked = localBanOverride?.isBanned ||
-        !!user?.is_blocked ||
-        error?.message === '403_FORBIDDEN' ||
-        (error && (error as any).status === 403) ||
-        (error && error.message?.includes('Permission refusée')) ||
-        (error && error.message?.includes('401'));
+    const isBlocked = localBanOverride?.isBanned === true ||
+        (localBanOverride?.isBanned !== false && (
+            !!user?.is_blocked ||
+            error?.message === '403_FORBIDDEN' ||
+            (error && (error as any).status === 403) ||
+            (error && error.message?.includes('Permission refusée')) ||
+            (error && error.message?.includes('401'))
+        ));
 
     const { status: syncStatus } = useWebSocketSync(
         isAuthenticated,

@@ -28,10 +28,10 @@ export function useWebSocketSync(
     }, [onBanStatusChange]);
 
     useEffect(() => {
-        // Logique de nettoyage immédiat si désactivé ou banni
-        if (!enabled || isBlocked) {
+        // Logique de nettoyage immédiat si désactivé
+        if (!enabled) {
             if (wsRef.current) {
-                console.log(`[WebSocket] Stopping connection (${!enabled ? 'Disabled' : 'Banned'})`);
+                console.log(`[WebSocket] Stopping connection (Disabled)`);
                 wsRef.current.onclose = null;
                 wsRef.current.onerror = null;
                 wsRef.current.close();
@@ -131,24 +131,17 @@ export function useWebSocketSync(
 
             ws.onclose = (event) => {
                 if (heartbeatInterval) clearInterval(heartbeatInterval);
-                if (!isBlocked) {
-                    console.log(`[WebSocket] Disconnected. Code: ${event.code}, Reason: ${event.reason}, Clean: ${event.wasClean}`);
-                    setStatus('connecting');
-                    // Reconnect on abnormal closure or if we still have token
-                    if (!event.wasClean || event.code === 1006 || (enabled && token)) {
-                        scheduleReconnect();
-                    }
-                } else {
-                    console.log('[WebSocket] Connection closed (User Banned)');
-                    setStatus('disconnected');
+                console.log(`[WebSocket] Disconnected. Code: ${event.code}, Reason: ${event.reason}, Clean: ${event.wasClean}`);
+                setStatus('connecting');
+                // Reconnect on abnormal closure or if we still have token
+                if (!event.wasClean || event.code === 1006 || (enabled && token)) {
+                    scheduleReconnect();
                 }
             };
 
             ws.onerror = (errorEvent) => {
-                if (!isBlocked) {
-                    console.error('[WebSocket] Generic Error occurred:', errorEvent);
-                    console.error('Check DevTools Network tab for more details on the WebSocket connection.');
-                }
+                console.error('[WebSocket] Generic Error occurred:', errorEvent);
+                console.error('Check DevTools Network tab for more details on the WebSocket connection.');
                 if (heartbeatInterval) clearInterval(heartbeatInterval);
                 if (ws.readyState === WebSocket.OPEN) {
                     ws.close();
@@ -157,7 +150,7 @@ export function useWebSocketSync(
         }
 
         function scheduleReconnect() {
-            if (isBlocked || !enabled || !token) return;
+            if (!enabled || !token) return;
             if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
 
             const strategy = [1000, 2000, 5000];

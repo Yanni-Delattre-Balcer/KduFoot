@@ -4,6 +4,7 @@
  */
 
 import { FC, ReactNode, useEffect, useState } from "react";
+import { mutate } from "swr";
 import { Button } from "@heroui/button";
 import { Tooltip } from "@heroui/tooltip";
 import { Link } from "@heroui/link";
@@ -960,9 +961,8 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({ childre
           // Note: "off" is the correct cacheMode for Auth0 SDK to force a network request.
           await getAccessToken({ cacheMode: "off" });
 
-          // Force a full reload to ensure all application components/providers
-          // receive the updated authentication state and permissions.
-          window.location.reload();
+          // Refresh all data silently
+          mutate(() => true, undefined, { revalidate: true });
         }
       } catch (error) {
         // eslint-disable-next-line no-console

@@ -81,7 +81,6 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                 location_city: initialData.location_city || '',
                 pitch_type: initialData.pitch_type || 'Herbe'
             });
-            window.scrollTo(0, 0);
         } else if (user) {
             setFormData(prev => ({
                 ...prev,
@@ -185,7 +184,6 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                     </Button>
                 ) : undefined
             });
-            window.scrollTo(0, 0);
             return;
         }
 
@@ -249,7 +247,6 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                 variant: 'flat',
                 color: 'danger'
             });
-            window.scrollTo(0, 0);
         } finally {
             setIsSaving(false);
         }

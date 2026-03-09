@@ -24,7 +24,6 @@ export default function MatchEditPage() {
     // Force revalidation on mount and scroll to top
     useEffect(() => {
         mutate('/api/me/context');
-        window.scrollTo(0, 0);
     }, [mutate]);
 
     if (isLocked) {
