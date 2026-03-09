@@ -91,7 +91,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const notifications = data?.notifications || { pendingRequests: 0, modifiedParticipations: 0 };
     const profileComplete = isProfileComplete(user);
 
-    const { status: syncStatus } = useWebSocketSync(isAuthenticated, user?.id, (status) => {
+    const { status: syncStatus } = useWebSocketSync(isAuthenticated, user?.auth0_sub, (status) => {
         console.log('[UserProvider] Ban status change detected:', status);
         setLocalBanOverride(status);
     });

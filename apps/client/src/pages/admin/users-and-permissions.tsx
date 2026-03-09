@@ -1313,7 +1313,6 @@ export default function UsersAndPermissionsPage() {
                                                 {/* Super-Pouvoirs Admin: Stadium & Counters */}
                                                 <div className="flex flex-col gap-4 p-4 bg-primary/5 border border-primary/20 rounded-2xl shadow-inner">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-lg">⚙️</span>
                                                         <h3 className="text-sm font-black text-primary uppercase tracking-wider">{t("adminUsersPage.superPowersTitle")}</h3>
                                                     </div>
 
