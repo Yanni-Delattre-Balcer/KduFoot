@@ -45,7 +45,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    const { status: syncStatus } = useWebSocketSync(isAuthenticated);
+    // Hook moved below user definitions
 
     const fetcher = useCallback(async () => {
         if (!isAuthenticated) return null;
@@ -75,6 +75,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const user = data?.user || null;
     const notifications = data?.notifications || { pendingRequests: 0, modifiedParticipations: 0 };
     const profileComplete = isProfileComplete(user);
+
+    const { status: syncStatus } = useWebSocketSync(isAuthenticated, user?.id);
 
     const isBlocked = !!user?.is_blocked || error?.message === '403_FORBIDDEN';
 

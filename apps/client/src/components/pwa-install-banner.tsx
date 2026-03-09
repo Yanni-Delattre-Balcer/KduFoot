@@ -5,7 +5,7 @@ import { usePWAInstall } from '@/hooks/use-pwa-install';
 import { useAuth } from '@/authentication/providers/use-auth';
 
 export const PwaInstallBanner = () => {
-    const { deferredPrompt, isStandalone, isIOS, isPermanentlyDismissed, isSessionDismissed, installPWA, dismissPrompt } = usePWAInstall();
+    const { deferredPrompt, isStandalone, isIOS, isPermanentlyDismissed, installPWA, dismissPrompt } = usePWAInstall();
     const { isAuthenticated, isLoading } = useAuth();
     const [isVisible, setIsVisible] = useState(false);
     const [showIOSHint, setShowIOSHint] = useState(false);
@@ -23,15 +23,15 @@ export const PwaInstallBanner = () => {
 
     useEffect(() => {
         // Strict visibility logic
-        if (isLoading || !isAuthenticated || isStandalone || isPermanentlyDismissed || isSessionDismissed) {
+        if (isLoading || !isAuthenticated || isStandalone || isPermanentlyDismissed) {
             setIsVisible(false);
             return;
         }
 
-        // Show systematically if not standalone and not dismissed
+        // Show systematically if not standalone and not dismissed permanently
         setIsVisible(true);
 
-    }, [isAuthenticated, isLoading, isStandalone, isPermanentlyDismissed, isSessionDismissed]);
+    }, [isAuthenticated, isLoading, isStandalone, isPermanentlyDismissed]);
 
     if (!isVisible) return null;
 

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSWRConfig } from 'swr';
+import { addToast } from "@heroui/toast";
 
 export type WebSocketStatus = 'connected' | 'connecting' | 'disconnected';
 
-export function useWebSocketSync(enabled: boolean = true) {
+export function useWebSocketSync(enabled: boolean = true, userId?: string) {
     const { mutate } = useSWRConfig();
     const [status, setStatus] = useState<WebSocketStatus>(enabled ? 'connecting' : 'disconnected');
     const wsRef = useRef<WebSocket | null>(null);
@@ -36,7 +37,6 @@ export function useWebSocketSync(enabled: boolean = true) {
 
             const heartbeatInterval = setInterval(() => {
                 if (ws.readyState === WebSocket.OPEN) {
-                    console.log('[WebSocket] Sending heartbeat ping');
                     ws.send('ping');
                 }
             }, 30000); // 30 seconds
@@ -49,18 +49,83 @@ export function useWebSocketSync(enabled: boolean = true) {
 
             ws.onmessage = (event) => {
                 if (event.data === 'pong') {
-                    console.log('[WebSocket] Received heartbeat pong');
                     return;
                 }
 
                 if (event.data === 'DATA_CHANGED') {
                     console.log('[WebSocket] Received DATA_CHANGED, revalidating cache...');
-                    // Match keys that are strings and belong to the API namespace
                     mutate(
                         (key) => typeof key === 'string' && key.startsWith('/api/'),
                         (currentData: any) => currentData,
                         { revalidate: true }
                     );
+                    return;
+                }
+
+                try {
+                    const payload = JSON.parse(event.data);
+                    if (payload.type === 'NOTIFICATION') {
+                        // Global cache invalidation usually follows a notification anyway, just to be safe
+                        mutate(
+                            (key) => typeof key === 'string' && key.startsWith('/api/'),
+                            (currentData: any) => currentData,
+                            { revalidate: true }
+                        );
+
+                        // If the notification targets a specific user, check if we are that user
+                        if (payload.targetUserId && payload.targetUserId !== userId) {
+                            return; // Not for us
+                        }
+
+                        // Wait, what if userId is not initialized? Or what if it's a global notification?
+                        // If it reaches here, it either has no targetUserId (global) or matches our userId.
+
+                        // Map notificationType to Toast styling
+                        let color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" = 'primary';
+                        let title = "KduFoot Notification";
+                        let description = payload.message;
+
+                        switch (payload.notificationType) {
+                            case 'ENROLLMENT_ACCEPTED':
+                                color = 'success';
+                                title = 'Inscription Acceptée';
+                                break;
+                            case 'ENROLLMENT_REFUSED':
+                                color = 'warning';
+                                title = 'Inscription Refusée';
+                                break;
+                            case 'MATCH_MODIFIED':
+                                color = 'warning';
+                                title = 'Modification d\'événement';
+                                break;
+                            case 'MATCH_CANCELLED':
+                                color = 'danger';
+                                title = 'Événement Annulé';
+                                break;
+                            case 'NEW_APPLICANT':
+                                color = 'secondary';
+                                title = 'Nouvelle Candidature';
+                                break;
+                            case 'TEAM_WITHDRAWAL':
+                                color = 'danger';
+                                title = 'Désistement';
+                                break;
+                            case 'NEW_MATCH_NEARBY':
+                                color = 'primary';
+                                title = 'Nouveau Match à proximité';
+                                break;
+                        }
+
+                        addToast({
+                            title,
+                            description,
+                            color,
+                            variant: 'solid',
+                            timeout: 6000
+                        });
+                    }
+                } catch (e) {
+                    // Not JSON or unknown format, ignore safely
                 }
             };
 

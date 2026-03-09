@@ -1,11 +1,10 @@
-
 import { Router } from './router';
 import { Env } from '../types/env';
 import { MatchService } from '../services/match.service';
 import { CreateMatchDto, UpdateMatchDto, ContactMatchDto } from '../types/match';
 import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
-import { broadcastDataChanged } from '../utils/broadcast';
+import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast';
 
 export const setupMatchRoutes = (router: Router, env: Env) => {
     const matchService = new MatchService(env.DB);
@@ -342,6 +341,12 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             const match = await matchService.update(params.id, dbUser.id, dto);
             if (!match) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
+            await broadcastNotification(env, {
+                type: 'NOTIFICATION',
+                notificationType: 'MATCH_MODIFIED',
+                message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été modifié.' : 'Un match auquel vous participez a été modifié.',
+                data: { matchId: params.id }
+            });
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -389,6 +394,12 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             const success = await matchService.delete(params.id, dbUser.id);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
+            await broadcastNotification(env, {
+                type: 'NOTIFICATION',
+                notificationType: 'MATCH_CANCELLED',
+                message: 'Un événement a été annulé par l\'organisateur.',
+                data: { matchId: params.id }
+            });
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -498,8 +509,18 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const dto = await request.json() as ContactMatchDto;
 
         try {
+            const matchInfo = await env.DB.prepare('SELECT owner_id FROM matches WHERE id = ?').bind(params.id).first<{ owner_id: string }>();
             const success = await matchService.contact(params.id, dbUser.id, dto);
             await broadcastDataChanged(env);
+            if (success && matchInfo) {
+                await broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: 'NEW_APPLICANT',
+                    targetUserId: matchInfo.owner_id,
+                    message: 'Nouvelle candidature pour votre événement !',
+                    data: { matchId: params.id }
+                });
+            }
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -563,6 +584,15 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         try {
             const success = await matchService.updateRequestStatus(params.matchId, params.userId, dbUser.id, body.status);
             await broadcastDataChanged(env);
+            if (success) {
+                await broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
+                    targetUserId: params.userId,
+                    message: body.status === 'accepted' ? 'Votre candidature a été acceptée !' : 'Votre candidature n\'a pas été retenue.',
+                    data: { matchId: params.matchId }
+                });
+            }
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -610,8 +640,21 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         }
 
         try {
+            const matchInfo = await env.DB.prepare('SELECT owner_id FROM matches WHERE id = ?').bind(params.matchId).first<{ owner_id: string }>();
             const success = await matchService.deleteContact(params.matchId, params.userId, dbUser.id);
             await broadcastDataChanged(env);
+
+            // If the user withdrew themselves
+            if (success && params.userId === dbUser.id && matchInfo && matchInfo.owner_id !== dbUser.id) {
+                await broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: 'TEAM_WITHDRAWAL',
+                    targetUserId: matchInfo.owner_id,
+                    message: 'Une équipe a annulé sa participation.',
+                    data: { matchId: params.matchId }
+                });
+            }
+
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

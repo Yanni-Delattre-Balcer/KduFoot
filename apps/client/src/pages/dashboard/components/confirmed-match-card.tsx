@@ -143,16 +143,6 @@ export const ConfirmedMatchCard = ({
                         </div>
 
                         <div className="space-y-3">
-                            {match.notification_state === 1 && (
-                                <Button
-                                    size="sm"
-                                    color="danger"
-                                    className="w-full font-black uppercase text-xs sm:text-sm h-10 shadow-lg shadow-danger/20"
-                                    onPress={() => onMarkAsRead(match.match_id)}
-                                >
-                                    {t('dashboard.labels.view_changes')}
-                                </Button>
-                            )}
                             <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                     size="sm"
