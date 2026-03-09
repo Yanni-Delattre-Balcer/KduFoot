@@ -41,6 +41,7 @@ export {
   AuthenticationGuard,
   AuthenticationGuardWithPermission,
   useSecuredApi,
+  BlockedPage,
 } from "./auth-components";
 
 export { UserSync } from "./user-sync";

@@ -18,7 +18,8 @@
 import { Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { SiteLoading } from "./components/site-loading";
-import { AuthenticationGuard, useAuth, UserSync } from "./authentication";
+import { AuthenticationGuard, useAuth, UserSync, useUser, BlockedPage } from "./authentication";
+
 import { PageNotFound } from "./pages/404";
 import { PwaInstallBanner } from "./components/pwa-install-banner";
 
@@ -48,9 +49,19 @@ import AccountPage from "@/pages/account";
 
 
 function App() {
-  const { isLoading } = useAuth();
+  const { isBlocked, isLoading: userLoading, user } = useUser();
+  const { isLoading: authLoading, isAuthenticated } = useAuth();
 
-  if (isLoading) {
+  // 1. PRIORITÉ ABSOLUE : NUCLEAR GUARD (Court-circuit immédiat)
+  if (isBlocked) {
+    return <BlockedPage isBlocked={true} />;
+  }
+
+  // 2. CHARGEMENT / ÉTANCHÉITÉ : 
+  // On bloque le rendu si on attend l'auth. 
+  // Si on est authentifié, on exige d'avoir un profil 'user' chargé AVANT de montrer le site.
+  // Cela empêche d'afficher le Dashboard si la requête context échoue (401/403).
+  if (authLoading || (isAuthenticated && (userLoading || !user))) {
     return <SiteLoading />;
   }
 

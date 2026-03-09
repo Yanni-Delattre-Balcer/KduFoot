@@ -33,15 +33,11 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
     // AUTH0_CLIENT_ID
     // AUTH0_AUDIENCE
     // AUTH0_SCOPE
-    const redirectUri = new URL(
-      import.meta.env.BASE_URL || "/",
-      window.location.origin,
-    ).toString();
 
     return (
       <Auth0Provider
         authorizationParams={{
-          redirect_uri: redirectUri,
+          redirect_uri: window.location.origin,
           audience: import.meta.env.AUTH0_AUDIENCE,
           scope: import.meta.env.AUTH0_SCOPE,
         }}
@@ -55,7 +51,7 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
           window.history.replaceState(
             {},
             document.title,
-            "/"
+            window.location.origin
           );
         }}
       >

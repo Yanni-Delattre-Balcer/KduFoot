@@ -40,20 +40,21 @@ export const useAuth0Provider = (): AuthProvider => {
   } = useAuth0();
 
   const login = useCallback(async (options?: LoginOptions): Promise<void> => {
-    return loginWithRedirect(options as RedirectLoginOptions);
+    return loginWithRedirect({
+      ...options,
+      authorizationParams: {
+        ...options?.authorizationParams,
+        redirect_uri: window.location.origin,
+      },
+    } as RedirectLoginOptions);
   }, [loginWithRedirect]);
 
   const logout = useCallback(async (options?: LogoutOptions): Promise<void> => {
     const auth0Options: Auth0LogoutOptions = {
       ...options,
       logoutParams: {
-        returnTo:
-          options?.logoutParams?.returnTo ||
-          new URL(
-            import.meta.env.BASE_URL || "/",
-            window.location.origin,
-          ).toString(),
         ...options?.logoutParams,
+        returnTo: window.location.origin,
       },
     };
 
@@ -161,6 +162,22 @@ export const useAuth0Provider = (): AuthProvider => {
   // Simple in-memory request cache to dedupe identical requests while active
   const requestCacheRef = useRef<Map<string, Promise<any>>>(new Map());
 
+  const handleGlobalError = useCallback(async (response: Response) => {
+    if (response.status === 403) {
+      const text = await response.clone().text().catch(() => "");
+      try {
+        const json = JSON.parse(text);
+        if (json.is_blocked || json.error === "403_FORBIDDEN" || (json.error && json.error.includes("suspendu"))) {
+          // Signal global pour le Nuclear Guard
+          const event = new CustomEvent("user_banned_signal", { detail: { reason: json.error || json.block_reason } });
+          window.dispatchEvent(event);
+        }
+      } catch (e) {
+        // Not JSON or other error
+      }
+    }
+  }, []);
+
   const getJson = useCallback(
     async (url: string): Promise<any> => {
       try {
@@ -180,16 +197,21 @@ export const useAuth0Provider = (): AuthProvider => {
           });
 
           if (!apiResponse.ok) {
+            await handleGlobalError(apiResponse);
             const errorText = await apiResponse.text().catch(() => "");
             let errorJson: any = {};
             try {
               if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
                 errorJson = JSON.parse(errorText);
               }
-            } catch (e) {
-              // Ignore parse error
+            } catch (e) { /* ignore parse error */ }
+
+            const error = new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+            if (apiResponse.status === 403) {
+              (error as any).status = 403;
+              (error as any).isBlocked = true;
             }
-            throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+            throw error;
           }
 
           const contentType = apiResponse.headers.get("Content-Type");
@@ -239,6 +261,7 @@ export const useAuth0Provider = (): AuthProvider => {
         });
 
         if (!apiResponse.ok) {
+          await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
           let errorJson: any = {};
           try {
@@ -279,6 +302,7 @@ export const useAuth0Provider = (): AuthProvider => {
         });
 
         if (!apiResponse.ok) {
+          await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
           let errorJson: any = {};
           try {
@@ -318,6 +342,7 @@ export const useAuth0Provider = (): AuthProvider => {
         });
 
         if (!apiResponse.ok) {
+          await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
           let errorJson: any = {};
           try {
@@ -358,6 +383,7 @@ export const useAuth0Provider = (): AuthProvider => {
         });
 
         if (!apiResponse.ok) {
+          await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
           let errorJson: any = {};
           try {

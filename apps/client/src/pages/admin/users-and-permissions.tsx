@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useState, useRef } from "react";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/button";
 import { Checkbox } from "@heroui/checkbox";
 import {
@@ -118,8 +118,6 @@ export default function UsersAndPermissionsPage() {
     const [isSyncing, setIsSyncing] = useState(false);
     const [isUpToDate, setIsUpToDate] = useState<boolean | null>(null);
 
-    const [blockingUserId, setBlockingUserId] = useState<string | null>(null);
-    const [blockReason, setBlockReason] = useState("");
 
     // SIRET UI states
     const [siretData, setSiretData] = useState<{
@@ -305,7 +303,6 @@ export default function UsersAndPermissionsPage() {
             // Force role_blocked based on our D1 truth instead of Auth0
             const userInList = users.find(u => u.user_id === userId);
             permState['role_blocked'] = !!userInList?.blocked;
-            setBlockReason(userInList?.block_reason || "");
 
             setEditing((prev) => ({ ...prev, [userId]: permState }));
         } catch (err) {
@@ -456,7 +453,7 @@ export default function UsersAndPermissionsPage() {
             // Execute D1 Blocking Logic
             if (handleBlockLogic) {
                 if (targetBlockState) {
-                    await blockUser(userId, true, blockReason || undefined);
+                    await blockUser(userId, true, "Suspension administrative");
                 } else {
                     await blockUser(userId, false);
                 }
@@ -486,7 +483,7 @@ export default function UsersAndPermissionsPage() {
                 let newBlockReason = u.block_reason;
                 if (handleBlockLogic) {
                     newBlockedState = targetBlockState;
-                    newBlockReason = targetBlockState ? blockReason : null;
+                    newBlockReason = targetBlockState ? "Suspension administrative" : null;
                     if (targetBlockState && !updatedPerms.includes(Permission.ROLE_BLOCKED)) {
                         updatedPerms.push(Permission.ROLE_BLOCKED);
                     } else if (!targetBlockState) {
@@ -566,24 +563,20 @@ export default function UsersAndPermissionsPage() {
             return;
         }
 
-        // Find the user's D1 ID (we need to look it up)
-        // The admin.ts route accepts Auth0 user_id and looks it up by ID in the path
-        // But our blockUser expects the D1 user ID. Let's use the Auth0 sub to query.
-        // Actually, looking at the admin route, it accepts the D1 user id in the path.
-        // We don't have the D1 id here. Let's show a prompt for the reason.
-        setBlockingUserId(userId);
-        setBlockReason("");
+        // Blocage immédiat One-Click
+        await confirmBlock(userId);
     };
 
-    const confirmBlock = async (d1UserId: string, onClose?: () => void) => {
+    const confirmBlock = async (d1UserId: string) => {
         try {
-            // Modification optimiste de l'état local pour rafraîchir le bouton instantanément (MOVED TO FRONT)
+            const defaultReason = "Suspension administrative";
+            // Modification optimiste de l'état local
             setUsers(prev => prev.map(u => {
                 if (u.user_id !== d1UserId) return u;
                 return {
                     ...u,
                     blocked: true,
-                    block_reason: blockReason || undefined,
+                    block_reason: defaultReason,
                     app_metadata: {
                         ...u.app_metadata,
                         permissions: [Permission.ROLE_BLOCKED]
@@ -591,27 +584,15 @@ export default function UsersAndPermissionsPage() {
                 };
             }));
 
-            // Force update editing state if the pane is open (MOVED TO FRONT)
+            // Force update editing state if the pane is open
             const newPerms: Record<string, boolean> = {};
             KDUFOOT_PERMISSIONS.forEach(p => {
                 newPerms[p.key] = p.key === 'role_blocked';
             });
             setEditing(prev => ({ ...prev, [d1UserId]: newPerms }));
 
-            await blockUser(d1UserId, true, blockReason);
-
-            if (mgmtToken) {
-                const permsToRemove = KDUFOOT_PERMISSIONS
-                    .filter(p => p.value !== Permission.ROLE_BLOCKED)
-                    .map(p => p.value);
-
-                await removePermissionsFromUser(mgmtToken, d1UserId, permsToRemove).catch(() => { });
-            }
-
-            if (onClose) onClose();
-            setBlockingUserId(null);
-            setBlockReason("");
-            addToast({ title: "Utilisateur banni", description: "L'utilisateur et ses matchs ont été supprimés.", color: "danger" });
+            // Action de bannissement réelle (inclut mutate(CONTEXT_KEY))
+            await blockUser(d1UserId, true, defaultReason);
 
             // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
             if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
@@ -751,14 +732,6 @@ export default function UsersAndPermissionsPage() {
                 };
             }));
 
-            // Force update editing state if the pane is open (MOVED TO FRONT)
-            setEditing(prev => {
-                const userEdits = { ...(prev[d1UserId] || {}) };
-                // Remove the blocked role from edits as it's now handled
-                delete userEdits['role_blocked'];
-                return { ...prev, [d1UserId]: userEdits };
-            });
-
             // 1. Débloquer dans D1
             await blockUser(d1UserId, false);
 
@@ -776,8 +749,6 @@ export default function UsersAndPermissionsPage() {
 
             addToast({ title: "Utilisateur débloqué", description: "L'utilisateur a retrouvé ses droits d'Abonné (Free).", variant: "solid", color: "success" });
 
-            // Set reason to empty
-            if (selectedUserId === d1UserId) setBlockReason("");
 
             // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
             if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
@@ -1107,63 +1078,6 @@ export default function UsersAndPermissionsPage() {
                     </>
                 )}
 
-                {/* ─── Modal de blocage avec motif ─────────────────────── */}
-                <Modal
-                    isOpen={!!blockingUserId}
-                    onOpenChange={(open) => { if (!open) { setBlockingUserId(null); setBlockReason(""); } }}
-                    classNames={{
-                        base: "bg-zinc-900 border-2 border-red-600 shadow-2xl shadow-red-900/40 w-full sm:max-w-md",
-                        backdrop: "bg-black/80 backdrop-blur-md"
-                    }}
-                    placement="center"
-                    backdrop="blur"
-                >
-                    <ModalContent>
-                        {(onClose) => (
-                            <>
-                                <ModalHeader className="flex flex-col gap-1">
-                                    <h3 className="text-lg font-black text-red-500 uppercase tracking-tight flex items-center gap-2">
-                                        {t("adminUsersPage.modalBanTitle")}
-                                    </h3>
-                                </ModalHeader>
-                                <ModalBody>
-                                    <p className="text-sm text-default-400 font-medium leading-relaxed">
-                                        <Trans
-                                            i18nKey="adminUsersPage.modalBanDescription"
-                                            components={[<span className="font-bold text-red-500" />]}
-                                        />
-                                    </p>
-                                    <Input
-                                        label={t("adminUsersPage.modalBanReasonLabel")}
-                                        placeholder={t("adminUsersPage.modalBanReasonPlaceholder")}
-                                        variant="bordered"
-                                        value={blockReason}
-                                        onValueChange={setBlockReason}
-                                        classNames={{ inputWrapper: "border-red-600/50 h-12" }}
-                                        autoFocus
-                                    />
-                                </ModalBody>
-                                <ModalFooter>
-                                    <Button
-                                        variant="flat"
-                                        onPress={onClose}
-                                        className="font-bold"
-                                    >
-                                        {t("adminUsersPage.modalBtnCancel")}
-                                    </Button>
-                                    <Button
-                                        color="danger"
-                                        className="font-black uppercase tracking-widest"
-                                        onPress={() => confirmBlock(blockingUserId!, onClose)}
-                                        isDisabled={blockReason.trim().length < 3}
-                                    >
-                                        {t("adminUsersPage.modalBanConfirm")}
-                                    </Button>
-                                </ModalFooter>
-                            </>
-                        )}
-                    </ModalContent>
-                </Modal>
 
                 {/* Panneau d'édition du profil (Modal) */}
                 <Modal
@@ -1263,7 +1177,7 @@ export default function UsersAndPermissionsPage() {
                                                                                 setSiretLoading(true);
                                                                                 try {
                                                                                     const token = await getAccessTokenSilently();
-                                                                                    const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${selectedUserId}/primary-siret`, {
+                                                                                    const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId as string)}/primary-siret`, {
                                                                                         method: 'DELETE',
                                                                                         headers: { Authorization: `Bearer ${token}` }
                                                                                     });
@@ -1360,7 +1274,7 @@ export default function UsersAndPermissionsPage() {
                                                                                 setSiretLoading(true);
                                                                                 try {
                                                                                     const token = await getAccessTokenSilently();
-                                                                                    const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${selectedUserId}/primary-siret`, {
+                                                                                    const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId as string)}/primary-siret`, {
                                                                                         method: 'POST',
                                                                                         headers: {
                                                                                             "Content-Type": "application/json",
@@ -1602,8 +1516,7 @@ export default function UsersAndPermissionsPage() {
                                             isLoading={savingUserId === selectedUserId}
                                             isDisabled={
                                                 modalLoading ||
-                                                Object.keys(editing[selectedUserId ?? ''] ?? {}).length === 0 ||
-                                                (editing[selectedUserId ?? '']?.['role_blocked'] && blockReason.trim().length < 3)
+                                                Object.keys(editing[selectedUserId ?? ''] ?? {}).length === 0
                                             }
                                         >
                                             {t("adminUsersPage.modalBtnSaveModifications")}
