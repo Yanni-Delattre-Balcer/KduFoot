@@ -85,7 +85,6 @@ export function useWebSocketSync(enabled: boolean = true, userId?: string, onBan
                         let color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" = 'primary';
                         let title = "KduFoot Notification";
                         let description = payload.message;
-
                         switch (payload.notificationType) {
                             case 'USER_BANNED':
                                 color = 'danger';
@@ -103,14 +102,48 @@ export function useWebSocketSync(enabled: boolean = true, userId?: string, onBan
                                     onBanStatusChangeRef.current({ isBanned: false });
                                 }
                                 break;
-                            // ... other cases omitted for brevity in chunk but I must keep them if I replace the whole block
-                            case 'ENROLLMENT_ACCEPTED': color = 'success'; title = 'Inscription Acceptée'; break;
-                            case 'ENROLLMENT_REFUSED': color = 'warning'; title = 'Inscription Refusée'; break;
-                            case 'MATCH_MODIFIED': color = 'warning'; title = 'Modification d\'événement'; break;
-                            case 'MATCH_CANCELLED': color = 'danger'; title = 'Événement Annulé'; break;
-                            case 'NEW_APPLICANT': color = 'secondary'; title = 'Nouvelle Candidature'; break;
-                            case 'TEAM_WITHDRAWAL': color = 'danger'; title = 'Désistement'; break;
-                            case 'NEW_MATCH_NEARBY': color = 'primary'; title = 'Nouveau Match à proximité'; break;
+                            case 'MATCH_UPDATE':
+                            case 'MATCH_MODIFIED':
+                                color = 'warning';
+                                title = 'Match Mis à jour';
+                                mutate((key) => typeof key === 'string' && key.includes('/api/matches'));
+                                break;
+                            case 'MATCH_CANCELLED':
+                                color = 'danger';
+                                title = 'Match Annulé';
+                                mutate((key) => typeof key === 'string' && key.includes('/api/matches'));
+                                break;
+                            case 'TOURNAMENT_PUBLISHED':
+                                color = 'success';
+                                title = 'Nouveau Tournoi';
+                                mutate((key) => typeof key === 'string' && key.includes('/api/tournaments'));
+                                break;
+                            case 'REQUEST_RECEIVED':
+                            case 'NEW_APPLICANT':
+                                color = 'primary';
+                                title = 'Nouvelle Demande';
+                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'));
+                                break;
+                            case 'REQUEST_ACCEPTED':
+                            case 'ENROLLMENT_ACCEPTED':
+                                color = 'success';
+                                title = 'Demande Acceptée';
+                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'));
+                                break;
+                            case 'ENROLLMENT_REFUSED':
+                                color = 'warning';
+                                title = 'Demande Refusée';
+                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'));
+                                break;
+                            case 'TEAM_WITHDRAWAL':
+                                color = 'danger';
+                                title = 'Désistement';
+                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'));
+                                break;
+                            case 'NEW_MATCH_NEARBY':
+                                color = 'primary';
+                                title = 'Match à proximité';
+                                break;
                         }
 
                         addToast({ title, description, color, variant: 'solid', timeout: 6000 });
