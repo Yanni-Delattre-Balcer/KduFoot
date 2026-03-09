@@ -528,7 +528,7 @@ export default function UsersAndPermissionsPage() {
             addToast({ title: t("warning"), description: t("adminUsersPage.toasts.protectionSuperAdmin"), variant: "solid", color: "danger" });
             return;
         }
-        if (!window.confirm(t("adminUsersPage.confirmDeletePrefix", { userId }))) return;
+        // Suppression directe sans confirm (ou gérer via un état si nécessaire, mais ici on suit "No Alert")
         try {
             const token = await getAccessTokenSilently();
             const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(userId)}`, {
@@ -1173,21 +1173,19 @@ export default function UsersAndPermissionsPage() {
                                                                         variant="flat"
                                                                         className="font-bold shrink-0"
                                                                         onPress={async () => {
-                                                                            if (confirm(t("adminUsersPage.confirmDetachPrimary"))) {
-                                                                                setSiretLoading(true);
-                                                                                try {
-                                                                                    const token = await getAccessTokenSilently();
-                                                                                    const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId as string)}/primary-siret`, {
-                                                                                        method: 'DELETE',
-                                                                                        headers: { Authorization: `Bearer ${token}` }
-                                                                                    });
-                                                                                    if (res.ok) {
-                                                                                        addToast({ title: t("adminUsersPage.toasts.siretDetached"), color: "success" });
-                                                                                        if (selectedUserId) loadSirets(selectedUserId);
-                                                                                    }
-                                                                                } finally {
-                                                                                    setSiretLoading(false);
+                                                                            setSiretLoading(true);
+                                                                            try {
+                                                                                const token = await getAccessTokenSilently();
+                                                                                const res = await fetch(`${import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId as string)}/primary-siret`, {
+                                                                                    method: 'DELETE',
+                                                                                    headers: { Authorization: `Bearer ${token}` }
+                                                                                });
+                                                                                if (res.ok) {
+                                                                                    addToast({ title: t("adminUsersPage.toasts.siretDetached"), color: "success" });
+                                                                                    if (selectedUserId) loadSirets(selectedUserId);
                                                                                 }
+                                                                            } finally {
+                                                                                setSiretLoading(false);
                                                                             }
                                                                         }}
                                                                     >
@@ -1489,7 +1487,7 @@ export default function UsersAndPermissionsPage() {
                                                 </div>
                                             </>
                                         )}
-                                    </ModalBody>
+                                    </ModalBody >
                                     <ModalFooter className="border-t border-white/5">
                                         <Button
                                             variant="flat"
@@ -1527,6 +1525,6 @@ export default function UsersAndPermissionsPage() {
                     </ModalContent >
                 </Modal>
             </section>
-        </DefaultLayout>
+        </DefaultLayout >
     );
 }

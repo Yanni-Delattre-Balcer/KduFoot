@@ -35,6 +35,9 @@ export default function MatchDetailsPage() {
     const [isCancelling, setIsCancelling] = useState(false);
     const [isAdminDeleting, setIsAdminDeleting] = useState(false);
     const [isBlocking, setIsBlocking] = useState(false);
+    const { isOpen: isBlockOpen, onOpen: onBlockOpen, onOpenChange: onBlockOpenChange } = useDisclosure();
+    const { isOpen: isCloseRegOpen, onOpen: onCloseRegOpen, onOpenChange: onCloseRegOpenChange } = useDisclosure();
+    const { isOpen: isCancelAcceptedOpen, onOpen: onCancelAcceptedOpen, onOpenChange: onCancelAcceptedOpenChange } = useDisclosure();
 
     if (isLoading) {
         return (
@@ -67,7 +70,7 @@ export default function MatchDetailsPage() {
             navigate('/matches');
         } catch (error) {
             console.error("Failed to delete match", error);
-            alert(t('error.delete_failed', 'Erreur lors de la suppression du match'));
+            addToast({ title: "Erreur", description: t('error.delete_failed', 'Erreur lors de la suppression du match'), color: "danger" });
         } finally {
             setIsDeleting(false);
         }
@@ -81,7 +84,7 @@ export default function MatchDetailsPage() {
             onCancelOpenChange();
         } catch (error: any) {
             console.error("Failed to cancel request", error);
-            alert(error.message || "Erreur lors de l'annulation");
+            addToast({ title: "Erreur", description: error.message || "Erreur lors de l'annulation", color: "danger" });
         } finally {
             setIsCancelling(false);
         }
@@ -95,7 +98,7 @@ export default function MatchDetailsPage() {
             navigate('/matches');
         } catch (error: any) {
             console.error("Admin delete failed", error);
-            alert(error.message || "Erreur lors de la suppression admin");
+            addToast({ title: "Erreur", description: error.message || "Erreur lors de la suppression admin", color: "danger" });
         } finally {
             setIsAdminDeleting(false);
         }
@@ -103,8 +106,6 @@ export default function MatchDetailsPage() {
 
     const handleBlockUser = async () => {
         if (!match.owner_id) return;
-        if (!confirm("Voulez-vous vraiment BLOQUER cet utilisateur ? Il ne pourra plus accéder au service.")) return;
-
         setIsBlocking(true);
         try {
             await blockUser(match.owner_id, true);
@@ -196,7 +197,7 @@ export default function MatchDetailsPage() {
                                                 <path fillRule="evenodd" d="M12 1.5a.75.75 0 0 1 .75.75V4.5a.75.75 0 0 1-1.5 0V2.25A.75.75 0 0 1 12 1.5ZM5.636 4.136a.75.75 0 0 1 1.06 0l1.592 1.591a.75.75 0 0 1-1.061 1.06L5.636 5.197a.75.75 0 0 1 0-1.061Zm12.728 0a.75.75 0 0 1 0 1.06l-1.591 1.592a.75.75 0 0 1-1.06-1.061l1.592-1.591a.75.75 0 0 1 1.06 0ZM12 5.25a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM3 12a.75.75 0 0 1 .75-.75h2.25a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 12Zm15 0a.75.75 0 0 1 .75-.75h2.25a.75.75 0 0 1 0 1.5h-2.25A.75.75 0 0 1 18 12ZM6.697 18.364a.75.75 0 0 1 1.06 0l1.591 1.591a.75.75 0 1 1-1.06 1.061l-1.591-1.592a.75.75 0 0 1 0-1.06Zm10.606 0a.75.75 0 0 1 0 1.06l-1.592 1.591a.75.75 0 1 1-1.06-1.06l1.591-1.592a.75.75 0 0 1 1.06 0ZM12 18.75a.75.75 0 0 1 .75.75V21.75a.75.75 0 0 1-1.5 0V19.5a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
                                             </svg>
                                         }
-                                        onPress={handleBlockUser}
+                                        onPress={onBlockOpen}
                                     >
                                         Bloquer l'utilisateur
                                     </Button>
@@ -351,13 +352,7 @@ export default function MatchDetailsPage() {
                                                         color="danger"
                                                         variant="flat"
                                                         className="w-full font-bold text-xs sm:text-sm h-9"
-                                                        onPress={() => {
-                                                            const acceptedContact = match.contacts?.find(c => c.status === 'accepted');
-                                                            const entityName = match.type === 'tournament' ? 'ce tournoi' : 'ce duel';
-                                                            if (confirm(`Attention : Vous allez annuler ${entityName}. L'adversaire sera notifié et l'annonce redeviendra ouverte. Continuer ?`)) {
-                                                                if (acceptedContact) updateRequestStatus(acceptedContact.user_id, 'refused');
-                                                            }
-                                                        }}
+                                                        onPress={onCancelAcceptedOpen}
                                                     >
                                                         {match.type === 'tournament' ? 'Annuler le tournoi' : 'Annuler le duel'}
                                                     </Button>
@@ -373,16 +368,7 @@ export default function MatchDetailsPage() {
                                                     color="success"
                                                     variant="solid"
                                                     className="w-full font-black uppercase tracking-tighter"
-                                                    onPress={async () => {
-                                                        if (confirm("Voulez-vous clôturer manuellement les inscriptions pour ce tournoi ?")) {
-                                                            try {
-                                                                await closeRegistrations();
-                                                                addToast({ title: "Inscriptions closes", description: "Le tournoi est désormais complet.", variant: 'flat', color: 'success' });
-                                                            } catch (e: any) {
-                                                                addToast({ title: "Erreur", description: "Impossible de clôturer", variant: 'flat', color: 'danger' });
-                                                            }
-                                                        }
-                                                    }}
+                                                    onPress={onCloseRegOpen}
                                                 >
                                                     Clôturer les inscriptions
                                                 </Button>
@@ -407,10 +393,12 @@ export default function MatchDetailsPage() {
                                                                         return;
                                                                     }
                                                                     window.location.href = `tel:${match.phone}`;
-                                                                    setTimeout(() => {
+                                                                    setTimeout(async () => {
                                                                         if (user?.club_id && !match.contacts?.some(c => c.user_id === user.id)) {
-                                                                            if (window.confirm("Voulez-vous aussi envoyer vos coordonnées au club sur l'application ?")) {
-                                                                                contactMatch({ message: "Intérêt manifesté (A téléphoné)" }).catch(e => console.error(e));
+                                                                            try {
+                                                                                await contactMatch({ message: "Intérêt manifesté (A téléphoné)" });
+                                                                            } catch (e) {
+                                                                                console.error(e);
                                                                             }
                                                                         }
                                                                     }, 500);
@@ -428,10 +416,12 @@ export default function MatchDetailsPage() {
                                                                         return;
                                                                     }
                                                                     window.location.href = `mailto:${match.email}`;
-                                                                    setTimeout(() => {
+                                                                    setTimeout(async () => {
                                                                         if (user?.club_id && !match.contacts?.some(c => c.user_id === user.id)) {
-                                                                            if (window.confirm("Voulez-vous aussi envoyer vos coordonnées au club sur l'application ?")) {
-                                                                                contactMatch({ message: "Intérêt manifesté (A envoyé un email)" }).catch(e => console.error(e));
+                                                                            try {
+                                                                                await contactMatch({ message: "Intérêt manifesté (A envoyé un email)" });
+                                                                            } catch (e) {
+                                                                                console.error(e);
                                                                             }
                                                                         }
                                                                     }, 500);
@@ -482,11 +472,11 @@ export default function MatchDetailsPage() {
                                                                         return;
                                                                     }
                                                                     if (!user) {
-                                                                        alert("Veuillez vous connecter pour envoyer une demande.");
+                                                                        openGateway("Veuillez vous connecter pour envoyer une demande.");
                                                                         return;
                                                                     }
                                                                     if (!user.club_id) {
-                                                                        alert("Veuillez lier votre club pour envoyer une demande.");
+                                                                        addToast({ title: "Profil incomplet", description: "Veuillez lier votre club pour envoyer une demande.", color: "warning" });
                                                                         return;
                                                                     }
                                                                     try {
@@ -522,12 +512,7 @@ export default function MatchDetailsPage() {
                                                         color="danger"
                                                         variant="flat"
                                                         className="w-full font-bold text-xs sm:text-sm h-9 mt-4"
-                                                        onPress={() => {
-                                                            const entityName = match.type === 'tournament' ? 'ce tournoi' : 'ce match';
-                                                            if (confirm(`Voulez-vous vraiment vous désister de ${entityName} confirmé ? L'organisateur sera averti.`)) {
-                                                                handleCancelRequest();
-                                                            }
-                                                        }}
+                                                        onPress={onCancelOpen}
                                                     >
                                                         {match.type === 'tournament' ? 'Se désister du tournoi' : 'Se désister du match'}
                                                     </Button>
@@ -693,6 +678,67 @@ export default function MatchDetailsPage() {
                                         <Button color="danger" onPress={handleAdminDelete} isLoading={isAdminDeleting} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">
                                             Supprimer définitivement
                                         </Button>
+                                    </ModalFooter>
+                                </>
+                            )}
+                        </ModalContent>
+                    </Modal>
+
+                    {/* Block Confirmation Modal */}
+                    <Modal isOpen={isBlockOpen} onOpenChange={onBlockOpenChange} backdrop="blur">
+                        <ModalContent className="bg-[#1a1a1c] border border-white/10">
+                            {(onClose) => (
+                                <>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Bloquer l'utilisateur</ModalHeader>
+                                    <ModalBody>
+                                        <p className="text-default-400 font-medium">Voulez-vous vraiment BLOQUER cet utilisateur ? Il ne pourra plus accéder à la plateforme.</p>
+                                    </ModalBody>
+                                    <ModalFooter>
+                                        <Button variant="light" onPress={onClose} className="font-bold">Annuler</Button>
+                                        <Button color="danger" onPress={async () => { await handleBlockUser(); onClose(); }} isLoading={isBlocking} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">Bloquer</Button>
+                                    </ModalFooter>
+                                </>
+                            )}
+                        </ModalContent>
+                    </Modal>
+
+                    {/* Close Registrations Modal */}
+                    <Modal isOpen={isCloseRegOpen} onOpenChange={onCloseRegOpenChange} backdrop="blur">
+                        <ModalContent className="bg-[#1a1a1c] border border-white/10">
+                            {(onClose) => (
+                                <>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Clôturer les inscriptions</ModalHeader>
+                                    <ModalBody>
+                                        <p className="text-default-400 font-medium">Voulez-vous clôturer manuellement les inscriptions pour ce tournoi ?</p>
+                                    </ModalBody>
+                                    <ModalFooter>
+                                        <Button variant="light" onPress={onClose} className="font-bold">Annuler</Button>
+                                        <Button color="success" onPress={async () => {
+                                            try { await closeRegistrations(); addToast({ title: "Succès", description: "Inscriptions closes", color: "success" }); onClose(); }
+                                            catch (e) { addToast({ title: "Erreur", description: "Action impossible", color: "danger" }); }
+                                        }} className="font-black uppercase tracking-tighter shadow-lg shadow-success/20">Clôturer</Button>
+                                    </ModalFooter>
+                                </>
+                            )}
+                        </ModalContent>
+                    </Modal>
+
+                    {/* Cancel Accepted Contact Modal (Owner view) */}
+                    <Modal isOpen={isCancelAcceptedOpen} onOpenChange={onCancelAcceptedOpenChange} backdrop="blur">
+                        <ModalContent className="bg-[#1a1a1c] border border-white/10">
+                            {(onClose) => (
+                                <>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Annuler le duel confirmé</ModalHeader>
+                                    <ModalBody>
+                                        <p className="text-default-400 font-medium">Attention : Vous allez annuler ce duel. L'adversaire sera notifié et l'annonce redeviendra ouverte. Continuer ?</p>
+                                    </ModalBody>
+                                    <ModalFooter>
+                                        <Button variant="light" onPress={onClose} className="font-bold">Annuler</Button>
+                                        <Button color="danger" onPress={() => {
+                                            const acceptedContact = match.contacts?.find(c => c.status === 'accepted');
+                                            if (acceptedContact) updateRequestStatus(acceptedContact.user_id, 'refused');
+                                            onClose();
+                                        }} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">Confirmer l'annulation</Button>
                                     </ModalFooter>
                                 </>
                             )}

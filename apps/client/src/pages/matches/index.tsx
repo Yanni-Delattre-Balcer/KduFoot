@@ -119,7 +119,6 @@ export default function MatchesPage() {
 
     const handleCreateSuccess = () => {
         setView('find');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const canUseDistance = !!(user?.club?.latitude && user?.club?.longitude);

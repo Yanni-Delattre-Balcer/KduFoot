@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '@/layouts/default';
 import { useSessions } from '@/hooks/use-sessions';
@@ -15,6 +15,7 @@ import { Spinner } from "@heroui/spinner";
 import { matchService } from '@/services/matches';
 import { useAuth0 } from '@auth0/auth0-react';
 import { showVideoAnalysis } from '@/config/site';
+import { useMatchRequests } from '@/hooks/use-match-requests';
 
 import DataWall from '@/components/data-wall';
 
@@ -24,26 +25,8 @@ export default function SessionPlannerPage() {
     const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');
     const { sessions, isError: isErrorSessions } = useSessions();
     const { matches, isLoading: isLoadingMatches } = useMatches({ ownerId: 'me', include_past: true });
-    const [requests, setRequests] = useState<any[]>([]);
-    const [isLoadingRequests, setIsLoadingRequests] = useState(false);
-
-    useEffect(() => {
-        const fetchRequests = async () => {
-            setIsLoadingRequests(true);
-            try {
-                const token = await getAccessTokenSilently();
-                const res = await matchService.getRequests(token);
-                if (res.success) setRequests(res.requests);
-            } catch (e) {
-                console.error("Failed to fetch requests", e);
-            } finally {
-                setIsLoadingRequests(false);
-            }
-        };
-        if (!showVideoAnalysis || view !== 'exercises') {
-            fetchRequests();
-        }
-    }, [getAccessTokenSilently, view]);
+    const { requests, isLoading: isLoadingRequests, mutate: mutateRequests } = useMatchRequests();
+    const [actioningId, setActioningId] = useState<string | null>(null);
 
     return (
         <DefaultLayout maxWidth="max-w-full">
@@ -242,10 +225,10 @@ export default function SessionPlannerPage() {
                                 <div className="space-y-6">
                                     <div className="flex items-center gap-3 px-2">
                                         <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Demandes Reçues</h2>
-                                        {requests.filter(r => r.request_status === 'pending').length > 0 && (
-                                            <span className="bg-violet-500 px-2 py-0.5 rounded text-xs font-bold text-white leading-tight animate-pulse">
-                                                {requests.filter(r => r.request_status === 'pending').length}
-                                            </span>
+                                        {requests.filter((r: any) => r.request_status === 'pending').length > 0 && (
+                                            <div className="space-y-4">
+                                                <h3 className="font-bold text-sm text-default-500 uppercase tracking-wider px-2">Demandes en attente ({requests.filter((r: any) => r.request_status === 'pending').length})</h3>
+                                            </div>
                                         )}
                                     </div>
 
@@ -254,8 +237,8 @@ export default function SessionPlannerPage() {
                                     ) : requests.length > 0 ? (
                                         <div className="flex flex-col gap-4">
                                             {requests
-                                                .filter(r => view === 'matches' ? r.type === 'match' : r.type === 'tournament')
-                                                .map((request, idx) => (
+                                                .filter((r: any) => view === 'matches' ? r.type === 'match' : r.type === 'tournament')
+                                                .map((request: any, idx: number) => (
                                                     <Card key={idx} className={`bg-[#1e1e20] border ${request.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'}`}>
                                                         <CardBody className="p-4 flex flex-col gap-3">
                                                             <div className="flex items-center gap-3">
@@ -279,12 +262,18 @@ export default function SessionPlannerPage() {
 
                                                             {request.request_status === 'pending' && (
                                                                 <div className="flex gap-2">
-                                                                    <Button size="sm" color="success" className="flex-1 font-black uppercase text-xs sm:text-sm h-8 text-success-950" onPress={async () => {
-                                                                        if (confirm(t('matchForm.confirm.accept', 'Accepter cette demande ?'))) {
+                                                                    <Button
+                                                                        size="sm"
+                                                                        color="success"
+                                                                        isLoading={actioningId === `${request.match_id}-${request.user_id}-accept`}
+                                                                        className="flex-1 font-black uppercase text-xs sm:text-sm h-8 text-success-950"
+                                                                        onPress={async () => {
                                                                             try {
+                                                                                setActioningId(`${request.match_id}-${request.user_id}-accept`);
                                                                                 const token = await getAccessTokenSilently();
                                                                                 await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
-                                                                                window.location.reload();
+                                                                                await mutateRequests();
+                                                                                addToast({ title: "Demande acceptée", color: "success" });
                                                                             } catch (e: any) {
                                                                                 const rawMessage = e.message || "";
                                                                                 let cleanMessage = rawMessage;
@@ -300,15 +289,26 @@ export default function SessionPlannerPage() {
                                                                                     description: cleanMessage === 'TOO_LATE_TO_MODIFY' ? t('error.too_late_to_modify') : cleanMessage,
                                                                                     color: "danger"
                                                                                 });
+                                                                            } finally {
+                                                                                setActioningId(null);
                                                                             }
-                                                                        }
-                                                                    }}>Accepter</Button>
-                                                                    <Button size="sm" variant="flat" color="danger" className="flex-1 font-black uppercase text-xs sm:text-sm h-8" onPress={async () => {
-                                                                        if (confirm(t('matchForm.confirm.refuse', 'Refuser cette demande ?'))) {
+                                                                        }}
+                                                                    >
+                                                                        Accepter
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="flat"
+                                                                        color="danger"
+                                                                        isLoading={actioningId === `${request.match_id}-${request.user_id}-refuse`}
+                                                                        className="flex-1 font-black uppercase text-xs sm:text-sm h-8"
+                                                                        onPress={async () => {
                                                                             try {
+                                                                                setActioningId(`${request.match_id}-${request.user_id}-refuse`);
                                                                                 const token = await getAccessTokenSilently();
                                                                                 await matchService.updateRequestStatus(request.match_id, request.user_id, 'refused', token);
-                                                                                window.location.reload();
+                                                                                await mutateRequests();
+                                                                                addToast({ title: "Demande refusée", color: "danger" });
                                                                             } catch (e: any) {
                                                                                 const rawMessage = e.message || "";
                                                                                 let cleanMessage = rawMessage;
@@ -324,9 +324,13 @@ export default function SessionPlannerPage() {
                                                                                     description: cleanMessage === 'TOO_LATE_TO_MODIFY' ? t('error.too_late_to_modify') : cleanMessage,
                                                                                     color: "danger"
                                                                                 });
+                                                                            } finally {
+                                                                                setActioningId(null);
                                                                             }
-                                                                        }
-                                                                    }}>Refuser</Button>
+                                                                        }}
+                                                                    >
+                                                                        Refuser
+                                                                    </Button>
                                                                 </div>
                                                             )}
 

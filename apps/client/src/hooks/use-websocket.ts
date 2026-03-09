@@ -9,7 +9,13 @@ export interface BanStatus {
     reason?: string;
 }
 
-export function useWebSocketSync(enabled: boolean = true, userId?: string, onBanStatusChange?: (status: BanStatus) => void) {
+export function useWebSocketSync(
+    enabled: boolean = true,
+    userId?: string,
+    onBanStatusChange?: (status: BanStatus) => void,
+    token?: string | null,
+    isBlocked: boolean = false
+) {
     const { mutate } = useSWRConfig();
     const [status, setStatus] = useState<WebSocketStatus>(enabled ? 'connecting' : 'disconnected');
     const wsRef = useRef<WebSocket | null>(null);
@@ -22,8 +28,12 @@ export function useWebSocketSync(enabled: boolean = true, userId?: string, onBan
     }, [onBanStatusChange]);
 
     useEffect(() => {
-        if (!enabled) {
+        // Logique de nettoyage immédiat si désactivé ou banni
+        if (!enabled || isBlocked) {
             if (wsRef.current) {
+                console.log(`[WebSocket] Stopping connection (${!enabled ? 'Disabled' : 'Banned'})`);
+                wsRef.current.onclose = null;
+                wsRef.current.onerror = null;
                 wsRef.current.close();
                 wsRef.current = null;
             }
@@ -35,139 +45,126 @@ export function useWebSocketSync(enabled: boolean = true, userId?: string, onBan
             return;
         }
 
+        // Attendre le token si nous sommes authentifiés
+        if (!token) {
+            if (wsRef.current) {
+                const ws = wsRef.current;
+                ws.onclose = null;
+                ws.onerror = null;
+                ws.onmessage = null;
+                ws.onopen = null;
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.close();
+                }
+                wsRef.current = null;
+            }
+            setStatus('connecting');
+            return;
+        }
+
         function connect() {
             if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
             setStatus('connecting');
             const apiUrl = import.meta.env.API_BASE_URL || import.meta.env.VITE_API_URL || window.location.origin;
-            const wsUrl = apiUrl.replace(/^http/, 'ws').replace(/\/+$/, '') + '/api/ws';
+            let wsUrl = apiUrl.replace(/^http/, 'ws').replace(/\/+$/, '') + '/api/ws';
+
+            if (token) {
+                wsUrl += `?token=${encodeURIComponent(token)}`;
+            }
 
             const ws = new WebSocket(wsUrl);
             wsRef.current = ws;
 
-            const heartbeatInterval = setInterval(() => {
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send('ping');
-                }
-            }, 30000); // 30 seconds
+            let heartbeatInterval: NodeJS.Timeout;
 
             ws.onopen = () => {
                 console.log('[WebSocket] Connected to hub');
                 setStatus('connected');
-                retryCountRef.current = 0; // Reset backoff on successful connection
+                retryCountRef.current = 0; // Reset backoff on success
+
+                heartbeatInterval = setInterval(() => {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        ws.send('ping');
+                    }
+                }, 30000);
             };
 
             ws.onmessage = (event) => {
-                if (event.data === 'pong') {
-                    return;
-                }
-
+                if (event.data === 'pong') return;
                 if (event.data === 'DATA_CHANGED') {
-                    console.log('[WebSocket] Received DATA_CHANGED, revalidating cache...');
-                    mutate(
-                        (key) => typeof key === 'string' && key.startsWith('/api/'),
-                        undefined,
-                        { revalidate: true }
-                    );
+                    mutate((key) => typeof key === 'string' && key.startsWith('/api/'), undefined, { revalidate: true });
                     return;
                 }
 
                 try {
                     const payload = JSON.parse(event.data);
                     if (payload.type === 'NOTIFICATION') {
-                        // Global cache invalidation
-                        mutate((key) => typeof key === 'string' && key.startsWith('/api/'), (currentData: any) => currentData, { revalidate: true });
-
-                        if (payload.targetUserId && payload.targetUserId !== userId) {
-                            return; // Not for us
-                        }
+                        mutate((key) => typeof key === 'string' && key.startsWith('/api/'), (d: any) => d, { revalidate: true });
+                        if (payload.targetUserId && payload.targetUserId !== userId) return;
 
                         let color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" = 'primary';
-                        let title = "KduFoot Notification";
+                        let title = "Notification";
                         let description = payload.message;
+
                         switch (payload.notificationType) {
                             case 'USER_BANNED':
-                                color = 'danger';
-                                title = 'Compte Bloqué';
-                                mutate('/api/me/context');
-                                if (onBanStatusChangeRef.current) {
-                                    onBanStatusChangeRef.current({ isBanned: true, reason: payload.data?.reason || payload.message });
-                                }
+                                color = 'danger'; title = 'Compte Bloqué'; mutate('/api/me/context');
+                                if (onBanStatusChangeRef.current) onBanStatusChangeRef.current({ isBanned: true, reason: payload.data?.reason || payload.message });
                                 break;
                             case 'USER_UNBANNED':
-                                color = 'success';
-                                title = 'Compte Débloqué';
-                                mutate('/api/me/context');
-                                if (onBanStatusChangeRef.current) {
-                                    onBanStatusChangeRef.current({ isBanned: false });
-                                }
+                                color = 'success'; title = 'Compte Débloqué'; mutate('/api/me/context');
+                                if (onBanStatusChangeRef.current) onBanStatusChangeRef.current({ isBanned: false });
                                 break;
-                            case 'MATCH_UPDATE':
-                            case 'MATCH_MODIFIED':
-                                color = 'warning';
-                                title = 'Match Mis à jour';
-                                mutate((key) => typeof key === 'string' && key.includes('/api/matches'));
-                                break;
-                            case 'MATCH_CANCELLED':
-                                color = 'danger';
-                                title = 'Match Annulé';
-                                mutate((key) => typeof key === 'string' && key.includes('/api/matches'));
-                                break;
-                            case 'TOURNAMENT_PUBLISHED':
-                                color = 'success';
-                                title = 'Nouveau Tournoi';
-                                mutate((key) => typeof key === 'string' && key.includes('/api/tournaments'));
-                                break;
-                            case 'REQUEST_RECEIVED':
-                            case 'NEW_APPLICANT':
-                                color = 'primary';
-                                title = 'Nouvelle Demande';
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'));
-                                break;
-                            case 'REQUEST_ACCEPTED':
-                            case 'ENROLLMENT_ACCEPTED':
-                                color = 'success';
-                                title = 'Demande Acceptée';
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'));
-                                break;
-                            case 'ENROLLMENT_REFUSED':
-                                color = 'warning';
-                                title = 'Demande Refusée';
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'));
-                                break;
-                            case 'TEAM_WITHDRAWAL':
-                                color = 'danger';
-                                title = 'Désistement';
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'));
-                                break;
-                            case 'NEW_MATCH_NEARBY':
-                                color = 'primary';
-                                title = 'Match à proximité';
-                                break;
+                            case 'MATCH_UPDATE': case 'MATCH_MODIFIED': color = 'warning'; title = 'Match Mis à jour'; mutate((key) => typeof key === 'string' && key.includes('/api/matches')); break;
+                            case 'MATCH_CANCELLED': color = 'danger'; title = 'Match Annulé'; mutate((key) => typeof key === 'string' && key.includes('/api/matches')); break;
+                            case 'TOURNAMENT_PUBLISHED': color = 'success'; title = 'Nouveau Tournoi'; mutate((key) => typeof key === 'string' && key.includes('/api/tournaments')); break;
+                            case 'REQUEST_RECEIVED': case 'NEW_APPLICANT': color = 'primary'; title = 'Nouvelle Demande'; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard')); break;
+                            case 'REQUEST_ACCEPTED': case 'ENROLLMENT_ACCEPTED': color = 'success'; title = 'Demande Acceptée'; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard')); break;
+                            case 'ENROLLMENT_REFUSED': color = 'warning'; title = 'Demande Refusée'; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard')); break;
+                            case 'TEAM_WITHDRAWAL': color = 'danger'; title = 'Désistement'; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard')); break;
                         }
-
                         addToast({ title, description, color, variant: 'solid', timeout: 6000 });
                     }
                 } catch (e) { }
             };
 
-            ws.onclose = () => {
-                console.log('[WebSocket] Disconnected');
-                clearInterval(heartbeatInterval);
-                setStatus('connecting');
-                scheduleReconnect();
+            ws.onclose = (event) => {
+                if (heartbeatInterval) clearInterval(heartbeatInterval);
+                if (!isBlocked) {
+                    console.log(`[WebSocket] Disconnected. Code: ${event.code}, Reason: ${event.reason}, Clean: ${event.wasClean}`);
+                    setStatus('connecting');
+                    // Reconnect on abnormal closure or if we still have token
+                    if (!event.wasClean || event.code === 1006 || (enabled && token)) {
+                        scheduleReconnect();
+                    }
+                } else {
+                    console.log('[WebSocket] Connection closed (User Banned)');
+                    setStatus('disconnected');
+                }
             };
 
-            ws.onerror = (error) => {
-                console.error('[WebSocket] Error:', error);
-                clearInterval(heartbeatInterval);
-                ws.close();
+            ws.onerror = (errorEvent) => {
+                if (!isBlocked) {
+                    console.error('[WebSocket] Generic Error occurred:', errorEvent);
+                    console.error('Check DevTools Network tab for more details on the WebSocket connection.');
+                }
+                if (heartbeatInterval) clearInterval(heartbeatInterval);
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.close();
+                }
             };
         }
 
         function scheduleReconnect() {
+            if (isBlocked || !enabled || !token) return;
             if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-            const backoffTime = Math.min(1000 * Math.pow(2, retryCountRef.current), 30000);
+
+            const strategy = [1000, 2000, 5000];
+            const backoffTime = retryCountRef.current < strategy.length
+                ? strategy[retryCountRef.current]
+                : 30000;
+
             retryCountRef.current += 1;
             reconnectTimeoutRef.current = setTimeout(connect, backoffTime);
         }
@@ -177,11 +174,21 @@ export function useWebSocketSync(enabled: boolean = true, userId?: string, onBan
         return () => {
             if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
             if (wsRef.current) {
-                wsRef.current.onclose = null;
-                wsRef.current.close();
+                const ws = wsRef.current;
+                ws.onclose = null;
+                ws.onerror = null;
+                ws.onmessage = null;
+                ws.onopen = null;
+
+                // IMPORTANT: Ne pas appeler close() si CONNECTING pour éviter le log console 
+                // "WebSocket is closed before the connection is established"
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.close();
+                }
+                wsRef.current = null;
             }
         };
-    }, [mutate, enabled, userId]);
+    }, [mutate, enabled, userId, token, isBlocked]);
 
     return { status };
 }

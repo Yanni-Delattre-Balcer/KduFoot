@@ -91,10 +91,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const notifications = data?.notifications || { pendingRequests: 0, modifiedParticipations: 0 };
     const profileComplete = isProfileComplete(user);
 
-    const { status: syncStatus } = useWebSocketSync(isAuthenticated, user?.auth0_sub, (status) => {
-        console.log('[UserProvider] Ban status change detected:', status);
-        setLocalBanOverride(status);
-    });
+    const [wsToken, setWsToken] = useState<string | null>(null);
+    const { getAccessToken } = useAuth();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            getAccessToken().then(setWsToken).catch(() => setWsToken(null));
+        } else {
+            setWsToken(null);
+        }
+    }, [isAuthenticated, getAccessToken]);
 
     const isBlocked = localBanOverride?.isBanned ||
         !!user?.is_blocked ||
@@ -102,6 +108,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
         (error && (error as any).status === 403) ||
         (error && error.message?.includes('Permission refusée')) ||
         (error && error.message?.includes('401'));
+
+    const { status: syncStatus } = useWebSocketSync(
+        isAuthenticated,
+        user?.auth0_sub,
+        (status: BanStatus) => {
+            console.log('[UserProvider] Ban status change detected:', status);
+            setLocalBanOverride(status);
+        },
+        wsToken,
+        isBlocked
+    );
 
     const blockReason = localBanOverride?.reason || user?.block_reason || (error as any)?.reason || (error?.message?.includes('Permission refusée') ? "Accès refusé par le serveur" : undefined);
 
