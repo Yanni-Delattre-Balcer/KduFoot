@@ -842,7 +842,7 @@ export const useSecuredApi = () => {
  * Composant de bannissement (Nuclear Guard)
  * Affiché immédiatement si l'utilisateur est bloqué.
  */
-export const BlockedPage: FC<{ isBlocked: boolean }> = ({ isBlocked }) => {
+export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlocked, reason }) => {
   const { logout } = useAuth();
 
   if (!isBlocked) return null;
@@ -864,7 +864,15 @@ export const BlockedPage: FC<{ isBlocked: boolean }> = ({ isBlocked }) => {
 
         {/* Message de Support Unique */}
         <div className="w-full bg-red-950/20 border border-red-800/20 rounded-2xl p-6">
-          <p className="text-base sm:text-lg font-medium text-red-200 leading-relaxed">
+          <p className="text-base sm:text-lg font-medium text-red-200 leading-relaxed mb-4">
+            {reason ? (
+              <>Votre compte a été suspendu pour le motif suivant : <br /><span className="text-white font-bold">"{reason}"</span></>
+            ) : (
+              "Votre compte a été temporairement suspendu."
+            )}
+          </p>
+          <div className="h-px bg-red-800/20 w-full mb-4"></div>
+          <p className="text-sm font-medium text-red-300/80 italic">
             Pour plus d'informations, veuillez contacter le support.
           </p>
         </div>

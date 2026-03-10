@@ -116,12 +116,12 @@ export function useWebSocketSync(
                                 color = 'success'; title = 'Compte Débloqué'; mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 if (onBanStatusChangeRef.current) onBanStatusChangeRef.current({ isBanned: false });
                                 break;
-                            case 'MATCH_UPDATE': case 'MATCH_MODIFIED': color = 'warning'; title = 'Match Mis à jour'; mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true }); break;
+                            case 'MATCH_UPDATE': case 'MATCH_MODIFIED': color = 'warning'; title = 'Match Mis à jour'; description = "Le match a été mis à jour."; mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true }); break;
                             case 'MATCH_CANCELLED': color = 'danger'; title = 'Match Annulé'; mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true }); break;
                             case 'TOURNAMENT_PUBLISHED': color = 'success'; title = 'Nouveau Tournoi'; mutate((key) => typeof key === 'string' && key.includes('/api/tournaments'), (d: any) => d, { revalidate: true }); break;
                             case 'REQUEST_RECEIVED': case 'NEW_APPLICANT': color = 'primary'; title = 'Nouvelle Demande'; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true }); break;
-                            case 'REQUEST_ACCEPTED': case 'ENROLLMENT_ACCEPTED': color = 'success'; title = 'Demande Acceptée'; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true }); break;
-                            case 'ENROLLMENT_REFUSED': color = 'warning'; title = 'Demande Refusée'; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true }); break;
+                            case 'REQUEST_ACCEPTED': case 'ENROLLMENT_ACCEPTED': color = 'success'; title = 'Demande Acceptée'; description = "Votre demande de match a été acceptée !"; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true }); break;
+                            case 'ENROLLMENT_REFUSED': color = 'warning'; title = 'Demande Refusée'; description = "Votre demande de match a été refusée."; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true }); break;
                             case 'TEAM_WITHDRAWAL': color = 'danger'; title = 'Désistement'; mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true }); break;
                         }
                         addToast({ title, description, color, variant: 'solid', timeout: 6000 });

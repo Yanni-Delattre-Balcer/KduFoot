@@ -118,6 +118,11 @@ export default function UsersAndPermissionsPage() {
     const [isSyncing, setIsSyncing] = useState(false);
     const [isUpToDate, setIsUpToDate] = useState<boolean | null>(null);
 
+    // Ban reason states
+    const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+    const [banTarget, setBanTarget] = useState<{ id: string, email?: string } | null>(null);
+    const [banReason, setBanReason] = useState("");
+
 
     // SIRET UI states
     const [siretData, setSiretData] = useState<{
@@ -556,27 +561,28 @@ export default function UsersAndPermissionsPage() {
     };
 
     // ─── 5b. Bloquer/Débloquer un utilisateur (D1) ─────────────────────────
-    const handleBlockUser = async (userId: string, email: string | undefined) => {
+    const handleBlockUser = (userId: string, email: string | undefined) => {
         // Super-admin protection
         if (email === SUPER_ADMIN_EMAIL) {
             addToast({ title: t("warning"), description: t("adminUsersPage.toasts.protectionSuperAdmin"), variant: "solid", color: "danger" });
             return;
         }
 
-        // Blocage immédiat One-Click
-        await confirmBlock(userId);
+        setBanTarget({ id: userId, email });
+        setBanReason("Suspension administrative");
+        setIsBanModalOpen(true);
     };
 
-    const confirmBlock = async (d1UserId: string) => {
+    const confirmBlock = async (d1UserId: string, reason: string) => {
         try {
-            const defaultReason = "Suspension administrative";
+            const finalReason = reason || "Suspension administrative";
             // Modification optimiste de l'état local
             setUsers(prev => prev.map(u => {
                 if (u.user_id !== d1UserId) return u;
                 return {
                     ...u,
                     blocked: true,
-                    block_reason: defaultReason,
+                    block_reason: finalReason,
                     app_metadata: {
                         ...u.app_metadata,
                         permissions: [Permission.ROLE_BLOCKED]
@@ -592,7 +598,7 @@ export default function UsersAndPermissionsPage() {
             setEditing(prev => ({ ...prev, [d1UserId]: newPerms }));
 
             // Action de bannissement réelle (inclut mutate(CONTEXT_KEY))
-            await blockUser(d1UserId, true, defaultReason);
+            await blockUser(d1UserId, true, finalReason);
 
             // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
             if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
@@ -1523,6 +1529,61 @@ export default function UsersAndPermissionsPage() {
                             );
                         }}
                     </ModalContent >
+                </Modal>
+
+                {/* Ban Reason Modal */}
+                <Modal
+                    isOpen={isBanModalOpen}
+                    onOpenChange={setIsBanModalOpen}
+                    className="bg-zinc-950 border border-white/10"
+                    size="md"
+                    backdrop="blur"
+                >
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1 text-red-500 uppercase font-black tracking-tight">
+                                    🔴 Bloquer l'utilisateur
+                                </ModalHeader>
+                                <ModalBody>
+                                    <p className="text-default-400 text-sm mb-2">
+                                        Voulez-vous vraiment bloquer l'utilisateur <strong>{banTarget?.email}</strong> ?
+                                    </p>
+                                    <Input
+                                        label="Motif du blocage"
+                                        placeholder="Ex: Suspension administrative, violation des règles..."
+                                        value={banReason}
+                                        onValueChange={setBanReason}
+                                        variant="bordered"
+                                        className="mb-4"
+                                        autoFocus
+                                    />
+                                    <div className="bg-red-950/20 border border-red-500/20 p-3 rounded-xl">
+                                        <p className="text-red-300 text-xs">
+                                            <strong>Note :</strong> L'utilisateur sera immédiatement déconnecté et verra ce motif sur son écran.
+                                        </p>
+                                    </div>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button variant="light" onPress={onClose} className="font-bold">
+                                        Annuler
+                                    </Button>
+                                    <Button
+                                        color="danger"
+                                        className="font-bold shadow-lg shadow-red-500/20"
+                                        onPress={async () => {
+                                            if (banTarget) {
+                                                await confirmBlock(banTarget.id, banReason);
+                                                onClose();
+                                            }
+                                        }}
+                                    >
+                                        Bloquer définitivement
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
                 </Modal>
             </section>
         </DefaultLayout >

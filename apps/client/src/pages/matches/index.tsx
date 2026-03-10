@@ -81,6 +81,40 @@ export default function MatchesPage() {
     const { matches, isError, isLoading } = useMatches(effectiveFilters);
     const { mutate: globalMutate } = useSWRConfig();
 
+    // ─── Surgical Highlight Logic ──────────────────────────────────────────
+    const [acceptedMatches, setAcceptedMatches] = useState<Record<string, any>>(() => {
+        try {
+            const saved = localStorage.getItem(`kdufoot_accepted_matches_${user?.id || 'guest'}`);
+            return saved ? JSON.parse(saved) : {};
+        } catch (e) { return {}; }
+    });
+
+    const handleAcceptChanges = useCallback((match: any) => {
+        setAcceptedMatches(prev => {
+            const next = { ...prev, [match.id]: { ...match } };
+            localStorage.setItem(`kdufoot_accepted_matches_${user?.id || 'guest'}`, JSON.stringify(next));
+            return next;
+        });
+    }, [user?.id]);
+
+    const getDiff = useCallback((currentMatch: any) => {
+        const accepted = acceptedMatches[currentMatch.id];
+        if (!accepted) return {};
+
+        const diff: Record<string, boolean> = {};
+        // Liste des champs critiques à surveiller pour le surlignage rouge
+        const fieldsToCompare = ['match_date', 'match_time', 'venue', 'location_city', 'pitch_type', 'category', 'registration_fee', 'name', 'max_teams'];
+
+        fieldsToCompare.forEach(field => {
+            // Comparaison simple (date/time/string)
+            if (currentMatch[field] !== accepted[field]) {
+                diff[field] = true;
+            }
+        });
+
+        return diff;
+    }, [acceptedMatches]);
+
     // Admin: supprimer un match
     const adminDeleteMatch = useCallback(async (matchId: string) => {
         if (!confirm('⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.')) return;
@@ -590,94 +624,112 @@ export default function MatchesPage() {
                                         )}
 
                                         <div id="results-list" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {filteredMatches.map((match) => (
-                                                <Card key={match.id} className={`group hover:shadow-lg transition-all border border-violet-800/50 hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
-                                                    <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
-                                                        {user?.id === match.owner_id && (
-                                                            <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-xs sm:text-sm uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                                                                    <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
-                                                                </svg>
-                                                                {t('matchesPage.my_creation')}
-                                                            </div>
-                                                        )}
-                                                        <div className="flex flex-col w-full">
-                                                            <h4 className={`font-bold text-xl text-default-900 group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full`}>
-                                                                {isMasked ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
-                                                            </h4>
-                                                            {match.type === 'tournament' && match.name && (
-                                                                <h5 className="font-bold text-sm text-fuchsia-400 group-hover:text-fuchsia-300 transition-colors uppercase truncate w-full pb-1">
-                                                                    {match.name}
-                                                                </h5>
-                                                            )}
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
-                                                                    {match.type === 'tournament' ? '🏆' : '⚽'} {t(`enums.type.${match.type}`)}
-                                                                </Chip>
-                                                                {match.type === 'tournament' && match.registration_fee !== undefined && match.registration_fee !== null && (
-                                                                    <Chip size="sm" variant="flat" color="success" className="h-4 text-[9px] uppercase font-bold">
-                                                                        {match.registration_fee > 0 ? `${match.registration_fee} €` : 'Gratuit'}
-                                                                    </Chip>
-                                                                )}
-                                                                <Chip size="sm" variant="flat" color="warning" className="h-4 text-[9px] uppercase font-bold">
-                                                                    {t(`enums.category.${match.category}`)}
-                                                                </Chip>
-                                                                <Chip size="sm" variant="flat" color="secondary" className="h-4 text-[9px] uppercase font-bold">
-                                                                    {match.venue === 'Domicile' ? '🏠 Reçoit' : '🚗 Se déplace'}
-                                                                </Chip>
-                                                                <Chip size="sm" variant="flat" color="primary" className="h-4 text-[9px] uppercase font-bold">
-                                                                    🏟️ {t(`enums.pitch.${match.pitch_type}`)}
-                                                                </Chip>
-                                                            </div>
-                                                            <p className={`text-small text-default-500 font-medium`}>
-                                                                {isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
-                                                            </p>
-                                                        </div>
-                                                    </CardHeader>
-                                                    <CardBody className="py-2 px-4 gap-3">
-                                                        {/* Date & Time Row - Simplified */}
-                                                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-default-600 bg-default-50 p-2 rounded-lg justify-center">
-                                                            <div className="flex items-center gap-1.5 shrink-0">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-violet-200">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                                                </svg>
-                                                                <span className="font-semibold capitalize text-xs sm:text-sm">{new Date(match.match_date).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
-                                                            </div>
-                                                            <div className="hidden sm:block w-px h-4 bg-default-300"></div>
-                                                            <div className="flex items-center gap-1.5 shrink-0">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-violet-200">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                                </svg>
-                                                                <span className="font-semibold text-xs sm:text-sm">{match.match_time}</span>
-                                                            </div>
-                                                        </div>
+                                            {filteredMatches.map((match) => {
+                                                const diff = getDiff(match);
+                                                const hasChanges = Object.keys(diff).length > 0;
 
-                                                        {match.distance_km != null && (
-                                                            <div className="flex justify-center">
-                                                                <Chip size="sm" variant="flat" color="primary" className="h-5 text-xs sm:text-sm">
-                                                                    {match.distance_approximate ? '~' : ''}{match.distance_km} km
-                                                                </Chip>
+                                                return (
+                                                    <Card key={match.id} className={`group hover:shadow-lg transition-all border ${hasChanges ? 'border-red-500/50 shadow-red-500/10' : 'border-violet-800/50'} hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
+                                                        <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
+                                                            {user?.id === match.owner_id && (
+                                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-xs sm:text-sm uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                                                                        <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                    {t('matchesPage.my_creation')}
+                                                                </div>
+                                                            )}
+                                                            <div className="flex flex-col w-full">
+                                                                <h4 className={`font-bold text-xl ${diff.name ? 'text-red-500' : 'text-default-900'} group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full`}>
+                                                                    {isMasked ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
+                                                                </h4>
+                                                                {match.type === 'tournament' && match.name && (
+                                                                    <h5 className={`font-bold text-sm ${diff.name ? 'text-red-400' : 'text-fuchsia-400'} group-hover:text-fuchsia-300 transition-colors uppercase truncate w-full pb-1`}>
+                                                                        {match.name}
+                                                                    </h5>
+                                                                )}
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
+                                                                        {match.type === 'tournament' ? '🏆' : '⚽'} {t(`enums.type.${match.type}`)}
+                                                                    </Chip>
+                                                                    {match.type === 'tournament' && match.registration_fee !== undefined && match.registration_fee !== null && (
+                                                                        <Chip size="sm" variant="flat" color={diff.registration_fee ? "danger" : "success"} className="h-4 text-[9px] uppercase font-bold">
+                                                                            {match.registration_fee > 0 ? `${match.registration_fee} €` : 'Gratuit'}
+                                                                        </Chip>
+                                                                    )}
+                                                                    <Chip size="sm" variant="flat" color={diff.category ? "danger" : "warning"} className="h-4 text-[9px] uppercase font-bold">
+                                                                        {t(`enums.category.${match.category}`)}
+                                                                    </Chip>
+                                                                    <Chip size="sm" variant="flat" color={diff.venue ? "danger" : "secondary"} className="h-4 text-[9px] uppercase font-bold">
+                                                                        {match.venue === 'Domicile' ? '🏠 Reçoit' : '🚗 Se déplace'}
+                                                                    </Chip>
+                                                                    <Chip size="sm" variant="flat" color={diff.pitch_type ? "danger" : "primary"} className="h-4 text-[9px] uppercase font-bold">
+                                                                        🏟️ {t(`enums.pitch.${match.pitch_type}`)}
+                                                                    </Chip>
+                                                                </div>
+                                                                <p className={`text-small ${diff.location_city ? 'text-red-500 font-bold' : 'text-default-500'} font-medium`}>
+                                                                    {isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
+                                                                </p>
                                                             </div>
-                                                        )}
-                                                    </CardBody>
-                                                    <CardFooter className="px-4 pb-4 flex gap-2">
-                                                        <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold flex-1 bg-linear-to-r from-violet-500 to-violet-700 text-white shadow-md shadow-violet-500/20">
-                                                            DÉTAILS
-                                                        </Button>
-                                                        {isAdmin && (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="solid"
-                                                                color="danger"
-                                                                className="font-black uppercase tracking-tight shadow-md shadow-red-500/20"
-                                                                onPress={() => adminDeleteMatch(match.id)}
-                                                            >
-                                                                🗑️ SUPPRIMER
-                                                            </Button>
-                                                        )}
-                                                    </CardFooter>
-                                                </Card>
-                                            ))}
+                                                        </CardHeader>
+                                                        <CardBody className="py-2 px-4 gap-3">
+                                                            {/* Date & Time Row - Simplified */}
+                                                            <div className={`flex flex-wrap items-center gap-2 sm:gap-4 text-sm ${diff.match_date || diff.match_time ? 'text-red-500 bg-red-500/10 border border-red-500/20' : 'text-default-600 bg-default-50'} p-2 rounded-lg justify-center transition-colors`}>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-4 h-4 ${diff.match_date ? 'text-red-500' : 'text-violet-200'}`}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                                                    </svg>
+                                                                    <span className={`font-semibold capitalize text-xs sm:text-sm ${diff.match_date ? 'animate-pulse' : ''}`}>{new Date(match.match_date).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                                                                </div>
+                                                                <div className={`hidden sm:block w-px h-4 ${diff.match_date || diff.match_time ? 'bg-red-500/30' : 'bg-default-300'}`}></div>
+                                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-4 h-4 ${diff.match_time ? 'text-red-500' : 'text-violet-200'}`}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                                    </svg>
+                                                                    <span className={`font-semibold text-xs sm:text-sm ${diff.match_time ? 'animate-pulse' : ''}`}>{match.match_time}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            {match.distance_km != null && (
+                                                                <div className="flex justify-center">
+                                                                    <Chip size="sm" variant="flat" color="primary" className="h-5 text-xs sm:text-sm">
+                                                                        {match.distance_approximate ? '~' : ''}{match.distance_km} km
+                                                                    </Chip>
+                                                                </div>
+                                                            )}
+                                                        </CardBody>
+                                                        <CardFooter className="px-4 pb-4 flex flex-col gap-2">
+                                                            {hasChanges && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="flat"
+                                                                    color="danger"
+                                                                    className="w-full font-bold bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 shadow-lg shadow-red-500/10"
+                                                                    onPress={() => handleAcceptChanges(match)}
+                                                                >
+                                                                    ✅ J'AI VU ET J'ACCEPTE LES CHANGEMENTS
+                                                                </Button>
+                                                            )}
+                                                            <div className="flex gap-2 w-full">
+                                                                <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold flex-1 bg-linear-to-r from-violet-500 to-violet-700 text-white shadow-md shadow-violet-500/20">
+                                                                    DÉTAILS
+                                                                </Button>
+                                                                {isAdmin && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="solid"
+                                                                        color="danger"
+                                                                        className="font-black uppercase tracking-tight shadow-md shadow-red-500/20"
+                                                                        onPress={() => adminDeleteMatch(match.id)}
+                                                                    >
+                                                                        🗑️ SUPPRIMER
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </CardFooter>
+                                                    </Card>
+                                                );
+                                            })}
                                         </div>
 
                                         {isLoading && filteredMatches.length === 0 && (

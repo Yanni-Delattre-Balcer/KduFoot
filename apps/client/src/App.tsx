@@ -49,12 +49,12 @@ import AccountPage from "@/pages/account";
 
 
 function App() {
-  const { isBlocked, isLoading: userLoading, user } = useUser();
+  const { isBlocked, isLoading: userLoading, user, blockReason } = useUser();
   const { isLoading: authLoading, isAuthenticated } = useAuth();
 
   // 1. PRIORITÉ ABSOLUE : NUCLEAR GUARD (Court-circuit immédiat)
   if (isBlocked) {
-    return <BlockedPage isBlocked={true} />;
+    return <BlockedPage isBlocked={true} reason={blockReason} />;
   }
 
   // 2. CHARGEMENT / ÉTANCHÉITÉ : 
