@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { SiteLoading } from "./components/site-loading";
 import { AuthenticationGuard, useAuth, UserSync, useUser, BlockedPage } from "./authentication";
@@ -51,6 +51,18 @@ import AccountPage from "@/pages/account";
 function App() {
   const { isBlocked, isLoading: userLoading, user, blockReason } = useUser();
   const { isLoading: authLoading, isAuthenticated } = useAuth();
+
+  // Mobile Redirection Logic (SEO & Auth0 fix)
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    // Redirect if it's not the official domain (and not local dev)
+    if (hostname !== 'kdufoot.com' &&
+      hostname !== 'localhost' &&
+      hostname !== '127.0.0.1' &&
+      !hostname.includes('192.168.')) {
+      window.location.replace('https://kdufoot.com' + window.location.pathname + window.location.search);
+    }
+  }, []);
 
   // 1. PRIORITÉ ABSOLUE : NUCLEAR GUARD (Court-circuit immédiat)
   if (isBlocked) {

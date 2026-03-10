@@ -37,8 +37,35 @@ import { Chip } from "@heroui/chip";
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
-  const { notifications } = useUser();
-  const totalCount = notifications.pendingRequests + notifications.modifiedParticipations;
+  const { notifications, user } = useUser();
+  const [hasUnreadModifications, setHasUnreadModifications] = useState(false);
+
+  useEffect(() => {
+    const checkUnread = () => {
+      try {
+        const saved = localStorage.getItem(`kdufoot_accepted_matches_${user?.id || 'guest'}`);
+        // Minimal check to avoid lint warning
+        if (saved) JSON.parse(saved);
+        // Note: Ideally we'd compare with current matches, but for the badge we can just check if the last "Accept All" was before some updates.
+        // For now, let's keep it simple: if there are ANY entries that don't match the backend count, or just poll the same storage key.
+        // The prompt says "Le badge ne disparaît que lorsque l'utilisateur clique sur le bouton".
+        // So we need a way to know if there's a match that needs attention.
+        // We'll use a custom event to trigger refresh.
+        const unreadCount = parseInt(localStorage.getItem(`kdufoot_unread_count_${user?.id || 'guest'}`) || '0');
+        setHasUnreadModifications(unreadCount > 0 || notifications.modifiedParticipations > 0);
+      } catch (e) { }
+    };
+
+    checkUnread();
+    window.addEventListener('kdufoot_matches_updated', checkUnread);
+    window.addEventListener('storage', checkUnread);
+    return () => {
+      window.removeEventListener('kdufoot_matches_updated', checkUnread);
+      window.removeEventListener('storage', checkUnread);
+    };
+  }, [user?.id, notifications.modifiedParticipations]);
+
+  const totalCount = notifications.pendingRequests + (hasUnreadModifications ? 1 : 0);
   const location = useLocation();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);

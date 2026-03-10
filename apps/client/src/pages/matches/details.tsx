@@ -66,6 +66,7 @@ export default function MatchDetailsPage() {
         setIsDeleting(true);
         try {
             await deleteMatch();
+            addToast({ title: "Match supprimé", description: "L'annonce a été retirée avec succès", color: "success" });
             onDeleteOpenChange(); // Close modal on success
             navigate('/matches');
         } catch (error) {

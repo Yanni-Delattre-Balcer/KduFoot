@@ -93,6 +93,8 @@ export default function MatchesPage() {
         setAcceptedMatches(prev => {
             const next = { ...prev, [match.id]: { ...match } };
             localStorage.setItem(`kdufoot_accepted_matches_${user?.id || 'guest'}`, JSON.stringify(next));
+            // Trigger badge update in navbar
+            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
             return next;
         });
     }, [user?.id]);
@@ -704,7 +706,7 @@ export default function MatchesPage() {
                                                                     size="sm"
                                                                     variant="flat"
                                                                     color="danger"
-                                                                    className="w-full font-bold bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 shadow-lg shadow-red-500/10"
+                                                                    className="w-full font-black bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 shadow-lg shadow-red-500/10 animate-pulse"
                                                                     onPress={() => handleAcceptChanges(match)}
                                                                 >
                                                                     ✅ J'AI VU ET J'ACCEPTE LES CHANGEMENTS
