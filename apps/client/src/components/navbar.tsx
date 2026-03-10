@@ -65,7 +65,9 @@ export const Navbar = () => {
     };
   }, [user?.id, notifications.modifiedParticipations]);
 
-  const totalCount = notifications.pendingRequests + (hasUnreadModifications ? 1 : 0);
+  // Badge Logic: Only show badge for participants (unread modifications)
+  // Logic: "Si USER == ORGANIZER ... Pas de badge dans la sidebar. Si USER == PARTICIPANT : Active le badge '1' dans la sidebar."
+  const totalCount = hasUnreadModifications ? 1 : 0;
   const location = useLocation();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);

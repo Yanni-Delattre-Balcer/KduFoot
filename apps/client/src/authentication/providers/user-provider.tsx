@@ -2,7 +2,7 @@ import { createContext, useCallback, ReactNode, useMemo, useContext, useState, u
 import useSWR, { mutate } from 'swr';
 import { User } from '@/types/user.types';
 import { isProfileComplete } from '@/utils/profile';
-import { useWebSocketSync, WebSocketStatus, BanStatus } from '@/hooks/use-websocket';
+import { useWebSocketSync, WebSocketStatus, BanStatus } from '@/hooks/use-websocket.tsx';
 import { useAuth } from './use-auth';
 
 interface UserContextType {

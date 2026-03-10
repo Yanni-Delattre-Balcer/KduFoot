@@ -220,7 +220,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
 
             if (initialData?.id) {
                 await updateMatch(initialData.id, payload as any);
-                addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.update_success', 'Tournoi mis à jour avec succès'), variant: 'flat', color: 'success' });
+                addToast({ title: t('success', 'Succès'), description: t('dashboard.alerts.success_discrete', 'Modification enregistrée'), variant: 'flat', color: 'success' });
             } else {
                 await createMatch(payload as any);
                 addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success', 'Tournoi créé avec succès'), variant: 'flat', color: 'success' });

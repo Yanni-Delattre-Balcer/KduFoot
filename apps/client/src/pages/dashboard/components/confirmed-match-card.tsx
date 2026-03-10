@@ -9,7 +9,13 @@ import { useTranslation } from 'react-i18next';
 interface ConfirmedMatchCardProps {
     match: any;
     highlighted?: boolean;
-    isTimeChanged?: boolean;
+    knownData?: {
+        date?: string;
+        time?: string;
+        venue?: string;
+        format?: string;
+        pitch?: string;
+    };
     onMarkAsRead: (matchId: string) => void;
     formatDate: (date: string) => string;
     formatTime: (time: string) => string;
@@ -18,22 +24,38 @@ interface ConfirmedMatchCardProps {
 export const ConfirmedMatchCard = ({
     match,
     highlighted,
-    isTimeChanged,
+    knownData,
     onMarkAsRead,
     formatDate,
     formatTime
 }: ConfirmedMatchCardProps) => {
-    const { t } = useTranslation();
+    const { t } = useTranslation('kdufoot');
 
     const isUserHome = match.isUserHome;
     const opponentClubName = match.opponent_club_name;
     const opponentClubLogo = match.opponent_club_logo;
 
+    const isParticipant = match._source === 'participant';
+    const isModification = match.notification_state === 1;
+    
+    // Surgical Highlights calculation
+    const showSurgical = isParticipant && isModification && knownData;
+    
+    const isDateChanged = showSurgical && knownData.date !== match.match_date;
+    const isTimeChanged = showSurgical && knownData.time !== match.match_time;
+    const isVenueChanged = showSurgical && knownData.venue !== match.venue;
+    const isFormatChanged = showSurgical && (knownData.format !== (match.match_format || match.format));
+    const isPitchChanged = showSurgical && (knownData.pitch !== (match.match_pitch_type || match.pitch_type));
+
+    // Role-based overall styling
+    const borderClass = (isParticipant && isModification) 
+        ? (highlighted ? 'border-danger ring-4 ring-danger/30 shadow-danger/20' : 'border-danger/50 bg-zinc-900/90 shadow-danger/10')
+        : 'border-violet-500/40 bg-zinc-900/90';
+
     return (
         <Card
             id={`card-${match.match_id}`}
-            className={`overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full ${highlighted ? 'border-danger ring-4 ring-danger/30 shadow-danger/20' : 'border-violet-500/40 bg-zinc-900/90'
-                } group`}
+            className={`overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full ${borderClass} group`}
         >
             <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
             <CardBody className="p-0">
@@ -57,7 +79,12 @@ export const ConfirmedMatchCard = ({
                                         <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                             ⚽ {t('enums.type.match')}
                                         </Chip>
-                                        <Chip size="sm" variant="flat" color={isUserHome ? 'primary' : 'warning'} className="h-5 text-[9px] uppercase font-black shrink-0">
+                                        <Chip 
+                                            size="sm" 
+                                            variant="flat" 
+                                            color={isUserHome ? 'primary' : 'warning'} 
+                                            className={`h-5 text-[9px] uppercase font-black shrink-0 ${isVenueChanged ? 'bg-danger text-white border-danger animate-pulse' : ''}`}
+                                        >
                                             {isUserHome ? t('dashboard.labels.home_badge') : t('dashboard.labels.away_badge')}
                                         </Chip>
                                     </div>
@@ -67,30 +94,25 @@ export const ConfirmedMatchCard = ({
                                 <Chip size="sm" color="secondary" variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30 w-full">
                                     {t('dashboard.status.accepted')}
                                 </Chip>
-                                {(highlighted || isTimeChanged) && (
-                                    <Button size="sm" color="danger" variant="flat" onPress={() => onMarkAsRead(match.match_id)} className="font-bold text-[10px] w-full mt-1 animate-pulse">
-                                        ✓ J'AI VU LES CHANGEMENTS
-                                    </Button>
-                                )}
                             </div>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                            <div className={`rounded-xl p-3 border transition-colors ${highlighted ? 'bg-danger/10 border-danger/40' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${highlighted ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.date', 'Date')}</p>
-                                <p className={`text-sm font-bold ${highlighted ? 'text-danger' : 'text-white'}`}>{formatDate(match.match_date)}</p>
+                            <div className={`rounded-xl p-3 border transition-colors ${isDateChanged ? 'bg-danger/20 border-danger animate-pulse' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isDateChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.date', 'Date')}</p>
+                                <p className={`text-sm font-bold ${isDateChanged ? 'text-danger' : 'text-white'}`}>{formatDate(match.match_date)}</p>
                             </div>
-                            <div className={`rounded-xl p-3 border transition-colors ${(highlighted || isTimeChanged) ? 'bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${(highlighted || isTimeChanged) ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.time', 'Heure')}</p>
-                                <p className={`text-sm font-bold ${(highlighted || isTimeChanged) ? 'text-danger' : 'text-white'}`}>{formatTime(match.match_time)}</p>
+                            <div className={`rounded-xl p-3 border transition-colors ${isTimeChanged ? 'bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isTimeChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.time', 'Heure')}</p>
+                                <p className={`text-sm font-bold ${isTimeChanged ? 'text-danger' : 'text-white'}`}>{formatTime(match.match_time)}</p>
                             </div>
-                            <div className={`rounded-xl p-3 border transition-colors ${highlighted ? 'bg-danger/10 border-danger/40' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${highlighted ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.format', 'Format')}</p>
-                                <Chip size="sm" variant="dot" color={highlighted ? 'danger' : 'primary'} className="font-black text-xs border-none p-0">{match.format || match.match_format || '11v11'}</Chip>
+                            <div className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? 'bg-danger/20 border-danger animate-pulse' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isFormatChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.format', 'Format')}</p>
+                                <Chip size="sm" variant="dot" color={isFormatChanged ? 'danger' : 'primary'} className="font-black text-xs border-none p-0">{match.format || match.match_format || '11v11'}</Chip>
                             </div>
-                            <div className={`rounded-xl p-3 border transition-colors ${highlighted ? 'bg-danger/10 border-danger/40' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${highlighted ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.pitch_type', 'Terrain')}</p>
-                                <p className={`text-sm font-bold break-words ${highlighted ? 'text-danger' : 'text-white'}`}>{match.opponent_pitch_type || match.pitch_type ? t(`enums.pitch.${match.opponent_pitch_type || match.pitch_type}`) : '—'}</p>
+                            <div className={`rounded-xl p-3 border transition-colors ${isPitchChanged ? 'bg-danger/20 border-danger animate-pulse' : 'bg-white/5 border-white/5'}`}>
+                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isPitchChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                <p className={`text-sm font-bold break-words ${isPitchChanged ? 'text-danger' : 'text-white'}`}>{match.opponent_pitch_type || match.pitch_type ? t(`enums.pitch.${match.opponent_pitch_type || match.pitch_type}`) : '—'}</p>
                             </div>
                         </div>
 
@@ -120,7 +142,6 @@ export const ConfirmedMatchCard = ({
                                 {/* User Club (Left) */}
                                 <div className="flex flex-col items-center gap-2">
                                     <div className="w-12 h-12 rounded-full border-2 border-orange-500/30 bg-orange-500/10 flex items-center justify-center overflow-hidden">
-                                        {/* Since we don't have user club logo easily here without extra props, we use a generic icon or initial if we had it */}
                                         <span className="text-orange-500 font-black text-lg">M</span>
                                     </div>
                                     <span className="text-[9px] font-bold text-default-400 uppercase">{t('dashboard.labels.my_club')}</span>
@@ -143,6 +164,17 @@ export const ConfirmedMatchCard = ({
                         </div>
 
                         <div className="space-y-3">
+                            {(isParticipant && isModification) && (
+                                <Button 
+                                    size="sm" 
+                                    color="danger" 
+                                    variant="solid" 
+                                    onPress={() => onMarkAsRead(match.match_id)} 
+                                    className="font-black text-[11px] w-full animate-pulse shadow-lg shadow-danger/20 uppercase h-11"
+                                >
+                                    {t('dashboard.controls.view_changes')}
+                                </Button>
+                            )}
                             <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                     size="sm"

@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { addToast } from "@heroui/toast";
+import { useTranslation } from 'react-i18next';
+import { Button } from '@heroui/button';
+import { matchService } from '@/services/matches';
+import { useNavigate } from 'react-router-dom';
 
 export type WebSocketStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -16,6 +20,8 @@ export function useWebSocketSync(
     token?: string | null,
     isBlocked: boolean = false
 ) {
+    const { t } = useTranslation('kdufoot');
+    const navigate = useNavigate();
     const { mutate } = useSWRConfig();
     const [status, setStatus] = useState<WebSocketStatus>(enabled ? 'connecting' : 'disconnected');
     const wsRef = useRef<WebSocket | null>(null);
@@ -104,7 +110,7 @@ export function useWebSocketSync(
                         if (payload.targetUserId && payload.targetUserId !== userId) return;
 
                         let color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" = 'primary';
-                        let title = "Notification";
+                        let title = t('dashboard.status.pending');
                         let description = payload.message;
 
                         switch (payload.notificationType) {
@@ -118,44 +124,123 @@ export function useWebSocketSync(
                                 break;
                             case 'MATCH_UPDATE':
                             case 'MATCH_MODIFIED':
-                                color = 'warning';
-                                title = 'Match modifié';
-                                description = `Votre match du ${payload.data?.match_date || ''} a été modifié par l'organisateur`;
-                                mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                {
+                                    const isOrganizer = payload.data?.host_user_id === userId;
+                                    if (isOrganizer) {
+                                        color = 'success';
+                                        title = t('success');
+                                        description = t('dashboard.alerts.success_discrete');
+                                    } else {
+                                        color = 'warning';
+                                        title = t('dashboard.alerts.title');
+                                        description = t('dashboard.alerts.message', {
+                                            host_club_name: payload.data?.host_club_name || ''
+                                        });
+                                    }
+                                    mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                }
                                 break;
                             case 'MATCH_CANCELLED':
                                 color = 'danger';
-                                title = 'Match Annulé';
+                                title = t('dashboard.status.refused');
+                                description = t('dashboard.notifications.cancellation', {
+                                    date: payload.data?.match_date || '',
+                                    time: payload.data?.match_time || ''
+                                });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
                                 break;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
-                                title = 'Nouveau Tournoi';
+                                title = t('enums.type.tournament');
                                 mutate((key) => typeof key === 'string' && key.includes('/api/tournaments'), (d: any) => d, { revalidate: true });
                                 break;
                             case 'REQUEST_RECEIVED':
                             case 'NEW_APPLICANT':
                                 color = 'primary';
-                                title = 'Nouvelle demande reçue';
-                                description = `Pour le ${payload.data?.match_date || ''} à ${payload.data?.match_time || ''}`;
+                                title = t('dashboard.status.pending');
+                                description = t('dashboard.notifications.new_request_interactive', {
+                                    date: payload.data?.match_date || ''
+                                });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                break;
+                                // Dispatch event for UI/Badge update
+                                window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                
+                                addToast({
+                                    title,
+                                    description: (
+                                        <div className="flex flex-col gap-3">
+                                            <p>{description}</p>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    color="success"
+                                                    variant="solid"
+                                                    className="font-black text-[10px]"
+                                                    onPress={async () => {
+                                                        if (token) {
+                                                            await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'accepted', token);
+                                                            mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                                            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                                        }
+                                                    }}
+                                                >
+                                                    {t('dashboard.controls.accept').toUpperCase()}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    color="default"
+                                                    variant="flat"
+                                                    className="font-black text-[10px] bg-white/20 text-white"
+                                                    onPress={() => {
+                                                        navigate('/dashboard');
+                                                    }}
+                                                >
+                                                    {t('dashboard.controls.view').toUpperCase()}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    color="danger"
+                                                    variant="solid"
+                                                    className="font-black text-[10px]"
+                                                    onPress={async () => {
+                                                        if (token) {
+                                                            await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'refused', token);
+                                                            mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                                            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                                        }
+                                                    }}
+                                                >
+                                                    {t('dashboard.controls.refuse').toUpperCase()}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ),
+                                    color,
+                                    variant: 'solid',
+                                    timeout: 10000
+                                });
+                                return; // Skip default addToast below
                             case 'REQUEST_ACCEPTED':
                             case 'ENROLLMENT_ACCEPTED':
                                 color = 'success';
-                                title = 'Demande acceptée';
-                                description = `Votre demande pour le ${payload.data?.match_date || ''} a été acceptée`;
+                                title = t('dashboard.status.accepted');
+                                description = t('dashboard.notifications.acceptance_player', {
+                                    date: payload.data?.match_date || '',
+                                    team: payload.data?.host_club_name || ''
+                                });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 break;
                             case 'ENROLLMENT_REFUSED':
                                 color = 'danger';
-                                title = 'Demande refusée';
-                                description = `Votre demande pour le ${payload.data?.match_date || ''} a été refusée`;
+                                title = t('dashboard.status.refused');
+                                description = t('dashboard.notifications.rejection_player', {
+                                    date: payload.data?.match_date || ''
+                                });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 break;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';
-                                title = 'Désistement';
+                                title = t('dashboard.status.refused');
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 break;
                         }
@@ -216,7 +301,7 @@ export function useWebSocketSync(
                 wsRef.current = null;
             }
         };
-    }, [mutate, enabled, userId, token, isBlocked]);
+    }, [mutate, enabled, userId, token, isBlocked, t, navigate]);
 
     return { status };
 }

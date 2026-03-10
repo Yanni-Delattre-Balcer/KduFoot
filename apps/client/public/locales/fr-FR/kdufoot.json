@@ -2,6 +2,15 @@
   "success": "Succès",
   "warning": "Attention",
   "info": "Information",
+  "user_banned_signal": "Signalement d'utilisateur banni",
+  "cookie-consent-title": "Gestion des cookies",
+  "cookie-policy": "Nous utilisons des cookies pour améliorer votre expérience.",
+  "accept-all": "Tout accepter",
+  "reject": "Refuser",
+  "switch-to-dark-mode": "Passer en mode sombre",
+  "switch-to-light-mode": "Passer en mode clair",
+  "rejected": "Refusé",
+  "Genre": "Genre",
   "profile_incomplete": "Complète ton profil club pour postuler à ce match",
   "site": {
     "description": "Kdufoot réunit deux outils essentiels pour les éducateurs de football : l'analyse vidéo pilotée par IA et la recherche de matchs amicaux entre clubs."
@@ -106,6 +115,7 @@
     "delete_failed": "La suppression a échoué. Si le match est dans moins de 2h, il est verrouillé.",
     "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
     "loading_matches": "Erreur lors du chargement des matchs amicaux",
+    "loading_exercises": "Erreur lors du chargement des exercices",
     "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
     "invalid_date": "La date saisie est invalide ou déjà passée.",
     "missing_fields": "Veuillez remplir tous les champs obligatoires."
@@ -120,6 +130,7 @@
     "error": "Erreur lors de l'analyse"
   },
   "exercises": {
+    "title": "Bibliothèque d'Exercices",
     "emptyTitle": "Aucun exercice pour le moment",
     "emptySubtitle": "Analysez une vidéo pour générer vos premiers exercices !",
     "noImage": "Pas d'image",
@@ -156,8 +167,13 @@
   "myMatches": "Mes Matchs Amicaux",
   "exercise": {
     "title": "Titre",
+    "title_label": "Titre de l'exercice",
     "synopsis": "Synopsis",
+    "info_general": "Informations Générales",
     "themes": "Thèmes",
+    "players": "Joueurs",
+    "dimensions": "Dimensions",
+    "equipment": "Matériel",
     "favorite": "Ajouter aux favoris",
     "unfavorite": "Retirer des favoris",
     "addToSession": "Ajouter à la séance",
@@ -389,6 +405,7 @@
       "gender": "Genre",
       "date": "Date",
       "time": "Heure",
+      "at": "à",
       "venue": "Lieu",
       "pitch_type": "Type terrain",
       "siret": "Numéro SIRET",
@@ -652,7 +669,8 @@
       "time_range_error": "L'heure doit être comprise entre {{start}} et {{end}}",
       "filling": "Remplissage du tournoi",
       "registered_teams": "Équipes inscrites",
-      "waiting_teams": "En attente d'équipes..."
+      "waiting_teams": "En attente d'équipes...",
+      "close_registration": "Clore les inscriptions"
     },
     "match": {
       "found": "Adversaire trouvé",
@@ -714,6 +732,7 @@
     "alerts": {
       "title": "Modification détectée",
       "message": "Le match contre {{host_club_name}} a été modifié.",
+      "success_discrete": "Modification enregistrée",
       "specific": {
         "date": "La date du match a été modifiée.",
         "time": "L'heure du match a été modifiée.",
@@ -784,7 +803,7 @@
     "btnAddAdditional": "En additionnel",
     "btnAddPrimary": "En Principal",
     "loadSiretsError": "Erreur lors du chargement des SIRETs.",
-    "superPowersTitle": "⚙️ Super-Pouvoirs Admin (D1 Direct)",
+    "superPowersTitle": "Super-Pouvoirs Admin (D1 Direct)",
     "stadiumAddressLabel": "Adresse Physique du Stade",
     "stadiumAddressPlaceholder": "Complexe Sportif, 123 Rue de la Victoire",
     "stadiumAddressDesc": "Écrase le verrouillage utilisateur. Sert d'adresse par défaut pour les matchs.",

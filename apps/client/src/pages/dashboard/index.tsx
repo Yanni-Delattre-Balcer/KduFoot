@@ -83,32 +83,40 @@ export default function DashboardPage() {
 
     const [selectedTab, setSelectedTab] = useState<any>("requests");
 
-    // Track last seen times to detect specific changes
-    const [knownTimes, setKnownTimes] = useState<Record<string, string>>(() => {
+    // Track last seen data to detect specific changes (Surgical Highlight)
+    const [knownData, setKnownData] = useState<Record<string, any>>(() => {
         try {
-            const saved = localStorage.getItem('kdufoot_known_match_times');
+            const saved = localStorage.getItem('kdufoot_known_match_data');
             return saved ? JSON.parse(saved) : {};
         } catch { return {}; }
     });
 
-    const updateKnownTimes = (participations: any[]) => {
-        const newKnown = { ...knownTimes };
+    const updateKnownData = (participations: any[]) => {
+        const newKnown = { ...knownData };
         let changed = false;
         participations.forEach(p => {
-            if (p.notification_state === 0 && newKnown[p.match_id] !== p.match_time) {
-                newKnown[p.match_id] = p.match_time;
+            // Only update known data for confirmations that are currently marked "unread" (notification_state === 0)
+            // or if we don't have data yet.
+            if (!newKnown[p.match_id]) {
+                newKnown[p.match_id] = {
+                    date: p.match_date,
+                    time: p.match_time,
+                    venue: p.venue,
+                    format: p.match_format || p.format,
+                    pitch: p.match_pitch_type || p.pitch_type
+                };
                 changed = true;
             }
         });
         if (changed) {
-            setKnownTimes(newKnown);
-            localStorage.setItem('kdufoot_known_match_times', JSON.stringify(newKnown));
+            setKnownData(newKnown);
+            localStorage.setItem('kdufoot_known_match_data', JSON.stringify(newKnown));
         }
     };
 
     useEffect(() => {
         if (myParticipations) {
-            updateKnownTimes(myParticipations);
+            updateKnownData(myParticipations);
         }
     }, [myParticipations]);
 
@@ -229,12 +237,21 @@ export default function DashboardPage() {
     const markAsRead = async (matchId: string) => {
         try {
             await markAsReadHook(matchId);
-            // Update knownTimes so change is no longer detected
+            // Update knownData so changes are no longer detected
             const p = (myParticipations || []).find(p => p.match_id === matchId);
             if (p) {
-                setKnownTimes(prev => {
-                    const next = { ...prev, [matchId]: p.match_time };
-                    localStorage.setItem('kdufoot_known_match_times', JSON.stringify(next));
+                setKnownData(prev => {
+                    const next = {
+                        ...prev,
+                        [matchId]: {
+                            date: p.match_date,
+                            time: p.match_time,
+                            venue: p.venue,
+                            format: p.match_format || p.format,
+                            pitch: p.match_pitch_type || p.pitch_type
+                        }
+                    };
+                    localStorage.setItem('kdufoot_known_match_data', JSON.stringify(next));
                     return next;
                 });
             }
@@ -764,7 +781,7 @@ export default function DashboardPage() {
                                                                     </div>
                                                                     <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[200px] shrink-0">
                                                                         <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] sm:text-sm py-3 shadow-lg shadow-violet-500/30 whitespace-normal text-center h-auto min-h-8">
-                                                                            {match.status === 'active' ? '🔍 RECHERCHE D\'ADVERSAIRE' : t(`dashboard.status.${match.status}`, match.status)}
+                                                                            {match.status === 'active' ? t('dashboard.status.searching') : t(`dashboard.status.${match.status}`, match.status)}
                                                                         </Chip>
                                                                     </div>
                                                                 </div>
@@ -912,7 +929,7 @@ export default function DashboardPage() {
                                                 key={part.match_id}
                                                 participation={part}
                                                 highlighted={highlightedCardId === part.match_id && showChanges}
-                                                isTimeChanged={!!(part.notification_state === 1 && knownTimes[part.match_id] && knownTimes[part.match_id] !== part.match_time)}
+                                                isTimeChanged={!!(part.notification_state === 1 && knownData[part.match_id] && knownData[part.match_id].time !== part.match_time)}
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
                                                 formatTime={formatTime}
@@ -961,7 +978,7 @@ export default function DashboardPage() {
                                                 key={idx}
                                                 match={cm}
                                                 highlighted={highlightedCardId === cm.match_id && showChanges}
-                                                isTimeChanged={!!(cm.notification_state === 1 && knownTimes[cm.match_id] && knownTimes[cm.match_id] !== cm.match_time)}
+                                                knownData={knownData[cm.match_id]}
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
                                                 formatTime={formatTime}
@@ -1057,7 +1074,7 @@ export default function DashboardPage() {
                                             </div>
                                             <div className="flex justify-between items-center text-xs">
                                                 <span className="text-default-500 tracking-tighter uppercase font-bold text-[9px]">{t('dashboard.profile_modal.for_match_on')}</span>
-                                                <span className="text-warning-500 font-black">{formatDate(selectedClubProfile.match_date)} à {formatTime(selectedClubProfile.match_time)}</span>
+                                                <span className="text-warning-500 font-black">{formatDate(selectedClubProfile.match_date)} {t('matchForm.labels.at', 'à')} {formatTime(selectedClubProfile.match_time)}</span>
                                             </div>
                                         </div>
                                     </div>
