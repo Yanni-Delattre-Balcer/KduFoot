@@ -341,27 +341,17 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             const match = await matchService.update(params.id, dbUser.id, dto);
             if (!match) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
-            
-            // Get accepted participants to notify only them
-            const { results: participants } = await env.DB.prepare(
-                'SELECT user_id FROM match_contacts WHERE match_id = ? AND status = "accepted"'
-            ).bind(params.id).all<{ user_id: string }>();
-
-            for (const p of participants) {
-                await broadcastNotification(env, {
-                    type: 'NOTIFICATION',
-                    notificationType: 'MATCH_MODIFIED',
-                    targetUserId: p.user_id,
-                    message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été modifié.' : 'Un match auquel vous participez a été modifié.',
-                    data: { 
-                        matchId: params.id,
-                        host_club_name: match.club?.name || '',
-                        host_user_id: dbUser.id, // For differentiation on client side
-                        date: match.match_date,
-                        time: match.match_time
-                    }
-                });
-            }
+            await broadcastNotification(env, {
+                type: 'NOTIFICATION',
+                notificationType: 'MATCH_MODIFIED',
+                message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été modifié.' : 'Un match auquel vous participez a été modifié.',
+                data: {
+                    match_id: params.id,
+                    match_date: match.match_date,
+                    match_time: match.match_time,
+                    host_club_name: match.club?.name || ''
+                }
+            });
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -397,28 +387,38 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const authHeader = request.headers.get('Authorization')!;
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) return Response.json({ success: false, error: 'Missing Authorization header' }, { status: 401, headers: router.corsHeaders });
+
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        let payload: any;
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            payload = JSON.parse(jsonPayload);
+        } catch (e) {
+            return Response.json({ success: false, error: 'Token decoding failed' }, { status: 400, headers: router.corsHeaders });
+        }
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         try {
-            const match = await matchService.getById(params.id);
             const success = await matchService.delete(params.id, dbUser.id);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
+            const match = await matchService.getById(params.id); // Re-fetch match to get details for notification
             await broadcastNotification(env, {
                 type: 'NOTIFICATION',
                 notificationType: 'MATCH_CANCELLED',
-                message: 'Un événement a été annulé par l\'organisateur.',
-                data: { 
-                    matchId: params.id,
-                    club_name: match?.club?.name || '',
-                    date: match?.match_date || '',
-                    time: match?.match_time || ''
+                message: match?.type === 'tournament' ? 'Un tournoi auquel vous participez a été supprimé.' : 'Un match auquel vous participez a été supprimé.',
+                data: {
+                    match_id: params.id,
+                    match_date: match?.match_date || '',
+                    match_time: match?.match_time || '',
+                    host_club_name: match?.club?.name || ''
                 }
             });
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -456,9 +456,19 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const authHeader = request.headers.get('Authorization')!;
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) return Response.json({ success: false, error: 'Missing Authorization header' }, { status: 401, headers: router.corsHeaders });
+
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        let payload: any;
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            payload = JSON.parse(jsonPayload);
+        } catch (e) {
+            return Response.json({ success: false, error: 'Token decoding failed' }, { status: 400, headers: router.corsHeaders });
+        }
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -511,10 +521,20 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const authHeader = request.headers.get('Authorization')!;
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) return Response.json({ success: false, error: 'Missing Authorization header' }, { status: 401, headers: router.corsHeaders });
+
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const dbUser = await env.DB.prepare('SELECT id, club_id, level, category, pitch_type, club_colors FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string, club_id: string, level: string, category: string, pitch_type: string, club_colors: string }>();
+        let payload: any;
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            payload = JSON.parse(jsonPayload);
+        } catch (e) {
+            return Response.json({ success: false, error: 'Token decoding failed' }, { status: 400, headers: router.corsHeaders });
+        }
+        const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type, club_colors FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string, level: string, category: string, pitch_type: string, club_colors: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
@@ -535,18 +555,16 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             if (success && matchInfo) {
                 const match = await matchService.getById(params.id);
-                const applicantClub = await env.DB.prepare('SELECT name FROM clubs WHERE id = ?').bind(dbUser.club_id).first<{ name: string }>();
-                
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'NEW_APPLICANT',
                     targetUserId: matchInfo.owner_id,
                     message: 'Nouvelle candidature pour votre événement !',
-                    data: { 
-                        matchId: params.id,
-                        club_name: applicantClub?.name || 'Club inconnu',
-                        date: match?.match_date || '',
-                        time: match?.match_time || ''
+                    data: {
+                        match_id: params.id,
+                        match_date: match?.match_date || '',
+                        match_time: match?.match_time || '',
+                        host_club_name: match?.club?.name || ''
                     }
                 });
             }
@@ -597,34 +615,50 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const authHeader = request.headers.get('Authorization')!;
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) return Response.json({ success: false, error: 'Missing Authorization header' }, { status: 401, headers: router.corsHeaders });
+
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        let payload: any;
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            payload = JSON.parse(jsonPayload);
+        } catch (e) {
+            return Response.json({ success: false, error: 'Token decoding failed' }, { status: 400, headers: router.corsHeaders });
+        }
+
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const body = await request.json() as { status: 'accepted' | 'refused' };
-        if (!['accepted', 'refused'].includes(body.status)) {
-            return Response.json({ success: false, error: 'Invalid status' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        let body: any;
+        try {
+            body = await request.json();
+        } catch (e) {
+            return Response.json({ success: false, error: 'Malformed or empty JSON body' }, { status: 400, headers: router.corsHeaders });
+        }
+
+        if (!body || !['accepted', 'refused'].includes(body.status)) {
+            return Response.json({ success: false, error: 'Invalid status provided' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         try {
             const success = await matchService.updateRequestStatus(params.matchId, params.userId, dbUser.id, body.status);
             await broadcastDataChanged(env);
             if (success) {
-                const match = await matchService.getById(params.matchId);
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
                     targetUserId: params.userId,
                     message: body.status === 'accepted' ? 'Votre candidature a été acceptée !' : 'Votre candidature n\'a pas été retenue.',
-                    data: { 
-                        matchId: params.matchId,
-                        host_club_name: match?.club?.name || '',
-                        date: match?.match_date || '',
-                        time: match?.match_time || ''
+                    data: {
+                        match_id: params.matchId,
+                        user_id: params.userId,
+                        match_date: (await matchService.getById(params.matchId))?.match_date || '',
+                        host_club_name: (await matchService.getById(params.matchId))?.club?.name || ''
                     }
                 });
             }
@@ -666,9 +700,19 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const authHeader = request.headers.get('Authorization')!;
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) return Response.json({ success: false, error: 'Missing Authorization header' }, { status: 401, headers: router.corsHeaders });
+
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        let payload: any;
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            payload = JSON.parse(jsonPayload);
+        } catch (e) {
+            return Response.json({ success: false, error: 'Token decoding failed' }, { status: 400, headers: router.corsHeaders });
+        }
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -686,7 +730,16 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                     notificationType: 'TEAM_WITHDRAWAL',
                     targetUserId: matchInfo.owner_id,
                     message: 'Une équipe a annulé sa participation.',
-                    data: { matchId: params.matchId }
+                    data: { match_id: params.matchId }
+                });
+            } else if (success && params.userId !== dbUser.id && matchInfo && matchInfo.owner_id === dbUser.id) {
+                // If the owner removed a request
+                await broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: 'REQUEST_CANCELLED',
+                    targetUserId: params.userId,
+                    message: 'Votre demande de match a été retirée.',
+                    data: { match_id: params.matchId }
                 });
             }
 

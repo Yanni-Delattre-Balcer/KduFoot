@@ -102,6 +102,7 @@ export const OrganizedTournamentCard = ({
                                 value={match.max_teams ? ((match.accepted_count || 0) / match.max_teams) * 100 : 100}
                                 color="secondary"
                                 className="max-w-md"
+                                aria-label={t('dashboard.tournament.filling', 'Remplissage du tournoi')}
                                 classNames={{
                                     indicator: "bg-linear-to-r from-purple-500 to-pink-500"
                                 }}

@@ -23,6 +23,7 @@ export type NotificationType =
     | 'MATCH_CANCELLED'
     | 'NEW_APPLICANT'
     | 'TEAM_WITHDRAWAL'
+    | 'REQUEST_CANCELLED'
     | 'NEW_MATCH_NEARBY'
     | 'USER_BANNED'
     | 'USER_UNBANNED';

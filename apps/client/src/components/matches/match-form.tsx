@@ -635,7 +635,14 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             <p className="text-sm font-bold text-violet-300 uppercase tracking-tight text-center">
                                 {t('matchForm.progress')}: {progress}%
                             </p>
-                            <div className="w-full h-4 bg-violet-900/30 rounded-full overflow-hidden p-px border border-violet-800/20 ring-1 ring-violet-500/10 shadow-inner">
+                            <div 
+                                className="w-full h-4 bg-violet-900/30 rounded-full overflow-hidden p-px border border-violet-800/20 ring-1 ring-violet-500/10 shadow-inner"
+                                role="progressbar"
+                                aria-valuenow={progress}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-label={t('matchForm.progress', 'Progression du formulaire')}
+                            >
                                 <div
                                     className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(139,92,246,0.3)]"
                                     style={{

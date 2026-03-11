@@ -696,6 +696,13 @@
       "delete_success": "Annonce supprimée avec succès",
       "all_read_success": "Toutes les modifications ont été validées"
     },
+    "notifications": {
+      "modification": "Modification du match",
+      "cancellation": "Le match du {{date}} contre {{team}} a été annulé par l'organisateur",
+      "new_request_interactive": "Nouvelle demande reçue pour le match du {{date}}",
+      "acceptance_player": "Votre demande pour le match du {{date}} avec {{team}} a été acceptée",
+      "rejection_player": "Votre demande pour le match du {{date}} a été refusée"
+    },
     "profile_modal": {
       "title": "Profil du Club",
       "subtitle": "Informations de contact vérifiées",
@@ -723,7 +730,8 @@
       "accepted": "Accepté",
       "refused": "Refusé",
       "pending": "En attente",
-      "searching": "🔍 RECHERCHE D'ADVERSAIRE",
+      "cancelled": "Annulé",
+      "searching": "🔍 RECHERCHE d'advERSAIRE",
       "active": "🔍 RECHERCHE D'ADVERSAIRE",
       "completed": "Terminé",
       "full": "Complet",

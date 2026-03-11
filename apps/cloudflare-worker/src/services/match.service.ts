@@ -35,16 +35,16 @@ export class MatchService {
             `INSERT INTO matches (
         id, owner_id, club_id, type, category, level, format, match_date, match_time, match_end_time,
         venue, location_address, location_city, location_zip, pitch_type,
-        email, phone, notes, max_teams, registration_fee, status, created_at, updated_at
+        email, phone, notes, max_teams, registration_fee, status, created_at
       ) VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?, 'active', ?, ?
+        ?, ?, ?, ?, ?, 'active', ?
       ) RETURNING *`
         ).bind(
             id, userId, dto.club_id, dto.type || 'match', dto.category, dto.level || null, dto.format, dto.match_date, dto.match_time, dto.match_end_time || null,
             dto.venue, dto.location_address || null, dto.location_city || null, dto.location_zip || null, dto.pitch_type || null,
-            dto.email, dto.phone, dto.notes || null, dto.max_teams || null, dto.registration_fee || null, now, now
+            dto.email, dto.phone, dto.notes || null, dto.max_teams || null, dto.registration_fee || null, now
         ).first<Match>();
 
         return result!;
@@ -69,8 +69,6 @@ export class MatchService {
             setClauses.push(`${key} = ?`);
             values.push(dto[key]);
         }
-        setClauses.push(`updated_at = ?`);
-        values.push(Math.floor(Date.now() / 1000));
 
         const query = `UPDATE matches SET ${setClauses.join(', ')} WHERE id = ?`;
         await this.db.prepare(query).bind(...values, id).run();
@@ -115,8 +113,8 @@ export class MatchService {
         }
 
         await this.db.prepare(
-            'UPDATE matches SET status = "found", updated_at = ? WHERE id = ?'
-        ).bind(Math.floor(Date.now() / 1000), id).run();
+            'UPDATE matches SET status = "found" WHERE id = ?'
+        ).bind(id).run();
 
         return this.getById(id);
     }
@@ -208,7 +206,7 @@ export class MatchService {
         }
 
         await this.db.prepare(
-            'UPDATE tournament_pairings SET scheduled_time = ?, updated_at = unixepoch() WHERE id = ?'
+            'UPDATE tournament_pairings SET scheduled_time = ? WHERE id = ?'
         ).bind(scheduledTime, pairingId).run();
 
         // Notify participants (optional but good for 'Real-time Vue')
@@ -224,9 +222,9 @@ export class MatchService {
         const id = uuidv4();
         const now = Math.floor(Date.now() / 1000);
         await this.db.prepare(`
-            INSERT INTO tournament_pairings (id, match_id, team_a_club_id, team_b_club_id, scheduled_time, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).bind(id, matchId, teamAId, teamBId, scheduledTime, now, now).run();
+            INSERT INTO tournament_pairings (id, match_id, team_a_club_id, team_b_club_id, scheduled_time, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `).bind(id, matchId, teamAId, teamBId, scheduledTime, now).run();
 
         const pairings = await this.getPairings(matchId);
         return pairings.find(p => p.id === id)!;
@@ -591,7 +589,7 @@ export class MatchService {
         }
 
         await this.db.prepare(
-            'UPDATE match_contacts SET status = ?, notification_state = 1, updated_at = unixepoch() WHERE match_id = ? AND user_id = ?'
+            'UPDATE match_contacts SET status = ? WHERE match_id = ? AND user_id = ?'
         ).bind(status, matchId, requestUserId).run();
 
         // If accepted, mark match as found (closed)
@@ -605,11 +603,11 @@ export class MatchService {
 
             if (matchDetails?.type === 'match') {
                 await this.db.prepare(
-                    'UPDATE matches SET status = "found", updated_at = unixepoch() WHERE id = ?'
+                    'UPDATE matches SET status = "found" WHERE id = ?'
                 ).bind(matchId).run();
             } else if (matchDetails?.type === 'tournament' && matchDetails?.max_teams && acceptedCount >= matchDetails.max_teams) {
                 await this.db.prepare(
-                    'UPDATE matches SET status = "found", updated_at = unixepoch() WHERE id = ?'
+                    'UPDATE matches SET status = "found" WHERE id = ?'
                 ).bind(matchId).run();
             }
         } else if (status === 'refused') {
@@ -620,7 +618,7 @@ export class MatchService {
 
             if ((acceptedCountResult?.count || 0) === 0) {
                 await this.db.prepare(
-                    'UPDATE matches SET status = "active", updated_at = unixepoch() WHERE id = ?'
+                    'UPDATE matches SET status = "active" WHERE id = ?'
                 ).bind(matchId).run();
             }
         }
@@ -641,12 +639,18 @@ export class MatchService {
         ).bind(matchId, userId).first<any>();
         if (!contact) return true;
 
-        // If the user is withdrawing themselves OR organizer is deleting
-        // We DELETE the record to avoid CHECK constraint issues with 'withdrawn' 
-        // and to ensure no more notifications are sent to this user.
-        await this.db.prepare(
-            'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
-        ).bind(matchId, userId).run();
+        // If the user is withdrawing themselves
+        if (userId === requesterId) {
+            const withdrawalMsg = `[DÉSISTEMENT AUTOMATIQUE] L'équipe s'est désistée. Message original: ${contact.message || 'Aucun'}`;
+            await this.db.prepare(
+                'UPDATE match_contacts SET status = "withdrawn", message = ?, notification_state = 2 WHERE match_id = ? AND user_id = ?'
+            ).bind(withdrawalMsg, matchId, userId).run();
+        } else {
+            // Organizer is deleting/refusing definitively
+            await this.db.prepare(
+                'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
+            ).bind(matchId, userId).run();
+        }
 
         if (contact.status === 'accepted') {
             const acceptedCountResult = await this.db.prepare(
@@ -655,7 +659,7 @@ export class MatchService {
 
             if ((acceptedCountResult?.count || 0) === 0) {
                 await this.db.prepare(
-                    'UPDATE matches SET status = "active", updated_at = unixepoch() WHERE id = ?'
+                    'UPDATE matches SET status = "active" WHERE id = ?'
                 ).bind(matchId).run();
             }
         }
@@ -713,9 +717,9 @@ export class MatchService {
             const now = Math.floor(Date.now() / 1000);
 
             await this.db.prepare(`
-                INSERT INTO tournament_pairings (id, match_id, team_a_club_id, team_b_club_id, scheduled_time, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            `).bind(id, matchId, teamA.club_id, teamB.club_id, matchTime, now, now).run();
+                INSERT INTO tournament_pairings (id, match_id, team_a_club_id, team_b_club_id, scheduled_time, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `).bind(id, matchId, teamA.club_id, teamB.club_id, matchTime, now).run();
         }
 
         return await this.getPairings(matchId);

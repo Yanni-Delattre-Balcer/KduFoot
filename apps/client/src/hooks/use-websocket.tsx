@@ -133,29 +133,21 @@ export function useWebSocketSync(
                                     } else {
                                         color = 'warning';
                                         title = t('dashboard.alerts.title');
-                                        description = t('dashboard.notifications.modification', {
-                                            host_club_name: payload.data?.host_club_name || '',
-                                            date: payload.data?.date || '',
-                                            time: payload.data?.time || ''
+                                        description = t('dashboard.alerts.message', {
+                                            host_club_name: payload.data?.host_club_name || ''
                                         });
-                                        // Update badge for player
-                                        mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                     }
                                     mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
-                                    mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 }
                                 break;
                             case 'MATCH_CANCELLED':
                                 color = 'danger';
-                                title = t('dashboard.status.cancelled');
+                                title = t('dashboard.status.refused');
                                 description = t('dashboard.notifications.cancellation', {
-                                    club_name: payload.data?.club_name || payload.data?.host_club_name || '',
-                                    date: payload.data?.date || '',
-                                    time: payload.data?.time || ''
+                                    date: payload.data?.match_date || '',
+                                    time: payload.data?.match_time || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 break;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
@@ -167,15 +159,12 @@ export function useWebSocketSync(
                                 color = 'primary';
                                 title = t('dashboard.status.pending');
                                 description = t('dashboard.notifications.new_request_interactive', {
-                                    club_name: payload.data?.club_name || '',
-                                    date: payload.data?.date || '',
-                                    time: payload.data?.time || ''
+                                    date: payload.data?.match_date || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 // Dispatch event for UI/Badge update
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                
+
                                 addToast({
                                     title,
                                     description: (
@@ -236,21 +225,18 @@ export function useWebSocketSync(
                                 color = 'success';
                                 title = t('dashboard.status.accepted');
                                 description = t('dashboard.notifications.acceptance_player', {
-                                    host_club_name: payload.data?.host_club_name || '',
-                                    date: payload.data?.date || '',
-                                    time: payload.data?.time || ''
+                                    date: payload.data?.match_date || '',
+                                    team: payload.data?.host_club_name || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 break;
                             case 'ENROLLMENT_REFUSED':
-                                color = 'warning';
+                                color = 'danger';
                                 title = t('dashboard.status.refused');
                                 description = t('dashboard.notifications.rejection_player', {
-                                    date: payload.data?.date || ''
+                                    date: payload.data?.match_date || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 break;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';

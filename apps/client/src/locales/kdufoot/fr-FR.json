@@ -660,7 +660,8 @@
       "no_participation_tournament": "Vous n'avez postulé à aucun tournoi",
       "no_participation_match": "Vous n'avez postulé à aucun match",
       "view_profile": "👤 Voir le profil",
-      "manage_registrations": "Gérer les demandes"
+      "manage_registrations": "Gérer les demandes",
+      "view_changes": "⚠️ Voir MODIFICATIONS"
     },
     "tournament": {
       "pairings": "Confrontations",
@@ -673,7 +674,8 @@
     },
     "match": {
       "found": "Adversaire trouvé",
-      "filled": "Match complet"
+      "filled": "Match complet",
+      "searching": "Recherche d'adversaire"
     },
     "memo": {
       "title": "📋 Historique de mes créations",
@@ -685,12 +687,21 @@
       "organized": "Vous n'avez publié aucune annonce.",
       "participations": "Vous n'avez postulé à aucun match.",
       "no_match": "Aucun match trouvé dans cette catégorie.",
-      "no_tournament": "Aucun tournoi trouvé dans cette catégorie."
+      "no_tournament": "Aucun tournoi trouvé dans cette catégorie.",
+      "no_requests": "Vous n'avez aucune demande en attente pour le moment.",
+      "no_organized": "Vous n'avez publié aucune annonce."
     },
     "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
     "toasts": {
       "delete_success": "Annonce supprimée avec succès",
       "all_read_success": "Toutes les modifications ont été validées"
+    },
+    "notifications": {
+      "modification": "Modification du match",
+      "cancellation": "Le match du {{date}} contre {{team}} a été annulé par l'organisateur",
+      "new_request_interactive": "Nouvelle demande reçue pour le match du {{date}}",
+      "acceptance_player": "Votre demande pour le match du {{date}} avec {{team}} a été acceptée",
+      "rejection_player": "Votre demande pour le match du {{date}} a été refusée"
     },
     "profile_modal": {
       "title": "Profil du Club",
@@ -718,24 +729,17 @@
     "status": {
       "accepted": "Accepté",
       "refused": "Refusé",
-      "cancelled": "Annulé",
       "pending": "En attente",
+      "cancelled": "Annulé",
       "searching": "🔍 RECHERCHE D'ADVERSAIRE",
       "active": "🔍 RECHERCHE D'ADVERSAIRE",
       "completed": "Terminé",
       "full": "Complet",
       "open": "Ouvert"
     },
-    "notifications": {
-      "new_request_interactive": "Vous avez reçu une demande de {{club_name}} pour le match du {{date}} à {{time}}",
-      "acceptance_player": "Votre demande pour le match du {{date}} à {{time}} a été acceptée",
-      "rejection_player": "Votre demande pour le match du {{date}} a été refusée",
-      "cancellation": "Le match prévu le {{date}} à {{time}} a été annulé par l'organisateur",
-      "modification": "Le match contre {{host_club_name}} prévu le {{date}} a été modifié"
-    },
     "alerts": {
       "title": "Modification détectée",
-      "message": "Le match contre {{host_club_name}} prévu le {{date}} a été modifié.",
+      "message": "Le match contre {{host_club_name}} a été modifié.",
       "success_discrete": "Modification enregistrée",
       "specific": {
         "date": "La date du match a été modifiée.",

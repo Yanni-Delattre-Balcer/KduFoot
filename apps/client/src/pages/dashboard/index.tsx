@@ -817,6 +817,7 @@ export default function DashboardPage() {
                                                                         value={(match.accepted_count || 0) >= 1 ? 100 : 0}
                                                                         color="secondary"
                                                                         className="max-w-md"
+                                                                        aria-label={t('dashboard.match.filling', 'Remplissage du match')}
                                                                         classNames={{
                                                                             indicator: "bg-linear-to-r from-violet-500 to-indigo-500"
                                                                         }}

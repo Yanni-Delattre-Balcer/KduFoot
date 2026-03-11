@@ -597,7 +597,14 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                             <p className="text-sm font-bold text-purple-300 uppercase tracking-tight text-center">
                                 {t('tournamentForm.progress')}: {progress}%
                             </p>
-                            <div className="w-full h-4 bg-purple-400/20 rounded-full overflow-hidden p-px border border-purple-300/40 ring-1 ring-purple-300/20 shadow-inner">
+                            <div 
+                                className="w-full h-4 bg-purple-400/20 rounded-full overflow-hidden p-px border border-purple-300/40 ring-1 ring-purple-300/20 shadow-inner"
+                                role="progressbar"
+                                aria-valuenow={progress}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-label={t('tournamentForm.progress', 'Progression du formulaire')}
+                            >
                                 <div
                                     className="h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(216,180,254,0.3)]"
                                     style={{

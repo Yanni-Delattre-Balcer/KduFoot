@@ -126,6 +126,7 @@ export const ConfirmedMatchCard = ({
                                 value={100}
                                 color="secondary"
                                 className="max-w-md"
+                                aria-label={t('dashboard.match.found', 'Match trouvé')}
                                 classNames={{
                                     indicator: "bg-linear-to-r from-violet-500 to-indigo-500"
                                 }}
