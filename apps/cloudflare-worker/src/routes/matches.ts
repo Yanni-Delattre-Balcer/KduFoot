@@ -349,7 +349,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                     match_id: params.id,
                     match_date: match.match_date,
                     match_time: match.match_time,
-                    host_club_name: match.club?.name || ''
+                    host_club_name: match.club?.name || '',
+                    host_user_id: dbUser.id,
+                    owner_id: dbUser.id
                 }
             });
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -418,7 +420,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                     match_id: params.id,
                     match_date: match?.match_date || '',
                     match_time: match?.match_time || '',
-                    host_club_name: match?.club?.name || ''
+                    host_club_name: match?.club?.name || '',
+                    owner_id: dbUser.id
                 }
             });
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -555,6 +558,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             if (success && matchInfo) {
                 const match = await matchService.getById(params.id);
+                const applicantClub = await env.DB.prepare('SELECT c.name FROM clubs c JOIN users u ON u.club_id = c.id WHERE u.id = ?').bind(dbUser.id).first<{name: string}>();
+
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'NEW_APPLICANT',
@@ -564,7 +569,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         match_id: params.id,
                         match_date: match?.match_date || '',
                         match_time: match?.match_time || '',
-                        host_club_name: match?.club?.name || ''
+                        host_club_name: match?.club?.name || '',
+                        applicant_club_name: applicantClub?.name || '',
+                        user_id: dbUser.id
                     }
                 });
             }
@@ -658,7 +665,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         match_id: params.matchId,
                         user_id: params.userId,
                         match_date: (await matchService.getById(params.matchId))?.match_date || '',
-                        host_club_name: (await matchService.getById(params.matchId))?.club?.name || ''
+                        match_time: (await matchService.getById(params.matchId))?.match_time || '',
+                        host_club_name: (await matchService.getById(params.matchId))?.club?.name || '',
+                        owner_id: dbUser.id
                     }
                 });
             }

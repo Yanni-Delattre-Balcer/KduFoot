@@ -125,7 +125,7 @@ export function useWebSocketSync(
                             case 'MATCH_UPDATE':
                             case 'MATCH_MODIFIED':
                                 {
-                                    const isOrganizer = payload.data?.host_user_id === userId;
+                                    const isOrganizer = payload.data?.owner_id === userId;
                                     if (isOrganizer) {
                                         color = 'success';
                                         title = t('success');
@@ -133,21 +133,35 @@ export function useWebSocketSync(
                                     } else {
                                         color = 'warning';
                                         title = t('dashboard.alerts.title');
-                                        description = t('dashboard.alerts.message', {
-                                            host_club_name: payload.data?.host_club_name || ''
-                                        });
+                                        description = (
+                                            <div className="cursor-pointer font-medium" onClick={() => navigate('/dashboard')}>
+                                                {t('dashboard.alerts.message', {
+                                                    team: payload.data?.host_club_name || '',
+                                                    date: payload.data?.match_date || ''
+                                                })}
+                                            </div>
+                                        );
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                     }
-                                    mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
                                 }
                                 break;
                             case 'MATCH_CANCELLED':
-                                color = 'danger';
-                                title = t('dashboard.status.refused');
-                                description = t('dashboard.notifications.cancellation', {
-                                    date: payload.data?.match_date || '',
-                                    time: payload.data?.match_time || ''
-                                });
-                                mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                {
+                                    const isOrganizer = payload.data?.owner_id === userId;
+                                    if (isOrganizer) return; // Silent for organizer, delete API handles toast
+
+                                    color = 'danger';
+                                    title = "Annulation";
+                                    description = t('dashboard.notifications.cancellation', {
+                                        date: payload.data?.match_date || '',
+                                        team: payload.data?.host_club_name || ''
+                                    });
+                                    mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                    mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                    window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                }
                                 break;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
@@ -159,7 +173,9 @@ export function useWebSocketSync(
                                 color = 'primary';
                                 title = t('dashboard.status.pending');
                                 description = t('dashboard.notifications.new_request_interactive', {
-                                    date: payload.data?.match_date || ''
+                                    date: payload.data?.match_date || '',
+                                    time: payload.data?.match_time || '',
+                                    team: payload.data?.applicant_club_name || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 // Dispatch event for UI/Badge update
@@ -234,7 +250,8 @@ export function useWebSocketSync(
                                 color = 'danger';
                                 title = t('dashboard.status.refused');
                                 description = t('dashboard.notifications.rejection_player', {
-                                    date: payload.data?.match_date || ''
+                                    date: payload.data?.match_date || '',
+                                    team: payload.data?.host_club_name || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 break;
