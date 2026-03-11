@@ -4,7 +4,7 @@ import { addToast } from "@heroui/toast";
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/button';
 import { matchService } from '@/services/matches';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export type WebSocketStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -22,7 +22,6 @@ export function useWebSocketSync(
 ) {
     const { t } = useTranslation('kdufoot');
     const navigate = useNavigate();
-    const location = useLocation();
     const { mutate } = useSWRConfig();
     const [status, setStatus] = useState<WebSocketStatus>(enabled ? 'connecting' : 'disconnected');
     const wsRef = useRef<WebSocket | null>(null);
@@ -134,8 +133,8 @@ export function useWebSocketSync(
                                         description = (
                                             <div className="cursor-pointer font-medium" onClick={() => navigate('/dashboard')}>
                                                 {t('dashboard.alerts.message', {
-                                                    team: payload.data?.host_club_name || '',
-                                                    date: payload.data?.match_date || ''
+                                                    team: payload.data?.host_club_name || 'un club',
+                                                    date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'
                                                 })}
                                             </div>
                                         );
@@ -149,14 +148,11 @@ export function useWebSocketSync(
                                 // Message ciblés envoyés uniquement aux joueurs par le backend
                                 color = 'danger';
                                 title = "Annulation";
-                                description = `Le match contre ${payload.data?.host_club_name || ''} le ${new Date(payload.data?.match_date || '').toLocaleDateString('fr-FR')} a été annulé par l'organisateur.`;
+                                description = `Le match contre ${payload.data?.host_club_name || 'un club'} le ${payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'} a été annulé par l'organisateur.`;
                                 mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                // Conditional toast: only show if on dashboard
-                                if (location.pathname === '/dashboard') {
-                                    addToast({ title, description, color, variant: 'solid', timeout: 6000 });
-                                }
+                                addToast({ title, description, color, variant: 'solid', timeout: 6000 });
                                 return;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
@@ -253,18 +249,15 @@ export function useWebSocketSync(
                                         color = 'success';
                                         title = t('dashboard.status.accepted');
                                         description = t('dashboard.notifications.acceptance_player', {
-                                            date: payload.data?.match_date || '',
-                                            team: payload.data?.host_club_name || ''
+                                            date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue',
+                                            team: payload.data?.host_club_name || 'un club'
                                         });
                                         mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                     } else {
                                         return; // Random users ignore this
                                     }
                                 }
-                                // Conditional toast: only show acceptance on dashboard
-                                if (location.pathname === '/dashboard') {
-                                    addToast({ title, description, color, variant: 'solid', timeout: 6000 });
-                                }
+                                addToast({ title, description, color, variant: 'solid', timeout: 6000 });
                                 return;
                             case 'ENROLLMENT_REFUSED':
                                 {
@@ -277,18 +270,15 @@ export function useWebSocketSync(
                                         color = 'warning'; // Info pour refusé
                                         title = t('dashboard.status.refused');
                                         description = t('dashboard.notifications.rejection_player', {
-                                            date: payload.data?.match_date || '',
-                                            team: payload.data?.host_club_name || ''
+                                            date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue',
+                                            team: payload.data?.host_club_name || 'un club'
                                         });
                                         mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                     } else {
                                         return; // Random users ignore this
                                     }
                                 }
-                                // Conditional toast: only show refusal on dashboard
-                                if (location.pathname === '/dashboard') {
-                                    addToast({ title, description, color, variant: 'solid', timeout: 6000 });
-                                }
+                                addToast({ title, description, color, variant: 'solid', timeout: 6000 });
                                 return;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';
@@ -352,7 +342,7 @@ export function useWebSocketSync(
                 wsRef.current = null;
             }
         };
-    }, [mutate, enabled, userId, token, isBlocked, t, navigate, location.pathname]);
+    }, [mutate, enabled, userId, token, isBlocked, t, navigate]);
 
     return { status };
 }

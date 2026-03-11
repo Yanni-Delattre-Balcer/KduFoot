@@ -65,8 +65,11 @@
     --safe-area-right: env(safe-area-inset-right);
   }
 
-  /* We don't apply padding-top to body directly as it breaks fixed elements like Navbar */
+  /* Apply safe area insets for iOS PWA (standalone mode) */
   body {
-    padding-top: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
   }
 }

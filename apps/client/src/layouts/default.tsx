@@ -25,6 +25,7 @@ import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
 import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
 import { ConnectivityStatus } from "@/components/connectivity-status";
+import { PushNotificationBanner } from "@/components/push-notification-banner";
 
 export default function DefaultLayout({
   children,
@@ -82,6 +83,8 @@ export default function DefaultLayout({
       <main className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}>
         {children}
       </main>
+      {/* iOS push notification banner — only for authenticated users */}
+      {isAuthenticated && <PushNotificationBanner />}
       <footer className="relative w-full border-t border-default-100 bg-background/80 backdrop-blur-md mt-auto">
         <div className="container mx-auto px-6 py-8 flex flex-col items-center gap-6">
           <div className="flex flex-row items-center justify-center gap-4 md:gap-12 w-full">

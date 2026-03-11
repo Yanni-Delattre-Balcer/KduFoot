@@ -672,6 +672,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             const success = await matchService.updateRequestStatus(params.matchId, params.userId, dbUser.id, body.status);
             await broadcastDataChanged(env);
             if (success) {
+                const matchData = await matchService.getById(params.matchId);
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
@@ -680,9 +681,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                     data: {
                         match_id: params.matchId,
                         user_id: params.userId,
-                        match_date: (await matchService.getById(params.matchId))?.match_date || '',
-                        match_time: (await matchService.getById(params.matchId))?.match_time || '',
-                        host_club_name: (await matchService.getById(params.matchId))?.club?.name || '',
+                        match_date: matchData?.match_date || '',
+                        match_time: matchData?.match_time || '',
+                        host_club_name: matchData?.club?.name || '',
                         owner_id: dbUser.id
                     }
                 });

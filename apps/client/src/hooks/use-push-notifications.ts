@@ -2,15 +2,14 @@ import { useEffect, useRef } from 'react';
 
 /**
  * Hook to manage Web Push notification subscription.
- * - Request notification permission on first visit
- * - Subscribe to the push service using the VAPID public key
- * - Send the subscription to the backend for storage
+ * - On non-iOS: auto-subscribe if permission is already granted
+ * - On iOS: wait for the user to click the banner button (kdufoot_push_granted event)
+ * - Sends the subscription to the backend for storage
  */
 export function usePushNotifications(token?: string | null) {
     const subscribedRef = useRef(false);
 
     useEffect(() => {
-        // Only run once, when authenticated and not already subscribed
         if (!token || subscribedRef.current) return;
 
         // Check browser support
@@ -18,28 +17,22 @@ export function usePushNotifications(token?: string | null) {
             return;
         }
 
-        // Skip if already subscribed in this session
+        // Skip if already subscribed in a previous session
         const alreadySubscribed = localStorage.getItem('kdufoot_push_subscribed');
         if (alreadySubscribed === 'true') {
             subscribedRef.current = true;
             return;
         }
 
-        async function subscribeToPush() {
+        const doSubscribe = async () => {
             try {
-                // Request notification permission
-                const permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    return;
-                }
+                // Only proceed if permission is already granted
+                if (Notification.permission !== 'granted') return;
 
-                // Wait for the service worker to be ready
                 const registration = await navigator.serviceWorker.ready;
 
-                // Check if already subscribed
                 let subscription = await registration.pushManager.getSubscription();
                 if (!subscription) {
-                    // Convert VAPID public key from base64url to Uint8Array
                     const vapidPublicKey = import.meta.env.VAPID_PUBLIC_KEY;
                     if (!vapidPublicKey) return;
 
@@ -62,15 +55,29 @@ export function usePushNotifications(token?: string | null) {
                     body: JSON.stringify(subscription.toJSON()),
                 });
 
-                // Mark as subscribed to avoid re-prompting
                 localStorage.setItem('kdufoot_push_subscribed', 'true');
                 subscribedRef.current = true;
             } catch (_e) {
                 // Silently fail — push is optional
             }
+        };
+
+        // If permission is already granted (e.g., on Android after a previous grant), subscribe now
+        if (Notification.permission === 'granted') {
+            doSubscribe();
+            return;
         }
 
-        subscribeToPush();
+        // On iOS, we can't auto-prompt. Instead, listen for the banner's custom event.
+        // The PushNotificationBanner component dispatches this event when the user clicks "Activer".
+        const handleGranted = () => {
+            doSubscribe();
+        };
+        window.addEventListener('kdufoot_push_granted', handleGranted);
+
+        return () => {
+            window.removeEventListener('kdufoot_push_granted', handleGranted);
+        };
     }, [token]);
 }
 
