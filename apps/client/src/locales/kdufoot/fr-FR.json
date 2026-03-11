@@ -660,8 +660,7 @@
       "no_participation_tournament": "Vous n'avez postulé à aucun tournoi",
       "no_participation_match": "Vous n'avez postulé à aucun match",
       "view_profile": "👤 Voir le profil",
-      "manage_registrations": "Gérer les demandes",
-      "view_changes": "⚠️ Voir MODIFICATIONS"
+      "manage_registrations": "Gérer les demandes"
     },
     "tournament": {
       "pairings": "Confrontations",
@@ -674,8 +673,7 @@
     },
     "match": {
       "found": "Adversaire trouvé",
-      "filled": "Match complet",
-      "searching": "Recherche d'adversaire"
+      "filled": "Match complet"
     },
     "memo": {
       "title": "📋 Historique de mes créations",
@@ -687,9 +685,7 @@
       "organized": "Vous n'avez publié aucune annonce.",
       "participations": "Vous n'avez postulé à aucun match.",
       "no_match": "Aucun match trouvé dans cette catégorie.",
-      "no_tournament": "Aucun tournoi trouvé dans cette catégorie.",
-      "no_requests": "Vous n'avez aucune demande en attente pour le moment.",
-      "no_organized": "Vous n'avez publié aucune annonce."
+      "no_tournament": "Aucun tournoi trouvé dans cette catégorie."
     },
     "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
     "toasts": {

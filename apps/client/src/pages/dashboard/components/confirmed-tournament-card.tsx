@@ -67,11 +67,6 @@ export const ConfirmedTournamentCard = ({
                                 <Chip size="sm" color="success" variant="flat" className="font-black uppercase text-xs sm:text-sm py-3 w-full">
                                     {t('dashboard.status.accepted')}
                                 </Chip>
-                                {(highlighted || isTimeChanged) && (
-                                    <Button size="sm" color="danger" variant="flat" onPress={() => onMarkAsRead(part.match_id)} className="font-bold text-[10px] w-full mt-1 animate-pulse">
-                                        ✓ J'AI VU LES CHANGEMENTS
-                                    </Button>
-                                )}
                             </div>
                         </div>
 
@@ -137,6 +132,17 @@ export const ConfirmedTournamentCard = ({
                         </div>
 
                         <div className="space-y-3">
+                            {(highlighted || isTimeChanged) && (
+                                <Button 
+                                    size="sm" 
+                                    color="danger" 
+                                    variant="solid" 
+                                    onPress={() => onMarkAsRead(part.match_id)} 
+                                    className="font-black text-[11px] w-full animate-pulse shadow-lg shadow-danger/20 uppercase h-11"
+                                >
+                                    {t('dashboard.controls.view_changes')}
+                                </Button>
+                            )}
                             <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                     size="sm"

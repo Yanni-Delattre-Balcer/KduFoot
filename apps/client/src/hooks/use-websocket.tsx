@@ -133,24 +133,29 @@ export function useWebSocketSync(
                                     } else {
                                         color = 'warning';
                                         title = t('dashboard.alerts.title');
-                                        description = t('dashboard.alerts.message', {
+                                        description = t('dashboard.notifications.modification', {
                                             host_club_name: payload.data?.host_club_name || '',
                                             date: payload.data?.date || '',
                                             time: payload.data?.time || ''
                                         });
+                                        // Update badge for player
+                                        mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                     }
                                     mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                    mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 }
                                 break;
                             case 'MATCH_CANCELLED':
                                 color = 'danger';
                                 title = t('dashboard.status.cancelled');
                                 description = t('dashboard.notifications.cancellation', {
-                                    club_name: payload.data?.club_name || '',
+                                    club_name: payload.data?.club_name || payload.data?.host_club_name || '',
                                     date: payload.data?.date || '',
                                     time: payload.data?.time || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 break;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';

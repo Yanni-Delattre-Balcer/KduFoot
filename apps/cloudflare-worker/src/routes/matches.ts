@@ -341,17 +341,27 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             const match = await matchService.update(params.id, dbUser.id, dto);
             if (!match) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
-            await broadcastNotification(env, {
-                type: 'NOTIFICATION',
-                notificationType: 'MATCH_MODIFIED',
-                message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été modifié.' : 'Un match auquel vous participez a été modifié.',
-                data: { 
-                    matchId: params.id,
-                    host_club_name: match.club?.name || '',
-                    date: match.match_date,
-                    time: match.match_time
-                }
-            });
+            
+            // Get accepted participants to notify only them
+            const { results: participants } = await env.DB.prepare(
+                'SELECT user_id FROM match_contacts WHERE match_id = ? AND status = "accepted"'
+            ).bind(params.id).all<{ user_id: string }>();
+
+            for (const p of participants) {
+                await broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: 'MATCH_MODIFIED',
+                    targetUserId: p.user_id,
+                    message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été modifié.' : 'Un match auquel vous participez a été modifié.',
+                    data: { 
+                        matchId: params.id,
+                        host_club_name: match.club?.name || '',
+                        host_user_id: dbUser.id, // For differentiation on client side
+                        date: match.match_date,
+                        time: match.match_time
+                    }
+                });
+            }
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

@@ -591,7 +591,7 @@ export class MatchService {
         }
 
         await this.db.prepare(
-            'UPDATE match_contacts SET status = ? WHERE match_id = ? AND user_id = ?'
+            'UPDATE match_contacts SET status = ?, notification_state = 1, updated_at = unixepoch() WHERE match_id = ? AND user_id = ?'
         ).bind(status, matchId, requestUserId).run();
 
         // If accepted, mark match as found (closed)
@@ -641,18 +641,12 @@ export class MatchService {
         ).bind(matchId, userId).first<any>();
         if (!contact) return true;
 
-        // If the user is withdrawing themselves
-        if (userId === requesterId) {
-            const withdrawalMsg = `[DÉSISTEMENT AUTOMATIQUE] L'équipe s'est désistée. Message original: ${contact.message || 'Aucun'}`;
-            await this.db.prepare(
-                'UPDATE match_contacts SET status = "withdrawn", message = ?, notification_state = 2, updated_at = unixepoch() WHERE match_id = ? AND user_id = ?'
-            ).bind(withdrawalMsg, matchId, userId).run();
-        } else {
-            // Organizer is deleting/refusing definitively
-            await this.db.prepare(
-                'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
-            ).bind(matchId, userId).run();
-        }
+        // If the user is withdrawing themselves OR organizer is deleting
+        // We DELETE the record to avoid CHECK constraint issues with 'withdrawn' 
+        // and to ensure no more notifications are sent to this user.
+        await this.db.prepare(
+            'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
+        ).bind(matchId, userId).run();
 
         if (contact.status === 'accepted') {
             const acceptedCountResult = await this.db.prepare(
