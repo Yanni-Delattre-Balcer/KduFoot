@@ -345,7 +345,12 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 type: 'NOTIFICATION',
                 notificationType: 'MATCH_MODIFIED',
                 message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été modifié.' : 'Un match auquel vous participez a été modifié.',
-                data: { matchId: params.id }
+                data: { 
+                    matchId: params.id,
+                    host_club_name: match.club?.name || '',
+                    date: match.match_date,
+                    time: match.match_time
+                }
             });
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
@@ -391,6 +396,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         }
 
         try {
+            const match = await matchService.getById(params.id);
             const success = await matchService.delete(params.id, dbUser.id);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
@@ -398,7 +404,12 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 type: 'NOTIFICATION',
                 notificationType: 'MATCH_CANCELLED',
                 message: 'Un événement a été annulé par l\'organisateur.',
-                data: { matchId: params.id }
+                data: { 
+                    matchId: params.id,
+                    club_name: match?.club?.name || '',
+                    date: match?.match_date || '',
+                    time: match?.match_time || ''
+                }
             });
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
@@ -493,7 +504,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
         const payload = JSON.parse(atob(token.split('.')[1]));
-        const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type, club_colors FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string, level: string, category: string, pitch_type: string, club_colors: string }>();
+        const dbUser = await env.DB.prepare('SELECT id, club_id, level, category, pitch_type, club_colors FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string, club_id: string, level: string, category: string, pitch_type: string, club_colors: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
@@ -513,12 +524,20 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             const success = await matchService.contact(params.id, dbUser.id, dto);
             await broadcastDataChanged(env);
             if (success && matchInfo) {
+                const match = await matchService.getById(params.id);
+                const applicantClub = await env.DB.prepare('SELECT name FROM clubs WHERE id = ?').bind(dbUser.club_id).first<{ name: string }>();
+                
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'NEW_APPLICANT',
                     targetUserId: matchInfo.owner_id,
                     message: 'Nouvelle candidature pour votre événement !',
-                    data: { matchId: params.id }
+                    data: { 
+                        matchId: params.id,
+                        club_name: applicantClub?.name || 'Club inconnu',
+                        date: match?.match_date || '',
+                        time: match?.match_time || ''
+                    }
                 });
             }
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -585,12 +604,18 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             const success = await matchService.updateRequestStatus(params.matchId, params.userId, dbUser.id, body.status);
             await broadcastDataChanged(env);
             if (success) {
+                const match = await matchService.getById(params.matchId);
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
                     targetUserId: params.userId,
                     message: body.status === 'accepted' ? 'Votre candidature a été acceptée !' : 'Votre candidature n\'a pas été retenue.',
-                    data: { matchId: params.matchId }
+                    data: { 
+                        matchId: params.matchId,
+                        host_club_name: match?.club?.name || '',
+                        date: match?.match_date || '',
+                        time: match?.match_time || ''
+                    }
                 });
             }
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
