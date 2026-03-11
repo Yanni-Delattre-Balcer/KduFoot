@@ -96,8 +96,8 @@ export default function DashboardPage() {
         let changed = false;
         participations.forEach(p => {
             // Only update known data for confirmations that are currently marked "unread" (notification_state === 0)
-            // or if we don't have data yet.
-            if (!newKnown[p.match_id]) {
+            // or if we don't have data yet. We ONLY save if it is NOT currently modified, so we lock in the "original" state.
+            if (!newKnown[p.match_id] && p.notification_state === 0) {
                 newKnown[p.match_id] = {
                     date: p.match_date,
                     time: p.match_time,

@@ -39,13 +39,24 @@ export const ConfirmedMatchCard = ({
     const isModification = match.notification_state === 1;
     
     // Surgical Highlights calculation
-    const showSurgical = isParticipant && isModification && knownData;
+    let previousState = knownData;
+    if (!previousState && match.previous_match_state) {
+        try {
+            previousState = typeof match.previous_match_state === 'string' 
+                ? JSON.parse(match.previous_match_state)
+                : match.previous_match_state;
+        } catch (e) {
+            // ignore JSON parse error
+        }
+    }
+
+    const showSurgical = isParticipant && isModification && previousState;
     
-    const isDateChanged = showSurgical && knownData.date !== match.match_date;
-    const isTimeChanged = showSurgical && knownData.time !== match.match_time;
-    const isVenueChanged = showSurgical && knownData.venue !== match.venue;
-    const isFormatChanged = showSurgical && (knownData.format !== (match.match_format || match.format));
-    const isPitchChanged = showSurgical && (knownData.pitch !== (match.match_pitch_type || match.pitch_type));
+    const isDateChanged = showSurgical && previousState?.date !== match.match_date;
+    const isTimeChanged = showSurgical && previousState?.time !== match.match_time;
+    const isVenueChanged = showSurgical && previousState?.venue !== match.venue;
+    const isFormatChanged = showSurgical && (previousState?.format !== (match.match_format || match.format));
+    const isPitchChanged = showSurgical && (previousState?.pitch !== (match.match_pitch_type || match.pitch_type));
 
     // Role-based overall styling
     const borderClass = (isParticipant && isModification) 

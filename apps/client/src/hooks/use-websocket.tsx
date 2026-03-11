@@ -127,9 +127,8 @@ export function useWebSocketSync(
                                 {
                                     const isOrganizer = payload.data?.owner_id === userId;
                                     if (isOrganizer) {
-                                        color = 'success';
-                                        title = t('success');
-                                        description = t('dashboard.alerts.success_discrete');
+                                        // Silent for organizer, the form submit API already handles the success toast!
+                                        return;
                                     } else {
                                         color = 'warning';
                                         title = t('dashboard.alerts.title');
@@ -265,10 +264,7 @@ export function useWebSocketSync(
                                     const isApplicant = payload.data?.user_id === userId;
 
                                     if (isOrganizer) {
-                                        color = 'success';
-                                        title = t('success');
-                                        description = t('dashboard.alerts.success_discrete');
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        return; // Organizer gets UI response instantly from button click
                                     } else if (isApplicant) {
                                         color = 'success';
                                         title = t('dashboard.status.accepted');
@@ -288,10 +284,7 @@ export function useWebSocketSync(
                                     const isApplicant = payload.data?.user_id === userId;
 
                                     if (isOrganizer) {
-                                        color = 'success';
-                                        title = t('success');
-                                        description = t('dashboard.alerts.success_discrete');
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        return; // Organizer gets UI response instantly from button click
                                     } else if (isApplicant) {
                                         color = 'danger';
                                         title = t('dashboard.status.refused');
