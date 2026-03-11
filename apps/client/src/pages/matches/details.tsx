@@ -13,6 +13,7 @@ import { Image } from "@heroui/image";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import DataWall from '@/components/data-wall';
 import { addToast } from '@heroui/toast';
+import { useFavorites } from '@/hooks/use-favorites';
 
 const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
@@ -27,6 +28,7 @@ export default function MatchDetailsPage() {
     const { isAuthenticated } = useAuth();
     const { openGateway } = useWelcomeGateway();
     const isMasked = !isAuthenticated || !profileComplete;
+    const { toggleFavorite, isFavorite } = useFavorites();
     const { match, isLoading, isError, contactMatch, deleteMatch, adminDeleteMatch, cancelMatchContact, updateRequestStatus, closeRegistrations } = useMatch(id || null);
     const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onOpenChange: onDeleteOpenChange } = useDisclosure();
     const { isOpen: isCancelOpen, onOpen: onCancelOpen, onOpenChange: onCancelOpenChange } = useDisclosure();
@@ -210,7 +212,21 @@ export default function MatchDetailsPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Main Details Card */}
                         <Card className="lg:col-span-2 shadow-medium border border-default-100 bg-[#18181b]">
-                            <CardHeader className="flex flex-col items-start gap-1 p-6 pb-4 bg-[#232120] rounded-t-xl border-b border-default-100/10">
+                            <CardHeader className="relative flex flex-col items-start gap-1 p-6 pb-4 bg-[#232120] rounded-t-xl border-b border-default-100/10">
+                                <div className="absolute top-4 right-4 z-10">
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            toggleFavorite(match.id, match.type);
+                                        }}
+                                        className="p-2 rounded-full bg-black/40 hover:bg-black/60 transition-colors backdrop-blur-sm"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={isFavorite(match.id, match.type) ? "currentColor" : "none"} stroke="currentColor" className={`w-6 h-6 ${isFavorite(match.id, match.type) ? "text-amber-400" : "text-white/60 hover:text-white"}`}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isFavorite(match.id, match.type) ? 1.5 : 2} d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div className="flex items-center gap-2 mb-2">
                                     <Chip size="sm" color={match.type === 'tournament' ? 'warning' : 'primary'} variant="flat" className="font-bold uppercase border border-current/20">
                                         {match.type === 'tournament' ? 'Tournoi' : 'Match Amical'}

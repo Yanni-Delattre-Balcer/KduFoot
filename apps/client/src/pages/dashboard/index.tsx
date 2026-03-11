@@ -20,7 +20,6 @@ import DataWall from '@/components/data-wall';
 import { addToast } from '@heroui/toast';
 import { ConfirmedTournamentCard } from './components/confirmed-tournament-card';
 import { OrganizedTournamentCard } from './components/organized-tournament-card';
-import { MyOrganizationsMemo } from './components/my-organizations-memo';
 import { ConfirmedMatchCard } from './components/confirmed-match-card';
 
 const formatDate = (dateStr: string) => {
@@ -349,8 +348,15 @@ export default function DashboardPage() {
     );
 
     const filteredOrganized = (myAnnouncements || []).filter(m => {
+        // Hide matches that are not "active" ("En recherche")
+        if (m.status !== 'active') return false;
+        
         // Hide matches that are confirmed (moved to Matchs Confirmés tab)
         if (confirmedMatchIds.has(m.id)) return false;
+        
+        // Hide matches that are full
+        if ((m.accepted_count || 0) >= (m.type === 'tournament' ? (m.max_teams || 2) : 1)) return false;
+
         if (organizedSubFilter === 'all') return true;
         return m.type === organizedSubFilter;
     });
@@ -727,11 +733,6 @@ export default function DashboardPage() {
                         <Tab key="organized" title={<div className="flex items-center space-x-2"><span>{t('dashboard.tabs.organized')}</span>{isLocked && <span className="text-default-400">🔒</span>}</div>}>
                             <div className="flex flex-col gap-4 pt-2">
                                 {renderSubFilters(organizedSubFilter, setOrganizedSubFilter)}
-                                <MyOrganizationsMemo
-                                    events={myAnnouncements}
-                                    isLoading={isLoadingAnnouncements}
-                                    formatDate={formatDate}
-                                />
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {isLoadingAnnouncements ? (
