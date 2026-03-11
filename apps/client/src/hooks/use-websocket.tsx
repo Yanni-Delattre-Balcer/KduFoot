@@ -150,17 +150,25 @@ export function useWebSocketSync(
                             case 'MATCH_CANCELLED':
                                 {
                                     const isOrganizer = payload.data?.owner_id === userId;
-                                    if (isOrganizer) return; // Silent for organizer, delete API handles toast
 
-                                    color = 'danger';
-                                    title = "Annulation";
-                                    description = t('dashboard.notifications.cancellation', {
-                                        date: payload.data?.match_date || '',
-                                        team: payload.data?.host_club_name || ''
-                                    });
-                                    mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
-                                    mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                    window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                    if (isOrganizer) {
+                                        color = 'success';
+                                        title = t('success');
+                                        description = t('dashboard.alerts.success_discrete');
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                    } else {
+                                        // Wait, we don't know if the user is a participant. We just display it for now (as the app currently does)
+                                        // Ideally, a match cancel targets only its participants. We will allow it through as before.
+                                        color = 'danger';
+                                        title = "Annulation";
+                                        description = t('dashboard.notifications.cancellation', {
+                                            date: payload.data?.match_date || '',
+                                            team: payload.data?.host_club_name || ''
+                                        });
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                    }
                                 }
                                 break;
                             case 'TOURNAMENT_PUBLISHED':
@@ -170,90 +178,132 @@ export function useWebSocketSync(
                                 break;
                             case 'REQUEST_RECEIVED':
                             case 'NEW_APPLICANT':
-                                color = 'primary';
-                                title = t('dashboard.status.pending');
-                                description = t('dashboard.notifications.new_request_interactive', {
-                                    date: payload.data?.match_date || '',
-                                    time: payload.data?.match_time || '',
-                                    team: payload.data?.applicant_club_name || ''
-                                });
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                // Dispatch event for UI/Badge update
-                                window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                {
+                                    const isOrganizer = payload.data?.owner_id === userId;
+                                    const isApplicant = payload.data?.user_id === userId;
 
-                                addToast({
-                                    title,
-                                    description: (
-                                        <div className="flex flex-col gap-3">
-                                            <p>{description}</p>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    color="success"
-                                                    variant="solid"
-                                                    className="font-black text-[10px]"
-                                                    onPress={async () => {
-                                                        if (token) {
-                                                            await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'accepted', token);
-                                                            mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                                            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                                        }
-                                                    }}
-                                                >
-                                                    {t('dashboard.controls.accept').toUpperCase()}
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    color="default"
-                                                    variant="flat"
-                                                    className="font-black text-[10px] bg-white/20 text-white"
-                                                    onPress={() => {
-                                                        navigate('/dashboard');
-                                                    }}
-                                                >
-                                                    {t('dashboard.controls.view').toUpperCase()}
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    color="danger"
-                                                    variant="solid"
-                                                    className="font-black text-[10px]"
-                                                    onPress={async () => {
-                                                        if (token) {
-                                                            await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'refused', token);
-                                                            mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                                            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                                        }
-                                                    }}
-                                                >
-                                                    {t('dashboard.controls.refuse').toUpperCase()}
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ),
-                                    color,
-                                    variant: 'solid',
-                                    timeout: 10000
-                                });
-                                return; // Skip default addToast below
+                                    if (isOrganizer) {
+                                        color = 'primary';
+                                        title = t('dashboard.status.pending');
+                                        description = t('dashboard.notifications.new_request_interactive', {
+                                            date: payload.data?.match_date || '',
+                                            time: payload.data?.match_time || '',
+                                            team: payload.data?.applicant_club_name || ''
+                                        });
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+
+                                        addToast({
+                                            title,
+                                            description: (
+                                                <div className="flex flex-col gap-3">
+                                                    <p>{description}</p>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            color="success"
+                                                            variant="solid"
+                                                            className="font-black text-[10px]"
+                                                            onPress={async () => {
+                                                                if (token) {
+                                                                    await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'accepted', token);
+                                                                    mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                                                    window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                                                }
+                                                            }}
+                                                        >
+                                                            {t('dashboard.controls.accept').toUpperCase()}
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            color="default"
+                                                            variant="flat"
+                                                            className="font-black text-[10px] bg-white/20 text-white"
+                                                            onPress={() => {
+                                                                navigate('/dashboard');
+                                                            }}
+                                                        >
+                                                            {t('dashboard.controls.view').toUpperCase()}
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            color="danger"
+                                                            variant="solid"
+                                                            className="font-black text-[10px]"
+                                                            onPress={async () => {
+                                                                if (token) {
+                                                                    await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'refused', token);
+                                                                    mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                                                    window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                                                }
+                                                            }}
+                                                        >
+                                                            {t('dashboard.controls.refuse').toUpperCase()}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ),
+                                            color,
+                                            variant: 'solid',
+                                            timeout: 10000
+                                        });
+                                        return; // Organizer gets interactive toast
+                                    } else if (isApplicant) {
+                                        color = 'success';
+                                        title = t('success');
+                                        description = t('dashboard.alerts.success_discrete');
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                    } else {
+                                        return; // Random users ignore this
+                                    }
+                                }
+                                break;
                             case 'REQUEST_ACCEPTED':
                             case 'ENROLLMENT_ACCEPTED':
-                                color = 'success';
-                                title = t('dashboard.status.accepted');
-                                description = t('dashboard.notifications.acceptance_player', {
-                                    date: payload.data?.match_date || '',
-                                    team: payload.data?.host_club_name || ''
-                                });
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                {
+                                    const isOrganizer = payload.data?.owner_id === userId;
+                                    const isApplicant = payload.data?.user_id === userId;
+
+                                    if (isOrganizer) {
+                                        color = 'success';
+                                        title = t('success');
+                                        description = t('dashboard.alerts.success_discrete');
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                    } else if (isApplicant) {
+                                        color = 'success';
+                                        title = t('dashboard.status.accepted');
+                                        description = t('dashboard.notifications.acceptance_player', {
+                                            date: payload.data?.match_date || '',
+                                            team: payload.data?.host_club_name || ''
+                                        });
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                    } else {
+                                        return; // Random users ignore this
+                                    }
+                                }
                                 break;
                             case 'ENROLLMENT_REFUSED':
-                                color = 'danger';
-                                title = t('dashboard.status.refused');
-                                description = t('dashboard.notifications.rejection_player', {
-                                    date: payload.data?.match_date || '',
-                                    team: payload.data?.host_club_name || ''
-                                });
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                {
+                                    const isOrganizer = payload.data?.owner_id === userId;
+                                    const isApplicant = payload.data?.user_id === userId;
+
+                                    if (isOrganizer) {
+                                        color = 'success';
+                                        title = t('success');
+                                        description = t('dashboard.alerts.success_discrete');
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                    } else if (isApplicant) {
+                                        color = 'danger';
+                                        title = t('dashboard.status.refused');
+                                        description = t('dashboard.notifications.rejection_player', {
+                                            date: payload.data?.match_date || '',
+                                            team: payload.data?.host_club_name || ''
+                                        });
+                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                    } else {
+                                        return; // Random users ignore this
+                                    }
+                                }
                                 break;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';

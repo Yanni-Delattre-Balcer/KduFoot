@@ -563,7 +563,6 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'NEW_APPLICANT',
-                    targetUserId: matchInfo.owner_id,
                     message: 'Nouvelle candidature pour votre événement !',
                     data: {
                         match_id: params.id,
@@ -571,7 +570,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         match_time: match?.match_time || '',
                         host_club_name: match?.club?.name || '',
                         applicant_club_name: applicantClub?.name || '',
-                        user_id: dbUser.id
+                        user_id: dbUser.id,
+                        owner_id: matchInfo.owner_id
                     }
                 });
             }
@@ -659,7 +659,6 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
-                    targetUserId: params.userId,
                     message: body.status === 'accepted' ? 'Votre candidature a été acceptée !' : 'Votre candidature n\'a pas été retenue.',
                     data: {
                         match_id: params.matchId,
