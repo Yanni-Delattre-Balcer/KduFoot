@@ -472,7 +472,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-full gap-3">
                             <div className="p-3 rounded-2xl bg-orange-500/10">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-orange-500">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -537,7 +537,7 @@ export default function DashboardPage() {
                                                 setHighlightedCardId(first.match_id);
                                             }}
                                         >
-                                            {t('dashboard.controls.view_changes', 'VOIR LES CHANGEMENTS')}
+                                            {t('dashboard.controls.view_changes', 'J\'AI VU LES MODIFICATIONS')}
                                         </Button>
                                         <Button
                                             color="success"
@@ -590,7 +590,7 @@ export default function DashboardPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {isLoadingIncoming ? (
-                                        <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="warning" aria-label={t('loading')} /></div>
                                     ) : filteredRequests.length > 0 ? (
                                         filteredRequests.map((request, idx) => (
                                             <Card key={idx} className={`overflow-hidden border ${request.request_status === 'accepted' ? 'border-success/30 bg-success/5' : request.request_status === 'refused' ? 'border-danger/20 bg-danger/5' : 'border-orange-500/20 bg-linear-to-br from-orange-500/5 to-transparent'} md:hover:scale-[1.01] transition-all duration-200 shadow-sm hover:shadow-md`}>
@@ -735,7 +735,7 @@ export default function DashboardPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {isLoadingAnnouncements ? (
-                                        <div className="col-span-full flex justify-center py-12"><Spinner color="warning" /></div>
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="warning" aria-label={t('loading')} /></div>
                                     ) : filteredOrganized.length > 0 ? (
                                         filteredOrganized.map((match) => (
                                             match.type === 'tournament' ? (
@@ -923,7 +923,7 @@ export default function DashboardPage() {
                             <div className="flex flex-col gap-4 pt-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {isLoadingParticipations ? (
-                                        <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" /></div>
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" aria-label={t('loading')} /></div>
                                     ) : allConfirmedTournaments.length > 0 ? (
                                         allConfirmedTournaments.map((part) => (
                                             <ConfirmedTournamentCard
@@ -972,7 +972,7 @@ export default function DashboardPage() {
                             <div className="flex flex-col gap-4 pt-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                                     {(isLoadingIncoming || isLoadingParticipations) ? (
-                                        <div className="col-span-full flex justify-center py-12"><Spinner color="success" /></div>
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="success" aria-label={t('loading')} /></div>
                                     ) : allConfirmedMatches.length > 0 ? (
                                         allConfirmedMatches.map((cm, idx) => (
                                             <ConfirmedMatchCard
@@ -1080,7 +1080,7 @@ export default function DashboardPage() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="flex justify-center p-8"><Spinner color="warning" /></div>
+                                    <div className="flex justify-center p-8"><Spinner color="warning" aria-label={t('loading')} /></div>
                                 )}
                             </ModalBody>
                             <ModalFooter className="border-t border-white/5 pt-4">

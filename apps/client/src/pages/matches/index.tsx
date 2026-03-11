@@ -364,7 +364,10 @@ export default function MatchesPage() {
                                         </p>
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                                             <Select
+                                                id="filter-category"
+                                                name="category"
                                                 label={t('matchesPage.filters.category')}
+                                                aria-label={t('matchesPage.filters.category')}
                                                 placeholder={t('matchesPage.filters.all')}
                                                 selectedKeys={filters.category ? [filters.category] : []}
                                                 onChange={(e) => handleFilterChange('category', e.target.value)}
@@ -377,7 +380,10 @@ export default function MatchesPage() {
                                             </Select>
 
                                             <Select
+                                                id="filter-level"
+                                                name="level"
                                                 label={t('matchesPage.filters.level')}
+                                                aria-label={t('matchesPage.filters.level')}
                                                 placeholder={t('matchesPage.filters.all')}
                                                 selectedKeys={filters.level ? [filters.level] : []}
                                                 onChange={(e) => handleFilterChange('level', e.target.value)}
@@ -390,7 +396,10 @@ export default function MatchesPage() {
                                             </Select>
 
                                             <Select
+                                                id="filter-format"
+                                                name="format"
                                                 label={t('matchesPage.filters.format')}
+                                                aria-label={t('matchesPage.filters.format')}
                                                 placeholder={t('matchesPage.filters.all')}
                                                 selectedKeys={filters.format ? [filters.format] : []}
                                                 onChange={(e) => handleFilterChange('format', e.target.value)}
@@ -403,7 +412,10 @@ export default function MatchesPage() {
                                             </Select>
 
                                             <Select
+                                                id="filter-gender"
+                                                name="gender"
                                                 label={t('matchesPage.filters.gender')}
+                                                aria-label={t('matchesPage.filters.gender')}
                                                 placeholder={t('matchesPage.filters.all')}
                                                 selectedKeys={filters.notes && filters.notes.includes('Genre:') ? [filters.notes.split('Genre: ')[1]] : []}
                                                 onChange={(e) => handleFilterChange('notes', e.target.value ? `Genre: ${e.target.value}` : '')} // Hacky filter via notes
@@ -417,7 +429,10 @@ export default function MatchesPage() {
                                             </Select>
 
                                             <Select
+                                                id="filter-pitch-type"
+                                                name="pitch_type"
                                                 label={t('matchesPage.filters.pitch_type')}
+                                                aria-label={t('matchesPage.filters.pitch_type')}
                                                 placeholder={t('matchesPage.filters.all')}
                                                 selectedKeys={filters.pitch_type ? [filters.pitch_type] : []}
                                                 onChange={(e) => handleFilterChange('pitch_type', e.target.value)}
@@ -430,7 +445,10 @@ export default function MatchesPage() {
                                             </Select>
 
                                             <Input
+                                                id="filter-date"
+                                                name="date"
                                                 label={t('matchesPage.filters.date')}
+                                                aria-label={t('matchesPage.filters.date')}
                                                 type="date"
                                                 value={filters.date || ''}
                                                 onChange={(e) => handleFilterChange('date', e.target.value)}
@@ -439,7 +457,10 @@ export default function MatchesPage() {
                                             />
 
                                             <Select
+                                                id="filter-venue"
+                                                name="venue"
                                                 label={t('matchesPage.filters.venue')}
+                                                aria-label={t('matchesPage.filters.venue')}
                                                 placeholder={t('matchesPage.filters.all')}
                                                 selectedKeys={filters.venue ? [filters.venue] : []}
                                                 onChange={(e) => handleFilterChange('venue', e.target.value)}
@@ -452,7 +473,10 @@ export default function MatchesPage() {
                                             </Select>
 
                                             <Input
+                                                id="filter-city"
+                                                name="city"
                                                 label={t('matchesPage.filters.city')}
+                                                aria-label={t('matchesPage.filters.city')}
                                                 placeholder="Ex: Lens"
                                                 value={filters.location_city || ''}
                                                 onChange={(e) => handleFilterChange('location_city', e.target.value)}
@@ -463,7 +487,10 @@ export default function MatchesPage() {
                                             />
 
                                             <Input
+                                                id="filter-zip"
+                                                name="zip"
                                                 label={t('matchesPage.filters.zip')}
+                                                aria-label={t('matchesPage.filters.zip')}
                                                 placeholder="Ex: 62300"
                                                 value={filters.location_zip || ''}
                                                 onChange={(e) => handleFilterChange('location_zip', e.target.value)}
@@ -474,8 +501,11 @@ export default function MatchesPage() {
                                             />
 
                                             <Input
+                                                id="filter-radius"
+                                                name="radius"
                                                 type="number"
                                                 label={t('matchesPage.filters.radius')}
+                                                aria-label={t('matchesPage.filters.radius')}
                                                 placeholder={canUseDistance ? "Ex: 20" : t('matchForm.labels.siret')}
                                                 min={0}
                                                 max={200}
@@ -535,7 +565,7 @@ export default function MatchesPage() {
                                     <Card className="shadow-lg shadow-violet-500/5 border border-violet-800/50 bg-[#232120] overflow-hidden">
                                         <CardHeader className="px-5 pt-5 pb-3">
                                             <div className="flex justify-between items-center w-full">
-                                                <Button size="sm" variant="light" onPress={prevMonth} isIconOnly>
+                                                <Button size="sm" variant="light" onPress={prevMonth} isIconOnly aria-label={t('back')}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                                                     </svg>
@@ -543,7 +573,7 @@ export default function MatchesPage() {
                                                 <h3 className="text-xl font-bold text-violet-400">
                                                     {getMonthName(calendarMonth)} {calendarMonth.getFullYear()}
                                                 </h3>
-                                                <Button size="sm" variant="light" onPress={nextMonth} isIconOnly>
+                                                <Button size="sm" variant="light" onPress={nextMonth} isIconOnly aria-label={t('nav.userDropdown.loading')}>
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                                                     </svg>
@@ -736,7 +766,7 @@ export default function MatchesPage() {
 
                                         {isLoading && filteredMatches.length === 0 && (
                                             <div className="flex justify-center py-20">
-                                                <Spinner color="secondary" size="lg" />
+                                                <Spinner color="secondary" size="lg" aria-label={t('loading')} />
                                             </div>
                                         )}
 

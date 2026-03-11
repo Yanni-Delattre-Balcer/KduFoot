@@ -184,7 +184,6 @@ export default function UsersAndPermissionsPage() {
         lastRequestTimestamp.current = requestTimestamp;
 
         try {
-            console.log(`[Admin] loadUsers #${requestTimestamp} called (silent=${silent})`);
             const [u, blockedIds] = await Promise.all([
                 listAuth0Users(token),
                 // Add a cache-buster to ensure we get fresh data from D1
@@ -193,11 +192,9 @@ export default function UsersAndPermissionsPage() {
 
             // If a newer request has started, ignore this one
             if (lastRequestTimestamp.current !== requestTimestamp) {
-                console.log(`[Admin] loadUsers #${requestTimestamp} ignored (newer request in flight)`);
                 return;
             }
 
-            console.log(`[Admin] loadUsers #${requestTimestamp} fetched ${u?.length || 0} users from Auth0 and ${blockedIds?.length || 0} blocked from D1`);
 
             // Merge the D1 blocked status and Auth0 data
             const mergedUsers = (u ?? []).map(user => {
@@ -211,7 +208,6 @@ export default function UsersAndPermissionsPage() {
 
                     // Log if we find a mismatch
                     if (!hasBlockedPerm) {
-                        console.log(`[Admin] User ${user.email} is blocked in D1 but MISSING permission in Auth0 (Correcting UI)`);
                     }
 
                     return {
@@ -229,7 +225,6 @@ export default function UsersAndPermissionsPage() {
                     const hasStalePerm = currentPerms.includes(Permission.ROLE_BLOCKED);
 
                     if (hasStalePerm) {
-                        console.log(`[Admin] User ${user.email} is NOT blocked in D1 but HAS stale permission in Auth0 (Correcting UI)`);
                     }
 
                     return {

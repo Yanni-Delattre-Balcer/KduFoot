@@ -165,6 +165,8 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                                                                 navigate("/admin/users");
                                                                 onClose();
                                                             }}
+                                                            role="button"
+                                                            aria-label={perm + " (Admin Panel)"}
                                                         >
                                                             {perm} (Admin Panel)
                                                         </Chip>

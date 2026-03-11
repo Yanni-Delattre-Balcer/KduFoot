@@ -66,7 +66,7 @@ export default function DefaultLayout({
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
       {/* Floating Logo - Independent of Navbar - Responsive */}
       <div className="fixed top-0 left-3 lg:left-6 z-[60] py-1 lg:py-2 pointer-events-none">
-        <a href="/" className="pointer-events-auto block">
+        <a href="/" className="pointer-events-auto block" aria-label={t('common.home', 'Accueil')}>
           <img
             src="/logo.png"
             alt="KduFoot Logo"
@@ -134,6 +134,7 @@ export default function DefaultLayout({
                 size="sm"
                 className="bg-background/80 backdrop-blur-xl border border-default-200 shadow-2xl px-4 font-bold text-xs"
                 onPress={() => setIsModalOpen(true)}
+                aria-label={t('nav.userPrefix') + ' ' + user.name}
               >
                 {t("nav.userPrefix")} {user.name}
               </Button>

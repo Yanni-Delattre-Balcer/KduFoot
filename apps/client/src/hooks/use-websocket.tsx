@@ -37,7 +37,6 @@ export function useWebSocketSync(
         // Logique de nettoyage immédiat si désactivé
         if (!enabled) {
             if (wsRef.current) {
-                console.log(`[WebSocket] Stopping connection (Disabled)`);
                 wsRef.current.onclose = null;
                 wsRef.current.onerror = null;
                 wsRef.current.close();
@@ -85,7 +84,6 @@ export function useWebSocketSync(
             let heartbeatInterval: NodeJS.Timeout;
 
             ws.onopen = () => {
-                console.log('[WebSocket] Connected to hub');
                 setStatus('connected');
                 retryCountRef.current = 0; // Reset backoff on success
 
@@ -145,7 +143,7 @@ export function useWebSocketSync(
                                         window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                     }
                                 }
-                                break;
+                                return; // Silent refresh, no toast
                             case 'MATCH_CANCELLED':
                                 // Message ciblés envoyés uniquement aux joueurs par le backend
                                 color = 'danger';
@@ -154,7 +152,7 @@ export function useWebSocketSync(
                                 mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                break;
+                                return; // Silent refresh, no toast
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
                                 title = t('enums.type.tournament');
@@ -258,7 +256,7 @@ export function useWebSocketSync(
                                         return; // Random users ignore this
                                     }
                                 }
-                                break;
+                                return; // Silent refresh, no toast
                             case 'ENROLLMENT_REFUSED':
                                 {
                                     const isOrganizer = payload.data?.owner_id === userId;
@@ -278,7 +276,7 @@ export function useWebSocketSync(
                                         return; // Random users ignore this
                                     }
                                 }
-                                break;
+                                return; // Silent refresh, no toast
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';
                                 title = t('dashboard.status.refused');
@@ -292,7 +290,6 @@ export function useWebSocketSync(
 
             ws.onclose = (event) => {
                 if (heartbeatInterval) clearInterval(heartbeatInterval);
-                console.log(`[WebSocket] Disconnected. Code: ${event.code}, Reason: ${event.reason}, Clean: ${event.wasClean}`);
                 setStatus('connecting');
                 // Reconnect on abnormal closure or if we still have token
                 if (!event.wasClean || event.code === 1006 || (enabled && token)) {

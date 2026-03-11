@@ -135,30 +135,39 @@ export default function SessionEditPage() {
                         <CardHeader className="font-bold bg-default-50">{t('session.info_general', 'Informations Générales')}</CardHeader>
                         <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Input
+                                id="session_name"
+                                name="session_name"
                                 label={t('session.name_label', 'Nom de la séance')}
                                 placeholder={t('session.name_placeholder', 'Ex: Séance Technico-Tactique')}
                                 value={formData.name}
                                 onValueChange={(v) => handleChange('name', v)}
                                 isRequired
                                 className="md:col-span-2"
+                                aria-label={t('session.name_label', 'Nom de la séance')}
                             />
                             <Select
+                                id="session_category"
+                                name="session_category"
                                 label={t('session.category_label', 'Catégorie')}
                                 placeholder={t('session.choose_category', 'Choisir une catégorie')}
                                 selectedKeys={formData.category ? [formData.category] : []}
                                 onChange={(e) => handleChange('category', e.target.value)}
                                 isRequired
+                                aria-label={t('session.category_label', 'Catégorie')}
                             >
                                 {Object.values(Category).map((cat) => (
                                     <SelectItem key={cat}>{t(`enums.category.${cat}`)}</SelectItem>
                                 ))}
                             </Select>
                             <Select
+                                id="session_level"
+                                name="session_level"
                                 label={t('session.level_label', 'Niveau')}
                                 placeholder={t('session.choose_level', 'Choisir un niveau')}
                                 selectedKeys={formData.level ? [formData.level] : []}
                                 onChange={(e) => handleChange('level', e.target.value)}
                                 isRequired
+                                aria-label={t('session.level_label', 'Niveau')}
                             >
                                 {Object.values(Level).map((lvl) => (
                                     <SelectItem key={lvl}>{t(`enums.level.${lvl}`)}</SelectItem>
@@ -166,23 +175,32 @@ export default function SessionEditPage() {
                             </Select>
 
                             <Input
+                                id="session_date"
+                                name="session_date"
                                 type="date"
                                 label={t('session.date_label', 'Date prévue')}
                                 value={formData.scheduled_date}
                                 onValueChange={(v) => handleChange('scheduled_date', v)}
+                                aria-label={t('session.date_label', 'Date prévue')}
                             />
                             <Input
+                                id="session_duration"
+                                name="session_duration"
                                 type="number"
                                 label={t('session.duration_label', 'Durée totale (min)')}
                                 value={formData.total_duration?.toString()}
                                 onValueChange={(v) => handleChange('total_duration', parseInt(v))}
                                 isRequired
+                                aria-label={t('session.duration_label', 'Durée totale (min)')}
                             />
                             <Select
+                                id="session_status"
+                                name="session_status"
                                 label={t('status', 'Statut')}
                                 selectedKeys={formData.status ? [formData.status] : []}
                                 onChange={(e) => handleChange('status', e.target.value)}
                                 isRequired
+                                aria-label={t('status', 'Statut')}
                             >
                                 <SelectItem key="draft">{t('session.status_enum.draft', 'Brouillon')}</SelectItem>
                                 <SelectItem key="scheduled">{t('session.status_enum.scheduled', 'Planifiée')}</SelectItem>
@@ -213,6 +231,8 @@ export default function SessionEditPage() {
                                                 </div>
                                                 <div className="flex flex-col gap-1 items-center min-w-[80px]">
                                                     <Input
+                                                        id={`exercise_duration_${index}`}
+                                                        name={`exercise_duration_${index}`}
                                                         type="number"
                                                         size="sm"
                                                         label={t('duration', 'Durée')}
@@ -221,6 +241,7 @@ export default function SessionEditPage() {
                                                         onValueChange={(v) => handleUpdateExerciseDuration(index, parseInt(v) || 0)}
                                                         endContent={<span className="text-default-400 text-xs">min</span>}
                                                         className="w-28"
+                                                        aria-label={t('duration', 'Durée')}
                                                     />
                                                 </div>
                                                 <div className="flex flex-col grow">
@@ -229,7 +250,13 @@ export default function SessionEditPage() {
                                                         {se.exercise?.category && <Chip size="sm" variant="flat">{t(`enums.category.${se.exercise.category}`)}</Chip>}
                                                     </div>
                                                 </div>
-                                                <Button isIconOnly color="danger" variant="light" onPress={() => handleRemoveExercise(index)}>
+                                                <Button 
+                                                    isIconOnly 
+                                                    color="danger" 
+                                                    variant="light" 
+                                                    onPress={() => handleRemoveExercise(index)}
+                                                    aria-label={t('common.remove', 'Supprimer')}
+                                                >
                                                     ✕
                                                 </Button>
                                             </CardBody>

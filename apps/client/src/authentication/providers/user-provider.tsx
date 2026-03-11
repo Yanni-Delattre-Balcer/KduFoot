@@ -40,7 +40,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         const handleOnline = () => setIsOnline(true);
         const handleOffline = () => setIsOnline(false);
         const handleBanSignal = (e: any) => {
-            console.log('[UserProvider] Signal de bannissement forcé reçu:', e.detail);
             setLocalBanOverride({ isBanned: true, reason: e.detail?.reason });
         };
 
@@ -115,7 +114,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
         isAuthenticated,
         user?.auth0_sub,
         (status: BanStatus) => {
-            console.log('[UserProvider] Ban status change detected:', status);
             setLocalBanOverride(status);
         },
         wsToken,

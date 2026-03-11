@@ -32,7 +32,6 @@ export function Profile() {
   const { user } = useAuth();
 
   // eslint-disable-next-line no-console
-  console.log(JSON.stringify(user));
 
   return (
     <Tooltip content={user?.nickname} delay={750}>

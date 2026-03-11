@@ -12,5 +12,12 @@
   ],
   "scss.customData": [
     ".vscode/tailwind-directives.json"
-  ]
+  ],
+  "i18n-ally.localesPaths": [
+    "apps/client/src/locales",
+    "apps/client/src/locales/kdufoot"
+  ],
+  "i18n-ally.pathMatcher": "{namespace}/{locale}.{ext}",
+  "i18n-ally.namespace": true,
+  "i18n-ally.keystyle": "nested"
 }

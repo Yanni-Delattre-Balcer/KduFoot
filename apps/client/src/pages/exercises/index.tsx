@@ -36,7 +36,6 @@ export default function ExercisesPage() {
             return;
         }
         // TODO: Implement analysis logic
-        console.log('Analyze:', videoUrl);
     };
 
 
@@ -73,6 +72,9 @@ export default function ExercisesPage() {
                         </p>
                         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                             <Input
+                                id="video_url"
+                                name="video_url"
+                                aria-label={t('video.urlPlaceholder')}
                                 placeholder={t('video.urlPlaceholder')}
                                 value={videoUrl}
                                 onValueChange={setVideoUrl}
@@ -212,6 +214,7 @@ export default function ExercisesPage() {
                                             onPress={() => isInTraining(exercise.id) ? removeExercise(exercise.id) : addExercise(exercise)}
                                             isIconOnly
                                             className="font-bold text-lg shadow-sm text-white"
+                                            aria-label={isInTraining(exercise.id) ? t('training.remove') : t('training.add')}
                                         >
                                             {isInTraining(exercise.id) ? "−" : "+"}
                                         </Button>

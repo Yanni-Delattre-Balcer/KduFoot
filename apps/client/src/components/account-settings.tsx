@@ -319,7 +319,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     {t('account.avatar.recommendation')}
                 </p>
 
-                <div className="relative group cursor-pointer z-10" onClick={handleAvatarClick}>
+                <div className="relative group cursor-pointer z-10" onClick={handleAvatarClick} role="button" aria-label={t('account.avatar.change')}>
                     <Image
                         src={previewUrl || dbUser?.picture || authUser.picture}
                         className={`w-24 h-24 rounded-full object-cover border-4 border-primary/20 ${isAnalyzing ? 'opacity-50' : ''}`}
@@ -327,9 +327,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     />
                     <div className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 shadow-lg border-2 border-white z-20">
                         {isAnalyzing ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-label={t('account.avatar.analyzing')} />
                         ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
                         )}
@@ -364,6 +364,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1">
                                     <Input
+                                        id="acc_firstname"
+                                        name="acc_firstname"
                                         label={t('account.fields.firstname')}
                                         variant="bordered"
                                         size="sm"
@@ -374,11 +376,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         }}
                                         isInvalid={!!errors.firstname}
                                         isRequired
+                                        aria-label={t('account.fields.firstname')}
                                     />
                                     {errors.firstname && <p className="text-xs font-bold pl-1">{errors.firstname}</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <Input
+                                        id="acc_lastname"
+                                        name="acc_lastname"
                                         label={t('account.fields.lastname')}
                                         variant="bordered"
                                         size="sm"
@@ -389,12 +394,15 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         }}
                                         isInvalid={!!errors.lastname}
                                         isRequired
+                                        aria-label={t('account.fields.lastname')}
                                     />
                                     {errors.lastname && <p className="text-xs font-bold pl-1">{errors.lastname}</p>}
                                 </div>
                             </div>
                             <div className="space-y-1">
                                 <Input
+                                    id="acc_phone"
+                                    name="acc_phone"
                                     label={t('account.fields.phone')}
                                     variant="bordered"
                                     size="sm"
@@ -406,11 +414,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     placeholder="+33 6 12 34 56 78"
                                     isInvalid={!!errors.phone}
                                     isRequired
+                                    aria-label={t('account.fields.phone')}
                                 />
                                 {errors.phone && <p className="text-xs font-bold pl-1">{errors.phone}</p>}
                             </div>
                             <div className="space-y-1">
                                 <Input
+                                    id="acc_license"
+                                    name="acc_license"
                                     label={t('account.fields.license')}
                                     variant="bordered"
                                     size="sm"
@@ -422,12 +433,16 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     placeholder={t('account.fields.license_placeholder')}
                                     isInvalid={!!errors.licenseId}
                                     isRequired
+                                    aria-label={t('account.fields.license')}
                                 />
                                 {errors.licenseId && <p className="text-xs font-bold pl-1">{errors.licenseId}</p>}
                             </div>
                             <div className="space-y-1">
                                 <Input
+                                    id="acc_hq_address"
+                                    name="acc_hq_address"
                                     label={t('account.fields.hq_address')}
+                                    aria-label={t('account.fields.hq_address')}
                                     variant="flat"
                                     size="sm"
                                     value={dbUser?.club?.address || "--"}
@@ -440,6 +455,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Input
+                                    id="acc_stadium_address"
+                                    name="acc_stadium_address"
                                     label={t('account.fields.stadium_address')}
                                     variant="bordered"
                                     size="sm"
@@ -452,6 +469,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     isInvalid={!!errors.stadiumAddress}
                                     isRequired
                                     description={t('account.fields.stadium_warning')}
+                                    aria-label={t('account.fields.stadium_address')}
                                     classNames={{
                                         description: "text-[10px] text-primary-500 font-medium",
                                         label: "font-black text-primary whitespace-nowrap",
@@ -467,6 +485,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <Select
+                                    id="acc_category"
+                                    name="acc_category"
                                     label={t('account.fields.category')}
                                     variant="bordered"
                                     size="sm"
@@ -477,6 +497,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     }}
                                     placeholder={t('common.choose', 'Choisir...')}
                                     isInvalid={!!errors.category}
+                                    aria-label={t('account.fields.category')}
                                 >
                                     {CATEGORIES.map((cat) => (
                                         <SelectItem key={cat} textValue={t(`enums.category.${cat}`)}>
@@ -488,6 +509,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Select
+                                    id="acc_level"
+                                    name="acc_level"
                                     label={t('account.fields.level')}
                                     variant="bordered"
                                     size="sm"
@@ -498,6 +521,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     }}
                                     placeholder={t('common.choose', 'Choisir...')}
                                     isInvalid={!!errors.level}
+                                    aria-label={t('account.fields.level')}
                                 >
                                     {LEVELS.map((lvl) => (
                                         <SelectItem key={lvl} textValue={t(`enums.level.${lvl}`)}>
@@ -509,6 +533,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Select
+                                    id="acc_pitch_type"
+                                    name="acc_pitch_type"
                                     label={t('account.fields.pitch')}
                                     variant="bordered"
                                     size="sm"
@@ -519,6 +545,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     }}
                                     placeholder={t('common.choose', 'Choisir...')}
                                     isInvalid={!!errors.pitchType}
+                                    aria-label={t('account.fields.pitch')}
                                 >
                                     {PITCH_TYPES.map((type) => (
                                         <SelectItem key={type} textValue={t(`enums.pitch.${type}`)}>
@@ -530,6 +557,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             </div>
                             <div className="space-y-1">
                                 <Input
+                                    id="acc_club_colors"
+                                    name="acc_club_colors"
                                     label={t('account.fields.colors')}
                                     variant="bordered"
                                     size="sm"
@@ -541,6 +570,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     placeholder={t('account.fields.colors_placeholder')}
                                     isInvalid={!!errors.clubColors}
                                     isRequired
+                                    aria-label={t('account.fields.colors')}
                                 />
                                 {errors.clubColors && <p className="text-xs font-bold pl-1">{errors.clubColors}</p>}
                             </div>
@@ -565,6 +595,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                     <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start order-2">
                                         <div className="flex-1 flex flex-col gap-1">
                                             <Input
+                                                id="acc_siret"
+                                                name="acc_siret"
                                                 label={
                                                     <span className="font-bold text-danger text-[0.75rem] sm:text-sm leading-tight">
                                                         SIRET (14 chiffres) ou SIREN (9 chiffres)
@@ -585,6 +617,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                                 isDisabled={!!dbUser?.club_id}
                                                 isInvalid={!!errors.siret}
                                                 className="w-full max-w-full"
+                                                aria-label="SIRET (14 chiffres) ou SIREN (9 chiffres)"
                                             />
                                             {errors.siret && (
                                                 <p className="text-xs font-bold pl-1 animate-shake">{errors.siret}</p>
@@ -659,6 +692,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
                                                 <div className="space-y-1.5">
                                                     <Input
+                                                        id={`acc_stadium_address_${s.siret}`}
+                                                        name={`acc_stadium_address_${s.siret}`}
                                                         label={t('account.fields.stadium_address_for', { club: s.name })}
                                                         placeholder={t('account.fields.stadium_placeholder')}
                                                         variant="bordered"
@@ -667,6 +702,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                                         onValueChange={(v) => {
                                                             setAdditionalStadiumAddresses(prev => ({ ...prev, [s.siret]: v }));
                                                         }}
+                                                        aria-label={t('account.fields.stadium_address_for', { club: s.name })}
                                                         classNames={{
                                                             label: "text-[10px] font-bold text-primary-400 uppercase tracking-tight",
                                                             input: "text-xs",

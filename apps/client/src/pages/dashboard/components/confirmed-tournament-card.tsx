@@ -79,7 +79,7 @@ export const ConfirmedTournamentCard = ({
                                 </Chip>
                                 {(highlighted || isTimeChanged) && (
                                     <Button size="sm" color="danger" variant="flat" onPress={() => onMarkAsRead(part.match_id)} className="font-bold text-[10px] w-full mt-1 animate-pulse">
-                                        ✓ J'AI VU LES CHANGEMENTS
+                                        ✓ J'AI VU LES MODIFICATIONS
                                     </Button>
                                 )}
                             </div>

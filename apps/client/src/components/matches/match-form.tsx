@@ -416,11 +416,14 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     <div className="md:col-span-2 flex flex-col gap-3 justify-center">
                         <div className="relative">
                             <Input
+                                id="match_address"
+                                name="match_address"
                                 label={t('matchForm.labels.address')}
                                 placeholder={t('matchForm.labels.auto_siret')}
                                 value={formData.location_address || ''}
                                 onValueChange={(v) => handleChange('location_address', v)}
                                 variant="bordered"
+                                aria-label={t('matchForm.labels.address')}
                                 classNames={{
                                     label: "text-primary font-bold"
                                 }}
@@ -442,20 +445,26 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <Input
+                                id="match_zip"
+                                name="match_zip"
                                 label={t('matchForm.labels.zip')}
                                 placeholder={t('matchForm.labels.auto')}
                                 value={formData.location_zip || ''}
                                 isDisabled
+                                aria-label={t('matchForm.labels.zip')}
                                 classNames={{
                                     inputWrapper: "bg-default-100! text-default-500",
                                     label: "text-default-500 font-bold"
                                 }}
                             />
                             <Input
+                                id="match_city"
+                                name="match_city"
                                 label={t('matchForm.labels.city')}
                                 placeholder={t('matchForm.labels.auto')}
                                 value={formData.location_city || ''}
                                 isDisabled
+                                aria-label={t('matchForm.labels.city')}
                                 classNames={{
                                     inputWrapper: "bg-default-100! text-default-500",
                                     label: "text-default-500 font-bold"
@@ -476,12 +485,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     {/* Row 2: Category, Level, Format, Gender */}
                     <div className="space-y-1">
                         <Select
+                            id="match_category"
+                            name="match_category"
                             label={t('matchForm.labels.category')}
                             placeholder={t('matchForm.labels.choose')}
                             selectedKeys={formData.category ? [formData.category] : []}
                             onChange={(e) => handleChange('category', e.target.value)}
                             isRequired
                             isInvalid={!!errors.category}
+                            aria-label={t('matchForm.labels.category')}
                             startContent={
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
                                     <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
@@ -496,12 +508,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     </div>
                     <div className="space-y-1">
                         <Select
+                            id="match_level"
+                            name="match_level"
                             label={t('matchForm.labels.level')}
                             placeholder={t('matchForm.labels.choose')}
                             selectedKeys={formData.level ? [formData.level] : []}
                             onChange={(e) => handleChange('level', e.target.value)}
                             isRequired
                             isInvalid={!!errors.level}
+                            aria-label={t('matchForm.labels.level')}
                             startContent={
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
                                     <path fillRule="evenodd" d="M11.484 2.17a.75.75 0 011.032 0 11.209 11.209 0 007.877 3.08.75.75 0 01.75.75V12a11.386 11.386 0 01-3.587 8.35c-2.433 2.193-5.338 3.4-8.556 3.401-3.218.001-6.123-1.208-8.556-3.401A11.389 11.389 0 011.5 12V6a.75.75 0 01.75-.75 11.21 11.21 0 007.877-3.08zM12 4.296a12.71 12.71 0 01-6.643 2.056l-.357.043V12c0 2.215.72 4.297 1.956 6.012C8.21 19.78 9.976 20.914 12 20.916c2.024-.002 3.79-1.136 5.044-2.904A9.889 9.889 0 0019 12V6.395a12.72 12.72 0 01-7 2.099z" clipRule="evenodd" />
@@ -516,12 +531,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     </div>
                     <div className="space-y-1">
                         <Select
+                            id="match_format"
+                            name="match_format"
                             label={t('matchForm.labels.format')}
                             placeholder={t('matchForm.labels.choose')}
                             selectedKeys={formData.format ? [formData.format] : []}
                             onChange={(e) => handleChange('format', e.target.value)}
                             isRequired
                             isInvalid={!!errors.format}
+                            aria-label={t('matchForm.labels.format')}
                             startContent={
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
                                     <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.365-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
@@ -536,10 +554,13 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                         {errors.format && <p id="err-format" className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.format}</p>}
                     </div>
                     <Select
+                        id="match_gender"
+                        name="match_gender"
                         label={t('matchForm.labels.gender')}
                         placeholder={t('matchForm.labels.choose')}
                         selectedKeys={[gender]}
                         onChange={(e) => setGender(e.target.value)}
+                        aria-label={t('matchForm.labels.gender')}
                         startContent={
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
                                 <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
@@ -553,6 +574,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
                     <div className="space-y-1">
                         <Input
+                            id="match_date"
+                            name="match_date"
                             type="date"
                             label={t('matchForm.labels.date')}
                             value={formData.match_date}
@@ -560,6 +583,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                             min={new Date().toISOString().split('T')[0]}
                             isRequired
                             isInvalid={!!errors.match_date}
+                            aria-label={t('matchForm.labels.date')}
                             startContent={
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
                                     <path d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" />
@@ -571,12 +595,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     </div>
                     <div className="space-y-1">
                         <Input
+                            id="match_time"
+                            name="match_time"
                             type="time"
                             label={t('matchForm.labels.time')}
                             value={formData.match_time}
                             onValueChange={(v) => handleChange('match_time', v)}
                             isRequired
                             isInvalid={!!errors.match_time}
+                            aria-label={t('matchForm.labels.time')}
                             startContent={
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
                                     <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
@@ -587,12 +614,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                     </div>
                     <div className="space-y-1">
                         <Select
+                            id="match_venue"
+                            name="match_venue"
                             label={t('matchForm.labels.venue')}
                             placeholder={t('matchForm.labels.choose')}
                             selectedKeys={formData.venue ? [formData.venue] : []}
                             onChange={(e) => handleChange('venue', e.target.value)}
                             isRequired
                             isInvalid={!!errors.venue}
+                            aria-label={t('matchForm.labels.venue')}
                             startContent={
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
                                     <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
@@ -607,12 +637,15 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
                     <div className="space-y-1">
                         <Select
+                            id="match_pitch_type"
+                            name="match_pitch_type"
                             label={t('matchForm.labels.pitch_type')}
                             placeholder={t('matchForm.labels.choose')}
                             selectedKeys={formData.pitch_type ? [formData.pitch_type] : []}
                             onChange={(e) => handleChange('pitch_type', e.target.value)}
                             isRequired
                             isInvalid={!!errors.pitch_type}
+                            aria-label={t('matchForm.labels.pitch_type')}
                             startContent={
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-default-400">
                                     <path fillRule="evenodd" d="M.75 9.75a3 3 0 0 1 3-3h16.5a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H3.75a3 3 0 0 1-3-3v-9Zm3-1.5a1.5 1.5 0 0 0-1.5 1.5v9a1.5 1.5 0 0 0 1.5 1.5h16.5a1.5 1.5 0 0 0 1.5-1.5v-9a1.5 1.5 0 0 0-1.5-1.5H3.75Z" clipRule="evenodd" />
@@ -662,33 +695,42 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                 <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                         <Input
+                            id="match_email"
+                            name="match_email"
                             label={t('matchForm.labels.email')}
                             type="email"
                             value={formData.email}
                             onValueChange={(v) => handleChange('email', v)}
                             isRequired
                             isInvalid={!!errors.email}
+                            aria-label={t('matchForm.labels.email')}
                         />
                         {errors.email && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.email}</p>}
                     </div>
                     <div className="space-y-1">
                         <Input
+                            id="match_phone"
+                            name="match_phone"
                             label={t('matchForm.labels.phone')}
                             type="tel"
                             value={formData.phone}
                             onValueChange={(v) => handleChange('phone', v)}
                             isRequired
                             isInvalid={!!errors.phone}
+                            aria-label={t('matchForm.labels.phone')}
                         />
                         {errors.phone && <p className="text-xs sm:text-sm text-danger font-bold pl-1">{errors.phone}</p>}
                     </div>
                     <Textarea
+                        id="match_notes"
+                        name="match_notes"
                         label={t('matchForm.labels.notes')}
                         placeholder={t('matchForm.labels.more_info')}
                         value={formData.notes || ''}
                         onValueChange={(v) => handleChange('notes', v)}
                         minRows={3}
                         className="md:col-span-2"
+                        aria-label={t('matchForm.labels.notes')}
                     />
                 </CardBody>
             </Card>

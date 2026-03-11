@@ -133,7 +133,7 @@ export default function FavoritesPage() {
                         {view === 'exercises' && (
                             <>
                                 {loadingEx ? (
-                                    <div className="flex justify-center py-10"><Spinner color="success" /></div>
+                                    <div className="flex justify-center py-10"><Spinner color="success" aria-label={t('loading')} /></div>
                                 ) : favExercises.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {favExercises.map(ex => (
@@ -181,7 +181,7 @@ export default function FavoritesPage() {
                         {view === 'matches' && (
                             <>
                                 {loadingMatches ? (
-                                    <div className="flex justify-center py-10"><Spinner color="secondary" /></div>
+                                    <div className="flex justify-center py-10"><Spinner color="secondary" aria-label={t('loading')} /></div>
                                 ) : favMatches.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {favMatches.map(match => (
@@ -227,7 +227,7 @@ export default function FavoritesPage() {
                         {view === 'tournaments' && (
                             <>
                                 {loadingMatches ? (
-                                    <div className="flex justify-center py-10"><Spinner color="secondary" /></div>
+                                    <div className="flex justify-center py-10"><Spinner color="secondary" aria-label={t('loading')} /></div>
                                 ) : favTournaments.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {favTournaments.map(match => (

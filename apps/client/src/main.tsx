@@ -34,9 +34,7 @@ import { WelcomeGatewayProvider } from "./contexts/welcome-gateway-context.tsx";
 if (navigator.storage && navigator.storage.persist) {
   navigator.storage.persist().then((persistent) => {
     if (persistent) {
-      console.log("[Storage] Persistence granted");
     } else {
-      console.log("[Storage] Persistence not granted");
     }
   });
 }

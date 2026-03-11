@@ -32,6 +32,7 @@ export const ConnectivityStatus = () => {
                 color={color}
                 variant="shadow"
                 className="h-10 px-4 font-bold border border-white/20 shadow-xl"
+                aria-label={message}
                 startContent={
                     <span className="mr-1">
                         {color === 'danger' ? '🚫' : '🔄'}

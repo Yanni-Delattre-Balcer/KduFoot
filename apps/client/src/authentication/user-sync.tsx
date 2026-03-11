@@ -10,11 +10,9 @@ export const UserSync = () => {
             // Avoid double calls if user object reference changes but sub is same
             syncedRef.current = user.sub;
 
-            console.log('Syncing user profile with backend...');
             postJson(`${import.meta.env.API_BASE_URL}/api/users/sync`, user)
                 .then((res: any) => {
                     if (res.success) {
-                        console.log('User synced successfully');
                     } else {
                         console.error('User sync returned error:', res.error);
                     }

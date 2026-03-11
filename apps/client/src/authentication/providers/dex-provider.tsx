@@ -75,16 +75,12 @@ export const useDexProvider = (
           window.location.search.includes("code=") &&
           window.location.search.includes("state=")
         ) {
-          console.log("Detected authorization callback");
 
           try {
             // Process the callback
             const user = await userManager.signinRedirectCallback();
 
-            console.log(
-              "Successfully processed signinRedirectCallback",
-              user.profile.name,
-            );
+            
 
             setUser(user);
             setIsAuthenticated(!!user?.access_token);
@@ -114,12 +110,10 @@ export const useDexProvider = (
             const currentUser = await userManager.getUser();
 
             if (currentUser && currentUser.access_token) {
-              console.log("User already logged in", currentUser);
 
               setUser(currentUser);
               setIsAuthenticated(true);
             } else {
-              console.log("No authenticated user found");
 
               // Check if we should auto login
               const shouldAutoLogin =
@@ -129,7 +123,6 @@ export const useDexProvider = (
                 shouldAutoLogin &&
                 !window.location.pathname.includes("/callback")
               ) {
-                console.log("Initiating automatic login flow");
 
                 // Store the current location to return after login
                 sessionStorage.setItem(
@@ -140,7 +133,6 @@ export const useDexProvider = (
                 // Redirect to Dex login - important to await this
                 try {
                   await userManager.signinRedirect();
-                  console.log("SigninRedirect initiated");
 
                   return; // Return early as we're redirecting
                 } catch (redirectError) {
@@ -171,13 +163,11 @@ export const useDexProvider = (
 
     // Set up event listeners for user session changes
     const addUserSignedIn = (user: User) => {
-      console.log("User signed in event received", user);
       setUser(user);
       setIsAuthenticated(true);
     };
 
     const addUserSignedOut = () => {
-      console.log("User signed out event received");
       setUser(null);
       setIsAuthenticated(false);
     };
@@ -186,10 +176,8 @@ export const useDexProvider = (
     userManager.events.addUserUnloaded(addUserSignedOut);
     // Also listen for token expiration
     userManager.events.addAccessTokenExpiring(() => {
-      console.log("Access token expiring soon");
     });
     userManager.events.addAccessTokenExpired(() => {
-      console.log("Access token expired");
     });
 
     return () => {
@@ -202,7 +190,6 @@ export const useDexProvider = (
 
   const login = async (options?: LoginOptions): Promise<void> => {
     try {
-      console.log("Login initiated", options);
 
       // Store the current path to redirect back after login
       if (window.location.pathname !== "/callback") {
@@ -213,7 +200,6 @@ export const useDexProvider = (
       }
 
       await userManager.signinRedirect(options);
-      console.log("Redirect to authentication provider initiated");
     } catch (error) {
       console.error("Error during login:", error);
       throw error;
@@ -222,7 +208,6 @@ export const useDexProvider = (
 
   const logout = async (options?: LogoutOptions): Promise<void> => {
     try {
-      console.log("Logout initiated", options);
 
       // Clear any stored redirect paths
       sessionStorage.removeItem("redirect_after_login");
@@ -236,7 +221,6 @@ export const useDexProvider = (
           ).toString(),
       });
 
-      console.log("Redirect to logout initiated");
     } catch (error) {
       console.error("Error during logout:", error);
       throw error;
@@ -250,13 +234,11 @@ export const useDexProvider = (
       const currentUser = await userManager.getUser();
 
       if (!currentUser || !currentUser.access_token) {
-        console.log("No access token available");
 
         // Token is missing - we should authenticate
         // But this might cause infinite loops if called repeatedly
         // So only redirect if it's an explicit token request (not background check)
         if (_options?.redirect !== false) {
-          console.log("Initiating login to obtain access token");
           login();
         }
 
@@ -268,13 +250,11 @@ export const useDexProvider = (
         currentUser.expires_at &&
         currentUser.expires_at < Date.now() / 1000
       ) {
-        console.log("Access token expired, attempting silent refresh");
 
         try {
           // Try to silently refresh the token
           const newUser = await userManager.signinSilent();
 
-          console.log("Silent token refresh successful");
 
           return newUser?.access_token || null;
         } catch (silentError) {
@@ -282,9 +262,7 @@ export const useDexProvider = (
 
           // Silent refresh failed, redirect to login
           if (_options?.redirect !== false) {
-            console.warn(
-              "Token expired and silent refresh failed. Redirecting to login.",
-            );
+            
             login();
           }
 
