@@ -486,6 +486,26 @@ export default function DashboardPage() {
                             {t('dashboard.subtitle')}
                         </p>
 
+                        {/* Push notification activation button for iOS */}
+                        {'Notification' in window && Notification.permission === 'default' && (
+                            <Button
+                                color="warning"
+                                variant="flat"
+                                size="sm"
+                                className="font-bold text-xs uppercase tracking-wide mt-2 shadow-lg shadow-orange-500/10 border border-orange-500/20"
+                                startContent={<span>🔔</span>}
+                                onPress={async () => {
+                                    const perm = await Notification.requestPermission();
+                                    if (perm === 'granted') {
+                                        window.dispatchEvent(new CustomEvent('kdufoot_push_granted'));
+                                    }
+                                }}
+                                aria-label="Activer les notifications push"
+                            >
+                                Activer les notifications
+                            </Button>
+                        )}
+
                         {isLocked && (
                             <div className="mt-6 flex flex-col items-center gap-3 animate-appearance-in w-full max-w-2xl">
                                 <Card className="bg-orange-500/10 border-2 border-orange-500/50 p-6 w-full shadow-2xl">

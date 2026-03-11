@@ -105,6 +105,8 @@ export function useWebSocketSync(
                     const payload = JSON.parse(event.data);
                     if (payload.type === 'NOTIFICATION') {
                         mutate((key) => typeof key === 'string' && key.startsWith('/api/'), (d: any) => d, { revalidate: true });
+                        // Explicit context mutate for badge "1" update
+                        mutate('/api/me/context', (d: any) => d, { revalidate: true });
                         if (payload.targetUserId && payload.targetUserId !== userId) return;
 
                         let color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" = 'primary';
