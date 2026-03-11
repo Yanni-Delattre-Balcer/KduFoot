@@ -1,9 +1,9 @@
 {
   "i18n-ally.localesPaths": [
-    "src/locales/base",
-    "src/locales/kdufoot"
+    "src/locales"
   ],
-  "i18n-ally.keystyle": "flat",
+  "i18n-ally.pathMatcher": "{namespace}/{locale}.json",
+  "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "en-US",
   "css.lint.unknownAtRules": "ignore",
   "scss.lint.unknownAtRules": "ignore"

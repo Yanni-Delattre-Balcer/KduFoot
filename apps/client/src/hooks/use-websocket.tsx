@@ -144,7 +144,7 @@ export function useWebSocketSync(
                                 break;
                             case 'MATCH_CANCELLED':
                                 color = 'danger';
-                                title = t('dashboard.status.refused');
+                                title = t('dashboard.status.cancelled');
                                 description = t('dashboard.notifications.cancellation', {
                                     club_name: payload.data?.club_name || '',
                                     date: payload.data?.date || '',
@@ -167,6 +167,7 @@ export function useWebSocketSync(
                                     time: payload.data?.time || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 // Dispatch event for UI/Badge update
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                 
@@ -235,14 +236,16 @@ export function useWebSocketSync(
                                     time: payload.data?.time || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 break;
                             case 'ENROLLMENT_REFUSED':
-                                color = 'danger';
+                                color = 'warning';
                                 title = t('dashboard.status.refused');
                                 description = t('dashboard.notifications.rejection_player', {
-                                    date: payload.data?.match_date || ''
+                                    date: payload.data?.date || ''
                                 });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                mutate('/api/me/context', (d: any) => d, { revalidate: true });
                                 break;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';

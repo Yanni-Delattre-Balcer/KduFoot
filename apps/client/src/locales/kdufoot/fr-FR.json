@@ -264,13 +264,7 @@
     "find_exercises": "Découvrir des exercices",
     "no_name": "Séance sans nom",
     "all_levels": "Tous niveaux",
-    "status": "Statut",
-    "notifications": {
-      "new_request_interactive": "Vous avez reçu une demande de {{club_name}} pour le match du {{date}} à {{time}}",
-      "acceptance_player": "Votre demande pour le match du {{date}} avec {{host_club_name}} a été acceptée par l'organisateur",
-      "cancellation": "Le match prévu avec l'équipe {{club_name}} le {{date}} a été annulé",
-      "modification": "Le match contre {{host_club_name}} prévu le {{date}} a été modifié"
-    }
+    "status": "Statut"
   },
   "permissions": {
     "quota": {
@@ -728,12 +722,20 @@
     "status": {
       "accepted": "Accepté",
       "refused": "Refusé",
+      "cancelled": "Annulé",
       "pending": "En attente",
       "searching": "🔍 RECHERCHE D'ADVERSAIRE",
       "active": "🔍 RECHERCHE D'ADVERSAIRE",
       "completed": "Terminé",
       "full": "Complet",
       "open": "Ouvert"
+    },
+    "notifications": {
+      "new_request_interactive": "Vous avez reçu une demande de {{club_name}} pour le match du {{date}} à {{time}}",
+      "acceptance_player": "Votre demande pour le match du {{date}} à {{time}} a été acceptée",
+      "rejection_player": "Votre demande pour le match du {{date}} a été refusée",
+      "cancellation": "Le match prévu le {{date}} à {{time}} a été annulé par l'organisateur",
+      "modification": "Le match contre {{host_club_name}} prévu le {{date}} a été modifié"
     },
     "alerts": {
       "title": "Modification détectée",

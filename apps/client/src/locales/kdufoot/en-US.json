@@ -624,12 +624,20 @@
     "status": {
       "accepted": "Accepted",
       "refused": "Refused",
+      "cancelled": "Cancelled",
       "pending": "Pending",
       "searching": "🔍 SEARCHING FOR OPPONENT",
       "active": "🔍 SEARCHING FOR OPPONENT",
       "completed": "Completed",
       "full": "Full",
       "open": "Open"
+    },
+    "notifications": {
+      "new_request_interactive": "You have received a request from {{club_name}} for the match on {{date}} at {{time}}",
+      "acceptance_player": "Your request for the match on {{date}} at {{time}} has been accepted",
+      "rejection_player": "Your request for the match on {{date}} has been refused",
+      "cancellation": "The match scheduled for {{date}} at {{time}} has been cancelled by the organizer",
+      "modification": "The match against {{host_club_name}} scheduled for {{date}} has been modified"
     },
     "memo": {
       "title": "📋 My Creation History",
@@ -664,6 +672,7 @@
     "alerts": {
       "title": "Match update",
       "message": "The match against {{host_club_name}} has been updated!",
+      "success_discrete": "Modification saved",
       "view_changes": "View changes",
       "h2_locked": "Event locked (H-2). Contact participants for any last-minute changes.",
       "specific": {
