@@ -639,18 +639,10 @@ export class MatchService {
         ).bind(matchId, userId).first<any>();
         if (!contact) return true;
 
-        // If the user is withdrawing themselves
-        if (userId === requesterId) {
-            const withdrawalMsg = `[DÉSISTEMENT AUTOMATIQUE] L'équipe s'est désistée. Message original: ${contact.message || 'Aucun'}`;
-            await this.db.prepare(
-                'UPDATE match_contacts SET status = "withdrawn", message = ?, notification_state = 2 WHERE match_id = ? AND user_id = ?'
-            ).bind(withdrawalMsg, matchId, userId).run();
-        } else {
-            // Organizer is deleting/refusing definitively
-            await this.db.prepare(
-                'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
-            ).bind(matchId, userId).run();
-        }
+        // If the user is withdrawing themselves or the organizer is deleting/refusing definitively
+        await this.db.prepare(
+            'DELETE FROM match_contacts WHERE match_id = ? AND user_id = ?'
+        ).bind(matchId, userId).run();
 
         if (contact.status === 'accepted') {
             const acceptedCountResult = await this.db.prepare(
