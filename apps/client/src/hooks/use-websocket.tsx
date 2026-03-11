@@ -154,14 +154,10 @@ export function useWebSocketSync(
 
                                     color = 'danger';
                                     title = "Annulation";
-                                    description = (
-                                        <div className="cursor-pointer font-medium" onClick={() => navigate('/dashboard')}>
-                                            {t('dashboard.notifications.cancellation', {
-                                                date: payload.data?.match_date || '',
-                                                team: payload.data?.host_club_name || ''
-                                            })}
-                                        </div>
-                                    );
+                                    description = t('dashboard.notifications.cancellation', {
+                                        date: payload.data?.match_date || '',
+                                        team: payload.data?.host_club_name || ''
+                                    });
                                     mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
                                     mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                     window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
@@ -244,27 +240,19 @@ export function useWebSocketSync(
                             case 'ENROLLMENT_ACCEPTED':
                                 color = 'success';
                                 title = t('dashboard.status.accepted');
-                                description = (
-                                    <div className="cursor-pointer font-medium" onClick={() => navigate('/dashboard')}>
-                                        {t('dashboard.notifications.acceptance_player', {
-                                            date: payload.data?.match_date || '',
-                                            team: payload.data?.host_club_name || ''
-                                        })}
-                                    </div>
-                                );
+                                description = t('dashboard.notifications.acceptance_player', {
+                                    date: payload.data?.match_date || '',
+                                    team: payload.data?.host_club_name || ''
+                                });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 break;
                             case 'ENROLLMENT_REFUSED':
                                 color = 'danger';
                                 title = t('dashboard.status.refused');
-                                description = (
-                                    <div className="cursor-pointer font-medium" onClick={() => navigate('/dashboard')}>
-                                        {t('dashboard.notifications.rejection_player', {
-                                            date: payload.data?.match_date || '',
-                                            team: payload.data?.host_club_name || ''
-                                        })}
-                                    </div>
-                                );
+                                description = t('dashboard.notifications.rejection_player', {
+                                    date: payload.data?.match_date || '',
+                                    team: payload.data?.host_club_name || ''
+                                });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 break;
                             case 'TEAM_WITHDRAWAL':

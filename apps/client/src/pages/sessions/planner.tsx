@@ -5,19 +5,28 @@ import { useSessions } from '@/hooks/use-sessions';
 import { useMatches } from '@/hooks/use-matches';
 import FootballClock from '../../components/football-clock';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
+import { addToast } from "@heroui/toast";
+
 import { Button } from '@heroui/button';
 import { Link } from 'react-router-dom';
 import { Chip } from "@heroui/chip";
+import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
+import { matchService } from '@/services/matches';
+import { useAuth0 } from '@auth0/auth0-react';
 import { showVideoAnalysis } from '@/config/site';
+import { useMatchRequests } from '@/hooks/use-match-requests';
 
 import DataWall from '@/components/data-wall';
 
 export default function SessionPlannerPage() {
     const { t, i18n } = useTranslation();
+    const { getAccessTokenSilently } = useAuth0();
     const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');
     const { sessions, isError: isErrorSessions } = useSessions();
     const { matches, isLoading: isLoadingMatches } = useMatches({ ownerId: 'me', include_past: true });
+    const { requests, isLoading: isLoadingRequests, mutate: mutateRequests } = useMatchRequests();
+    const [actioningId, setActioningId] = useState<string | null>(null);
 
     return (
         <DefaultLayout maxWidth="max-w-full">
@@ -160,49 +169,187 @@ export default function SessionPlannerPage() {
                         )}
 
                         {(view === 'matches' || view === 'tournaments') && (
-                            <div className="w-full max-w-4xl mx-auto space-y-6">
-                                <div className="flex items-center gap-3 px-2">
-                                    <h2 className="text-xl font-bold text-white uppercase tracking-tighter">
-                                        Mon Historique {view === 'matches' ? 'de Matchs' : 'de Tournois'}
-                                    </h2>
-                                    <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">
-                                        {matches?.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').length || 0}
-                                    </span>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                                {/* Colonne Gauche: Mes Annonces */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-3 px-2">
+                                        <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Mes Annonces</h2>
+                                        <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">
+                                            {matches?.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').length || 0}
+                                        </span>
+                                    </div>
+
+                                    {isLoadingMatches ? (
+                                        <div className="flex justify-center py-6 px-4"><Spinner color="secondary" /></div>
+                                    ) : matches && matches.length > 0 ? (
+                                        <div className="flex flex-col gap-4">
+                                            {matches.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').map((match) => (
+                                                <Card key={match.id} as={Link} to={`/matches/${match.id}`} className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group">
+                                                    <CardBody className="flex flex-row items-center gap-4 p-4">
+                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${match.type === 'tournament' ? 'bg-purple-500/20 text-purple-500' : 'bg-violet-500/20 text-violet-500'}`}>
+                                                            {match.type === 'tournament' ? (
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z" /><path d="m3.265 10.602 7.641 4.114a.75.75 0 0 0 .712 0l7.641-4.114.679.365a.75.75 0 0 1 0 1.32l-8.32 4.48a.75.75 0 0 1-.712 0l-8.32-4.48a.75.75 0 0 1 0-1.32l.679-.365Z" /></svg>
+                                                            ) : (
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Z" /></svg>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0 text-left">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-white/40">{match.match_date}</span>
+                                                                <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] uppercase font-black">{match.status}</Chip>
+                                                            </div>
+                                                            <h3 className="font-bold text-white truncate text-base">
+                                                                {match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || '??'}`}
+                                                            </h3>
+                                                            <p className="text-xs text-default-500 font-medium truncate">{match.club?.city} • {t(`enums.category.${match.category}`)}</p>
+                                                        </div>
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <span className="text-xs font-black text-primary uppercase tracking-tighter">{match.contacts_count || 0} Demandes</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-white/20 group-hover:text-primary group-hover:translate-x-1 transition-all">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                                            </svg>
+                                                        </div>
+                                                    </CardBody>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">
+                                            <p className="text-default-400 font-medium">Aucune annonce publiée.</p>
+                                            <Button as={Link} to={view === 'tournaments' ? "/matches?view=create&type=tournament" : "/matches?view=create&type=match"} color={view === 'tournaments' ? "default" : "secondary"} variant="flat" size="sm" className={`font-bold ${view === 'tournaments' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>Créer une annonce</Button>
+                                        </div>
+                                    )}
                                 </div>
 
-                                {isLoadingMatches ? (
-                                    <div className="flex justify-center py-6 px-4"><Spinner color="secondary" /></div>
-                                ) : matches && matches.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {matches.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').map((match) => (
-                                            <Card key={match.id} className="bg-default-50/5 border border-default-100/10">
-                                                <CardBody className="flex flex-row items-center gap-4 p-4">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${match.type === 'tournament' ? 'bg-purple-500/20 text-purple-500' : 'bg-violet-500/20 text-violet-500'}`}>
-                                                        {match.type === 'tournament' ? (
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z" /><path d="m3.265 10.602 7.641 4.114a.75.75 0 0 0 .712 0l7.641-4.114.679.365a.75.75 0 0 1 0 1.32l-8.32 4.48a.75.75 0 0 1-.712 0l-8.32-4.48a.75.75 0 0 1 0-1.32l.679-.365Z" /></svg>
-                                                        ) : (
-                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Z" /></svg>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0 text-left">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-default-400">{match.match_date} à {match.match_time}</span>
-                                                            <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] uppercase font-black">{match.status}</Chip>
-                                                        </div>
-                                                        <h3 className="font-bold text-white truncate text-base">
-                                                            {match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || '??'}`}
-                                                        </h3>
-                                                        <p className="text-xs text-default-500 font-medium truncate">{match.club?.city} • {t(`enums.category.${match.category}`)}</p>
-                                                    </div>
-                                                </CardBody>
-                                            </Card>
-                                        ))}
+                                {/* Colonne Droite: Demandes Reçues */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-3 px-2">
+                                        <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Demandes Reçues</h2>
+                                        {requests.filter((r: any) => r.request_status === 'pending').length > 0 && (
+                                            <div className="space-y-4">
+                                                <h3 className="font-bold text-sm text-default-500 uppercase tracking-wider px-2">Demandes en attente ({requests.filter((r: any) => r.request_status === 'pending').length})</h3>
+                                            </div>
+                                        )}
                                     </div>
-                                ) : (
-                                    <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">
-                                        <p className="text-default-400 font-medium">Aucun historique disponible.</p>
-                                    </div>
-                                )}
+
+                                    {isLoadingRequests ? (
+                                        <div className="flex justify-center py-6 px-4"><Spinner color="primary" /></div>
+                                    ) : requests.length > 0 ? (
+                                        <div className="flex flex-col gap-4">
+                                            {requests
+                                                .filter((r: any) => view === 'matches' ? r.type === 'match' : r.type === 'tournament')
+                                                .map((request: any, idx: number) => (
+                                                    <Card key={idx} className={`bg-[#1e1e20] border ${request.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'}`}>
+                                                        <CardBody className="p-4 flex flex-col gap-3">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
+                                                                    {request.requester_club_logo ? (
+                                                                        <Image src={request.requester_club_logo} className="object-contain" />
+                                                                    ) : (
+                                                                        <span className="text-white font-bold">{request.requester_club_name?.charAt(0)}</span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1 text-left">
+                                                                    <h3 className="font-bold text-white text-sm line-clamp-1">{request.requester_club_name}</h3>
+                                                                    <p className="text-xs sm:text-sm text-default-500 font-bold uppercase tracking-widest truncate">
+                                                                        {t(`enums.category.${request.category}`)} • {request.match_date}
+                                                                    </p>
+                                                                </div>
+                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
+                                                                    {request.request_status}
+                                                                </Chip>
+                                                            </div>
+
+                                                            {request.request_status === 'pending' && (
+                                                                <div className="flex gap-2">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        color="success"
+                                                                        isLoading={actioningId === `${request.match_id}-${request.user_id}-accept`}
+                                                                        className="flex-1 font-black uppercase text-xs sm:text-sm h-8 text-success-950"
+                                                                        onPress={async () => {
+                                                                            try {
+                                                                                setActioningId(`${request.match_id}-${request.user_id}-accept`);
+                                                                                const token = await getAccessTokenSilently();
+                                                                                await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
+                                                                                await mutateRequests();
+                                                                                addToast({ title: "Demande acceptée", color: "success" });
+                                                                            } catch (e: any) {
+                                                                                const rawMessage = e.message || "";
+                                                                                let cleanMessage = rawMessage;
+                                                                                try {
+                                                                                    if (rawMessage.startsWith('{')) {
+                                                                                        const parsed = JSON.parse(rawMessage);
+                                                                                        cleanMessage = parsed.error || parsed.message || rawMessage;
+                                                                                    }
+                                                                                } catch { /* ignore */ }
+
+                                                                                addToast({
+                                                                                    title: t('error.title'),
+                                                                                    description: cleanMessage === 'TOO_LATE_TO_MODIFY' ? t('error.too_late_to_modify') : cleanMessage,
+                                                                                    color: "danger"
+                                                                                });
+                                                                            } finally {
+                                                                                setActioningId(null);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        Accepter
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="flat"
+                                                                        color="danger"
+                                                                        isLoading={actioningId === `${request.match_id}-${request.user_id}-refuse`}
+                                                                        className="flex-1 font-black uppercase text-xs sm:text-sm h-8"
+                                                                        onPress={async () => {
+                                                                            try {
+                                                                                setActioningId(`${request.match_id}-${request.user_id}-refuse`);
+                                                                                const token = await getAccessTokenSilently();
+                                                                                await matchService.updateRequestStatus(request.match_id, request.user_id, 'refused', token);
+                                                                                await mutateRequests();
+                                                                                addToast({ title: "Demande refusée", color: "danger" });
+                                                                            } catch (e: any) {
+                                                                                const rawMessage = e.message || "";
+                                                                                let cleanMessage = rawMessage;
+                                                                                try {
+                                                                                    if (rawMessage.startsWith('{')) {
+                                                                                        const parsed = JSON.parse(rawMessage);
+                                                                                        cleanMessage = parsed.error || parsed.message || rawMessage;
+                                                                                    }
+                                                                                } catch { /* ignore */ }
+
+                                                                                addToast({
+                                                                                    title: t('error.title'),
+                                                                                    description: cleanMessage === 'TOO_LATE_TO_MODIFY' ? t('error.too_late_to_modify') : cleanMessage,
+                                                                                    color: "danger"
+                                                                                });
+                                                                            } finally {
+                                                                                setActioningId(null);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        Refuser
+                                                                    </Button>
+                                                                </div>
+                                                            )}
+
+                                                            <Button size="sm" variant="flat" className={`w-full text-xs sm:text-sm font-bold h-7 ${request.type === 'tournament' ? 'bg-purple-300/10 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`} as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
+                                                        </CardBody>
+                                                    </Card>
+                                                ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">
+                                            <div className="p-4 bg-white/5 rounded-full text-white/20">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-default-400 font-medium">Aucune demande reçue pour le moment.</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>

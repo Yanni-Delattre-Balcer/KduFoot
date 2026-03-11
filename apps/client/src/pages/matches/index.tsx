@@ -28,7 +28,6 @@ import DataWall from '@/components/data-wall';
 
 import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 import { useAuth } from '@/authentication';
-import { useFavorites } from '../../hooks/use-favorites';
 
 export default function MatchesPage() {
     const { t, i18n } = useTranslation();
@@ -39,7 +38,6 @@ export default function MatchesPage() {
     const { user, profileComplete, isAdmin } = useUser();
     const { isAuthenticated, getAccessToken } = useAuth();
     const isMasked = !isAuthenticated || !profileComplete;
-    const { toggleFavorite, isFavorite } = useFavorites();
 
     // Synchronization de l'URL avec l'état
     useEffect(() => {
@@ -635,28 +633,14 @@ export default function MatchesPage() {
                                                 return (
                                                     <Card key={match.id} className={`group hover:shadow-lg transition-all border ${hasChanges ? 'border-red-500/50 shadow-red-500/10' : 'border-violet-800/50'} hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
                                                         <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
-                                                            <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
-                                                                {user?.id === match.owner_id && (
-                                                                    <div className="flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-xs sm:text-sm uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                                                                            <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                        {t('matchesPage.my_creation')}
-                                                                    </div>
-                                                                )}
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.preventDefault();
-                                                                        e.stopPropagation();
-                                                                        toggleFavorite(match.id, match.type);
-                                                                    }}
-                                                                    className="p-1.5 rounded-full bg-black/40 hover:bg-black/60 transition-colors backdrop-blur-sm"
-                                                                >
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={isFavorite(match.id, match.type) ? "currentColor" : "none"} stroke="currentColor" className={`w-5 h-5 ${isFavorite(match.id, match.type) ? "text-amber-400" : "text-white/60 hover:text-white"}`}>
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isFavorite(match.id, match.type) ? 1.5 : 2} d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                                            {user?.id === match.owner_id && (
+                                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-xs sm:text-sm uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                                                                        <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
                                                                     </svg>
-                                                                </button>
-                                                            </div>
+                                                                    {t('matchesPage.my_creation')}
+                                                                </div>
+                                                            )}
                                                             <div className="flex flex-col w-full">
                                                                 <h4 className={`font-bold text-xl ${diff.name ? 'text-red-500' : 'text-default-900'} group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full`}>
                                                                     {isMasked ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
