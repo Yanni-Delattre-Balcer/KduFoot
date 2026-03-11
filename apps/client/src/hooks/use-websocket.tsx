@@ -147,28 +147,13 @@ export function useWebSocketSync(
                                 }
                                 break;
                             case 'MATCH_CANCELLED':
-                                {
-                                    const isOrganizer = payload.data?.owner_id === userId;
-
-                                    if (isOrganizer) {
-                                        color = 'success';
-                                        title = t('success');
-                                        description = t('dashboard.alerts.success_discrete');
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                    } else {
-                                        // Wait, we don't know if the user is a participant. We just display it for now (as the app currently does)
-                                        // Ideally, a match cancel targets only its participants. We will allow it through as before.
-                                        color = 'danger';
-                                        title = "Annulation";
-                                        description = t('dashboard.notifications.cancellation', {
-                                            date: payload.data?.match_date || '',
-                                            team: payload.data?.host_club_name || ''
-                                        });
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                        window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                    }
-                                }
+                                // Message ciblés envoyés uniquement aux joueurs par le backend
+                                color = 'danger';
+                                title = "Annulation";
+                                description = `Le match contre ${payload.data?.host_club_name || ''} le ${new Date(payload.data?.match_date || '').toLocaleDateString('fr-FR')} a été annulé par l'organisateur.`;
+                                mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
+                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                 break;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
@@ -184,11 +169,7 @@ export function useWebSocketSync(
                                     if (isOrganizer) {
                                         color = 'primary';
                                         title = t('dashboard.status.pending');
-                                        description = t('dashboard.notifications.new_request_interactive', {
-                                            date: payload.data?.match_date || '',
-                                            time: payload.data?.match_time || '',
-                                            team: payload.data?.applicant_club_name || ''
-                                        });
+                                        description = `Vous avez reçu une demande de ${payload.data?.applicant_club_name || ''} pour le match du ${new Date(payload.data?.match_date || '').toLocaleDateString('fr-FR')}`;
                                         mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                         window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
 
@@ -286,7 +267,7 @@ export function useWebSocketSync(
                                     if (isOrganizer) {
                                         return; // Organizer gets UI response instantly from button click
                                     } else if (isApplicant) {
-                                        color = 'danger';
+                                        color = 'warning'; // Info pour refusé
                                         title = t('dashboard.status.refused');
                                         description = t('dashboard.notifications.rejection_player', {
                                             date: payload.data?.match_date || '',
