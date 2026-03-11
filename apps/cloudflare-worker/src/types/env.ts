@@ -57,4 +57,8 @@ export interface Env {
 
     // Google Maps (Distance Matrix)
     GOOGLE_MAPS_API_KEY: string;
+
+    // Web Push (VAPID)
+    VAPID_PUBLIC_KEY: string;
+    VAPID_PRIVATE_KEY: string;
 }

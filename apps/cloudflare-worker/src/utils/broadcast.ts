@@ -1,4 +1,5 @@
 import { Env } from "../types/env";
+import { sendPushNotification } from "./push";
 
 export async function broadcastDataChanged(env: Env) {
     if (!env.WEBSOCKET_HUB) return;
@@ -38,17 +39,67 @@ export interface NotificationPayload {
     data?: any;
 }
 
+// Notification types that should trigger a native push notification
+const PUSH_NOTIFICATION_TYPES: NotificationType[] = [
+    'ENROLLMENT_ACCEPTED',
+    'ENROLLMENT_REFUSED',
+    'MATCH_MODIFIED',
+    'MATCH_CANCELLED',
+    'NEW_APPLICANT',
+];
+
 export async function broadcastNotification(env: Env, payload: NotificationPayload) {
-    if (!env.WEBSOCKET_HUB) return;
-    try {
-        const id = env.WEBSOCKET_HUB.idFromName("global-hub");
-        const hub = env.WEBSOCKET_HUB.get(id);
-        const request = new Request("http://dummy/broadcast", {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
-        await hub.fetch(request as any).catch(() => { });
-    } catch (e) {
-        console.error("Failed to trigger notification broadcast", e);
+    // 1. WebSocket broadcast (existing behaviour — unchanged)
+    if (env.WEBSOCKET_HUB) {
+        try {
+            const id = env.WEBSOCKET_HUB.idFromName("global-hub");
+            const hub = env.WEBSOCKET_HUB.get(id);
+            const request = new Request("http://dummy/broadcast", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            await hub.fetch(request as any).catch(() => { });
+        } catch (e) {
+            console.error("Failed to trigger notification broadcast", e);
+        }
+    }
+
+    // 2. Native Push Notification (additive — only for targeted events)
+    if (
+        payload.targetUserId &&
+        PUSH_NOTIFICATION_TYPES.includes(payload.notificationType) &&
+        env.VAPID_PUBLIC_KEY &&
+        env.VAPID_PRIVATE_KEY
+    ) {
+        try {
+            // Look up the target user's push subscription in D1
+            const row = await env.DB.prepare(
+                'SELECT push_subscription FROM users WHERE id = ?'
+            ).bind(payload.targetUserId).first<{ push_subscription: string | null }>();
+
+            if (row?.push_subscription) {
+                const subscription = JSON.parse(row.push_subscription);
+
+                const pushPayload = {
+                    title: 'Kdufoot',
+                    body: payload.message,
+                    icon: '/logo.png',
+                    url: payload.actionUrl || '/dashboard',
+                };
+
+                const success = await sendPushNotification(subscription, pushPayload, env);
+
+                // If subscription expired, clean it from DB
+                if (!success) {
+                    await env.DB.prepare(
+                        'UPDATE users SET push_subscription = NULL WHERE id = ?'
+                    ).bind(payload.targetUserId).run().catch(() => { });
+                }
+            }
+        } catch (e) {
+            // Push is best-effort, never block the main flow
+            console.error("Failed to send push notification:", e);
+        }
     }
 }
+

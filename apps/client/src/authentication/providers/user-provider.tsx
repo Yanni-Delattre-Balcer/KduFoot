@@ -3,6 +3,7 @@ import useSWR, { mutate } from 'swr';
 import { User } from '@/types/user.types';
 import { isProfileComplete } from '@/utils/profile';
 import { useWebSocketSync, WebSocketStatus, BanStatus } from '@/hooks/use-websocket';
+import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { useAuth } from './use-auth';
 
 interface UserContextType {
@@ -119,6 +120,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
         wsToken,
         isBlocked
     );
+
+    // Register for native push notifications when authenticated
+    usePushNotifications(wsToken);
 
     const blockReason = localBanOverride?.reason || user?.block_reason || (error as any)?.reason || (error?.message?.includes('Permission refusée') ? "Accès refusé par le serveur" : undefined);
 

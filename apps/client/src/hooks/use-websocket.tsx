@@ -4,7 +4,7 @@ import { addToast } from "@heroui/toast";
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/button';
 import { matchService } from '@/services/matches';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export type WebSocketStatus = 'connected' | 'connecting' | 'disconnected';
 
@@ -22,6 +22,7 @@ export function useWebSocketSync(
 ) {
     const { t } = useTranslation('kdufoot');
     const navigate = useNavigate();
+    const location = useLocation();
     const { mutate } = useSWRConfig();
     const [status, setStatus] = useState<WebSocketStatus>(enabled ? 'connecting' : 'disconnected');
     const wsRef = useRef<WebSocket | null>(null);
@@ -152,7 +153,11 @@ export function useWebSocketSync(
                                 mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                return; // Silent refresh, no toast
+                                // Conditional toast: only show if on dashboard
+                                if (location.pathname === '/dashboard') {
+                                    addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                                }
+                                return;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
                                 title = t('enums.type.tournament');
@@ -256,7 +261,11 @@ export function useWebSocketSync(
                                         return; // Random users ignore this
                                     }
                                 }
-                                return; // Silent refresh, no toast
+                                // Conditional toast: only show acceptance on dashboard
+                                if (location.pathname === '/dashboard') {
+                                    addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                                }
+                                return;
                             case 'ENROLLMENT_REFUSED':
                                 {
                                     const isOrganizer = payload.data?.owner_id === userId;
@@ -276,7 +285,11 @@ export function useWebSocketSync(
                                         return; // Random users ignore this
                                     }
                                 }
-                                return; // Silent refresh, no toast
+                                // Conditional toast: only show refusal on dashboard
+                                if (location.pathname === '/dashboard') {
+                                    addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                                }
+                                return;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';
                                 title = t('dashboard.status.refused');
@@ -339,7 +352,7 @@ export function useWebSocketSync(
                 wsRef.current = null;
             }
         };
-    }, [mutate, enabled, userId, token, isBlocked, t, navigate]);
+    }, [mutate, enabled, userId, token, isBlocked, t, navigate, location.pathname]);
 
     return { status };
 }
