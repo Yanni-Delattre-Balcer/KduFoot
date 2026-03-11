@@ -38,18 +38,8 @@ export const ConfirmedMatchCard = ({
     const isParticipant = match._source === 'participant';
     const isModification = match.notification_state === 1;
     
-    // Surgical Highlights calculation
-    let previousState = knownData;
-    if (!previousState && match.previous_match_state) {
-        try {
-            previousState = typeof match.previous_match_state === 'string' 
-                ? JSON.parse(match.previous_match_state)
-                : match.previous_match_state;
-        } catch (e) {
-            // ignore JSON parse error
-        }
-    }
-
+    // Surgical Highlights calculation rely on knownData
+    const previousState = knownData;
     const showSurgical = isParticipant && isModification && previousState;
     
     const isDateChanged = showSurgical && previousState?.date !== match.match_date;

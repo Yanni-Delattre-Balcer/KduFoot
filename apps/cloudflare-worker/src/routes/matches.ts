@@ -193,8 +193,14 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const participations = await matchService.getMyParticipations(dbUser.id);
-        return Response.json({ success: true, participations }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        try {
+            const participations = await matchService.getMyParticipations(dbUser.id);
+            return Response.json({ success: true, participations }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: any) {
+            console.error('[Matches API] Error fetching participations:', e);
+            // Return empty array instead of 500 to prevent Dashboard crash
+            return Response.json({ success: true, participations: [] }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
     });
 
     /**

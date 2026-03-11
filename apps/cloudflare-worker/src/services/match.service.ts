@@ -565,7 +565,6 @@ export class MatchService {
                    u_req.level as requester_level, u_req.category as requester_category, u_req.club_colors as requester_club_colors, u_req.pitch_type as requester_pitch_type,
                    mc.status as request_status,
                    COALESCE(mc.notification_state, 0) as notification_state,
-                   mc.previous_match_state as previous_match_state,
                    m.pitch_type as match_pitch_type
             FROM match_contacts mc
             JOIN matches m ON mc.match_id = m.id

@@ -25,14 +25,8 @@ export const ConfirmedTournamentCard = ({
 }: ConfirmedTournamentCardProps) => {
     const { t } = useTranslation('kdufoot');
 
-    let previousState: any = null;
-    if (part.previous_match_state) {
-        try {
-            previousState = typeof part.previous_match_state === 'string' 
-                ? JSON.parse(part.previous_match_state)
-                : part.previous_match_state;
-        } catch (e) {}
-    }
+    // Rely entirely on props for highlighted state since previous_match_state is not in DB anymore
+    const previousState: any = null;
 
     const showSurgical = part.notification_state === 1 && previousState;
     const isDateChanged = showSurgical && previousState?.date !== part.match_date;

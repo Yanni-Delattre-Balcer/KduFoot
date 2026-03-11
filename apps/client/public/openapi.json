@@ -748,6 +748,25 @@
         }
       }
     },
+    "/api/matches/organized": {
+      "get": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "List matches organized by the current user",
+        "description": "Retrieves all matches where the current user is the owner.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of organized matches."
+          }
+        }
+      }
+    },
     "/api/matches/participations": {
       "get": {
         "tags": [
