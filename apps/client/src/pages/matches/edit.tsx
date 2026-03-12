@@ -58,13 +58,13 @@ export default function MatchEditPage() {
                         {(!isEditing || match?.type === 'match') ? (
                             <MatchForm
                                 initialData={match}
-                                onSuccess={() => navigate('/matches')}
+                                onSuccess={() => navigate('/matches?scroll_to_bottom=true')}
                                 onCancel={() => navigate('/matches')}
                             />
                         ) : (
                             <TournamentForm
                                 initialData={match}
-                                onSuccess={() => navigate('/matches')}
+                                onSuccess={() => navigate('/matches?scroll_to_bottom=true')}
                                 onCancel={() => navigate('/matches')}
                             />
                         )}

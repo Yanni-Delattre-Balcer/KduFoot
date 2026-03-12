@@ -39,7 +39,14 @@ export function Provider({ children }: { children: React.ReactNode }) {
       revalidateOnReconnect: false,
     }}>
       <HeroUIProvider navigate={navigate} useHref={useHref}>
-        <ToastProvider placement="top-center" />
+        <ToastProvider 
+          placement="top-center" 
+          toastProps={{
+            classNames: {
+              base: "safe-area-top"
+            }
+          }}
+        />
         {children}
       </HeroUIProvider>
     </SWRConfig>

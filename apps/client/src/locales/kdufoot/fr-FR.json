@@ -160,7 +160,8 @@
     "empty_tournaments_desc": "Ajoutez des tournois à vos favoris pour les retrouver ici.",
     "discover_exercises": "Découvrir les exercices",
     "find_matches": "Trouver un match / tournoi",
-    "find_tournaments": "Trouver des tournois"
+    "find_tournaments": "Trouver des tournois",
+    "remove": "Retirer des favoris"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",

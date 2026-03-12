@@ -49,16 +49,34 @@ export default function MatchesPage() {
         setSearchParams(nextParams, { replace: true });
     }, [view, type, setSearchParams]);
 
-    // Smooth scroll logic removed to prevent jumps during WebSocket updates
-    // useEffect(() => {
-    //     const scrollTs = searchParams.get('scroll_ts');
-    //     if (scrollTs) {
-    //         const element = document.getElementById('results-list');
-    //         if (element) {
-    //             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    //         }
-    //     }
-    // }, [searchParams]);
+    // Auto-scroll logic
+    useEffect(() => {
+        // Case 1: Scroll to results list on load
+        if (view === 'find') {
+            const element = document.getElementById('results-container');
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Case 2: Scroll to bottom after creation
+        if (searchParams.get('scroll_to_bottom') === 'true') {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            // Clean up the param to avoid re-scrolling
+            const nextParams = new URLSearchParams(searchParams);
+            nextParams.delete('scroll_to_bottom');
+            setSearchParams(nextParams, { replace: true });
+        }
+
+        // Case 3: Manual scroll via ts (badge click etc)
+        const scrollTs = searchParams.get('scroll_ts');
+        if (scrollTs) {
+            const element = document.getElementById('results-list');
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }, [view, searchParams, setSearchParams]);
 
     const [displayMode, setDisplayMode] = useState<'list' | 'calendar'>('list');
     const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -129,7 +147,13 @@ export default function MatchesPage() {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) throw new Error('Erreur lors de la suppression');
-            addToast({ title: 'Match supprimé', description: 'Le match a été supprimé par l\'administrateur.', variant: 'solid', color: 'success', timeout: 5000 });
+            addToast({ 
+                title: 'Match supprimé', 
+                description: 'Le match a été supprimé. Les participants ont été notifiés de l\'annulation.', 
+                variant: 'solid', 
+                color: 'success', 
+                timeout: 5000 
+            });
             // Global invalidation: refresh ALL /api/matches keys across all views
             globalMutate(
                 key => typeof key === 'string' && key.includes('/api/matches'),

@@ -138,7 +138,8 @@
     "empty_tournaments_desc": "Add tournaments to your favorites to find them here.",
     "discover_exercises": "Discover exercises",
     "find_matches": "Find a match / tournament",
-    "find_tournaments": "Find tournaments"
+    "find_tournaments": "Find tournaments",
+    "remove": "Remove from favorites"
   },
   "myExercises": "My Exercises",
   "mySessions": "My Sessions",

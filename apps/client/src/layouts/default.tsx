@@ -65,16 +65,7 @@ export default function DefaultLayout({
 
   return (
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
-      {/* Floating Logo - Independent of Navbar - offset by iOS safe area */}
-      <div className="fixed top-0 left-3 lg:left-6 z-[60] py-1 lg:py-2 pointer-events-none" style={{ paddingTop: 'env(safe-area-inset-top, 20px)' }}>
-        <a href="/" className="pointer-events-auto block" aria-label={t('common.home', 'Accueil')}>
-          <img
-            src="/logo.png"
-            alt="KduFoot Logo"
-            className="h-12 lg:h-20 w-auto object-contain"
-          />
-        </a>
-      </div>
+
 
       <Navbar />
       <ConnectivityStatus />

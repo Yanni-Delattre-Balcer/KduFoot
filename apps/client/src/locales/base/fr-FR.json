@@ -451,5 +451,8 @@
     "auth0_admin_api": "Accès API Auth0",
     "coach_certified": "Coach certifié"
   },
-  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur"
+  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur",
+  "common": {
+    "home": "Accueil"
+  }
 }

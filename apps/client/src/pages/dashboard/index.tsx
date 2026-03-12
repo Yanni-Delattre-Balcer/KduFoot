@@ -295,7 +295,7 @@ export default function DashboardPage() {
             if (res.success) {
                 addToast({
                     title: t('success'),
-                    description: t('dashboard.toasts.delete_success', "Annonce supprimée avec succès"),
+                    description: t('dashboard.toasts.delete_success', "Annonce supprimée avec succès. Les participants ont été notifiés de l'annulation."),
                     color: "success"
                 });
                 mutateAnnouncements();

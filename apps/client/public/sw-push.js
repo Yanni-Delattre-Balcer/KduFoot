@@ -19,8 +19,8 @@ self.addEventListener('push', function(event) {
                 url: payload.url || '/dashboard',
             };
         } catch (e) {
-            // If JSON parsing fails, use the text as body
-            data.body = event.data.text();
+            // If JSON parsing fails, use the official fallback message
+            data.body = 'Nouvelle alerte Kdufoot - Ouvrez l\'application pour plus de détails.';
         }
     }
 
