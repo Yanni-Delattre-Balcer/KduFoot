@@ -446,7 +446,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                     await broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: 'MATCH_CANCELLED',
-                        message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été supprimé.' : 'Un match auquel vous participez a été supprimé.',
+                        message: match.type === 'tournament' 
+                            ? `Le tournoi contre ${match.club?.name || 'club inconnu'} prévu le ${match.match_date || ''} a été annulé par l'organisateur.`
+                            : `Le match contre ${match.club?.name || 'club inconnu'} prévu le ${match.match_date || ''} a été annulé par l'organisateur.`,
                         targetUserIds: subs.map(s => s.auth0_sub),
                         data: {
                             match_id: params.id,
