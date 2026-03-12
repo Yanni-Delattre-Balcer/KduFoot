@@ -109,7 +109,7 @@ export const Navbar = () => {
       isBlurred={false}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className={`fixed! top-0 left-0 right-0 m-0! p-0! bg-background z-50 transition-all duration-300 pt-[env(safe-area-inset-top)] ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
+      className={`fixed! top-0 left-0 right-0 m-0! p-0! bg-background z-50 transition-all duration-300 safe-area-top ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
         }`}
       classNames={{
         wrapper: "max-w-full px-4 lg:px-6 h-14 lg:h-24 relative flex items-center justify-between"

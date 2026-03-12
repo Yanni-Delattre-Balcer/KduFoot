@@ -73,3 +73,8 @@
     padding-right: env(safe-area-inset-right, 0px);
   }
 }
+
+/* Utility classes for safe area — Tailwind can't parse env() in arbitrary values */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px) !important;
+}

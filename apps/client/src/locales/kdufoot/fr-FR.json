@@ -661,7 +661,7 @@
       "no_participation_match": "Vous n'avez postulé à aucun match",
       "view_profile": "👤 Voir le profil",
       "manage_registrations": "Gérer les demandes",
-      "view_changes": "⚠️ Voir MODIFICATIONS"
+      "view_changes": "⚠️ J'AI VU LES MODIFICATIONS"
     },
     "tournament": {
       "pairings": "Confrontations",
@@ -723,7 +723,7 @@
       "contact": "📞 Contacter",
       "itinerary": "📍 Itinéraire",
       "new": "Nouvelle Annonce",
-      "view_changes": "VOIR LES CHANGEMENTS",
+      "view_changes": "J'AI VU LES MODIFICATIONS",
       "mark_all_read": "TOUT VALIDER"
     },
     "status": {
@@ -751,7 +751,7 @@
       "action_required": "Action Requise : Modifications Détectées",
       "match_count": "{{count}} match a été modifié par l'organisateur. Veuillez vérifier les détails.",
       "matches_count": "{{count}} matchs ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
-      "view_changes": "Voir les changements",
+      "view_changes": "J'ai vu les changements",
       "mark_as_read": "J'ai compris, marquer comme lu",
       "verify": "VÉRIFIER",
       "action_required_short": "Modifications Détectées",

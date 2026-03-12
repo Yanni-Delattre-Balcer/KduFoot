@@ -25,6 +25,7 @@ const VENUES: Venue[] = ['Domicile', 'Extérieur'];
 import MatchForm from '@/components/matches/match-form';
 import TournamentForm from '@/components/matches/tournament-form';
 import DataWall from '@/components/data-wall';
+import { useFavorites } from '@/hooks/use-favorites';
 
 import { useWelcomeGateway } from '@/contexts/welcome-gateway-context';
 import { useAuth } from '@/authentication';
@@ -37,6 +38,7 @@ export default function MatchesPage() {
     const [type, setType] = useState<'match' | 'tournament'>((searchParams.get('type') as 'match' | 'tournament') || 'match');
     const { user, profileComplete, isAdmin } = useUser();
     const { isAuthenticated, getAccessToken } = useAuth();
+    const { toggleFavorite, isFavorite } = useFavorites();
     const isMasked = !isAuthenticated || !profileComplete;
 
     // Synchronization de l'URL avec l'état
@@ -742,7 +744,25 @@ export default function MatchesPage() {
                                                                     ✅ J'AI VU ET J'ACCEPTE LES CHANGEMENTS
                                                                 </Button>
                                                             )}
-                                                            <div className="flex gap-2 w-full">
+                                                            <div className="flex gap-2 w-full items-center">
+                                                                {/* Favorite Star */}
+                                                                <Button
+                                                                    isIconOnly
+                                                                    size="sm"
+                                                                    variant="light"
+                                                                    className="shrink-0"
+                                                                    onPress={() => toggleFavorite(match.id, match.type === 'tournament' ? 'tournament' : 'match')}
+                                                                    aria-label={isFavorite(match.id, match.type === 'tournament' ? 'tournament' : 'match') ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                                        fill={isFavorite(match.id, match.type === 'tournament' ? 'tournament' : 'match') ? '#fbbf24' : 'none'}
+                                                                        stroke={isFavorite(match.id, match.type === 'tournament' ? 'tournament' : 'match') ? '#fbbf24' : 'currentColor'}
+                                                                        strokeWidth={1.5}
+                                                                        className="w-5 h-5 transition-colors"
+                                                                    >
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                                                                    </svg>
+                                                                </Button>
                                                                 <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="solid" color="secondary" className="font-bold flex-1 bg-linear-to-r from-violet-500 to-violet-700 text-white shadow-md shadow-violet-500/20">
                                                                     DÉTAILS
                                                                 </Button>

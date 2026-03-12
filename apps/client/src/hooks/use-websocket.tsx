@@ -142,10 +142,16 @@ export function useWebSocketSync(
                                         );
                                         mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
                                         mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        // Increment badge unread counter in localStorage
+                                        const unreadKey = `kdufoot_unread_count_${userId || 'guest'}`;
+                                        const current = parseInt(localStorage.getItem(unreadKey) || '0');
+                                        localStorage.setItem(unreadKey, String(current + 1));
                                         window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                     }
                                 }
-                                return; // Silent refresh, no toast
+                                // Show the toast for participant (organizer already returned)
+                                addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                                return;
                             case 'MATCH_CANCELLED':
                                 // Message ciblés envoyés uniquement aux joueurs par le backend
                                 color = 'danger';
@@ -153,6 +159,11 @@ export function useWebSocketSync(
                                 description = `Le match contre ${payload.data?.host_club_name || 'un club'} le ${payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'} a été annulé par l'organisateur.`;
                                 mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                // Increment badge unread counter
+                                {
+                                    const uk = `kdufoot_unread_count_${userId || 'guest'}`;
+                                    localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
+                                }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                 addToast({ title, description, color, variant: 'solid', timeout: 6000 });
                                 return;
@@ -170,8 +181,13 @@ export function useWebSocketSync(
                                     if (isOrganizer) {
                                         color = 'primary';
                                         title = t('dashboard.status.pending');
-                                        description = `Vous avez reçu une demande de ${payload.data?.applicant_club_name || ''} pour le match du ${new Date(payload.data?.match_date || '').toLocaleDateString('fr-FR')}`;
+                                        description = `Vous avez reçu une demande de ${payload.data?.applicant_club_name || 'un club'} pour le match du ${payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'}`;
                                         mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        // Increment badge unread counter
+                                        {
+                                            const uk = `kdufoot_unread_count_${userId || 'guest'}`;
+                                            localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
+                                        }
                                         window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
 
                                         addToast({
@@ -259,6 +275,12 @@ export function useWebSocketSync(
                                         return; // Random users ignore this
                                     }
                                 }
+                                // Increment badge unread counter
+                                {
+                                    const uk = `kdufoot_unread_count_${userId || 'guest'}`;
+                                    localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
+                                }
+                                window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                 addToast({ title, description, color, variant: 'solid', timeout: 6000 });
                                 return;
                             case 'ENROLLMENT_REFUSED':
@@ -280,12 +302,24 @@ export function useWebSocketSync(
                                         return; // Random users ignore this
                                     }
                                 }
+                                // Increment badge unread counter
+                                {
+                                    const uk = `kdufoot_unread_count_${userId || 'guest'}`;
+                                    localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
+                                }
+                                window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                 addToast({ title, description, color, variant: 'solid', timeout: 6000 });
                                 return;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';
                                 title = t('dashboard.status.refused');
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                // Increment badge unread counter
+                                {
+                                    const uk = `kdufoot_unread_count_${userId || 'guest'}`;
+                                    localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
+                                }
+                                window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                 break;
                         }
                         addToast({ title, description, color, variant: 'solid', timeout: 6000 });

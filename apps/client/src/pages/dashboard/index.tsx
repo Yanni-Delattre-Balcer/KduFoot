@@ -79,7 +79,7 @@ export default function DashboardPage() {
 
     // Modal state for 'Voir le profil'
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
-    const { isLocked } = useUser();
+    const { isLocked, user } = useUser();
 
     const [selectedTab, setSelectedTab] = useState<any>("requests");
 
@@ -222,6 +222,9 @@ export default function DashboardPage() {
             for (const p of modifiedParticipations) {
                 await markAsReadHook(p.match_id);
             }
+            // Reset badge counter
+            localStorage.removeItem(`kdufoot_unread_count_${user?.id || 'guest'}`);
+            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
             addToast({
                 title: t('success'),
                 description: t('dashboard.toasts.all_read_success', "Toutes les modifications ont été validées"),
@@ -260,6 +263,15 @@ export default function DashboardPage() {
                 setHighlightedCardIdState(null);
                 setShowChanges(false);
             }
+            // Decrement (or clear) badge counter
+            const uk = `kdufoot_unread_count_${user?.id || 'guest'}`;
+            const current = parseInt(localStorage.getItem(uk) || '0');
+            if (current <= 1) {
+                localStorage.removeItem(uk);
+            } else {
+                localStorage.setItem(uk, String(current - 1));
+            }
+            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
         } catch (e) {
             console.error("Failed to mark as read", e);
         }

@@ -64,6 +64,9 @@ export const useAuth0Provider = (): AuthProvider => {
     return Promise.resolve();
   }, [auth0Logout]);
 
+  // Debounce flag: only show the session-expired error toast once
+  const sessionErrorShownRef = useRef(false);
+
   const getAccessToken = useCallback(async (
     options?: TokenOptions,
   ): Promise<string | null> => {
@@ -98,12 +101,16 @@ export const useAuth0Provider = (): AuthProvider => {
         return null;
       }
 
-      addToast({
-        title: "Session expirée",
-        description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
-        variant: 'flat',
-        color: 'danger'
-      });
+      // Only show the error toast once per session to avoid spam
+      if (!sessionErrorShownRef.current) {
+        sessionErrorShownRef.current = true;
+        addToast({
+          title: "Session expirée",
+          description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
+          variant: 'flat',
+          color: 'danger'
+        });
+      }
       return null;
     }
   }, [getAccessTokenSilently, login]);
