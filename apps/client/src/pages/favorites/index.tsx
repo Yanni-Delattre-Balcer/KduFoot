@@ -137,7 +137,7 @@ export default function FavoritesPage() {
                                 ) : favExercises.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {favExercises.map(ex => (
-                                            <Card key={ex.id} isPressable onPress={() => navigate(`/exercises/${ex.id}`)} className="group hover:shadow-lg hover:shadow-cyan-500/10 transition-all bg-[#251820] border border-cyan-500/20 hover:border-cyan-500/40">
+                                            <Card key={ex.id} onClick={() => navigate(`/exercises/${ex.id}`)} className="group cursor-pointer hover:shadow-lg hover:shadow-cyan-500/10 transition-all bg-[#251820] border border-cyan-500/20 hover:border-cyan-500/40">
                                                 <CardHeader className="flex gap-3">
                                                     <div className="shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500/10 to-blue-500/10 flex items-center justify-center">
                                                         <div className="p-2 rounded-full bg-cyan-500/10">
@@ -198,7 +198,7 @@ export default function FavoritesPage() {
                                 ) : favMatches.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {favMatches.map(match => (
-                                            <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-violet-500/10 transition-all bg-[#252018] border border-violet-500/20 hover:border-violet-500/40">
+                                            <Card key={match.id} onClick={() => navigate(`/matches/${match.id}`)} className="group cursor-pointer hover:shadow-lg hover:shadow-violet-500/10 transition-all bg-[#252018] border border-violet-500/20 hover:border-violet-500/40">
                                                 <CardBody>
                                                     <div className="flex justify-between items-start mb-2">
                                                         <Chip size="sm" variant="flat" color="secondary" className="font-semibold bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">{match.category}</Chip>
@@ -257,7 +257,7 @@ export default function FavoritesPage() {
                                 ) : favTournaments.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {favTournaments.map(match => (
-                                            <Card key={match.id} isPressable onPress={() => navigate(`/matches/${match.id}`)} className="group hover:shadow-lg hover:shadow-purple-500/10 transition-all bg-[#252318] border border-purple-500/20 hover:border-purple-500/40">
+                                            <Card key={match.id} onClick={() => navigate(`/matches/${match.id}`)} className="group cursor-pointer hover:shadow-lg hover:shadow-purple-500/10 transition-all bg-[#252318] border border-purple-500/20 hover:border-purple-500/40">
                                                 <CardBody>
                                                     <div className="flex justify-between items-start mb-2">
                                                         <Chip size="sm" variant="flat" color="secondary" className="font-semibold bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">{match.category}</Chip>
