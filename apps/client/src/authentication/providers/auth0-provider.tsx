@@ -64,8 +64,6 @@ export const useAuth0Provider = (): AuthProvider => {
     return Promise.resolve();
   }, [auth0Logout]);
 
-  // Debounce flag: only show the session-expired error toast once
-  const sessionErrorShownRef = useRef(false);
 
   const getAccessToken = useCallback(async (
     options?: TokenOptions,
@@ -102,8 +100,9 @@ export const useAuth0Provider = (): AuthProvider => {
       }
 
       // Only show the error toast once per session to avoid spam
-      if (!sessionErrorShownRef.current) {
-        sessionErrorShownRef.current = true;
+      const HAS_SHOWN_KEY = 'kdufoot_session_error_shown';
+      if (!sessionStorage.getItem(HAS_SHOWN_KEY)) {
+        sessionStorage.setItem(HAS_SHOWN_KEY, 'true');
         addToast({
           title: "Session expirée",
           description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",

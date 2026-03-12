@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 interface ConfirmedTournamentCardProps {
     participation: any;
     highlighted?: boolean;
+    knownData?: any;
     isTimeChanged?: boolean;
     onMarkAsRead: (matchId: string) => void;
     formatDate: (date: string) => string;
@@ -18,6 +19,7 @@ interface ConfirmedTournamentCardProps {
 export const ConfirmedTournamentCard = ({
     participation: part,
     highlighted,
+    knownData,
     isTimeChanged,
     onMarkAsRead,
     formatDate,
@@ -25,8 +27,8 @@ export const ConfirmedTournamentCard = ({
 }: ConfirmedTournamentCardProps) => {
     const { t } = useTranslation('kdufoot');
 
-    // Rely entirely on props for highlighted state since previous_match_state is not in DB anymore
-    const previousState: any = null;
+    // Use knownData for surgical highlights
+    const previousState = knownData ? knownData[part.match_id] : null;
 
     const showSurgical = part.notification_state === 1 && previousState;
     const isDateChanged = showSurgical && previousState?.date !== part.match_date;
@@ -79,7 +81,7 @@ export const ConfirmedTournamentCard = ({
                                 </Chip>
                                 {(highlighted || isTimeChanged) && (
                                     <Button size="sm" color="danger" variant="flat" onPress={() => onMarkAsRead(part.match_id)} className="font-bold text-[10px] w-full mt-1 animate-pulse">
-                                        ✓ J'AI VU LES MODIFICATIONS
+                                        J'ai vu les changements
                                     </Button>
                                 )}
                             </div>

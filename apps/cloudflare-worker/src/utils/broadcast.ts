@@ -32,7 +32,8 @@ export type NotificationType =
 export interface NotificationPayload {
     type: 'NOTIFICATION';
     notificationType: NotificationType;
-    targetUserId?: string; // If undefined, considered global or filterable by client
+    targetUserId?: string; // Auth0 Sub (auth0|...)
+    targetUserIds?: string[]; // List of Auth0 Subs for bulk push
     targetClubId?: string; // E.g., for "NEW_MATCH_NEARBY"
     message: string;
     actionUrl?: string;
@@ -49,7 +50,7 @@ const PUSH_NOTIFICATION_TYPES: NotificationType[] = [
 ];
 
 export async function broadcastNotification(env: Env, payload: NotificationPayload) {
-    // 1. WebSocket broadcast (existing behaviour — unchanged)
+    // 1. WebSocket broadcast (existing behaviour — broadcast to ALL, clients filter)
     if (env.WEBSOCKET_HUB) {
         try {
             const id = env.WEBSOCKET_HUB.idFromName("global-hub");
@@ -66,39 +67,43 @@ export async function broadcastNotification(env: Env, payload: NotificationPaylo
 
     // 2. Native Push Notification (additive — only for targeted events)
     if (
-        payload.targetUserId &&
+        (payload.targetUserId || (payload.targetUserIds && payload.targetUserIds.length > 0)) &&
         PUSH_NOTIFICATION_TYPES.includes(payload.notificationType) &&
         env.VAPID_PUBLIC_KEY &&
         env.VAPID_PRIVATE_KEY
     ) {
-        try {
-            // Look up the target user's push subscription in D1
-            const row = await env.DB.prepare(
-                'SELECT push_subscription FROM users WHERE id = ?'
-            ).bind(payload.targetUserId).first<{ push_subscription: string | null }>();
+        const recipients = payload.targetUserIds || [payload.targetUserId!];
 
-            if (row?.push_subscription) {
-                const subscription = JSON.parse(row.push_subscription);
+        for (const recipientSub of recipients) {
+            try {
+                // Look up the target user's push subscription in D1 using auth0_sub
+                const row = await env.DB.prepare(
+                    'SELECT push_subscription FROM users WHERE auth0_sub = ?'
+                ).bind(recipientSub).first<{ push_subscription: string | null }>();
 
-                const pushPayload = {
-                    title: 'Kdufoot',
-                    body: payload.message,
-                    icon: '/logo.png',
-                    url: payload.actionUrl || '/dashboard',
-                };
+                if (row?.push_subscription) {
+                    const subscription = JSON.parse(row.push_subscription);
 
-                const success = await sendPushNotification(subscription, pushPayload, env);
+                    const pushPayload = {
+                        title: 'Kdufoot',
+                        body: payload.message,
+                        icon: '/logo.png',
+                        url: payload.actionUrl || '/dashboard',
+                    };
 
-                // If subscription expired, clean it from DB
-                if (!success) {
-                    await env.DB.prepare(
-                        'UPDATE users SET push_subscription = NULL WHERE id = ?'
-                    ).bind(payload.targetUserId).run().catch(() => { });
+                    const success = await sendPushNotification(subscription, pushPayload, env);
+
+                    // If subscription expired, clean it from DB
+                    if (!success) {
+                        await env.DB.prepare(
+                            'UPDATE users SET push_subscription = NULL WHERE auth0_sub = ?'
+                        ).bind(recipientSub).run().catch(() => { });
+                    }
                 }
+            } catch (e) {
+                // Push is best-effort, never block the main flow
+                console.error(`Failed to send push notification to ${recipientSub}:`, e);
             }
-        } catch (e) {
-            // Push is best-effort, never block the main flow
-            console.error("Failed to send push notification:", e);
         }
     }
 }

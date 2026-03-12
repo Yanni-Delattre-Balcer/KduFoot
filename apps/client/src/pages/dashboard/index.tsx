@@ -514,7 +514,7 @@ export default function DashboardPage() {
                                 }}
                                 aria-label="Activer les notifications push"
                             >
-                                Activer les notifications
+                                Activer les alertes
                             </Button>
                         )}
 
@@ -569,7 +569,7 @@ export default function DashboardPage() {
                                                 setHighlightedCardId(first.match_id);
                                             }}
                                         >
-                                            {t('dashboard.controls.view_changes', 'J\'AI VU LES MODIFICATIONS')}
+                                            {t('dashboard.controls.view_changes', 'J\'ai vu les changements')}
                                         </Button>
                                         <Button
                                             color="success"
@@ -961,6 +961,7 @@ export default function DashboardPage() {
                                             <ConfirmedTournamentCard
                                                 key={part.match_id}
                                                 participation={part}
+                                                knownData={knownData}
                                                 highlighted={highlightedCardId === part.match_id && showChanges}
                                                 isTimeChanged={!!(part.notification_state === 1 && knownData[part.match_id] && knownData[part.match_id].time !== part.match_time)}
                                                 onMarkAsRead={markAsRead}

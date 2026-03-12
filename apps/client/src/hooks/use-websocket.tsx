@@ -104,10 +104,17 @@ export function useWebSocketSync(
                 try {
                     const payload = JSON.parse(event.data);
                     if (payload.type === 'NOTIFICATION') {
+                        // ALWAYS mutate before any filtering to ensure badge/data refresh
                         mutate((key) => typeof key === 'string' && key.startsWith('/api/'), (d: any) => d, { revalidate: true });
-                        // Explicit context mutate for badge "1" update
                         mutate('/api/me/context', (d: any) => d, { revalidate: true });
-                        if (payload.targetUserId && payload.targetUserId !== userId) return;
+
+                        // Early return if not intended for current user (targeted notification)
+                        const isTargetedToMe = 
+                            (payload.targetUserId && payload.targetUserId === userId) || 
+                            (payload.targetUserIds && Array.isArray(payload.targetUserIds) && payload.targetUserIds.includes(userId));
+                        
+                        // If it's a targeted notification (has at least one target field) and I am not a target, ignore it.
+                        if ((payload.targetUserId || payload.targetUserIds) && !isTargetedToMe) return;
 
                         let color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" = 'primary';
                         let title = t('dashboard.status.pending');
@@ -140,8 +147,8 @@ export function useWebSocketSync(
                                                 })}
                                             </div>
                                         );
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/matches'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                         // Increment badge unread counter in localStorage
                                         const unreadKey = `kdufoot_unread_count_${userId || 'guest'}`;
                                         const current = parseInt(localStorage.getItem(unreadKey) || '0');
@@ -150,22 +157,25 @@ export function useWebSocketSync(
                                     }
                                 }
                                 // Show the toast for participant (organizer already returned)
-                                addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
                                 return;
                             case 'MATCH_CANCELLED':
                                 // Message ciblés envoyés uniquement aux joueurs par le backend
                                 color = 'danger';
                                 title = "Annulation";
-                                description = `Le match contre ${payload.data?.host_club_name || 'un club'} le ${payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'} a été annulé par l'organisateur.`;
-                                mutate((key) => typeof key === 'string' && key.includes('/api/matches'), (d: any) => d, { revalidate: true });
-                                mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                description = t('dashboard.notifications.cancellation', {
+                                    team: payload.data?.host_club_name || 'un club',
+                                    date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'
+                                });
+                                mutate((key) => typeof key === 'string' && key.startsWith('/api/matches'), (d: any) => d, { revalidate: true });
+                                mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 // Increment badge unread counter
                                 {
                                     const uk = `kdufoot_unread_count_${userId || 'guest'}`;
                                     localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
                                 }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
                                 return;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
@@ -182,7 +192,7 @@ export function useWebSocketSync(
                                         color = 'primary';
                                         title = t('dashboard.status.pending');
                                         description = `Vous avez reçu une demande de ${payload.data?.applicant_club_name || 'un club'} pour le match du ${payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'}`;
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                         // Increment badge unread counter
                                         {
                                             const uk = `kdufoot_unread_count_${userId || 'guest'}`;
@@ -204,7 +214,7 @@ export function useWebSocketSync(
                                                             onPress={async () => {
                                                                 if (token) {
                                                                     await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'accepted', token);
-                                                                    mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                                                    mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                                                     window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                                                 }
                                                             }}
@@ -230,7 +240,7 @@ export function useWebSocketSync(
                                                             onPress={async () => {
                                                                 if (token) {
                                                                     await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'refused', token);
-                                                                    mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                                                    mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                                                     window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                                                 }
                                                             }}
@@ -241,7 +251,7 @@ export function useWebSocketSync(
                                                 </div>
                                             ),
                                             color,
-                                            variant: 'solid',
+                                            variant: 'flat',
                                             timeout: 10000
                                         });
                                         return; // Organizer gets interactive toast
@@ -249,7 +259,7 @@ export function useWebSocketSync(
                                         color = 'success';
                                         title = t('success');
                                         description = t('dashboard.alerts.success_discrete');
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                     } else {
                                         return; // Random users ignore this
                                     }
@@ -270,7 +280,7 @@ export function useWebSocketSync(
                                             date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue',
                                             team: payload.data?.host_club_name || 'un club'
                                         });
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                     } else {
                                         return; // Random users ignore this
                                     }
@@ -281,7 +291,7 @@ export function useWebSocketSync(
                                     localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
                                 }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
                                 return;
                             case 'ENROLLMENT_REFUSED':
                                 {
@@ -297,7 +307,7 @@ export function useWebSocketSync(
                                             date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue',
                                             team: payload.data?.host_club_name || 'un club'
                                         });
-                                        mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                     } else {
                                         return; // Random users ignore this
                                     }
@@ -308,7 +318,7 @@ export function useWebSocketSync(
                                     localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
                                 }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
                                 return;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';

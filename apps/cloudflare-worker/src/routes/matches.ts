@@ -347,19 +347,31 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             const match = await matchService.update(params.id, dbUser.id, dto);
             if (!match) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
-            await broadcastNotification(env, {
-                type: 'NOTIFICATION',
-                notificationType: 'MATCH_MODIFIED',
-                message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été modifié.' : 'Un match auquel vous participez a été modifié.',
-                data: {
-                    match_id: params.id,
-                    match_date: match.match_date,
-                    match_time: match.match_time,
-                    host_club_name: match.club?.name || '',
-                    host_user_id: dbUser.id,
-                    owner_id: dbUser.id
-                }
-            });
+
+            // Fetch all accepted participants using their Auth0 Sub for targeted notifications
+            const { results: subs } = await env.DB.prepare(`
+                SELECT u.auth0_sub 
+                FROM match_contacts mc 
+                JOIN users u ON mc.user_id = u.id 
+                WHERE mc.match_id = ? AND mc.status = 'accepted'
+            `).bind(params.id).all<{ auth0_sub: string }>();
+
+            if (subs.length > 0) {
+                await broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: 'MATCH_MODIFIED',
+                    message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été modifié.' : 'Un match auquel vous participez a été modifié.',
+                    targetUserIds: subs.map(s => s.auth0_sub),
+                    data: {
+                        match_id: params.id,
+                        match_date: match.match_date,
+                        match_time: match.match_time,
+                        host_club_name: match.club?.name || '',
+                        host_user_id: payload.sub, // Use Auth0 Sub
+                        owner_id: payload.sub
+                    }
+                });
+            }
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -422,19 +434,26 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             
             if (match && match.contacts && match.contacts.length > 0) {
-                // Send targeted cancellation to each applicant
-                for (const contact of match.contacts) {
+                // Fetch all participants using their Auth0 Sub for targeted cancellation
+                const { results: subs } = await env.DB.prepare(`
+                    SELECT u.auth0_sub 
+                    FROM match_contacts mc 
+                    JOIN users u ON mc.user_id = u.id 
+                    WHERE mc.match_id = ?
+                `).bind(params.id).all<{ auth0_sub: string }>();
+
+                if (subs.length > 0) {
                     await broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: 'MATCH_CANCELLED',
                         message: match.type === 'tournament' ? 'Un tournoi auquel vous participez a été supprimé.' : 'Un match auquel vous participez a été supprimé.',
-                        targetUserId: contact.user_id,
+                        targetUserIds: subs.map(s => s.auth0_sub),
                         data: {
                             match_id: params.id,
                             match_date: match.match_date || '',
                             match_time: match.match_time || '',
                             host_club_name: match.club?.name || '',
-                            owner_id: dbUser.id
+                            owner_id: payload.sub // Auth0 Sub
                         }
                     });
                 }
@@ -573,23 +592,28 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             if (success && matchInfo) {
                 const match = await matchService.getById(params.id);
-                const applicantClub = await env.DB.prepare('SELECT c.name FROM clubs c JOIN users u ON u.club_id = c.id WHERE u.id = ?').bind(dbUser.id).first<{name: string}>();
+                const applicantClub = await env.DB.prepare('SELECT c.name FROM clubs c JOIN users u ON u.club_id = c.id WHERE u.id = ?').bind(dbUser.id).first<{ name: string }>();
+                
+                // Get owner sub
+                const owner = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(matchInfo.owner_id).first<{ auth0_sub: string }>();
 
-                await broadcastNotification(env, {
-                    type: 'NOTIFICATION',
-                    notificationType: 'NEW_APPLICANT',
-                    message: 'Nouvelle candidature pour votre événement !',
-                    targetUserId: matchInfo.owner_id,
-                    data: {
-                        match_id: params.id,
-                        match_date: match?.match_date || '',
-                        match_time: match?.match_time || '',
-                        host_club_name: match?.club?.name || '',
-                        applicant_club_name: applicantClub?.name || '',
-                        user_id: dbUser.id,
-                        owner_id: matchInfo.owner_id
-                    }
-                });
+                if (owner) {
+                    await broadcastNotification(env, {
+                        type: 'NOTIFICATION',
+                        notificationType: 'NEW_APPLICANT',
+                        message: 'Nouvelle candidature pour votre événement !',
+                        targetUserId: owner.auth0_sub,
+                        data: {
+                            match_id: params.id,
+                            match_date: match?.match_date || '',
+                            match_time: match?.match_time || '',
+                            host_club_name: match?.club?.name || '',
+                            applicant_club_name: applicantClub?.name || '',
+                            user_id: payload.sub, // Auth0 Sub
+                            owner_id: owner.auth0_sub
+                        }
+                    });
+                }
             }
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
@@ -673,20 +697,25 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             if (success) {
                 const matchData = await matchService.getById(params.matchId);
-                await broadcastNotification(env, {
-                    type: 'NOTIFICATION',
-                    notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
-                    message: body.status === 'accepted' ? 'Votre candidature a été acceptée !' : 'Votre candidature n\'a pas été retenue.',
-                    targetUserId: params.userId,
-                    data: {
-                        match_id: params.matchId,
-                        user_id: params.userId,
-                        match_date: matchData?.match_date || '',
-                        match_time: matchData?.match_time || '',
-                        host_club_name: matchData?.club?.name || '',
-                        owner_id: dbUser.id
-                    }
-                });
+                // Get applicant sub
+                const applicant = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(params.userId).first<{ auth0_sub: string }>();
+                
+                if (applicant) {
+                    await broadcastNotification(env, {
+                        type: 'NOTIFICATION',
+                        notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
+                        message: body.status === 'accepted' ? 'Votre candidature a été acceptée !' : 'Votre candidature n\'a pas été retenue.',
+                        targetUserId: applicant.auth0_sub,
+                        data: {
+                            match_id: params.matchId,
+                            user_id: applicant.auth0_sub,
+                            match_date: matchData?.match_date || '',
+                            match_time: matchData?.match_time || '',
+                            host_club_name: matchData?.club?.name || '',
+                            owner_id: payload.sub // Auth0 Sub
+                        }
+                    });
+                }
             }
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
@@ -751,22 +780,28 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
             // If the user withdrew themselves
             if (success && params.userId === dbUser.id && matchInfo && matchInfo.owner_id !== dbUser.id) {
-                await broadcastNotification(env, {
-                    type: 'NOTIFICATION',
-                    notificationType: 'TEAM_WITHDRAWAL',
-                    targetUserId: matchInfo.owner_id,
-                    message: 'Une équipe a annulé sa participation.',
-                    data: { match_id: params.matchId }
-                });
+                const owner = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(matchInfo.owner_id).first<{ auth0_sub: string }>();
+                if (owner) {
+                    await broadcastNotification(env, {
+                        type: 'NOTIFICATION',
+                        notificationType: 'TEAM_WITHDRAWAL',
+                        targetUserId: owner.auth0_sub,
+                        message: 'Une équipe a annulé sa participation.',
+                        data: { match_id: params.matchId }
+                    });
+                }
             } else if (success && params.userId !== dbUser.id && matchInfo && matchInfo.owner_id === dbUser.id) {
                 // If the owner removed a request
-                await broadcastNotification(env, {
-                    type: 'NOTIFICATION',
-                    notificationType: 'REQUEST_CANCELLED',
-                    targetUserId: params.userId,
-                    message: 'Votre demande de match a été retirée.',
-                    data: { match_id: params.matchId }
-                });
+                const applicant = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(params.userId).first<{ auth0_sub: string }>();
+                if (applicant) {
+                    await broadcastNotification(env, {
+                        type: 'NOTIFICATION',
+                        notificationType: 'REQUEST_CANCELLED',
+                        targetUserId: applicant.auth0_sub,
+                        message: 'Votre demande de match a été retirée.',
+                        data: { match_id: params.matchId }
+                    });
+                }
             }
 
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });

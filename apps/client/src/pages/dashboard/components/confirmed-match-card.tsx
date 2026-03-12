@@ -174,7 +174,7 @@ export const ConfirmedMatchCard = ({
                                     onPress={() => onMarkAsRead(match.match_id)} 
                                     className="font-black text-[11px] w-full animate-pulse shadow-lg shadow-danger/20 uppercase h-11"
                                 >
-                                    {t('dashboard.controls.view_changes', 'J\'AI VU LES MODIFICATIONS')}
+                                    {t('dashboard.controls.view_changes', 'J\'ai vu les changements')}
                                 </Button>
                             )}
                             <div className="flex flex-col sm:flex-row gap-2">

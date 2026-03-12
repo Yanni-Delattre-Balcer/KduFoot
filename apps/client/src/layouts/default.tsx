@@ -66,7 +66,7 @@ export default function DefaultLayout({
   return (
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
       {/* Floating Logo - Independent of Navbar - offset by iOS safe area */}
-      <div className="fixed left-3 lg:left-6 z-[60] py-1 lg:py-2 pointer-events-none" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
+      <div className="fixed top-0 left-3 lg:left-6 z-[60] py-1 lg:py-2 pointer-events-none" style={{ paddingTop: 'env(safe-area-inset-top, 20px)' }}>
         <a href="/" className="pointer-events-auto block" aria-label={t('common.home', 'Accueil')}>
           <img
             src="/logo.png"
@@ -79,7 +79,7 @@ export default function DefaultLayout({
       <Navbar />
       <ConnectivityStatus />
       {/* Spacer pour compenser la navbar fixed, avec prise en compte de la Safe Area iOS */}
-      <div className="h-14 lg:h-24 shrink-0" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }} />
+      <div className="h-16 lg:h-28 shrink-0" />
       <main className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}>
         {children}
       </main>

@@ -661,7 +661,7 @@
       "no_participation_match": "Vous n'avez postulé à aucun match",
       "view_profile": "👤 Voir le profil",
       "manage_registrations": "Gérer les demandes",
-      "view_changes": "⚠️ Voir MODIFICATIONS"
+      "view_changes": "J'AI VU LES MODIFICATIONS"
     },
     "tournament": {
       "pairings": "Confrontations",
@@ -675,7 +675,8 @@
     "match": {
       "found": "Adversaire trouvé",
       "filled": "Match complet",
-      "searching": "Recherche d'adversaire"
+      "searching": "Recherche d'adversaire",
+      "filling": "Remplissage du match"
     },
     "memo": {
       "title": "📋 Historique de mes créations",
@@ -695,6 +696,13 @@
     "toasts": {
       "delete_success": "Annonce supprimée avec succès",
       "all_read_success": "Toutes les modifications ont été validées"
+    },
+    "notifications": {
+      "modification": "Modification du match",
+      "cancellation": "Le match prévu contre {{team}} le {{date}} a été annulé par l'organisateur",
+      "new_request_interactive": "Vous avez reçu une demande de {{team}} pour le match du {{date}} à {{time}}",
+      "acceptance_player": "Votre match contre {{team}} le {{date}} a été accepté par l'organisateur",
+      "rejection_player": "Votre demande pour le match du {{date}} contre {{team}} a été refusée"
     },
     "profile_modal": {
       "title": "Profil du Club",
@@ -716,13 +724,14 @@
       "contact": "📞 Contacter",
       "itinerary": "📍 Itinéraire",
       "new": "Nouvelle Annonce",
-      "view_changes": "VOIR LES CHANGEMENTS",
+      "view_changes": "J'AI VU LES MODIFICATIONS",
       "mark_all_read": "TOUT VALIDER"
     },
     "status": {
       "accepted": "Accepté",
       "refused": "Refusé",
       "pending": "En attente",
+      "cancelled": "Annulé",
       "searching": "🔍 RECHERCHE D'ADVERSAIRE",
       "active": "🔍 RECHERCHE D'ADVERSAIRE",
       "completed": "Terminé",
@@ -731,8 +740,8 @@
     },
     "alerts": {
       "title": "Modification détectée",
-      "message": "Le match contre {{host_club_name}} a été modifié.",
-      "success_discrete": "Modification enregistrée",
+      "message": "Le match contre {{team}} prévu le {{date}} a été modifié.",
+      "success_discrete": "Action effectuée",
       "specific": {
         "date": "La date du match a été modifiée.",
         "time": "L'heure du match a été modifiée.",
@@ -743,7 +752,7 @@
       "action_required": "Action Requise : Modifications Détectées",
       "match_count": "{{count}} match a été modifié par l'organisateur. Veuillez vérifier les détails.",
       "matches_count": "{{count}} matchs ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
-      "view_changes": "Voir les changements",
+      "view_changes": "J'ai vu les changements",
       "mark_as_read": "J'ai compris, marquer comme lu",
       "verify": "VÉRIFIER",
       "action_required_short": "Modifications Détectées",
