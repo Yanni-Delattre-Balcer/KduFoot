@@ -6,6 +6,7 @@
 
 // Listen for push events from the Web Push server
 self.addEventListener('push', function(event) {
+    console.log("Notification reçue !", event.data ? event.data.text() : "Pas de payload");
     let data = { title: 'Kdufoot', body: '', icon: '/logo.png', url: '/dashboard' };
 
     if (event.data) {

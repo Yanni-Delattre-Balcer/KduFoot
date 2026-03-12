@@ -426,39 +426,40 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         }
 
         try {
-            const match = await matchService.getById(params.id); // Fetch match before deletion to safely build the notification
+            const match = await matchService.getById(params.id); 
+            if (!match) return Response.json({ success: false, error: 'Not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+
+            // Fetch all participants using their Auth0 Sub BEFORE deletion (to avoid cascade loss)
+            const { results: subs } = await env.DB.prepare(`
+                SELECT u.auth0_sub 
+                FROM match_contacts mc 
+                JOIN users u ON mc.user_id = u.id 
+                WHERE mc.match_id = ?
+            `).bind(params.id).all<{ auth0_sub: string }>();
             
             const success = await matchService.delete(params.id, dbUser.id);
-            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (!success) return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             
             await broadcastDataChanged(env);
             
-            if (match && match.contacts && match.contacts.length > 0) {
-                // Fetch all participants using their Auth0 Sub for targeted cancellation
-                const { results: subs } = await env.DB.prepare(`
-                    SELECT u.auth0_sub 
-                    FROM match_contacts mc 
-                    JOIN users u ON mc.user_id = u.id 
-                    WHERE mc.match_id = ?
-                `).bind(params.id).all<{ auth0_sub: string }>();
+            if (subs.length > 0) {
+                const cancellationMessage = match.type === 'tournament' 
+                    ? `Le tournoi à ${match.club?.name || 'club inconnu'} le ${match.match_date || ''} a été annulé par l'organisateur.` 
+                    : `Le match à ${match.club?.name || 'club inconnu'} le ${match.match_date || ''} a été annulé par l'organisateur.`;
 
-                if (subs.length > 0) {
-                    await broadcastNotification(env, {
-                        type: 'NOTIFICATION',
-                        notificationType: 'MATCH_CANCELLED',
-                        message: match.type === 'tournament' 
-                            ? `Le tournoi contre ${match.club?.name || 'club inconnu'} prévu le ${match.match_date || ''} a été annulé par l'organisateur.`
-                            : `Le match contre ${match.club?.name || 'club inconnu'} prévu le ${match.match_date || ''} a été annulé par l'organisateur.`,
-                        targetUserIds: subs.map(s => s.auth0_sub),
-                        data: {
-                            match_id: params.id,
-                            match_date: match.match_date || '',
-                            match_time: match.match_time || '',
-                            host_club_name: match.club?.name || '',
-                            owner_id: payload.sub // Auth0 Sub
-                        }
-                    });
-                }
+                await broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: 'MATCH_CANCELLED',
+                    message: cancellationMessage,
+                    targetUserIds: subs.map(s => s.auth0_sub),
+                    data: {
+                        match_id: params.id,
+                        match_date: match.match_date || '',
+                        match_time: match.match_time || '',
+                        host_club_name: match.club?.name || '',
+                        owner_id: payload.sub // Auth0 Sub
+                    }
+                });
             }
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {

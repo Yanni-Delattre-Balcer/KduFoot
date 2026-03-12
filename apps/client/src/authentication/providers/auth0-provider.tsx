@@ -107,7 +107,8 @@ export const useAuth0Provider = (): AuthProvider => {
           title: "Session expirée",
           description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
           variant: 'flat',
-          color: 'danger'
+          color: 'danger',
+          timeout: 5000
         });
       }
       return null;

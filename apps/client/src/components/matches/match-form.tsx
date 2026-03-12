@@ -180,6 +180,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                 description: "Veuillez remplir tous les champs obligatoires en rouge.",
                 variant: 'flat',
                 color: 'danger',
+                timeout: 5000,
                 endContent: firstErrorKey ? (
                     <Button size="sm" variant="flat" color="danger" onPress={() => {
                         const el = document.getElementById(`err-${firstErrorKey}`);
@@ -192,7 +193,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
             return;
         }
         if (!user?.club_id) {
-            addToast({ title: t('warning', 'Attention'), description: t('matchForm.alerts.must_link', 'Veuillez lier votre club avant de créer un match'), variant: 'flat', color: 'warning' });
+            addToast({ title: t('warning', 'Attention'), description: t('matchForm.alerts.must_link', 'Veuillez lier votre club avant de créer un match'), variant: 'flat', color: 'warning', timeout: 5000 });
             return;
         }
 
@@ -203,7 +204,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         selectedDate.setHours(hours, minutes);
 
         if (selectedDate < now) {
-            addToast({ title: t('error'), description: t('matchForm.alerts.date_past'), variant: 'flat', color: 'danger' });
+            addToast({ title: t('error'), description: t('matchForm.alerts.date_past'), variant: 'flat', color: 'danger', timeout: 5000 });
             return;
         }
 
@@ -211,7 +212,7 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         const twoYearsFromNow = new Date();
         twoYearsFromNow.setFullYear(now.getFullYear() + 2);
         if (selectedDate > twoYearsFromNow) {
-            addToast({ title: t('error'), description: t('matchForm.alerts.date_far'), variant: 'flat', color: 'danger' });
+            addToast({ title: t('error'), description: t('matchForm.alerts.date_far'), variant: 'flat', color: 'danger', timeout: 5000 });
             return;
         }
         setIsSaving(true);
@@ -229,10 +230,10 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
 
             if (initialData?.id) {
                 await updateMatch(initialData.id, payload as any);
-                addToast({ title: t('success', 'Succès'), description: t('dashboard.alerts.success_discrete', 'Modification enregistrée'), variant: 'flat', color: 'success' });
+                addToast({ title: t('success', 'Succès'), description: t('dashboard.alerts.success_discrete', 'Modification enregistrée'), variant: 'flat', color: 'success', timeout: 5000 });
             } else {
                 await createMatch(payload as any);
-                addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.create_success', 'Match créé avec succès'), variant: 'flat', color: 'success' });
+                addToast({ title: t('success', 'Succès'), description: t('matchForm.alerts.create_success', 'Match créé avec succès'), variant: 'flat', color: 'success', timeout: 5000 });
             }
             if (onSuccess) onSuccess();
         } catch (error: any) {
@@ -340,9 +341,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                         className="w-full font-black px-8 shadow-md h-9 uppercase tracking-tighter"
                                         onPress={() => {
                                             addToast({
-                                                title: "Action requise",
-                                                description: "Cliquez sur l'icône de votre profil dans la barre de navigation pour renseigner votre SIRET.",
-                                                color: "warning"
+                                                color: "warning",
+                                                timeout: 5000
                                             });
                                         }}
                                     >

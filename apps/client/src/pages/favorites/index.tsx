@@ -17,7 +17,7 @@ import DataWall from "@/components/data-wall";
 
 export default function FavoritesPage() {
     const { t, i18n } = useTranslation();
-    const { favorites } = useFavorites();
+    const { favorites, toggleFavorite } = useFavorites();
     const { exercises, isLoading: loadingEx } = useExercises();
     const { matches, isLoading: loadingMatches } = useMatches();
 
@@ -151,8 +151,21 @@ export default function FavoritesPage() {
                                                         <p className="text-small text-default-600 font-medium">{ex.category}</p>
                                                     </div>
                                                 </CardHeader>
-                                                <CardBody className="pt-0">
+                                                <CardBody className="pt-0 flex flex-col gap-3">
                                                     <p className="text-sm text-default-700 line-clamp-2">{ex.synopsis}</p>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="flat" 
+                                                        color="danger" 
+                                                        className="w-full font-bold text-xs"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleFavorite(ex.id, 'exercise');
+                                                        }}
+                                                        startContent={<span className="text-lg">🗑️</span>}
+                                                    >
+                                                        {t('favorites.remove', 'Retirer des favoris')}
+                                                    </Button>
                                                 </CardBody>
                                             </Card>
                                         ))}
@@ -199,6 +212,19 @@ export default function FavoritesPage() {
                                                         {new Date(match.match_date).toLocaleDateString(i18n.language)}
                                                     </div>
                                                     {match.level && <Chip size="sm" variant="flat" color="secondary" className="mt-3">{match.level}</Chip>}
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="flat" 
+                                                        color="danger" 
+                                                        className="w-full font-bold text-xs mt-4"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleFavorite(match.id, 'match');
+                                                        }}
+                                                        startContent={<span className="text-lg">🗑️</span>}
+                                                    >
+                                                        {t('favorites.remove', 'Retirer des favoris')}
+                                                    </Button>
                                                 </CardBody>
                                             </Card>
                                         ))}
@@ -245,6 +271,19 @@ export default function FavoritesPage() {
                                                         {new Date(match.match_date).toLocaleDateString(i18n.language)}
                                                     </div>
                                                     {match.level && <Chip size="sm" variant="flat" color="secondary" className="mt-3">{match.level}</Chip>}
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="flat" 
+                                                        color="danger" 
+                                                        className="w-full font-bold text-xs mt-4"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleFavorite(match.id, 'tournament');
+                                                        }}
+                                                        startContent={<span className="text-lg">🗑️</span>}
+                                                    >
+                                                        {t('favorites.remove', 'Retirer des favoris')}
+                                                    </Button>
                                                 </CardBody>
                                             </Card>
                                         ))}

@@ -3,21 +3,28 @@ import { useState, useEffect } from 'react';
 type FavoriteType = 'exercise' | 'match' | 'tournament';
 
 export function useFavorites() {
-    const [favorites, setFavorites] = useState<{ exercises: string[], matches: string[], tournaments: string[] }>({
-        exercises: [],
-        matches: [],
-        tournaments: []
-    });
-
-    useEffect(() => {
+    const [favorites, setFavorites] = useState<{ exercises: string[], matches: string[], tournaments: string[] }>(() => {
+        if (typeof window === 'undefined') return { exercises: [], matches: [], tournaments: [] };
         const stored = localStorage.getItem('kdufoot_favorites');
         if (stored) {
             try {
-                setFavorites(JSON.parse(stored));
+                return JSON.parse(stored);
             } catch (e) {
                 console.error("Failed to parse favorites", e);
             }
         }
+        return { exercises: [], matches: [], tournaments: [] };
+    });
+
+    useEffect(() => {
+        // Sync with storage events from other tabs if needed (optional but good)
+        const handleStorage = (e: StorageEvent) => {
+            if (e.key === 'kdufoot_favorites' && e.newValue) {
+                setFavorites(JSON.parse(e.newValue));
+            }
+        };
+        window.addEventListener('storage', handleStorage);
+        return () => window.removeEventListener('storage', handleStorage);
     }, []);
 
     const saveFavorites = (newFavs: { exercises: string[], matches: string[], tournaments: string[] }) => {

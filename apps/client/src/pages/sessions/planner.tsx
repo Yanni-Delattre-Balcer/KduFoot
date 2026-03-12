@@ -273,7 +273,7 @@ export default function SessionPlannerPage() {
                                                                                 const token = await getAccessTokenSilently();
                                                                                 await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
                                                                                 await mutateRequests();
-                                                                                addToast({ title: "Demande acceptée", color: "success" });
+                                                                                addToast({ title: "Demande acceptée", color: "success", timeout: 5000 });
                                                                             } catch (e: any) {
                                                                                 const rawMessage = e.message || "";
                                                                                 let cleanMessage = rawMessage;
@@ -308,7 +308,7 @@ export default function SessionPlannerPage() {
                                                                                 const token = await getAccessTokenSilently();
                                                                                 await matchService.updateRequestStatus(request.match_id, request.user_id, 'refused', token);
                                                                                 await mutateRequests();
-                                                                                addToast({ title: "Demande refusée", color: "danger" });
+                                                                                addToast({ title: "Demande refusée", color: "danger", timeout: 5000 });
                                                                             } catch (e: any) {
                                                                                 const rawMessage = e.message || "";
                                                                                 let cleanMessage = rawMessage;

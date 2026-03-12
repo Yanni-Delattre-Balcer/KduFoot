@@ -152,7 +152,7 @@ export const Navbar = () => {
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarContent className="lg:hidden basis-1 pl-4" justify="end" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingRight: 'env(safe-area-inset-right, 0px)' }}>
+      <NavbarContent className="lg:hidden flex basis-1 items-center justify-end pr-4 h-full" justify="end" style={{ paddingTop: 'env(safe-area-inset-top, 20px)', paddingRight: 'env(safe-area-inset-right, 20px)' }}>
         <NavbarMenuToggle
           className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
           srOnlyText="Menu"

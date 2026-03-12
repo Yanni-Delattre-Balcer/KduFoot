@@ -477,14 +477,14 @@ export default function MatchDetailsPage() {
                                                                         return;
                                                                     }
                                                                     if (!user.club_id) {
-                                                                        addToast({ title: "Profil incomplet", description: "Veuillez lier votre club pour envoyer une demande.", color: "warning" });
+                                                                        addToast({ title: "Profil incomplet", description: "Veuillez lier votre club pour envoyer une demande.", color: "warning", timeout: 5000 });
                                                                         return;
                                                                     }
                                                                     try {
                                                                         await contactMatch({ message: "Demande de participation envoyée via KduFoot" });
-                                                                        addToast({ title: "Succès", description: "Demande envoyée avec succès !", variant: 'flat', color: 'success' });
+                                                                        addToast({ title: "Succès", description: "Demande envoyée avec succès !", variant: 'flat', color: 'success', timeout: 5000 });
                                                                     } catch (e: any) {
-                                                                        addToast({ title: "Erreur", description: e.message || "Erreur lors de l'envoi", variant: 'flat', color: 'danger' });
+                                                                        addToast({ title: "Erreur", description: e.message || "Erreur lors de l'envoi", variant: 'flat', color: 'danger', timeout: 5000 });
                                                                     }
                                                                 }}
                                                                 isDisabled={isProfileIncomplete && !isMasked}

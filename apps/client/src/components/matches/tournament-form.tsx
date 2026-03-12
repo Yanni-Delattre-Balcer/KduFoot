@@ -175,6 +175,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                 description: "Veuillez remplir tous les champs obligatoires en rouge.",
                 variant: 'flat',
                 color: 'danger',
+                timeout: 5000,
                 endContent: firstErrorKey ? (
                     <Button size="sm" variant="flat" color="danger" onPress={() => {
                         const el = document.getElementById(`err-${firstErrorKey}`);
@@ -188,7 +189,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
         }
 
         if (!user?.club_id) {
-            addToast({ title: t('warning'), description: t('tournamentForm.alerts.must_link'), variant: 'flat', color: 'warning' });
+            addToast({ title: t('warning'), description: t('tournamentForm.alerts.must_link'), variant: 'flat', color: 'warning', timeout: 5000 });
             return;
         }
 
@@ -198,7 +199,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
         selectedDate.setHours(hours, minutes);
 
         if (selectedDate < now) {
-            addToast({ title: t('error'), description: t('matchForm.alerts.date_past'), variant: 'flat', color: 'danger' });
+            addToast({ title: t('error'), description: t('matchForm.alerts.date_past'), variant: 'flat', color: 'danger', timeout: 5000 });
             return;
         }
 
@@ -220,10 +221,10 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
 
             if (initialData?.id) {
                 await updateMatch(initialData.id, payload as any);
-                addToast({ title: t('success', 'Succès'), description: t('dashboard.alerts.success_discrete', 'Modification enregistrée'), variant: 'flat', color: 'success' });
+                addToast({ title: t('success', 'Succès'), description: t('dashboard.alerts.success_discrete', 'Modification enregistrée'), variant: 'flat', color: 'success', timeout: 5000 });
             } else {
                 await createMatch(payload as any);
-                addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success', 'Tournoi créé avec succès'), variant: 'flat', color: 'success' });
+                addToast({ title: t('success', 'Succès'), description: t('tournamentForm.alerts.create_success', 'Tournoi créé avec succès'), variant: 'flat', color: 'success', timeout: 5000 });
             }
 
             if (onSuccess) onSuccess();
@@ -333,9 +334,8 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                                         className="bg-purple-300 text-purple-950 w-full font-black px-8 shadow-md h-9 uppercase tracking-tighter"
                                         onPress={() => {
                                             addToast({
-                                                title: "Action requise",
-                                                description: "Cliquez sur l'icône de votre profil dans la barre de navigation pour renseigner votre SIRET.",
-                                                color: "warning"
+                                                color: "warning",
+                                                timeout: 5000
                                             });
                                         }}
                                     >
@@ -397,9 +397,9 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                                         if (confirm("Détacher le club ? (Admin uniquement)")) {
                                             try {
                                                 await unlinkClub();
-                                                addToast({ title: "Club détaché", color: "success" });
+                                                addToast({ title: "Club détaché", color: "success", timeout: 5000 });
                                             } catch (e: any) {
-                                                addToast({ title: e.message, color: "danger" });
+                                                addToast({ title: e.message, color: "danger", timeout: 5000 });
                                             }
                                         }
                                     }}>{t('matchForm.buttons.unlink', 'Détacher (Admin)')}</Button>

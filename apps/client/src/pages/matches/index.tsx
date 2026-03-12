@@ -129,7 +129,7 @@ export default function MatchesPage() {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) throw new Error('Erreur lors de la suppression');
-            addToast({ title: 'Match supprimé', description: 'Le match a été supprimé par l\'administrateur.', variant: 'solid', color: 'success' });
+            addToast({ title: 'Match supprimé', description: 'Le match a été supprimé par l\'administrateur.', variant: 'solid', color: 'success', timeout: 5000 });
             // Global invalidation: refresh ALL /api/matches keys across all views
             globalMutate(
                 key => typeof key === 'string' && key.includes('/api/matches'),
@@ -137,7 +137,7 @@ export default function MatchesPage() {
                 { revalidate: true }
             );
         } catch (err: any) {
-            addToast({ title: 'Erreur', description: err.message, variant: 'solid', color: 'danger' });
+            addToast({ title: 'Erreur', description: err.message, variant: 'solid', color: 'danger', timeout: 5000 });
         }
     }, [getAccessToken, globalMutate]);
 

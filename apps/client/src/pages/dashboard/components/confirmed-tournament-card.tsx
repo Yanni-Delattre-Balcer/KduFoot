@@ -42,11 +42,15 @@ export const ConfirmedTournamentCard = ({
     const displayTeams = teams.slice(0, 3);
     const remainingTeamsCount = Math.max(0, part.accepted_count - 3);
 
+    const isModification = part.notification_state === 1;
+    const borderClass = isModification
+        ? (highlighted ? 'border-danger ring-4 ring-danger/30 shadow-danger/20' : 'border-danger/50 bg-zinc-900/90 shadow-danger/10')
+        : 'border-purple-400/20 bg-purple-500/5';
+
     return (
         <Card
             id={`card-${part.match_id}`}
-            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md ${highlighted ? 'border-danger ring-4 ring-danger/30 shadow-danger/20' : 'border-purple-400/20 bg-purple-500/5'
-                } group`}
+            className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md ${borderClass} group`}
         >
             <CardBody className="p-0">
                 <div className="flex flex-col 2xl:flex-row">

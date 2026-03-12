@@ -157,7 +157,7 @@ export function useWebSocketSync(
                                     }
                                 }
                                 // Show the toast for participant (organizer already returned)
-                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
+                        addToast({ title, description, color, variant: 'flat', timeout: 5000 });
                                 return;
                             case 'MATCH_CANCELLED':
                                 // Message ciblés envoyés uniquement aux joueurs par le backend
@@ -175,7 +175,7 @@ export function useWebSocketSync(
                                     localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
                                 }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
+                        addToast({ title, description, color, variant: 'flat', timeout: 5000 });
                                 return;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
@@ -252,7 +252,7 @@ export function useWebSocketSync(
                                             ),
                                             color,
                                             variant: 'flat',
-                                            timeout: 10000
+                                            timeout: 5000
                                         });
                                         return; // Organizer gets interactive toast
                                     } else if (isApplicant) {
@@ -291,7 +291,7 @@ export function useWebSocketSync(
                                     localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
                                 }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
+                        addToast({ title, description, color, variant: 'flat', timeout: 5000 });
                                 return;
                             case 'ENROLLMENT_REFUSED':
                                 {

@@ -135,7 +135,8 @@ export default function DashboardPage() {
                 addToast({
                     title: t('dashboard.alerts.title'),
                     description: t('dashboard.alerts.message', { host_club_name: p.host_club_name }),
-                    color: "warning"
+                    color: "warning",
+                    timeout: 5000
                 });
                 seenNotificationsRef.current.add(p.match_id);
             } else if (p.notification_state === 0 && seenNotificationsRef.current.has(p.match_id)) {

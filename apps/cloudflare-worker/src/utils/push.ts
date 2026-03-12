@@ -35,19 +35,89 @@ export async function sendPushNotification(
             env.VAPID_PRIVATE_KEY
         );
 
-        // Send the push message (unencrypted payload via aes128gcm)
-        // For simplicity, we use the "urgency: normal" and a plain text payload.
-        // The push service will deliver it to the browser which passes it to the SW.
-        const body = JSON.stringify(payload);
+        // PAYLOAD ENCRYPTION (AES-128-GCM)
+        // Modern browsers REQUIRE the payload to be encrypted.
+        const encodedPayload = new TextEncoder().encode(JSON.stringify(payload));
+        
+        // 1. Generate salt (16 bytes)
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        
+        // 2. Generate Local Key Pair for ECDH
+        const localKeyPair = (await crypto.subtle.generateKey(
+            { name: 'ECDH', namedCurve: 'P-256' },
+            true,
+            ['deriveBits']
+        )) as CryptoKeyPair;
+        const localPublicKey = new Uint8Array(await crypto.subtle.exportKey('raw', localKeyPair.publicKey) as ArrayBuffer);
+
+        // 3. Import Remote Public Key (p256dh)
+        const remotePublicKey = await crypto.subtle.importKey(
+            'raw',
+            base64urlDecode(subscription.keys.p256dh),
+            { name: 'ECDH', namedCurve: 'P-256' },
+            true,
+            []
+        );
+
+        // 4. Derive Shared Secret
+        const sharedSecret = await crypto.subtle.deriveBits(
+            { name: 'ECDH', public: remotePublicKey } as any,
+            localKeyPair.privateKey,
+            256
+        );
+
+        // 5. HKDF - Extract & Expand to get CEK and Nonce
+        const authSecret = base64urlDecode(subscription.keys.auth);
+        
+        // Info strings for HKDF
+        const info = new TextEncoder().encode("Content-Encoding: aes128gcm\0");
+        
+        // PRK = HMAC-SHA-256(authSecret, sharedSecret)
+        const prkKey = await crypto.subtle.importKey('raw', authSecret, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+        const prk = await crypto.subtle.sign('HMAC', prkKey, sharedSecret);
+        
+        // HKDF Expand (CEK and Nonce)
+        const hkdfKey = await crypto.subtle.importKey('raw', prk, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+        
+        // CEK (16 bytes)
+        const cekInfo = concatUint8(info, new Uint8Array([1]));
+        const cek = (await crypto.subtle.sign('HMAC', hkdfKey, cekInfo)).slice(0, 16);
+        
+        // Nonce (12 bytes)
+        const nonceInfo = concatUint8(info, new Uint8Array([2]));
+        const nonce = (await crypto.subtle.sign('HMAC', hkdfKey, nonceInfo)).slice(0, 12);
+
+        // 6. Encrypt
+        const aesKey = await crypto.subtle.importKey('raw', cek, { name: 'AES-GCM' }, false, ['encrypt']);
+        // Add record padding
+        const padding = new Uint8Array([0, 0]); 
+        const dataToEncrypt = concatUint8(encodedPayload, padding);
+        
+        const ciphertext = new Uint8Array(await crypto.subtle.encrypt(
+            { name: 'AES-GCM', iv: nonce },
+            aesKey,
+            dataToEncrypt
+        ));
+
+        // 7. Construct Final Body
+        const body = new Uint8Array(21 + localPublicKey.length + ciphertext.length);
+        body.set(salt, 0);
+        new DataView(body.buffer).setUint32(16, 4096);
+        body.set([localPublicKey.length], 20);
+        body.set(localPublicKey, 21);
+        body.set(ciphertext, 21 + localPublicKey.length);
 
         const response = await fetch(subscription.endpoint, {
             method: 'POST',
             headers: {
                 'Authorization': vapidHeaders.authorization,
-                'Content-Type': 'application/json',
-                'Content-Encoding': 'identity',
+                'Content-Type': 'application/octet-stream',
+                'Content-Encoding': 'aes128gcm',
                 'TTL': '86400',
                 'Urgency': 'normal',
+                // Legacy headers for older mobile browsers or specific proxy requirements
+                'Crypto-Key': `p256dh=${subscription.keys.p256dh}`,
+                'Encryption': `salt=${arrayBufferToBase64url(salt)}`,
             },
             body,
         });
@@ -68,6 +138,13 @@ export async function sendPushNotification(
         console.error('sendPushNotification error:', error);
         return false;
     }
+}
+
+function concatUint8(a: Uint8Array, b: Uint8Array): Uint8Array {
+    const res = new Uint8Array(a.length + b.length);
+    res.set(a, 0);
+    res.set(b, a.length);
+    return res;
 }
 
 /**
