@@ -93,6 +93,11 @@
   "back_to_list": "Back to list",
   "loading": "Loading...",
   "edit": "Edit",
+  "not_provided": "Not provided",
+  "unknown_city": "Unknown city",
+  "unknown_date": "Unknown date",
+  "unknown": "Unknown",
+  "untitled": "Untitled",
   "error": {
     "not_found": "Item not found",
     "save_failed": "Error during save",

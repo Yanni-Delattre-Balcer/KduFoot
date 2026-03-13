@@ -6,7 +6,7 @@ import { usePWAInstall } from '@/hooks/use-pwa-install';
 
 interface PwaInstallModalProps {
     isOpen: boolean;
-    onClose: (completed: boolean) => void;
+    onClose: (action: 'installed' | 'dismissed') => void;
 }
 
 export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
@@ -14,14 +14,15 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
     const [showIOSHint, setShowIOSHint] = useState(false);
     const [showPCHint, setShowPCHint] = useState(false);
 
-    const handleInstallClick = () => {
+    const handleInstallClick = async () => {
         if (isIOS) {
             setShowIOSHint(true);
         } else if (deferredPrompt) {
-            installPWA();
-            // Transition is handled by custom event in hook or user choice
-            // But we can also close on success if we want.
-            // The hook dispatches 'kdufoot_pwa_step_complete'
+            await installPWA();
+            // The browser's native prompt will appear. 
+            // If they accept, we'll be in standalone mode eventually.
+            // We notify orchestrator that user took the 'install' action.
+            onClose('installed');
         } else {
             setShowPCHint(true);
         }
@@ -29,25 +30,25 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
 
     const handleDismissSession = () => {
         dismissPrompt(false);
-        onClose(false);
+        onClose('dismissed');
     };
 
     const handleDismissPermanent = () => {
         dismissPrompt(true);
-        onClose(true);
+        onClose('dismissed');
     };
 
-    // Auto-close overlay if installed or dismissed permanently outside this component
+    // Auto-close overlay if installed elsewhere
     useEffect(() => {
-        if (isStandalone) {
-            onClose(true);
+        if (isStandalone && isOpen) {
+            onClose('installed');
         }
-    }, [isStandalone]);
+    }, [isStandalone, isOpen]);
 
     return (
         <Modal 
             isOpen={isOpen} 
-            onClose={() => onClose(false)}
+            onClose={() => onClose('dismissed')}
             backdrop="blur"
             isDismissable={false}
             isKeyboardDismissDisabled={true}

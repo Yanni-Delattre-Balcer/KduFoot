@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSWRConfig } from 'swr';
 import { LayoutDashboard } from 'lucide-react';
 import DefaultLayout from '@/layouts/default';
 import { useMatches } from '@/hooks/use-matches';
@@ -58,6 +59,7 @@ const formatTimestampTime = (ts: number) => {
 export default function DashboardPage() {
     const { t } = useTranslation('kdufoot');
     const { getAccessTokenSilently } = useAuth0();
+    const { mutate: globalMutate } = useSWRConfig();
 
     // 1. Mes Annonces (Organisateur)
     const { mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
@@ -142,10 +144,17 @@ export default function DashboardPage() {
         try {
             const token = await getAccessTokenSilently();
             await matchService.updateRequestStatus(matchId, userId, status, token);
+            
+            // Force global refresh of all API data for maximum reliability
+            globalMutate((key) => typeof key === 'string' && key.startsWith('/api/'), undefined, { revalidate: true });
+
             // Refresh all relevant hooks
             mutateIncoming();
             mutateAnnouncements();
             mutateParticipations();
+            
+            // Trigger local update event
+            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
         } catch (e: any) {
             const rawMessage = e.message || "";
             let cleanMessage = rawMessage;

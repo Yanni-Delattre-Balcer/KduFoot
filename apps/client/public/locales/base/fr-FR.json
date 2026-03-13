@@ -117,6 +117,11 @@
   "back_to_list": "Retour à la liste",
   "loading": "Chargement...",
   "edit": "Modifier",
+  "not_provided": "Non renseigné",
+  "unknown_city": "Ville inconnue",
+  "unknown_date": "Date inconnue",
+  "unknown": "Inconnu",
+  "untitled": "Sans titre",
   "video": {
     "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
     "analyze": "Analyser la vidéo",
@@ -153,7 +158,8 @@
     "empty_matches": "Aucun match favori",
     "empty_matches_desc": "Vos matchs likés apparaîtront ici.",
     "discover_exercises": "Découvrir les exercices",
-    "find_matches": "Trouver un match / tournoi"
+    "find_matches": "Trouver un match / tournoi",
+    "remove": "Retirer des favoris"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",

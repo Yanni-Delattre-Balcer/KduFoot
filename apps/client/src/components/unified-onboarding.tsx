@@ -74,25 +74,30 @@ export const UnifiedOnboarding = () => {
 
     }, [isAuthenticated, authLoading, userLoading, isStandalone, isPermanentlyDismissed, isSessionDismissed, user?.calendar_token, pwaStepEvaluated, canInstall]);
 
-    const handlePwaClose = (completed: boolean) => {
-        console.log("[Onboarding] PWA Modal closed, completed:", completed);
+    const handlePwaClose = (action: 'installed' | 'dismissed') => {
+        console.log("[Onboarding] PWA Modal closed with action:", action);
         setActiveStep(null);
         setPwaStepEvaluated(true); // Mark as done for this session to allow Auth step
 
-        // Cascade transition with a delay for visual comfort
-        setTimeout(() => {
-            const hasNotificationSupport = typeof Notification !== 'undefined';
-            const notificationGranted = hasNotificationSupport ? Notification.permission === 'granted' : false;
-            
-            const needsAuth = (!user?.calendar_token || !notificationGranted) 
-                             && !isAuthDismissedPermanent 
-                             && !isAuthDismissedSession;
-            
-            if (needsAuth) {
-                console.log("[Onboarding] Cascade: Triggering Step 2: Auth");
-                setActiveStep('auth');
-            }
-        }, 600);
+        // Cascade transition ONLY if dismissed. 
+        // If installed, we want them to open the app first.
+        if (action === 'dismissed') {
+            setTimeout(() => {
+                const hasNotificationSupport = typeof Notification !== 'undefined';
+                const notificationGranted = hasNotificationSupport ? Notification.permission === 'granted' : false;
+                
+                const needsAuth = (!user?.calendar_token || !notificationGranted) 
+                                 && !isAuthDismissedPermanent 
+                                 && !isAuthDismissedSession;
+                
+                if (needsAuth) {
+                    console.log("[Onboarding] Cascade: Triggering Step 2: Auth");
+                    setActiveStep('auth');
+                }
+            }, 600);
+        } else {
+            console.log("[Onboarding] User installed the app. Skipping cascade to allow relaunch.");
+        }
     };
 
     const handleAuthClose = () => {

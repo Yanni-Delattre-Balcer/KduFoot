@@ -96,8 +96,9 @@ export function useWebSocketSync(
 
             ws.onmessage = (event) => {
                 if (event.data === 'pong') return;
-                if (event.data === 'DATA_CHANGED') {
+                if (event.data === 'DATA_CHANGED' || event.data === 'MATCH_ACCEPTED') {
                     mutate((key) => typeof key === 'string' && key.startsWith('/api/'), (d: any) => d, { revalidate: true });
+                    window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                     return;
                 }
 
@@ -265,14 +266,22 @@ export function useWebSocketSync(
                                     }
                                 }
                                 break;
+                            case 'MATCH_ACCEPTED':
                             case 'REQUEST_ACCEPTED':
                             case 'ENROLLMENT_ACCEPTED':
                                 {
                                     const isOrganizer = payload.data?.owner_id === userId;
                                     const isApplicant = payload.data?.user_id === userId;
 
+                                    // Trigger global mutation for all participants
+                                    mutate((key) => typeof key === 'string' && key.startsWith('/api/matches'), (d: any) => d, { revalidate: true });
+                                    mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
+
                                     if (isOrganizer) {
-                                        return; // Organizer gets UI response instantly from button click
+                                        // Still mutate for other tabs/devices of the organizer
+                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/matches/requests'), (d: any) => d, { revalidate: true });
+                                        window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+                                        return; 
                                     } else if (isApplicant) {
                                         color = 'success';
                                         title = t('dashboard.status.accepted');
@@ -280,7 +289,7 @@ export function useWebSocketSync(
                                             date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue',
                                             team: payload.data?.host_club_name || 'un club'
                                         });
-                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
+                                        mutate((key) => typeof key === 'string' && key.startsWith('/api/matches/participations'), (d: any) => d, { revalidate: true });
                                     } else {
                                         return; // Random users ignore this
                                     }

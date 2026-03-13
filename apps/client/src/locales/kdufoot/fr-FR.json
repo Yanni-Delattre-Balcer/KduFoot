@@ -2,6 +2,24 @@
   "success": "Succès",
   "warning": "Attention",
   "info": "Information",
+  "loading": "Chargement...",
+  "error": {
+    "title": "Erreur",
+    "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
+    "not_found": "Élément non trouvé",
+    "save_failed": "Erreur lors de la sauvegarde. Veuillez vérifier votre connexion.",
+    "delete_failed": "La suppression a échoué. Si le match est dans moins de 2h, il est verrouillé.",
+    "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
+    "loading_matches": "Erreur lors du chargement des matchs amicaux",
+    "loading_exercises": "Erreur lors du chargement des exercices",
+    "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
+    "invalid_date": "La date saisie est invalide ou déjà passée.",
+    "missing_fields": "Veuillez remplir tous les champs obligatoires.",
+    "technical_issue": "Problème Technique",
+    "bug_report": "Signaler un bug",
+    "feature_request": "Suggérer une fonctionnalité",
+    "other": "Autre"
+  },
   "user_banned_signal": "Signalement d'utilisateur banni",
   "cookie-consent-title": "Gestion des cookies",
   "cookie-policy": "Nous utilisons des cookies pour améliorer votre expérience.",
@@ -105,21 +123,6 @@
   "equipment": "Matériel",
   "back": "Retour",
   "back_to_list": "Retour à la liste",
-  "loading": "Chargement...",
-  "edit": "Modifier",
-  "error": {
-    "title": "Erreur",
-    "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
-    "not_found": "Élément non trouvé",
-    "save_failed": "Erreur lors de la sauvegarde. Veuillez vérifier votre connexion.",
-    "delete_failed": "La suppression a échoué. Si le match est dans moins de 2h, il est verrouillé.",
-    "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
-    "loading_matches": "Erreur lors du chargement des matchs amicaux",
-    "loading_exercises": "Erreur lors du chargement des exercices",
-    "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
-    "invalid_date": "La date saisie est invalide ou déjà passée.",
-    "missing_fields": "Veuillez remplir tous les champs obligatoires."
-  },
   "video": {
     "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
     "analyze": "Analyser la vidéo",
@@ -808,15 +811,6 @@
       "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations.",
       "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
     }
-  },
-  "common": {
-    "home": "Accueil",
-    "choose": "Choisir",
-    "not_provided": "Non renseigné",
-    "unknown_city": "Ville inconnue",
-    "unknown_date": "Date inconnue",
-    "unknown": "Inconnu",
-    "untitled": "Sans titre"
   },
   "adminUsersPage": {
     "pageTitle": "Gestion des utilisateurs et permissions",

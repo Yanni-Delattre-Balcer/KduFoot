@@ -119,8 +119,21 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, on
             console.log("[Calendar] Fetching sync link...");
             const data = await api.get("/api/users/me/calendar-link", getAccessTokenSilently);
             if (data && (data as any).url) {
-                console.log("[Calendar] Redirecting to Webcal:", (data as any).url);
-                window.location.href = (data as any).url;
+                let finalUrl = (data as any).url;
+                
+                // Android Compatibility: Force Google Calendar Web UI
+                const ua = navigator.userAgent.toLowerCase();
+                const isAndroid = /android/.test(ua);
+
+                if (isAndroid) {
+                    console.log("[Calendar] Android detected, using Google Calendar redirect");
+                    // Convert webcal:// to https:// for Google
+                    const httpUrl = finalUrl.replace('webcal://', 'https://');
+                    finalUrl = `https://www.google.com/calendar/render?cid=${encodeURIComponent(httpUrl)}`;
+                }
+
+                console.log("[Calendar] Redirecting to:", finalUrl);
+                window.location.href = finalUrl;
                 addToast({ title: "Synchronisation calendrier lancée !", color: "success" });
             }
         } catch (error) {
