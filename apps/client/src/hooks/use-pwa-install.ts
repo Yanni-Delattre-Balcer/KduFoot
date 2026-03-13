@@ -25,12 +25,11 @@ export function usePWAInstall() {
         const sessionDismissed = sessionStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
         setIsSessionDismissed(sessionDismissed);
 
-        // Find if already installed
+        // Find if already installed (strictly detected by the browser/OS)
         const isStandaloneMatch = window.matchMedia('(display-mode: standalone)').matches
             || (window.navigator as any).standalone
-            || document.referrer.includes('android-app://')
-            || localStorage.getItem('kdufoot-pwa-installed') === 'true';
-
+            || document.referrer.includes('android-app://');
+ 
         setIsStandalone(isStandaloneMatch);
 
         // Detect iOS Safari (specifically not Chrome/Firefox on iOS)

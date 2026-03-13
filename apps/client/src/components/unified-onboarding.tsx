@@ -25,8 +25,9 @@ export const UnifiedOnboarding = () => {
         const isWebMode = !isStandalone;
 
         // --- STEP 1: PWA (Installation) ---
-        // Only for Web mode + not dismissed
-        const needsPWA = isWebMode && !isPermanentlyDismissed && !isSessionDismissed;
+        // We prompt for installation if in Web Mode (not standalone)
+        // We only respect SESSION dismissal here to "verify all the time" on new site visits
+        const needsPWA = isWebMode && !isSessionDismissed;
         
         // --- STEP 2: Auth (Notifications & Calendar) ---
         // For everyone if data is missing, but only after PWA if in Web mode
