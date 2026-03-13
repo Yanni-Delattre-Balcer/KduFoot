@@ -67,6 +67,7 @@ i18n
     ns: ["base", "kdufoot", "common"],
     defaultNS: "kdufoot",
     fallbackNS: ["base", "common"],
+    nsSeparator: '.',
     interpolation: {
       escapeValue: false, // react already safes from xss
     },

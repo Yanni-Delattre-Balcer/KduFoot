@@ -99,7 +99,7 @@
   "duration": "Durée",
   "status": "Statut",
   "summary": "Résumé",
-  "details": "DÉTAILS",
+  "details": "Détails",
   "duration_total": "Durée Totale",
   "players": "Joueurs",
   "equipment": "Matériel",
@@ -137,7 +137,9 @@
     "selected": "exercice(s)"
   },
   "training": {
-    "go": "Mon Entraînement",
+    "remove": "Retirer",
+    "add": "Ajouter",
+    "go": "C'est parti !",
     "empty": "Pas d'entraînement en cours",
     "description": "Sélectionnez des exercices depuis la bibliothèque pour construire votre séance d'entraînement.",
     "go_exercises": "Découvrir les exercices",
@@ -160,7 +162,37 @@
     "empty_tournaments_desc": "Ajoutez des tournois à vos favoris pour les retrouver ici.",
     "discover_exercises": "Découvrir les exercices",
     "find_matches": "Trouver un match / tournoi",
-    "find_tournaments": "Trouver des tournois"
+    "find_tournaments": "Trouver des tournois",
+    "remove": "Retirer des favoris",
+    "withdraw_match": "Se désister du match",
+    "cancel_request": "Annuler ma demande"
+  },
+  "support": {
+    "technical_issue": "Problème Technique",
+    "technical_issue_subject": "Problème Technique - Kdufoot",
+    "other_inquiry": "Autre demande",
+    "other_inquiry_subject": "Autre Demande - Kdufoot",
+    "need_help": "Besoin d'aide ?",
+    "technical_issue_desc": "Bugs, problèmes techniques...",
+    "other_inquiry_desc": "Sponsors, publicité, partenariats..."
+  },
+  "planner": {
+    "en_cours": "En cours / À venir",
+    "mes_annonces": "Mes Annonces",
+    "requests": "Demandes",
+    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
+    "deleted_success": "Supprimé avec succès",
+    "no_active_match": "Aucune annonce de match active.",
+    "no_active_tournament": "Aucune annonce de tournoi active.",
+    "demandes_recues": "Demandes Reçues",
+    "mes_candidatures": "Mes Candidatures",
+    "my_club_default": "Mon Club",
+    "plateau": "Plateau",
+    "history": {
+      "title": "Historique Match / Tournoi / Exercice"
+    },
+    "terminated": "Terminé"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",
@@ -196,17 +228,19 @@
     "edit_title": "Modifier l'exercice",
     "create_button": "Créer l'exercice",
     "no_exercises_found": "Aucun exercice trouvé.",
+    "noSynopsis": "Aucun synopsis disponible.",
     "untitled": "Exercice sans titre",
     "schema": "Schéma Tactic"
   },
   "match": {
+    "vs": "vs",
     "title": "Matchs Amicaux",
     "tab_matches": "Matchs",
     "tab_tournaments": "Tournois",
     "tournament": "Tournoi",
     "create": "Créer un Match",
-    "create_title": "CRÉER UN MATCH",
-    "edit_title": "METTRE À JOUR LE MATCH",
+    "create_title": "Créer un match",
+    "edit_title": "Mettre à jour le match",
     "create_tournament": "Créer un Tournoi",
     "find": "Chercher un Match",
     "find_tournament": "Chercher un Tournoi",
@@ -330,8 +364,8 @@
       "Autre": "Autre"
     },
     "venue": {
-      "Domicile": "🏠 Domicile (Nous recevons)",
-      "Extérieur": "🚗 Extérieur (Nous nous déplaçons)",
+      "Domicile": "🏠 Home",
+      "Extérieur": "🚗 Away",
       "Neutre": "📍 Terrain neutre"
     },
     "pitch": {
@@ -389,10 +423,10 @@
     "unknown_club": "Club Inconnu",
     "found": "match(s) amical(aux) trouvé(s)",
     "found_tournament": "tournoi(s) trouvé(s)",
-    "empty_title": "Aucun match amical trouvé",
+    "empty_title": "Aucun match disponible",
     "empty_title_tournament": "Aucun tournoi trouvé",
-    "empty_desc": "Essayez de modifier vos filtres ou créez un nouveau match amical.",
-    "empty_desc_tournament": "Essayez de modifier vos filtres ou créez un nouveau tournoi amical."
+    "empty_desc": "Modifier vos filtres ou créez un nouveau match amical.",
+    "empty_desc_tournament": "Modifier vos filtres ou créez un nouveau tournoi amical."
   },
   "matchForm": {
     "title": "Informations du Match",
@@ -408,10 +442,11 @@
       "at": "à",
       "venue": "Lieu",
       "pitch_type": "Type terrain",
-      "siret": "Numéro SIRET",
-      "address": "Adresse du stade",
-      "zip": "Code Postal",
-      "city": "Ville",
+      "location_address": "Adresse du stade",
+      "address_placeholder": "Rechercher un stade ou une adresse...",
+      "location_city": "Ville",
+      "location_zip": "Code postal",
+      "jersey_color": "Couleur du maillot",
       "email": "Email de contact",
       "phone": "Téléphone",
       "notes": "Notes / Instructions",
@@ -451,6 +486,9 @@
       "link_error": "Erreur lors de la liaison du club. Vérifiez le SIRET.",
       "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un match.",
       "contact_required": "⚠️ CONTACT OBLIGATOIRE\n\nL'email et le téléphone sont indispensables pour que les joueurs puissent vous contacter.",
+      "date_required": "La date du match est obligatoire.",
+      "time_required": "L'heure du match est obligatoire.",
+      "venue_required": "Le lieu du match est obligatoire.",
       "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un match dans le passé.",
       "date_far": "⚠️ DATE INVALIDE\n\nLa date du match est trop éloignée.",
       "link_success": "Club lié avec succès !",
@@ -503,6 +541,10 @@
       "category": "Catégorie",
       "level": "Niveau",
       "pitch": "Terrain habituel",
+      "home_jersey": "Maillot Domicile",
+      "home_jersey_placeholder": "Ex: Rouge et Noir",
+      "away_jersey": "Maillot Extérieur",
+      "away_jersey_placeholder": "Ex: Blanc",
       "colors": "Couleur des maillots",
       "colors_placeholder": "Rouge et Noir...",
       "current_club": "Club actuel",
@@ -523,6 +565,10 @@
       "pitch_required": "Ce champ est obligatoire (choisissez un terrain)",
       "stadium_required": "L'adresse du stade est obligatoire.",
       "siret_required": "Numéro SIRET (14 chiffres) ou SIREN (9 chiffres) requis.",
+      "format_required": "Le format du match est obligatoire.",
+      "email_invalid": "Un email valide est obligatoire.",
+      "home_jersey_required": "La couleur du maillot domicile est obligatoire.",
+      "away_jersey_required": "La couleur du maillot extérieur est obligatoire.",
       "form_incomplete": "Formulaire incomplet",
       "form_incomplete_desc": "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès."
     },
@@ -640,10 +686,10 @@
       "modifications_desc": "{{count}} match{{plural}} été modifié par l'organisateur. Veuillez vérifier les détails."
     },
     "tabs": {
-      "requests": "DEMANDES REÇUES",
+      "requests": "Demandes reçues",
       "organized": "Mes Matchs / Tournois Organisés",
-      "participations": "TOURNOIS CONFIRMÉS",
-      "confirmed_matches": "MATCHS CONFIRMÉS",
+      "participations": "Tournois confirmés",
+      "confirmed_matches": "Matchs confirmés",
       "all": "Tous",
       "matches": "Matchs",
       "tournaments": "Tournois"
@@ -694,6 +740,7 @@
     },
     "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
     "toasts": {
+      "accept_success": "Demande acceptée",
       "delete_success": "Annonce supprimée avec succès",
       "all_read_success": "Toutes les modifications ont été validées"
     },
@@ -720,20 +767,21 @@
       "accept": "Accepter",
       "refuse": "Refuser",
       "view": "Détails",
+      "view_ad": "Voir l'annonce",
       "manage_registrations": "Gérer les demandes",
       "contact": "📞 Contacter",
       "itinerary": "📍 Itinéraire",
       "new": "Nouvelle Annonce",
       "view_changes": "J'AI VU LES MODIFICATIONS",
-      "mark_all_read": "TOUT VALIDER"
+      "mark_all_read": "Tout valider"
     },
     "status": {
       "accepted": "Accepté",
       "refused": "Refusé",
       "pending": "En attente",
       "cancelled": "Annulé",
-      "searching": "🔍 RECHERCHE D'ADVERSAIRE",
-      "active": "🔍 RECHERCHE D'ADVERSAIRE",
+      "searching": "🔍 Recherche d'adversaire",
+      "active": "🔍 Recherche d'adversaire",
       "completed": "Terminé",
       "full": "Complet",
       "open": "Ouvert"
@@ -754,18 +802,21 @@
       "matches_count": "{{count}} matchs ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
       "view_changes": "J'ai vu les changements",
       "mark_as_read": "J'ai compris, marquer comme lu",
-      "verify": "VÉRIFIER",
-      "action_required_short": "Modifications Détectées",
+      "verify": "Vérifier",
+      "action_required_short": "Modifications détectées",
       "attention": "Attention !",
       "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations.",
       "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
     }
   },
   "common": {
+    "home": "Accueil",
     "choose": "Choisir",
     "not_provided": "Non renseigné",
     "unknown_city": "Ville inconnue",
-    "unknown_date": "Date inconnue"
+    "unknown_date": "Date inconnue",
+    "unknown": "Inconnu",
+    "untitled": "Sans titre"
   },
   "adminUsersPage": {
     "pageTitle": "Gestion des utilisateurs et permissions",

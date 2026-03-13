@@ -360,7 +360,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'MATCH_MODIFIED',
-                    message: match.type === 'tournament' ? `Tournoi modifié. L'heure ou le lieu du tournoi pour le ${match.match_date || ''} a changé. Vérifiez votre calendrier.` : `Match modifié. L'heure ou le lieu du match pour le ${match.match_date || ''} a changé. Vérifiez votre calendrier.`,
+                    message: `Match modifié. L'heure ou le lieu pour le ${match.match_date || ''} a changé.`,
                     targetUserIds: subs.map(s => s.auth0_sub),
                     data: {
                         match_id: params.id,
@@ -448,7 +448,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'MATCH_CANCELLED',
-                    message: match.type === 'tournament' ? `Match annulé. La rencontre prévue le ${match.match_date || ''} a été supprimée.` : `Match annulé. La rencontre prévue le ${match.match_date || ''} a été supprimée.`,
+                    message: `Match annulé. La rencontre prévue le ${match.match_date || ''} a été supprimée.`,
                     targetUserIds: subs.map(s => s.auth0_sub),
                     data: {
                         match_id: params.id,
@@ -602,7 +602,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                     await broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: 'NEW_APPLICANT',
-                        message: 'Une nouvelle équipe souhaite organiser un match avec vous !',
+                        message: 'Vous avez reçu une demande de match !',
                         targetUserId: owner.auth0_sub,
                         data: {
                             match_id: params.id,
@@ -793,7 +793,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         type: 'NOTIFICATION',
                         notificationType: 'TEAM_WITHDRAWAL',
                         targetUserId: owner.auth0_sub,
-                        message: `Match annulé. La rencontre prévue le ${matchData?.match_date || ''} a été supprimée.`,
+                        message: `Désistement. Une équipe s'est retirée de la rencontre prévue le ${matchData?.match_date || ''}.`,
                         data: { match_id: params.matchId }
                     });
                 }

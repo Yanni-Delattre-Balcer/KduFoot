@@ -15,6 +15,26 @@ export const CalendarSyncBanner: React.FC = () => {
     const location = useLocation();
     const [isVisible, setIsVisible] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
+    const [isStep1Active, setIsStep1Active] = useState(true);
+
+    useEffect(() => {
+        const checkStep1 = () => {
+            const perm = localStorage.getItem('kdufoot-pwa-permanent-dismiss') === 'true';
+            const sess = sessionStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
+            const standalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+            
+            if (perm || sess || standalone) {
+                setIsStep1Active(false);
+            } else {
+                setIsStep1Active(true);
+            }
+        };
+
+        checkStep1();
+        
+        window.addEventListener('kdufoot_pwa_step_complete', checkStep1);
+        return () => window.removeEventListener('kdufoot_pwa_step_complete', checkStep1);
+    }, []);
 
     useEffect(() => {
         // If user is already synced and has push, don't show the banner
@@ -37,25 +57,37 @@ export const CalendarSyncBanner: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        // If user is already synced, don't show the banner
-        if (user?.calendar_token) {
-            setIsVisible(false);
-            return;
-        }
+        const checkVisibility = () => {
+            // If user already has a token, we don't need to show the banner automatically
+            if (user?.calendar_token) {
+                setIsVisible(false);
+                return;
+            }
 
-        // Check permanent dismissal
-        const isNeverShow = localStorage.getItem("calendar-banner-never-show") === "true";
-        if (isNeverShow) {
-            setIsVisible(false);
-            return;
-        }
+            // Check permanent dismissal
+            const isNeverShow = localStorage.getItem("calendar-banner-never-show") === "true";
+            if (isNeverShow) {
+                setIsVisible(false);
+                return;
+            }
 
-        // Check session dismissal
-        const isDismissed = sessionStorage.getItem("calendar-banner-dismissed") === "true";
-        if (!isDismissed) {
-            setIsVisible(true);
-        }
-    }, [user?.calendar_token]);
+            // Check session dismissal
+            const isDismissed = sessionStorage.getItem("calendar-banner-dismissed") === "true";
+            if (isDismissed) {
+                setIsVisible(false);
+                return;
+            }
+
+            // ONLY show if PWA step is completed or skipped
+            if (!isStep1Active) {
+                setIsVisible(true);
+            } else {
+                setIsVisible(false);
+            }
+        };
+
+        checkVisibility();
+    }, [user?.calendar_token, isStep1Active]);
 
     const urlBase64ToUint8Array = (base64String: string) => {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -85,11 +117,14 @@ export const CalendarSyncBanner: React.FC = () => {
                 applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
             });
 
+            console.log("Push subscription success:", subscription.endpoint);
+
             // Save to backend
             await updateUser({
                 push_subscription: JSON.stringify(subscription)
             });
             
+            console.log("Push subscription saved to profiles");
             return true;
         } catch (error) {
             console.error("Push subscription failed:", error);
@@ -136,7 +171,7 @@ export const CalendarSyncBanner: React.FC = () => {
         localStorage.setItem("calendar-banner-never-show", "true");
     };
 
-    if (!isAuthenticated || !isVisible || location.pathname === '/') return null;
+    if (!isAuthenticated || !isVisible || isStep1Active || location.pathname === '/') return null;
 
     return (
         <Card 
@@ -195,7 +230,7 @@ export const CalendarSyncBanner: React.FC = () => {
                             onPress={handleNever}
                             className="flex-1 font-bold text-xs h-9 text-white/40 hover:text-white/60"
                         >
-                            Déjà fait
+                            Je ne veux pas
                         </Button>
                     </div>
 

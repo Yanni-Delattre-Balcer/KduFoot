@@ -21,8 +21,8 @@ export function usePWAInstall() {
         const permanentlyDismissed = localStorage.getItem('kdufoot-pwa-permanent-dismiss') === 'true';
         setIsPermanentlyDismissed(permanentlyDismissed);
 
-        // Check local storage for SESSION dismissal (Share across tabs)
-        const sessionDismissed = localStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
+        // Check session storage for SESSION dismissal
+        const sessionDismissed = sessionStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
         setIsSessionDismissed(sessionDismissed);
 
         // Find if already installed
@@ -51,11 +51,10 @@ export function usePWAInstall() {
 
         window.addEventListener('beforeinstallprompt', handler);
 
-        // Sync dismissal across tabs
+        // Sync dismissal across tabs (Only local storage since session is tab-specific, 
+        // but here we might want all tabs of same session to hide it)
         const storageHandler = (e: StorageEvent) => {
-            if (e.key === 'kdufoot-pwa-session-dismiss') {
-                setIsSessionDismissed(e.newValue === 'true');
-            } else if (e.key === 'kdufoot-pwa-permanent-dismiss') {
+            if (e.key === 'kdufoot-pwa-permanent-dismiss') {
                 setIsPermanentlyDismissed(e.newValue === 'true');
             }
         };
@@ -77,6 +76,7 @@ export function usePWAInstall() {
             localStorage.setItem('kdufoot-pwa-installed', 'true');
             setIsStandalone(true);
             setIsPermanentlyDismissed(true);
+            window.dispatchEvent(new CustomEvent('kdufoot_pwa_step_complete'));
         }
 
         setDeferredPrompt(null);
@@ -87,9 +87,10 @@ export function usePWAInstall() {
             localStorage.setItem('kdufoot-pwa-permanent-dismiss', 'true');
             setIsPermanentlyDismissed(true);
         } else {
-            localStorage.setItem('kdufoot-pwa-session-dismiss', 'true');
+            sessionStorage.setItem('kdufoot-pwa-session-dismiss', 'true');
             setIsSessionDismissed(true);
         }
+        window.dispatchEvent(new CustomEvent('kdufoot_pwa_step_complete'));
     };
 
     return {

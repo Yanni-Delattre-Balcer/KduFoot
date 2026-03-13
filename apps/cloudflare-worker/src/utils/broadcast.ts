@@ -105,18 +105,21 @@ async function sendWebPush(env: Env, subscription: any, payload: any) {
             headers: {
                 'TTL': '86400',
                 'Urgency': 'high',
-                'Authorization': `WebPush ${jwt}`,
-                'Crypto-Key': `p256ecdsa=${env.VAPID_PUBLIC_KEY}`,
-                'Content-Type': 'application/octet-stream',
+                'Authorization': `vapid t=${jwt}, k=${env.VAPID_PUBLIC_KEY}`,
+                'Content-Type': payload ? 'application/json' : 'text/plain',
             },
-            body: JSON.stringify(payload) // Note: Real Web Push usually requires encryption, but some browsers support plain JSON for testing or if configured
-            // In a real production scenario, we'd need to encrypt the payload. 
-            // For now, I'll assume we might need a library or we are just triggering the wake up.
+            body: payload ? JSON.stringify(payload) : null
         });
 
         if (!response.ok) {
             const error = await response.text();
-            console.error(`Push subscription error: ${response.status} ${error}`);
+            console.error(`Push subscription error at ${endpoint.host}: ${response.status} ${error}`);
+            if (response.status === 410 || response.status === 404) {
+                console.log(`Unregistering invalid subscription for ${subscription.endpoint}`);
+                // Optional: clear the subscription in DB here if we had the user ID
+            }
+        } else {
+            console.log(`Push sent successfully to ${endpoint.host}`);
         }
     } catch (e) {
         console.error("Error sending Web Push:", e);

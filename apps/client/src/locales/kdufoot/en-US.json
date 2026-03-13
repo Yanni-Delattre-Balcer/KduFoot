@@ -94,10 +94,17 @@
   "loading": "Loading...",
   "edit": "Edit",
   "error": {
+    "title": "Error",
+    "too_late_to_modify": "Too late! You can no longer modify this announcement online. Please contact the opposing coach by phone or email to notify them directly.",
     "not_found": "Item not found",
-    "save_failed": "Error during save",
+    "save_failed": "Error during save. Please check your connection.",
+    "delete_failed": "Deletion failed. If the match is in less than 2 hours, it is locked.",
     "loading_sessions": "Error loading training sessions",
-    "loading_matches": "Error loading friendly matches"
+    "loading_matches": "Error loading friendly matches",
+    "loading_exercises": "Error loading exercises",
+    "server_error": "Server is not responding. Please try again in a few moments.",
+    "invalid_date": "The entered date is invalid or already past.",
+    "missing_fields": "Please fill in all mandatory fields."
   },
   "video": {
     "urlPlaceholder": "Paste your YouTube, TikTok, Insta, etc. video link",

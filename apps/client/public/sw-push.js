@@ -3,36 +3,35 @@
 // Handles push events in the background for KduFoot
 
 self.addEventListener('push', (event) => {
-    if (!event.data) return;
-
-    try {
-        const payload = event.data.json();
-        const { title, body, data } = payload;
-
-        const options = {
-            body: body || '',
-            icon: '/android-chrome-192x192.png',
-            badge: '/logo.png',
-            data: data || {},
-            vibrate: [100, 50, 100],
-            actions: [
-                { action: 'open', title: 'Ouvrir' }
-            ]
-        };
-
-        event.waitUntil(
-            self.registration.showNotification(title || 'KduFoot', options)
-        );
-    } catch (e) {
-        console.error('Error in push event:', e);
-        // Fallback for plain text
-        event.waitUntil(
-            self.registration.showNotification('KduFoot', {
-                body: event.data.text(),
-                icon: '/android-chrome-192x192.png'
-            })
-        );
+    let payload = null;
+    if (event.data) {
+        try {
+            payload = event.data.json();
+        } catch (e) {
+            console.warn('Push data is not JSON:', event.data.text());
+        }
     }
+
+    const title = payload?.title || 'Kdufoot';
+    const body = payload?.body || (payload ? '' : 'Vous avez une nouvelle notification !');
+    const data = payload?.data || { url: '/' };
+
+    const options = {
+        body,
+        icon: '/android-chrome-192x192.png',
+        badge: '/logo.png',
+        data,
+        vibrate: [100, 50, 100],
+        actions: [
+            { action: 'open', title: 'Ouvrir' }
+        ],
+        tag: 'kdufoot-notification', // Replace if same tag
+        renotify: true
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(title, options)
+    );
 });
 
 self.addEventListener('notificationclick', (event) => {
