@@ -499,7 +499,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         setCategory(e.target.value);
                                         if (errors.category) setErrors(prev => ({ ...prev, category: "" }));
                                     }}
-                                    placeholder={t('common.choose', 'Choisir...')}
+                                    placeholder={t('common:choose', 'Choisir...')}
                                     isInvalid={!!errors.category}
                                     aria-label={t('account.fields.category')}
                                 >
@@ -523,7 +523,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                         setLevel(e.target.value);
                                         if (errors.level) setErrors(prev => ({ ...prev, level: "" }));
                                     }}
-                                    placeholder={t('common.choose', 'Choisir...')}
+                                    placeholder={t('common:choose', 'Choisir...')}
                                     isInvalid={!!errors.level}
                                     aria-label={t('account.fields.level')}
                                 >

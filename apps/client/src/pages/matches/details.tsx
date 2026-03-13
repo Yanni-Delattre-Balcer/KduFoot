@@ -594,9 +594,9 @@ export default function MatchDetailsPage() {
                                                                     }
                                                                     try {
                                                                         await contactMatch({ message: "A porté de l'intérêt en envoyant une demande" });
-                                                                        addToast({ title: t('common.success'), description: t('matchForm.alerts.create_success'), variant: 'flat', color: 'success', timeout: 5000 });
+                                                                        addToast({ title: t('common:success'), description: t('matchForm.alerts.create_success'), variant: 'flat', color: 'success', timeout: 5000 });
                                                                     } catch (e: any) {
-                                                                        addToast({ title: t('common.error'), description: e.message || "Erreur lors de l'envoi", variant: 'flat', color: 'danger', timeout: 5000 });
+                                                                        addToast({ title: t('common:error'), description: e.message || "Erreur lors de l'envoi", variant: 'flat', color: 'danger', timeout: 5000 });
                                                                     }
                                                                 }}
                                                                 isDisabled={isProfileIncomplete && !isMasked}

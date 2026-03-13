@@ -43,7 +43,7 @@ const formatTimestamp = (ts: number, t: any) => {
         const date = new Date(ts * 1000);
         return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
     } catch {
-        return t('common.unknown_date', 'Date inconnue');
+        return t('common:unknown_date', 'Date inconnue');
     }
 };
 
@@ -461,11 +461,11 @@ export default function DashboardPage() {
                                                         <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
                                                             <div className="flex items-center gap-1 text-[9px] text-default-400">
                                                                 <span className="text-default-600">👤</span>
-                                                                <span className="truncate">{request.requester_firstname && request.requester_lastname ? `${request.requester_firstname} ${request.requester_lastname}` : t('common.not_provided', 'Non renseigné')}</span>
+                                                                <span className="truncate">{request.requester_firstname && request.requester_lastname ? `${request.requester_firstname} ${request.requester_lastname}` : t('common:not_provided', 'Non renseigné')}</span>
                                                             </div>
                                                             <div className="flex items-center gap-1 text-[9px] text-default-400">
                                                                 <span className="text-default-600">📍</span>
-                                                                <span className="truncate">{request.requester_city || request.location_city || t('common.unknown_city', 'Ville inconnue')}</span>
+                                                                <span className="truncate">{request.requester_city || request.location_city || t('common:unknown_city', 'Ville inconnue')}</span>
                                                             </div>
                                                             <div className="flex items-center gap-1 text-[9px] text-default-400">
                                                                 <span className="text-default-600">🏅</span>

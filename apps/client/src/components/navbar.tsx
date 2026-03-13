@@ -125,7 +125,7 @@ export const Navbar = () => {
     >
       {/* Absolute Logo - Stays on the same line as nav items but far left */}
       <div className="absolute left-1 h-full flex items-end pb-2 lg:items-center lg:pb-0 z-[60]">
-        <a href="/" className="flex items-center active:scale-95 transition-transform" aria-label={t('common.home', 'Accueil')}>
+        <a href="/" className="flex items-center active:scale-95 transition-transform" aria-label={t('common:home', 'Accueil')}>
           <img
             src="/logo.png"
             alt="KduFoot Logo"

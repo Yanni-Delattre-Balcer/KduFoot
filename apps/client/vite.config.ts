@@ -129,7 +129,6 @@ export default defineConfig(({ mode }) => {
       process.env.WRITE_PERMISSION || "write:api",
       process.env.ADMIN_AUTH0_PERMISSION || "auth0:admin:api"]),
       "import.meta.env.AUTH0_AUTOMATIC_PERMISSIONS": JSON.stringify(process.env.AUTH0_AUTOMATIC_PERMISSIONS?.split(",") || []),
-      "import.meta.env.VAPID_PUBLIC_KEY": JSON.stringify(env.VAPID_PUBLIC_KEY || ""),
     },
     plugins: [
       react(),
@@ -176,8 +175,8 @@ export default defineConfig(({ mode }) => {
           navigateFallbackDenylist: [/^\/api\//, /^\/_auth0\//, /code=/, /state=/, /error=/],
           skipWaiting: true,
           clientsClaim: true,
-          // Import our custom push notification handler
-          importScripts: ['/sw-push.js'],
+          // Import our custom logic
+          importScripts: [],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

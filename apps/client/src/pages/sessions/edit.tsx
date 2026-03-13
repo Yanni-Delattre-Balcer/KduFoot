@@ -255,7 +255,7 @@ export default function SessionEditPage() {
                                                     color="danger" 
                                                     variant="light" 
                                                     onPress={() => handleRemoveExercise(index)}
-                                                    aria-label={t('common.remove', 'Supprimer')}
+                                                    aria-label={t('common:remove', 'Supprimer')}
                                                 >
                                                     ✕
                                                 </Button>

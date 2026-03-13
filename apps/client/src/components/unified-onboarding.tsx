@@ -20,21 +20,14 @@ export const UnifiedOnboarding = () => {
         if (authLoading || userLoading || !isAuthenticated) return;
 
         // --- DETECT MODE ---
-        // isStandalone is true if the app is launched from Home Screen (PWA)
         const isAppMode = isStandalone;
         const isWebMode = !isStandalone;
 
         // --- STEP 1: PWA (Installation) ---
-        // We prompt for installation if in Web Mode (not standalone)
-        // We only respect SESSION dismissal here to "verify all the time" on new site visits
         const needsPWA = isWebMode && !isSessionDismissed;
         
-        // --- STEP 2: Auth (Notifications & Calendar) ---
-        // For everyone if data is missing, but only after PWA if in Web mode
-        const hasNotificationSupport = typeof Notification !== 'undefined';
-        const notificationGranted = hasNotificationSupport ? Notification.permission === 'granted' : false;
-
-        const needsAuth = (!user?.calendar_token || !notificationGranted) 
+        // --- STEP 2: Calendar Synchronization ---
+        const needsAuth = !user?.calendar_token 
                          && !isAuthDismissedPermanent 
                          && !isAuthDismissedSession;
 
@@ -47,7 +40,6 @@ export const UnifiedOnboarding = () => {
 
         // --- ORCHESTRATION ---
 
-        // CASE A: User is on Web
         if (isWebMode) {
             if (needsPWA && !pwaStepEvaluated) {
                 if (activeStep !== 'pwa') {
@@ -55,17 +47,15 @@ export const UnifiedOnboarding = () => {
                     setActiveStep('pwa');
                 }
             } else if (needsAuth && activeStep === null) {
-                console.log("[Onboarding] Phase: Auth Request (Web post-PWA)");
+                console.log("[Onboarding] Phase: Calendar Sync Request (Web post-PWA)");
                 setActiveStep('auth');
             } else if (!needsPWA && !needsAuth && activeStep !== null) {
                 setActiveStep(null);
             }
         } 
-        
-        // CASE B: User is on Phone (Standalone)
         else {
             if (needsAuth && activeStep === null) {
-                console.log("[Onboarding] Phase: Auth Request (Phone/Standalone)");
+                console.log("[Onboarding] Phase: Calendar Sync Request (Phone/Standalone)");
                 setActiveStep('auth');
             } else if (!needsAuth && activeStep !== null) {
                 setActiveStep(null);
@@ -77,21 +67,16 @@ export const UnifiedOnboarding = () => {
     const handlePwaClose = (action: 'installed' | 'dismissed') => {
         console.log("[Onboarding] PWA Modal closed with action:", action);
         setActiveStep(null);
-        setPwaStepEvaluated(true); // Mark as done for this session to allow Auth step
+        setPwaStepEvaluated(true);
 
-        // Cascade transition ONLY if dismissed. 
-        // If installed, we want them to open the app first.
         if (action === 'dismissed') {
             setTimeout(() => {
-                const hasNotificationSupport = typeof Notification !== 'undefined';
-                const notificationGranted = hasNotificationSupport ? Notification.permission === 'granted' : false;
-                
-                const needsAuth = (!user?.calendar_token || !notificationGranted) 
+                const needsAuth = !user?.calendar_token 
                                  && !isAuthDismissedPermanent 
                                  && !isAuthDismissedSession;
                 
                 if (needsAuth) {
-                    console.log("[Onboarding] Cascade: Triggering Step 2: Auth");
+                    console.log("[Onboarding] Cascade: Triggering Step 2: Calendar Sync");
                     setActiveStep('auth');
                 }
             }, 600);
