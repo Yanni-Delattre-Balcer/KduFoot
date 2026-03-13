@@ -54,7 +54,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             }
         });
 
-        const items = Array.from(matchMap.values());
+        const items = Array.from(matchMap.values()).filter(m => m.status !== 'cancelled' && m.match_status !== 'cancelled');
 
         const ics = [
             'BEGIN:VCALENDAR',
@@ -62,7 +62,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             'PRODID:-//KduFoot//Calendar Sync//FR',
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
-            'X-WR-CALNAME:KduFoot - Mes Matchs',
+            'X-WR-CALNAME:KduFoot - Mes Matchs/Tournois',
             'X-WR-TIMEZONE:Europe/Paris'
         ];
 
@@ -71,29 +71,54 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             const time = item.match_time;
             if (!date || !time) continue;
 
-            const type = item.match_type || item.type || 'Match';
-            const name = item.name || (type === 'tournament' ? 'Tournoi' : 'Match');
+            const typeRaw = item.match_type || item.type || 'Match';
+            const typeLabel = typeRaw === 'tournament' ? 'Tournoi' : 'Match';
+            const opponentName = item.name || (typeRaw === 'tournament' ? 'Tournoi' : 'Adversaire inconnu');
             const category = item.category || item.match_category || 'N/A';
             const level = item.level || item.match_level || '';
-            const venue = item.venue;
-            
+            const venue = item.venue || 'N/A';
+
             let location = '';
             if (venue === 'Domicile') {
                 location = item.stadium_address || item.location_address || '';
             } else {
-                 location = item.location_address || item.stadium_address || '';
+                location = item.location_address || item.stadium_address || '';
             }
             if (item.location_city) location += (location ? ', ' : '') + item.location_city;
 
-            const summary = `${name} - ${category} ${level}`.trim();
-            const description = `Type: ${type}\nCatégorie: ${category}\nNiveau: ${level || 'N/A'}\nLieu: ${venue}\n\nAccédez à vos détails sur KduFoot.`;
+            const summary = `Kdufoot : ${typeLabel} - ${opponentName}`.trim();
+            const description = [
+                `Type: ${typeLabel}`,
+                `Catégorie: ${category}`,
+                `Niveau: ${level || 'N/A'}`,
+                `Lieu: ${location || 'N/A'}`,
+                `Position: ${venue}`,
+                '',
+                'Accédez à vos détails sur KduFoot.'
+            ].join('\n');
 
             const dateParts = date.split('-');
             const timeParts = time.split(':');
             const dtStart = `${dateParts.join('')}T${timeParts.join('')}00`;
-            
-            const endHour = (parseInt(timeParts[0]) + 2).toString().padStart(2, '0');
-            const dtEnd = `${dateParts.join('')}T${endHour}${timeParts[1]}00`;
+
+            let dtEnd = '';
+            if (typeRaw === 'tournament' && item.match_end_time) {
+                const endTimeParts = item.match_end_time.split(':');
+                dtEnd = `${dateParts.join('')}T${endTimeParts.join('')}00`;
+            } else {
+                // Default 2h duration
+                const startHour = parseInt(timeParts[0]);
+                const startMin = parseInt(timeParts[1]);
+                const endDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]), startHour + 2, startMin);
+
+                const endYear = endDate.getFullYear();
+                const endMonth = (endDate.getMonth() + 1).toString().padStart(2, '0');
+                const endDay = endDate.getDate().toString().padStart(2, '0');
+                const endH = endDate.getHours().toString().padStart(2, '0');
+                const endM = endDate.getMinutes().toString().padStart(2, '0');
+
+                dtEnd = `${endYear}${endMonth}${endDay}T${endH}${endM}00`;
+            }
 
             const uid = `match-${item.id || item.match_id}@kdufoot.com`;
 
@@ -107,7 +132,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 `DESCRIPTION:${description.replace(/\n/g, '\\n')}`,
                 `LOCATION:${location}`,
                 'BEGIN:VALARM',
-                'TRIGGER:-P1D', 
+                'TRIGGER:-P1D',
                 'ACTION:DISPLAY',
                 `DESCRIPTION:Rappel: ${summary} demain`,
                 'END:VALARM',

@@ -5,20 +5,34 @@ import { Calendar, Bell, ChevronRight, X, CheckCircle2 } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "../services/api";
 
+import { useUser } from "../authentication";
+
 export const CalendarSyncBanner: React.FC = () => {
     const { getAccessTokenSilently } = useAuth0();
+    const { user } = useUser();
     const [isVisible, setIsVisible] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
 
     useEffect(() => {
-        // Check if the user has already dismissed the banner in this session
-        const isDismissed = sessionStorage.getItem("calendar-banner-dismissed");
+        // If user is already synced, don't show the banner
+        if (user?.calendar_token) {
+            setIsVisible(false);
+            return;
+        }
+
+        // Check permanent dismissal
+        const isNeverShow = localStorage.getItem("calendar-banner-never-show") === "true";
+        if (isNeverShow) {
+            setIsVisible(false);
+            return;
+        }
+
+        // Check session dismissal
+        const isDismissed = sessionStorage.getItem("calendar-banner-dismissed") === "true";
         if (!isDismissed) {
-            // Check if user is already synced? 
-            // For now, we show it if they haven't dismissed it.
             setIsVisible(true);
         }
-    }, []);
+    }, [user?.calendar_token]);
 
     const handleConnect = async () => {
         setIsSyncing(true);
@@ -27,6 +41,9 @@ export const CalendarSyncBanner: React.FC = () => {
             if (data && (data as any).url) {
                 // Trigger the webcal link
                 window.location.href = (data as any).url;
+                // Once clicked/connected, we can consider it "done" for this session or permanently?
+                // The prompt says "Si le flux est déjà actif, l'application ne doit plus jamais afficher cette demande."
+                // The backend will set the token, so user.calendar_token will be populated on next refetch.
             }
         } catch (error) {
             console.error("Failed to fetch calendar link", error);
@@ -38,6 +55,11 @@ export const CalendarSyncBanner: React.FC = () => {
     const handleDismiss = () => {
         setIsVisible(false);
         sessionStorage.setItem("calendar-banner-dismissed", "true");
+    };
+
+    const handleNever = () => {
+        setIsVisible(false);
+        localStorage.setItem("calendar-banner-never-show", "true");
     };
 
     if (!isVisible) return null;
@@ -75,7 +97,7 @@ export const CalendarSyncBanner: React.FC = () => {
                     Restez informé de vos matchs et tournois ! Connectez votre calendrier pour synchroniser automatiquement vos rencontres et recevoir des rappels.
                 </p>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2.5 mt-2">
                     <Button 
                         color="primary" 
                         onPress={handleConnect}
@@ -83,16 +105,34 @@ export const CalendarSyncBanner: React.FC = () => {
                         className="w-full font-black tracking-tight h-12 bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/20 group"
                         endContent={!isSyncing && <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />}
                     >
-                        Connecter mon calendrier
+                        Connecter maintenant
                     </Button>
-                    <div className="flex items-center justify-center gap-4 py-1">
+                    
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="flat" 
+                            onPress={handleDismiss}
+                            className="flex-1 font-bold text-xs h-9 bg-white/5 hover:bg-white/10 text-white/70"
+                        >
+                            Pas maintenant
+                        </Button>
+                        <Button 
+                            variant="light" 
+                            onPress={handleNever}
+                            className="flex-1 font-bold text-xs h-9 text-white/40 hover:text-white/60"
+                        >
+                            Je ne veux pas
+                        </Button>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-4 pt-2 border-t border-white/5 mt-1">
                         <div className="flex items-center gap-1.5 opacity-50">
                             <CheckCircle2 size={12} className="text-blue-400" />
-                            <span className="text-[10px] text-white/60 font-medium">Auto-sync</span>
+                            <span className="text-[10px] text-white/60 font-medium tracking-tight">Auto-sync</span>
                         </div>
                         <div className="flex items-center gap-1.5 opacity-50">
                             <Bell size={12} className="text-blue-400" />
-                            <span className="text-[10px] text-white/60 font-medium">Rappels 24h & 4h</span>
+                            <span className="text-[10px] text-white/60 font-medium tracking-tight">Rappels 24h & 4h</span>
                         </div>
                     </div>
                 </div>

@@ -119,12 +119,12 @@ export const Navbar = () => {
           : 'border-none shadow-none'
       }`}
       classNames={{
-        wrapper: "h-full items-end pb-3 lg:items-center lg:pb-0",
-        content: "h-full items-end pb-3 lg:items-center lg:pb-0"
+        wrapper: "h-full items-end pb-0 lg:items-center lg:pb-0 px-0",
+        content: "h-full items-end pb-0 lg:items-center lg:pb-0"
       }}
     >
       {/* Absolute Logo - Stays on the same line as nav items but far left */}
-      <div className="absolute left-4 h-full flex items-end pb-3 lg:items-center lg:pb-0 z-[60]">
+      <div className="absolute left-1 h-full flex items-end pb-0 lg:items-center lg:pb-0 z-[60]">
         <a href="/" className="flex items-center active:scale-95 transition-transform" aria-label={t('common.home', 'Accueil')}>
           <img
             src="/logo.png"
@@ -171,7 +171,7 @@ export const Navbar = () => {
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarContent className="lg:hidden flex basis-1 items-end justify-end pr-2 h-full pb-3" justify="end">
+      <NavbarContent className="lg:hidden flex basis-1 items-end justify-end pr-1 h-full pb-0" justify="end">
         <NavbarMenuToggle
           className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
           srOnlyText="Menu"
