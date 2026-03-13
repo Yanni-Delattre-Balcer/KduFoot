@@ -44,7 +44,7 @@ export function Provider({ children }: { children: React.ReactNode }) {
           maxVisibleToasts={1}
           toastProps={{
             classNames: {
-              base: "safe-area-top"
+              base: "mt-[80px] sm:mt-0"
             }
           }}
         />

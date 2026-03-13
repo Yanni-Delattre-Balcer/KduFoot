@@ -110,7 +110,7 @@ export const Navbar = () => {
       isBlurred={false}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className={`fixed top-0 left-0 right-0 m-0! p-0! bg-background/80 backdrop-blur-md z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
+      className={`fixed top-0 left-0 right-0 m-0! p-0! bg-background/80 backdrop-blur-md z-50 transition-all duration-300 pt-[env(safe-area-inset-top,20px)] ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
         }`}
     >
       {/* Absolute Logo - Stays on the same line as nav items but far left */}

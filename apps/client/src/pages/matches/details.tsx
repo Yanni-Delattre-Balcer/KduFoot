@@ -275,14 +275,14 @@ export default function MatchDetailsPage() {
                                             </div>
 
                                             <div className="w-full">
-                                                <h1 className="text-2xl md:text-4xl font-black text-white leading-tight tracking-tighter mb-2 break-words">
+                                                <h1 className="text-xl md:text-4xl font-black text-white leading-tight tracking-tighter mb-2 break-words flex-wrap">
                                                     {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : match.club?.name)}
                                                 </h1>
-                                                <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+                                                <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold uppercase tracking-widest text-[9px] md:text-xs">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-primary shrink-0">
                                                         <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                                                     </svg>
-                                                    <span className="truncate">{isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}</span>
+                                                    <span className="truncate whitespace-normal text-left">{isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}</span>
                                                 </p>
                                             </div>
 
@@ -603,22 +603,32 @@ export default function MatchDetailsPage() {
                                             })()}
 
                                             {match.contacts?.find(c => c.user_id === user?.id)?.status === 'accepted' && (
-                                                <div className="mt-4 p-4 bg-success-500/10 border border-success-500/20 rounded-xl space-y-3 animate-appearance-in">
-                                                    <p className="text-success font-black text-center uppercase text-sm tracking-tighter">
-                                                        {match.type === 'tournament' ? 'Tournoi' : 'Duel'} Confirmé ! ✅
+                                                <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-4 animate-appearance-in">
+                                                    <p className="text-emerald-400 font-black text-center uppercase text-sm tracking-widest flex items-center justify-center gap-2">
+                                                        DUEL CONFIRMÉ ! ✅
                                                     </p>
-                                                    <div className="pt-2 border-t border-success-500/10 space-y-2">
-                                                        <div className="flex items-center gap-2 text-white text-sm">
-                                                            📞 {match.phone}
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm break-all">
-                                                            ✉️ {match.email}
-                                                        </div>
+                                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                                        <Button
+                                                            color="warning"
+                                                            variant="flat"
+                                                            className="font-black uppercase tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
+                                                            onPress={() => window.location.href = `tel:${match.phone}`}
+                                                        >
+                                                            📞 Appeler
+                                                        </Button>
+                                                        <Button
+                                                            color="secondary"
+                                                            variant="flat"
+                                                            className="font-black uppercase tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
+                                                            onPress={() => window.location.href = `mailto:${match.email}`}
+                                                        >
+                                                            ✉️ Email
+                                                        </Button>
                                                     </div>
                                                     <Button
                                                         color="danger"
                                                         variant="flat"
-                                                        className="w-full font-bold text-xs sm:text-sm h-9 mt-4"
+                                                        className="w-full font-bold text-xs sm:text-sm h-11 mt-2"
                                                         onPress={onCancelOpen}
                                                     >
                                                         {match.type === 'tournament' ? 'Se désister du tournoi' : 'Se désister du match'}

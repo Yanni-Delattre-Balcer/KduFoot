@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard } from 'lucide-react';
 import DefaultLayout from '@/layouts/default';
@@ -71,8 +71,6 @@ export default function DashboardPage() {
     // States
     const [requestsSubFilter, setRequestsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
     const [highlightedCardId, setHighlightedCardIdState] = useState<string | null>(null);
-    const [showChanges, setShowChanges] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
     const [selectedClubProfile, setSelectedClubProfile] = useState<any>(null);
 
     // Modal state for 'Voir le profil'
@@ -124,38 +122,7 @@ export default function DashboardPage() {
         }
     }, [isLocked]);
 
-    // Track seen notifications to trigger toasts only once
-    const seenNotificationsRef = useRef<Set<string>>(new Set());
 
-    useEffect(() => {
-        (myParticipations || []).forEach(p => {
-            if (p.notification_state === 1 && !seenNotificationsRef.current.has(p.match_id)) {
-                addToast({
-                    title: t('dashboard.alerts.title'),
-                    description: t('dashboard.alerts.message', { host_club_name: p.host_club_name }),
-                    color: "warning",
-                    timeout: 5000
-                });
-                seenNotificationsRef.current.add(p.match_id);
-            } else if (p.notification_state === 0 && seenNotificationsRef.current.has(p.match_id)) {
-                seenNotificationsRef.current.delete(p.match_id);
-            }
-        });
-    }, [myParticipations, t]);
-
-    const setHighlightedCardId = (id: string) => {
-        setHighlightedCardIdState(id);
-        setShowChanges(true);
-        // Wait a tick for React to render (e.g. tab switch) then scroll
-        requestAnimationFrame(() => {
-            setTimeout(() => {
-                const element = document.getElementById(`card-${id}`);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            }, 150);
-        });
-    };
 
     // Sécurité H-2 : Verrouillage uniquement dans les 2h AVANT le match
 
@@ -201,26 +168,6 @@ export default function DashboardPage() {
         }
     };
 
-    const markAllAsRead = async () => {
-        setIsSaving(true);
-        try {
-            for (const p of modifiedParticipations) {
-                await markAsReadHook(p.match_id);
-            }
-            // Reset badge counter
-            localStorage.removeItem(`kdufoot_unread_count_${user?.id || 'guest'}`);
-            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-            addToast({
-                title: t('success'),
-                description: t('dashboard.toasts.all_read_success', "Toutes les modifications ont été validées"),
-                color: "success"
-            });
-        } catch (e) {
-            console.error("Failed to mark all as read", e);
-        } finally {
-            setIsSaving(false);
-        }
-    };
 
     const markAsRead = async (matchId: string) => {
         try {
@@ -246,7 +193,6 @@ export default function DashboardPage() {
             // Clear highlight if this was the highlighted card
             if (highlightedCardId === matchId) {
                 setHighlightedCardIdState(null);
-                setShowChanges(false);
             }
             // Decrement (or clear) badge counter
             const uk = `kdufoot_unread_count_${user?.id || 'guest'}`;
@@ -445,55 +391,6 @@ export default function DashboardPage() {
                 </div>
 
                 <DataWall>
-                    {/* Flash Notifications Panel */}
-                    {modifiedParticipations.length > 0 && (
-                        <div className="mb-6 animate-appearance-in">
-                            <Card className="bg-danger/10 border-2 border-danger/30 shadow-xl shadow-danger/10">
-                                <CardBody className="p-4 flex flex-col sm:flex-row items-center gap-4">
-                                    <div className="flex items-center gap-3 flex-1">
-                                        <div className="p-3 rounded-2xl bg-danger/20 text-danger animate-pulse">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z" /></svg>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <h4 className="font-black text-danger uppercase tracking-tight text-sm">{t('dashboard.sections.modifications_title')}</h4>
-                                            <p className="text-default-400 text-xs">
-                                                {t('dashboard.sections.modifications_desc', { count: modifiedParticipations.length, plural: modifiedParticipations.length > 1 ? 's ont' : ' a' })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        <Button
-                                            color="danger"
-                                            size="sm"
-                                            className="font-bold uppercase text-xs sm:text-sm px-6"
-                                            onPress={() => {
-                                                const first = modifiedParticipations[0];
-                                                // Switch to the correct tab
-                                                if (first.match_type === 'tournament') {
-                                                    setSelectedTab('participations');
-                                                } else {
-                                                    setSelectedTab('confirmed_matches');
-                                                }
-                                                setHighlightedCardId(first.match_id);
-                                            }}
-                                        >
-                                            {t('dashboard.controls.view_changes', 'J\'ai vu les changements')}
-                                        </Button>
-                                        <Button
-                                            color="success"
-                                            variant="flat"
-                                            size="sm"
-                                            className="font-bold uppercase text-xs sm:text-sm px-6 bg-success/20 text-success"
-                                            onPress={markAllAsRead}
-                                            isLoading={isSaving}
-                                        >
-                                            {t('dashboard.controls.mark_all_read', "TOUT VALIDER")}
-                                        </Button>
-                                    </div>
-                                </CardBody>
-                            </Card>
-                        </div>
-                    )}
 
                     <Tabs
                         aria-label="Dashboard Options"
@@ -694,7 +591,7 @@ export default function DashboardPage() {
                                             <ConfirmedMatchCard
                                                 key={idx}
                                                 match={cm}
-                                                highlighted={highlightedCardId === cm.match_id && showChanges}
+                                                highlighted={highlightedCardId === cm.match_id}
                                                 knownData={knownData[cm.match_id]}
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
@@ -753,7 +650,7 @@ export default function DashboardPage() {
                                                 key={part.match_id}
                                                 participation={part}
                                                 knownData={knownData}
-                                                highlighted={highlightedCardId === part.match_id && showChanges}
+                                                highlighted={highlightedCardId === part.match_id}
                                                 isTimeChanged={!!(part.notification_state === 1 && knownData[part.match_id] && knownData[part.match_id].time !== part.match_time)}
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
