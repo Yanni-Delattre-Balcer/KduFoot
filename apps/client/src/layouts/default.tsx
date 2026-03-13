@@ -25,7 +25,6 @@ import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
 import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
 import { ConnectivityStatus } from "@/components/connectivity-status";
-import { CalendarSyncBanner } from "@/components/calendar-sync-banner";
 
 export default function DefaultLayout({
   children,
@@ -71,7 +70,6 @@ export default function DefaultLayout({
       <div className="h-16 lg:h-28 shrink-0" />
       <main className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}>
         {children}
-        <CalendarSyncBanner />
       </main>
       <footer className="relative w-full border-t border-default-100 bg-background/80 backdrop-blur-md mt-auto">
         <div className="container mx-auto px-6 py-8 flex flex-col items-center gap-6">

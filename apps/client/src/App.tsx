@@ -21,7 +21,7 @@ import { SiteLoading } from "./components/site-loading";
 import { AuthenticationGuard, useAuth, UserSync, useUser, BlockedPage } from "./authentication";
 
 import { PageNotFound } from "./pages/404";
-import { PwaInstallBanner } from "./components/pwa-install-banner";
+import { UnifiedOnboarding } from "./components/unified-onboarding";
 
 
 import IndexPage from "@/pages/index";
@@ -81,7 +81,7 @@ function App() {
     <Suspense fallback={<SiteLoading />}>
       <TrainingProvider>
         <UserSync />
-        <PwaInstallBanner />
+        <UnifiedOnboarding />
         <Routes>
           <Route element={<IndexPage />} path="/" />
           <Route
