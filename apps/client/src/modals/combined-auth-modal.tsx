@@ -86,25 +86,29 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, on
         
         // 1. Notifications
         try {
-            console.log("[Push Debug] Current permission level:", Notification.permission);
-            if (Notification.permission !== 'granted') {
-                console.log("[Push Debug] Requesting permission...");
-                const permission = await Notification.requestPermission();
-                console.log("[Push Debug] Permission result:", permission);
-                
-                if (permission === 'granted') {
-                    const success = await subscribeToPush();
-                    if (success) {
-                        addToast({ title: "Notifications activées !", color: "success" });
+            if (typeof Notification === 'undefined') {
+                console.warn("[Push Debug] Notification API NOT supported in this browser environment");
+            } else {
+                console.log("[Push Debug] Current permission level:", Notification.permission);
+                if (Notification.permission !== 'granted') {
+                    console.log("[Push Debug] Requesting permission...");
+                    const permission = await Notification.requestPermission();
+                    console.log("[Push Debug] Permission result:", permission);
+                    
+                    if (permission === 'granted') {
+                        const success = await subscribeToPush();
+                        if (success) {
+                            addToast({ title: "Notifications activées !", color: "success" });
+                        } else {
+                            addToast({ title: "Erreur technique (Push)", color: "danger" });
+                        }
                     } else {
-                        addToast({ title: "Erreur technique (Push)", color: "danger" });
+                        console.warn("[Push Debug] Permission was NOT granted");
                     }
                 } else {
-                    console.warn("[Push Debug] Permission was NOT granted");
+                    console.log("[Push Debug] Permission already granted, refreshing subscription...");
+                    await subscribeToPush();
                 }
-            } else {
-                console.log("[Push Debug] Permission already granted, refreshing subscription...");
-                await subscribeToPush();
             }
         } catch (e) {
             console.error("[Push Debug] Error during notification request flow:", e);
