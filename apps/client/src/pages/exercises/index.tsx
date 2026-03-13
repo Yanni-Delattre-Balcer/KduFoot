@@ -67,7 +67,7 @@ export default function ExercisesPage() {
                                 {t('video.analyzeTitle')}
                             </h1>
                         </div>
-                        <p className="text-default-500 text-center max-w-lg font-bold uppercase tracking-widest text-xs opacity-70">
+                        <p className="text-default-500 text-center max-w-lg font-bold tracking-widest text-xs opacity-70">
                             {t('video.analyzeSubtitle')}
                         </p>
                         <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -196,7 +196,7 @@ export default function ExercisesPage() {
 
                                         {/* 2. Title & Category (Below icon, centered) */}
                                         <div className="flex flex-col items-center text-center gap-1 w-full">
-                                            <Chip size="sm" variant="flat" color="warning" className="font-bold text-[10px] uppercase tracking-wider">
+                                            <Chip size="sm" variant="flat" color="warning" className="font-bold text-[10px] tracking-wider">
                                                 {t(`enums.category.${exercise.category}`)}
                                             </Chip>
                                             <h4 className="font-bold text-lg group-hover:text-amber-500 transition-colors line-clamp-1">{exercise.title}</h4>

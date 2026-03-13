@@ -162,6 +162,15 @@
     "find_matches": "Trouver un match / tournoi",
     "find_tournaments": "Trouver des tournois"
   },
+  "support": {
+    "technical_issue": "Problème Technique",
+    "technical_issue_subject": "Problème Technique - Kdufoot",
+    "other_inquiry": "Autre demande",
+    "other_inquiry_subject": "Autre Demande - Kdufoot",
+    "need_help": "Besoin d'aide ?",
+    "technical_issue_desc": "Bugs, problèmes techniques...",
+    "other_inquiry_desc": "Sponsors, publicité, partenariats..."
+  },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",
   "myMatches": "Mes Matchs Amicaux",
@@ -203,6 +212,7 @@
     "title": "Matchs Amicaux",
     "tab_matches": "Matchs",
     "tab_tournaments": "Tournois",
+    "vs": "vs",
     "tournament": "Tournoi",
     "create": "Créer un Match",
     "create_title": "CRÉER UN MATCH",
@@ -779,7 +789,9 @@
     "choose": "Choisir",
     "not_provided": "Non renseigné",
     "unknown_city": "Ville inconnue",
-    "unknown_date": "Date inconnue"
+    "unknown_date": "Date inconnue",
+    "unknown": "??",
+    "untitled": "Sans titre"
   },
   "adminUsersPage": {
     "pageTitle": "Gestion des utilisateurs et permissions",
@@ -938,6 +950,24 @@
     "role_blocked": "Banni / Bloqué"
   },
   "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur",
+  "planner": {
+    "en_cours": "En cours / À venir",
+    "mes_annonces": "Mes Annonces",
+    "requests": "Demandes",
+    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
+    "deleted_success": "Supprimé avec succès",
+    "no_active_match": "Aucune annonce de match active.",
+    "no_active_tournament": "Aucune annonce de tournoi active.",
+    "demandes_recues": "Demandes Reçues",
+    "mes_candidatures": "Mes Candidatures",
+    "my_club_default": "Mon Club",
+    "plateau": "Plateau",
+    "history": {
+      "title": "Historique Match / Tournoi / Exercice"
+    },
+    "terminated": "TERMINÉ"
+  },
   "connectivity": {
     "offline": "Vous êtes hors ligne. Vérifiez votre connexion.",
     "reconnecting": "Connexion instable, mise à jour en cours..."

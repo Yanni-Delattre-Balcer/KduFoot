@@ -25,7 +25,7 @@ export default function ThankYouPage() {
 
         <div className="grid grid-cols-1 gap-4 w-full max-w-2xl px-4">
           {/* Ronan Le Meillat */}
-          <Card className="p-4 border-none bg-linear-to-br from-teal-500/10 to-emerald-500/10 backdrop-blur-md">
+          <Card className="p-4 border border-teal-500/20 bg-teal-500/5">
             <CardHeader className="flex gap-2 py-2">
               <div className="flex flex-col">
                 <p className="text-xl font-bold">
@@ -66,7 +66,7 @@ export default function ThankYouPage() {
           </Card>
 
           {/* Philippe & Franck Dubart */}
-          <Card className="p-4 border-none bg-teal-500/5 backdrop-blur-sm">
+          <Card className="p-4 border border-teal-500/20 bg-teal-500/5">
             <CardHeader className="flex gap-2 py-2 flex-col items-start">
               <div className="flex gap-2 items-center">
                 <p className="text-lg font-bold">

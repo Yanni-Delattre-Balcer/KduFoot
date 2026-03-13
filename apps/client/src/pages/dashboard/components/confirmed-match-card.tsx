@@ -78,14 +78,14 @@ export const ConfirmedMatchCard = ({
                                         {opponentClubName}
                                     </h3>
                                     <div className="flex flex-wrap items-center gap-3 mt-2">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider h-auto py-0.5 whitespace-normal">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm tracking-wider h-auto py-0.5 whitespace-normal">
                                             ⚽ {t('enums.type.match')}
                                         </Chip>
                                         <Chip 
                                             size="sm" 
                                             variant="flat" 
                                             color={isUserHome ? 'primary' : 'warning'} 
-                                            className={`h-5 text-[9px] uppercase font-black shrink-0 ${isVenueChanged ? 'bg-danger text-white border-danger animate-pulse' : ''}`}
+                                            className={`h-5 text-[9px] font-black shrink-0 ${isVenueChanged ? 'bg-danger text-white border-danger animate-pulse' : ''}`}
                                         >
                                             {isUserHome ? t('dashboard.labels.home_badge') : t('dashboard.labels.away_badge')}
                                         </Chip>
@@ -99,7 +99,7 @@ export const ConfirmedMatchCard = ({
                                 </div>
                             </div>
                             <div className="flex justify-end lg:w-48 shrink-0 flex-col gap-2">
-                                <Chip size="sm" color="secondary" variant="solid" className="font-black uppercase text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30 w-full">
+                                <Chip size="sm" color="secondary" variant="solid" className="font-black text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30 w-full">
                                     {t('dashboard.status.accepted')}
                                 </Chip>
                             </div>
@@ -107,26 +107,26 @@ export const ConfirmedMatchCard = ({
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                             <div className={`rounded-xl p-3 border transition-colors ${isDateChanged ? 'bg-danger/20 border-danger animate-pulse' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isDateChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.date', 'Date')}</p>
+                                <p className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isDateChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.date', 'Date')}</p>
                                 <p className={`text-sm font-bold ${isDateChanged ? 'text-danger' : 'text-white'}`}>{formatDate(match.match_date)}</p>
                             </div>
                             <div className={`rounded-xl p-3 border transition-colors ${isTimeChanged ? 'bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isTimeChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.time', 'Heure')}</p>
+                                <p className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isTimeChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.time', 'Heure')}</p>
                                 <p className={`text-sm font-bold ${isTimeChanged ? 'text-danger' : 'text-white'}`}>{formatTime(match.match_time)}</p>
                             </div>
                             <div className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? 'bg-danger/20 border-danger animate-pulse' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isFormatChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.format', 'Format')}</p>
+                                <p className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isFormatChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.format', 'Format')}</p>
                                 <Chip size="sm" variant="dot" color={isFormatChanged ? 'danger' : 'primary'} className="font-black text-xs border-none p-0">{match.format || match.match_format || '11v11'}</Chip>
                             </div>
                             <div className={`rounded-xl p-3 border transition-colors ${isPitchChanged ? 'bg-danger/20 border-danger animate-pulse' : 'bg-white/5 border-white/5'}`}>
-                                <p className={`text-xs sm:text-sm font-black uppercase tracking-widest mb-1 ${isPitchChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.pitch_type', 'Terrain')}</p>
+                                <p className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isPitchChanged ? 'text-danger' : 'text-default-400'}`}>{t('matchForm.labels.pitch_type', 'Terrain')}</p>
                                 <p className={`text-sm font-bold break-words ${isPitchChanged ? 'text-danger' : 'text-white'}`}>{match.opponent_pitch_type || match.pitch_type ? t(`enums.pitch.${match.opponent_pitch_type || match.pitch_type}`) : '—'}</p>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-end">
-                                <p className="text-sm font-black text-violet-400 uppercase tracking-widest">{t('dashboard.match.found')}</p>
+                                <p className="text-sm font-black text-violet-400 tracking-widest">{t('dashboard.match.found')}</p>
                                 <p className="text-xs font-bold text-white">1 / 1</p>
                             </div>
                             <Progress
@@ -145,7 +145,7 @@ export const ConfirmedMatchCard = ({
                     {/* Right Section: VS Visual & Actions */}
                     <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
                         <div className="mb-6 flex flex-col items-center">
-                            <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-4 w-full text-center md:text-left">{t('dashboard.labels.match_opposition')}</p>
+                            <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-4 w-full text-center md:text-left">{t('dashboard.labels.match_opposition')}</p>
 
                             <div className="flex items-center justify-center gap-6 w-full">
                                 {/* User Club (Left) */}
@@ -153,7 +153,7 @@ export const ConfirmedMatchCard = ({
                                     <div className="w-12 h-12 rounded-full border-2 border-orange-500/30 bg-orange-500/10 flex items-center justify-center overflow-hidden">
                                         <span className="text-orange-500 font-black text-lg">M</span>
                                     </div>
-                                    <span className="text-[9px] font-bold text-default-400 uppercase">{t('dashboard.labels.my_club')}</span>
+                                    <span className="text-[9px] font-bold text-default-400">{t('dashboard.labels.my_club')}</span>
                                 </div>
 
                                 <div className="text-xl font-black text-default-300 italic">VS</div>
@@ -167,7 +167,7 @@ export const ConfirmedMatchCard = ({
                                             <span className="text-success-500 font-black text-lg">{opponentClubName?.charAt(0)}</span>
                                         )}
                                     </div>
-                                    <span className="text-[9px] font-bold text-default-400 uppercase truncate max-w-[60px]">{opponentClubName}</span>
+                                    <span className="text-[9px] font-bold text-default-400 truncate max-w-[60px]">{opponentClubName}</span>
                                 </div>
                             </div>
                         </div>
@@ -179,7 +179,7 @@ export const ConfirmedMatchCard = ({
                                     color="danger" 
                                     variant="solid" 
                                     onPress={() => onMarkAsRead(match.match_id)} 
-                                    className="font-black text-[11px] w-full animate-pulse shadow-lg shadow-danger/20 uppercase h-11"
+                                    className="font-black text-[11px] w-full animate-pulse shadow-lg shadow-danger/20 h-11"
                                 >
                                     {t('dashboard.controls.view_changes', 'J\'ai vu les changements')}
                                 </Button>
@@ -198,7 +198,7 @@ export const ConfirmedMatchCard = ({
                                     size="sm"
                                     variant="flat"
                                     color="primary"
-                                    className="w-full sm:flex-1 font-black text-[10px] uppercase h-10 active:scale-95 shadow-sm"
+                                    className="w-full sm:flex-1 font-black text-[10px] h-10 active:scale-95 shadow-sm"
                                     as="a"
                                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${(!match.isUserHome && match.opponent_stadium_address) ? match.opponent_stadium_address : match.location_address}, ${(!match.isUserHome && match.opponent_city) ? match.opponent_city : match.location_city}`)}`}
                                     target="_blank"

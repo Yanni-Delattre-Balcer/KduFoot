@@ -76,7 +76,7 @@ export const PwaInstallBanner = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <h3 className="text-2xl font-black text-white uppercase tracking-tighter italic leading-none">
+                                <h3 className="text-2xl font-black text-white tracking-tighter italic leading-none">
                                     Installer Kdufoot
                                 </h3>
                                 <p className="text-sm text-zinc-400 font-medium px-4">
@@ -88,28 +88,28 @@ export const PwaInstallBanner = () => {
                                 <Button
                                     size="lg"
                                     color="primary"
-                                    className="font-black h-12 text-sm uppercase tracking-widest shadow-xl shadow-primary/20 w-full"
+                                    className="font-black h-12 text-sm tracking-widest shadow-xl shadow-primary/20 w-full"
                                     onPress={handleInstallClick}
                                 >
-                                    INSTALLER
+                                    Installer
                                 </Button>
 
                                 <div className="grid grid-cols-2 gap-2">
                                     <Button
                                         size="sm"
                                         variant="flat"
-                                        className="font-bold text-[10px] uppercase tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
+                                        className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
                                         onPress={handleDismissSession}
                                     >
-                                        PLUS TARD
+                                        Plus tard
                                     </Button>
                                     <Button
                                         size="sm"
                                         variant="flat"
-                                        className="font-bold text-[10px] uppercase tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
+                                        className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
                                         onPress={handleDismissPermanent}
                                     >
-                                        JE L'AI DÉJÀ
+                                        Je l'ai déjà
                                     </Button>
                                 </div>
                             </div>
@@ -128,7 +128,7 @@ export const PwaInstallBanner = () => {
                             </div>
                             <div className="space-y-1">
                                 <h2 className="text-2xl font-black text-white tracking-tighter italic leading-tight">Kdufoot Mobile</h2>
-                                <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">Guide d'installation</p>
+                                <p className="text-[10px] text-primary font-black tracking-[0.2em]">Guide d'installation</p>
                             </div>
                         </div>
 
@@ -185,10 +185,10 @@ export const PwaInstallBanner = () => {
                         <div className="flex flex-col gap-2">
                             <Button
                                 color="primary"
-                                className="w-full font-black uppercase tracking-widest h-12 text-sm shadow-xl shadow-primary/20"
+                                className="w-full font-black tracking-widest h-12 text-sm shadow-xl shadow-primary/20"
                                 onPress={() => { setShowIOSHint(false); handleDismissSession(); }}
                             >
-                                C'EST COMPRIS !
+                                C'est compris !
                             </Button>
                             <Button
                                 size="sm"
@@ -223,10 +223,10 @@ export const PwaInstallBanner = () => {
 
                         <Button
                             color="primary"
-                            className="w-full font-black uppercase tracking-widest h-12 text-sm"
+                            className="w-full font-black tracking-widest h-12 text-sm"
                             onPress={() => { setShowPCHint(false); handleDismissSession(); }}
                         >
-                            J'AI COMPRIS
+                            J'ai compris
                         </Button>
                     </Card>
                 </div>

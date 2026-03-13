@@ -38,7 +38,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                             <div className="flex items-center gap-2">
                                 <span>Mon Compte</span>
                                 {isLocked && (
-                                    <span className="text-xs sm:text-sm bg-danger/10 text-danger px-2 py-0.5 rounded-full animate-pulse border border-danger/20 font-black uppercase">
+                                    <span className="text-xs sm:text-sm bg-danger/10 text-danger px-2 py-0.5 rounded-full animate-pulse border border-danger/20 font-black">
                                         Configuration Requise
                                     </span>
                                 )}

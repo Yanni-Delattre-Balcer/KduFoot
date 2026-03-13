@@ -939,13 +939,13 @@ export default function UsersAndPermissionsPage() {
                                             </div>
                                             <div className="flex flex-col items-end gap-1">
                                                 {isSuperAdmin && (
-                                                    <Chip size="sm" color="warning" variant="solid" className="h-5 text-[10px] uppercase font-bold">Base Admin</Chip>
+                                                    <Chip size="sm" color="warning" variant="solid" className="h-5 text-[10px] font-bold">Base Admin</Chip>
                                                 )}
                                                 {isUserBlocked && (
-                                                    <Chip size="sm" color="danger" variant="solid" className="h-5 text-[10px] uppercase font-black">🚫 BANNI</Chip>
+                                                    <Chip size="sm" color="danger" variant="solid" className="h-5 text-[10px] font-black">🚫 Banni</Chip>
                                                 )}
                                                 {!isUserBlocked && !isSuperAdmin && (
-                                                    <Chip size="sm" color="success" variant="flat" className="h-5 text-[10px] uppercase font-bold">ACTIF</Chip>
+                                                    <Chip size="sm" color="success" variant="flat" className="h-5 text-[10px] font-bold">Actif</Chip>
                                                 )}
                                             </div>
                                         </div>
@@ -956,7 +956,7 @@ export default function UsersAndPermissionsPage() {
                                             color="primary"
                                             onPress={() => openUserEditing(u.user_id)}
                                             isDisabled={!mgmtToken || (isSuperAdmin && u.user_id !== currentUserId)}
-                                            className="font-black w-full h-12 uppercase tracking-widest text-sm shadow-primary/20"
+                                            className="font-black w-full h-12 tracking-widest text-sm shadow-primary/20"
                                         >
                                             Voir le Profil
                                         </Button>
@@ -1022,16 +1022,16 @@ export default function UsersAndPermissionsPage() {
                                             <TableCell>
                                                 <div className="flex flex-wrap gap-1">
                                                     {isSuperAdmin && (
-                                                        <Chip size="sm" color="warning" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">{t("adminUsersPage.statusSuperAdmin")}</Chip>
+                                                        <Chip size="sm" color="warning" variant="solid" className="h-5 text-xs sm:text-sm font-bold">{t("adminUsersPage.statusSuperAdmin")}</Chip>
                                                     )}
                                                     {u.app_metadata?.permissions?.includes('auth0:admin:api') && !isSuperAdmin && (
-                                                        <Chip size="sm" color="primary" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold">{t("adminUsersPage.statusAdmin")}</Chip>
+                                                        <Chip size="sm" color="primary" variant="solid" className="h-5 text-xs sm:text-sm font-bold">{t("adminUsersPage.statusAdmin")}</Chip>
                                                     )}
                                                     {isUserBlocked && (
-                                                        <Chip size="sm" color="danger" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-black animate-pulse">{t("adminUsersPage.statusBanned")}</Chip>
+                                                        <Chip size="sm" color="danger" variant="solid" className="h-5 text-xs sm:text-sm font-black animate-pulse">{t("adminUsersPage.statusBanned")}</Chip>
                                                     )}
                                                     {u.app_metadata?.permissions?.includes('coach:certified') && (
-                                                        <Chip size="sm" color="success" variant="solid" className="h-5 text-xs sm:text-sm uppercase font-bold italic">{t("adminUsersPage.statusCertified")}</Chip>
+                                                        <Chip size="sm" color="success" variant="solid" className="h-5 text-xs sm:text-sm font-bold italic">{t("adminUsersPage.statusCertified")}</Chip>
                                                     )}
                                                 </div>
                                             </TableCell>
@@ -1112,7 +1112,7 @@ export default function UsersAndPermissionsPage() {
                                                 {targetUser?.name ?? selectedUserId}
                                             </span>
                                             {targetUser?.email === SUPER_ADMIN_EMAIL && (
-                                                <Chip size="sm" color="warning" variant="solid" className="ml-2 h-5 text-xs sm:text-sm uppercase font-bold">
+                                                <Chip size="sm" color="warning" variant="solid" className="ml-2 h-5 text-xs sm:text-sm font-bold">
                                                     {t("adminUsersPage.modalProtected")}
                                                 </Chip>
                                             )}
@@ -1123,11 +1123,11 @@ export default function UsersAndPermissionsPage() {
                                         {!modalLoading && siretData && (
                                             <div className="flex gap-4 mb-2">
                                                 <div className="flex-1 p-3 rounded-xl bg-zinc-800/50 border border-white/5 text-center">
-                                                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest mb-1">{t("adminUsersPage.statBans")}</p>
+                                                    <p className="text-xs font-bold text-default-500 tracking-widest mb-1">{t("adminUsersPage.statBans")}</p>
                                                     <p className="text-2xl font-black text-red-500">{(siretData as any).block_count || 0}</p>
                                                 </div>
                                                 <div className="flex-1 p-3 rounded-xl bg-zinc-800/50 border border-white/5 text-center">
-                                                    <p className="text-xs font-bold text-default-500 uppercase tracking-widest mb-1">{t("adminUsersPage.statSiretChanges")}</p>
+                                                    <p className="text-xs font-bold text-default-500 tracking-widest mb-1">{t("adminUsersPage.statSiretChanges")}</p>
                                                     <p className="text-2xl font-black text-primary">{(siretData as any).siret_change_count || 0}</p>
                                                 </div>
                                             </div>
@@ -1162,7 +1162,7 @@ export default function UsersAndPermissionsPage() {
                                                             {siretData.primary_siret ? (
                                                                 <div className="flex items-center justify-between bg-zinc-900 border border-primary/20 p-3 rounded-lg shadow-sm">
                                                                     <div className="flex-1 min-w-0 mr-3">
-                                                                        <span className="text-[10px] font-black text-primary uppercase tracking-tighter">{t("adminUsersPage.primaryClub")}</span>
+                                                                        <span className="text-[10px] font-black text-primary tracking-tighter">{t("adminUsersPage.primaryClub")}</span>
                                                                         <p className="text-sm font-bold text-white truncate">
                                                                             {siretData.primary_name || siretData.primary_siret}
                                                                         </p>
@@ -1195,13 +1195,13 @@ export default function UsersAndPermissionsPage() {
                                                                 </div>
                                                             ) : (
                                                                 <div className="p-3 border border-dashed border-white/10 rounded-lg text-center bg-zinc-800/20">
-                                                                    <p className="text-xs text-default-400 uppercase font-bold italic">{t("adminUsersPage.noPrimaryClub")}</p>
+                                                                    <p className="text-xs text-default-400 font-bold italic">{t("adminUsersPage.noPrimaryClub")}</p>
                                                                 </div>
                                                             )}
 
                                                             {/* Additional Sirets */}
                                                             <div className="flex flex-col gap-2 mt-2">
-                                                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter">{t("adminUsersPage.secondaryClubs")}</span>
+                                                                <span className="text-[10px] font-black text-zinc-500 tracking-tighter">{t("adminUsersPage.secondaryClubs")}</span>
                                                                 {siretData.additional_sirets && siretData.additional_sirets.length > 0 ? (
                                                                     siretData.additional_sirets.map((item: any) => (
                                                                         <div key={item.siret} className="flex items-center justify-between bg-zinc-900/50 border border-zinc-800 p-2 rounded-lg">
@@ -1228,14 +1228,14 @@ export default function UsersAndPermissionsPage() {
                                                             {/* Add Siret */}
                                                             <div className="flex flex-col gap-3 mt-4 p-3 bg-zinc-900/40 rounded-xl border border-white/5">
                                                                 <div className="flex justify-between items-center mb-1">
-                                                                    <p className="text-xs font-bold text-blue-400 uppercase px-1">
+                                                                    <p className="text-xs font-bold text-blue-400 px-1">
                                                                         {t("adminUsersPage.addSiretTitle")}
                                                                     </p>
                                                                     <Checkbox
                                                                         size="sm"
                                                                         isSelected={forceSiret}
                                                                         onValueChange={setForceSiret}
-                                                                        classNames={{ label: "text-xs font-bold text-warning-500 uppercase" }}
+                                                                        classNames={{ label: "text-xs font-bold text-warning-500" }}
                                                                     >
                                                                         {t("adminUsersPage.forceSiret")}
                                                                     </Checkbox>
@@ -1312,7 +1312,7 @@ export default function UsersAndPermissionsPage() {
                                                 {/* Super-Pouvoirs Admin: Stadium & Counters */}
                                                 <div className="flex flex-col gap-4 p-4 bg-primary/5 border border-primary/20 rounded-2xl shadow-inner">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="text-sm font-black text-primary uppercase tracking-wider">{t("adminUsersPage.superPowersTitle")}</h3>
+                                                        <h3 className="text-sm font-black text-primary tracking-wider">{t("adminUsersPage.superPowersTitle")}</h3>
                                                     </div>
 
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1349,7 +1349,7 @@ export default function UsersAndPermissionsPage() {
                                                         color="primary"
                                                         variant="shadow"
                                                         size="sm"
-                                                        className="font-black uppercase tracking-widest h-10 mt-1 shadow-primary/20"
+                                                        className="font-black tracking-widest h-10 mt-1 shadow-primary/20"
                                                         onPress={handleUpdateUserProfile}
                                                         isLoading={isSavingProfile}
                                                     >
@@ -1376,7 +1376,7 @@ export default function UsersAndPermissionsPage() {
                                                                             size="md"
                                                                             variant="solid"
                                                                             color="primary"
-                                                                            className="font-bold uppercase tracking-tight flex-1"
+                                                                            className="font-bold tracking-tight flex-1"
                                                                             onPress={() => handleUnblockUser(selectedUserId as string)}
                                                                         >
                                                                             {t("adminUsersPage.btnUnblock")}
@@ -1471,7 +1471,7 @@ export default function UsersAndPermissionsPage() {
                                                                                             (isSuperAdminTarget && selectedUserId !== currentUserId)
                                                                                         }
                                                                                     >
-                                                                                        <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500 uppercase' : isDirty ? 'text-red-500 font-bold animate-pulse' : 'text-default-300'}`}>
+                                                                                        <span className={`text-xs ${perm.key === 'role_blocked' ? 'font-black text-red-500' : isDirty ? 'text-red-500 font-bold animate-pulse' : 'text-default-300'}`}>
                                                                                             {perm.key === 'role_blocked' ? '🚫 ' : ''}{perm.label} {isDirty && "•"}
                                                                                         </span>
                                                                                     </Checkbox>
@@ -1537,7 +1537,7 @@ export default function UsersAndPermissionsPage() {
                     <ModalContent>
                         {(onClose) => (
                             <>
-                                <ModalHeader className="flex flex-col gap-1 text-red-500 uppercase font-black tracking-tight">
+                                <ModalHeader className="flex flex-col gap-1 text-red-500 font-black tracking-tight">
                                     🔴 Bloquer l'utilisateur
                                 </ModalHeader>
                                 <ModalBody>

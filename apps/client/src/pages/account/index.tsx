@@ -17,7 +17,7 @@ export default function AccountPage() {
         <DefaultLayout>
             <div className="container mx-auto max-w-5xl p-4 md:p-8 space-y-8 animate-appearance-in pb-24">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-4xl font-black text-white uppercase tracking-tighter">
+                    <h1 className="text-4xl font-black text-white tracking-tighter">
                         {t('nav.userPrefix', 'Mon')} <span className="text-primary">Compte</span>
                     </h1>
                     <p className="text-default-500 font-medium">

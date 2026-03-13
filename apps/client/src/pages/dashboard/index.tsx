@@ -343,7 +343,7 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 shadow-xl shadow-amber-500/5 transition-transform hover:scale-110 duration-300">
                             <LayoutDashboard className="w-8 h-8 text-amber-500" strokeWidth={1.5} />
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-[#fbbf24] to-[#f59e0b] tracking-tighter uppercase whitespace-nowrap overflow-x-auto scrollbar-hide">
+                        <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-[#fbbf24] to-[#f59e0b] tracking-tighter whitespace-nowrap overflow-x-auto scrollbar-hide">
                             {t('dashboard.title', 'Tableau de bord')}
                         </h1>
                     </div>
@@ -358,7 +358,7 @@ export default function DashboardPage() {
                                 color="warning"
                                 variant="flat"
                                 size="sm"
-                                className="font-bold text-xs uppercase tracking-wide mt-2 shadow-lg shadow-orange-500/10 border border-orange-500/20"
+                                className="font-bold text-xs tracking-wide mt-2 shadow-lg shadow-orange-500/10 border border-orange-500/20"
                                 startContent={<span>🔔</span>}
                                 onPress={async () => {
                                     const perm = await Notification.requestPermission();
@@ -378,7 +378,7 @@ export default function DashboardPage() {
                                     <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
                                         <div className="text-5xl animate-bounce">🛡️</div>
                                         <div className="flex-1">
-                                            <p className="text-orange-500 font-black text-xl uppercase mb-1 tracking-tighter">{t('dashboard.sections.locked_title')}</p>
+                                            <p className="text-orange-500 font-black text-xl mb-1 tracking-tighter">{t('dashboard.sections.locked_title')}</p>
                                             <p className="text-default-400 text-sm font-medium leading-relaxed">
                                                 {t('dashboard.sections.locked_desc')}
                                             </p>
@@ -404,7 +404,7 @@ export default function DashboardPage() {
                         classNames={{
                             tabList: "bg-default-100/50 p-1.5 rounded-2xl w-full flex-col sm:flex-row border-b-0 gap-2",
                             cursor: "rounded-xl shadow-lg shadow-purple-500/20",
-                            tab: "h-auto py-3 sm:h-12 uppercase font-black tracking-tight text-[11px] sm:text-sm flex-1 min-w-full sm:min-w-0 px-3 sm:px-4",
+                            tab: "h-auto py-3 sm:h-12 font-black tracking-tight text-[11px] sm:text-sm flex-1 min-w-full sm:min-w-0 px-3 sm:px-4",
                             tabContent: "group-data-[selected=true]:text-white whitespace-normal text-center leading-tight overflow-hidden"
                         }}
                     >
@@ -447,12 +447,12 @@ export default function DashboardPage() {
                                                                     )}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
-                                                                    <h3 className="font-black text-white text-sm leading-tight break-words uppercase tracking-tight">{request.requester_club_name}</h3>
+                                                                    <h3 className="font-black text-white text-sm leading-tight break-words tracking-tight">{request.requester_club_name}</h3>
                                                                     <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                                                                        <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-auto py-0.5 px-1.5 uppercase shrink-0">
-                                                                            {request.match_type === 'tournament' ? '🏆 ' + t('enums.type.tournament').toUpperCase() : '⚽ ' + t('enums.type.match').toUpperCase()}
+                                                                        <Chip size="sm" variant="flat" color={request.match_type === 'tournament' ? 'secondary' : 'warning'} className="font-bold text-[9px] h-auto py-0.5 px-1.5 shrink-0">
+                                                                            {request.match_type === 'tournament' ? '🏆 ' + t('enums.type.tournament') : '⚽ ' + t('enums.type.match')}
                                                                         </Chip>
-                                                                        <Chip size="sm" variant="flat" color={(request.match_type === 'tournament' || request.venue === 'Domicile') ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 uppercase grayscale-[0.5]">
+                                                                        <Chip size="sm" variant="flat" color={(request.match_type === 'tournament' || request.venue === 'Domicile') ? 'primary' : 'warning'} className="font-bold text-[9px] h-5 px-1.5 grayscale-[0.5]">
                                                                             {(request.match_type === 'tournament' || request.venue === 'Domicile') ? t('dashboard.labels.home_badge') : t('dashboard.labels.away_badge')}
                                                                         </Chip>
                                                                         <Chip size="sm" variant="dot" color="default" className="font-bold text-[9px] h-5 border-none">
@@ -462,7 +462,7 @@ export default function DashboardPage() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[120px] shrink-0">
-                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black uppercase text-[9px] shadow-sm whitespace-nowrap">
+                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black text-[9px] shadow-sm whitespace-nowrap">
                                                                     {t('dashboard.status.' + request.request_status)}
                                                                 </Chip>
                                                             </div>
@@ -491,7 +491,7 @@ export default function DashboardPage() {
                                                         <div className="bg-white/[0.03] rounded-xl p-3 border border-white/5">
                                                             <div className="flex justify-between items-center">
                                                                 <div className="flex flex-col">
-                                                                    <span className="text-[9px] font-bold text-default-400 uppercase tracking-widest">{t('dashboard.labels.for_event', { type: request.match_type === 'tournament' ? t('enums.type.tournament').toLowerCase() : t('enums.type.match').toLowerCase() })}</span>
+                                                                    <span className="text-[9px] font-bold text-default-400 tracking-widest">{t('dashboard.labels.for_event', { type: request.match_type === 'tournament' ? t('enums.type.tournament').toLowerCase() : t('enums.type.match').toLowerCase() })}</span>
                                                                     <span className="text-sm font-black text-white mt-0.5">{formatDate(request.match_date)} à {formatTime(request.match_time)}</span>
                                                                 </div>
                                                                 {request.location_city && (
@@ -512,7 +512,7 @@ export default function DashboardPage() {
                                                                     <Button
                                                                         size="sm"
                                                                         color="success"
-                                                                        className="w-full sm:flex-1 font-black uppercase text-sm h-12 shadow-md shadow-success/20 active:scale-95"
+                                                                        className="w-full sm:flex-1 font-black text-sm h-12 shadow-md shadow-success/20 active:scale-95"
                                                                         onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'accepted'); }}
                                                                     >
                                                                         ✓ {t('dashboard.controls.accept')}
@@ -521,7 +521,7 @@ export default function DashboardPage() {
                                                                         size="sm"
                                                                         variant="flat"
                                                                         color="danger"
-                                                                        className="w-full sm:flex-1 font-black uppercase text-sm h-12 active:scale-95"
+                                                                        className="w-full sm:flex-1 font-black text-sm h-12 active:scale-95"
                                                                         onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'refused'); }}
                                                                     >
                                                                         ✕ {t('dashboard.controls.refuse')}
@@ -680,8 +680,8 @@ export default function DashboardPage() {
                                     <span className="text-xl">🛡️</span>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-lg font-black uppercase tracking-tighter text-white">{t('dashboard.profile_modal.title')}</h3>
-                                    <p className="text-xs sm:text-sm text-default-400 font-bold uppercase">{t('dashboard.profile_modal.subtitle')}</p>
+                                    <h3 className="text-lg font-black tracking-tighter text-white">{t('dashboard.profile_modal.title')}</h3>
+                                    <p className="text-xs sm:text-sm text-default-400 font-bold">{t('dashboard.profile_modal.subtitle')}</p>
                                 </div>
                             </ModalHeader>
                             <ModalBody className="py-6">
@@ -697,10 +697,10 @@ export default function DashboardPage() {
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="text-xl font-black text-white uppercase truncate">{selectedClubProfile.requester_club_name || selectedClubProfile.host_club_name}</h4>
+                                                <h4 className="text-xl font-black text-white truncate">{selectedClubProfile.requester_club_name || selectedClubProfile.host_club_name}</h4>
                                                 <div className="flex flex-wrap gap-2 mt-2">
-                                                    <Chip size="sm" variant="flat" color="warning" className="font-bold text-[9px] uppercase">{t(`enums.category.${selectedClubProfile.requester_category || selectedClubProfile.category}`)}</Chip>
-                                                    <Chip size="sm" variant="flat" color="primary" className="font-bold text-[9px] uppercase">{t(`enums.level.${selectedClubProfile.requester_level || selectedClubProfile.level}`)}</Chip>
+                                                    <Chip size="sm" variant="flat" color="warning" className="font-bold text-[9px]">{t(`enums.category.${selectedClubProfile.requester_category || selectedClubProfile.category}`)}</Chip>
+                                                    <Chip size="sm" variant="flat" color="primary" className="font-bold text-[9px]">{t(`enums.level.${selectedClubProfile.requester_level || selectedClubProfile.level}`)}</Chip>
                                                 </div>
                                             </div>
                                         </div>
@@ -708,39 +708,39 @@ export default function DashboardPage() {
                                         {/* Contact Details */}
                                         <div className="grid gap-3">
                                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('dashboard.profile_modal.manager')}</span>
-                                                <span className="text-sm font-bold text-white uppercase">{selectedClubProfile.requester_firstname || selectedClubProfile.host_firstname} {selectedClubProfile.requester_lastname || selectedClubProfile.host_lastname}</span>
+                                                <span className="text-xs sm:text-sm font-black text-default-400">{t('dashboard.profile_modal.manager')}</span>
+                                                <span className="text-sm font-bold text-white">{selectedClubProfile.requester_firstname || selectedClubProfile.host_firstname} {selectedClubProfile.requester_lastname || selectedClubProfile.host_lastname}</span>
                                             </div>
                                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('dashboard.profile_modal.phone')}</span>
+                                                <span className="text-xs sm:text-sm font-black text-default-400">{t('dashboard.profile_modal.phone')}</span>
                                                 <a href={`tel:${selectedClubProfile.requester_phone || selectedClubProfile.host_phone}`} className="text-sm font-black text-orange-500 hover:animate-pulse">
                                                     {selectedClubProfile.requester_phone || selectedClubProfile.host_phone}
                                                 </a>
                                             </div>
                                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('dashboard.profile_modal.email')}</span>
+                                                <span className="text-xs sm:text-sm font-black text-default-400">{t('dashboard.profile_modal.email')}</span>
                                                 <a href={`mailto:${selectedClubProfile.requester_email || selectedClubProfile.host_email}`} className="text-sm font-bold text-primary hover:underline truncate ml-4">
                                                     {selectedClubProfile.requester_email || selectedClubProfile.host_email}
                                                 </a>
                                             </div>
                                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('dashboard.profile_modal.city')}</span>
-                                                <span className="text-sm font-bold text-white uppercase tracking-tight">{selectedClubProfile.requester_city || selectedClubProfile.host_city || selectedClubProfile.location_city}</span>
+                                                <span className="text-xs sm:text-sm font-black text-default-400">{t('dashboard.profile_modal.city')}</span>
+                                                <span className="text-sm font-bold text-white tracking-tight">{selectedClubProfile.requester_city || selectedClubProfile.host_city || selectedClubProfile.location_city}</span>
                                             </div>
                                             {(selectedClubProfile.requester_home_jersey_color || selectedClubProfile.host_home_jersey_color) && (
                                                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                    <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('account.fields.home_jersey', 'Maillot Domicile')}</span>
+                                                    <span className="text-xs sm:text-sm font-black text-default-400">{t('account.fields.home_jersey', 'Maillot Domicile')}</span>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-bold text-white uppercase">{selectedClubProfile.requester_home_jersey_color || selectedClubProfile.host_home_jersey_color}</span>
+                                                        <span className="text-xs font-bold text-white">{selectedClubProfile.requester_home_jersey_color || selectedClubProfile.host_home_jersey_color}</span>
                                                         <JerseyColorDots colors={selectedClubProfile.requester_home_jersey_color || selectedClubProfile.host_home_jersey_color} size="md" />
                                                     </div>
                                                 </div>
                                             )}
                                             {(selectedClubProfile.requester_away_jersey_color || selectedClubProfile.host_away_jersey_color) && (
                                                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                                    <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('account.fields.away_jersey', 'Maillot Extérieur')}</span>
+                                                    <span className="text-xs sm:text-sm font-black text-default-400">{t('account.fields.away_jersey', 'Maillot Extérieur')}</span>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-bold text-white uppercase">{selectedClubProfile.requester_away_jersey_color || selectedClubProfile.host_away_jersey_color}</span>
+                                                        <span className="text-xs font-bold text-white">{selectedClubProfile.requester_away_jersey_color || selectedClubProfile.host_away_jersey_color}</span>
                                                         <JerseyColorDots colors={selectedClubProfile.requester_away_jersey_color || selectedClubProfile.host_away_jersey_color} size="md" />
                                                     </div>
                                                 </div>
@@ -750,13 +750,13 @@ export default function DashboardPage() {
                                         {/* Metadata box */}
                                         <div className="mt-2 pt-4 border-t border-white/5 space-y-2">
                                             <div className="flex justify-between items-center text-xs">
-                                                <span className="text-default-500 tracking-tighter uppercase font-bold text-[9px]">{t('dashboard.profile_modal.request_date')}</span>
+                                                <span className="text-default-500 tracking-tighter font-bold text-[9px]">{t('dashboard.profile_modal.request_date')}</span>
                                                 <span className="text-white font-bold">
                                                     {selectedClubProfile.contacted_at ? `${formatTimestamp(selectedClubProfile.contacted_at, t)} ${t('matchForm.labels.at', 'à')} ${formatTimestampTime(selectedClubProfile.contacted_at)}` : t('dashboard.profile_modal.unknown')}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between items-center text-xs">
-                                                <span className="text-default-500 tracking-tighter uppercase font-bold text-[9px]">{t('dashboard.profile_modal.for_match_on')}</span>
+                                                <span className="text-default-500 tracking-tighter font-bold text-[9px]">{t('dashboard.profile_modal.for_match_on')}</span>
                                                 <span className="text-warning-500 font-black">{formatDate(selectedClubProfile.match_date)} {t('matchForm.labels.at', 'à')} {formatTime(selectedClubProfile.match_time)}</span>
                                             </div>
                                         </div>
@@ -766,7 +766,7 @@ export default function DashboardPage() {
                                 )}
                             </ModalBody>
                             <ModalFooter className="border-t border-white/5 pt-4">
-                                <Button color="secondary" variant="flat" onPress={onClose} className="font-black uppercase tracking-tighter w-full h-12">
+                                <Button color="secondary" variant="flat" onPress={onClose} className="font-black tracking-tighter w-full h-12">
                                     {t('dashboard.profile_modal.close')}
                                 </Button>
                             </ModalFooter>

@@ -232,7 +232,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                         </svg>
                     </div>
                     <div className="flex flex-col">
-                        <p className="text-base font-black text-white uppercase tracking-tight leading-none mb-1">Créer un Tournoi Amical</p>
+                        <p className="text-base font-black text-white tracking-tight leading-none mb-1">Créer un tournoi amical</p>
                         <p className="text-[11px] text-zinc-400 font-medium">Organisez une compétition et invitez des équipes.</p>
                     </div>
                 </CardHeader>
@@ -247,12 +247,12 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" /></svg>
                                 </div>
                                 <div className="flex flex-col w-full min-w-0">
-                                    <span className="text-[10px] font-black uppercase text-emerald-500/70 tracking-tighter">CLUB LIÉ</span>
+                                    <span className="text-[10px] font-black text-emerald-500/70 tracking-tighter">Club lié</span>
                                     {Array.isArray(user?.additional_sirets) && user.additional_sirets.length > 0 ? (
                                         <Dropdown>
                                             <DropdownTrigger>
                                                 <Button className="h-auto p-0 min-w-0 bg-transparent text-left justify-start" endContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 text-emerald-400/50"><path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>} size="sm">
-                                                    <span className="text-sm font-black text-emerald-100 uppercase truncate">
+                                                    <span className="text-sm font-black text-emerald-100 truncate">
                                                         {formData.club_id === user.club?.id || !formData.club_id ? user.club?.name || 'Club Principal' : user.additional_clubs?.find(c => c.id === formData.club_id)?.name || formData.club_id}
                                                     </span>
                                                 </Button>
@@ -266,7 +266,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                                             </DropdownMenu>
                                         </Dropdown>
                                     ) : (
-                                        <span className="text-sm font-black text-emerald-100 uppercase truncate">{user?.club?.name}</span>
+                                        <span className="text-sm font-black text-emerald-100 truncate">{user?.club?.name}</span>
                                     )}
                                 </div>
                             </div>
@@ -289,7 +289,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                                         <div className="flex items-center h-full">
                                             <div className="bg-emerald-500 text-[#0f0717] text-[10px] sm:text-[11px] font-black px-2 py-1 rounded-full flex items-center gap-1 leading-none shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                                                 <span>🏟️</span>
-                                                <span className="mb-[1px]">STADE</span>
+                                                <span className="mb-[1px]">Stade</span>
                                             </div>
                                         </div>
                                     }
@@ -446,13 +446,13 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
 
                         <div className="bg-[#160d21]/50 border border-[#2a1b3d] rounded-2xl p-4 flex items-center justify-between group cursor-pointer" onClick={() => showLockedInfo('jersey')}>
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] font-black uppercase text-purple-400 tracking-widest pl-1">{t('matchForm.labels.jersey_color', 'Couleurs de maillot')}</span>
+                                <span className="text-[10px] font-black text-purple-400 tracking-widest pl-1">{t('matchForm.labels.jersey_color', 'Couleurs de maillot')}</span>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-white font-bold pl-1 uppercase">{formData.jersey_color || "Non spécifiée"}</span>
+                                    <span className="text-white font-bold pl-1">{formData.jersey_color || "Non spécifiée"}</span>
                                     {formData.jersey_color && <JerseyColorDots colors={formData.jersey_color} size="md" />}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 bg-purple-500/10 text-purple-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-purple-500/20 group-hover:bg-purple-500/20 transition-all uppercase">
+                            <div className="flex items-center gap-2 bg-purple-500/10 text-purple-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-purple-500/20 group-hover:bg-purple-500/20 transition-all">
                                 <span>🔒</span>
                                 <span className="mb-[1px]">Modifier dans mon compte</span>
                             </div>
@@ -462,8 +462,8 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                     {/* Progress Bar Section */}
                     <div className="flex flex-col gap-2 mt-4">
                         <div className="flex justify-center text-center px-4">
-                            <span className="text-[11px] font-black text-purple-300 uppercase tracking-[0.15em] leading-tight">
-                                PRÉPARATION DE L'ANNONCE DU TOURNOI: 91%
+                            <span className="text-[11px] font-black text-purple-300 tracking-[0.15em] leading-tight">
+                                Preparation de l'annonce du tournoi: 91%
                             </span>
                         </div>
                         <Progress 
@@ -482,7 +482,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
             {/* Second Card: Contact & Notes */}
             <Card className="shadow-none border-none bg-transparent">
                 <CardHeader className="bg-[#160d21] rounded-t-2xl px-6 py-3 border-b border-white/5">
-                    <p className="text-sm font-black text-white uppercase tracking-tight">Contact & Infos complémentaires</p>
+                    <p className="text-sm font-black text-white tracking-tight">Contact & Infos complémentaires</p>
                 </CardHeader>
                 <CardBody className="bg-[#0f0717] rounded-b-2xl p-6 flex flex-col gap-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -524,7 +524,7 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                             type="submit"
                             color="primary"
                             isLoading={isSaving}
-                            className="bg-purple-600 font-black uppercase tracking-tighter px-12 rounded-xl shadow-lg shadow-purple-500/20"
+                            className="bg-purple-600 font-black tracking-tighter px-12 rounded-xl shadow-lg shadow-purple-500/20"
                         >
                             {initialData ? "Mettre à jour" : "Publier l'annonce"}
                         </Button>

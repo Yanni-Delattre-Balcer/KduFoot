@@ -32,7 +32,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage, chil
                 <div className="absolute inset-0 z-30 backdrop-blur-xl bg-black/30 rounded-2xl flex items-center justify-center">
                     <div className="flex items-center gap-3">
                         <Spinner color="white" size="sm" />
-                        <span className="text-sm font-black uppercase tracking-tighter text-white/80">Vérification du profil...</span>
+                        <span className="text-sm font-black tracking-tighter text-white/80">Vérification du profil...</span>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage, chil
                         <Button
                             onPress={() => login()}
                             size="sm"
-                            className="bg-white/20 text-white font-bold text-xs sm:text-sm uppercase tracking-tight rounded-xl h-7 px-3 shrink-0 border border-white/10 hover:bg-white/30 transition-colors"
+                            className="bg-white/20 text-white font-bold text-xs sm:text-sm tracking-tight rounded-xl h-7 px-3 shrink-0 border border-white/10 hover:bg-white/30 transition-colors"
                         >
                             Connexion
                         </Button>
@@ -96,7 +96,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage, chil
                     <div className="flex flex-col gap-3 w-full max-w-xs">
                         <Button
                             onPress={() => login({ authorizationParams: { screen_hint: 'signup' } })}
-                            className="bg-white text-black font-black uppercase tracking-tighter w-full rounded-2xl h-12 sm:h-13 text-sm sm:text-base shadow-2xl shadow-white/10 hover:shadow-white/20 hover:scale-[1.02] transition-all"
+                            className="bg-white text-black font-black tracking-tighter w-full rounded-2xl h-12 sm:h-13 text-sm sm:text-base shadow-2xl shadow-white/10 hover:shadow-white/20 hover:scale-[1.02] transition-all"
                             size="lg"
                         >
                             S'inscrire
@@ -105,7 +105,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage, chil
                         <Button
                             onPress={() => login()}
                             variant="bordered"
-                            className="border-2 border-white/40 text-white font-black uppercase tracking-tighter w-full rounded-2xl h-12 sm:h-13 text-sm sm:text-base hover:bg-white/10 transition-all"
+                            className="border-2 border-white/40 text-white font-black tracking-tighter w-full rounded-2xl h-12 sm:h-13 text-sm sm:text-base hover:bg-white/10 transition-all"
                             size="lg"
                         >
                             Se connecter
@@ -113,7 +113,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage, chil
 
                         <div className="flex items-center gap-3 w-full my-1">
                             <div className="h-px bg-white/20 flex-1" />
-                            <span className="text-xs sm:text-sm font-bold text-white/30 uppercase tracking-widest">ou</span>
+                            <span className="text-xs sm:text-sm font-bold text-white/30 tracking-widest">ou</span>
                             <div className="h-px bg-white/20 flex-1" />
                         </div>
 

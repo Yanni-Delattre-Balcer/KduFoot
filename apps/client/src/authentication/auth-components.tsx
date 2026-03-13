@@ -858,8 +858,8 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlo
         </div>
 
         {/* Title */}
-        <h1 className="text-xl sm:text-2xl font-black text-red-500 uppercase tracking-tight leading-tight">
-          ACCÈS RESTREINT
+        <h1 className="text-xl sm:text-2xl font-black text-red-500 tracking-tight leading-tight">
+          Accès restreint
         </h1>
 
         {/* Message de Support Unique */}
@@ -881,7 +881,7 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlo
         <div className="flex flex-col gap-3 w-full mt-2">
           <a
             href="mailto:support@kdufoot.com?subject=Demande%20de%20débannissement%20KduFoot"
-            className="flex items-center justify-center gap-2 bg-white text-black font-black uppercase tracking-tight rounded-2xl h-12 text-sm shadow-lg hover:shadow-white/20 hover:scale-[1.02] transition-all w-full"
+            className="flex items-center justify-center gap-2 bg-white text-black font-black tracking-tight rounded-2xl h-12 text-sm shadow-lg hover:shadow-white/20 hover:scale-[1.02] transition-all w-full"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
@@ -890,7 +890,7 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlo
           </a>
           <button
             onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-            className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold uppercase tracking-tight rounded-2xl h-12 text-sm shadow-lg transition-all w-full cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold tracking-tight rounded-2xl h-12 text-sm shadow-lg transition-all w-full cursor-pointer"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />

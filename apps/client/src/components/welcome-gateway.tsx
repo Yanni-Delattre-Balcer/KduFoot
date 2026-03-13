@@ -92,7 +92,7 @@ export const WelcomeGateway: React.FC = () => {
                                 <div className="flex flex-col gap-3 w-full">
                                     <Button
                                         onPress={() => login()}
-                                        className="bg-primary text-white font-black uppercase tracking-tighter w-full rounded-2xl h-14 text-lg shadow-lg shadow-primary/20"
+                                        className="bg-primary text-white font-black tracking-tighter w-full rounded-2xl h-14 text-lg shadow-lg shadow-primary/20"
                                         size="lg"
                                     >
                                         Se connecter
@@ -101,7 +101,7 @@ export const WelcomeGateway: React.FC = () => {
                                     <Button
                                         onPress={() => login({ authorizationParams: { screen_hint: 'signup' } })}
                                         variant="bordered"
-                                        className="border-primary text-primary font-black uppercase tracking-tighter w-full rounded-2xl h-14 text-lg"
+                                        className="border-primary text-primary font-black tracking-tighter w-full rounded-2xl h-14 text-lg"
                                         size="lg"
                                     >
                                         Créer un compte
@@ -109,7 +109,7 @@ export const WelcomeGateway: React.FC = () => {
 
                                     <div className="flex items-center gap-3 w-full my-1">
                                         <div className="h-px bg-default-200 flex-1" />
-                                        <span className="text-xs sm:text-sm font-bold text-default-400 uppercase tracking-widest">ou</span>
+                                        <span className="text-xs sm:text-sm font-bold text-default-400">ou</span>
                                         <div className="h-px bg-default-200 flex-1" />
                                     </div>
 
@@ -132,7 +132,7 @@ export const WelcomeGateway: React.FC = () => {
                                     <Button
                                         onPress={closeGateway}
                                         variant="light"
-                                        className="font-black h-10 text-default-500 hover:text-default-900 active:scale-95 transition-all uppercase tracking-widest text-xs"
+                                        className="font-black h-10 text-default-500 hover:text-default-900 active:scale-95 transition-all tracking-widest text-xs"
                                     >
                                         Continuer sans compte
                                     </Button>
@@ -140,7 +140,7 @@ export const WelcomeGateway: React.FC = () => {
                             ) : (
                                 <div className="flex flex-col gap-4 w-full">
                                     <Button
-                                        className="bg-danger text-white font-black uppercase tracking-tighter w-full rounded-2xl h-14 text-lg shadow-lg shadow-danger/20"
+                                        className="bg-danger text-white font-black tracking-tighter w-full rounded-2xl h-14 text-lg shadow-lg shadow-danger/20"
                                         onPress={handleRegister}
                                     >
                                         Remplir mon profil Coach
@@ -148,7 +148,7 @@ export const WelcomeGateway: React.FC = () => {
 
                                     <Button
                                         variant="light"
-                                        className="font-black h-10 text-default-500 hover:text-default-900 active:scale-95 transition-all uppercase tracking-widest text-xs"
+                                        className="font-black h-10 text-default-500 hover:text-default-900 active:scale-95 transition-all tracking-widest text-xs"
                                         onPress={setVisitorMode}
                                     >
                                         Visiter le site

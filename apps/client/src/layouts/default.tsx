@@ -82,16 +82,16 @@ export default function DefaultLayout({
             <div className="flex flex-col items-center gap-2 group">
               <Button
                 as="a"
-                href="mailto:support@kdufoot.com"
+                href={`mailto:support@kdufoot.com?subject=${t('support.technical_issue_subject')}`}
                 variant="flat"
                 color="warning"
                 size="md"
-                className="font-black uppercase tracking-tighter text-xs h-10 px-6 shadow-lg shadow-warning/5 border border-warning/10 hover:scale-105 transition-transform"
+                className="font-black tracking-tighter text-xs h-10 px-6 shadow-lg shadow-warning/5 border border-warning/10 hover:scale-105 transition-transform"
                 startContent={<span>🛠️</span>}
               >
                 {t('support.need_help')}
               </Button>
-              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">{t('footer.support_bugs')}</span>
+              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">{t('support.technical_issue_desc')}</span>
             </div>
 
             <div className="h-10 w-px bg-default-200/30"></div>
@@ -99,21 +99,21 @@ export default function DefaultLayout({
             <div className="flex flex-col items-center gap-2 group">
               <Button
                 as="a"
-                href="mailto:contact@kdufoot.com"
+                href={`mailto:contact@kdufoot.com?subject=${t('support.other_inquiry_subject')}`}
                 variant="flat"
                 color="primary"
                 size="md"
-                className="font-black uppercase tracking-tighter text-xs h-10 px-6 shadow-lg shadow-primary/5 border border-primary/10 hover:scale-105 transition-transform"
+                className="font-black tracking-tighter text-xs h-10 px-6 shadow-lg shadow-primary/5 border border-primary/10 hover:scale-105 transition-transform"
                 startContent={<span>✉️</span>}
               >
-                {t('footer.other_inquiry')}
+                {t('support.other_inquiry')}
               </Button>
-              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">{t('footer.other_inquiry_desc')}</span>
+              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">{t('support.other_inquiry_desc')}</span>
             </div>
           </div>
 
           <div className="pt-4 pb-12 sm:pb-0 border-t border-default-100 w-full text-center">
-            <p className="text-xs sm:text-sm text-default-400 uppercase tracking-widest font-bold opacity-50">
+            <p className="text-xs sm:text-sm text-default-400 tracking-widest font-bold opacity-50">
               © 2026 KduFoot
             </p>
           </div>

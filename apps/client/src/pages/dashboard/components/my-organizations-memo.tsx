@@ -31,7 +31,7 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
         return (
             <Card className="bg-default-50/5 border border-default-100/10">
                 <CardBody className="p-4 flex justify-center items-center">
-                    <div className="animate-pulse text-default-400 font-bold text-xs uppercase tracking-widest">{t('dashboard.memo.loading', 'Chargement du mémo...')}</div>
+                    <div className="animate-pulse text-default-400 font-bold text-xs tracking-widest">{t('dashboard.memo.loading', 'Chargement du mémo...')}</div>
                 </CardBody>
             </Card>
         );
@@ -44,7 +44,7 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
         <Card className="bg-default-50/5 border border-default-100/10 shadow-sm overflow-hidden mb-8">
             <CardBody className="p-0">
                 <div className="bg-white/[0.03] p-3 border-b border-white/5 flex items-center justify-between">
-                    <h4 className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest flex items-center gap-2">
+                    <h4 className="text-xs sm:text-sm font-black text-default-400 tracking-widest flex items-center gap-2">
                         <span>{t('dashboard.memo.title', '📋 Historique de mes créations')}</span>
                         <Chip size="sm" variant="flat" className="h-4 text-[8px] bg-white/5">{events.length}</Chip>
                     </h4>
@@ -68,7 +68,7 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
                                                 <span className="text-[10px] sm:text-xs font-bold text-default-500 shrink-0">
                                                     {formatDate(event.match_date)}
                                                 </span>
-                                                <span className="text-white font-bold text-[11px] sm:text-xs truncate group-hover:text-violet-400 transition-colors uppercase tracking-tight">
+                                                <span className="text-white font-bold text-[11px] sm:text-xs truncate group-hover:text-violet-400 transition-colors tracking-tight">
                                                     {event.type === 'tournament' ? (event.name || t('match.tournament')) : (event.club?.name || '??')}
                                                 </span>
                                             </div>
@@ -77,12 +77,12 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
                                                     size="sm"
                                                     variant="flat"
                                                     color="secondary"
-                                                    className="h-3.5 sm:h-4 text-[7px] font-black uppercase"
+                                                    className="h-3.5 sm:h-4 text-[7px] font-black"
                                                 >
-                                                    {event.type === 'tournament' ? t('enums.type.tournament').toUpperCase() : t('enums.type.match').toUpperCase()}
+                                                    {event.type === 'tournament' ? t('enums.type.tournament') : t('enums.type.match')}
                                                 </Chip>
                                                 {event.venue && (
-                                                    <span className={`text-[7px] font-black uppercase px-1.5 py-0.5 rounded-md ${event.venue === 'Extérieur' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
+                                                    <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-md ${event.venue === 'Extérieur' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
                                                         {event.venue === 'Extérieur' ? t('dashboard.labels.away_badge') : t('dashboard.labels.home_badge')}
                                                     </span>
                                                 )}
@@ -94,7 +94,7 @@ export const MyOrganizationsMemo = ({ events, isLoading, formatDate }: MyOrganiz
                                             size="sm"
                                             variant="flat"
                                             color={status.color}
-                                            className="h-5 text-[9px] font-black uppercase hidden 2xs:flex"
+                                            className="h-5 text-[9px] font-black hidden 2xs:flex"
                                         >
                                             {status.label}
                                         </Chip>

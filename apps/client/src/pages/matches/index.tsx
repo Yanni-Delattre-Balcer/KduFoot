@@ -305,7 +305,7 @@ export default function MatchesPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0-4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                             </div>
-                            <h1 className={`text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r ${uiConfig.titleGradient} uppercase tracking-tighter`}>
+                            <h1 className={`text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r ${uiConfig.titleGradient} tracking-tighter`}>
                                 {uiConfig.title}
                             </h1>
                         </div>
@@ -573,7 +573,7 @@ export default function MatchesPage() {
                                         <Button
                                             color="secondary"
                                             variant="shadow"
-                                            className="w-full font-black uppercase tracking-widest h-14 text-lg shadow-violet-500/30"
+                                            className="w-full font-black tracking-widest h-14 text-lg shadow-violet-500/30"
                                             onPress={handleManualSearch}
                                             startContent={
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
@@ -649,7 +649,7 @@ export default function MatchesPage() {
                                             {/* Day headers */}
                                             <div className="grid grid-cols-7 gap-1 mb-2">
                                                 {dayNames.map(d => (
-                                                    <div key={d} className="text-center text-xs font-semibold text-default-400 uppercase py-1">
+                                                    <div key={d} className="text-center text-xs font-semibold text-default-400 py-1">
                                                         {d}
                                                     </div>
                                                 ))}
@@ -716,7 +716,7 @@ export default function MatchesPage() {
                                         {!isLoading && filteredMatches.length > 0 && (
                                             <div className="flex items-center gap-2 mb-2">
                                                 <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
-                                                <span className="text-sm font-bold text-white uppercase tracking-wider">{filteredMatches.length} {type === 'tournament' ? t('matchesPage.found_tournament') : t('matchesPage.found')}</span>
+                                                <span className="text-sm font-bold text-white tracking-wider">{filteredMatches.length} {type === 'tournament' ? t('matchesPage.found_tournament') : t('matchesPage.found')}</span>
                                             </div>
                                         )}
 
@@ -729,7 +729,7 @@ export default function MatchesPage() {
                                                     <Card key={match.id} className={`group hover:shadow-lg transition-all border ${hasChanges ? 'border-red-500/50 shadow-red-500/10' : 'border-violet-800/50'} hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? 'ring-2 ring-violet-500 shadow-violet-500/20' : ''}`}>
                                                         <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
                                                             {user?.id === match.owner_id && (
-                                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-xs sm:text-sm uppercase font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-xs sm:text-sm font-bold px-2 py-0.5 rounded-full shadow-lg">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
                                                                         <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
                                                                     </svg>
@@ -737,30 +737,30 @@ export default function MatchesPage() {
                                                                 </div>
                                                             )}
                                                             <div className="flex flex-col w-full">
-                                                                <h4 className={`font-bold text-xl ${diff.name ? 'text-red-500' : 'text-default-900'} group-hover:text-violet-200 transition-colors uppercase tracking-tight break-words whitespace-normal w-full`}>
+                                                                <h4 className={`font-bold text-xl ${diff.name ? 'text-red-500' : 'text-default-900'} group-hover:text-violet-200 transition-colors tracking-tight break-words whitespace-normal w-full`}>
                                                                     {isMasked ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
                                                                 </h4>
                                                                 {match.type === 'tournament' && match.name && (
-                                                                    <h5 className={`font-bold text-sm ${diff.name ? 'text-red-400' : 'text-fuchsia-400'} group-hover:text-fuchsia-300 transition-colors uppercase break-words whitespace-normal w-full pb-1`}>
+                                                                    <h5 className={`font-bold text-sm ${diff.name ? 'text-red-400' : 'text-fuchsia-400'} group-hover:text-fuchsia-300 transition-colors break-words whitespace-normal w-full pb-1`}>
                                                                         {match.name}
                                                                     </h5>
                                                                 )}
                                                                 <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                                                    <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
+                                                                    <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] font-bold">
                                                                         {match.type === 'tournament' ? '🏆' : '⚽'} {t(`enums.type.${match.type}`)}
                                                                     </Chip>
                                                                     {match.type === 'tournament' && match.registration_fee !== undefined && match.registration_fee !== null && (
-                                                                        <Chip size="sm" variant="flat" color={diff.registration_fee ? "danger" : "success"} className="h-4 text-[9px] uppercase font-bold">
+                                                                        <Chip size="sm" variant="flat" color={diff.registration_fee ? "danger" : "success"} className="h-4 text-[9px] font-bold">
                                                                             {match.registration_fee > 0 ? `${match.registration_fee} €` : 'Gratuit'}
                                                                         </Chip>
                                                                     )}
-                                                                    <Chip size="sm" variant="flat" color={diff.category || diff.level ? "danger" : "warning"} className="h-4 text-[9px] uppercase font-black">
+                                                                    <Chip size="sm" variant="flat" color={diff.category || diff.level ? "danger" : "warning"} className="h-4 text-[9px] font-black">
                                                                         {t(`enums.category.${match.category}`)} {match.level ? `• ${t(`enums.level.${match.level}`)}` : ''}
                                                                     </Chip>
-                                                                    <Chip size="sm" variant="flat" color={diff.pitch_type ? "danger" : "primary"} className="h-4 text-[9px] uppercase font-black">
+                                                                    <Chip size="sm" variant="flat" color={diff.pitch_type ? "danger" : "primary"} className="h-4 text-[9px] font-black">
                                                                         🏟️ {t(`enums.pitch.${match.pitch_type}`)}
                                                                     </Chip>
-                                                                    <Chip size="sm" variant="flat" color={diff.venue ? "danger" : "secondary"} className="h-4 text-[9px] uppercase font-black">
+                                                                    <Chip size="sm" variant="flat" color={diff.venue ? "danger" : "secondary"} className="h-4 text-[9px] font-black">
                                                                         {match.venue === 'Domicile' ? '🏠 REÇOIT' : '🚗 SE DÉPLACE'}
                                                                     </Chip>
                                                                 </div>
@@ -834,7 +834,7 @@ export default function MatchesPage() {
                                                                         size="sm"
                                                                         variant="solid"
                                                                         color="danger"
-                                                                        className="font-black uppercase tracking-tight shadow-md shadow-red-500/20"
+                                                                        className="font-black tracking-tight shadow-md shadow-red-500/20"
                                                                         onPress={() => adminDeleteMatch(match.id)}
                                                                     >
                                                                         🗑️ SUPPRIMER

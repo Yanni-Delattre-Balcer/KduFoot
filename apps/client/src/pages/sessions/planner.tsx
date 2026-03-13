@@ -47,7 +47,7 @@ export default function SessionPlannerPage() {
         } catch { return dateStr; }
     };
 
-    const myClubName = user?.club?.name || 'Mon Club';
+    const myClubName = user?.club?.name || t('planner.my_club_default');
     const myClubLogo = user?.club?.logo_url || '';
 
     const historyMatches = (matches || [])
@@ -63,7 +63,7 @@ export default function SessionPlannerPage() {
                 level: m.level,
                 teamA: { name: myClubName, logo: myClubLogo },
                 teamB: { 
-                    name: acceptedReq?.requester_club_name || (m.type === 'tournament' ? 'Plateau' : '??'), 
+                    name: acceptedReq?.requester_club_name || (m.type === 'tournament' ? t('planner.plateau') : t('common.unknown')), 
                     logo: acceptedReq?.requester_club_logo || '' 
                 },
                 isTournament: m.type === 'tournament'
@@ -122,7 +122,7 @@ export default function SessionPlannerPage() {
                         </div>
                         <p className="text-default-500 text-lg max-w-lg">
                             {view === 'exercises'
-                                ? t('sessions.description_exercises', 'Suivez vos séances d\'entraînement et exercices vidéo.')
+                                ? t('sessions.description_exercises')
                                 : view === 'matches'
                                     ? t('sessions.description_matches')
                                     : t('matchesPage.description_create_tournament')}
@@ -171,7 +171,7 @@ export default function SessionPlannerPage() {
                                     </svg>
                                 }
                             >
-                                {t('match.tab_tournaments', 'Tournois')}
+                                {t('match.tab_tournaments')}
                             </Button>
                         </div>
                     </div>
@@ -182,7 +182,7 @@ export default function SessionPlannerPage() {
 
                         {view === 'exercises' && (
                             <div className="flex flex-col gap-4">
-                                {isErrorSessions && <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">{t('error.loading_sessions', 'Erreur chargement séances')}</div>}
+                                {isErrorSessions && <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">{t('error.loading_sessions')}</div>}
 
                                 {sessions.length === 0 && !isErrorSessions && (
                                     <Card className="border border-green-500/20 bg-green-500/5">
@@ -192,9 +192,9 @@ export default function SessionPlannerPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                                 </svg>
                                             </div>
-                                            <p className="text-lg font-semibold text-green-900/80 dark:text-green-100">{t('sessions.empty_sessions', 'Aucune séance trouvée')}</p>
+                                            <p className="text-lg font-semibold text-green-900/80 dark:text-green-100">{t('sessions.empty_sessions')}</p>
                                             <Button as={Link} to="/exercises" color="success" variant="flat" className="bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 font-bold">
-                                                {t('sessions.find_exercises', 'Découvrir des exercices')}
+                                                {t('sessions.find_exercises')}
                                             </Button>
                                         </CardBody>
                                     </Card>
@@ -205,10 +205,10 @@ export default function SessionPlannerPage() {
                                         <Card key={session.id} className="group hover:shadow-lg hover:shadow-green-500/10 transition-all bg-[#18251e] border border-green-500/20 hover:border-green-500/40">
                                             <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
                                                 <div className="flex justify-between w-full">
-                                                    <p className="text-tiny uppercase font-bold text-green-600">{session.category || 'Séance'}</p>
+                                                    <p className="text-tiny font-bold text-green-600">{session.category || 'Séance'}</p>
                                                     <Chip size="sm" variant="flat" className="bg-green-50 text-green-800 dark:bg-green-500/10 dark:text-green-300">{session.status}</Chip>
                                                 </div>
-                                                <h4 className="font-bold text-large mt-1 truncate group-hover:text-green-600 transition-colors">{session.name || t('common.untitled', 'Session sans titre')}</h4>
+                                                <h4 className="font-bold text-large mt-1 truncate group-hover:text-green-600 transition-colors">{session.name || t('common.untitled')}</h4>
                                                 <small className="text-default-500 flex items-center gap-1 mt-1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -218,7 +218,7 @@ export default function SessionPlannerPage() {
                                             </CardHeader>
                                             <CardBody className="overflow-visible py-2">
                                                 <p className="text-sm text-default-600 line-clamp-2">
-                                                    {session.category} - {session.level || t('sessions.all_levels', 'Tous niveaux')}
+                                                    {session.category} - {session.level || t('sessions.all_levels')}
                                                 </p>
                                             </CardBody>
                                             <CardFooter>
@@ -239,14 +239,14 @@ export default function SessionPlannerPage() {
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-2 mb-2">
                                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                                            <h2 className="text-xl font-black text-white uppercase tracking-tighter">{t('planner.en_cours', 'En cours / À venir')}</h2>
+                                            <h2 className="text-xl font-black text-white tracking-tighter">{t('planner.en_cours', 'En cours / À venir')}</h2>
                                         </div>
                                         
                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
                                             {/* Colonne Gauche: Mes Annonces */}
                                             <div className="space-y-6">
                                                 <div className="flex items-center gap-3 px-2">
-                                                    <h3 className="text-lg font-bold text-white/70 uppercase tracking-tighter">{t('planner.mes_annonces', 'Mes Annonces')}</h3>
+                                                    <h3 className="text-lg font-bold text-white/70 tracking-tighter">{t('planner.mes_annonces', 'Mes Annonces')}</h3>
                                                     <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">
                                                         {activeMatches.filter((m: any) => view === 'matches' ? m.type === 'match' : m.type === 'tournament').length}
                                                     </span>
@@ -271,8 +271,8 @@ export default function SessionPlannerPage() {
                                                                     {/* 2. Title & Date (Centered) */}
                                                                     <div className="flex flex-col items-center gap-1 w-full">
                                                                         <div className="flex items-center gap-2">
-                                                                            <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{match.match_date}</span>
-                                                                            <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] uppercase font-black">{match.status}</Chip>
+                                                                            <span className="text-[10px] font-black tracking-widest text-white/40">{match.match_date}</span>
+                                                                            <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] font-black">{match.status}</Chip>
                                                                         </div>
                                                                         <h3 className="font-bold text-white text-lg line-clamp-1">
                                                                             {match.type === 'tournament' ? match.name : `${t('match.vs')} ${match.club?.name || '??'}`}
@@ -282,7 +282,7 @@ export default function SessionPlannerPage() {
 
                                                                     {/* 3. Status/Count (Bottom) */}
                                                                     <div className="flex flex-col items-center gap-1">
-                                                                        <span className="text-[10px] font-black text-primary uppercase tracking-tighter">
+                                                                        <span className="text-[10px] font-black text-primary tracking-tighter">
                                                                             {match.contacts_count || 0} {t('planner.requests', 'Demandes')}
                                                                         </span>
                                                                     </div>
@@ -330,7 +330,7 @@ export default function SessionPlannerPage() {
                                                 {/* Demandes Reçues */}
                                                 <div className="space-y-6">
                                                     <div className="flex items-center gap-3 px-2">
-                                                        <h3 className="text-lg font-bold text-white/70 uppercase tracking-tighter">{t('planner.demandes_recues', 'Demandes Reçues')}</h3>
+                                                        <h3 className="text-lg font-bold text-white/70 tracking-tighter">{t('planner.demandes_recues', 'Demandes Reçues')}</h3>
                                                         {activeRequests.filter((r: any) => r.request_status === 'pending').length > 0 && (
                                                             <span className="bg-amber-500/20 px-2 py-0.5 rounded text-xs font-bold text-amber-500 animate-pulse">
                                                                 {activeRequests.filter((r: any) => r.request_status === 'pending').length}
@@ -357,11 +357,11 @@ export default function SessionPlannerPage() {
                                                                                 </div>
                                                                                 <div className="flex-1 text-left">
                                                                                     <h3 className="font-bold text-white text-sm line-clamp-1">{request.requester_club_name}</h3>
-                                                                                    <p className="text-xs text-default-500 font-bold uppercase tracking-widest truncate">
+                                                                                    <p className="text-xs text-default-500 font-bold tracking-widest truncate">
                                                                                         {t(`enums.category.${request.category}`)} • {request.match_date}
                                                                                     </p>
                                                                                 </div>
-                                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
+                                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black text-[9px]">
                                                                                     {request.request_status}
                                                                                 </Chip>
                                                                             </div>
@@ -372,14 +372,14 @@ export default function SessionPlannerPage() {
                                                                                         size="sm"
                                                                                         color="success"
                                                                                         isLoading={actioningId === `${request.match_id}-${request.user_id}-accept`}
-                                                                                        className="flex-1 font-black uppercase text-xs h-8 text-success-950"
+                                                                                        className="flex-1 font-black text-xs h-8 text-success-950"
                                                                                         onPress={async () => {
                                                                                             try {
                                                                                                 setActioningId(`${request.match_id}-${request.user_id}-accept`);
                                                                                                 const token = await getAccessTokenSilently();
                                                                                                 await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
                                                                                                 await mutateRequests();
-                                                                                                 addToast({ title: t('dashboard.toasts.accept_success', 'Demande acceptée'), color: "success" });
+                                                                                                 addToast({ title: t('dashboard.toasts.accept_success'), color: "success" });
                                                                                             } catch (e: any) {
                                                                                                 addToast({ title: t('error.title'), color: "danger" });
                                                                                             } finally {
@@ -387,7 +387,7 @@ export default function SessionPlannerPage() {
                                                                                             }
                                                                                         }}
                                                                                     >
-                                                                                        Accepter
+                                                                                        {t('dashboard.controls.accept')}
                                                                                     </Button>
                                                                                 </div>
                                                                             )}
@@ -406,7 +406,7 @@ export default function SessionPlannerPage() {
                                                 {/* Mes Candidatures */}
                                                 <div className="space-y-6">
                                                     <div className="flex items-center gap-3 px-2">
-                                                        <h3 className="text-lg font-bold text-white/70 uppercase tracking-tighter">{t('planner.mes_candidatures', 'Mes Candidatures')}</h3>
+                                                        <h3 className="text-lg font-bold text-white/70 tracking-tighter">{t('planner.mes_candidatures', 'Mes Candidatures')}</h3>
                                                         <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">{activeParticipations.length}</span>
                                                     </div>
 
@@ -427,9 +427,9 @@ export default function SessionPlannerPage() {
                                                                                 </div>
                                                                                 <div className="flex-1 text-left">
                                                                                     <h3 className="font-bold text-white text-sm truncate">{participation.club?.name}</h3>
-                                                                                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest">{participation.match_date}</p>
+                                                                                    <p className="text-xs text-default-400 font-bold tracking-widest">{participation.match_date}</p>
                                                                                 </div>
-                                                                                <Chip size="sm" color={participation.request_status === 'accepted' ? 'success' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
+                                                                                <Chip size="sm" color={participation.request_status === 'accepted' ? 'success' : 'warning'} variant="flat" className="font-black text-[9px]">
                                                                                     {participation.request_status}
                                                                                 </Chip>
                                                                             </div>
@@ -453,8 +453,8 @@ export default function SessionPlannerPage() {
                                         <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-xl shadow-indigo-500/5">
                                             <span className="text-xl">👥</span>
                                         </div>
-                                        <h2 className="text-2xl font-black text-indigo-500 uppercase tracking-tighter whitespace-nowrap overflow-x-auto scrollbar-hide">
-                                            {t('planner.history.title', 'Historique Match / Tournoi / Exercice')}
+                                        <h2 className="text-xl md:text-2xl font-black text-indigo-500 tracking-tighter">
+                                            {t('planner.history.title')}
                                         </h2>
                                     </div>
 
@@ -488,14 +488,14 @@ export default function SessionPlannerPage() {
                                                                 {h.teamA.name} <span className="text-indigo-500 mx-1">vs</span> {h.teamB.name}
                                                             </h3>
                                                             <div className="flex items-center gap-2">
-                                                                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{formatMatchDate(h.date)}</p>
-                                                                <Chip size="sm" variant="dot" color="default" className="h-4 border-white/10 text-white/40 font-bold uppercase text-[9px]">{t('planner.terminated', 'TERMINÉ')}</Chip>
+                                                                <p className="text-[10px] font-black text-white/40 tracking-widest">{formatMatchDate(h.date)}</p>
+                                                                <Chip size="sm" variant="dot" color="default" className="h-4 border-white/10 text-white/40 font-bold text-[9px]">{t('planner.terminated', 'Terminé')}</Chip>
                                                             </div>
                                                         </div>
 
                                                         {/* 3. Description (Bottom) */}
                                                         <div className="text-center w-full">
-                                                            <p className="text-xs font-bold text-default-500 uppercase tracking-tight">
+                                                            <p className="text-xs font-bold text-default-500 tracking-tight">
                                                                 {t(`enums.category.${h.category}`)} • {h.level}
                                                             </p>
                                                         </div>
@@ -505,7 +505,7 @@ export default function SessionPlannerPage() {
                                         </div>
                                     ) : (
                                          <div className="py-12 flex flex-col items-center justify-center gap-4 bg-white/5 border border-dashed border-white/10 rounded-3xl opacity-50">
-                                             <p className="font-bold text-white/20 uppercase tracking-widest">{t('dashboard.memo.empty', 'Aucun historique disponible')}</p>
+                                             <p className="font-bold text-white/20 tracking-widest">{t('dashboard.memo.empty')}</p>
                                          </div>
                                     )}
                                 </div>

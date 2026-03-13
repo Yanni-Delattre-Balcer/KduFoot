@@ -317,7 +317,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             />
 
             <div className="flex flex-col items-center gap-6">
-                <p className="text-sm font-extrabold text-danger uppercase tracking-widest -mb-4 animate-pulse-red">
+                <p className="text-sm font-extrabold text-danger tracking-widest -mb-4 animate-pulse-red">
                     {t('account.avatar.recommendation')}
                 </p>
 
@@ -350,7 +350,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             size="sm"
                             color={dbUser?.subscription === 'Free' ? 'default' : 'primary'}
                             variant="flat"
-                            className="font-black px-4 uppercase tracking-tighter"
+                            className="font-black px-4 tracking-tighter"
                         >
                             {dbUser?.subscription ? t('account.subscription.free', { plan: dbUser.subscription }) : t('account.subscription.free_account')}
                         </Chip>
@@ -359,7 +359,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
                 <div className="w-full space-y-8">
                     <div className="space-y-3">
-                        <p className="text-sm font-bold text-default-400 uppercase ml-1">{t('account.sections.identity')}</p>
+                        <p className="text-sm font-bold text-default-400 ml-1">{t('account.sections.identity')}</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-default-500">Email</span>
@@ -485,7 +485,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </div>
 
                     <div className="space-y-3">
-                        <p className="text-sm font-bold text-default-400 uppercase ml-1 mt-2">{t('account.sections.sports_profile')}</p>
+                        <p className="text-sm font-bold text-default-400 ml-1 mt-2">{t('account.sections.sports_profile')}</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <Select
@@ -579,7 +579,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </div>
 
                     <div className="space-y-3">
-                        <p className="text-sm font-bold text-default-400 uppercase ml-1 mt-2">{t('account.sections.club_location')}</p>
+                        <p className="text-sm font-bold text-default-400 ml-1 mt-2">{t('account.sections.club_location')}</p>
                         <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-default-500">{t('account.fields.current_club')}</span>
@@ -618,7 +618,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                                 isDisabled={!!dbUser?.club_id}
                                                 isInvalid={!!errors.siret}
                                                 className="w-full max-w-full"
-                                                aria-label="SIRET (14 chiffres) ou SIREN (9 chiffres)"
+                                                aria-label="Siret (14 chiffres) ou Siren (9 chiffres)"
                                             />
                                             {errors.siret && (
                                                 <p className="text-xs font-bold pl-1 animate-shake">{errors.siret}</p>
@@ -640,7 +640,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                                     color="danger"
                                                     variant="flat"
                                                     size="sm"
-                                                    className="h-12 font-bold px-4 w-full sm:w-auto uppercase"
+                                                    className="h-12 font-bold px-4 w-full sm:w-auto"
                                                     onPress={async () => {
                                                         if (confirm("Détacher le club ? (Admin uniquement)")) {
                                                             try {
@@ -676,13 +676,13 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
                                 {dbUser?.additional_clubs && dbUser.additional_clubs.length > 0 && (
                                     <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
-                                        <p className="text-[10px] font-bold text-default-400 uppercase tracking-widest mb-1">{t('account.fields.other_clubs')}</p>
+                                        <p className="text-[10px] font-bold text-default-400 tracking-widest mb-1">{t('account.fields.other_clubs')}</p>
                                         {dbUser.additional_clubs.map((s: any, idx: number) => (
                                             <div key={idx} className="bg-white/5 p-4 rounded-xl border border-white/10 flex flex-col gap-3">
                                                 <div className="flex justify-between items-start gap-2 w-full overflow-hidden">
                                                     <div className="flex flex-col min-w-0">
                                                         <span className="text-xs font-black text-white truncate">{s.name || t('account.fields.nameless_club')}</span>
-                                                        <div className="flex gap-2 text-[10px] text-default-500 uppercase font-bold mt-0.5">
+                                                        <div className="flex gap-2 text-[10px] text-default-500 font-bold mt-0.5">
                                                             <span>{s.city}</span>
                                                             <span>•</span>
                                                             <span>{getDept(s.zip)}</span>
@@ -705,7 +705,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                                         }}
                                                         aria-label={t('account.fields.stadium_address_for', { club: s.name })}
                                                         classNames={{
-                                                            label: "text-[10px] font-bold text-primary-400 uppercase tracking-tight",
+                                                            label: "text-[10px] font-bold text-primary-400 tracking-tight",
                                                             input: "text-xs",
                                                             inputWrapper: "h-9 min-h-9"
                                                         }}
@@ -718,7 +718,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
                                 {dbUser?.club_id ? (
                                     <div className="mt-6 p-6 bg-red-900/20 border-2 border-red-500/50 rounded-2xl text-center shadow-2xl shadow-red-900/20">
-                                        <p className="text-xl font-black text-red-500 uppercase tracking-tight mb-2">
+                                        <p className="text-xl font-black text-red-500 tracking-tight mb-2">
                                             {t('support.need_help')}
                                         </p>
                                         <p className="text-base font-bold text-white mb-6">
@@ -731,7 +731,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                             color="danger"
                                             variant="shadow"
                                             size="lg"
-                                            className="w-full font-black uppercase text-xs sm:text-sm h-12 sm:h-14 shadow-red-500/40 tracking-wider sm:tracking-widest animate-pulse"
+                                            className="w-full font-black text-xs sm:text-sm h-12 sm:h-14 shadow-red-500/40 tracking-wider sm:tracking-widest animate-pulse"
                                         >
                                             {t('account.buttons.contact_support')}
                                         </Button>
@@ -777,7 +777,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             onPress={handleSave}
                             isLoading={isSaving}
                             isDisabled={isDeleting}
-                            className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider order-1"
+                             className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto tracking-wider order-1"
                         >
                             {from ? t('account.buttons.save_and_continue') : t('account.buttons.save_changes')}
                         </Button>
@@ -788,7 +788,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             onPress={handleDeleteAccount}
                             isLoading={isDeleting}
                             isDisabled={isSaving}
-                            className="font-bold px-8 w-full sm:w-auto uppercase tracking-wider order-2 sm:ml-auto"
+                             className="font-bold px-8 w-full sm:w-auto tracking-wider order-2 sm:ml-auto"
                         >
                             {t('account.buttons.delete_account')}
                         </Button>

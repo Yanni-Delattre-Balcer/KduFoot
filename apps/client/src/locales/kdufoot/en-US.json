@@ -150,7 +150,9 @@
     "technical_issue_subject": "Technical Issue - Kdufoot",
     "other_inquiry": "Other inquiry",
     "other_inquiry_subject": "Other Inquiry - Kdufoot",
-    "need_help": "Need help?"
+    "need_help": "Need help?",
+    "technical_issue_desc": "Bugs, technical issues...",
+    "other_inquiry_desc": "Sponsors, advertising, partnerships..."
   },
   "planner": {
     "en_cours": "Ongoing / Upcoming",
@@ -163,10 +165,12 @@
     "no_active_tournament": "No active tournament ads.",
     "demandes_recues": "Requests Received",
     "mes_candidatures": "My Applications",
+    "my_club_default": "My Club",
+    "plateau": "Tournament",
     "history": {
       "title": "Match / Tournament / Exercise History"
     },
-    "terminated": "TERMINATED"
+    "terminated": "Terminated"
   },
   "myExercises": "My Exercises",
   "mySessions": "My Sessions",
@@ -203,6 +207,8 @@
   },
   "match": {
     "vs": "vs",
+    "tab_matches": "Matches",
+    "tab_tournaments": "Tournaments",
     "title": "Friendly Matches",
     "tournament": "Tournament",
     "create": "Create a friendly match",
@@ -715,11 +721,19 @@
       }
     }
   },
+  "choose_file": "Choose a file",
+  "technical_issue": "Technical Issue",
+  "bug_report": "Report a Bug",
+  "feature_request": "Request a Feature",
+  "other": "Other",
   "common": {
+    "home": "Home",
     "choose": "Choose",
     "not_provided": "Not provided",
     "unknown_city": "Unknown city",
-    "unknown_date": "Unknown date"
+    "unknown_date": "Unknown date",
+    "unknown": "Unknown",
+    "untitled": "Untitled"
   },
   "adminUsersPage": {
     "pageTitle": "User and Permission Management",

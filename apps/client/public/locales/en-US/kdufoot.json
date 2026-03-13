@@ -140,6 +140,15 @@
     "find_matches": "Find a match / tournament",
     "find_tournaments": "Find tournaments"
   },
+  "support": {
+    "technical_issue": "Technical issue",
+    "technical_issue_subject": "Technical Issue - Kdufoot",
+    "other_inquiry": "Other inquiry",
+    "other_inquiry_subject": "Other Inquiry - Kdufoot",
+    "need_help": "Need help?",
+    "technical_issue_desc": "Bugs, technical issues...",
+    "other_inquiry_desc": "Sponsors, advertising, partnerships..."
+  },
   "myExercises": "My Exercises",
   "mySessions": "My Sessions",
   "myMatches": "My Friendly Matches",
@@ -173,6 +182,9 @@
     "schema": "Tactic Diagram"
   },
   "match": {
+    "vs": "vs",
+    "tab_matches": "Matches",
+    "tab_tournaments": "Tournaments",
     "title": "Friendly Matches",
     "tournament": "Tournament",
     "create": "Create a friendly match",
@@ -228,6 +240,10 @@
     "empty_matches": "No friendly matches",
     "not_scheduled": "Not scheduled",
     "opponent_default": "Opponent",
+    "description_exercises": "Follow your training sessions and video exercises.",
+    "find_exercises": "Discover exercises",
+    "no_name": "Untitled Session",
+    "all_levels": "All levels",
     "status": "Status"
   },
   "permissions": {
@@ -684,7 +700,9 @@
     "choose": "Choose",
     "not_provided": "Not provided",
     "unknown_city": "Unknown city",
-    "unknown_date": "Unknown date"
+    "unknown_date": "Unknown date",
+    "unknown": "??",
+    "untitled": "Untitled"
   },
   "adminUsersPage": {
     "pageTitle": "User and Permission Management",
@@ -843,6 +861,24 @@
     "role_blocked": "Banned / Blocked"
   },
   "error-updating-user": "Error updating user",
+  "planner": {
+    "en_cours": "Ongoing / Upcoming",
+    "mes_annonces": "My Ads",
+    "requests": "Requests",
+    "confirm_delete_tournament": "Are you sure you want to delete this tournament?",
+    "confirm_delete_match": "Are you sure you want to delete this match?",
+    "deleted_success": "Successfully deleted",
+    "no_active_match": "No active match ads.",
+    "no_active_tournament": "No active tournament ads.",
+    "demandes_recues": "Requests Received",
+    "mes_candidatures": "My Applications",
+    "my_club_default": "My Club",
+    "plateau": "Tournament",
+    "history": {
+      "title": "Match / Tournament / Exercise History"
+    },
+    "terminated": "TERMINATED"
+  },
   "connectivity": {
     "offline": "You are offline. Please check your connection.",
     "reconnecting": "Unstable connection, updating..."

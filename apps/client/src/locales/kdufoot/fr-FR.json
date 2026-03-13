@@ -99,7 +99,7 @@
   "duration": "Durée",
   "status": "Statut",
   "summary": "Résumé",
-  "details": "DÉTAILS",
+  "details": "Détails",
   "duration_total": "Durée Totale",
   "players": "Joueurs",
   "equipment": "Matériel",
@@ -172,23 +172,27 @@
     "technical_issue_subject": "Problème Technique - Kdufoot",
     "other_inquiry": "Autre demande",
     "other_inquiry_subject": "Autre Demande - Kdufoot",
-    "need_help": "Besoin d'aide ?"
+    "need_help": "Besoin d'aide ?",
+    "technical_issue_desc": "Bugs, problèmes techniques...",
+    "other_inquiry_desc": "Sponsors, publicité, partenariats..."
   },
   "planner": {
     "en_cours": "En cours / À venir",
     "mes_annonces": "Mes Annonces",
     "requests": "Demandes",
-    "confirm_delete_tournament": "Voulez-vous vraiment supprimer ce tournoi ?",
-    "confirm_delete_match": "Voulez-vous vraiment supprimer ce match ?",
+    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "deleted_success": "Supprimé avec succès",
     "no_active_match": "Aucune annonce de match active.",
     "no_active_tournament": "Aucune annonce de tournoi active.",
     "demandes_recues": "Demandes Reçues",
     "mes_candidatures": "Mes Candidatures",
+    "my_club_default": "Mon Club",
+    "plateau": "Plateau",
     "history": {
       "title": "Historique Match / Tournoi / Exercice"
     },
-    "terminated": "TERMINÉ"
+    "terminated": "Terminé"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",
@@ -235,8 +239,8 @@
     "tab_tournaments": "Tournois",
     "tournament": "Tournoi",
     "create": "Créer un Match",
-    "create_title": "CRÉER UN MATCH",
-    "edit_title": "METTRE À JOUR LE MATCH",
+    "create_title": "Créer un match",
+    "edit_title": "Mettre à jour le match",
     "create_tournament": "Créer un Tournoi",
     "find": "Chercher un Match",
     "find_tournament": "Chercher un Tournoi",
@@ -682,10 +686,10 @@
       "modifications_desc": "{{count}} match{{plural}} été modifié par l'organisateur. Veuillez vérifier les détails."
     },
     "tabs": {
-      "requests": "DEMANDES REÇUES",
+      "requests": "Demandes reçues",
       "organized": "Mes Matchs / Tournois Organisés",
-      "participations": "TOURNOIS CONFIRMÉS",
-      "confirmed_matches": "MATCHS CONFIRMÉS",
+      "participations": "Tournois confirmés",
+      "confirmed_matches": "Matchs confirmés",
       "all": "Tous",
       "matches": "Matchs",
       "tournaments": "Tournois"
@@ -769,15 +773,15 @@
       "itinerary": "📍 Itinéraire",
       "new": "Nouvelle Annonce",
       "view_changes": "J'AI VU LES MODIFICATIONS",
-      "mark_all_read": "TOUT VALIDER"
+      "mark_all_read": "Tout valider"
     },
     "status": {
       "accepted": "Accepté",
       "refused": "Refusé",
       "pending": "En attente",
       "cancelled": "Annulé",
-      "searching": "🔍 RECHERCHE D'ADVERSAIRE",
-      "active": "🔍 RECHERCHE D'ADVERSAIRE",
+      "searching": "🔍 Recherche d'adversaire",
+      "active": "🔍 Recherche d'adversaire",
       "completed": "Terminé",
       "full": "Complet",
       "open": "Ouvert"
@@ -798,8 +802,8 @@
       "matches_count": "{{count}} matchs ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
       "view_changes": "J'ai vu les changements",
       "mark_as_read": "J'ai compris, marquer comme lu",
-      "verify": "VÉRIFIER",
-      "action_required_short": "Modifications Détectées",
+      "verify": "Vérifier",
+      "action_required_short": "Modifications détectées",
       "attention": "Attention !",
       "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations.",
       "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
@@ -811,6 +815,7 @@
     "not_provided": "Non renseigné",
     "unknown_city": "Ville inconnue",
     "unknown_date": "Date inconnue",
+    "unknown": "Inconnu",
     "untitled": "Sans titre"
   },
   "adminUsersPage": {

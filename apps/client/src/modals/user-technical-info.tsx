@@ -99,7 +99,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                     <ModalBody className="gap-4">
                         {/* User Identity */}
                         <div className="bg-default-100/5 border border-default-100/10 rounded-xl p-3 space-y-1">
-                            <p className="text-xs text-default-400 uppercase tracking-wider font-bold mb-2">
+                            <p className="text-xs text-default-400 tracking-wider font-bold mb-2">
                                 Identité
                             </p>
                             <p className="text-sm font-semibold text-white">{user.name}</p>
@@ -112,7 +112,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
 
                         {/* Token Status */}
                         <div className="space-y-2">
-                            <p className="text-xs text-default-400 uppercase tracking-wider font-bold">
+                            <p className="text-xs text-default-400 tracking-wider font-bold">
                                 {t("nav.userDropdown.tokenStatus")}
                             </p>
                             {tokenPayload?.exp ? (
@@ -145,7 +145,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                             <>
                                 <Divider className="bg-default-100/10" />
                                 <div className="space-y-2">
-                                    <p className="text-xs text-default-400 uppercase tracking-wider font-bold">
+                                    <p className="text-xs text-default-400 tracking-wider font-bold">
                                         Permissions
                                     </p>
                                     <div className="flex flex-wrap gap-1.5">
@@ -196,7 +196,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                         {/* Access Token */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <p className="text-xs text-default-400 uppercase tracking-wider font-bold">
+                                <p className="text-xs text-default-400 tracking-wider font-bold">
                                     {t("nav.userDropdown.accessToken")}
                                 </p>
                                 <CopyButton

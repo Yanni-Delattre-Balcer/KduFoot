@@ -5,7 +5,10 @@
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+## Phase 9: Navbar Refinement
+- [/] 1. Increase Navbar height and center logo/menu vertically
+- [/] 2. Ensure logo size is appropriate (+20/30%)
+- [ ] 3. Verify safe area compliance on mobile
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -110,23 +113,30 @@ export const Navbar = () => {
       isBlurred={false}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className={`fixed top-0 left-0 right-0 m-0! p-0! bg-background/80 backdrop-blur-md z-50 transition-all duration-300 pt-[env(safe-area-inset-top,20px)] ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
-        }`}
+      className={`fixed top-0 left-0 right-0 m-0! p-0! bg-background/80 backdrop-blur-sm z-50 transition-all duration-300 pt-[env(safe-area-inset-top,20px)] lg:pt-0 h-24 lg:h-20 ${
+        isScrolled 
+          ? 'shadow-lg shadow-black/30 border-b border-default-200/50' 
+          : 'border-none shadow-none'
+      }`}
+      classNames={{
+        wrapper: "h-full items-end pb-3 lg:items-center lg:pb-0",
+        content: "h-full items-end pb-3 lg:items-center lg:pb-0"
+      }}
     >
       {/* Absolute Logo - Stays on the same line as nav items but far left */}
-      <div className="absolute left-4 h-full flex items-center z-[60]">
+      <div className="absolute left-4 h-full flex items-end pb-3 lg:items-center lg:pb-0 z-[60]">
         <a href="/" className="flex items-center active:scale-95 transition-transform" aria-label={t('common.home', 'Accueil')}>
           <img
             src="/logo.png"
             alt="KduFoot Logo"
-            className="h-12 lg:h-20 w-auto object-contain"
+            className="h-14 lg:h-16 w-auto object-contain"
           />
         </a>
       </div>
 
-      <NavbarContent className="hidden lg:flex gap-6 w-full justify-center" justify="center">
+      <NavbarContent className="hidden lg:flex gap-6 w-full justify-center h-full items-center" justify="center">
         {siteConfig().navItems.map((item) => (
-          <NavbarItem key={item.href}>
+          <NavbarItem key={item.href} className="h-full flex items-center">
             <LinkUniversal
               className={clsx(
                 linkStyles({ color: "foreground" }),
@@ -154,14 +164,14 @@ export const Navbar = () => {
         ))}
       </NavbarContent>
 
-      <NavbarContent className="hidden sm:flex basis-0" justify="end">
-        <NavbarItem className="hidden sm:flex items-center gap-2">
+      <NavbarContent className="hidden sm:flex basis-0 h-full items-end pb-6 lg:items-center lg:pb-0" justify="end">
+        <NavbarItem className="hidden sm:flex flex items-end pb-1 lg:items-center lg:pb-0 gap-2 h-full">
           <LanguageSwitch availableLanguages={availableLanguages} icon={I18nIcon} />
           <LoginLogoutButton />
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarContent className="lg:hidden flex basis-1 items-center justify-end pr-2 h-full" justify="end">
+      <NavbarContent className="lg:hidden flex basis-1 items-end justify-end pr-2 h-full pb-3" justify="end">
         <NavbarMenuToggle
           className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
           srOnlyText="Menu"

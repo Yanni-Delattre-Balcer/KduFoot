@@ -52,22 +52,22 @@ export const OrganizedTournamentCard = ({
                                     )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="font-black text-violet-400 text-xl sm:text-2xl lg:text-3xl leading-tight uppercase tracking-tighter group-hover:text-violet-300 transition-colors break-words">
-                                        {t('enums.type.tournament').toUpperCase()}
+                                    <h3 className="font-black text-violet-400 text-xl sm:text-2xl lg:text-3xl leading-tight tracking-tighter group-hover:text-violet-300 transition-colors break-words">
+                                        {t('enums.type.tournament')}
                                     </h3>
-                                    <p className="text-white/70 text-xs sm:text-sm font-bold uppercase tracking-widest break-words leading-tight">{match.name || match.club?.name || '??'}</p>
+                                    <p className="text-white/70 text-xs sm:text-sm font-bold tracking-widest break-words leading-tight">{match.name || match.club?.name || '??'}</p>
                                     <div className="flex flex-wrap items-center gap-2 mt-2">
-                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[9px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
+                                        <Chip size="sm" variant="flat" color="secondary" className="font-black text-[9px] sm:text-xs tracking-wider h-auto py-0.5 whitespace-normal">
                                             🏆 {t('enums.type.tournament')}
                                         </Chip>
-                                        <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black shrink-0">
+                                        <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] font-black shrink-0">
                                             {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge') : t('dashboard.labels.home_badge')}
                                         </Chip>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[200px] shrink-0">
-                                <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] sm:text-sm py-3 shadow-lg shadow-violet-500/30 whitespace-normal text-center h-auto min-h-8">
+                                <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black text-[10px] sm:text-sm py-3 shadow-lg shadow-violet-500/30 whitespace-normal text-center h-auto min-h-8">
                                     {match.status === 'active' ? t('dashboard.status.searching') : t(`dashboard.status.${match.status}`, match.status)}
                                 </Chip>
                             </div>
@@ -75,26 +75,26 @@ export const OrganizedTournamentCard = ({
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
                                 <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
                                 <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
                                 <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || '5x5'}</Chip>
                             </div>
                             <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('tournamentForm.labels.fee', 'Frais')}</p>
+                                <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-1">{t('tournamentForm.labels.fee', 'Frais')}</p>
                                 <p className="text-sm font-bold text-green-400">{match.registration_fee ? `${match.registration_fee}€` : t('matchForm.labels.free', 'Gratuit')}</p>
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-end">
-                                <p className="text-sm font-black text-purple-400 uppercase tracking-widest">{t('dashboard.tournament.filling', 'Remplissage du tournoi')}</p>
+                                <p className="text-sm font-black text-purple-400 tracking-widest">{t('dashboard.tournament.filling', 'Remplissage du tournoi')}</p>
                                 <p className="text-xs font-bold text-white">{match.accepted_count || 0} / {match.max_teams || '∞'}</p>
                             </div>
                             <Progress
@@ -113,7 +113,7 @@ export const OrganizedTournamentCard = ({
                     {/* Right Section: Teams & Actions */}
                     <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
                         <div className="mb-6">
-                            <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-3">{t('dashboard.tournament.registered_teams', 'Équipes inscrites')}</p>
+                            <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-3">{t('dashboard.tournament.registered_teams', 'Équipes inscrites')}</p>
                             <div className="flex items-center -space-x-3">
                                 {displayTeams.map((contact: any, i: number) => (
                                     <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]">
@@ -134,7 +134,7 @@ export const OrganizedTournamentCard = ({
                         <div className="space-y-3">
                             {isTooLate ? (
                                 <div className="py-3 px-4 text-center border border-dashed border-danger/30 rounded-xl bg-danger/5">
-                                    <p className="text-xs sm:text-sm font-black text-danger leading-tight uppercase px-2">
+                                    <p className="text-xs sm:text-sm font-black text-danger leading-tight px-2">
                                         {t('dashboard.alerts.h2_locked')}
                                     </p>
                                 </div>

@@ -39,9 +39,9 @@ const InfoItem = ({ icon, label, value, color }: { icon: string, label: string, 
                 <div className="w-10 h-10 rounded-xl bg-black/20 border border-white/5 flex items-center justify-center text-xl shadow-inner">
                     {icon}
                 </div>
-                <span className="text-[9px] uppercase font-black tracking-[0.2em] opacity-40">{label}</span>
+                <span className="text-[9px] font-black tracking-[0.2em] opacity-40">{label}</span>
             </div>
-            <p className="text-white font-black uppercase text-xs sm:text-sm leading-tight break-words">
+            <p className="text-white font-black text-xs sm:text-sm leading-tight break-words">
                 {cleanedValue}
             </p>
         </div>
@@ -200,7 +200,7 @@ export default function MatchDetailsPage() {
 
                         {isAdmin && user?.id !== match.owner_id && (
                             <div className="flex flex-col sm:flex-row gap-2 bg-danger/5 p-2 rounded-2xl border border-danger/20 animate-pulse">
-                                <span className="text-xs sm:text-sm font-bold text-danger uppercase px-2 py-1">Outils Modération (ADMIN)</span>
+                                <span className="text-xs sm:text-sm font-bold text-danger px-2 py-1">Outils Modération (ADMIN)</span>
                                 <div className="flex gap-2">
                                     <Button
                                         color="danger"
@@ -220,7 +220,7 @@ export default function MatchDetailsPage() {
                                         color="danger"
                                         size="sm"
                                         variant="bordered"
-                                        className="font-black uppercase tracking-tighter"
+                                        className="font-black tracking-tighter"
                                         isLoading={isBlocking}
                                         startContent={
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -266,11 +266,11 @@ export default function MatchDetailsPage() {
 
                                         <div className="flex-1 space-y-4">
                                             <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                                                <Chip size="sm" color={match.type === 'tournament' ? 'warning' : 'primary'} variant="shadow" className="font-black uppercase tracking-tighter shadow-lg shadow-primary/20">
+                                                <Chip size="sm" color={match.type === 'tournament' ? 'warning' : 'primary'} variant="shadow" className="font-black tracking-tighter shadow-lg shadow-primary/20">
                                                     {match.type === 'tournament' ? '🏆 TOURNOI' : '⚽ MATCH AMICAL'}
                                                 </Chip>
                                                 {match.status === 'found' && (
-                                                    <Chip size="sm" color="success" variant="shadow" className="font-black uppercase tracking-tighter">COMPLET</Chip>
+                                                    <Chip size="sm" color="success" variant="shadow" className="font-black">Complet</Chip>
                                                 )}
                                             </div>
 
@@ -278,7 +278,7 @@ export default function MatchDetailsPage() {
                                                 <h1 className="text-xl md:text-4xl font-black text-white leading-tight tracking-tighter mb-2 break-words [overflow-wrap:anywhere]">
                                                     {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : match.club?.name)}
                                                 </h1>
-                                                <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold uppercase tracking-widest text-[9px] md:text-xs">
+                                                <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold tracking-widest text-[9px] md:text-xs">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-primary shrink-0">
                                                         <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                                                     </svg>
@@ -289,13 +289,13 @@ export default function MatchDetailsPage() {
                                             {!isMasked && (
                                                 <div className="flex flex-col gap-3 pt-2">
                                                     <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-3">
-                                                        <p className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Localisation précise</p>
+                                                        <p className="text-[10px] text-default-400 font-black tracking-widest mb-1">Localisation précise</p>
                                                         <p className="text-white font-bold text-sm break-words">{match.location_address || match.club?.address}</p>
                                                     </div>
                                                     <Button
                                                         variant="shadow"
                                                         color="primary"
-                                                        className="font-black uppercase tracking-tighter h-auto py-3 px-6 rounded-2xl"
+                                                        className="font-black tracking-tighter h-auto py-3 px-6 rounded-2xl"
                                                         as="a"
                                                         href={(match.club?.latitude && match.club?.longitude && (!match.location_address || match.location_address === match.club.address))
                                                             ? `https://www.google.com/maps/dir/?api=1&destination=${match.club.latitude},${match.club.longitude}`
@@ -370,8 +370,8 @@ export default function MatchDetailsPage() {
                                 {match.jersey_color && (
                                     <div className="bg-[#1c1c1f] rounded-3xl p-6 border border-white/5 flex items-center justify-between">
                                         <div>
-                                            <p className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Couleurs de maillot</p>
-                                            <p className="text-white font-bold uppercase">{t('matchForm.labels.jersey_color', 'Principal')}</p>
+                                            <p className="text-[10px] text-default-400 font-black tracking-widest mb-1">Couleurs de maillot</p>
+                                            <p className="text-white font-bold">{t('matchForm.labels.jersey_color', 'Principal')}</p>
                                         </div>
                                         <JerseyColorDots colors={match.jersey_color} size="lg" />
                                     </div>
@@ -379,7 +379,7 @@ export default function MatchDetailsPage() {
                                 {match.type === 'tournament' && (
                                     <div className="bg-[#1c1c1f] rounded-3xl p-6 border border-white/5 flex items-center justify-between">
                                         <div>
-                                            <p className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Inscriptions</p>
+                                            <p className="text-[10px] text-default-400 font-black tracking-widest mb-1">Inscriptions</p>
                                             <p className="text-white font-bold">{match.accepted_count || 0} / {match.max_teams} Équipes confirmées</p>
                                         </div>
                                         <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary flex items-center justify-center font-black text-xs text-primary">
@@ -391,7 +391,7 @@ export default function MatchDetailsPage() {
 
                             {cleanNotes && (
                                 <div className="bg-linear-to-br from-amber-500/10 to-orange-500/5 rounded-3xl p-8 border border-amber-500/20">
-                                    <h3 className="font-black text-xl text-amber-500 uppercase tracking-tighter mb-4 flex items-center gap-3">
+                                    <h3 className="font-black text-xl text-amber-500 tracking-tighter mb-4 flex items-center gap-3">
                                         <span className="text-2xl">📝</span> {t('matchForm.labels.notes', 'Notes & Instructions')}
                                     </h3>
                                     <div className="text-default-300 font-medium leading-relaxed italic text-lg opacity-80 border-l-2 border-amber-500/30 pl-6">
@@ -405,30 +405,30 @@ export default function MatchDetailsPage() {
                         <div className="flex flex-col gap-4">
 
                             <Card className="shadow-2xl border-none bg-linear-to-br from-primary/10 to-secondary/10 overflow-hidden">
-                                <CardHeader className="font-black bg-primary/20 text-white justify-center uppercase tracking-widest text-xs py-3 border-b border-white/5">Action Requise</CardHeader>
+                                <CardHeader className="font-black bg-primary/20 text-white justify-center tracking-widest text-xs py-3 border-b border-white/5">Action Requise</CardHeader>
                                 <CardBody className="gap-6 p-8">
                                     {user?.id === match.owner_id ? (
                                         <div className="text-center space-y-4">
                                             {match.contacts?.some(c => c.status === 'accepted') ? (
                                                 <div className="bg-emerald-500/20 border-2 border-emerald-500/30 p-5 rounded-[2rem] space-y-4 mb-4 animate-appearance-in">
-                                                    <p className="text-emerald-400 font-black text-center uppercase text-sm tracking-widest flex items-center justify-center gap-2">
+                                                    <p className="text-emerald-400 font-black text-center text-sm tracking-widest flex items-center justify-center gap-2">
                                                         Confirmed ✅
                                                     </p>
                                                     <Button
                                                         color="danger"
                                                         variant="shadow"
-                                                        className="w-full font-black uppercase tracking-tighter h-12 rounded-2xl shadow-lg shadow-rose-500/20"
+                                                        className="w-full font-black tracking-tighter h-12 rounded-2xl shadow-lg shadow-rose-500/20"
                                                         onPress={onCancelAcceptedOpen}
                                                     >
                                                         {match.type === 'tournament' ? 'Annuler le tournoi' : 'Annuler le duel'}
                                                     </Button>
                                                 </div>
                                             ) : (
-                                                <p className="text-default-400 text-sm font-bold uppercase tracking-wide opacity-60">Gestion de l'organisateur</p>
+                                                <p className="text-default-400 text-sm font-bold tracking-wide opacity-60">Gestion de l'organisateur</p>
                                             )}
                                             <Button 
                                                 variant="shadow" 
-                                                className="w-full font-black uppercase tracking-tighter h-14 rounded-2xl bg-white text-black shadow-xl" 
+                                                className="w-full font-black tracking-tighter h-14 rounded-2xl bg-white text-black shadow-xl" 
                                                 as={Link} 
                                                 to={`/matches/${id}/edit`}
                                                 startContent={<span className="text-xl">✍️</span>}
@@ -439,7 +439,7 @@ export default function MatchDetailsPage() {
                                                 <Button
                                                     color="success"
                                                     variant="shadow"
-                                                    className="w-full font-black uppercase tracking-tighter h-14 rounded-2xl shadow-lg shadow-emerald-500/20"
+                                                    className="w-full font-black tracking-tighter h-14 rounded-2xl shadow-lg shadow-emerald-500/20"
                                                     onPress={onCloseRegOpen}
                                                     startContent={<span className="text-xl">🔒</span>}
                                                 >
@@ -457,14 +457,14 @@ export default function MatchDetailsPage() {
                                                 if (userContact?.status === 'accepted') {
                                                     return (
                                                         <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-4 animate-appearance-in">
-                                                            <p className="text-emerald-400 font-black text-center uppercase text-sm tracking-widest flex items-center justify-center gap-2">
+                                                            <p className="text-emerald-400 font-black text-center text-sm tracking-widest flex items-center justify-center gap-2">
                                                                 DUEL CONFIRMÉ ! ✅
                                                             </p>
                                                             <div className="grid grid-cols-2 gap-2 mt-2">
                                                                 <Button
                                                                     color="warning"
                                                                     variant="flat"
-                                                                    className="font-black uppercase tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
+                                                                    className="font-black tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
                                                                     onPress={() => window.location.href = `tel:${match.phone}`}
                                                                 >
                                                                     📞 Appeler
@@ -472,7 +472,7 @@ export default function MatchDetailsPage() {
                                                                 <Button
                                                                     color="secondary"
                                                                     variant="flat"
-                                                                    className="font-black uppercase tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
+                                                                    className="font-black tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
                                                                     onPress={() => window.location.href = `mailto:${match.email}`}
                                                                 >
                                                                     ✉️ Email
@@ -494,7 +494,7 @@ export default function MatchDetailsPage() {
                                                 if (userContact?.status === 'refused') {
                                                     return (
                                                         <div className="p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl">
-                                                            <p className="text-danger font-black text-center uppercase text-sm tracking-tighter">Demande Refusée</p>
+                                                            <p className="text-danger font-black text-center text-sm tracking-tighter">Demande Refusée</p>
                                                         </div>
                                                     );
                                                 }
@@ -508,7 +508,7 @@ export default function MatchDetailsPage() {
                                                             <Button
                                                                 color="warning"
                                                                 variant="flat"
-                                                                className="font-black uppercase tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
+                                                                className="font-black tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
                                                                 onPress={() => {
                                                                     if (isMasked) {
                                                                         openGateway("Veuillez compléter votre profil pour effectuer cette action");
@@ -531,7 +531,7 @@ export default function MatchDetailsPage() {
                                                             <Button
                                                                 color="secondary"
                                                                 variant="flat"
-                                                                className="font-black uppercase tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
+                                                                className="font-black tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
                                                                 onPress={() => {
                                                                     if (isMasked) {
                                                                         openGateway("Veuillez compléter votre profil pour effectuer cette action");
@@ -554,13 +554,13 @@ export default function MatchDetailsPage() {
                                                         </div>
                                                         <div className="relative flex items-center py-2">
                                                             <div className="flex-1 border-t border-default-100/10"></div>
-                                                            <span className="shrink-0 px-2 text-default-500 text-xs font-bold uppercase tracking-widest">ou</span>
+                                                            <span className="shrink-0 px-2 text-default-500 text-xs font-bold tracking-widest">ou</span>
                                                             <div className="flex-1 border-t border-default-100/10"></div>
                                                         </div>
 
                                                         {isProfileIncomplete && (
                                                             <div className="bg-danger/10 border border-danger/20 p-3 rounded-xl mb-2 animate-appearance-in">
-                                                                <p className="text-danger text-xs sm:text-sm font-bold text-center uppercase">
+                                                                <p className="text-danger text-xs sm:text-sm font-bold text-center">
                                                                     {t('profile_incomplete', 'Complète ton profil club pour postuler à ce match')}
                                                                 </p>
                                                             </div>
@@ -570,7 +570,7 @@ export default function MatchDetailsPage() {
                                                             <Button
                                                                 color="danger"
                                                                 variant="shadow"
-                                                                className="w-full font-black uppercase tracking-tighter h-12 shadow-lg shadow-danger/20 border border-danger/20"
+                                                                className="w-full font-black tracking-tighter h-12 shadow-lg shadow-danger/20 border border-danger/20"
                                                                 onPress={onCancelOpen}
                                                             >
                                                                 🗑️ Annuler ma demande
@@ -578,7 +578,7 @@ export default function MatchDetailsPage() {
                                                         ) : (
                                                             <Button
                                                                 color={isProfileIncomplete ? "default" : "primary"}
-                                                                className="w-full font-black uppercase tracking-tighter h-12 shadow-lg"
+                                                                className="w-full font-black tracking-tighter h-12 shadow-lg"
                                                                 onPress={async () => {
                                                                     if (isMasked) {
                                                                         openGateway("Veuillez compléter votre profil pour effectuer cette action");
@@ -620,7 +620,7 @@ export default function MatchDetailsPage() {
                                 
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                                     <div className="space-y-1 text-center md:text-left">
-                                        <h2 className="text-3xl font-black text-white flex items-center justify-center md:justify-start gap-3 tracking-tighter uppercase">
+                                        <h2 className="text-3xl font-black text-white flex items-center justify-center md:justify-start gap-3 tracking-tighter">
                                             <span className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-primary/10">🤝</span>
                                             Suivi des Contacts
                                         </h2>
@@ -629,7 +629,7 @@ export default function MatchDetailsPage() {
                                         </p>
                                     </div>
                                     <Chip size="lg" variant="shadow" color="primary" className="font-black px-6 self-center md:self-auto shadow-lg shadow-primary/20">
-                                        {match.contacts?.length || 0} INTÉRÊT{(match.contacts?.length || 0) > 1 ? 'S' : ''}
+                                        {match.contacts?.length || 0} Intérêt{(match.contacts?.length || 0) > 1 ? 's' : ''}
                                     </Chip>
                                 </div>
 
@@ -662,24 +662,24 @@ export default function MatchDetailsPage() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex-1 min-w-0 overflow-hidden">
-                                                                <p className="font-black text-white uppercase tracking-tighter leading-tight mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide">{contact.club_name || 'Club intéressé'}</p>
+                                                                <p className="font-black text-white tracking-tighter leading-tight mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide">{contact.club_name || 'Club intéressé'}</p>
                                                                 <div className="flex flex-col gap-0.5">
-                                                                    <p className="text-[10px] text-default-500 font-bold uppercase tracking-widest">{new Date(contact.contacted_at).toLocaleDateString()}</p>
+                                                                    <p className="text-[10px] text-default-500 font-bold tracking-widest">{new Date(contact.contacted_at).toLocaleDateString()}</p>
                                                                     {contact.message && (
-                                                                        <p className="text-[10px] text-primary font-black uppercase tracking-tighter italic opacity-80">{contact.message}</p>
+                                                                        <p className="text-[10px] text-primary font-black tracking-tighter italic opacity-80">{contact.message}</p>
                                                                     )}
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         {contact.status !== 'pending' && (
-                                                            <div className={`py-1.5 px-3 rounded-xl border border-current/20 font-black text-[10px] uppercase text-center tracking-widest ${statusConfig.color}`}>
-                                                                {contact.status === 'accepted' ? 'ÉQUIPE INSCRITE' : contact.status === 'refused' ? 'DEMANDE REFUSÉE' : 'DÉSISTEMENT'}
+                                                            <div className={`py-1.5 px-3 rounded-xl border border-current/20 font-black text-[10px] text-center tracking-widest ${statusConfig.color}`}>
+                                                                {contact.status === 'accepted' ? 'Équipe inscrite' : contact.status === 'refused' ? 'Demande refusée' : 'Désistement'}
                                                             </div>
                                                         )}
                                                         
                                                         {isActionable && (
-                                                            <Button size="sm" color="primary" variant="shadow" className="font-black uppercase tracking-tighter w-full rounded-xl">
+                                                            <Button size="sm" color="primary" variant="shadow" className="font-black tracking-tighter w-full rounded-xl">
                                                                 Voir la demande
                                                             </Button>
                                                         )}
@@ -690,7 +690,7 @@ export default function MatchDetailsPage() {
                                     ) : (
                                         <div className="col-span-full min-h-[300px] flex flex-col items-center justify-center bg-white/5 rounded-[2rem] border border-dashed border-white/10 opacity-60 p-8 text-center">
                                             <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-3xl mb-4">🌑</div>
-                                            <p className="text-default-400 font-black uppercase tracking-widest text-sm max-w-[200px] md:max-w-none">Aucune candidature pour le moment</p>
+                                            <p className="text-default-400 font-black tracking-widest text-sm max-w-[200px] md:max-w-none">Aucune candidature pour le moment</p>
                                         </div>
                                     )}
                                 </div>
@@ -703,7 +703,7 @@ export default function MatchDetailsPage() {
                         <ModalContent className="bg-[#1a1a1c] border border-white/10">
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Retirer ma candidature</ModalHeader>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">Retirer ma candidature</ModalHeader>
                                     <ModalBody>
                                         <p className="text-default-400 font-medium">
                                             Es-tu sûr de vouloir retirer ta candidature pour ce match ?
@@ -717,7 +717,7 @@ export default function MatchDetailsPage() {
                                             color="danger"
                                             onPress={handleCancelRequest}
                                             isLoading={isCancelling}
-                                            className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20"
+                                            className="font-black tracking-tighter shadow-lg shadow-danger/20"
                                         >
                                             Oui, retirer
                                         </Button>
@@ -732,7 +732,7 @@ export default function MatchDetailsPage() {
                         <ModalContent className="bg-[#1a1a1c] border border-white/10">
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Supprimer l'annonce</ModalHeader>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">Supprimer l'annonce</ModalHeader>
                                     <ModalBody>
                                         <p className="text-default-400 font-medium">
                                             Es-tu sûr de vouloir supprimer définitivement cette annonce ? Cette action est irréversible.
@@ -742,7 +742,7 @@ export default function MatchDetailsPage() {
                                         <Button variant="light" onPress={onClose} className="font-bold">
                                             {t('cancel')}
                                         </Button>
-                                        <Button color="danger" onPress={handleDelete} isLoading={isDeleting} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">
+                                        <Button color="danger" onPress={handleDelete} isLoading={isDeleting} className="font-black tracking-tighter shadow-lg shadow-danger/20">
                                             Confirmer la suppression
                                         </Button>
                                     </ModalFooter>
@@ -756,7 +756,7 @@ export default function MatchDetailsPage() {
                         <ModalContent className="bg-[#1a1a1c] border border-white/10">
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Suppression Modérateur (ADMIN)</ModalHeader>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">Suppression Modérateur (Admin)</ModalHeader>
                                     <ModalBody>
                                         <p className="text-default-400 font-medium italic">
                                             ⚠️ Attention : En tant qu'administrateur, vous allez supprimer cette annonce.
@@ -767,7 +767,7 @@ export default function MatchDetailsPage() {
                                         <Button variant="light" onPress={onClose} className="font-bold">
                                             Annuler
                                         </Button>
-                                        <Button color="danger" onPress={handleAdminDelete} isLoading={isAdminDeleting} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">
+                                        <Button color="danger" onPress={handleAdminDelete} isLoading={isAdminDeleting} className="font-black tracking-tighter shadow-lg shadow-danger/20">
                                             Supprimer définitivement
                                         </Button>
                                     </ModalFooter>
@@ -781,13 +781,13 @@ export default function MatchDetailsPage() {
                         <ModalContent className="bg-[#1a1a1c] border border-white/10">
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Bloquer l'utilisateur</ModalHeader>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">Bloquer l'utilisateur</ModalHeader>
                                     <ModalBody>
                                         <p className="text-default-400 font-medium">Voulez-vous vraiment BLOQUER cet utilisateur ? Il ne pourra plus accéder à la plateforme.</p>
                                     </ModalBody>
                                     <ModalFooter>
                                         <Button variant="light" onPress={onClose} className="font-bold">Annuler</Button>
-                                        <Button color="danger" onPress={async () => { await handleBlockUser(); onClose(); }} isLoading={isBlocking} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">Bloquer</Button>
+                                        <Button color="danger" onPress={async () => { await handleBlockUser(); onClose(); }} isLoading={isBlocking} className="font-black tracking-tighter shadow-lg shadow-danger/20">Bloquer</Button>
                                     </ModalFooter>
                                 </>
                             )}
@@ -799,7 +799,7 @@ export default function MatchDetailsPage() {
                         <ModalContent className="bg-[#1a1a1c] border border-white/10">
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Clôturer les inscriptions</ModalHeader>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">Clôturer les inscriptions</ModalHeader>
                                     <ModalBody>
                                         <p className="text-default-400 font-medium">Voulez-vous clôturer manuellement les inscriptions pour ce tournoi ?</p>
                                     </ModalBody>
@@ -808,7 +808,7 @@ export default function MatchDetailsPage() {
                                         <Button color="success" onPress={async () => {
                                             try { await closeRegistrations(); addToast({ title: "Succès", description: "Inscriptions closes", color: "success" }); onClose(); }
                                             catch (e) { addToast({ title: "Erreur", description: "Action impossible", color: "danger" }); }
-                                        }} className="font-black uppercase tracking-tighter shadow-lg shadow-success/20">Clôturer</Button>
+                                        }} className="font-black tracking-tighter shadow-lg shadow-success/20">Clôturer</Button>
                                     </ModalFooter>
                                 </>
                             )}
@@ -820,7 +820,7 @@ export default function MatchDetailsPage() {
                         <ModalContent className="bg-[#1a1a1c] border border-white/10">
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="flex flex-col gap-1 text-white font-black uppercase tracking-tighter">Annuler le duel confirmé</ModalHeader>
+                                    <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">Annuler le duel confirmé</ModalHeader>
                                     <ModalBody>
                                         <p className="text-default-400 font-medium">Attention : Vous allez annuler ce duel. L'adversaire sera notifié et l'annonce redeviendra ouverte. Continuer ?</p>
                                     </ModalBody>
@@ -830,7 +830,7 @@ export default function MatchDetailsPage() {
                                             const acceptedContact = match.contacts?.find(c => c.status === 'accepted');
                                             if (acceptedContact) updateRequestStatus(acceptedContact.user_id, 'refused');
                                             onClose();
-                                        }} className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20">Confirmer l'annulation</Button>
+                                        }} className="font-black tracking-tighter shadow-lg shadow-danger/20">Confirmer l'annulation</Button>
                                     </ModalFooter>
                                 </>
                             )}
