@@ -58,15 +58,16 @@ export class UserService {
 
         // Create new user
         const id = uuidv4();
+        const calendar_token = uuidv4();
         const result = await this.db
             .prepare(
                 `INSERT INTO users (
-          id, auth0_sub, email, firstname, lastname, subscription
+          id, auth0_sub, email, firstname, lastname, subscription, calendar_token
         ) VALUES (
-          ?, ?, ?, ?, ?, 'Free'
+          ?, ?, ?, ?, ?, 'Free', ?
         ) RETURNING *`
             )
-            .bind(id, dto.auth0_sub, dto.email, dto.firstname, dto.lastname)
+            .bind(id, dto.auth0_sub, dto.email, dto.firstname, dto.lastname, calendar_token)
             .first<User>();
 
         return this.parseUser(result)!;
@@ -122,6 +123,27 @@ export class UserService {
                 .run();
             return result.success;
         }
+    }
+
+    async getOrCreateCalendarToken(userId: string): Promise<string> {
+        const user = await this.getUserById(userId);
+        if (!user) throw new Error('User not found');
+        if (user.calendar_token) return user.calendar_token;
+
+        const newToken = uuidv4();
+        await this.db
+            .prepare('UPDATE users SET calendar_token = ? WHERE id = ?')
+            .bind(newToken, userId)
+            .run();
+        return newToken;
+    }
+
+    async getUserByCalendarToken(token: string): Promise<User | null> {
+        const result = await this.db
+            .prepare('SELECT * FROM users WHERE calendar_token = ?')
+            .bind(token)
+            .first<User>();
+        return this.parseUser(result);
     }
 
     async deleteUser(id: string): Promise<boolean> {

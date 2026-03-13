@@ -24,6 +24,7 @@ export interface User {
     is_blocked?: boolean;
     block_reason?: string | null;
     additional_sirets?: (string | { siret: string; stadium_address?: string | null })[] | null;
+    calendar_token?: string | null;
     block_count: number;
     siret_change_count: number;
     created_at: number;
@@ -58,6 +59,7 @@ export interface UpdateUserDto {
     picture?: string;
     subscription?: 'Free' | 'Pro' | 'Ultime';
     additional_sirets?: (string | { siret: string; stadium_address?: string | null })[];
+    calendar_token?: string;
     block_count?: number;
     siret_change_count?: number;
 }

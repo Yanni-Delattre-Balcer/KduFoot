@@ -552,18 +552,11 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     });
 
     /**
-     * POST /api/user/push-subscription
-     * Save the user's Web Push subscription for native push notifications.
+     * GET /api/users/me/calendar-link
+     * Returns the webcal sync URL for the user.
      */
-    router.post('/api/user/push-subscription', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+    router.get('/api/users/me/calendar-link', async (request, env) => {
+        const payload = (request as any).user;
         const sub = payload.sub;
 
         const user = await userService.getUserByAuth0Sub(sub);
@@ -571,19 +564,10 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        try {
-            const body: any = await request.json();
-            if (!body.endpoint || !body.keys) {
-                return Response.json({ success: false, error: 'Invalid push subscription' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            }
+        const token = await userService.getOrCreateCalendarToken(user.id);
+        const url = new URL(request.url);
+        const webcalUrl = `webcal://${url.host}/api/calendar/${token}.ics`;
 
-            await env.DB.prepare(
-                'UPDATE users SET push_subscription = ? WHERE id = ?'
-            ).bind(JSON.stringify(body), user.id).run();
-
-            return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-    });
+        return Response.json({ success: true, url: webcalUrl }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+    }, Permission.READ_API);
 };

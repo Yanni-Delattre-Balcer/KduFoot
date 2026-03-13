@@ -34,6 +34,7 @@ import { setupExerciseRoutes } from "./exercises";
 import { setupSessionRoutes } from "./sessions";
 import { setupMatchRoutes } from "./matches";
 import { setupAdminRoutes } from "./admin";
+import { setupCalendarRoutes } from "./calendar";
 import { Env } from "../types/env";
 
 /**
@@ -329,6 +330,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 	setupSessionRoutes(router, env);
 	setupMatchRoutes(router, env);
 	setupAdminRoutes(router, env);
+	setupCalendarRoutes(router, env);
 	// Preserve the original root response for backwards compatibility
 	router.get("/", async () => {
 		return new Response("KduFoot API is running", {
