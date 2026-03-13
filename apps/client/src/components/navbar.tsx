@@ -113,18 +113,18 @@ export const Navbar = () => {
       isBlurred={false}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className={`fixed top-0 left-0 right-0 m-0! p-0! bg-background/80 backdrop-blur-sm z-50 transition-all duration-300 pt-[env(safe-area-inset-top,20px)] lg:pt-0 h-24 lg:h-20 ${
+      className={`fixed top-0 left-0 right-0 m-0! p-0! bg-background/80 backdrop-blur-sm z-50 transition-all duration-500 pt-[env(safe-area-inset-top,20px)] lg:pt-0 h-[calc(70px+env(safe-area-inset-top,20px))] lg:h-[70px] ${
         isScrolled 
           ? 'shadow-lg shadow-black/30 border-b border-default-200/50' 
           : 'border-none shadow-none'
       }`}
       classNames={{
-        wrapper: "h-full items-end pb-0 lg:items-center lg:pb-0 px-0",
-        content: "h-full items-end pb-0 lg:items-center lg:pb-0"
+        wrapper: "h-full items-end pb-2 lg:items-center lg:pb-0 px-0",
+        content: "h-full items-end pb-2 lg:items-center lg:pb-0"
       }}
     >
       {/* Absolute Logo - Stays on the same line as nav items but far left */}
-      <div className="absolute left-1 h-full flex items-end pb-0 lg:items-center lg:pb-0 z-[60]">
+      <div className="absolute left-1 h-full flex items-end pb-2 lg:items-center lg:pb-0 z-[60]">
         <a href="/" className="flex items-center active:scale-95 transition-transform" aria-label={t('common.home', 'Accueil')}>
           <img
             src="/logo.png"
@@ -171,7 +171,7 @@ export const Navbar = () => {
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarContent className="lg:hidden flex basis-1 items-end justify-end pr-1 h-full pb-0" justify="end">
+      <NavbarContent className="lg:hidden flex basis-1 items-end justify-end pr-1 h-full pb-2" justify="end">
         <NavbarMenuToggle
           className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
           srOnlyText="Menu"

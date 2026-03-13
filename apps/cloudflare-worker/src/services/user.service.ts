@@ -62,9 +62,9 @@ export class UserService {
         const result = await this.db
             .prepare(
                 `INSERT INTO users (
-          id, auth0_sub, email, firstname, lastname, subscription, calendar_token
+          id, auth0_sub, email, firstname, lastname, subscription, calendar_token, push_subscription
         ) VALUES (
-          ?, ?, ?, ?, ?, 'Free', ?
+          ?, ?, ?, ?, ?, 'Free', ?, NULL
         ) RETURNING *`
             )
             .bind(id, dto.auth0_sub, dto.email, dto.firstname, dto.lastname, calendar_token)

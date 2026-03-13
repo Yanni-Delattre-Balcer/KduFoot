@@ -1,17 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
-import { Calendar, Bell, ChevronRight, X, CheckCircle2 } from "lucide-react";
+import { Bell, ChevronRight, X, CheckCircle2 } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useLocation } from "react-router-dom";
 import { api } from "../services/api";
+import { addToast } from "@heroui/toast";
 
 import { useUser } from "../authentication";
 
 export const CalendarSyncBanner: React.FC = () => {
-    const { getAccessTokenSilently } = useAuth0();
-    const { user } = useUser();
+    const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+    const { user, updateUser } = useUser();
+    const location = useLocation();
     const [isVisible, setIsVisible] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
+
+    useEffect(() => {
+        // If user is already synced and has push, don't show the banner
+        const checkStatus = async () => {
+            if (user?.calendar_token && Notification.permission === 'granted') {
+                setIsVisible(false);
+                return;
+            }
+        };
+        checkStatus();
+    }, [user?.calendar_token]);
+
+    useEffect(() => {
+        const handleShow = () => {
+            setIsVisible(true);
+            sessionStorage.removeItem("calendar-banner-dismissed");
+        };
+        window.addEventListener('kdufoot_show_auth_tunnel', handleShow);
+        return () => window.removeEventListener('kdufoot_show_auth_tunnel', handleShow);
+    }, []);
 
     useEffect(() => {
         // If user is already synced, don't show the banner
@@ -34,19 +57,70 @@ export const CalendarSyncBanner: React.FC = () => {
         }
     }, [user?.calendar_token]);
 
-    const handleConnect = async () => {
+    const urlBase64ToUint8Array = (base64String: string) => {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    };
+
+    const subscribeToPush = async () => {
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const vapidPublicKey = import.meta.env.VAPID_PUBLIC_KEY;
+            
+            if (!vapidPublicKey) {
+                console.warn("VAPID Public Key missing");
+                return false;
+            }
+
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+            });
+
+            // Save to backend
+            await updateUser({
+                push_subscription: JSON.stringify(subscription)
+            });
+            
+            return true;
+        } catch (error) {
+            console.error("Push subscription failed:", error);
+            return false;
+        }
+    };
+
+    const handleAllEnable = async () => {
         setIsSyncing(true);
+        
+        // 1. Notifications
+        if (Notification.permission !== 'granted') {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                await subscribeToPush();
+                addToast({ title: "Notifications activées !", color: "success" });
+            }
+        } else {
+            await subscribeToPush();
+        }
+
+        // 2. Calendar
         try {
             const data = await api.get("/api/users/me/calendar-link", getAccessTokenSilently);
             if (data && (data as any).url) {
-                // Trigger the webcal link
                 window.location.href = (data as any).url;
-                // Once clicked/connected, we can consider it "done" for this session or permanently?
-                // The prompt says "Si le flux est déjà actif, l'application ne doit plus jamais afficher cette demande."
-                // The backend will set the token, so user.calendar_token will be populated on next refetch.
+                addToast({ title: "Synchronisation calendrier lancée !", color: "success" });
             }
         } catch (error) {
             console.error("Failed to fetch calendar link", error);
+            addToast({ title: "Échec de la synchronisation calendrier", color: "danger" });
         } finally {
             setIsSyncing(false);
         }
@@ -62,7 +136,7 @@ export const CalendarSyncBanner: React.FC = () => {
         localStorage.setItem("calendar-banner-never-show", "true");
     };
 
-    if (!isVisible) return null;
+    if (!isAuthenticated || !isVisible || location.pathname === '/') return null;
 
     return (
         <Card 
@@ -75,10 +149,10 @@ export const CalendarSyncBanner: React.FC = () => {
                 <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400">
-                            <Calendar size={24} strokeWidth={2.5} />
+                            <Bell size={24} strokeWidth={2.5} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-white tracking-tight">Synchronisation Calendrier</h3>
+                            <h3 className="font-bold text-white tracking-tight">Alertes & Calendrier</h3>
                             <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mt-0.5">Nouveauté</p>
                         </div>
                     </div>
@@ -94,18 +168,18 @@ export const CalendarSyncBanner: React.FC = () => {
                 </div>
 
                 <p className="text-sm text-white/70 leading-relaxed">
-                    Restez informé de vos matchs et tournois ! Connectez votre calendrier pour synchroniser automatiquement vos rencontres et recevoir des rappels.
+                    Ne ratez aucune info ! Activez les notifications pour les alertes de match et synchronisez votre calendrier pour ne plus rien oublier.
                 </p>
 
                 <div className="flex flex-col gap-2.5 mt-2">
                     <Button 
                         color="primary" 
-                        onPress={handleConnect}
+                        onPress={handleAllEnable}
                         isLoading={isSyncing}
                         className="w-full font-black tracking-tight h-12 bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/20 group"
                         endContent={!isSyncing && <ChevronRight size={18} className="group-hover:translate-x-0.5 transition-transform" />}
                     >
-                        Connecter maintenant
+                        Tout activer
                     </Button>
                     
                     <div className="flex gap-2">
@@ -121,7 +195,7 @@ export const CalendarSyncBanner: React.FC = () => {
                             onPress={handleNever}
                             className="flex-1 font-bold text-xs h-9 text-white/40 hover:text-white/60"
                         >
-                            Je ne veux pas
+                            Déjà fait
                         </Button>
                     </div>
 

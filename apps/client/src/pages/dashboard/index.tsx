@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard, Bell } from 'lucide-react';
 import DefaultLayout from '@/layouts/default';
 import { useMatches } from '@/hooks/use-matches';
 import { matchService } from '@/services/matches';
@@ -352,25 +352,28 @@ export default function DashboardPage() {
                             {t('dashboard.subtitle')}
                         </p>
 
-                        {/* Push notification activation button for iOS */}
-                        {'Notification' in window && Notification.permission === 'default' && (
-                            <Button
-                                color="warning"
-                                variant="flat"
-                                size="sm"
-                                className="font-bold text-xs tracking-wide mt-2 shadow-lg shadow-orange-500/10 border border-orange-500/20"
-                                startContent={<span>🔔</span>}
-                                onPress={async () => {
-                                    const perm = await Notification.requestPermission();
-                                    if (perm === 'granted') {
-                                        window.dispatchEvent(new CustomEvent('kdufoot_push_granted'));
-                                    }
-                                }}
-                                aria-label="Activer les notifications push"
-                            >
-                                Activer les alertes
-                            </Button>
-                        )}
+                        {/* Unified Alertes & Calendrier Widget */}
+                        <div className="mt-2 group">
+                            {Notification.permission === 'granted' && user?.calendar_token ? (
+                                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20 text-success font-black text-xs">
+                                    <Bell size={14} />
+                                    <span>Alertes & Calendrier : Activé ✅</span>
+                                </div>
+                            ) : (
+                                <Button
+                                    color="warning"
+                                    variant="flat"
+                                    size="sm"
+                                    className="font-black text-xs tracking-tight shadow-lg shadow-orange-500/10 border border-orange-500/20 h-9 px-5 group-hover:scale-105 transition-transform"
+                                    startContent={<Bell size={16} className="animate-pulse" />}
+                                    onPress={() => {
+                                        window.dispatchEvent(new CustomEvent('kdufoot_show_auth_tunnel'));
+                                    }}
+                                >
+                                    Alertes & Calendrier : Finaliser la configuration
+                                </Button>
+                            )}
+                        </div>
 
                         {isLocked && (
                             <div className="mt-6 flex flex-col items-center gap-3 animate-appearance-in w-full max-w-2xl">
