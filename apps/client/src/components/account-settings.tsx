@@ -1,5 +1,6 @@
 import { Button } from "@heroui/button";
 import { addToast } from "@heroui/toast";
+
 import { Image } from "@heroui/image";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
@@ -718,7 +719,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 {dbUser?.club_id ? (
                                     <div className="mt-6 p-6 bg-red-900/20 border-2 border-red-500/50 rounded-2xl text-center shadow-2xl shadow-red-900/20">
                                         <p className="text-xl font-black text-red-500 uppercase tracking-tight mb-2">
-                                            {t('account.support.title')}
+                                            {t('support.need_help')}
                                         </p>
                                         <p className="text-base font-bold text-white mb-6">
                                             {t('account.support.description')}
@@ -741,7 +742,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                             ⚠️ <strong>{t('warning')} :</strong> {t('account.siret.warning_title')}
                                         </p>
                                         <p className="text-xs sm:text-sm leading-tight text-default-500 italic">
-                                            {t('account.siret.warning_desc')}
+                                            {t('account.siret.warning_desc', 'Pour toute modification ultérieure, vous devrez contacter le support technique.')}
                                         </p>
                                     </div>
                                 )}
@@ -750,27 +751,48 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </div>
                 </div>
 
-                <div className="w-full flex md:w-auto flex-col gap-3 sm:flex-row sm:justify-start mt-8 pt-6 border-t border-white/10">
-                    <Button
-                        color="primary"
-                        onPress={handleSave}
-                        isLoading={isSaving}
-                        isDisabled={isDeleting}
-                        className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider order-1"
-                    >
-                        {from ? t('account.buttons.save_and_continue') : t('account.buttons.save_changes')}
-                    </Button>
+                <div className="w-full flex md:w-auto flex-col gap-3 mt-8 pt-6 border-t border-white/10">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <Button
+                            as="a"
+                            href={`mailto:support@kdufoot.com?subject=${t('support.technical_issue_subject', 'Problème Technique - Kdufoot')}`}
+                            variant="flat"
+                            className="bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 font-bold flex-1 h-12"
+                        >
+                            🛠️ {t('support.technical_issue')}
+                        </Button>
+                        <Button
+                            as="a"
+                            href={`mailto:support@kdufoot.com?subject=${t('support.other_inquiry_subject', 'Autre Demande - Kdufoot')}`}
+                            variant="flat"
+                            className="bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 font-bold flex-1 h-12"
+                        >
+                            📩 {t('support.other_inquiry')}
+                        </Button>
+                    </div>
 
-                    <Button
-                        color="danger"
-                        variant="bordered"
-                        onPress={handleDeleteAccount}
-                        isLoading={isDeleting}
-                        isDisabled={isSaving}
-                        className="font-bold px-8 w-full sm:w-auto uppercase tracking-wider order-2 sm:ml-auto"
-                    >
-                        {t('account.buttons.delete_account')}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <Button
+                            color="primary"
+                            onPress={handleSave}
+                            isLoading={isSaving}
+                            isDisabled={isDeleting}
+                            className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto uppercase tracking-wider order-1"
+                        >
+                            {from ? t('account.buttons.save_and_continue') : t('account.buttons.save_changes')}
+                        </Button>
+
+                        <Button
+                            color="danger"
+                            variant="bordered"
+                            onPress={handleDeleteAccount}
+                            isLoading={isDeleting}
+                            isDisabled={isSaving}
+                            className="font-bold px-8 w-full sm:w-auto uppercase tracking-wider order-2 sm:ml-auto"
+                        >
+                            {t('account.buttons.delete_account')}
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -11,6 +11,7 @@ import { Level, PitchType } from '@/types/match.types';
 import { useUser } from '@/hooks/use-user';
 import { addToast } from "@heroui/toast";
 import { useMatches } from '@/hooks/use-matches';
+import { JerseyColorDots } from '@/components/jersey-color-dots';
 
 interface TournamentFormProps {
     initialData?: any;
@@ -441,6 +442,20 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
                                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
                                 size="sm"
                             />
+                        </div>
+
+                        <div className="bg-[#160d21]/50 border border-[#2a1b3d] rounded-2xl p-4 flex items-center justify-between group cursor-pointer" onClick={() => showLockedInfo('jersey')}>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] font-black uppercase text-purple-400 tracking-widest pl-1">{t('matchForm.labels.jersey_color', 'Couleurs de maillot')}</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-white font-bold pl-1 uppercase">{formData.jersey_color || "Non spécifiée"}</span>
+                                    {formData.jersey_color && <JerseyColorDots colors={formData.jersey_color} size="md" />}
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 bg-purple-500/10 text-purple-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-purple-500/20 group-hover:bg-purple-500/20 transition-all uppercase">
+                                <span>🔒</span>
+                                <span className="mb-[1px]">Modifier dans mon compte</span>
+                            </div>
                         </div>
                     </div>
 

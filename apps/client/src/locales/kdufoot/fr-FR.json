@@ -137,7 +137,9 @@
     "selected": "exercice(s)"
   },
   "training": {
-    "go": "Mon Entraînement",
+    "remove": "Retirer",
+    "add": "Ajouter",
+    "go": "C'est parti !",
     "empty": "Pas d'entraînement en cours",
     "description": "Sélectionnez des exercices depuis la bibliothèque pour construire votre séance d'entraînement.",
     "go_exercises": "Découvrir les exercices",
@@ -161,7 +163,32 @@
     "discover_exercises": "Découvrir les exercices",
     "find_matches": "Trouver un match / tournoi",
     "find_tournaments": "Trouver des tournois",
-    "remove": "Retirer des favoris"
+    "remove": "Retirer des favoris",
+    "withdraw_match": "Se désister du match",
+    "cancel_request": "Annuler ma demande"
+  },
+  "support": {
+    "technical_issue": "Problème Technique",
+    "technical_issue_subject": "Problème Technique - Kdufoot",
+    "other_inquiry": "Autre demande",
+    "other_inquiry_subject": "Autre Demande - Kdufoot",
+    "need_help": "Besoin d'aide ?"
+  },
+  "planner": {
+    "en_cours": "En cours / À venir",
+    "mes_annonces": "Mes Annonces",
+    "requests": "Demandes",
+    "confirm_delete_tournament": "Voulez-vous vraiment supprimer ce tournoi ?",
+    "confirm_delete_match": "Voulez-vous vraiment supprimer ce match ?",
+    "deleted_success": "Supprimé avec succès",
+    "no_active_match": "Aucune annonce de match active.",
+    "no_active_tournament": "Aucune annonce de tournoi active.",
+    "demandes_recues": "Demandes Reçues",
+    "mes_candidatures": "Mes Candidatures",
+    "history": {
+      "title": "Historique Match / Tournoi / Exercice"
+    },
+    "terminated": "TERMINÉ"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",
@@ -197,10 +224,12 @@
     "edit_title": "Modifier l'exercice",
     "create_button": "Créer l'exercice",
     "no_exercises_found": "Aucun exercice trouvé.",
+    "noSynopsis": "Aucun synopsis disponible.",
     "untitled": "Exercice sans titre",
     "schema": "Schéma Tactic"
   },
   "match": {
+    "vs": "vs",
     "title": "Matchs Amicaux",
     "tab_matches": "Matchs",
     "tab_tournaments": "Tournois",
@@ -331,8 +360,8 @@
       "Autre": "Autre"
     },
     "venue": {
-      "Domicile": "🏠 Domicile (Nous recevons)",
-      "Extérieur": "🚗 Extérieur (Nous nous déplaçons)",
+      "Domicile": "🏠 Home",
+      "Extérieur": "🚗 Away",
       "Neutre": "📍 Terrain neutre"
     },
     "pitch": {
@@ -390,10 +419,10 @@
     "unknown_club": "Club Inconnu",
     "found": "match(s) amical(aux) trouvé(s)",
     "found_tournament": "tournoi(s) trouvé(s)",
-    "empty_title": "Aucun match amical trouvé",
+    "empty_title": "Aucun match disponible",
     "empty_title_tournament": "Aucun tournoi trouvé",
-    "empty_desc": "Essayez de modifier vos filtres ou créez un nouveau match amical.",
-    "empty_desc_tournament": "Essayez de modifier vos filtres ou créez un nouveau tournoi amical."
+    "empty_desc": "Modifier vos filtres ou créez un nouveau match amical.",
+    "empty_desc_tournament": "Modifier vos filtres ou créez un nouveau tournoi amical."
   },
   "matchForm": {
     "title": "Informations du Match",
@@ -707,6 +736,7 @@
     },
     "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
     "toasts": {
+      "accept_success": "Demande acceptée",
       "delete_success": "Annonce supprimée avec succès",
       "all_read_success": "Toutes les modifications ont été validées"
     },
@@ -733,6 +763,7 @@
       "accept": "Accepter",
       "refuse": "Refuser",
       "view": "Détails",
+      "view_ad": "Voir l'annonce",
       "manage_registrations": "Gérer les demandes",
       "contact": "📞 Contacter",
       "itinerary": "📍 Itinéraire",
@@ -779,7 +810,8 @@
     "choose": "Choisir",
     "not_provided": "Non renseigné",
     "unknown_city": "Ville inconnue",
-    "unknown_date": "Date inconnue"
+    "unknown_date": "Date inconnue",
+    "untitled": "Sans titre"
   },
   "adminUsersPage": {
     "pageTitle": "Gestion des utilisateurs et permissions",

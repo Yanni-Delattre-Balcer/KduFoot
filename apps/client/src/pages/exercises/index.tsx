@@ -2,7 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '../../layouts/default';
 import { useExercises } from '../../hooks/use-exercises';
-import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
+import { Card, CardBody, CardFooter } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { useState } from 'react';
@@ -57,7 +57,7 @@ export default function ExercisesPage() {
                     </div>
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6">
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-center gap-4">
                             <div className="p-3 rounded-2xl bg-[linear-gradient(to_bottom_right,#f59e0b,#fbbf24)] shadow-lg shadow-amber-500/20 text-white">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
@@ -174,18 +174,12 @@ export default function ExercisesPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {exercises.map((exercise) => (
                                 <Card key={exercise.id} className="group hover:shadow-lg hover:shadow-amber-500/10 transition-all bg-[#202124] border border-amber-500/20 hover:border-amber-500/40">
-                                    <CardHeader className="pb-0 pt-4 px-4 flex-col items-start gap-1">
-                                        <div className="flex justify-between w-full">
-                                            <Chip size="sm" variant="flat" color="warning" className="font-semibold">{t(`enums.category.${exercise.category}`)}</Chip>
-                                        </div>
-                                        <small className="text-default-400">{exercise.themes}</small>
-                                        <h4 className="font-bold text-large group-hover:text-amber-500 transition-colors">{exercise.title}</h4>
-                                    </CardHeader>
-                                    <CardBody className="overflow-visible py-3">
+                                    <div className="flex flex-col items-center pt-5 px-4 gap-4">
+                                        {/* 1. Icon/Thumbnail (Top) */}
                                         <div className="w-full h-40 bg-linear-to-br from-default-50 to-default-100 rounded-xl flex items-center justify-center overflow-hidden">
                                             {exercise.thumbnail_url ? (
                                                 <Image
-                                                    alt="Card background"
+                                                    alt={exercise.title}
                                                     className="object-cover rounded-xl w-full h-full"
                                                     src={exercise.thumbnail_url}
                                                     width={270}
@@ -199,13 +193,27 @@ export default function ExercisesPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <p className="mt-3 text-sm text-default-600 line-clamp-3">
-                                            {exercise.synopsis}
+
+                                        {/* 2. Title & Category (Below icon, centered) */}
+                                        <div className="flex flex-col items-center text-center gap-1 w-full">
+                                            <Chip size="sm" variant="flat" color="warning" className="font-bold text-[10px] uppercase tracking-wider">
+                                                {t(`enums.category.${exercise.category}`)}
+                                            </Chip>
+                                            <h4 className="font-bold text-lg group-hover:text-amber-500 transition-colors line-clamp-1">{exercise.title}</h4>
+                                            <small className="text-default-400 font-medium truncate w-full">{exercise.themes}</small>
+                                        </div>
+                                    </div>
+
+                                    {/* 3. Description (Bottom) */}
+                                    <CardBody className="overflow-hidden py-3 text-center">
+                                        <p className="text-sm text-default-500 line-clamp-2 italic leading-relaxed">
+                                            {exercise.synopsis || t('exercises.noSynopsis', 'Aucune description disponible')}
                                         </p>
                                     </CardBody>
+
                                     <CardFooter className="gap-2 px-4 pb-4">
-                                        <Button as={Link} to={`/exercises/${exercise.id}`} size="sm" variant="flat" className="flex-1">
-                                            {t('details', 'Voir détails')}
+                                        <Button as={Link} to={`/exercises/${exercise.id}`} size="sm" variant="flat" className="flex-1 font-bold">
+                                            {t('details')}
                                         </Button>
                                         <Button
                                             size="sm"

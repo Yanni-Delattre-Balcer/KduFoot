@@ -275,7 +275,7 @@ export default function MatchDetailsPage() {
                                             </div>
 
                                             <div className="w-full">
-                                                <h1 className="text-xl md:text-4xl font-black text-white leading-tight tracking-tighter mb-2 break-words flex-wrap">
+                                                <h1 className="text-xl md:text-4xl font-black text-white leading-tight tracking-tighter mb-2 break-words [overflow-wrap:anywhere]">
                                                     {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : match.club?.name)}
                                                 </h1>
                                                 <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold uppercase tracking-widest text-[9px] md:text-xs">
@@ -287,10 +287,10 @@ export default function MatchDetailsPage() {
                                             </div>
 
                                             {!isMasked && (
-                                                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                                                <div className="flex flex-col gap-3 pt-2">
                                                     <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-3">
                                                         <p className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Localisation précise</p>
-                                                        <p className="text-white font-bold text-sm truncate">{match.location_address || match.club?.address}</p>
+                                                        <p className="text-white font-bold text-sm break-words">{match.location_address || match.club?.address}</p>
                                                     </div>
                                                     <Button
                                                         variant="shadow"
@@ -401,51 +401,8 @@ export default function MatchDetailsPage() {
                             )}
                         </div>
 
-                        {/* Sidebar: Club & Contact */}
+                        {/* Sidebar: Contact */}
                         <div className="flex flex-col gap-4">
-                            {/* Club Organizer Card */}
-                            <Card className="bg-[#1c1c1f] shadow-2xl border-none overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none group-hover:bg-primary/10 transition-all" />
-                                <CardHeader className="font-black text-center border-b border-white/5 justify-center pb-4 text-white uppercase tracking-widest text-xs opacity-60">Club Organisateur</CardHeader>
-                                <CardBody className="flex flex-col items-center gap-6 py-8 relative">
-                                    {match.club?.logo_url ? (
-                                        <div className="w-28 h-28 bg-[#111] rounded-[2rem] p-4 border border-white/5 flex items-center justify-center shadow-inner">
-                                            <Image
-                                                alt={match.club.name}
-                                                src={match.club.logo_url}
-                                                width={100}
-                                                height={100}
-                                                className="object-contain drop-shadow-2xl"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="w-28 h-28 bg-linear-to-br from-zinc-700 to-zinc-900 rounded-[2rem] flex items-center justify-center shadow-2xl border border-white/10">
-                                            <span className="text-4xl font-black text-white">{match.club?.name?.charAt(0)}</span>
-                                        </div>
-                                    )}
-                                    <div className="text-center space-y-1">
-                                        <h3 className="font-black text-2xl text-white leading-tight uppercase tracking-tighter">{isMasked ? 'CLUB MASQUÉ' : match.club?.name}</h3>
-                                        <p className="text-primary font-black uppercase text-sm tracking-widest">{isMasked ? 'VILLE MASQUÉE' : match.club?.city}</p>
-                                        
-                                        {!isMasked && (match.club?.home_jersey_color || match.club?.away_jersey_color) && (
-                                            <div className="flex justify-center gap-4 pt-4 mt-4 border-t border-white/5">
-                                                {match.club.home_jersey_color && (
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className="text-[10px] text-zinc-500 font-black uppercase tracking-tighter">Home</span>
-                                                        <JerseyColorDots colors={match.club.home_jersey_color} size="sm" />
-                                                    </div>
-                                                )}
-                                                {match.club.away_jersey_color && (
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        <span className="text-[10px] text-zinc-500 font-black uppercase tracking-tighter">Away</span>
-                                                        <JerseyColorDots colors={match.club.away_jersey_color} size="sm" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </CardBody>
-                            </Card>
 
                             <Card className="shadow-2xl border-none bg-linear-to-br from-primary/10 to-secondary/10 overflow-hidden">
                                 <CardHeader className="font-black bg-primary/20 text-white justify-center uppercase tracking-widest text-xs py-3 border-b border-white/5">Action Requise</CardHeader>
@@ -493,7 +450,56 @@ export default function MatchDetailsPage() {
                                     ) : (
                                         <>
                                             {(() => {
+                                                const userContact = match.contacts?.find(c => c.user_id === user?.id);
                                                 const isProfileIncomplete = !user?.level || !user?.category || !user?.pitch_type || !user?.club_colors;
+
+                                                // STATE: Accepted → show only "DUEL CONFIRMÉ" block
+                                                if (userContact?.status === 'accepted') {
+                                                    return (
+                                                        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-4 animate-appearance-in">
+                                                            <p className="text-emerald-400 font-black text-center uppercase text-sm tracking-widest flex items-center justify-center gap-2">
+                                                                DUEL CONFIRMÉ ! ✅
+                                                            </p>
+                                                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                                                <Button
+                                                                    color="warning"
+                                                                    variant="flat"
+                                                                    className="font-black uppercase tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
+                                                                    onPress={() => window.location.href = `tel:${match.phone}`}
+                                                                >
+                                                                    📞 Appeler
+                                                                </Button>
+                                                                <Button
+                                                                    color="secondary"
+                                                                    variant="flat"
+                                                                    className="font-black uppercase tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
+                                                                    onPress={() => window.location.href = `mailto:${match.email}`}
+                                                                >
+                                                                    ✉️ Email
+                                                                </Button>
+                                                            </div>
+                                                            <Button
+                                                                color="danger"
+                                                                variant="flat"
+                                                                className="w-full font-bold text-xs sm:text-sm h-11 mt-2"
+                                                                onPress={onCancelOpen}
+                                                            >
+                                                                {match.type === 'tournament' ? 'Se désister du tournoi' : 'Se désister du match'}
+                                                            </Button>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                // STATE: Refused → show only "Demande Refusée"
+                                                if (userContact?.status === 'refused') {
+                                                    return (
+                                                        <div className="p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl">
+                                                            <p className="text-danger font-black text-center uppercase text-sm tracking-tighter">Demande Refusée</p>
+                                                        </div>
+                                                    );
+                                                }
+
+                                                // STATE: Pending or no contact → show initial request block
                                                 return (
                                                     <>
                                                         <p className="text-default-300 text-sm text-center">Vous souhaitez faire participer votre équipe ?</p>
@@ -560,7 +566,7 @@ export default function MatchDetailsPage() {
                                                             </div>
                                                         )}
 
-                                                        {match.contacts?.some(c => c.user_id === user?.id && c.message === "A porté de l'intérêt en envoyant une demande") ? (
+                                                        {userContact?.message === "A porté de l'intérêt en envoyant une demande" ? (
                                                             <Button
                                                                 color="danger"
                                                                 variant="shadow"
@@ -588,58 +594,19 @@ export default function MatchDetailsPage() {
                                                                     }
                                                                     try {
                                                                         await contactMatch({ message: "A porté de l'intérêt en envoyant une demande" });
-                                                                        addToast({ title: "Succès", description: "Demande envoyée avec succès !", variant: 'flat', color: 'success', timeout: 5000 });
+                                                                        addToast({ title: t('common.success'), description: t('matchForm.alerts.create_success'), variant: 'flat', color: 'success', timeout: 5000 });
                                                                     } catch (e: any) {
-                                                                        addToast({ title: "Erreur", description: e.message || "Erreur lors de l'envoi", variant: 'flat', color: 'danger', timeout: 5000 });
+                                                                        addToast({ title: t('common.error'), description: e.message || "Erreur lors de l'envoi", variant: 'flat', color: 'danger', timeout: 5000 });
                                                                     }
                                                                 }}
                                                                 isDisabled={isProfileIncomplete && !isMasked}
                                                             >
-                                                                {match.type === 'tournament' ? 'POSTULER AU TOURNOI' : 'ENVOYER UNE DEMANDE'}
+                                                                {match.type === 'tournament' ? t('match.find_tournament').toUpperCase() : t('homePage.buttons.find_match').toUpperCase()}
                                                             </Button>
                                                         )}
                                                     </>
                                                 );
                                             })()}
-
-                                            {match.contacts?.find(c => c.user_id === user?.id)?.status === 'accepted' && (
-                                                <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-4 animate-appearance-in">
-                                                    <p className="text-emerald-400 font-black text-center uppercase text-sm tracking-widest flex items-center justify-center gap-2">
-                                                        DUEL CONFIRMÉ ! ✅
-                                                    </p>
-                                                    <div className="grid grid-cols-2 gap-2 mt-2">
-                                                        <Button
-                                                            color="warning"
-                                                            variant="flat"
-                                                            className="font-black uppercase tracking-tighter h-12 border border-warning/20 shadow-lg shadow-warning/10"
-                                                            onPress={() => window.location.href = `tel:${match.phone}`}
-                                                        >
-                                                            📞 Appeler
-                                                        </Button>
-                                                        <Button
-                                                            color="secondary"
-                                                            variant="flat"
-                                                            className="font-black uppercase tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
-                                                            onPress={() => window.location.href = `mailto:${match.email}`}
-                                                        >
-                                                            ✉️ Email
-                                                        </Button>
-                                                    </div>
-                                                    <Button
-                                                        color="danger"
-                                                        variant="flat"
-                                                        className="w-full font-bold text-xs sm:text-sm h-11 mt-2"
-                                                        onPress={onCancelOpen}
-                                                    >
-                                                        {match.type === 'tournament' ? 'Se désister du tournoi' : 'Se désister du match'}
-                                                    </Button>
-                                                </div>
-                                            )}
-                                            {match.contacts?.find(c => c.user_id === user?.id)?.status === 'refused' && (
-                                                <div className="mt-4 p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl">
-                                                    <p className="text-danger font-black text-center uppercase text-sm tracking-tighter">Demande Refusée</p>
-                                                </div>
-                                            )}
                                         </>
                                     )}
                                 </CardBody>

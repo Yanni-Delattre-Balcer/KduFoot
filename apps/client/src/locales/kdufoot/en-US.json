@@ -121,7 +121,9 @@
     "go_exercises": "Discover exercises",
     "hero_stats": "{{count}} exercise(s) selected · Estimated duration: ~{{duration}} min",
     "hero_create": "Create your custom training session by adding exercises from the library.",
-    "add_exercises": "+ Add exercises"
+    "add_exercises": "+ Add exercises",
+    "add": "Add",
+    "remove": "Remove"
   },
   "favorites": {
     "title": "My Favorites",
@@ -139,7 +141,32 @@
     "discover_exercises": "Discover exercises",
     "find_matches": "Find a match / tournament",
     "find_tournaments": "Find tournaments",
-    "remove": "Remove from favorites"
+    "remove": "Remove from favorites",
+    "withdraw_match": "Withdraw from match",
+    "cancel_request": "Cancel my request"
+  },
+  "support": {
+    "technical_issue": "Technical issue",
+    "technical_issue_subject": "Technical Issue - Kdufoot",
+    "other_inquiry": "Other inquiry",
+    "other_inquiry_subject": "Other Inquiry - Kdufoot",
+    "need_help": "Need help?"
+  },
+  "planner": {
+    "en_cours": "Ongoing / Upcoming",
+    "mes_annonces": "My Ads",
+    "requests": "Requests",
+    "confirm_delete_tournament": "Are you sure you want to delete this tournament?",
+    "confirm_delete_match": "Are you sure you want to delete this match?",
+    "deleted_success": "Successfully deleted",
+    "no_active_match": "No active match ads.",
+    "no_active_tournament": "No active tournament ads.",
+    "demandes_recues": "Requests Received",
+    "mes_candidatures": "My Applications",
+    "history": {
+      "title": "Match / Tournament / Exercise History"
+    },
+    "terminated": "TERMINATED"
   },
   "myExercises": "My Exercises",
   "mySessions": "My Sessions",
@@ -169,11 +196,13 @@
     "create_title": "Create an exercise",
     "edit_title": "Modify the exercise",
     "create_button": "Create the exercise",
+    "noSynopsis": "No synopsis available.",
     "no_exercises_found": "No exercises found.",
     "untitled": "Untitled Exercise",
     "schema": "Tactic Diagram"
   },
   "match": {
+    "vs": "vs",
     "title": "Friendly Matches",
     "tournament": "Tournament",
     "create": "Create a friendly match",
@@ -225,6 +254,7 @@
     "create": "Plan a session",
     "description_sessions": "Organize and plan your training sessions to best prepare your players.",
     "description_matches": "Track your scheduled friendly matches and keep control of your sports calendar.",
+    "description_exercises": "Track your training sessions and video exercises.",
     "empty_sessions": "No scheduled sessions",
     "empty_matches": "No friendly matches",
     "not_scheduled": "Not scheduled",
@@ -269,7 +299,7 @@
       "U15": "U15",
       "U16": "U16",
       "U17": "U17",
-      "U18": "U18",
+      "U18": "U18 (U18 group)",
       "U19": "U19",
       "U20": "U20",
       "Séniors": "Seniors",
@@ -277,10 +307,10 @@
       "Loisir": "Leisure"
     },
     "level": {
-      "Débutant": "Beginner",
-      "Ligue": "League",
-      "Régional": "Regional",
-      "National": "National",
+      "Débutant": "Beginner level",
+      "Ligue": "League level",
+      "Régional": "Regional level",
+      "National": "National level",
       "Pro": "Professional",
       "Ligue 1": "League 1",
       "Ligue 2": "League 2",
@@ -297,15 +327,15 @@
       "Autre": "Other"
     },
     "venue": {
-      "Domicile": "🏠 Home (We host)",
-      "Extérieur": "🚗 Away (We travel)",
+      "Domicile": "🏠 Home",
+      "Extérieur": "🚗 Away",
       "Neutre": "📍 Neutral ground"
     },
     "pitch": {
-      "Herbe": "Grass",
-      "Synthétique": "Artificial",
-      "Hybride": "Hybrid",
-      "Stabilisé": "Stabilized",
+      "Herbe": "Grass pitch",
+      "Synthétique": "Artificial pitch",
+      "Hybride": "Hybrid pitch",
+      "Stabilisé": "Stabilized pitch",
       "Indoor": "All surfaces",
       "Toutes surfaces": "All surfaces"
     },
@@ -354,8 +384,11 @@
     "my_creation": "My creation",
     "unknown_club": "Unknown Club",
     "found": "friendly match(es) found",
-    "empty_title": "No friendly matches found",
-    "empty_desc": "Try modifying your filters or create a new friendly match."
+    "found_tournament": "tournament(s) found",
+    "empty_title": "No matches available",
+    "empty_title_tournament": "No tournaments found",
+    "empty_desc": "Adjust your filters or create a new friendly match.",
+    "empty_desc_tournament": "Adjust your filters or create a new friendly tournament."
   },
   "matchForm": {
     "title": "Match Information",

@@ -119,7 +119,7 @@ export const Navbar = () => {
           <img
             src="/logo.png"
             alt="KduFoot Logo"
-            className="h-10 lg:h-16 w-auto object-contain"
+            className="h-12 lg:h-20 w-auto object-contain"
           />
         </a>
       </div>
@@ -161,7 +161,7 @@ export const Navbar = () => {
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarContent className="lg:hidden flex basis-1 items-center justify-end pr-2 h-full" justify="end" style={{ paddingTop: 'env(safe-area-inset-top, 40px)' }}>
+      <NavbarContent className="lg:hidden flex basis-1 items-center justify-end pr-2 h-full" justify="end">
         <NavbarMenuToggle
           className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
           srOnlyText="Menu"

@@ -89,9 +89,9 @@ export default function DefaultLayout({
                 className="font-black uppercase tracking-tighter text-xs h-10 px-6 shadow-lg shadow-warning/5 border border-warning/10 hover:scale-105 transition-transform"
                 startContent={<span>🛠️</span>}
               >
-                Besoin d'aide ?
+                {t('support.need_help')}
               </Button>
-              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">Bugs, problèmes techniques...</span>
+              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">{t('footer.support_bugs')}</span>
             </div>
 
             <div className="h-10 w-px bg-default-200/30"></div>
@@ -106,9 +106,9 @@ export default function DefaultLayout({
                 className="font-black uppercase tracking-tighter text-xs h-10 px-6 shadow-lg shadow-primary/5 border border-primary/10 hover:scale-105 transition-transform"
                 startContent={<span>✉️</span>}
               >
-                Autres demandes
+                {t('footer.other_inquiry')}
               </Button>
-              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">Sponsors, publicité, partenariats...</span>
+              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">{t('footer.other_inquiry_desc')}</span>
             </div>
           </div>
 

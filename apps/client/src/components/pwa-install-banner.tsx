@@ -142,10 +142,10 @@ export const PwaInstallBanner = () => {
 
                             <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                    <span className="text-primary font-black text-xs">2</span>
+                                    <span className="text-primary font-black text-xs">1</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <p className="text-xs text-zinc-300 font-medium leading-relaxed">Appuyez sur le bouton <span className="text-blue-400 font-bold italic">Partager</span></p>
+                                    <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur l'icône <span className="text-blue-400 font-bold italic">Partager</span> (le carré avec la flèche vers le haut) en bas au centre.</p>
                                     <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-blue-400">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
@@ -156,23 +156,29 @@ export const PwaInstallBanner = () => {
 
                             <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                    <span className="text-primary font-black text-xs">2</span>
+                                </div>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Faites défiler le menu pour trouver le bouton <span className="text-white font-bold italic">"En savoir plus"</span>.</p>
+                            </div>
+
+                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
                                     <span className="text-primary font-black text-xs">3</span>
                                 </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Faites défiler le menu vers le bas.</p>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur la ligne <span className="text-white font-bold italic">"Sur l'écran d'accueil"</span> (généralement la 5ème option).</p>
                             </div>
 
                             <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
                                     <span className="text-primary font-black text-xs">4</span>
                                 </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur <span className="text-white font-bold italic">"Sur l'écran d'accueil"</span>.</p>
+                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Appuyez sur <span className="text-white font-bold">"Ajouter"</span> en haut à droite.</p>
                             </div>
 
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                    <span className="text-primary font-black text-xs">5</span>
-                                </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Sélectionnez-le puis faites <span className="text-white font-bold">"Ajouter"</span>.</p>
+                            <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20 mt-2">
+                                <p className="text-[10px] text-green-400 font-bold text-center leading-tight">
+                                    Votre application Kdufoot est maintenant installée sur votre écran d'accueil, prête à l'emploi !
+                                </p>
                             </div>
                         </div>
 

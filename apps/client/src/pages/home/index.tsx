@@ -53,7 +53,7 @@ export default function IndexPage() {
                   radius: "full",
                   size: "lg",
                 })}
-                href="/matches"
+                href="/matches?view=find&type=match&scroll=true"
               >
                 {t("homePage.buttons.find_match")}
               </Link>
@@ -63,7 +63,7 @@ export default function IndexPage() {
                   radius: "full",
                   size: "lg",
                 })}
-                href="/matches"
+                href="/matches?view=find&type=tournament&scroll=true"
               >
                 {t("homePage.buttons.find_tournament")}
               </Link>

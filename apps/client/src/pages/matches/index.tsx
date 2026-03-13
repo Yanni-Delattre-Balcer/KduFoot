@@ -49,14 +49,31 @@ export default function MatchesPage() {
         setSearchParams(nextParams, { replace: true });
     }, [view, type, setSearchParams]);
 
+    // Manual scroll for "Chercher" button
+    const handleManualSearch = useCallback(() => {
+        const element = document.getElementById('results-list') || document.getElementById('results-container');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, []);
+
     // Auto-scroll logic
     useEffect(() => {
-        // Case 1: Scroll to results list on load
-        if (view === 'find') {
-            const element = document.getElementById('results-container');
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+        const scrollRequested = searchParams.get('scroll') === 'true';
+        
+        // Case 1: Scroll to results list ONLY if 'scroll' param is present (e.g. from Home)
+        if (view === 'find' && scrollRequested) {
+            const timer = setTimeout(() => {
+                const element = document.getElementById('results-list') || document.getElementById('results-container');
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Remove the scroll param to prevent re-scrolling on internal pagination/filters
+                    const nextParams = new URLSearchParams(searchParams);
+                    nextParams.delete('scroll');
+                    setSearchParams(nextParams, { replace: true });
+                }
+            }, 150);
+            return () => clearTimeout(timer);
         }
 
         // Case 2: Scroll to bottom after creation
@@ -249,7 +266,7 @@ export default function MatchesPage() {
             border: "border-violet-800/50",
             titleGradient: "from-violet-800 via-violet-700 to-violet-600",
             iconColor: "text-violet-200",
-            title: t('match.title', 'Matchs Amicaux'),
+            title: t('match.tab_matches', 'Matchs Amicaux'),
             desc_find: t('matchesPage.description_find'),
             desc_create: t('matchesPage.description_create')
         },
@@ -258,7 +275,7 @@ export default function MatchesPage() {
             border: "border-purple-300/40",
             titleGradient: "from-purple-400 to-purple-300",
             iconColor: "text-purple-300",
-            title: t('matchesPage.title_tournament', 'Tournois Amicaux'),
+            title: t('match.tab_tournaments', 'Tournois Amicaux'),
             desc_find: t('matchesPage.description_find_tournament'),
             desc_create: t('matchesPage.description_create_tournament')
         }
@@ -282,13 +299,13 @@ export default function MatchesPage() {
                     </div>
 
                     <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-center gap-4">
                             <div className={`p-3 rounded-2xl ${type === 'match' ? 'bg-violet-800/20' : 'bg-purple-300/20'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`w-8 h-8 ${uiConfig.iconColor}`}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0-4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
                                 </svg>
                             </div>
-                            <h1 className={`text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r ${uiConfig.titleGradient}`}>
+                            <h1 className={`text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r ${uiConfig.titleGradient} uppercase tracking-tighter`}>
                                 {uiConfig.title}
                             </h1>
                         </div>
@@ -552,6 +569,21 @@ export default function MatchesPage() {
                                             />
                                         </div>
                                     </CardBody>
+                                    <CardFooter className="px-5 pb-5 pt-0">
+                                        <Button
+                                            color="secondary"
+                                            variant="shadow"
+                                            className="w-full font-black uppercase tracking-widest h-14 text-lg shadow-violet-500/30"
+                                            onPress={handleManualSearch}
+                                            startContent={
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                                </svg>
+                                            }
+                                        >
+                                            {type === 'match' ? t('homePage.buttons.find_match') : t('match.find_tournament')}
+                                        </Button>
+                                    </CardFooter>
                                 </Card>
 
                                 {/* Display Mode Toggle */}

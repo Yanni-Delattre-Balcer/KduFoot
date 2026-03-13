@@ -10,6 +10,7 @@ import { CreateMatchDto, Match, Level, Venue, PitchType } from '@/types/match.ty
 import { Category } from '@/types/exercise.types';
 import { useMatches } from '@/hooks/use-matches';
 import { useUser } from '@/hooks/use-user';
+import { JerseyColorDots } from '@/components/jersey-color-dots';
 
 interface MatchFormProps {
     initialData?: Match;
@@ -389,6 +390,20 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                     <SelectItem key={type}>{type}</SelectItem>
                                 ))}
                             </Select>
+                        </div>
+
+                        <div className="bg-[#160d21]/50 border border-[#2a1b3d] rounded-2xl p-4 flex items-center justify-between group cursor-pointer" onClick={() => showLockedInfo('jersey')}>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] font-black uppercase text-violet-400 tracking-widest pl-1">{t('matchForm.labels.jersey_color', 'Couleurs de maillot')}</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-white font-bold pl-1 uppercase">{formData.jersey_color || "Non spécifiée"}</span>
+                                    {formData.jersey_color && <JerseyColorDots colors={formData.jersey_color} size="md" />}
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 bg-violet-500/10 text-violet-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-violet-500/20 group-hover:bg-violet-500/20 transition-all uppercase">
+                                <span>🔒</span>
+                                <span className="mb-[1px]">Modifier dans mon compte</span>
+                            </div>
                         </div>
                     </div>
 
