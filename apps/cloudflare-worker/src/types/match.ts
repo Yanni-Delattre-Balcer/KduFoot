@@ -35,6 +35,7 @@ export interface Match {
     club_id: string;
     club?: Club; // Joined field
     type: 'match' | 'tournament';
+    name?: string;
     category: string;
     level?: string;
     format: '11v11' | '8v8' | '5v5' | 'Futsal';
@@ -46,6 +47,7 @@ export interface Match {
     location_city?: string;
     location_zip?: string;
     pitch_type?: string;
+    jersey_color?: string;
     email: string;
     phone: string;
     notes?: string;
@@ -65,6 +67,7 @@ export interface Match {
 export interface CreateMatchDto {
     club_id: string;
     type: 'match' | 'tournament';
+    name?: string;
     category: string;
     level?: string;
     format: '11v11' | '8v8' | '5v5' | 'Futsal';
@@ -76,6 +79,7 @@ export interface CreateMatchDto {
     location_city?: string;
     location_zip?: string;
     pitch_type?: string;
+    jersey_color?: string;
     email: string;
     phone: string;
     notes?: string;

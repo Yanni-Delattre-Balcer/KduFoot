@@ -33,17 +33,17 @@ export class MatchService {
 
         const result = await this.db.prepare(
             `INSERT INTO matches (
-        id, owner_id, club_id, type, category, level, format, match_date, match_time, match_end_time,
-        venue, location_address, location_city, location_zip, pitch_type,
+        id, owner_id, club_id, type, name, category, level, format, match_date, match_time, match_end_time,
+        venue, location_address, location_city, location_zip, pitch_type, jersey_color,
         email, phone, notes, max_teams, registration_fee, status, created_at
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?, 'active', ?
       ) RETURNING *`
         ).bind(
-            id, userId, dto.club_id, dto.type || 'match', dto.category, dto.level || null, dto.format, dto.match_date, dto.match_time, dto.match_end_time || null,
-            dto.venue, dto.location_address || null, dto.location_city || null, dto.location_zip || null, dto.pitch_type || null,
+            id, userId, dto.club_id, dto.type || 'match', dto.name || null, dto.category, dto.level || null, dto.format, dto.match_date, dto.match_time, dto.match_end_time || null,
+            dto.venue, dto.location_address || null, dto.location_city || null, dto.location_zip || null, dto.pitch_type || null, dto.jersey_color || null,
             dto.email, dto.phone, dto.notes || null, dto.max_teams || null, dto.registration_fee || null, now
         ).first<Match>();
 

@@ -28,7 +28,6 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  NavbarBrand,
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 
@@ -104,7 +103,6 @@ export const Navbar = () => {
     if (href === '/remerciements') return `${base} bg-[linear-gradient(to_right,#115e59,#2dd4bf,#115e59)]`;
     return "text-foreground font-bold";
   };
-
   return (
     <HeroUINavbar
       maxWidth="full"
@@ -112,19 +110,21 @@ export const Navbar = () => {
       isBlurred={false}
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
-      className={`fixed! top-0 left-0 right-0 m-0! p-0! bg-background z-50 transition-all duration-300 safe-area-top ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
+      className={`fixed top-0 left-0 right-0 m-0! p-0! bg-background/80 backdrop-blur-md z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
         }`}
     >
-      <NavbarBrand className="flex-none flex items-center justify-start h-full px-2" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      {/* Absolute Logo - Stays on the same line as nav items but far left */}
+      <div className="absolute left-4 h-full flex items-center z-[60]">
         <a href="/" className="flex items-center active:scale-95 transition-transform" aria-label={t('common.home', 'Accueil')}>
           <img
             src="/logo.png"
             alt="KduFoot Logo"
-            className="h-12 lg:h-16 w-auto object-contain"
+            className="h-10 lg:h-16 w-auto object-contain"
           />
         </a>
-      </NavbarBrand>
-      <NavbarContent className="hidden lg:flex gap-4 justify-center" justify="center">
+      </div>
+
+      <NavbarContent className="hidden lg:flex gap-6 w-full justify-center" justify="center">
         {siteConfig().navItems.map((item) => (
           <NavbarItem key={item.href}>
             <LinkUniversal
@@ -154,7 +154,7 @@ export const Navbar = () => {
         ))}
       </NavbarContent>
 
-      <NavbarContent className="hidden sm:flex basis-0 grow" justify="end">
+      <NavbarContent className="hidden sm:flex basis-0" justify="end">
         <NavbarItem className="hidden sm:flex items-center gap-2">
           <LanguageSwitch availableLanguages={availableLanguages} icon={I18nIcon} />
           <LoginLogoutButton />
@@ -206,3 +206,4 @@ export const Navbar = () => {
     </HeroUINavbar>
   );
 };
+;

@@ -171,6 +171,25 @@
         }
       }
     },
+    "/api/test-push": {
+      "get": {
+        "tags": [
+          "Development"
+        ],
+        "summary": "Test Push Notification",
+        "description": "Sends a dummy push notification to the current user to verify connectivity and VAPID setup.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Push attempt initiated."
+          }
+        }
+      }
+    },
     "/api/get_users": {
       "get": {
         "tags": [

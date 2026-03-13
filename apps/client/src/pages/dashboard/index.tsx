@@ -395,9 +395,9 @@ export default function DashboardPage() {
                     <div className="relative flex flex-col items-center gap-6 py-12 px-8">
                     <div className="relative flex flex-col items-center gap-4 w-full">
                         <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 shadow-xl shadow-amber-500/5 transition-transform hover:scale-110 duration-300">
-                            <LayoutDashboard className="w-8 h-8 text-amber-500" strokeWidth={2.5} />
+                            <LayoutDashboard className="w-8 h-8 text-amber-500" strokeWidth={1.5} />
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-bold text-[#fbbf24] tracking-tighter uppercase whitespace-nowrap overflow-x-auto scrollbar-hide">
+                        <h1 className="text-4xl md:text-6xl font-medium text-[#fbbf24] tracking-tighter uppercase whitespace-nowrap overflow-x-auto scrollbar-hide">
                             {t('dashboard.title', 'Tableau de bord')}
                         </h1>
                     </div>

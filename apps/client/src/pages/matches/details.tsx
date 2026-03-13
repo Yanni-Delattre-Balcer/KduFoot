@@ -243,7 +243,7 @@ export default function MatchDetailsPage() {
                             <Card className="shadow-2xl border-none bg-linear-to-br from-[#1c1c1f] to-[#141416] overflow-hidden">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
                                 <CardBody className="p-8 relative">
-                                    <div className="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
+                                    <div className="flex flex-col items-center md:flex-row md:items-start gap-8 text-center md:text-left">
                                         {/* Club Logo / Big Icon */}
                                         <div className="relative group">
                                             <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-xl group-hover:bg-primary/30 transition-all" />
@@ -274,15 +274,15 @@ export default function MatchDetailsPage() {
                                                 )}
                                             </div>
 
-                                            <div>
-                                                <h1 className="text-3xl md:text-4xl font-black text-white leading-none tracking-tighter mb-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                                            <div className="w-full">
+                                                <h1 className="text-2xl md:text-4xl font-black text-white leading-tight tracking-tighter mb-2 break-words">
                                                     {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : match.club?.name)}
                                                 </h1>
-                                                <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold uppercase tracking-widest text-xs">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-primary">
+                                                <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-primary shrink-0">
                                                         <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                                                     </svg>
-                                                    {isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
+                                                    <span className="truncate">{isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}</span>
                                                 </p>
                                             </div>
 
@@ -611,7 +611,7 @@ export default function MatchDetailsPage() {
                                                         <div className="flex items-center gap-2 text-white text-sm">
                                                             📞 {match.phone}
                                                         </div>
-                                                        <div className="flex items-center gap-2 text-white text-sm">
+                                                        <div className="flex items-center gap-2 text-white text-xs sm:text-sm break-all">
                                                             ✉️ {match.email}
                                                         </div>
                                                     </div>
@@ -711,9 +711,9 @@ export default function MatchDetailsPage() {
                                             )
                                         })
                                     ) : (
-                                        <div className="col-span-full py-20 flex flex-col items-center justify-center bg-white/5 rounded-[2rem] border border-dashed border-white/10 opacity-60">
+                                        <div className="col-span-full min-h-[300px] flex flex-col items-center justify-center bg-white/5 rounded-[2rem] border border-dashed border-white/10 opacity-60 p-8 text-center">
                                             <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-3xl mb-4">🌑</div>
-                                            <p className="text-default-400 font-black uppercase tracking-widest text-sm">Aucune candidature pour le moment</p>
+                                            <p className="text-default-400 font-black uppercase tracking-widest text-sm max-w-[200px] md:max-w-none">Aucune candidature pour le moment</p>
                                         </div>
                                     )}
                                 </div>
