@@ -5,6 +5,7 @@ import { Image } from "@heroui/image";
 import { Progress } from "@heroui/progress";
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { JerseyColorDots } from '@/components/jersey-color-dots';
 
 interface ConfirmedTournamentCardProps {
     participation: any;
@@ -69,13 +70,19 @@ export const ConfirmedTournamentCard = ({
                                     <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
                                         {part.host_club_name}
                                     </h3>
-                                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                                    <div className="flex flex-wrap items-center gap-3 mt-2">
                                         <Chip size="sm" variant="flat" color="secondary" className="font-black text-[10px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                             🏆 {part.name || t('enums.type.tournament')}
                                         </Chip>
                                         <Chip size="sm" variant="flat" color="warning" className="h-5 text-[9px] uppercase font-black shrink-0">
                                             ✈️ {t('dashboard.away_label')}
                                         </Chip>
+                                        {(part.host_home_jersey_color || part.host_away_jersey_color) && (
+                                            <div className="flex gap-2 items-center bg-white/5 px-2 py-0.5 rounded-lg border border-white/10 group-hover:border-purple-500/30 transition-colors">
+                                                {part.host_home_jersey_color && <JerseyColorDots colors={part.host_home_jersey_color} size="sm" />}
+                                                {part.host_away_jersey_color && <JerseyColorDots colors={part.host_away_jersey_color} size="sm" />}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DefaultLayout from '@/layouts/default';
 import { useSessions } from '@/hooks/use-sessions';
-import { useMatches } from '@/hooks/use-matches';
+import { useMatches, useMyParticipations } from '@/hooks/use-matches';
 import FootballClock from '../../components/football-clock';
 import { Card, CardBody, CardHeader, CardFooter } from '@heroui/card';
 import { addToast } from "@heroui/toast";
@@ -16,17 +16,81 @@ import { matchService } from '@/services/matches';
 import { useAuth0 } from '@auth0/auth0-react';
 import { showVideoAnalysis } from '@/config/site';
 import { useMatchRequests } from '@/hooks/use-match-requests';
+import { useUser } from '@/hooks/use-user';
 
 import DataWall from '@/components/data-wall';
 
 export default function SessionPlannerPage() {
     const { t, i18n } = useTranslation();
     const { getAccessTokenSilently } = useAuth0();
+    const { user } = useUser();
     const [view, setView] = useState<'exercises' | 'matches' | 'tournaments'>(showVideoAnalysis ? 'exercises' : 'matches');
     const { sessions, isError: isErrorSessions } = useSessions();
-    const { matches, isLoading: isLoadingMatches } = useMatches({ ownerId: 'me', include_past: true });
+    const { matches, isLoading: isLoadingMatches, deleteMatch, mutate: mutateMatches } = useMatches({ ownerId: 'me', include_past: true });
     const { requests, isLoading: isLoadingRequests, mutate: mutateRequests } = useMatchRequests();
+    const { participations } = useMyParticipations();
     const [actioningId, setActioningId] = useState<string | null>(null);
+
+    const isPassed = (dateStr: string, timeStr: string) => {
+        try {
+            const date = new Date(`${dateStr}T${timeStr || '00:00'}`);
+            return date < new Date();
+        } catch {
+            return false;
+        }
+    };
+
+    const formatMatchDate = (dateStr: string) => {
+        try {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+        } catch { return dateStr; }
+    };
+
+    const myClubName = user?.club?.name || 'Mon Club';
+    const myClubLogo = user?.club?.logo_url || '';
+
+    const historyMatches = (matches || [])
+        .filter(m => isPassed(m.match_date, m.match_time))
+        .map(m => {
+            const acceptedReq = (requests || []).find((r: any) => r.match_id === m.id && r.request_status === 'accepted');
+            return {
+                id: m.id,
+                type: m.type,
+                date: m.match_date,
+                time: m.match_time,
+                category: m.category,
+                level: m.level,
+                teamA: { name: myClubName, logo: myClubLogo },
+                teamB: { 
+                    name: acceptedReq?.requester_club_name || (m.type === 'tournament' ? 'Plateau' : '??'), 
+                    logo: acceptedReq?.requester_club_logo || '' 
+                },
+                isTournament: m.type === 'tournament'
+            };
+        });
+
+    const historyParticipations = (participations || [])
+        .filter(p => isPassed(p.match_date, p.match_time) && p.request_status === 'accepted')
+        .map(p => ({
+            id: p.id,
+            type: p.type || p.match_type,
+            date: p.match_date,
+            time: p.match_time,
+            category: p.match_category || p.category,
+            level: p.match_level || p.level,
+            teamA: { name: p.host_club_name || p.club?.name || '??', logo: p.host_club_logo || p.club?.logo_url || '' },
+            teamB: { name: myClubName, logo: myClubLogo },
+            isTournament: p.type === 'tournament' || p.match_type === 'tournament'
+        }));
+
+    const allHistory = [...historyMatches, ...historyParticipations]
+        .filter((h: any) => view === 'matches' ? !h.isTournament : h.isTournament)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const activeMatches = (matches || []).filter((m: any) => !isPassed(m.match_date, m.match_time));
+    const activeParticipations = (participations || []).filter((p: any) => !isPassed(p.match_date, p.match_time));
+    const activeRequests = (requests || []).filter((r: any) => !isPassed(r.match_date, r.match_time));
 
     return (
         <DefaultLayout maxWidth="max-w-full">
@@ -169,184 +233,262 @@ export default function SessionPlannerPage() {
                         )}
 
                         {(view === 'matches' || view === 'tournaments') && (
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-                                {/* Colonne Gauche: Mes Annonces */}
+                            <div className="flex flex-col gap-12 w-full">
+                                {/* Section : En Cours */}
+                                {(activeMatches.length > 0 || activeRequests.length > 0 || activeParticipations.length > 0) && (
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                            <h2 className="text-xl font-black text-white uppercase tracking-tighter">En cours / À venir</h2>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                                            {/* Colonne Gauche: Mes Annonces */}
+                                            <div className="space-y-6">
+                                                <div className="flex items-center gap-3 px-2">
+                                                    <h3 className="text-lg font-bold text-white/70 uppercase tracking-tighter">Mes Annonces</h3>
+                                                    <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">
+                                                        {activeMatches.filter((m: any) => view === 'matches' ? m.type === 'match' : m.type === 'tournament').length}
+                                                    </span>
+                                                </div>
+
+                                                {isLoadingMatches ? (
+                                                    <div className="flex justify-center py-6 px-4"><Spinner color="secondary" /></div>
+                                                ) : activeMatches.filter((m: any) => view === 'matches' ? m.type === 'match' : m.type === 'tournament').length > 0 ? (
+                                                    <div className="flex flex-col gap-4">
+                                                        {activeMatches.filter((m: any) => view === 'matches' ? m.type === 'match' : m.type === 'tournament').map((match: any) => (
+                                                            <Card key={match.id} className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group">
+                                                                <CardBody className="flex flex-col gap-4 p-4">
+                                                                    <div className="flex flex-row items-center gap-4">
+                                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${match.type === 'tournament' ? 'bg-purple-500/20 text-purple-500' : 'bg-violet-500/20 text-violet-500'}`}>
+                                                                            {match.type === 'tournament' ? (
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z" /><path d="m3.265 10.602 7.641 4.114a.75.75 0 0 0 .712 0l7.641-4.114.679.365a.75.75 0 0 1 0 1.32l-8.32 4.48a.75.75 0 0 1-.712 0l-8.32-4.48a.75.75 0 0 1 0-1.32l.679-.365Z" /></svg>
+                                                                            ) : (
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Z" /></svg>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0 text-left">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-white/40">{match.match_date}</span>
+                                                                                <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] uppercase font-black">{match.status}</Chip>
+                                                                            </div>
+                                                                            <h3 className="font-bold text-white text-base whitespace-normal break-words">
+                                                                                {match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || '??'}`}
+                                                                            </h3>
+                                                                            <p className="text-xs text-default-500 font-medium truncate">{match.club?.city} • {t(`enums.category.${match.category}`)}</p>
+                                                                        </div>
+                                                                        <div className="flex flex-col items-end gap-1">
+                                                                            <span className="text-xs font-black text-primary uppercase tracking-tighter">{match.contacts_count || 0} Demandes</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="flex gap-2 pt-2 border-t border-white/5">
+                                                                        <Button as={Link} to={`/matches/${match.id}`} size="sm" variant="flat" className="flex-1 font-bold text-xs">Détails</Button>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="flat"
+                                                                            color="danger"
+                                                                            className="flex-1 font-bold text-xs"
+                                                                            isLoading={actioningId === `delete-${match.id}`}
+                                                                            onPress={async () => {
+                                                                                if (confirm(view === 'tournaments' ? "Supprimer ce tournoi ?" : "Supprimer ce match ?")) {
+                                                                                    try {
+                                                                                        setActioningId(`delete-${match.id}`);
+                                                                                        await deleteMatch(match.id);
+                                                                                        await mutateMatches();
+                                                                                        addToast({ title: "Supprimé avec succès", color: "success" });
+                                                                                    } catch (e) {
+                                                                                        addToast({ title: "Erreur lors de la suppression", color: "danger" });
+                                                                                    } finally {
+                                                                                        setActioningId(null);
+                                                                                    }
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            Supprimer
+                                                                        </Button>
+                                                                    </div>
+                                                                </CardBody>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4 text-default-500 font-medium">
+                                                        Aucune annonce active.
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Colonne Droite: Demandes & Candidatures */}
+                                            <div className="space-y-8">
+                                                {/* Demandes Reçues */}
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center gap-3 px-2">
+                                                        <h3 className="text-lg font-bold text-white/70 uppercase tracking-tighter">Demandes Reçues</h3>
+                                                        {activeRequests.filter((r: any) => r.request_status === 'pending').length > 0 && (
+                                                            <span className="bg-amber-500/20 px-2 py-0.5 rounded text-xs font-bold text-amber-500 animate-pulse">
+                                                                {activeRequests.filter((r: any) => r.request_status === 'pending').length}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {isLoadingRequests ? (
+                                                        <div className="flex justify-center py-6 px-4"><Spinner color="primary" /></div>
+                                                    ) : activeRequests.filter((r: any) => view === 'matches' ? r.type === 'match' : r.type === 'tournament').length > 0 ? (
+                                                        <div className="flex flex-col gap-4">
+                                                            {activeRequests
+                                                                .filter((r: any) => view === 'matches' ? r.type === 'match' : r.type === 'tournament')
+                                                                .map((request: any, idx: number) => (
+                                                                    <Card key={idx} className={`bg-[#1e1e20] border ${request.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'}`}>
+                                                                        <CardBody className="p-4 flex flex-col gap-3">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
+                                                                                    {request.requester_club_logo ? (
+                                                                                        <Image src={request.requester_club_logo} className="object-contain" />
+                                                                                    ) : (
+                                                                                        <span className="text-white font-bold">{request.requester_club_name?.charAt(0)}</span>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="flex-1 text-left">
+                                                                                    <h3 className="font-bold text-white text-sm line-clamp-1">{request.requester_club_name}</h3>
+                                                                                    <p className="text-xs text-default-500 font-bold uppercase tracking-widest truncate">
+                                                                                        {t(`enums.category.${request.category}`)} • {request.match_date}
+                                                                                    </p>
+                                                                                </div>
+                                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
+                                                                                    {request.request_status}
+                                                                                </Chip>
+                                                                            </div>
+
+                                                                            {request.request_status === 'pending' && (
+                                                                                <div className="flex gap-2">
+                                                                                    <Button
+                                                                                        size="sm"
+                                                                                        color="success"
+                                                                                        isLoading={actioningId === `${request.match_id}-${request.user_id}-accept`}
+                                                                                        className="flex-1 font-black uppercase text-xs h-8 text-success-950"
+                                                                                        onPress={async () => {
+                                                                                            try {
+                                                                                                setActioningId(`${request.match_id}-${request.user_id}-accept`);
+                                                                                                const token = await getAccessTokenSilently();
+                                                                                                await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
+                                                                                                await mutateRequests();
+                                                                                                addToast({ title: "Demande acceptée", color: "success" });
+                                                                                            } catch (e: any) {
+                                                                                                addToast({ title: t('error.title'), color: "danger" });
+                                                                                            } finally {
+                                                                                                setActioningId(null);
+                                                                                            }
+                                                                                        }}
+                                                                                    >
+                                                                                        Accepter
+                                                                                    </Button>
+                                                                                </div>
+                                                                            )}
+                                                                            <Button size="sm" variant="flat" className="w-full text-xs font-bold h-7" as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
+                                                                        </CardBody>
+                                                                    </Card>
+                                                                ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center text-default-500 font-medium text-sm">
+                                                            Aucune demande reçue.
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Mes Candidatures */}
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center gap-3 px-2">
+                                                        <h3 className="text-lg font-bold text-white/70 uppercase tracking-tighter">Mes Candidatures</h3>
+                                                        <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">{activeParticipations.length}</span>
+                                                    </div>
+
+                                                    {activeParticipations.filter((p: any) => view === 'matches' ? p.type === 'match' : p.type === 'tournament').length > 0 ? (
+                                                        <div className="flex flex-col gap-4">
+                                                            {activeParticipations
+                                                                .filter((p: any) => view === 'matches' ? p.type === 'match' : p.type === 'tournament')
+                                                                .map((participation: any, idx: number) => (
+                                                                    <Card key={idx} className="bg-default-50/5 border border-default-100/10">
+                                                                        <CardBody className="p-4 flex flex-col gap-3">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center overflow-hidden">
+                                                                                    {participation.club?.logo_url ? (
+                                                                                        <Image src={participation.club.logo_url} className="object-contain" />
+                                                                                    ) : (
+                                                                                        <span className="text-violet-500 font-bold">{participation.club?.name?.charAt(0)}</span>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="flex-1 text-left">
+                                                                                    <h3 className="font-bold text-white text-sm truncate">{participation.club?.name}</h3>
+                                                                                    <p className="text-xs text-default-400 font-bold uppercase tracking-widest">{participation.match_date}</p>
+                                                                                </div>
+                                                                                <Chip size="sm" color={participation.request_status === 'accepted' ? 'success' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
+                                                                                    {participation.request_status}
+                                                                                </Chip>
+                                                                            </div>
+                                                                            <Button size="sm" variant="flat" className="w-full text-xs font-bold h-7" as={Link} to={`/matches/${participation.id}`}>Détails</Button>
+                                                                        </CardBody>
+                                                                    </Card>
+                                                                ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center text-default-500 font-medium text-sm">
+                                                            Aucune candidature.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Section : Historique */}
                                 <div className="space-y-6">
-                                    <div className="flex items-center gap-3 px-2">
-                                        <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Mes Annonces</h2>
-                                        <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">
-                                            {matches?.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').length || 0}
-                                        </span>
+                                    <div className="flex items-center gap-4 mb-8">
+                                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-xl shadow-indigo-500/5">
+                                            <span className="text-xl">👥</span>
+                                        </div>
+                                        <h2 className="text-2xl font-black text-indigo-500 uppercase tracking-tighter whitespace-nowrap overflow-x-auto scrollbar-hide">
+                                            {t('planner.history.title', 'Historique Match / Tournoi / Exercice')}
+                                        </h2>
                                     </div>
 
-                                    {isLoadingMatches ? (
-                                        <div className="flex justify-center py-6 px-4"><Spinner color="secondary" /></div>
-                                    ) : matches && matches.length > 0 ? (
-                                        <div className="flex flex-col gap-4">
-                                            {matches.filter(m => view === 'matches' ? m.type === 'match' : m.type === 'tournament').map((match) => (
-                                                <Card key={match.id} as={Link} to={`/matches/${match.id}`} className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group">
-                                                    <CardBody className="flex flex-row items-center gap-4 p-4">
-                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${match.type === 'tournament' ? 'bg-purple-500/20 text-purple-500' : 'bg-violet-500/20 text-violet-500'}`}>
-                                                            {match.type === 'tournament' ? (
-                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z" /><path d="m3.265 10.602 7.641 4.114a.75.75 0 0 0 .712 0l7.641-4.114.679.365a.75.75 0 0 1 0 1.32l-8.32 4.48a.75.75 0 0 1-.712 0l-8.32-4.48a.75.75 0 0 1 0-1.32l.679-.365Z" /></svg>
-                                                            ) : (
-                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Z" /></svg>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0 text-left">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-white/40">{match.match_date}</span>
-                                                                <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] uppercase font-black">{match.status}</Chip>
+                                    {allHistory.length > 0 ? (
+                                        <div className="flex flex-col gap-3">
+                                            {allHistory.map((h: any) => (
+                                                <div key={h.id} className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-2xl bg-[#1e1e20]/50 border border-white/5 hover:border-white/10 transition-all gap-4">
+                                                    <div className="flex items-center gap-4 sm:gap-8 w-full sm:w-auto overflow-hidden">
+                                                        <div className="flex items-center gap-3 flex-1 sm:flex-initial">
+                                                            <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                                {h.teamA.logo ? <Image src={h.teamA.logo} className="object-contain" /> : <span className="text-xs font-bold text-white/20">{h.teamA.name.charAt(0)}</span>}
                                                             </div>
-                                                            <h3 className="font-bold text-white truncate text-base">
-                                                                {match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || '??'}`}
-                                                            </h3>
-                                                            <p className="text-xs text-default-500 font-medium truncate">{match.club?.city} • {t(`enums.category.${match.category}`)}</p>
+                                                            <span className="font-bold text-white text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">{h.teamA.name}</span>
                                                         </div>
-                                                        <div className="flex flex-col items-end gap-1">
-                                                            <span className="text-xs font-black text-primary uppercase tracking-tighter">{match.contacts_count || 0} Demandes</span>
-                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-white/20 group-hover:text-primary group-hover:translate-x-1 transition-all">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                                                            </svg>
+                                                        
+                                                        <span className="text-xl sm:text-2xl font-black text-white/10 italic shrink-0">VS</span>
+                                                        
+                                                        <div className="flex items-center gap-3 flex-1 sm:flex-initial flex-row-reverse sm:flex-row">
+                                                            <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                                                                {h.teamB.logo ? <Image src={h.teamB.logo} className="object-contain" /> : <span className="text-xs font-bold text-white/20">{h.teamB.name.charAt(0)}</span>}
+                                                            </div>
+                                                            <span className="font-bold text-white text-sm sm:text-base truncate max-w-[120px] sm:max-w-none text-right sm:text-left">{h.teamB.name}</span>
                                                         </div>
-                                                    </CardBody>
-                                                </Card>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto px-2 sm:px-0">
+                                                        <div className="text-left sm:text-right">
+                                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{formatMatchDate(h.date)}</p>
+                                                            <p className="text-xs font-bold text-default-500 uppercase">{t(`enums.category.${h.category}`)} • {h.level}</p>
+                                                        </div>
+                                                        <Chip size="sm" variant="dot" color="default" className="border-white/10 text-white/40 font-bold uppercase text-[9px] shrink-0">TERMINÉ</Chip>
+                                                    </div>
+                                                </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">
-                                            <p className="text-default-400 font-medium">Aucune annonce publiée.</p>
-                                            <Button as={Link} to={view === 'tournaments' ? "/matches?view=create&type=tournament" : "/matches?view=create&type=match"} color={view === 'tournaments' ? "default" : "secondary"} variant="flat" size="sm" className={`font-bold ${view === 'tournaments' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>Créer une annonce</Button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Colonne Droite: Demandes Reçues */}
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-3 px-2">
-                                        <h2 className="text-xl font-bold text-white uppercase tracking-tighter">Demandes Reçues</h2>
-                                        {requests.filter((r: any) => r.request_status === 'pending').length > 0 && (
-                                            <div className="space-y-4">
-                                                <h3 className="font-bold text-sm text-default-500 uppercase tracking-wider px-2">Demandes en attente ({requests.filter((r: any) => r.request_status === 'pending').length})</h3>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {isLoadingRequests ? (
-                                        <div className="flex justify-center py-6 px-4"><Spinner color="primary" /></div>
-                                    ) : requests.length > 0 ? (
-                                        <div className="flex flex-col gap-4">
-                                            {requests
-                                                .filter((r: any) => view === 'matches' ? r.type === 'match' : r.type === 'tournament')
-                                                .map((request: any, idx: number) => (
-                                                    <Card key={idx} className={`bg-[#1e1e20] border ${request.request_status === 'accepted' ? 'border-success/30' : 'border-default-100/10'}`}>
-                                                        <CardBody className="p-4 flex flex-col gap-3">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
-                                                                    {request.requester_club_logo ? (
-                                                                        <Image src={request.requester_club_logo} className="object-contain" />
-                                                                    ) : (
-                                                                        <span className="text-white font-bold">{request.requester_club_name?.charAt(0)}</span>
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex-1 text-left">
-                                                                    <h3 className="font-bold text-white text-sm line-clamp-1">{request.requester_club_name}</h3>
-                                                                    <p className="text-xs sm:text-sm text-default-500 font-bold uppercase tracking-widest truncate">
-                                                                        {t(`enums.category.${request.category}`)} • {request.match_date}
-                                                                    </p>
-                                                                </div>
-                                                                <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="flat" className="font-black uppercase text-[9px]">
-                                                                    {request.request_status}
-                                                                </Chip>
-                                                            </div>
-
-                                                            {request.request_status === 'pending' && (
-                                                                <div className="flex gap-2">
-                                                                    <Button
-                                                                        size="sm"
-                                                                        color="success"
-                                                                        isLoading={actioningId === `${request.match_id}-${request.user_id}-accept`}
-                                                                        className="flex-1 font-black uppercase text-xs sm:text-sm h-8 text-success-950"
-                                                                        onPress={async () => {
-                                                                            try {
-                                                                                setActioningId(`${request.match_id}-${request.user_id}-accept`);
-                                                                                const token = await getAccessTokenSilently();
-                                                                                await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
-                                                                                await mutateRequests();
-                                                                                addToast({ title: "Demande acceptée", color: "success", timeout: 5000 });
-                                                                            } catch (e: any) {
-                                                                                const rawMessage = e.message || "";
-                                                                                let cleanMessage = rawMessage;
-                                                                                try {
-                                                                                    if (rawMessage.startsWith('{')) {
-                                                                                        const parsed = JSON.parse(rawMessage);
-                                                                                        cleanMessage = parsed.error || parsed.message || rawMessage;
-                                                                                    }
-                                                                                } catch { /* ignore */ }
-
-                                                                                addToast({
-                                                                                    title: t('error.title'),
-                                                                                    description: cleanMessage === 'TOO_LATE_TO_MODIFY' ? t('error.too_late_to_modify') : cleanMessage,
-                                                                                    color: "danger"
-                                                                                });
-                                                                            } finally {
-                                                                                setActioningId(null);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        Accepter
-                                                                    </Button>
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="flat"
-                                                                        color="danger"
-                                                                        isLoading={actioningId === `${request.match_id}-${request.user_id}-refuse`}
-                                                                        className="flex-1 font-black uppercase text-xs sm:text-sm h-8"
-                                                                        onPress={async () => {
-                                                                            try {
-                                                                                setActioningId(`${request.match_id}-${request.user_id}-refuse`);
-                                                                                const token = await getAccessTokenSilently();
-                                                                                await matchService.updateRequestStatus(request.match_id, request.user_id, 'refused', token);
-                                                                                await mutateRequests();
-                                                                                addToast({ title: "Demande refusée", color: "danger", timeout: 5000 });
-                                                                            } catch (e: any) {
-                                                                                const rawMessage = e.message || "";
-                                                                                let cleanMessage = rawMessage;
-                                                                                try {
-                                                                                    if (rawMessage.startsWith('{')) {
-                                                                                        const parsed = JSON.parse(rawMessage);
-                                                                                        cleanMessage = parsed.error || parsed.message || rawMessage;
-                                                                                    }
-                                                                                } catch { /* ignore */ }
-
-                                                                                addToast({
-                                                                                    title: t('error.title'),
-                                                                                    description: cleanMessage === 'TOO_LATE_TO_MODIFY' ? t('error.too_late_to_modify') : cleanMessage,
-                                                                                    color: "danger"
-                                                                                });
-                                                                            } finally {
-                                                                                setActioningId(null);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        Refuser
-                                                                    </Button>
-                                                                </div>
-                                                            )}
-
-                                                            <Button size="sm" variant="flat" className={`w-full text-xs sm:text-sm font-bold h-7 ${request.type === 'tournament' ? 'bg-purple-300/10 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`} as={Link} to={`/matches/${request.match_id}`}>Voir l'annonce</Button>
-                                                        </CardBody>
-                                                    </Card>
-                                                ))}
-                                        </div>
-                                    ) : (
-                                        <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center flex flex-col items-center gap-4">
-                                            <div className="p-4 bg-white/5 rounded-full text-white/20">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                                                </svg>
-                                            </div>
-                                            <p className="text-default-400 font-medium">Aucune demande reçue pour le moment.</p>
+                                        <div className="py-12 flex flex-col items-center justify-center gap-4 bg-white/5 border border-dashed border-white/10 rounded-3xl opacity-50">
+                                            <p className="font-bold text-white/20 uppercase tracking-widest">Aucun historique disponible</p>
                                         </div>
                                     )}
                                 </div>

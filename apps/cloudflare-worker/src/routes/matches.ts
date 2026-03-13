@@ -443,9 +443,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             
             if (subs.length > 0) {
-                const cancellationMessage = match.type === 'tournament' 
-                    ? `Le tournoi à ${match.club?.name || 'club inconnu'} le ${match.match_date || ''} a été annulé par l'organisateur.` 
-                    : `Le match à ${match.club?.name || 'club inconnu'} le ${match.match_date || ''} a été annulé par l'organisateur.`;
+                const cancellationMessage = `Le créateur du match à ${match.club?.name || 'club inconnu'} le ${match.match_date || ''} a annulé sa candidature avec vous.`;
 
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
@@ -785,11 +783,15 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             if (success && params.userId === dbUser.id && matchInfo && matchInfo.owner_id !== dbUser.id) {
                 const owner = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(matchInfo.owner_id).first<{ auth0_sub: string }>();
                 if (owner) {
+                    const applicantUser = await env.DB.prepare('SELECT firstname FROM users WHERE id = ?').bind(dbUser.id).first<{ firstname: string }>();
+                    const matchData = await matchService.getById(params.matchId);
+                    const withdrawalMessage = `${applicantUser?.firstname || 'L\'utilisateur'} a annulé sa candidature pour le match à ${matchData?.club?.name || 'club inconnu'} le ${matchData?.match_date || ''}.`;
+                    
                     await broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: 'TEAM_WITHDRAWAL',
                         targetUserId: owner.auth0_sub,
-                        message: 'Une équipe a annulé sa participation.',
+                        message: withdrawalMessage,
                         data: { match_id: params.matchId }
                     });
                 }
@@ -797,11 +799,14 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 // If the owner removed a request
                 const applicant = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(params.userId).first<{ auth0_sub: string }>();
                 if (applicant) {
+                    const matchData = await matchService.getById(params.matchId);
+                    const cancelMessage = `Le créateur du match à ${matchData?.club?.name || 'club inconnu'} le ${matchData?.match_date || ''} a annulé sa candidature avec vous.`;
+                    
                     await broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: 'REQUEST_CANCELLED',
                         targetUserId: applicant.auth0_sub,
-                        message: 'Votre demande de match a été retirée.',
+                        message: cancelMessage,
                         data: { match_id: params.matchId }
                     });
                 }

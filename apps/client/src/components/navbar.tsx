@@ -115,17 +115,16 @@ export const Navbar = () => {
       className={`fixed! top-0 left-0 right-0 m-0! p-0! bg-background z-50 transition-all duration-300 safe-area-top ${isScrolled ? 'shadow-lg shadow-black/30 border-b border-default-200/50' : 'border-none shadow-none'
         }`}
     >
-      <NavbarBrand className="basis-1 flex items-center justify-start gap-3 h-full px-2" style={{ paddingTop: 'env(safe-area-inset-top, 20px)' }}>
-        <a href="/" className="flex items-center gap-1.5 active:scale-95 transition-transform" aria-label={t('common.home', 'Accueil')}>
+      <NavbarBrand className="flex-none flex items-center justify-start h-full px-2" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+        <a href="/" className="flex items-center active:scale-95 transition-transform" aria-label={t('common.home', 'Accueil')}>
           <img
             src="/logo.png"
             alt="KduFoot Logo"
-            className="h-10 lg:h-16 w-auto object-contain drop-shadow-md"
+            className="h-12 lg:h-16 w-auto object-contain"
           />
-          <span className="text-xl lg:text-3xl font-black text-white italic tracking-tighter drop-shadow-lg lg:ml-1">KDUFOOT</span>
         </a>
       </NavbarBrand>
-      <NavbarContent className="hidden lg:flex gap-4 justify-center w-full" justify="center">
+      <NavbarContent className="hidden lg:flex gap-4 justify-center" justify="center">
         {siteConfig().navItems.map((item) => (
           <NavbarItem key={item.href}>
             <LinkUniversal
@@ -162,7 +161,7 @@ export const Navbar = () => {
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarContent className="lg:hidden flex basis-1 items-center justify-end pr-2 h-full" justify="end" style={{ paddingTop: 'env(safe-area-inset-top, 20px)' }}>
+      <NavbarContent className="lg:hidden flex basis-1 items-center justify-end pr-2 h-full" justify="end" style={{ paddingTop: 'env(safe-area-inset-top, 40px)' }}>
         <NavbarMenuToggle
           className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
           srOnlyText="Menu"

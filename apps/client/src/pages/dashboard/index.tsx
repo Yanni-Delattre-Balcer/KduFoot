@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { LayoutDashboard } from 'lucide-react';
 import DefaultLayout from '@/layouts/default';
 import { useMatches } from '@/hooks/use-matches';
 import { matchService } from '@/services/matches';
@@ -9,7 +10,6 @@ import { Button } from '@heroui/button';
 import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
-import { Progress } from "@heroui/progress";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Link } from 'react-router-dom';
 import FootballClock from '../../components/football-clock';
@@ -18,9 +18,8 @@ import { useUser } from '@/hooks/use-user';
 import { useIncomingRequests, useMyParticipations } from '@/hooks/use-matches';
 import DataWall from '@/components/data-wall';
 import { addToast } from '@heroui/toast';
+import { JerseyColorDots } from '@/components/jersey-color-dots';
 import { ConfirmedTournamentCard } from './components/confirmed-tournament-card';
-import { OrganizedTournamentCard } from './components/organized-tournament-card';
-import { MyOrganizationsMemo } from './components/my-organizations-memo';
 import { ConfirmedMatchCard } from './components/confirmed-match-card';
 
 const formatDate = (dateStr: string) => {
@@ -61,7 +60,7 @@ export default function DashboardPage() {
     const { getAccessTokenSilently } = useAuth0();
 
     // 1. Mes Annonces (Organisateur)
-    const { matches: myAnnouncements, isLoading: isLoadingAnnouncements, mutate: mutateAnnouncements, closeRegistrations } = useMatches({ ownerId: 'me', include_past: true });
+    const { mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
 
     // 2. Demandes Reçues (Organisateur)
     const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateIncoming } = useIncomingRequests();
@@ -71,7 +70,6 @@ export default function DashboardPage() {
 
     // States
     const [requestsSubFilter, setRequestsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
-    const [organizedSubFilter, setOrganizedSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
     const [highlightedCardId, setHighlightedCardIdState] = useState<string | null>(null);
     const [showChanges, setShowChanges] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -160,20 +158,6 @@ export default function DashboardPage() {
     };
 
     // Sécurité H-2 : Verrouillage uniquement dans les 2h AVANT le match
-    const isTooLate = (matchDate: string, matchTime: string) => {
-        try {
-            const matchDateTime = new Date(`${matchDate}T${matchTime}`);
-            if (isNaN(matchDateTime.getTime())) return false;
-            const now = new Date();
-            const diffMs = matchDateTime.getTime() - now.getTime();
-            const diffHours = diffMs / (1000 * 60 * 60);
-
-            // On ne bloque QUE si on est dans la fenêtre des 2h avant le début
-            return diffHours > 0 && diffHours < 2;
-        } catch (e) {
-            return false;
-        }
-    };
 
     const isMatchPast = (matchDate: string, matchTime: string) => {
         try {
@@ -278,72 +262,6 @@ export default function DashboardPage() {
         }
     };
 
-    const handleDeleteMatch = async (id: string, matchDate: string, matchTime: string) => {
-        if (isTooLate(matchDate, matchTime)) {
-            addToast({
-                title: t('error.title'),
-                description: t('error.too_late_to_modify'),
-                color: "danger"
-            });
-            return;
-        }
-        if (!confirm(t('dashboard.confirm_delete', 'Voulez-vous vraiment supprimer cette annonce ?'))) return;
-        setIsSaving(true);
-        try {
-            const token = await getAccessTokenSilently();
-            const res = await matchService.delete(id, token);
-            if (res.success) {
-                addToast({
-                    title: t('success'),
-                    description: t('dashboard.toasts.delete_success', "Annonce supprimée avec succès. Les participants ont été notifiés de l'annulation."),
-                    color: "success"
-                });
-                mutateAnnouncements();
-                mutateIncoming();
-            }
-        } catch (err: any) {
-            const rawMessage = err.message || "";
-            let cleanMessage = rawMessage;
-            try {
-                if (rawMessage.startsWith('{')) {
-                    const parsed = JSON.parse(rawMessage);
-                    cleanMessage = parsed.error || parsed.message || rawMessage;
-                }
-            } catch { /* ignore */ }
-
-            const errorMessage = cleanMessage === 'TOO_LATE_TO_MODIFY'
-                ? t('error.too_late_to_modify')
-                : t('error.delete_failed');
-
-            addToast({
-                title: t('error.title'),
-                description: errorMessage,
-                color: "danger"
-            });
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleCloseRegistrations = async (id: string) => {
-        setIsSaving(true);
-        try {
-            await closeRegistrations(id);
-            addToast({
-                title: t('success'),
-                description: "Les inscriptions sont désormais closes.",
-                color: "success"
-            });
-        } catch (err: any) {
-            addToast({
-                title: t('error.title'),
-                description: err.message || "Erreur lors de la fermeture des inscriptions",
-                color: "danger"
-            });
-        } finally {
-            setIsSaving(false);
-        }
-    };
 
     // Filtered lists
     const filteredRequests = (incomingRequests || []).filter(r => {
@@ -356,17 +274,7 @@ export default function DashboardPage() {
         return r.match_type === requestsSubFilter;
     });
 
-    // Get IDs of matches that have at least one accepted request (they go to Matchs Confirmés)
-    const confirmedMatchIds = new Set(
-        (incomingRequests || []).filter(r => r.request_status === 'accepted').map(r => r.match_id)
-    );
 
-    const filteredOrganized = (myAnnouncements || []).filter(m => {
-        // Hide matches that are confirmed (moved to Matchs Confirmés tab)
-        if (confirmedMatchIds.has(m.id)) return false;
-        if (organizedSubFilter === 'all') return true;
-        return m.type === organizedSubFilter;
-    });
 
     // Combine accepted participations + accepted incoming requests into "Matchs Confirmés"
     const acceptedIncomingAsOrganizer = (incomingRequests || [])
@@ -484,18 +392,17 @@ export default function DashboardPage() {
                         <FootballClock size={140} />
                     </div>
 
-                    <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
-                        <div className="flex items-center justify-center w-full gap-3">
-                            <div className="p-3 rounded-2xl bg-orange-500/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-orange-500">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
-                            </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-orange-500 to-amber-500">
-                                {t('dashboard.title')}
-                            </h1>
+                    <div className="relative flex flex-col items-center gap-6 py-12 px-8">
+                    <div className="relative flex flex-col items-center gap-4 w-full">
+                        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 shadow-xl shadow-amber-500/5 transition-transform hover:scale-110 duration-300">
+                            <LayoutDashboard className="w-8 h-8 text-amber-500" strokeWidth={2.5} />
                         </div>
-                        <p className="text-default-500 text-lg max-w-lg">
+                        <h1 className="text-4xl md:text-6xl font-bold text-[#fbbf24] tracking-tighter uppercase whitespace-nowrap overflow-x-auto scrollbar-hide">
+                            {t('dashboard.title', 'Tableau de bord')}
+                        </h1>
+                    </div>
+
+                        <p className="text-default-500 text-lg max-w-lg text-center">
                             {t('dashboard.subtitle')}
                         </p>
 
@@ -757,231 +664,6 @@ export default function DashboardPage() {
                             </div>
                         </Tab>
 
-                        <Tab key="organized" title={<div className="flex items-center space-x-2"><span>{t('dashboard.tabs.organized')}</span>{isLocked && <span className="text-default-400">🔒</span>}</div>}>
-                            <div className="flex flex-col gap-4 pt-2">
-                                {renderSubFilters(organizedSubFilter, setOrganizedSubFilter)}
-                                <MyOrganizationsMemo
-                                    events={myAnnouncements}
-                                    isLoading={isLoadingAnnouncements}
-                                    formatDate={formatDate}
-                                />
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                                    {isLoadingAnnouncements ? (
-                                        <div className="col-span-full flex justify-center py-12"><Spinner color="warning" aria-label={t('loading')} /></div>
-                                    ) : filteredOrganized.length > 0 ? (
-                                        filteredOrganized.map((match) => (
-                                            match.type === 'tournament' ? (
-                                                <OrganizedTournamentCard
-                                                    key={match.id}
-                                                    match={match}
-                                                    isTooLate={isTooLate(match.match_date, match.match_time)}
-                                                    isSaving={isSaving}
-                                                    onDelete={handleDeleteMatch}
-                                                    onCloseRegistrations={handleCloseRegistrations}
-                                                    formatDate={formatDate}
-                                                    formatTime={formatTime}
-                                                />
-                                            ) : (
-                                                <Card key={match.id} className="overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 border-violet-500/40 bg-zinc-900/90 group">
-                                                    <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50"></div>
-                                                    <CardBody className="p-0">
-                                                        <div className="flex flex-col md:flex-row">
-                                                            <div className="flex-1 p-6 border-b md:border-b-0 md:border-r border-white/5">
-                                                                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
-                                                                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                                                                        <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
-                                                                            {match.club?.logo_url ? (
-                                                                                <Image src={match.club.logo_url} className="object-contain" />
-                                                                            ) : (
-                                                                                <span className="text-white font-black text-2xl">{match.club?.name?.charAt(0)}</span>
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="min-w-0 flex-1">
-                                                                            <h3 className="font-black text-violet-400 text-xl sm:text-2xl leading-tight uppercase tracking-tighter group-hover:text-violet-300 transition-colors break-words">
-                                                                                {t('enums.type.match').toUpperCase()}
-                                                                            </h3>
-                                                                            <p className="text-white/70 text-xs sm:text-sm font-bold uppercase tracking-widest break-words leading-tight">{match.club?.name || '??'}</p>
-                                                                            <div className="flex flex-wrap items-center gap-2 mt-1">
-                                                                                <Chip size="sm" variant="flat" color="secondary" className="font-black text-[9px] sm:text-xs uppercase tracking-wider h-auto py-0.5 whitespace-normal">
-                                                                                    ⚽ {t('enums.type.match')}
-                                                                                </Chip>
-                                                                                <Chip size="sm" variant="flat" color={match.venue === 'Extérieur' ? 'warning' : 'primary'} className="h-5 text-[9px] uppercase font-black shrink-0">
-                                                                                    {match.venue === 'Extérieur' ? t('dashboard.labels.away_badge') : t('dashboard.labels.home_badge')}
-                                                                                </Chip>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[200px] shrink-0">
-                                                                        <Chip size="sm" color={match.status === 'active' ? 'secondary' : 'default'} variant="solid" className="font-black uppercase text-[10px] sm:text-sm py-3 shadow-lg shadow-violet-500/30 whitespace-normal text-center h-auto min-h-8">
-                                                                            {match.status === 'active' ? t('dashboard.status.searching') : t(`dashboard.status.${match.status}`, match.status)}
-                                                                        </Chip>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                                                                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                        <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.date', 'Date')}</p>
-                                                                        <p className="text-sm font-bold text-white">{formatDate(match.match_date)}</p>
-                                                                    </div>
-                                                                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                        <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.time', 'Heure')}</p>
-                                                                        <p className="text-sm font-bold text-white">{formatTime(match.match_time)}</p>
-                                                                    </div>
-                                                                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                        <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.format', 'Format')}</p>
-                                                                        <Chip size="sm" variant="dot" color="primary" className="font-black text-xs border-none p-0">{match.format || '11v11'}</Chip>
-                                                                    </div>
-                                                                    <div className="bg-white/5 rounded-xl p-3 border border-white/5">
-                                                                        <p className="text-xs sm:text-sm font-black text-default-400 uppercase tracking-widest mb-1">{t('matchForm.labels.pitch_type', 'Terrain')}</p>
-                                                                        <p className="text-sm font-bold text-white truncate">{match.pitch_type || '—'}</p>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="space-y-2">
-                                                                    <div className="flex justify-between items-end">
-                                                                        <p className="text-sm font-black text-violet-400 uppercase tracking-widest">
-                                                                            {(match.accepted_count || 0) >= 1 ? t('dashboard.match.filled', 'Match complet') : t('dashboard.match.searching', 'Recherche d\'adversaire')}
-                                                                        </p>
-                                                                        <p className="text-xs font-bold text-white">{match.accepted_count || 0} / 1</p>
-                                                                    </div>
-                                                                    <Progress
-                                                                        size="md"
-                                                                        value={(match.accepted_count || 0) >= 1 ? 100 : 0}
-                                                                        color="secondary"
-                                                                        className="max-w-md"
-                                                                        aria-label={t('dashboard.match.filling', 'Remplissage du match')}
-                                                                        classNames={{
-                                                                            indicator: "bg-linear-to-r from-violet-500 to-indigo-500"
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="w-full md:w-80 p-6 flex flex-col justify-end bg-white/[0.02]">
-                                                                <div className="space-y-3">
-                                                                    {isTooLate(match.match_date, match.match_time) ? (
-                                                                        <div className="py-3 px-4 text-center border border-dashed border-danger/30 rounded-xl bg-danger/5">
-                                                                            <p className="text-xs sm:text-sm font-black text-danger leading-tight uppercase px-2">
-                                                                                {t('dashboard.alerts.h2_locked', 'Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute.')}
-                                                                            </p>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="flex flex-col gap-2">
-                                                                            <div className="flex flex-wrap gap-2">
-                                                                                <Button
-                                                                                    as={Link}
-                                                                                    to={`/matches/${match.id}/edit`}
-                                                                                    size="sm"
-                                                                                    variant="flat"
-                                                                                    className="flex-1 min-w-[100px] font-bold text-sm h-11 bg-amber-500/10 text-amber-500 active:scale-95"
-                                                                                >
-                                                                                    {t('edit')}
-                                                                                </Button>
-                                                                                <Button
-                                                                                    size="sm"
-                                                                                    variant="flat"
-                                                                                    color="danger"
-                                                                                    className="flex-1 min-w-[100px] h-11 font-bold text-sm active:scale-95"
-                                                                                    onPress={() => handleDeleteMatch(match.id, match.match_date, match.match_time)}
-                                                                                    isLoading={isSaving}
-                                                                                >
-                                                                                    {t('delete')}
-                                                                                </Button>
-                                                                            </div>
-                                                                            <Button
-                                                                                as={Link}
-                                                                                to={`/matches/${match.id}`}
-                                                                                size="sm"
-                                                                                variant="solid"
-                                                                                color="secondary"
-                                                                                className="w-full font-bold text-sm h-10 active:scale-95 shadow-md shadow-secondary/20"
-                                                                            >
-                                                                                {t('dashboard.controls.manage_registrations', 'Gérer les demandes')}
-                                                                            </Button>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </CardBody>
-                                                </Card>
-                                            )
-                                        ))
-                                    ) : (
-                                        <div className="col-span-full py-8 text-center space-y-6">
-                                            <p className="text-default-400 font-medium">
-                                                {organizedSubFilter === 'all' ? t('dashboard.empty.no_organized') : organizedSubFilter === 'match' ? t('dashboard.empty.no_match') : t('dashboard.empty.no_tournament')}
-                                            </p>
-                                            {organizedSubFilter === 'all' ? (
-                                                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                                                    <Button as={Link} to="/matches" color="secondary" variant="flat" className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto">{t('dashboard.labels.search_match')}{isLocked && ' 🔒'}</Button>
-                                                    <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament')}{isLocked && ' 🔒'}</Button>
-                                                </div>
-                                            ) : (
-                                                <Button as={Link} to={organizedSubFilter === 'tournament' ? "/matches?type=tournament" : "/matches"} color={organizedSubFilter === 'tournament' ? 'default' : 'secondary'} variant="flat" className={`font-bold w-full sm:w-auto ${organizedSubFilter === 'tournament' ? 'bg-purple-300/20 text-purple-400' : 'bg-violet-500/10 text-violet-400'}`}>
-                                                    {organizedSubFilter === 'tournament' ? t('dashboard.labels.search_tournament') : t('dashboard.labels.search_match')}{isLocked && ' 🔒'}
-                                                </Button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-
-                            </div>
-                        </Tab>
-
-                        <Tab
-                            key="participations"
-                            title={
-                                <div className="flex items-center space-x-2">
-                                    <span>{t('dashboard.tabs.participations')}</span>
-                                    {isLocked && <span className="text-default-400">🔒</span>}
-                                    {allConfirmedTournaments.length > 0 && (
-                                        <Chip size="sm" variant="solid" color="secondary" className="h-5 min-w-5 px-1 font-black">
-                                            {allConfirmedTournaments.length}
-                                        </Chip>
-                                    )}
-                                    {modifiedTournamentCount > 0 && (
-                                        <span className="relative flex h-5 min-w-5">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"></span>
-                                            <Chip size="sm" variant="solid" color="danger" className="relative h-5 min-w-5 px-1 font-black">
-                                                {modifiedTournamentCount}
-                                            </Chip>
-                                        </span>
-                                    )}
-                                </div>
-                            }
-                        >
-                            <div className="flex flex-col gap-4 pt-2">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                                    {isLoadingParticipations ? (
-                                        <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" aria-label={t('loading')} /></div>
-                                    ) : allConfirmedTournaments.length > 0 ? (
-                                        allConfirmedTournaments.map((part) => (
-                                            <ConfirmedTournamentCard
-                                                key={part.match_id}
-                                                participation={part}
-                                                knownData={knownData}
-                                                highlighted={highlightedCardId === part.match_id && showChanges}
-                                                isTimeChanged={!!(part.notification_state === 1 && knownData[part.match_id] && knownData[part.match_id].time !== part.match_time)}
-                                                onMarkAsRead={markAsRead}
-                                                formatDate={formatDate}
-                                                formatTime={formatTime}
-                                            />
-                                        ))
-                                    ) : (
-                                        <div className="col-span-full py-8 text-center space-y-4">
-                                            <p className="text-default-400 font-medium">
-                                                {t('dashboard.labels.no_participation_tournament')}
-                                            </p>
-                                            <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament')}</Button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </Tab>
-
                         <Tab
                             key="confirmed_matches"
                             title={
@@ -1033,6 +715,57 @@ export default function DashboardPage() {
                                             >
                                                 {t('dashboard.labels.search_match')}{isLocked && ' 🔒'}
                                             </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </Tab>
+
+                        <Tab
+                            key="participations"
+                            title={
+                                <div className="flex items-center space-x-2">
+                                    <span>{t('dashboard.tabs.participations')}</span>
+                                    {isLocked && <span className="text-default-400">🔒</span>}
+                                    {allConfirmedTournaments.length > 0 && (
+                                        <Chip size="sm" variant="solid" color="secondary" className="h-5 min-w-5 px-1 font-black">
+                                            {allConfirmedTournaments.length}
+                                        </Chip>
+                                    )}
+                                    {modifiedTournamentCount > 0 && (
+                                        <span className="relative flex h-5 min-w-5">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"></span>
+                                            <Chip size="sm" variant="solid" color="danger" className="relative h-5 min-w-5 px-1 font-black">
+                                                {modifiedTournamentCount}
+                                            </Chip>
+                                        </span>
+                                    )}
+                                </div>
+                            }
+                        >
+                            <div className="flex flex-col gap-4 pt-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                                    {isLoadingParticipations ? (
+                                        <div className="col-span-full flex justify-center py-12"><Spinner color="secondary" aria-label={t('loading')} /></div>
+                                    ) : allConfirmedTournaments.length > 0 ? (
+                                        allConfirmedTournaments.map((part) => (
+                                            <ConfirmedTournamentCard
+                                                key={part.match_id}
+                                                participation={part}
+                                                knownData={knownData}
+                                                highlighted={highlightedCardId === part.match_id && showChanges}
+                                                isTimeChanged={!!(part.notification_state === 1 && knownData[part.match_id] && knownData[part.match_id].time !== part.match_time)}
+                                                onMarkAsRead={markAsRead}
+                                                formatDate={formatDate}
+                                                formatTime={formatTime}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-8 text-center space-y-4">
+                                            <p className="text-default-400 font-medium">
+                                                {t('dashboard.labels.no_participation_tournament')}
+                                            </p>
+                                            <Button as={Link} to="/matches?type=tournament" color="default" variant="flat" className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto">{t('dashboard.labels.search_tournament')}</Button>
                                         </div>
                                     )}
                                 </div>
@@ -1097,6 +830,24 @@ export default function DashboardPage() {
                                                 <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('dashboard.profile_modal.city')}</span>
                                                 <span className="text-sm font-bold text-white uppercase tracking-tight">{selectedClubProfile.requester_city || selectedClubProfile.host_city || selectedClubProfile.location_city}</span>
                                             </div>
+                                            {(selectedClubProfile.requester_home_jersey_color || selectedClubProfile.host_home_jersey_color) && (
+                                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                                    <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('account.fields.home_jersey', 'Maillot Domicile')}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-bold text-white uppercase">{selectedClubProfile.requester_home_jersey_color || selectedClubProfile.host_home_jersey_color}</span>
+                                                        <JerseyColorDots colors={selectedClubProfile.requester_home_jersey_color || selectedClubProfile.host_home_jersey_color} size="md" />
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {(selectedClubProfile.requester_away_jersey_color || selectedClubProfile.host_away_jersey_color) && (
+                                                <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                                    <span className="text-xs sm:text-sm font-black uppercase text-default-400">{t('account.fields.away_jersey', 'Maillot Extérieur')}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-bold text-white uppercase">{selectedClubProfile.requester_away_jersey_color || selectedClubProfile.host_away_jersey_color}</span>
+                                                        <JerseyColorDots colors={selectedClubProfile.requester_away_jersey_color || selectedClubProfile.host_away_jersey_color} size="md" />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Metadata box */}

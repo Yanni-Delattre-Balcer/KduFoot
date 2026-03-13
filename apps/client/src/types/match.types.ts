@@ -24,6 +24,7 @@ export interface Match {
     location_city?: string;
     location_zip?: string;
     pitch_type?: PitchType;
+    jersey_color?: string;
     email: string;
     phone: string;
     notes?: string;
@@ -79,9 +80,12 @@ export interface MatchContact {
     user_id: string;
     club_id?: string;
     club_name?: string;
+    club_logo?: string;
     message: string;
     contacted_at: string;
     status: 'pending' | 'accepted' | 'refused' | 'withdrawn';
+    home_jersey_color?: string;
+    away_jersey_color?: string;
 }
 
 export interface Club {
@@ -94,6 +98,8 @@ export interface Club {
     logo_url?: string;
     latitude?: number;
     longitude?: number;
+    home_jersey_color?: string;
+    away_jersey_color?: string;
 }
 
 export interface CreateMatchDto {
@@ -111,6 +117,7 @@ export interface CreateMatchDto {
     location_city?: string;
     location_zip?: string;
     pitch_type?: PitchType;
+    jersey_color?: string;
     email: string;
     phone: string;
     notes?: string;

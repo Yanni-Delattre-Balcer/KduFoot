@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button } from "@heroui/button";
-import { Link, useLocation } from "react-router-dom";
 import { useAuth, useUser } from "@/authentication";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { Spinner } from "@heroui/spinner";
@@ -12,9 +11,8 @@ interface DataWallProps {
 
 export const DataWall: React.FC<DataWallProps> = ({ message: customMessage, children }) => {
     const { isAuthenticated, isLoading: isAuthLoading, login } = useAuth();
-    const { isLoading: isProfileLoading, profileComplete } = useUser();
+    const { isLoading: isProfileLoading, profileComplete, setIsAccountModalOpen } = useUser();
     const { isVisitor, setVisitorMode } = useWelcomeGateway();
-    const location = useLocation();
     const [dismissed, setDismissed] = useState(false);
 
     // ACCÈS TOTAL
@@ -177,8 +175,7 @@ export const DataWall: React.FC<DataWallProps> = ({ message: customMessage, chil
                     </p>
 
                     <Button
-                        as={Link}
-                        to={`/account?from=${encodeURIComponent(location.pathname + location.search)}`}
+                        onPress={() => setIsAccountModalOpen(true)}
                         className="bg-warning text-white font-black uppercase tracking-tighter w-full rounded-2xl h-12 sm:h-13 text-sm sm:text-base shadow-2xl shadow-warning/20 hover:shadow-warning/30 hover:scale-[1.02] transition-all mt-1"
                         size="lg"
                     >

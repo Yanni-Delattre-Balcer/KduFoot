@@ -13,10 +13,39 @@ import { Image } from "@heroui/image";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import DataWall from '@/components/data-wall';
 import { addToast } from '@heroui/toast';
+import { JerseyColorDots } from '@/components/jersey-color-dots';
 
 const formatTime = (timeStr: string) => {
     if (!timeStr) return '';
     return timeStr.replace(':', 'h');
+};
+
+const InfoItem = ({ icon, label, value, color }: { icon: string, label: string, value: string, color: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'default' }) => {
+    const colorClasses = {
+        primary: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+        secondary: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+        success: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+        warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+        danger: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+        default: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20"
+    };
+
+    // Regex to remove emojis from the value if we already have a dedicated icon
+    const cleanedValue = value.replace(/[\u{1F300}-\u{1F9FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}]/gu, '').replace(/^\s+|\s+$/g, '');
+
+    return (
+        <div className={`p-4 rounded-[1.5rem] border ${colorClasses[color]} flex flex-col justify-between gap-3 transition-all hover:scale-[1.02] cursor-default h-full bg-linear-to-b from-transparent to-black/5`}>
+            <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-xl bg-black/20 border border-white/5 flex items-center justify-center text-xl shadow-inner">
+                    {icon}
+                </div>
+                <span className="text-[9px] uppercase font-black tracking-[0.2em] opacity-40">{label}</span>
+            </div>
+            <p className="text-white font-black uppercase text-xs sm:text-sm leading-tight break-words">
+                {cleanedValue}
+            </p>
+        </div>
+    );
 };
 
 export default function MatchDetailsPage() {
@@ -207,169 +236,255 @@ export default function MatchDetailsPage() {
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Main Details Card */}
-                        <Card className="lg:col-span-2 shadow-medium border border-default-100 bg-[#18181b]">
-                            <CardHeader className="flex flex-col items-start gap-1 p-6 pb-4 bg-[#232120] rounded-t-xl border-b border-default-100/10">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Chip size="sm" color={match.type === 'tournament' ? 'warning' : 'primary'} variant="flat" className="font-bold uppercase border border-current/20">
-                                        {match.type === 'tournament' ? 'Tournoi' : 'Match Amical'}
-                                    </Chip>
-                                    {match.type === 'tournament' && (
-                                        <Chip size="sm" color="success" variant="flat" className="font-bold border border-success/20">
-                                            👥 {match.accepted_count || 0} / {match.max_teams} équipes
-                                        </Chip>
-                                    )}
-                                </div>
-                                <h1 className={`text-3xl font-black text-white leading-tight`}>
-                                    {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : `Match vs ${match.club?.name || 'Club'}`)}
-                                </h1>
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <p className={`text-default-400 font-medium flex items-center gap-1`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                                            <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                                        </svg>
-                                        {isMasked ? 'ADRESSE MASQUÉE, VILLE MASQUÉE (00000)' : `${match.location_address || match.club?.address}, ${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
-                                    </p>
-                                    {!isMasked && (
-                                        <Button
-                                            size="sm"
-                                            variant="flat"
-                                            color="primary"
-                                            className="h-7 text-[10px] font-black uppercase px-2 shadow-sm"
-                                            as="a"
-                                            href={(match.club?.latitude && match.club?.longitude && (!match.location_address || match.location_address === match.club.address))
-                                                ? `https://www.google.com/maps/dir/?api=1&destination=${match.club.latitude},${match.club.longitude}`
-                                                : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${match.location_address || match.club?.address || ''}, ${match.location_city || match.club?.city || ''}`.trim().replace(/^,/, '').trim())}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            📍 Itinéraire
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardHeader>
-
-                            <CardBody className="p-6 gap-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <Chip
-                                        startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1 text-primary"><path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" /></svg>}
-                                        variant="flat" color="primary" className="h-12 w-full justify-start text-base font-bold border border-primary/20"
-                                    >
-                                        <span className="ml-2">{t(`enums.category.${match.category}`)}</span>
-                                    </Chip>
-                                    <Chip
-                                        startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1 text-secondary"><path fillRule="evenodd" d="M5.166 2.621v.858c-1.035.148-2.059.33-3.071.543a.75.75 0 0 0-.584.859 6.753 6.753 0 0 0 6.138 5.6 6.73 6.73 0 0 0 2.743 1.346A6.707 6.707 0 0 1 9.279 15H8.54c-1.036 0-1.875.84-1.875 1.875V19.5h-.75a2.25 2.25 0 0 0-2.25 2.25c0 .414.336.75.75.75h15a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-2.25-2.25h-.75v-2.625c0-1.036-.84-1.875-1.875-1.875h-.739a6.706 6.706 0 0 1-1.112-3.173 6.73 6.73 0 0 0 2.743-1.347 6.753 6.753 0 0 0 6.139-5.6.75.75 0 0 0-.585-.858 47.077 47.077 0 0 0-3.07-.543V2.62a.75.75 0 0 0-.658-.744 49.22 49.22 0 0 0-6.093-.377c-2.063 0-4.096.128-6.093.377a.75.75 0 0 0-.657.744Zm0 2.629c0 1.196.312 2.32.857 3.294A5.266 5.266 0 0 1 3.16 5.337a45.6 45.6 0 0 1 2.006-.343v.256Zm13.5 0v-.256c.674.1 1.343.214 2.006.343a5.265 5.265 0 0 1-2.863 3.207 6.72 6.72 0 0 0 .857-3.294Z" clipRule="evenodd" /></svg>}
-                                        variant="flat" color="secondary" className="h-12 w-full justify-start text-base font-bold border border-secondary/20"
-                                    >
-                                        <span className="ml-2">{match.level ? t(`enums.level.${match.level}`) : t('matchForm.labels.choose')}</span>
-                                    </Chip>
-                                    <Chip
-                                        startContent={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-1 text-warning"><path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" /><path fillRule="evenodd" d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" clipRule="evenodd" /></svg>}
-                                        variant="flat" color="warning" className="h-12 w-full justify-start text-base font-bold border border-warning/20"
-                                    >
-                                        <span className="ml-2">{t(`enums.format.${match.format}`, match.format)}</span>
-                                    </Chip>
-                                    <Chip
-                                        startContent={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 ml-1 text-success"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m16.5-4.5v4.5m-16.5 5.25v9a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-9m-16.5-5.25h16.5m-16.5 0a1.5 1.5 0 011.5-1.5h13.5a1.5 1.5 0 011.5 1.5m-16.5 5.25h16.5" /></svg>}
-                                        variant="flat" color="success" className="h-12 w-full justify-start text-base font-bold border border-success/20"
-                                    >
-                                        <span className="ml-2">{match.pitch_type ? t(`enums.pitch.${match.pitch_type}`) : t('matchForm.labels.choose')}</span>
-                                    </Chip>
-                                    <Chip
-                                        variant="flat" className="h-12 w-full justify-start text-base font-bold border border-default-400/20"
-                                        color={match.venue === 'Domicile' ? 'success' : match.venue === 'Extérieur' ? 'danger' : 'default'}
-                                    >
-                                        <span className="ml-2">{t(`enums.venue.${match.venue}`)}</span>
-                                    </Chip>
-                                    <Chip
-                                        variant="flat" color="default" className="h-12 w-full justify-start text-base font-bold border border-default-200"
-                                    >
-                                        <span className="ml-2">{t(`enums.gender.${gender}`)}</span>
-                                    </Chip>
-                                    <Chip
-                                        variant="flat" color="warning" className="h-12 w-full justify-start text-base font-bold border border-warning/20 bg-warning/10"
-                                    >
-                                        <span className="ml-2 text-warning-600 dark:text-warning">{new Date(match.match_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                    </Chip>
-                                    <Chip
-                                        variant="flat" color="warning" className="h-12 w-full justify-start text-base font-bold border border-warning/20 bg-warning/10"
-                                    >
-                                        <span className="ml-2 text-warning-600 dark:text-warning">{formatTime(match.match_time)}{match.match_end_time ? ` - ${formatTime(match.match_end_time)}` : ''}</span>
-                                    </Chip>
-                                </div>
-
-                                {cleanNotes && (
-                                    <div className="mt-4 space-y-2">
-                                        <h3 className="font-bold text-lg flex items-center gap-2 text-default-600">
-                                            {t('matchForm.labels.notes', 'Notes & Instructions')}
-                                        </h3>
-                                        <div className="bg-default-100/10 p-4 rounded-xl border-l-4 border-warning text-default-400 italic">
-                                            {cleanNotes}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Main Details Section */}
+                        <div className="lg:col-span-2 space-y-6">
+                            {/* Premium Match Header Card */}
+                            <Card className="shadow-2xl border-none bg-linear-to-br from-[#1c1c1f] to-[#141416] overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+                                <CardBody className="p-8 relative">
+                                    <div className="flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
+                                        {/* Club Logo / Big Icon */}
+                                        <div className="relative group">
+                                            <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-xl group-hover:bg-primary/30 transition-all" />
+                                            {match.club?.logo_url ? (
+                                                <div className="relative w-32 h-32 bg-[#232120] rounded-3xl p-4 border border-white/5 flex items-center justify-center shadow-2xl">
+                                                    <Image
+                                                        alt={match.club.name}
+                                                        src={match.club.logo_url}
+                                                        width={100}
+                                                        height={100}
+                                                        className="object-contain"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="relative w-32 h-32 bg-linear-to-br from-orange-400 to-red-500 rounded-3xl flex items-center justify-center shadow-2xl">
+                                                    <span className="text-5xl font-black text-white">{match.club?.name?.charAt(0)}</span>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                )}
-                            </CardBody>
-                        </Card>
 
-                        {/* Sidebar: Club & Contact */}
-                        <div className="flex flex-col gap-4">
-                            {/* Club Organizer Card */}
-                            <Card className="bg-[#18181b] shadow-medium border border-default-100/20">
-                                <CardHeader className="font-bold text-center border-b border-default-100/10 justify-center pb-4 text-white">Club Organisateur</CardHeader>
-                                <CardBody className="flex flex-col items-center gap-4 py-8">
-                                    {match.club?.logo_url ? (
-                                        <Image
-                                            alt={match.club.name}
-                                            src={match.club.logo_url}
-                                            width={120}
-                                            height={120}
-                                            className="object-contain drop-shadow-md"
-                                        />
-                                    ) : (
-                                        <div className="w-24 h-24 bg-linear-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-lg text-white">
-                                            <span className="text-4xl font-black">{match.club?.name?.charAt(0)}</span>
+                                        <div className="flex-1 space-y-4">
+                                            <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                                                <Chip size="sm" color={match.type === 'tournament' ? 'warning' : 'primary'} variant="shadow" className="font-black uppercase tracking-tighter shadow-lg shadow-primary/20">
+                                                    {match.type === 'tournament' ? '🏆 TOURNOI' : '⚽ MATCH AMICAL'}
+                                                </Chip>
+                                                {match.status === 'found' && (
+                                                    <Chip size="sm" color="success" variant="shadow" className="font-black uppercase tracking-tighter">COMPLET</Chip>
+                                                )}
+                                            </div>
+
+                                            <div>
+                                                <h1 className="text-3xl md:text-4xl font-black text-white leading-none tracking-tighter mb-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                                                    {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : match.club?.name)}
+                                                </h1>
+                                                <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold uppercase tracking-widest text-xs">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-primary">
+                                                        <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                                                    </svg>
+                                                    {isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
+                                                </p>
+                                            </div>
+
+                                            {!isMasked && (
+                                                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                                                    <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-3">
+                                                        <p className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Localisation précise</p>
+                                                        <p className="text-white font-bold text-sm truncate">{match.location_address || match.club?.address}</p>
+                                                    </div>
+                                                    <Button
+                                                        variant="shadow"
+                                                        color="primary"
+                                                        className="font-black uppercase tracking-tighter h-auto py-3 px-6 rounded-2xl"
+                                                        as="a"
+                                                        href={(match.club?.latitude && match.club?.longitude && (!match.location_address || match.location_address === match.club.address))
+                                                            ? `https://www.google.com/maps/dir/?api=1&destination=${match.club.latitude},${match.club.longitude}`
+                                                            : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${match.location_address || match.club?.address || ''}, ${match.location_city || match.club?.city || ''}`.trim().replace(/^,/, '').trim())}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        startContent={<span className="text-xl">📍</span>}
+                                                    >
+                                                        Itinéraire
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                    <div className={`text-center`}>
-                                        <h3 className="font-black text-xl text-white leading-tight">{isMasked ? 'CLUB MASQUÉ' : match.club?.name}</h3>
-                                        <p className="text-white font-black uppercase mt-1 text-lg">{isMasked ? 'VILLE MASQUÉE' : match.club?.city}</p>
-                                        <p className="text-default-400 text-xs font-medium">({isMasked ? '00000' : match.club?.zip})</p>
                                     </div>
                                 </CardBody>
                             </Card>
 
-                            <Card className="shadow-medium border-primary/20 bg-[#202022]">
-                                <CardHeader className="font-bold bg-primary/10 text-primary justify-center uppercase tracking-tighter">Action Requise</CardHeader>
-                                <CardBody className="gap-4 p-6">
+                            {/* Info Grid Component */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <InfoItem 
+                                    icon="⚽" 
+                                    label="Catégorie" 
+                                    value={t(`enums.category.${match.category}`)} 
+                                    color="primary" 
+                                />
+                                <InfoItem 
+                                    icon="⭐" 
+                                    label="Niveau" 
+                                    value={match.level ? t(`enums.level.${match.level}`) : "Non spécifié"} 
+                                    color="secondary" 
+                                />
+                                <InfoItem 
+                                    icon="🏟️" 
+                                    label="Terrain" 
+                                    value={match.pitch_type ? t(`enums.pitch.${match.pitch_type}`) : "Toutes surfaces"} 
+                                    color="success" 
+                                />
+                                <InfoItem 
+                                    icon="👥" 
+                                    label="Format" 
+                                    value={t(`enums.format.${match.format}`, match.format)} 
+                                    color="warning" 
+                                />
+                                <InfoItem 
+                                    icon="📅" 
+                                    label="Date" 
+                                    value={new Date(match.match_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} 
+                                    color="danger" 
+                                />
+                                <InfoItem 
+                                    icon="🕒" 
+                                    label="Horaire" 
+                                    value={`${formatTime(match.match_time)}${match.match_end_time ? ` - ${formatTime(match.match_end_time)}` : ''}`} 
+                                    color="primary" 
+                                />
+                                <InfoItem 
+                                    icon={match.venue === 'Domicile' ? "🏠" : "🚗"} 
+                                    label="Lieu" 
+                                    value={t(`enums.venue.${match.venue}`)} 
+                                    color="secondary" 
+                                />
+                                <InfoItem 
+                                    icon="⚤" 
+                                    label="Genre" 
+                                    value={t(`enums.gender.${gender}`)} 
+                                    color="default" 
+                                />
+                            </div>
+
+                            {/* Additional Details */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {match.jersey_color && (
+                                    <div className="bg-[#1c1c1f] rounded-3xl p-6 border border-white/5 flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Couleurs de maillot</p>
+                                            <p className="text-white font-bold uppercase">{t('matchForm.labels.jersey_color', 'Principal')}</p>
+                                        </div>
+                                        <JerseyColorDots colors={match.jersey_color} size="lg" />
+                                    </div>
+                                )}
+                                {match.type === 'tournament' && (
+                                    <div className="bg-[#1c1c1f] rounded-3xl p-6 border border-white/5 flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] text-default-400 uppercase font-black tracking-widest mb-1">Inscriptions</p>
+                                            <p className="text-white font-bold">{match.accepted_count || 0} / {match.max_teams} Équipes confirmées</p>
+                                        </div>
+                                        <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary flex items-center justify-center font-black text-xs text-primary">
+                                            {Math.round(((match.accepted_count || 0) / (match.max_teams || 1)) * 100)}%
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {cleanNotes && (
+                                <div className="bg-linear-to-br from-amber-500/10 to-orange-500/5 rounded-3xl p-8 border border-amber-500/20">
+                                    <h3 className="font-black text-xl text-amber-500 uppercase tracking-tighter mb-4 flex items-center gap-3">
+                                        <span className="text-2xl">📝</span> {t('matchForm.labels.notes', 'Notes & Instructions')}
+                                    </h3>
+                                    <div className="text-default-300 font-medium leading-relaxed italic text-lg opacity-80 border-l-2 border-amber-500/30 pl-6">
+                                        {cleanNotes}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Sidebar: Club & Contact */}
+                        <div className="flex flex-col gap-4">
+                            {/* Club Organizer Card */}
+                            <Card className="bg-[#1c1c1f] shadow-2xl border-none overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none group-hover:bg-primary/10 transition-all" />
+                                <CardHeader className="font-black text-center border-b border-white/5 justify-center pb-4 text-white uppercase tracking-widest text-xs opacity-60">Club Organisateur</CardHeader>
+                                <CardBody className="flex flex-col items-center gap-6 py-8 relative">
+                                    {match.club?.logo_url ? (
+                                        <div className="w-28 h-28 bg-[#111] rounded-[2rem] p-4 border border-white/5 flex items-center justify-center shadow-inner">
+                                            <Image
+                                                alt={match.club.name}
+                                                src={match.club.logo_url}
+                                                width={100}
+                                                height={100}
+                                                className="object-contain drop-shadow-2xl"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="w-28 h-28 bg-linear-to-br from-zinc-700 to-zinc-900 rounded-[2rem] flex items-center justify-center shadow-2xl border border-white/10">
+                                            <span className="text-4xl font-black text-white">{match.club?.name?.charAt(0)}</span>
+                                        </div>
+                                    )}
+                                    <div className="text-center space-y-1">
+                                        <h3 className="font-black text-2xl text-white leading-tight uppercase tracking-tighter">{isMasked ? 'CLUB MASQUÉ' : match.club?.name}</h3>
+                                        <p className="text-primary font-black uppercase text-sm tracking-widest">{isMasked ? 'VILLE MASQUÉE' : match.club?.city}</p>
+                                        
+                                        {!isMasked && (match.club?.home_jersey_color || match.club?.away_jersey_color) && (
+                                            <div className="flex justify-center gap-4 pt-4 mt-4 border-t border-white/5">
+                                                {match.club.home_jersey_color && (
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-[10px] text-zinc-500 font-black uppercase tracking-tighter">Home</span>
+                                                        <JerseyColorDots colors={match.club.home_jersey_color} size="sm" />
+                                                    </div>
+                                                )}
+                                                {match.club.away_jersey_color && (
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <span className="text-[10px] text-zinc-500 font-black uppercase tracking-tighter">Away</span>
+                                                        <JerseyColorDots colors={match.club.away_jersey_color} size="sm" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardBody>
+                            </Card>
+
+                            <Card className="shadow-2xl border-none bg-linear-to-br from-primary/10 to-secondary/10 overflow-hidden">
+                                <CardHeader className="font-black bg-primary/20 text-white justify-center uppercase tracking-widest text-xs py-3 border-b border-white/5">Action Requise</CardHeader>
+                                <CardBody className="gap-6 p-8">
                                     {user?.id === match.owner_id ? (
-                                        <div className="text-center space-y-3">
+                                        <div className="text-center space-y-4">
                                             {match.contacts?.some(c => c.status === 'accepted') ? (
-                                                <div className="bg-success-500/10 border border-success-500/20 p-4 rounded-xl space-y-3 mb-2 animate-appearance-in">
-                                                    <p className="text-success font-black text-center uppercase text-sm tracking-tighter">
-                                                        {match.type === 'tournament' ? 'Tournoi' : 'Match'} Confirmé ✅
+                                                <div className="bg-emerald-500/20 border-2 border-emerald-500/30 p-5 rounded-[2rem] space-y-4 mb-4 animate-appearance-in">
+                                                    <p className="text-emerald-400 font-black text-center uppercase text-sm tracking-widest flex items-center justify-center gap-2">
+                                                        Confirmed ✅
                                                     </p>
                                                     <Button
                                                         color="danger"
-                                                        variant="flat"
-                                                        className="w-full font-bold text-xs sm:text-sm h-9"
+                                                        variant="shadow"
+                                                        className="w-full font-black uppercase tracking-tighter h-12 rounded-2xl shadow-lg shadow-rose-500/20"
                                                         onPress={onCancelAcceptedOpen}
                                                     >
                                                         {match.type === 'tournament' ? 'Annuler le tournoi' : 'Annuler le duel'}
                                                     </Button>
                                                 </div>
                                             ) : (
-                                                <p className="text-default-400 text-sm font-medium">Vous êtes l'organisateur. Gérez les demandes ci-dessous.</p>
+                                                <p className="text-default-400 text-sm font-bold uppercase tracking-wide opacity-60">Gestion de l'organisateur</p>
                                             )}
-                                            <Button color="primary" variant="flat" className="w-full font-black uppercase tracking-tighter" as={Link} to={`/matches/${id}/edit`}>
+                                            <Button 
+                                                variant="shadow" 
+                                                className="w-full font-black uppercase tracking-tighter h-14 rounded-2xl bg-white text-black shadow-xl" 
+                                                as={Link} 
+                                                to={`/matches/${id}/edit`}
+                                                startContent={<span className="text-xl">✍️</span>}
+                                            >
                                                 Modifier l'annonce
                                             </Button>
                                             {match.type === 'tournament' && match.status === 'active' && (
                                                 <Button
                                                     color="success"
-                                                    variant="solid"
-                                                    className="w-full font-black uppercase tracking-tighter"
+                                                    variant="shadow"
+                                                    className="w-full font-black uppercase tracking-tighter h-14 rounded-2xl shadow-lg shadow-emerald-500/20"
                                                     onPress={onCloseRegOpen}
+                                                    startContent={<span className="text-xl">🔒</span>}
                                                 >
                                                     Clôturer les inscriptions
                                                 </Button>
@@ -395,14 +510,14 @@ export default function MatchDetailsPage() {
                                                                     }
                                                                     window.location.href = `tel:${match.phone}`;
                                                                     setTimeout(async () => {
-                                                                        if (user?.club_id && !match.contacts?.some(c => c.user_id === user.id)) {
+                                                                        if (user?.club_id && !match.contacts?.some((c: any) => c.user_id === user.id)) {
                                                                             try {
-                                                                                await contactMatch({ message: "Intérêt manifesté (A téléphoné)" });
+                                                                                await contactMatch({ message: "A porté de l'intérêt en appelant" });
                                                                             } catch (e) {
                                                                                 console.error(e);
                                                                             }
                                                                         }
-                                                                    }, 500);
+                                                                    }, 1000);
                                                                 }}
                                                             >
                                                                 📞 Appeler
@@ -418,14 +533,14 @@ export default function MatchDetailsPage() {
                                                                     }
                                                                     window.location.href = `mailto:${match.email}`;
                                                                     setTimeout(async () => {
-                                                                        if (user?.club_id && !match.contacts?.some(c => c.user_id === user.id)) {
+                                                                        if (user?.club_id && !match.contacts?.some((c: any) => c.user_id === user.id)) {
                                                                             try {
-                                                                                await contactMatch({ message: "Intérêt manifesté (A envoyé un email)" });
+                                                                                await contactMatch({ message: "A porté de l'intérêt en envoyant un mail" });
                                                                             } catch (e) {
                                                                                 console.error(e);
                                                                             }
                                                                         }
-                                                                    }, 500);
+                                                                    }, 1000);
                                                                 }}
                                                             >
                                                                 ✉️ Email
@@ -445,24 +560,15 @@ export default function MatchDetailsPage() {
                                                             </div>
                                                         )}
 
-                                                        {match.contacts?.some(c => c.user_id === user?.id) ? (
-                                                            <div className="space-y-2">
-                                                                <Button
-                                                                    color="default"
-                                                                    className="w-full font-black uppercase tracking-tighter h-12 shadow-lg"
-                                                                    isDisabled={true}
-                                                                >
-                                                                    DEMANDE DÉJÀ ENVOYÉE
-                                                                </Button>
-                                                                <Button
-                                                                    color="danger"
-                                                                    variant="flat"
-                                                                    className="w-full font-black uppercase tracking-tighter h-10 border border-danger/20"
-                                                                    onPress={onCancelOpen}
-                                                                >
-                                                                    🗑️ Annuler ma demande
-                                                                </Button>
-                                                            </div>
+                                                        {match.contacts?.some(c => c.user_id === user?.id && c.message === "A porté de l'intérêt en envoyant une demande") ? (
+                                                            <Button
+                                                                color="danger"
+                                                                variant="shadow"
+                                                                className="w-full font-black uppercase tracking-tighter h-12 shadow-lg shadow-danger/20 border border-danger/20"
+                                                                onPress={onCancelOpen}
+                                                            >
+                                                                🗑️ Annuler ma demande
+                                                            </Button>
                                                         ) : (
                                                             <Button
                                                                 color={isProfileIncomplete ? "default" : "primary"}
@@ -481,7 +587,7 @@ export default function MatchDetailsPage() {
                                                                         return;
                                                                     }
                                                                     try {
-                                                                        await contactMatch({ message: "Demande de participation envoyée via KduFoot" });
+                                                                        await contactMatch({ message: "A porté de l'intérêt en envoyant une demande" });
                                                                         addToast({ title: "Succès", description: "Demande envoyée avec succès !", variant: 'flat', color: 'success', timeout: 5000 });
                                                                     } catch (e: any) {
                                                                         addToast({ title: "Erreur", description: e.message || "Erreur lors de l'envoi", variant: 'flat', color: 'danger', timeout: 5000 });
@@ -531,78 +637,86 @@ export default function MatchDetailsPage() {
                         </div>
 
                         {/* Interaction / Tracking Section */}
-                        <div className="lg:col-span-3 mt-8">
-                            <div className="flex items-center gap-3 mb-4">
-                                <h2 className="text-2xl font-bold flex items-center gap-2 text-white">
-                                    <span className="p-2 bg-linear-to-r from-orange-500 to-amber-500 rounded-lg text-white">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                                        </svg>
-                                    </span>
-                                    Suivi des Contacts & Intérêts
-                                </h2>
-                                <Chip size="sm" variant="flat" color="warning" className="font-bold">
-                                    {match.contacts?.length || 0} intéressé{(match.contacts?.length || 0) > 1 ? 's' : ''}
-                                </Chip>
-                            </div>
-
-                            <p className="text-default-500 mb-6 max-w-2xl">
-                                Liste des clubs intéressés par ce match.
-                            </p>
-
-                            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
-                                {match.contacts && match.contacts.length > 0 ? (
-                                    match.contacts.map((contact, index) => {
-                                        const isActionable = user?.id === match.owner_id && contact.message === "Demande de participation envoyée via KduFoot";
-                                        return (
-                                            <Card
-                                                key={index}
-                                                isPressable={isActionable}
-                                                onPress={() => isActionable && navigate('/dashboard')}
-                                                className={`border ${contact.status === 'accepted' ? 'border-success/30 bg-success/5' : contact.status === 'refused' ? 'border-danger/20 opacity-60' : contact.status === 'withdrawn' ? 'border-default-200 opacity-50 grayscale' : 'border-default-200'} bg-[#202022] ${isActionable ? 'hover:scale-105 hover:border-primary/50 transition-all cursor-pointer' : ''}`}
-                                            >
-                                                <CardBody className="flex flex-col gap-4 p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-10 h-10 rounded-full bg-linear-to-br ${contact.status === 'accepted' ? 'from-success to-emerald-600' : 'from-orange-400 to-amber-500'} flex items-center justify-center text-white font-bold shadow-md`}>
-                                                            {contact.club_name?.charAt(0) || '?'}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="flex justify-between items-start">
-                                                                <p className="font-bold text-white leading-tight">{contact.club_name || 'Club intéressé'}</p>
-                                                                {contact.status !== 'pending' ? (
-                                                                    <Chip size="sm" color={contact.status === 'accepted' ? 'success' : contact.status === 'refused' ? 'danger' : 'default'} variant="flat" className="font-bold uppercase text-xs sm:text-sm">
-                                                                        {contact.status === 'accepted' ? 'Accepté' : contact.status === 'refused' ? 'Refusé' : 'Désisté'}
-                                                                    </Chip>
-                                                                ) : isActionable && (
-                                                                    <Chip size="sm" color="primary" variant="flat" className="font-bold uppercase text-[10px]">Voir la demande</Chip>
-                                                                )}
-                                                            </div>
-                                                            <p className="text-xs sm:text-sm text-default-500">{new Date(contact.contacted_at).toLocaleDateString()} à {new Date(contact.contacted_at).toLocaleTimeString()}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    {contact.status === 'accepted' && (
-                                                        <p className="text-xs text-success-400 font-medium text-center bg-success/10 py-1 rounded-lg">Équipe officiellement inscrite</p>
-                                                    )}
-                                                    {contact.status === 'withdrawn' && (
-                                                        <p className="text-[10px] text-default-400 italic bg-default-100/10 p-2 rounded-lg leading-tight">
-                                                            {contact.message}
-                                                        </p>
-                                                    )}
-                                                </CardBody>
-                                            </Card>
-                                        )
-                                    })
-                                ) : (
-                                    <div className="col-span-full py-12 flex flex-col items-center justify-center bg-[#202022] rounded-3xl border border-dashed border-default-100/10">
-                                        <div className="p-4 rounded-2xl bg-default-100/5 mb-4 opacity-20">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm6 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75z" />
-                                            </svg>
-                                        </div>
-                                        <p className="text-default-400 font-medium">Aucun club n'a encore postulé.</p>
+                        <div className="lg:col-span-3 mt-12">
+                            <div className="bg-linear-to-br from-[#1c1c1f] to-[#141416] rounded-[2.5rem] p-8 border border-white/5 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary via-secondary to-primary opacity-50" />
+                                
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                                    <div className="space-y-1 text-center md:text-left">
+                                        <h2 className="text-3xl font-black text-white flex items-center justify-center md:justify-start gap-3 tracking-tighter uppercase">
+                                            <span className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-primary/10">🤝</span>
+                                            Suivi des Contacts
+                                        </h2>
+                                        <p className="text-default-500 font-medium opacity-80 pl-0 md:pl-12">
+                                            Dépêchez-vous de candidater pour ce match, il y a déjà {match.contacts?.length || 0} club{(match.contacts?.length || 0) > 1 ? 's' : ''} qui ont candidaté ou porté de l'intérêt pour ce match.
+                                        </p>
                                     </div>
-                                )}
+                                    <Chip size="lg" variant="shadow" color="primary" className="font-black px-6 self-center md:self-auto shadow-lg shadow-primary/20">
+                                        {match.contacts?.length || 0} INTÉRÊT{(match.contacts?.length || 0) > 1 ? 'S' : ''}
+                                    </Chip>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {match.contacts && match.contacts.length > 0 ? (
+                                        match.contacts.map((contact, index) => {
+                                            const isActionable = user?.id === match.owner_id && contact.message === "A porté de l'intérêt en envoyant une demande";
+                                            const statusConfig = {
+                                                accepted: { border: 'border-emerald-500/50', bg: 'bg-emerald-500/5', color: 'text-emerald-400', icon: '✅' },
+                                                refused: { border: 'border-rose-500/30', bg: 'bg-rose-500/5', color: 'text-rose-400', icon: '❌' },
+                                                withdrawn: { border: 'border-zinc-500/20', bg: 'bg-zinc-500/5', color: 'text-zinc-500', icon: '🗑️' },
+                                                pending: { border: 'border-primary/30', bg: 'bg-primary/5', color: 'text-primary', icon: '⏳' }
+                                            }[contact.status];
+
+                                            return (
+                                                <Card
+                                                    key={index}
+                                                    isPressable={isActionable}
+                                                    onPress={() => isActionable && navigate('/dashboard')}
+                                                    className={`border-2 ${statusConfig.border} ${statusConfig.bg} rounded-3xl transition-all ${isActionable ? 'hover:scale-[1.03] hover:border-primary shadow-xl shadow-primary/5 cursor-pointer' : ''}`}
+                                                >
+                                                    <CardBody className="p-6 gap-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className={`w-14 h-14 rounded-2xl bg-[#000] border border-white/10 flex items-center justify-center text-2xl shadow-inner relative`}>
+                                                                {contact.club_logo ? (
+                                                                    <Image src={contact.club_logo} className="w-10 h-10 object-contain" />
+                                                                ) : contact.club_name?.charAt(0) || '?'}
+                                                                <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-[#111] border border-white/10 flex items-center justify-center text-xs">
+                                                                    {statusConfig.icon}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex-1 min-w-0 overflow-hidden">
+                                                                <p className="font-black text-white uppercase tracking-tighter leading-tight mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide">{contact.club_name || 'Club intéressé'}</p>
+                                                                <div className="flex flex-col gap-0.5">
+                                                                    <p className="text-[10px] text-default-500 font-bold uppercase tracking-widest">{new Date(contact.contacted_at).toLocaleDateString()}</p>
+                                                                    {contact.message && (
+                                                                        <p className="text-[10px] text-primary font-black uppercase tracking-tighter italic opacity-80">{contact.message}</p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {contact.status !== 'pending' && (
+                                                            <div className={`py-1.5 px-3 rounded-xl border border-current/20 font-black text-[10px] uppercase text-center tracking-widest ${statusConfig.color}`}>
+                                                                {contact.status === 'accepted' ? 'ÉQUIPE INSCRITE' : contact.status === 'refused' ? 'DEMANDE REFUSÉE' : 'DÉSISTEMENT'}
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {isActionable && (
+                                                            <Button size="sm" color="primary" variant="shadow" className="font-black uppercase tracking-tighter w-full rounded-xl">
+                                                                Voir la demande
+                                                            </Button>
+                                                        )}
+                                                    </CardBody>
+                                                </Card>
+                                            )
+                                        })
+                                    ) : (
+                                        <div className="col-span-full py-20 flex flex-col items-center justify-center bg-white/5 rounded-[2rem] border border-dashed border-white/10 opacity-60">
+                                            <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-3xl mb-4">🌑</div>
+                                            <p className="text-default-400 font-black uppercase tracking-widest text-sm">Aucune candidature pour le moment</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

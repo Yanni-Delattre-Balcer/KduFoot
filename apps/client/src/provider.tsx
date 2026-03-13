@@ -41,6 +41,7 @@ export function Provider({ children }: { children: React.ReactNode }) {
       <HeroUIProvider navigate={navigate} useHref={useHref}>
         <ToastProvider 
           placement="top-center" 
+          maxVisibleToasts={1}
           toastProps={{
             classNames: {
               base: "safe-area-top"

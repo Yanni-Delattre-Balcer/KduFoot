@@ -76,7 +76,7 @@ export default function MatchesPage() {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
-    }, [view, searchParams, setSearchParams]);
+    }, [view, type, searchParams, setSearchParams]);
 
     const [displayMode, setDisplayMode] = useState<'list' | 'calendar'>('list');
     const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -180,20 +180,27 @@ export default function MatchesPage() {
     const activeFilterCount = Object.values(filters).filter(v => v !== undefined).length + (radiusKm > 0 ? 1 : 0);
 
     const handleCreateSuccess = () => {
+        globalMutate(
+            key => typeof key === 'string' && key.includes('/api/matches'),
+            undefined,
+            { revalidate: true }
+        );
         setView('find');
     };
 
     const canUseDistance = !!(user?.club?.latitude && user?.club?.longitude);
 
-    // Group matches by date for calendar view
+    // Group matches by date for calendar view - Synchronized with result list
     const matchesByDate = useMemo(() => {
         const map: Record<string, number> = {};
-        for (const m of matches) {
-            const dateKey = m.match_date; // ISO date string YYYY-MM-DD
+        // Filter out found matches and filter by current type
+        const visibleMatches = matches.filter(m => m.status !== 'found' && m.type === type);
+        for (const m of visibleMatches) {
+            const dateKey = m.match_date.split('T')[0]; // Ensure YYYY-MM-DD
             map[dateKey] = (map[dateKey] || 0) + 1;
         }
         return map;
-    }, [matches]);
+    }, [matches, type]);
 
     // Calendar helpers
     const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -698,15 +705,15 @@ export default function MatchesPage() {
                                                                 </div>
                                                             )}
                                                             <div className="flex flex-col w-full">
-                                                                <h4 className={`font-bold text-xl ${diff.name ? 'text-red-500' : 'text-default-900'} group-hover:text-violet-200 transition-colors uppercase tracking-tight truncate w-full`}>
+                                                                <h4 className={`font-bold text-xl ${diff.name ? 'text-red-500' : 'text-default-900'} group-hover:text-violet-200 transition-colors uppercase tracking-tight break-words whitespace-normal w-full`}>
                                                                     {isMasked ? 'CLUB MASQUÉ' : (match.club?.name || t('matchesPage.unknown_club'))}
                                                                 </h4>
                                                                 {match.type === 'tournament' && match.name && (
-                                                                    <h5 className={`font-bold text-sm ${diff.name ? 'text-red-400' : 'text-fuchsia-400'} group-hover:text-fuchsia-300 transition-colors uppercase truncate w-full pb-1`}>
+                                                                    <h5 className={`font-bold text-sm ${diff.name ? 'text-red-400' : 'text-fuchsia-400'} group-hover:text-fuchsia-300 transition-colors uppercase break-words whitespace-normal w-full pb-1`}>
                                                                         {match.name}
                                                                     </h5>
                                                                 )}
-                                                                <div className="flex items-center gap-2 mb-1">
+                                                                <div className="flex flex-wrap items-center gap-1.5 mb-1">
                                                                     <Chip size="sm" variant="flat" color="default" className="h-4 text-[9px] uppercase font-bold">
                                                                         {match.type === 'tournament' ? '🏆' : '⚽'} {t(`enums.type.${match.type}`)}
                                                                     </Chip>
@@ -715,14 +722,14 @@ export default function MatchesPage() {
                                                                             {match.registration_fee > 0 ? `${match.registration_fee} €` : 'Gratuit'}
                                                                         </Chip>
                                                                     )}
-                                                                    <Chip size="sm" variant="flat" color={diff.category ? "danger" : "warning"} className="h-4 text-[9px] uppercase font-bold">
-                                                                        {t(`enums.category.${match.category}`)}
+                                                                    <Chip size="sm" variant="flat" color={diff.category || diff.level ? "danger" : "warning"} className="h-4 text-[9px] uppercase font-black">
+                                                                        {t(`enums.category.${match.category}`)} {match.level ? `• ${t(`enums.level.${match.level}`)}` : ''}
                                                                     </Chip>
-                                                                    <Chip size="sm" variant="flat" color={diff.venue ? "danger" : "secondary"} className="h-4 text-[9px] uppercase font-bold">
-                                                                        {match.venue === 'Domicile' ? '🏠 Reçoit' : '🚗 Se déplace'}
-                                                                    </Chip>
-                                                                    <Chip size="sm" variant="flat" color={diff.pitch_type ? "danger" : "primary"} className="h-4 text-[9px] uppercase font-bold">
+                                                                    <Chip size="sm" variant="flat" color={diff.pitch_type ? "danger" : "primary"} className="h-4 text-[9px] uppercase font-black">
                                                                         🏟️ {t(`enums.pitch.${match.pitch_type}`)}
+                                                                    </Chip>
+                                                                    <Chip size="sm" variant="flat" color={diff.venue ? "danger" : "secondary"} className="h-4 text-[9px] uppercase font-black">
+                                                                        {match.venue === 'Domicile' ? '🏠 REÇOIT' : '🚗 SE DÉPLACE'}
                                                                     </Chip>
                                                                 </div>
                                                                 <p className={`text-small ${diff.location_city ? 'text-red-500 font-bold' : 'text-default-500'} font-medium`}>

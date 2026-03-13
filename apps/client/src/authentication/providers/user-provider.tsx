@@ -26,6 +26,8 @@ interface UserContextType {
         pendingRequests: number;
         modifiedParticipations: number;
     };
+    isAccountModalOpen: boolean;
+    setIsAccountModalOpen: (open: boolean) => void;
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -36,6 +38,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const { getJson, postJson, putJson, patchJson, isAuthenticated, logout } = useAuth();
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [localBanOverride, setLocalBanOverride] = useState<BanStatus | null>(null);
+    const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
@@ -170,8 +173,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
         blockReason,
         isOnline,
         syncStatus,
-        notifications
-    }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, isOnline, syncStatus, notifications, logout]);
+        notifications,
+        isAccountModalOpen,
+        setIsAccountModalOpen
+    }), [user, isLoading, error, profileComplete, isLocked, isAdmin, isBlocked, isOnline, syncStatus, notifications, logout, isAccountModalOpen]);
 
     if (isLoading && isAuthenticated && !isBlocked && !user) {
         return (

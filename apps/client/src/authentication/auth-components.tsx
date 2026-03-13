@@ -22,6 +22,7 @@ import {
   getNameWithFallback,
   withAuthentication,
 } from "./providers/use-auth";
+import { useUser } from "./providers/user-provider";
 import { AccountModal } from "./account-modal";
 
 /**
@@ -230,16 +231,16 @@ export const LogoutLink: FC<LogoutLinkProps> = ({
 export const LoginLogoutButton: FC<LogoutButtonProps> = ({
   showButtonIfNotAuthenticated = false,
 }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { isLoading, isAccountModalOpen, setIsAccountModalOpen } = useUser();
   const { t } = useTranslation();
-  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   if (isLoading) return null;
 
   return isAuthenticated ? (
     <div className="flex items-center gap-2">
       <Button
-        onPress={() => setIsAccountOpen(true)}
+        onPress={() => setIsAccountModalOpen(true)}
         variant="flat"
         color="default"
         radius="full"
@@ -251,7 +252,7 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
         showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
         text={t("auth.logout")}
       />
-      <AccountModal isOpen={isAccountOpen} onOpenChange={setIsAccountOpen} />
+      <AccountModal isOpen={isAccountModalOpen} onOpenChange={setIsAccountModalOpen} />
     </div>
   ) : (
     <LoginButton />
@@ -268,9 +269,9 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
   text,
   color,
 }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { isLoading, isAccountModalOpen, setIsAccountModalOpen } = useUser();
   const { t } = useTranslation();
-  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   if (isLoading) return null;
 
@@ -280,7 +281,7 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
         color="foreground"
         size="lg"
         className="font-bold cursor-pointer"
-        onPress={() => setIsAccountOpen(true)}
+        onPress={() => setIsAccountModalOpen(true)}
       >
         {t("auth.account")}
       </Link>
@@ -289,7 +290,7 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
         showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
         text={text}
       />
-      <AccountModal isOpen={isAccountOpen} onOpenChange={setIsAccountOpen} />
+      <AccountModal isOpen={isAccountModalOpen} onOpenChange={setIsAccountModalOpen} />
     </div>
   ) : (
     <LoginLink />

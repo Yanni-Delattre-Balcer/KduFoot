@@ -153,7 +153,8 @@
     "empty_matches": "Aucun match favori",
     "empty_matches_desc": "Vos matchs likés apparaîtront ici.",
     "discover_exercises": "Découvrir les exercices",
-    "find_matches": "Trouver un match / tournoi"
+    "find_matches": "Trouver un match / tournoi",
+    "remove": "Retirer des favoris"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",
@@ -451,8 +452,5 @@
     "auth0_admin_api": "Accès API Auth0",
     "coach_certified": "Coach certifié"
   },
-  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur",
-  "common": {
-    "home": "Accueil"
-  }
+  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur"
 }

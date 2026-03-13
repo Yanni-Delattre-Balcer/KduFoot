@@ -454,6 +454,47 @@ export const setupRoutes = (router: Router, env: Env) => {
 
 	/**
 	 * @openapi
+	 * /api/test-push:
+	 *   get:
+	 *     tags:
+	 *       - Development
+	 *     summary: Test Push Notification
+	 *     description: Sends a dummy push notification to the current user to verify connectivity and VAPID setup.
+	 *     security:
+	 *       - bearerAuth: []
+	 *     responses:
+	 *       200:
+	 *         description: Push attempt initiated.
+	 */
+	router.get(
+		"/api/test-push",
+		async (request) => {
+			const sub = router.jwtPayload.sub;
+			if (!sub) return Response.json({ success: false, error: 'Unauthorized' }, { status: 401, headers: router.corsHeaders });
+
+			const user = await env.DB.prepare('SELECT push_subscription FROM users WHERE auth0_sub = ?').bind(sub).first<{ push_subscription: string | null }>();
+			if (!user?.push_subscription) {
+				return Response.json({ success: false, error: 'No push subscription found for this user' }, { status: 400, headers: router.corsHeaders });
+			}
+
+			const subscription = JSON.parse(user.push_subscription);
+			const { broadcastNotification } = await import("../utils/broadcast");
+			
+			await broadcastNotification(env, {
+				type: 'NOTIFICATION',
+				notificationType: 'ENROLLMENT_ACCEPTED', // Use an existing type to trigger push
+				message: 'Test de notification Push KduFoot ! ' + new Date().toLocaleTimeString(),
+				targetUserId: sub,
+				data: { test: true }
+			});
+
+			return Response.json({ success: true, message: 'Push test triggered' }, { headers: router.corsHeaders });
+		},
+		env.READ_PERMISSION,
+	);
+
+	/**
+	 * @openapi
 	 * /api/get_users:
 	 *   get:
 	 *     tags:

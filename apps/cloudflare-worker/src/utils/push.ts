@@ -107,6 +107,8 @@ export async function sendPushNotification(
         body.set(localPublicKey, 21);
         body.set(ciphertext, 21 + localPublicKey.length);
 
+        console.log(`[Push] Sending encrypted payload to ${subscription.endpoint}. Size: ${body.length} bytes (Ciphertext: ${ciphertext.length} bytes).`);
+
         const response = await fetch(subscription.endpoint, {
             method: 'POST',
             headers: {

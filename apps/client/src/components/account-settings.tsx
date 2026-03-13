@@ -10,13 +10,13 @@ import { useState, useRef, useEffect } from "react";
 import * as faceapi from "face-api.js";
 import { useTranslation } from "react-i18next";
 import { Category } from "@/types/exercise.types";
-import { Level, PitchType } from "@/types/match.types";
+import { Level } from "@/types/match.types";
 import { mutate } from "swr";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { JerseyColorDots } from "./jersey-color-dots";
 
 const CATEGORIES = Object.values(Category);
 const LEVELS = Object.values(Level);
-const PITCH_TYPES: PitchType[] = ['Herbe', 'Synthétique', 'Hybride', 'Stabilisé', 'Toutes surfaces'];
 
 interface AccountSettingsProps {
     onSaveSuccess?: () => void;
@@ -38,8 +38,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     const [lastname, setLastname] = useState("");
     const [level, setLevel] = useState("");
     const [category, setCategory] = useState("");
-    const [pitchType, setPitchType] = useState("");
-    const [clubColors, setClubColors] = useState("");
+    const [homeJerseyColor, setHomeJerseyColor] = useState("");
+    const [awayJerseyColor, setAwayJerseyColor] = useState("");
     const [phone, setPhone] = useState("");
     const [siret, setSiret] = useState("");
     const [stadiumAddress, setStadiumAddress] = useState("");
@@ -111,8 +111,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             setLicenseId(dbUser.license_id || "");
             setLevel(dbUser.level || "");
             setCategory(dbUser.category || "");
-            setPitchType(dbUser.pitch_type || "");
-            setClubColors(dbUser.club_colors || "");
+            setHomeJerseyColor(dbUser.home_jersey_color || "");
+            setAwayJerseyColor(dbUser.away_jersey_color || "");
             setPhone(formatPhoneNumber(dbUser.phone || ""));
             setSiret(formatSiret(dbUser.siret || ""));
             setStadiumAddress(dbUser.stadium_address || "");
@@ -187,11 +187,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         if (!level) {
             newErrors.level = t('account.errors.level_required');
         }
-        if (!pitchType) {
-            newErrors.pitchType = t('account.errors.pitch_required');
-        }
         if (!stadiumAddress || stadiumAddress.trim() === "") {
             newErrors.stadiumAddress = t('account.errors.stadium_required');
+        }
+        if (!homeJerseyColor || homeJerseyColor.trim() === "") {
+            newErrors.homeJerseyColor = t('account.errors.home_jersey_required');
+        }
+        if (!awayJerseyColor || awayJerseyColor.trim() === "") {
+            newErrors.awayJerseyColor = t('account.errors.away_jersey_required');
         }
 
         const cleanSiret = siret.replace(/\s/g, '').trim();
@@ -224,8 +227,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 license_id: licenseId,
                 level,
                 category,
-                pitch_type: pitchType,
-                club_colors: clubColors,
+                home_jersey_color: homeJerseyColor,
+                away_jersey_color: awayJerseyColor,
                 phone: phone,
                 stadium_address: stadiumAddress,
                 additional_sirets: (dbUser?.additional_sirets || []).map(item => {
@@ -238,16 +241,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 picture: previewUrl || dbUser?.picture || authUser.picture
             });
 
-            await getAccessToken({ cacheMode: 'off' } as any);
-            await refetch();
-            await mutate('/api/me/context');
-
-            addToast({ title: t('success', 'Succès'), description: t('accountModal.alerts.update_success', 'Profil mis à jour avec succès'), variant: 'flat', color: 'success' });
-
             if (onSaveSuccess) onSaveSuccess();
 
             // Systematic redirection to 'from' or defaults to '/matches'
             navigate(from || '/matches');
+
+            await getAccessToken({ cacheMode: 'off' } as any);
+            await refetch();
+            await mutate('/api/me/context');
         } catch (error: any) {
             console.error("Update profile error:", error);
             addToast({ title: t('error.title'), description: error.message || t('accountModal.alerts.update_error', 'Erreur de mise à jour'), variant: 'flat', color: 'danger' });
@@ -339,8 +340,10 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </div>
                 </div>
 
-                <div className="text-center w-full">
-                    <h3 className="text-lg sm:text-2xl font-bold truncate">{authUser.name}</h3>
+                <div className="text-center w-full overflow-hidden">
+                    <h3 className="text-lg sm:text-2xl font-bold truncate hover:overflow-x-auto whitespace-nowrap scrollbar-hide">
+                        {authUser.name}
+                    </h3>
                     <div className="flex items-center justify-center gap-2 mt-1">
                         <Chip
                             size="sm"
@@ -532,47 +535,44 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 {errors.level && <p className="text-xs font-bold pl-1">{errors.level}</p>}
                             </div>
                             <div className="space-y-1">
-                                <Select
-                                    id="acc_pitch_type"
-                                    name="acc_pitch_type"
-                                    label={t('account.fields.pitch')}
+                                <Input
+                                    id="acc_home_jersey"
+                                    name="acc_home_jersey"
+                                    label={t('account.fields.home_jersey', 'Couleur maillot Domicile')}
                                     variant="bordered"
                                     size="sm"
-                                    selectedKeys={pitchType ? [pitchType] : []}
-                                    onChange={(e) => {
-                                        setPitchType(e.target.value);
-                                        if (errors.pitchType) setErrors(prev => ({ ...prev, pitchType: "" }));
+                                    value={homeJerseyColor}
+                                    onValueChange={(v) => {
+                                        setHomeJerseyColor(v);
+                                        if (errors.homeJerseyColor) setErrors(prev => ({ ...prev, homeJerseyColor: "" }));
                                     }}
-                                    placeholder={t('common.choose', 'Choisir...')}
-                                    isInvalid={!!errors.pitchType}
-                                    aria-label={t('account.fields.pitch')}
-                                >
-                                    {PITCH_TYPES.map((type) => (
-                                        <SelectItem key={type} textValue={t(`enums.pitch.${type}`)}>
-                                            {t(`enums.pitch.${type}`)}
-                                        </SelectItem>
-                                    ))}
-                                </Select>
-                                {errors.pitchType && <p className="text-xs font-bold pl-1">{errors.pitchType}</p>}
+                                    placeholder={t('account.fields.home_jersey_placeholder', 'Ex: Rouge et Blanc')}
+                                    isInvalid={!!errors.homeJerseyColor}
+                                    isRequired
+                                    aria-label={t('account.fields.home_jersey')}
+                                    endContent={<JerseyColorDots colors={homeJerseyColor} size="md" />}
+                                />
+                                {errors.homeJerseyColor && <p className="text-xs font-bold pl-1 text-danger">{errors.homeJerseyColor}</p>}
                             </div>
                             <div className="space-y-1">
                                 <Input
-                                    id="acc_club_colors"
-                                    name="acc_club_colors"
-                                    label={t('account.fields.colors')}
+                                    id="acc_away_jersey"
+                                    name="acc_away_jersey"
+                                    label={t('account.fields.away_jersey', 'Couleur maillot Extérieur')}
                                     variant="bordered"
                                     size="sm"
-                                    value={clubColors}
+                                    value={awayJerseyColor}
                                     onValueChange={(v) => {
-                                        setClubColors(v);
-                                        if (errors.clubColors) setErrors(prev => ({ ...prev, clubColors: "" }));
+                                        setAwayJerseyColor(v);
+                                        if (errors.awayJerseyColor) setErrors(prev => ({ ...prev, awayJerseyColor: "" }));
                                     }}
-                                    placeholder={t('account.fields.colors_placeholder')}
-                                    isInvalid={!!errors.clubColors}
+                                    placeholder={t('account.fields.away_jersey_placeholder', 'Ex: Bleu')}
+                                    isInvalid={!!errors.awayJerseyColor}
                                     isRequired
-                                    aria-label={t('account.fields.colors')}
+                                    aria-label={t('account.fields.away_jersey')}
+                                    endContent={<JerseyColorDots colors={awayJerseyColor} size="md" />}
                                 />
-                                {errors.clubColors && <p className="text-xs font-bold pl-1">{errors.clubColors}</p>}
+                                {errors.awayJerseyColor && <p className="text-xs font-bold pl-1 text-danger">{errors.awayJerseyColor}</p>}
                             </div>
                         </div>
                     </div>

@@ -5,6 +5,7 @@ import { Image } from "@heroui/image";
 import { Progress } from "@heroui/progress";
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { JerseyColorDots } from '@/components/jersey-color-dots';
 
 interface ConfirmedMatchCardProps {
     match: any;
@@ -76,7 +77,7 @@ export const ConfirmedMatchCard = ({
                                     <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
                                         {opponentClubName}
                                     </h3>
-                                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                                    <div className="flex flex-wrap items-center gap-3 mt-2">
                                         <Chip size="sm" variant="flat" color="secondary" className="font-black text-xs sm:text-sm uppercase tracking-wider h-auto py-0.5 whitespace-normal">
                                             ⚽ {t('enums.type.match')}
                                         </Chip>
@@ -88,6 +89,12 @@ export const ConfirmedMatchCard = ({
                                         >
                                             {isUserHome ? t('dashboard.labels.home_badge') : t('dashboard.labels.away_badge')}
                                         </Chip>
+                                        {(match.opponent_home_jersey_color || match.opponent_away_jersey_color) && (
+                                            <div className="flex gap-2 items-center bg-white/5 px-2 py-0.5 rounded-lg border border-white/10 group-hover:border-violet-500/30 transition-colors">
+                                                {match.opponent_home_jersey_color && <JerseyColorDots colors={match.opponent_home_jersey_color} size="sm" />}
+                                                {match.opponent_away_jersey_color && <JerseyColorDots colors={match.opponent_away_jersey_color} size="sm" />}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

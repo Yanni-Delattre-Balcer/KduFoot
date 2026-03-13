@@ -13,6 +13,8 @@ export interface User {
     level?: string | null;
     pitch_type?: string | null;
     club_colors?: string | null;
+    home_jersey_color?: string | null;
+    away_jersey_color?: string | null;
     stadium_address?: string | null;
     latitude?: number | null;
     longitude?: number | null;
@@ -37,6 +39,8 @@ export interface Club {
     logo_url?: string;
     latitude?: number;
     longitude?: number;
+    home_jersey_color?: string;
+    away_jersey_color?: string;
 }
 
 export interface LinkClubDto {
