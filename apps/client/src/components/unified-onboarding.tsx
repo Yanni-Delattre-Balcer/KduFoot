@@ -19,14 +19,17 @@ export const UnifiedOnboarding = () => {
     useEffect(() => {
         if (authLoading || userLoading || !isAuthenticated) return;
 
-        // --- STEP 1: PWA ---
-        // We show it if: not standalone AND not dismissed AND browser says it can be installed
-        // Note: canInstall depends on beforeinstallprompt or isIOS check in the hook
-        const needsPWA = !isStandalone && !isPermanentlyDismissed && !isSessionDismissed;
+        // --- DETECT MODE ---
+        // isStandalone is true if the app is launched from Home Screen (PWA)
+        const isAppMode = isStandalone;
+        const isWebMode = !isStandalone;
+
+        // --- STEP 1: PWA (Installation) ---
+        // Only for Web mode + not dismissed
+        const needsPWA = isWebMode && !isPermanentlyDismissed && !isSessionDismissed;
         
-        // --- STEP 2: Auth ---
-        // We show it if: (Calendar or Push missing) AND not dismissed
-        // SEURITY: Check if Notification exists to avoid crash on mobile Safari
+        // --- STEP 2: Auth (Notifications & Calendar) ---
+        // For everyone if data is missing, but only after PWA if in Web mode
         const hasNotificationSupport = typeof Notification !== 'undefined';
         const notificationGranted = hasNotificationSupport ? Notification.permission === 'granted' : false;
 
@@ -34,35 +37,40 @@ export const UnifiedOnboarding = () => {
                          && !isAuthDismissedPermanent 
                          && !isAuthDismissedSession;
 
-        console.log("[Onboarding] Evaluating state:", {
+        console.log(`[Onboarding] Version Check: ${isAppMode ? 'PHONE/APP' : 'WEB'}`, {
             isStandalone,
-            isPermanentlyDismissed,
-            isSessionDismissed,
-            canInstall,
             needsPWA,
             needsAuth,
-            activeStep,
-            pwaStepEvaluated,
-            hasNotificationSupport
+            pwaStepEvaluated
         });
 
-        // PRIORITÉ STRICTE : Si PWA est nécessaire, on ne regarde RIEN d'autre tant qu'il n'est pas traité
-        if (needsPWA && !pwaStepEvaluated) {
-            if (activeStep !== 'pwa') {
-                console.log("[Onboarding] Triggering Step 1: PWA");
-                setActiveStep('pwa');
+        // --- ORCHESTRATION ---
+
+        // CASE A: User is on Web
+        if (isWebMode) {
+            if (needsPWA && !pwaStepEvaluated) {
+                if (activeStep !== 'pwa') {
+                    console.log("[Onboarding] Phase: PWA Request (Web)");
+                    setActiveStep('pwa');
+                }
+            } else if (needsAuth && activeStep === null) {
+                console.log("[Onboarding] Phase: Auth Request (Web post-PWA)");
+                setActiveStep('auth');
+            } else if (!needsPWA && !needsAuth && activeStep !== null) {
+                setActiveStep(null);
             }
-            return;
+        } 
+        
+        // CASE B: User is on Phone (Standalone)
+        else {
+            if (needsAuth && activeStep === null) {
+                console.log("[Onboarding] Phase: Auth Request (Phone/Standalone)");
+                setActiveStep('auth');
+            } else if (!needsAuth && activeStep !== null) {
+                setActiveStep(null);
+            }
         }
 
-        // Si PWA n'est pas nécessaire OU déjà évalué (fermé), on check l'Auth
-        if (needsAuth && activeStep === null) {
-            console.log("[Onboarding] Step 1 skipped/done, checking Step 2...");
-            setActiveStep('auth');
-        } else if (!needsPWA && !needsAuth && activeStep !== null) {
-            console.log("[Onboarding] Nothing needed, clearing steps");
-            setActiveStep(null);
-        }
     }, [isAuthenticated, authLoading, userLoading, isStandalone, isPermanentlyDismissed, isSessionDismissed, user?.calendar_token, pwaStepEvaluated, canInstall]);
 
     const handlePwaClose = (completed: boolean) => {
