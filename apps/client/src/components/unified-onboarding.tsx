@@ -7,9 +7,10 @@ import { CombinedAuthModal } from '@/modals/combined-auth-modal';
 export const UnifiedOnboarding = () => {
     const { isAuthenticated, isLoading: authLoading } = useAuth();
     const { user, isLoading: userLoading } = useUser();
-    const { isStandalone, isPermanentlyDismissed, isSessionDismissed } = usePWAInstall();
+    const { isStandalone, isPermanentlyDismissed, isSessionDismissed, canInstall } = usePWAInstall();
 
     const [activeStep, setActiveStep] = useState<'pwa' | 'auth' | null>(null);
+    const [pwaStepEvaluated, setPwaStepEvaluated] = useState(false);
 
     // Persistence for Auth Step
     const isAuthDismissedPermanent = localStorage.getItem("kdufoot-auth-onboarding-dismissed") === "true";
@@ -18,40 +19,62 @@ export const UnifiedOnboarding = () => {
     useEffect(() => {
         if (authLoading || userLoading || !isAuthenticated) return;
 
-        // Check if Step 1 (PWA) is needed
+        // --- STEP 1: PWA ---
+        // We show it if: not standalone AND not dismissed
         const needsPWA = !isStandalone && !isPermanentlyDismissed && !isSessionDismissed;
         
-        // Check if Step 2 (Auth) is needed
-        // - No calendar token
-        // - OR Notifications not granted (and not permanently dismissed)
+        // --- STEP 2: Auth ---
+        // We show it if: (Calendar or Push missing) AND not dismissed
         const needsAuth = (!user?.calendar_token || Notification.permission !== 'granted') 
                          && !isAuthDismissedPermanent 
                          && !isAuthDismissedSession;
 
-        if (needsPWA) {
-            setActiveStep('pwa');
-        } else if (needsAuth) {
+        console.log("[Onboarding] Evaluating state:", {
+            isStandalone,
+            isPermanentlyDismissed,
+            isSessionDismissed,
+            canInstall,
+            needsPWA,
+            needsAuth,
+            activeStep,
+            pwaStepEvaluated
+        });
+
+        // PRIORITÉ STRICTE : Si PWA est nécessaire, on ne regarde RIEN d'autre tant qu'il n'est pas traité
+        if (needsPWA && !pwaStepEvaluated) {
+            if (activeStep !== 'pwa') {
+                console.log("[Onboarding] Triggering Step 1: PWA");
+                setActiveStep('pwa');
+            }
+            return;
+        }
+
+        // Si PWA n'est pas nécessaire OU déjà évalué (fermé), on check l'Auth
+        if (needsAuth && activeStep === null) {
+            console.log("[Onboarding] Step 1 skipped/done, checking Step 2...");
             setActiveStep('auth');
-        } else {
+        } else if (!needsPWA && !needsAuth && activeStep !== null) {
+            console.log("[Onboarding] Nothing needed, clearing steps");
             setActiveStep(null);
         }
-    }, [isAuthenticated, authLoading, userLoading, isStandalone, isPermanentlyDismissed, isSessionDismissed, user?.calendar_token]);
+    }, [isAuthenticated, authLoading, userLoading, isStandalone, isPermanentlyDismissed, isSessionDismissed, user?.calendar_token, pwaStepEvaluated]);
 
     const handlePwaClose = (completed: boolean) => {
+        console.log("[Onboarding] PWA Modal closed, completed:", completed);
         setActiveStep(null);
-        console.log("[Onboarding] PWA Step closed, completed:", completed);
+        setPwaStepEvaluated(true); // Mark as done for this session to allow Auth step
 
-        // Cascade to Auth step after a short delay
+        // Cascade transition with a delay for visual comfort
         setTimeout(() => {
             const needsAuth = (!user?.calendar_token || Notification.permission !== 'granted') 
                              && !isAuthDismissedPermanent 
                              && !isAuthDismissedSession;
             
             if (needsAuth) {
-                console.log("[Onboarding] Cascading to Auth Step...");
+                console.log("[Onboarding] Cascade: Triggering Step 2: Auth");
                 setActiveStep('auth');
             }
-        }, 800);
+        }, 600);
     };
 
     const handleAuthClose = () => {
