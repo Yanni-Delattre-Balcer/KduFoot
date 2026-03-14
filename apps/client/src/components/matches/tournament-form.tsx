@@ -202,15 +202,12 @@ export default function TournamentForm({
     if (!formData.match_date) {
       newErrors.match_date = "La date est obligatoire.";
     } else {
-      const today = new Date();
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-      today.setHours(0, 0, 0, 0);
-      const selectedDate = new Date(formData.match_date);
-
-      if (selectedDate < today) {
-        newErrors.match_date =
-          "Date invalide : Vous ne pouvez pas créer un match ou un tournoi dans le passé.";
-      } else if (formData.match_date === today.toISOString().split("T")[0]) {
+      if (formData.match_date < todayStr) {
+        newErrors.match_date = t("tournamentForm.alerts.date_past", "Date invalide : Vous ne pouvez pas créer un match ou un tournoi dans le passé.");
+      } else if (formData.match_date === todayStr) {
         // Rule of 2 hours delay
         const [hours, minutes] = (formData.match_time || "00:00")
           .split(":")
@@ -218,12 +215,14 @@ export default function TournamentForm({
         const matchDateTime = new Date();
         matchDateTime.setHours(hours, minutes, 0, 0);
 
-        const now = new Date();
         const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-        if (matchDateTime < minTime) {
+        if (matchDateTime < now) {
           newErrors.match_time =
-            "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation.";
+            "Impossible de publier : l'heure sélectionnée est dépassée.";
+        } else if (matchDateTime < minTime) {
+          newErrors.match_time =
+            "Délai trop court : Un tournoi doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation.";
         }
       }
     }
@@ -245,7 +244,15 @@ export default function TournamentForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      // Afficher un warning global si la validation bloque (surtout pour les dates/heures passées)
+      addToast({
+        title: t("error", "Erreur", { ns: "base" }),
+        description: t("matchForm.alerts.validation_failed", "Impossible de publier : Vérifiez les champs en rouge."),
+        color: "danger",
+      });
+      return;
+    }
     if (!user?.club_id) return;
 
     setIsSaving(true);
@@ -602,6 +609,8 @@ export default function TournamentForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
+                errorMessage={errors.match_date}
+                isInvalid={!!errors.match_date}
                 label={t("tournamentForm.labels.date")}
                 min={
                   new Date(
@@ -620,6 +629,8 @@ export default function TournamentForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
+                errorMessage={errors.match_time}
+                isInvalid={!!errors.match_time}
                 label={t("tournamentForm.labels.time")}
                 size="sm"
                 type="time"
@@ -630,6 +641,8 @@ export default function TournamentForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
+                errorMessage={errors.match_end_time}
+                isInvalid={!!errors.match_end_time}
                 label={t("tournamentForm.labels.end_time")}
                 size="sm"
                 type="time"
@@ -737,7 +750,7 @@ export default function TournamentForm({
                 isLoading={isSaving}
                 type="submit"
               >
-                {initialData ? t("matchForm.buttons.update") : t("matchForm.buttons.create")}
+                {initialData ? t("tournamentForm.labels.update", "Mettre à jour le tournoi") : t("tournamentForm.labels.publish", "Publier le tournoi")}
               </Button>
             </div>
         </CardBody>

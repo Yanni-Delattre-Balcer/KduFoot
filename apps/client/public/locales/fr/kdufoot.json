@@ -494,7 +494,9 @@
       "link_success": "Club lié avec succès !",
       "create_success": "Annonce de match créée avec succès !",
       "update_success": "Match mis à jour avec succès !",
-      "delete_success": "Match supprimé avec succès !"
+      "delete_success": "Match supprimé avec succès !",
+      "validation_failed": "Impossible de publier : Vérifiez les champs en rouge.",
+      "delay_short_error": "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation."
     },
     "confirm": {
       "accept": "Accepter cette demande ?",
@@ -606,7 +608,10 @@
       "contact_email": "Email de contact",
       "notes": "Informations sur le tournoi",
       "notes_placeholder": "Règlement, récompenses, restauration...",
-      "publish": "Publier le tournoi"
+      "publish": "Publier le tournoi",
+      "update": "Mettre à jour le tournoi",
+      "name_form": "Nom du Tournoi",
+      "subtitle_form": "Sous-titre de l'annonce"
     },
     "link_club": "Lien club requis pour organiser",
     "contact_title": "Contact & Infos complémentaires",
@@ -788,8 +793,8 @@
       "open": "Ouvert"
     },
     "alerts": {
-      "title": "Modification détectée",
-      "message": "Le match contre {{team}} prévu le {{date}} a été modifié.",
+      "title": "⚠️ Match modifié",
+      "message": "Votre duel du {{date}} a été modifié. Cliquez pour voir le détail.",
       "success_discrete": "Action effectuée",
       "specific": {
         "date": "La date du match a été modifiée.",

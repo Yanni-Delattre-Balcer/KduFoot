@@ -41,14 +41,19 @@
   "accept-all": "Accepter tout",
   "reject": "Rejeter",
   "cookie-consent-title": "Politique de cookies",
-  "error": "Erreur",
+  "error": {
+    "title": "Erreur"
+  },
   "authentication_error": "erreur d'authentification",
   "expiration": "expiration",
   "no-permissions": "Aucune autorisation",
   "permissions": "autorisation",
   "token": "jeton",
   "user": "utilisateur",
-  "success": "Succès",
+  "success": {
+    "title": "Succès"
+  },
+  "edit": "Mettre à jour",
   "warning": "Attention",
   "info": "Information",
   "matchForm": {
@@ -61,7 +66,9 @@
   },
   "match": {
     "create_title": "CRÉER UN MATCH",
-    "edit_title": "METTRE À JOUR LE MATCH"
+    "edit_title": "METTRE À JOUR LE MATCH",
+    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?"
   },
   "dashboard": {
     "status": {

@@ -640,7 +640,17 @@
       "club_secondary": "Club Secondaire",
       "unspecified": "Non spécifiée",
       "progress_announcement": "Preparation de l'annonce du tournoi",
-      "contact_additional": "Contact & Infos complémentaires"
+      "contact_additional": "Contact & Infos complémentaires",
+      "update": "Mettre à jour le tournoi",
+      "name_form": "Nom du Tournoi",
+      "subtitle_form": "Sous-titre de l'annonce"
+    },
+    "alerts": {
+      "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un tournoi.",
+      "create_success": "Votre tournoi a été publié avec succès !",
+      "update_success": "Votre tournoi a été mis à jour avec succès !",
+      "delete_success": "Le tournoi a été supprimé avec succès !",
+      "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un tournoi dans le passé."
     }
   },
   "pricing": {

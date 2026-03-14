@@ -215,14 +215,12 @@ export default function MatchForm({
     if (!formData.match_date) {
       newErrors.match_date = t("matchForm.alerts.date_required");
     } else {
-      const today = new Date();
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-      today.setHours(0, 0, 0, 0);
-      const selectedDate = new Date(formData.match_date);
-
-      if (selectedDate < today) {
-        newErrors.match_date = t("matchForm.alerts.date_past_error");
-      } else if (formData.match_date === today.toISOString().split("T")[0]) {
+      if (formData.match_date < todayStr) {
+        newErrors.match_date = t("matchForm.alerts.date_past_error", "Vous ne pouvez pas créer un match dans le passé. Veuillez choisir une date valide.");
+      } else if (formData.match_date === todayStr) {
         // Rule of 2 hours delay
         const [hours, minutes] = (formData.match_time || "00:00")
           .split(":")
@@ -230,10 +228,11 @@ export default function MatchForm({
         const matchDateTime = new Date();
         matchDateTime.setHours(hours, minutes, 0, 0);
 
-        const now = new Date();
         const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-        if (matchDateTime < minTime) {
+        if (matchDateTime < now) {
+            newErrors.match_time = t("matchForm.alerts.date_past_error", "Impossible de publier : l'heure sélectionnée est dépassée.");
+        } else if (matchDateTime < minTime) {
           newErrors.match_time = t("matchForm.alerts.delay_short_error");
         }
       }
@@ -255,7 +254,15 @@ export default function MatchForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      // Afficher un warning global si la validation bloque (surtout pour les dates/heures passées)
+      addToast({
+        title: t("error", "Erreur", { ns: "base" }),
+        description: t("matchForm.alerts.validation_failed", "Impossible de publier : Vérifiez les champs en rouge."),
+        color: "danger",
+      });
+      return;
+    }
     if (!user?.club_id) return;
 
     setIsSaving(true);
@@ -524,6 +531,8 @@ export default function MatchForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
+                errorMessage={errors.match_time}
+                isInvalid={!!errors.match_time}
                 label={t("matchForm.labels.time")}
                 size="sm"
                 type="time"

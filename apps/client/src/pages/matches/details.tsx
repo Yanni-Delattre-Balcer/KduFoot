@@ -154,16 +154,16 @@ export default function MatchDetailsPage() {
   });
 
   const matchKnownData = knownData[id || ""];
-  const isModified = participation?.notification_state === 1 && !!matchKnownData;
+  const isModified = participation?.notification_state === 1;
 
   const highlights = {
-    date: isModified && match.match_date !== matchKnownData.date,
-    time: isModified && match.match_time !== matchKnownData.time,
-    venue: isModified && match.venue !== matchKnownData.venue,
-    pitch: isModified && match.pitch_type !== matchKnownData.pitch,
-    format: isModified && match.format !== matchKnownData.format,
-    category: isModified && match.category !== matchKnownData.category,
-    level: isModified && match.level !== matchKnownData.level,
+    date: isModified && !!matchKnownData && match.match_date !== matchKnownData.date,
+    time: isModified && !!matchKnownData && match.match_time?.slice(0, 5) !== matchKnownData.time?.slice(0, 5),
+    venue: isModified && !!matchKnownData && match.venue !== matchKnownData.venue,
+    pitch: isModified && !!matchKnownData && match.pitch_type !== matchKnownData.pitch,
+    format: isModified && !!matchKnownData && match.format !== matchKnownData.format,
+    category: isModified && !!matchKnownData && match.category !== matchKnownData.category,
+    level: isModified && !!matchKnownData && match.level !== matchKnownData.level,
   };
 
   const [isMarkingRead, setIsMarkingRead] = useState(false);
@@ -192,7 +192,7 @@ export default function MatchDetailsPage() {
       setKnownData(nextKnown);
 
       addToast({
-        title: t("common:success", "Succès"),
+        title: t("success", "Succès", { ns: "base" }),
         description: "Modifications validées",
         color: "success",
       });
@@ -389,7 +389,7 @@ export default function MatchDetailsPage() {
                   to={`/matches/${id}/edit`}
                   variant="flat"
                 >
-                  {t("common:edit")}
+                  {t("edit", "Mettre à jour", { ns: "base" })}
                 </Button>
                 <Button
                   color="danger"
@@ -880,23 +880,6 @@ export default function MatchDetailsPage() {
                                     return;
                                   }
                                   window.location.href = `tel:${match.phone}`;
-                                  setTimeout(async () => {
-                                    if (
-                                      user?.club_id &&
-                                      !match.contacts?.some(
-                                        (c: any) => c.user_id === user.id,
-                                      )
-                                    ) {
-                                      try {
-                                        await contactMatch({
-                                          message:
-                                            "A porté de l'intérêt en appelant",
-                                        });
-                                      } catch (e) {
-                                        console.error(e);
-                                      }
-                                    }
-                                  }, 1000);
                                 }}
                               >
                                 📞 Appeler
@@ -914,23 +897,6 @@ export default function MatchDetailsPage() {
                                     return;
                                   }
                                   window.location.href = `mailto:${match.email}`;
-                                  setTimeout(async () => {
-                                    if (
-                                      user?.club_id &&
-                                      !match.contacts?.some(
-                                        (c: any) => c.user_id === user.id,
-                                      )
-                                    ) {
-                                      try {
-                                        await contactMatch({
-                                          message:
-                                            "A porté de l'intérêt en envoyant un mail",
-                                        });
-                                      } catch (e) {
-                                        console.error(e);
-                                      }
-                                    }
-                                  }, 1000);
                                 }}
                               >
                                 ✉️ Email
@@ -1004,7 +970,7 @@ export default function MatchDetailsPage() {
                                         "A porté de l'intérêt en envoyant une demande",
                                     });
                                     addToast({
-                                      title: t("common:success", "Succès"),
+                                      title: t("success", "Succès", { ns: "base" }),
                                       description: t(
                                         "matchForm.alerts.contact_success",
                                         { date: match.match_date },
@@ -1015,7 +981,7 @@ export default function MatchDetailsPage() {
                                     });
                                   } catch (e: any) {
                                     addToast({
-                                      title: t("common:error.title", "Erreur"),
+                                      title: t("error.title", "Erreur", { ns: "base" }),
                                       description:
                                         e.message || "Erreur lors de l'envoi",
                                       variant: "flat",
@@ -1243,8 +1209,9 @@ export default function MatchDetailsPage() {
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium">
-                      Es-tu sûr de vouloir supprimer définitivement cette
-                      annonce ? Cette action est irréversible.
+                      {match.type === "tournament"
+                        ? t("match.confirm_delete_tournament", "Es-tu sûr de vouloir supprimer ce tournoi ?")
+                        : t("match.confirm_delete_match", "Es-tu sûr de vouloir supprimer ce match ?")} Cette action est irréversible.
                     </p>
                   </ModalBody>
                   <ModalFooter>
@@ -1417,11 +1384,11 @@ export default function MatchDetailsPage() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">
-                    Annuler le duel confirmé
+                    {match.type === "tournament" ? "Annuler le tournoi confirmé" : "Annuler le duel confirmé"}
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium">
-                      Attention : Vous allez annuler ce duel. L'adversaire sera
+                      Attention : Vous allez annuler {match.type === "tournament" ? "ce tournoi confirme" : "ce duel"}. L'adversaire sera
                       notifié et l'annonce redeviendra ouverte. Continuer ?
                     </p>
                   </ModalBody>

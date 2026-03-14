@@ -122,8 +122,9 @@ export const UnifiedOnboarding = () => {
     setActiveStep(null);
     if (action === "installed") {
       // CAS A: L'utilisateur a installé l'app sur le web.
-      // On s'arrête là pour cette session.
+      // On passe quand même à l'étape suivante (Calendrier) selon la demande.
       setInstalledThisSession(true);
+      setPwaStepEvaluated(true);
     } else {
       // CAS B: L'utilisateur a fait "Plus tard" ou "Déjà fait".
       // On passe à l'étape suivante (Calendrier).

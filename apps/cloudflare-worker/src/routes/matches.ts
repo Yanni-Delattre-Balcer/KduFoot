@@ -360,7 +360,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'MATCH_MODIFIED',
-                    message: `Match modifié ⚠️. Les détails (heure/lieu) pour le duel du ${match.match_date || ''} ont changé.`,
+                    message: match.type === 'tournament' 
+                        ? `Tournoi modifié ⚠️. Les détails (heure/lieu) pour le tournoi du ${match.match_date || ''} ont changé.` 
+                        : `Match modifié ⚠️. Les détails (heure/lieu) pour le duel du ${match.match_date || ''} ont changé.`,
                     targetUserIds: subs.map(s => s.auth0_sub),
                     data: {
                         match_id: params.id,
@@ -446,7 +448,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'MATCH_CANCELLED',
-                    message: `Match annulé ❌. La rencontre du ${match.match_date || ''} contre ${match.club?.name || 'un club'} n'aura pas lieu.`,
+                    message: match.type === 'tournament' 
+                        ? `Tournoi annulé ❌. Le tournoi du ${match.match_date || ''} n'aura pas lieu.` 
+                        : `Match annulé ❌. La rencontre du ${match.match_date || ''} contre ${match.club?.name || 'un club'} n'aura pas lieu.`,
                     targetUserIds: subs.map(s => s.auth0_sub),
                     data: {
                         match_id: params.id,
@@ -600,7 +604,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                     await broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: 'NEW_APPLICANT',
-                        message: `Vous avez reçu une nouvelle demande de ${applicantClub?.name || 'un club'} pour le ${match?.match_date || ''}.`,
+                        message: match?.type === 'tournament' 
+                            ? `Vous avez reçu une nouvelle demande de ${applicantClub?.name || 'un club'} pour votre tournoi du ${match?.match_date || ''}.` 
+                            : `Vous avez reçu une nouvelle demande de ${applicantClub?.name || 'un club'} pour le ${match?.match_date || ''}.`,
                         targetUserId: owner.auth0_sub,
                         data: {
                             match_id: params.id,
@@ -704,7 +710,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         type: 'NOTIFICATION',
                         notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
                         message: body.status === 'accepted' 
-                            ? `Duel Confirmé ! ✅ Votre rencontre du ${matchData?.match_date || ''} est validée.` 
+                            ? (matchData?.type === 'tournament' ? `Tournoi Confirmé ! ✅ Votre inscription au tournoi du ${matchData?.match_date || ''} est validée.` : `Duel Confirmé ! ✅ Votre rencontre du ${matchData?.match_date || ''} est validée.`) 
                             : `Demande refusée. ${matchData?.club?.name || 'un club'} n'est pas disponible pour le ${matchData?.match_date || ''}.`,
                         targetUserId: applicant.auth0_sub,
                         data: {
@@ -790,7 +796,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         type: 'NOTIFICATION',
                         notificationType: 'TEAM_WITHDRAWAL',
                         targetUserId: owner.auth0_sub,
-                        message: `Annulation du duel. La rencontre du ${matchData?.match_date || ''} avec ${applicantClub?.name || 'un club'} a été annulée.`,
+                        message: matchData?.type === 'tournament' 
+                            ? `Annulation d'inscription. L'équipe ${applicantClub?.name || 'un club'} a annulé sa participation au tournoi du ${matchData?.match_date || ''}.` 
+                            : `Annulation du duel. La rencontre du ${matchData?.match_date || ''} avec ${applicantClub?.name || 'un club'} a été annulée.`,
                         data: { 
                             match_id: params.matchId,
                             match_date: matchData?.match_date || '',
