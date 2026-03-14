@@ -87,15 +87,13 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             if (item.location_city) location += (location ? ', ' : '') + item.location_city;
 
             // --- Titre ---
-            // Tournoi → "Kdufoot : Tournoi [nom du tournoi]"
+            // Tournoi → "Kdufoot : [nom du tournoi]"
             // Match  → "Kdufoot : Match contre [nom du club adverse]"
             let summary = '';
             if (typeRaw === 'tournament') {
                 const tournamentName = item.name || 'Sans nom';
-                summary = `Kdufoot : Tournoi ${tournamentName}`;
+                summary = `Kdufoot : ${tournamentName}`;
             } else {
-                // Pour les participations : host_club_name = le club organisateur
-                // Pour les matchs owned : on cherche le nom du club adverse dans les contacts
                 const opponentName = item.host_club_name || item.requester_club_name || item.club_name || 'Adversaire';
                 summary = `Kdufoot : Match contre ${opponentName}`;
             }
@@ -113,14 +111,22 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 `Type : ${typeLabel}`,
                 `Catégorie : ${category || 'N/A'}`,
                 `Niveau : ${level || 'N/A'}`,
-                '',
-                `Lieu : ${location || 'N/A'}`,
-                `Lien GPS : ${location ? gpsLink : 'N/A'}`,
+                `Lieu : ${location || 'N/A'} (Lien GPS : ${gpsLink})`,
                 `Position : ${venue}`,
-                '',
-                `Accéder à vos détails sur Kdufoot : ${matchDetailUrl}`,
+                `Lien Direct : Suivez vos détails sur le site Kdufoot (${matchDetailUrl})`,
             ];
             const description = descLines.join('\\n');
+
+            const htmlDescription = [
+                '<!DOCTYPE html><html><body>',
+                `Type : <b>${typeLabel}</b><br>`,
+                `Catégorie : ${category || 'N/A'}<br>`,
+                `Niveau : ${level || 'N/A'}<br>`,
+                `Lieu : <a href="${gpsLink}">${location || 'N/A'}</a><br>`,
+                `Position : ${venue}<br>`,
+                `Lien Direct : <a href="${matchDetailUrl}">Suivez vos détails sur le site Kdufoot</a>`,
+                '</body></html>'
+            ].join('');
 
             // --- Dates ---
             const dateParts = date.split('-');
@@ -158,6 +164,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 `DTEND;TZID=Europe/Paris:${dtEnd}`,
                 `SUMMARY:${summary}`,
                 `DESCRIPTION:${description}`,
+                `X-ALT-DESC;FMTTYPE=text/html:${htmlDescription}`,
                 `LOCATION:${location}`,
                 `URL:${matchDetailUrl}`,
                 'BEGIN:VALARM',

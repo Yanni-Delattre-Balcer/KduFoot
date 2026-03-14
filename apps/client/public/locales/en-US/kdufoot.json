@@ -690,10 +690,13 @@
       "accept": "Accept",
       "refuse": "Refuse",
       "view": "Details",
+      "view_ad": "View ad",
       "manage_registrations": "Manage requests",
       "contact": "📞 Contact",
       "itinerary": "📍 Itinerary",
-      "new": "New Ad"
+      "new": "New Ad",
+      "view_changes": "I'VE SEEN THE CHANGES",
+      "mark_all_read": "Mark all as read"
     },
     "status": {
       "accepted": "Accepted",
@@ -704,6 +707,21 @@
       "completed": "Completed",
       "full": "Full",
       "open": "Open"
+    },
+    "tournament": {
+      "pairings": "Pairings",
+      "edit_time": "Edit time",
+      "time_range_error": "Time must be between {{start}} and {{end}}",
+      "filling": "Tournament filling",
+      "registered_teams": "Registered teams",
+      "waiting_teams": "Waiting for teams...",
+      "close_registration": "Close registration"
+    },
+    "match": {
+      "found": "Opponent found",
+      "filled": "Match full",
+      "searching": "Searching for opponent",
+      "filling": "Match filling"
     },
     "memo": {
       "title": "📋 My Creation History",

@@ -58,13 +58,14 @@ export const ConfirmedTournamentCard = ({
     ? highlighted
       ? "border-danger ring-4 ring-danger/30 shadow-danger/20"
       : "border-danger/50 bg-zinc-900/90 shadow-danger/10"
-    : "border-purple-400/20 bg-purple-500/5";
+    : "border-purple-400/40 bg-zinc-900/90 shadow-xl hover:shadow-purple-500/20";
 
   return (
     <Card
-      className={`overflow-hidden border transition-all duration-300 shadow-sm hover:shadow-md ${borderClass} group`}
+      className={`overflow-hidden border transition-all duration-300 col-span-full ${borderClass} group`}
       id={`card-${part.match_id}`}
     >
+      <div className="absolute inset-0 bg-linear-to-br from-purple-600/10 via-transparent to-transparent opacity-50" />
       <CardBody className="p-0">
         <div className="flex flex-col 2xl:flex-row">
           {/* Left Section: Info & Progress */}
@@ -126,28 +127,17 @@ export const ConfirmedTournamentCard = ({
               </div>
               <div className="flex justify-end lg:w-48 shrink-0 flex-col gap-2">
                 <Chip
-                  className="font-black text-xs sm:text-sm py-3 w-full"
+                  className="font-black text-xs sm:text-sm py-3 shadow-lg shadow-emerald-500/20 w-full"
                   color="success"
                   size="sm"
-                  variant="flat"
+                  variant="solid"
                 >
                   {t("dashboard.status.accepted")}
                 </Chip>
-                {(highlighted || isTimeChanged) && (
-                  <Button
-                    className="font-bold text-[10px] w-full mt-1 animate-pulse"
-                    color="danger"
-                    size="sm"
-                    variant="flat"
-                    onPress={() => onMarkAsRead(part.match_id)}
-                  >
-                    J'ai vu les changements
-                  </Button>
-                )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
               <div
                 className={`rounded-xl p-3 border transition-colors ${isDateChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
               >
@@ -303,6 +293,20 @@ export const ConfirmedTournamentCard = ({
             </div>
 
             <div className="space-y-3">
+              {isModification && (
+                <Button
+                  className="font-black text-[11px] w-full animate-pulse shadow-lg shadow-danger/20 h-11"
+                  color="danger"
+                  size="sm"
+                  variant="solid"
+                  onPress={() => onMarkAsRead(part.match_id)}
+                >
+                  {t(
+                    "dashboard.controls.view_changes",
+                    "J'ai vu les changements",
+                  )}
+                </Button>
+              )}
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   as={Link}
@@ -328,7 +332,7 @@ export const ConfirmedTournamentCard = ({
                 </Button>
                 <Button
                   as="a"
-                  className="w-full sm:flex-1 font-bold text-sm h-10 active:scale-95"
+                  className="w-full sm:flex-1 font-bold text-sm h-10 active:scale-95 shadow-md shadow-purple-500/20"
                   color="secondary"
                   href={`tel:${part.host_phone || part.opponent_phone}`}
                   size="sm"
