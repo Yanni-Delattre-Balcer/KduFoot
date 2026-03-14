@@ -75,7 +75,7 @@ export default function IndexPage() {
                   })} bg-linear-to-r from-violet-700 to-indigo-800 text-white border-none min-w-[160px]`}
                   href="/matches?type=match"
                 >
-                  {t("homePage.buttons.find_match")}
+                  {t("homePage.buttons.match")}
                 </Link>
                 <Link
                   className={`${buttonStyles({
@@ -85,7 +85,7 @@ export default function IndexPage() {
                   })} bg-linear-to-r from-violet-400 to-violet-500 text-white border-none min-w-[160px]`}
                   href="/matches?type=tournament"
                 >
-                  {t("homePage.buttons.find_tournament")}
+                  {t("homePage.buttons.tournament")}
                 </Link>
               </div>
             </div>

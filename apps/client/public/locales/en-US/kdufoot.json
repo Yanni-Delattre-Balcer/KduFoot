@@ -252,7 +252,8 @@
     "refuse_confirm": "Are you sure you want to refuse this team?",
     "filters": {
       "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
-    }
+    },
+    "send_request": "Send a request"
   },
   "session": {
     "create": "New session",

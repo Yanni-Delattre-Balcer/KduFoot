@@ -145,7 +145,7 @@ export const Navbar = () => {
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarContent className="lg:hidden flex basis-1 items-end justify-end pr-1 h-full pb-2" justify="end">
+      <NavbarContent className="flex basis-1 items-end justify-end pr-1 h-full pb-2" justify="end">
         <NavbarMenuToggle
           className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
           srOnlyText="Menu"

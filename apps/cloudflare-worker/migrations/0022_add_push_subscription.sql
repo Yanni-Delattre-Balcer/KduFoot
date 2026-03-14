@@ -1,4 +1,4 @@
 -- apps/cloudflare-worker/migrations/0022_add_push_subscription.sql
 -- Add column to store Web Push subscription (JSON string)
-
-ALTER TABLE users ADD COLUMN push_subscription TEXT;
+-- NOTE: Commented out because the column already exists in the local database but Wrangler wasn't aware.
+-- ALTER TABLE users ADD COLUMN push_subscription TEXT;

@@ -252,7 +252,8 @@
     "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",
     "filters": {
       "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs de toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner votre recherche selon vos besoins."
-    }
+    },
+    "send_request": "Envoyer une demande"
   },
   "session": {
     "create": "Nouvelle séance",
