@@ -47,17 +47,16 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: "24"
-          cache: "yarn"
-          cache-dependency-path: "yarn.lock"
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
 
-      - name: Cache Yarn dependencies
+      - name: Cache npm dependencies
         uses: actions/cache@v5
         with:
-          path: |
-            node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-node-
 
       - name: Cache Turborepo
         uses: actions/cache@v5
