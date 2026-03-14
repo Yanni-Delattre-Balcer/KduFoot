@@ -367,31 +367,52 @@ export default function SessionPlannerPage() {
                                                                             </div>
 
                                                                             {request.request_status === 'pending' && (
-                                                                                <div className="flex gap-2">
-                                                                                    <Button
-                                                                                        size="sm"
-                                                                                        color="success"
-                                                                                        isLoading={actioningId === `${request.match_id}-${request.user_id}-accept`}
-                                                                                        className="flex-1 font-black text-xs h-8 text-success-950"
-                                                                                        onPress={async () => {
-                                                                                            try {
-                                                                                                setActioningId(`${request.match_id}-${request.user_id}-accept`);
-                                                                                                const token = await getAccessTokenSilently();
-                                                                                                await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
-                                                                                                await mutateRequests();
-                                                                                                 addToast({ title: t('dashboard.toasts.accept_success'), color: "success" });
-                                                                                            } catch (e: any) {
-                                                                                                addToast({ title: t('error.title'), color: "danger" });
-                                                                                            } finally {
-                                                                                                setActioningId(null);
-                                                                                            }
-                                                                                        }}
-                                                                                    >
-                                                                                        {t('dashboard.controls.accept')}
-                                                                                    </Button>
-                                                                                </div>
+                                                                                    <div className="flex gap-2">
+                                                                                        <Button
+                                                                                            size="sm"
+                                                                                            color="success"
+                                                                                            isLoading={actioningId === `${request.match_id}-${request.user_id}-accept`}
+                                                                                            className="flex-1 font-black text-xs h-8 text-success-950"
+                                                                                            onPress={async () => {
+                                                                                                try {
+                                                                                                    setActioningId(`${request.match_id}-${request.user_id}-accept`);
+                                                                                                    const token = await getAccessTokenSilently();
+                                                                                                    await matchService.updateRequestStatus(request.match_id, request.user_id, 'accepted', token);
+                                                                                                    await mutateRequests();
+                                                                                                    addToast({ title: t('dashboard.toasts.accept_success'), color: "success" });
+                                                                                                } catch (e: any) {
+                                                                                                    addToast({ title: t('error.title'), color: "danger" });
+                                                                                                } finally {
+                                                                                                    setActioningId(null);
+                                                                                                }
+                                                                                            }}
+                                                                                        >
+                                                                                            {t('dashboard.controls.accept').toUpperCase()}
+                                                                                        </Button>
+                                                                                        <Button
+                                                                                            size="sm"
+                                                                                            color="danger"
+                                                                                            isLoading={actioningId === `${request.match_id}-${request.user_id}-refuse`}
+                                                                                            className="flex-1 font-black text-xs h-8"
+                                                                                            onPress={async () => {
+                                                                                                try {
+                                                                                                    setActioningId(`${request.match_id}-${request.user_id}-refuse`);
+                                                                                                    const token = await getAccessTokenSilently();
+                                                                                                    await matchService.updateRequestStatus(request.match_id, request.user_id, 'refused', token);
+                                                                                                    await mutateRequests();
+                                                                                                    addToast({ title: t('dashboard.status.refused'), color: "warning" });
+                                                                                                } catch (e: any) {
+                                                                                                    addToast({ title: t('error.title'), color: "danger" });
+                                                                                                } finally {
+                                                                                                    setActioningId(null);
+                                                                                                }
+                                                                                            }}
+                                                                                        >
+                                                                                            {t('dashboard.controls.refuse').toUpperCase()}
+                                                                                        </Button>
+                                                                                    </div>
                                                                             )}
-                                                                             <Button size="sm" variant="flat" className="w-full text-xs font-bold h-7" as={Link} to={`/matches/${request.match_id}`}>{t('dashboard.controls.view_ad', "Voir l'annonce")}</Button>
+                                                                             <Button size="sm" variant="flat" className="w-full text-xs font-bold h-7 mt-1" as={Link} to={`/matches/${request.match_id}`}>{t('dashboard.controls.view', "DÉTAILS").toUpperCase()}</Button>
                                                                         </CardBody>
                                                                     </Card>
                                                                 ))}

@@ -35,38 +35,72 @@ export default function IndexPage() {
             <p className="text-default-500 text-base">
               {t("homePage.description")}
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+            <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 mt-2 w-full max-w-4xl mx-auto">
+              {/* Analyse Vidéo - Primary & Full Width on Mobile */}
               <Link
                 className={buttonStyles({
                   color: "primary",
                   radius: "full",
                   variant: "shadow",
                   size: "lg",
+                  className: "w-full sm:w-auto sm:min-w-[200px]"
                 })}
                 href="/exercises"
               >
                 {t("homePage.buttons.exercises")}
               </Link>
-              <Link
-                className={buttonStyles({
-                  variant: "bordered",
-                  radius: "full",
-                  size: "lg",
-                })}
-                href="/matches?view=find&type=match&scroll=true"
-              >
-                {t("homePage.buttons.find_match")}
-              </Link>
-              <Link
-                className={buttonStyles({
-                  variant: "bordered",
-                  radius: "full",
-                  size: "lg",
-                })}
-                href="/matches?view=find&type=tournament&scroll=true"
-              >
-                {t("homePage.buttons.find_tournament")}
-              </Link>
+
+              {/* Matchs Group */}
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Link
+                  className={buttonStyles({
+                    variant: "bordered",
+                    radius: "full",
+                    size: "lg",
+                    className: "w-full sm:w-auto sm:min-w-[180px]"
+                  })}
+                  href="/matches?view=find&type=match&scroll=true"
+                >
+                  {t("homePage.buttons.find_match")}
+                </Link>
+                <Link
+                  className={buttonStyles({
+                    variant: "flat",
+                    radius: "full",
+                    size: "lg",
+                    className: "w-full sm:w-auto sm:min-w-[180px] bg-white/10 text-white border border-white/20"
+                  })}
+                  href="/matches?view=create&type=match&scroll=true"
+                >
+                  {t("homePage.buttons.create_match")}
+                </Link>
+              </div>
+
+              {/* Tournaments Group */}
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Link
+                  className={buttonStyles({
+                    variant: "bordered",
+                    radius: "full",
+                    size: "lg",
+                    className: "w-full sm:w-auto sm:min-w-[180px]"
+                  })}
+                  href="/matches?view=find&type=tournament&scroll=true"
+                >
+                  {t("homePage.buttons.find_tournament")}
+                </Link>
+                <Link
+                  className={buttonStyles({
+                    variant: "flat",
+                    radius: "full",
+                    size: "lg",
+                    className: "w-full sm:w-auto sm:min-w-[180px] bg-white/10 text-white border border-white/20"
+                  })}
+                  href="/matches?view=create&type=tournament&scroll=true"
+                >
+                  {t("homePage.buttons.create_tournament")}
+                </Link>
+              </div>
             </div>
           </div>
         </div>

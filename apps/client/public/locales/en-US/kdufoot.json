@@ -68,8 +68,10 @@
     "buttons": {
       "exercises": "Analyze a video",
       "sessions": "Find a match / tournament",
-      "find_match": "Find a match",
-      "find_tournament": "Find a tournament"
+      "find_match": "Find a Match",
+      "create_match": "Create a Match",
+      "find_tournament": "Find a Tournament",
+      "create_tournament": "Create a Tournament"
     },
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
     "about": {

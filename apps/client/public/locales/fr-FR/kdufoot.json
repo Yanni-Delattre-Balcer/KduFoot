@@ -78,8 +78,10 @@
     "buttons": {
       "exercises": "Analyser une vidéo",
       "sessions": "Trouver ou créer un match / tournoi",
-      "find_match": "Trouver ou créer un match",
-      "find_tournament": "Trouver ou créer un tournoi"
+      "find_match": "Chercher un match",
+      "create_match": "Créer un match",
+      "find_tournament": "Chercher un tournoi",
+      "create_tournament": "Créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
