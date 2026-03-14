@@ -80,10 +80,10 @@
 }
 
 /* Fix Hero UI Toast container blocking clicks */
-[role="region"][aria-label="Notifications"] {
+[role="region"] {
   pointer-events: none !important;
 }
 
-[role="status"] {
+[role="status"], [role="alert"] {
   pointer-events: auto !important;
 }

@@ -121,6 +121,20 @@ export default function DashboardPage() {
         }
     }, [isLocked, searchParams]);
 
+    useEffect(() => {
+        const highlight = searchParams.get('highlight');
+        if (highlight) {
+            setHighlightedCardIdState(highlight);
+            // Scroll to it after a short delay to ensure rendering
+            setTimeout(() => {
+                const element = document.getElementById(`card-${highlight}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 500);
+        }
+    }, [searchParams]);
+
     const handleRequestAction = async (matchId: string, userId: string, status: 'accepted' | 'refused') => {
         const key = `${matchId}-${userId}`;
         setActionLoading(prev => ({ ...prev, [key]: true }));
@@ -138,6 +152,32 @@ export default function DashboardPage() {
             addToast({
                 title: "Erreur",
                 description: error.message || "Erreur lors de l'action",
+                color: "danger"
+            });
+        } finally {
+            setActionLoading(prev => ({ ...prev, [key]: false }));
+        }
+    };
+
+    const handleWithdraw = async (matchId: string, userId: string) => {
+        const key = `${matchId}-${userId}`;
+        setActionLoading(prev => ({ ...prev, [key]: true }));
+        try {
+            const token = await getAccessTokenSilently();
+            await matchService.cancelRequest(matchId, userId, token);
+            addToast({
+                title: t('success'),
+                description: "Désistement enregistré avec succès",
+                color: "success"
+            });
+            mutateRequests();
+            // Also mutate participations as the list should update
+            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
+        } catch (error: any) {
+            console.error("Action error:", error);
+            addToast({
+                title: "Erreur",
+                description: error.message || "Erreur lors du désistement",
                 color: "danger"
             });
         } finally {
@@ -566,6 +606,8 @@ export default function DashboardPage() {
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
                                                 formatTime={formatTime}
+                                                onWithdraw={() => handleWithdraw(cm.match_id, user?.id || '')}
+                                                isWithdrawing={actionLoading[`${cm.match_id}-${user?.id || ''}`]}
                                             />
                                         ))
                                     ) : (
@@ -625,6 +667,8 @@ export default function DashboardPage() {
                                                 onMarkAsRead={markAsRead}
                                                 formatDate={formatDate}
                                                 formatTime={formatTime}
+                                                onWithdraw={() => handleWithdraw(part.match_id, user?.id || '')}
+                                                isWithdrawing={actionLoading[`${part.match_id}-${user?.id || ''}`]}
                                             />
                                         ))
                                     ) : (

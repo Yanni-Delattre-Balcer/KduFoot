@@ -152,7 +152,7 @@ export function useWebSocketSync(
                                     }
                                 }
                                 // Show the toast for participant (organizer already returned)
-                        addToast({ title, description, color, variant: 'flat', timeout: 5000 });
+                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
                                 return;
                             case 'MATCH_CANCELLED':
                                 // Message ciblés envoyés uniquement aux joueurs par le backend
@@ -170,7 +170,17 @@ export function useWebSocketSync(
                                     localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
                                 }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                        addToast({ title, description, color, variant: 'flat', timeout: 5000 });
+                                addToast({ 
+                                    title, 
+                                    description: (
+                                        <div className="cursor-pointer h-full w-full" onClick={() => navigate('/dashboard')}>
+                                            {description}
+                                        </div>
+                                    ), 
+                                    color, 
+                                    variant: 'flat', 
+                                    timeout: 6000 
+                                });
                                 return;
                             case 'TOURNAMENT_PUBLISHED':
                                 color = 'success';
@@ -199,13 +209,20 @@ export function useWebSocketSync(
                                         }
                                         window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
 
-                                        addToast({
-                                            title,
-                                            description,
-                                            color,
-                                            variant: 'flat',
-                                            timeout: 5000
-                                        });
+                                         addToast({
+                                             title,
+                                             description: (
+                                                 <div 
+                                                     className="cursor-pointer w-full h-full" 
+                                                     onClick={() => navigate(`/dashboard?tab=requests&highlight=${payload.data?.match_id}`)}
+                                                 >
+                                                     {description}
+                                                 </div>
+                                             ),
+                                             color,
+                                             variant: 'flat',
+                                             timeout: 6000
+                                         });
                                         return; // Organizer gets interactive toast
                                     } else if (isApplicant) {
                                         color = 'success';
@@ -251,7 +268,23 @@ export function useWebSocketSync(
                                     localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
                                 }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                        addToast({ title, description, color, variant: 'flat', timeout: 5000 });
+                                addToast({ 
+                                    title, 
+                                    description: (
+                                        <div 
+                                            className="cursor-pointer w-full h-full" 
+                                            onClick={() => {
+                                                const tab = payload.data?.match_type === 'tournament' ? 'participations' : 'confirmed_matches';
+                                                navigate(`/dashboard?tab=${tab}&highlight=${payload.data?.match_id}`);
+                                            }}
+                                        >
+                                            {description}
+                                        </div>
+                                    ), 
+                                    color, 
+                                    variant: 'flat', 
+                                    timeout: 6000 
+                                });
                                 return;
                             case 'ENROLLMENT_REFUSED':
                                 {
@@ -278,7 +311,17 @@ export function useWebSocketSync(
                                     localStorage.setItem(uk, String(parseInt(localStorage.getItem(uk) || '0') + 1));
                                 }
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                        addToast({ title, description, color, variant: 'flat', timeout: 6000 });
+                                addToast({ 
+                                    title, 
+                                    description: (
+                                        <div className="cursor-pointer w-full h-full" onClick={() => navigate('/dashboard')}>
+                                            {description}
+                                        </div>
+                                    ), 
+                                    color, 
+                                    variant: 'flat', 
+                                    timeout: 6000 
+                                });
                                 return;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';
@@ -297,7 +340,17 @@ export function useWebSocketSync(
                                 window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
                                 break;
                         }
-                        addToast({ title, description, color, variant: 'solid', timeout: 6000 });
+                        addToast({ 
+                            title, 
+                            description: (
+                                <div className="cursor-pointer w-full h-full" onClick={() => navigate('/dashboard')}>
+                                    {description}
+                                </div>
+                            ), 
+                            color, 
+                            variant: 'flat', 
+                            timeout: 6000 
+                        });
                     }
                 } catch (e) { }
             };

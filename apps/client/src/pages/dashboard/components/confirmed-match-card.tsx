@@ -20,6 +20,8 @@ interface ConfirmedMatchCardProps {
     onMarkAsRead: (matchId: string) => void;
     formatDate: (date: string) => string;
     formatTime: (time: string) => string;
+    onWithdraw?: () => void;
+    isWithdrawing?: boolean;
 }
 
 export const ConfirmedMatchCard = ({
@@ -28,7 +30,9 @@ export const ConfirmedMatchCard = ({
     knownData,
     onMarkAsRead,
     formatDate,
-    formatTime
+    formatTime,
+    onWithdraw,
+    isWithdrawing
 }: ConfirmedMatchCardProps) => {
     const { t } = useTranslation('kdufoot');
 
@@ -216,6 +220,18 @@ export const ConfirmedMatchCard = ({
                                 >
                                     {t('dashboard.controls.contact')}
                                 </Button>
+                                {match._source === 'participant' && onWithdraw && (
+                                    <Button
+                                        size="sm"
+                                        color="danger"
+                                        variant="light"
+                                        className="w-full sm:flex-1 font-bold text-xs h-10 active:scale-95 border border-danger/20 hover:bg-danger/10"
+                                        onPress={onWithdraw}
+                                        isLoading={isWithdrawing}
+                                    >
+                                        Se désister
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>

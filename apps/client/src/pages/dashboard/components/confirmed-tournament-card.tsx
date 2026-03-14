@@ -15,6 +15,8 @@ interface ConfirmedTournamentCardProps {
     onMarkAsRead: (matchId: string) => void;
     formatDate: (date: string) => string;
     formatTime: (time: string) => string;
+    onWithdraw?: () => void;
+    isWithdrawing?: boolean;
 }
 
 export const ConfirmedTournamentCard = ({
@@ -24,7 +26,9 @@ export const ConfirmedTournamentCard = ({
     isTimeChanged,
     onMarkAsRead,
     formatDate,
-    formatTime
+    formatTime,
+    onWithdraw,
+    isWithdrawing
 }: ConfirmedTournamentCardProps) => {
     const { t } = useTranslation('kdufoot');
 
@@ -194,6 +198,18 @@ export const ConfirmedTournamentCard = ({
                                 >
                                     {t('dashboard.controls.contact')}
                                 </Button>
+                                {onWithdraw && (
+                                    <Button
+                                        size="sm"
+                                        color="danger"
+                                        variant="light"
+                                        className="w-full sm:flex-1 font-bold text-xs h-10 active:scale-95 border border-danger/20 hover:bg-danger/10"
+                                        onPress={onWithdraw}
+                                        isLoading={isWithdrawing}
+                                    >
+                                        Se désister
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>

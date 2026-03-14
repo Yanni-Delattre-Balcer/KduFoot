@@ -527,7 +527,7 @@ export class MatchService {
 
     async getIncomingRequests(userId: string): Promise<any[]> {
         const { results } = await this.db.prepare(`
-            SELECT mc.*, 
+            SELECT mc.*, mc.user_id as requester_user_id,
                    m.type as match_type, m.category, m.level, m.match_date, m.match_time, m.venue, m.max_teams as match_max_teams,
                    (SELECT COUNT(*) FROM match_contacts mc2 WHERE mc2.match_id = m.id AND mc2.status = 'accepted') as accepted_count,
                    u_req.firstname as requester_firstname, u_req.lastname as requester_lastname,
