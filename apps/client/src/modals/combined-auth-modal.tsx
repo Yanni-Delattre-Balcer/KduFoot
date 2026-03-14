@@ -152,6 +152,18 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
                   Après avoir accepté l'abonnement dans votre application calendrier, cliquez sur « Je l'ai déjà fait » ci-dessus.
                 </p>
               )}
+
+              {/* Bouton "Pas maintenant" : ferme pour cette session uniquement */}
+              <button
+                className="text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] transition-colors py-2 uppercase tracking-wider"
+                onClick={() => {
+                  sessionStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
+                  window.dispatchEvent(new CustomEvent("kdufoot_auth_step_complete"));
+                  onClose();
+                }}
+              >
+                Pas maintenant
+              </button>
             </div>
         </ModalFooter>
       </ModalContent>

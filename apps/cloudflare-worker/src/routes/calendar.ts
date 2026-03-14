@@ -73,11 +73,11 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
 
             const typeRaw = item.match_type || item.type || 'Match';
             const typeLabel = typeRaw === 'tournament' ? 'Tournoi' : 'Match';
-            const opponentName = item.name || (typeRaw === 'tournament' ? 'Tournoi' : 'Adversaire inconnu');
-            const category = item.category || item.match_category || 'N/A';
+            const category = item.category || item.match_category || '';
             const level = item.level || item.match_level || '';
             const venue = item.venue || 'N/A';
 
+            // --- Location ---
             let location = '';
             if (venue === 'Domicile') {
                 location = item.stadium_address || item.location_address || '';
@@ -86,27 +86,54 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             }
             if (item.location_city) location += (location ? ', ' : '') + item.location_city;
 
-            const summary = `Kdufoot : ${typeLabel} - ${opponentName}`.trim();
-            const description = [
-                `Type: ${typeLabel}`,
-                `Catégorie: ${category}`,
-                `Niveau: ${level || 'N/A'}`,
-                `Lieu: ${location || 'N/A'}`,
-                `Position: ${venue}`,
-                '',
-                'Accédez à vos détails sur KduFoot.'
-            ].join('\n');
+            // --- Titre ---
+            // Tournoi → "Kdufoot : Tournoi [nom du tournoi]"
+            // Match  → "Kdufoot : Match contre [nom du club adverse]"
+            let summary = '';
+            if (typeRaw === 'tournament') {
+                const tournamentName = item.name || 'Sans nom';
+                summary = `Kdufoot : Tournoi ${tournamentName}`;
+            } else {
+                // Pour les participations : host_club_name = le club organisateur
+                // Pour les matchs owned : on cherche le nom du club adverse dans les contacts
+                const opponentName = item.host_club_name || item.requester_club_name || item.club_name || 'Adversaire';
+                summary = `Kdufoot : Match contre ${opponentName}`;
+            }
 
+            // --- Lien GPS Google Maps ---
+            const encodedAddress = encodeURIComponent(location || 'France');
+            const gpsLink = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+
+            // --- Lien Kdufoot ---
+            const kduFootUrl = 'https://kdufoot.com';
+            const matchDetailUrl = `${kduFootUrl}/matches/${item.id || item.match_id}`;
+
+            // --- Description enrichie ---
+            const descLines = [
+                `Type : ${typeLabel}`,
+                `Catégorie : ${category || 'N/A'}`,
+                `Niveau : ${level || 'N/A'}`,
+                '',
+                `Lieu : ${location || 'N/A'}`,
+                `Lien GPS : ${location ? gpsLink : 'N/A'}`,
+                `Position : ${venue}`,
+                '',
+                `Accéder à vos détails sur Kdufoot : ${matchDetailUrl}`,
+            ];
+            const description = descLines.join('\\n');
+
+            // --- Dates ---
             const dateParts = date.split('-');
             const timeParts = time.split(':');
             const dtStart = `${dateParts.join('')}T${timeParts.join('')}00`;
 
             let dtEnd = '';
             if (typeRaw === 'tournament' && item.match_end_time) {
+                // Tournois : utiliser l'heure de fin réelle
                 const endTimeParts = item.match_end_time.split(':');
                 dtEnd = `${dateParts.join('')}T${endTimeParts.join('')}00`;
             } else {
-                // Default 2h duration
+                // Matchs : durée fixe de 2 heures
                 const startHour = parseInt(timeParts[0]);
                 const startMin = parseInt(timeParts[1]);
                 const endDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]), startHour + 2, startMin);
@@ -120,6 +147,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 dtEnd = `${endYear}${endMonth}${endDay}T${endH}${endM}00`;
             }
 
+            // UID stable = pas de doublons même si on re-synchronise
             const uid = `match-${item.id || item.match_id}@kdufoot.com`;
 
             ics.push(
@@ -129,8 +157,9 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 `DTSTART;TZID=Europe/Paris:${dtStart}`,
                 `DTEND;TZID=Europe/Paris:${dtEnd}`,
                 `SUMMARY:${summary}`,
-                `DESCRIPTION:${description.replace(/\n/g, '\\n')}`,
+                `DESCRIPTION:${description}`,
                 `LOCATION:${location}`,
+                `URL:${matchDetailUrl}`,
                 'BEGIN:VALARM',
                 'TRIGGER:-P1D',
                 'ACTION:DISPLAY',
@@ -139,7 +168,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 'BEGIN:VALARM',
                 'TRIGGER:-PT4H',
                 'ACTION:DISPLAY',
-                `DESCRIPTION:Rappel: ${summary} aujourd'hui (4h)`,
+                `DESCRIPTION:Rappel: ${summary} dans 4h`,
                 'END:VALARM',
                 'END:VEVENT'
             );
