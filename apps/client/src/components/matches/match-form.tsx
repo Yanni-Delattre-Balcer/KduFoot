@@ -357,7 +357,7 @@ export default function MatchForm({
                   <span className="text-[10px] font-black text-emerald-500/70 tracking-tighter">
                     Club lié
                   </span>
-                  <span className="text-sm font-black text-emerald-100 truncate">
+                  <span className="text-sm font-black text-emerald-100 whitespace-normal break-words leading-tight">
                     {user?.club?.name || "NON LIÉ"}
                   </span>
                 </div>

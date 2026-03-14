@@ -511,7 +511,7 @@
       "create_success": "Annonce de match créée avec succès !",
       "update_success": "Match mis à jour avec succès !",
       "delete_success": "Match supprimé avec succès !",
-      "contact_success": "Votre demande pour le {{date}} a bien été envoyée."
+      "contact_success": "Votre demande a été envoyée avec succès ! 🚀"
     },
     "confirm": {
       "accept": "Accepter cette demande ?",

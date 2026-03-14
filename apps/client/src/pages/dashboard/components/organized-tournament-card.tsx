@@ -149,7 +149,7 @@ export const OrganizedTournamentCard = ({
                   {t("dashboard.tournament.filling", "Remplissage du tournoi")}
                 </p>
                 <p className="text-xs font-bold text-white">
-                  {match.accepted_count || 0} / {match.max_teams || "∞"}
+                  {(match.accepted_count || 0) + 1} / {match.max_teams || "∞"}
                 </p>
               </div>
               <Progress
@@ -165,7 +165,8 @@ export const OrganizedTournamentCard = ({
                 size="md"
                 value={
                   match.max_teams
-                    ? ((match.accepted_count || 0) / match.max_teams) * 100
+                    ? (((match.accepted_count || 0) + 1) / match.max_teams) *
+                      100
                     : 100
                 }
               />

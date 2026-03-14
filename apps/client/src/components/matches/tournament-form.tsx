@@ -386,7 +386,7 @@ export default function TournamentForm({
                           }
                           size="sm"
                         >
-                          <span className="text-sm font-black text-emerald-100 truncate">
+                          <span className="text-sm font-black text-emerald-100 whitespace-normal break-words leading-tight">
                             {formData.club_id === user.club?.id ||
                             !formData.club_id
                               ? user.club?.name || "Club Principal"
@@ -418,7 +418,7 @@ export default function TournamentForm({
                       </DropdownMenu>
                     </Dropdown>
                   ) : (
-                    <span className="text-sm font-black text-emerald-100 truncate">
+                    <span className="text-sm font-black text-emerald-100 whitespace-normal break-words leading-tight">
                       {user?.club?.name}
                     </span>
                   )}

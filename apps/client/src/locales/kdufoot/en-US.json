@@ -481,7 +481,8 @@
       "time_required": "Match time is required.",
       "venue_required": "Match venue is required.",
       "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future.",
-      "delete_success": "Match successfully deleted!"
+      "delete_success": "Match successfully deleted!",
+      "contact_success": "Your request has been successfully sent! 🚀"
     },
     "confirm": {
       "accepted": "Do you really want to accept this team?",

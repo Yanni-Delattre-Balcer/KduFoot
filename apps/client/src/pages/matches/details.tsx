@@ -588,7 +588,12 @@ export default function MatchDetailsPage() {
                         {t("matchForm.labels.jersey_color", "Principal")}
                       </p>
                     </div>
-                    <JerseyColorDots colors={match.jersey_color} size="lg" />
+                    <div className="flex items-center gap-2">
+                      <p className="text-white font-bold text-sm sm:text-base text-right">
+                        {match.jersey_color}
+                      </p>
+                      <JerseyColorDots colors={match.jersey_color} size="lg" />
+                    </div>
                   </div>
                 )}
                 {match.type === "tournament" && (
@@ -598,13 +603,14 @@ export default function MatchDetailsPage() {
                         Inscriptions
                       </p>
                       <p className="text-white font-bold">
-                        {match.accepted_count || 0} / {match.max_teams} Équipes
-                        confirmées
+                        {(match.accepted_count || 0) + 1} / {match.max_teams}{" "}
+                        Équipes confirmées
                       </p>
                     </div>
                     <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary flex items-center justify-center font-black text-xs text-primary">
                       {Math.round(
-                        ((match.accepted_count || 0) / (match.max_teams || 1)) *
+                        (((match.accepted_count || 0) + 1) /
+                          (match.max_teams || 1)) *
                           100,
                       )}
                       %
