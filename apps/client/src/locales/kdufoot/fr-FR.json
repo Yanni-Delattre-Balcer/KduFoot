@@ -28,6 +28,7 @@
   "switch-to-dark-mode": "Passer en mode sombre",
   "switch-to-light-mode": "Passer en mode clair",
   "rejected": "Refusé",
+  "refused": "Refusé",
   "Genre": "Genre",
   "profile_incomplete": "Complète ton profil club pour postuler à ce match",
   "site": {
@@ -209,7 +210,7 @@
     },
     "terminated": "Terminé"
   },
-  "myExercises": "Mes exercices",
+  "myExercises": "Mes Exercices",
   "mySessions": "Mes Séances",
   "myMatches": "Mes Matchs Amicaux",
   "exercise": {
@@ -356,7 +357,9 @@
       "U18": "U18",
       "U19": "U19",
       "U20": "U20",
-      "Seniors": "Séniors"
+      "Seniors": "Séniors",
+      "Vétérans": "Vétérans",
+      "Loisir": "Loisir"
     },
     "level": {
       "Débutant": "Débutant",
@@ -379,16 +382,16 @@
       "Autre": "Autre"
     },
     "venue": {
-      "Domicile": "🏠 Home",
-      "Extérieur": "🚗 Away",
-      "Neutre": "📍 Terrain neutre"
+      "Domicile": "Nous recevons (Domicile)",
+      "Extérieur": "Nous nous déplaçons (Extérieur)",
+      "Neutre": "Terrain neutre / À définir"
     },
     "pitch": {
       "Herbe": "Herbe",
       "Synthétique": "Synthétique",
       "Hybride": "Hybride",
       "Stabilisé": "Stabilisé",
-      "Indoor": "Toutes surfaces",
+      "Indoor": "Indoor",
       "Toutes surfaces": "Toutes surfaces"
     },
     "gender": {
@@ -438,10 +441,10 @@
     "unknown_club": "Club Inconnu",
     "found": "match(s) amical(aux) trouvé(s)",
     "found_tournament": "tournoi(s) trouvé(s)",
-    "empty_title": "Aucun match disponible",
+    "empty_title": "Aucun match amical trouvé",
     "empty_title_tournament": "Aucun tournoi trouvé",
-    "empty_desc": "Modifier vos filtres ou créez un nouveau match amical.",
-    "empty_desc_tournament": "Modifier vos filtres ou créez un nouveau tournoi amical."
+    "empty_desc": "Essayez de modifier vos filtres ou créez un nouveau match amical.",
+    "empty_desc_tournament": "Essayez de modifier vos filtres ou créez un nouveau tournoi amical."
   },
   "matchForm": {
     "title": "Informations du Match",
@@ -457,10 +460,10 @@
       "at": "à",
       "venue": "Lieu",
       "pitch_type": "Type terrain",
-      "location_address": "Adresse du stade",
+      "address": "Adresse du stade",
       "address_placeholder": "Rechercher un stade ou une adresse...",
-      "location_city": "Ville",
-      "location_zip": "Code postal",
+      "city": "Ville",
+      "zip": "Code postal",
       "jersey_color": "Couleur du maillot",
       "email": "Email de contact",
       "phone": "Téléphone",
@@ -471,7 +474,8 @@
       "auto": "Rempli automatiquement",
       "more_info": "Informations complémentaires...",
       "free": "Gratuit",
-      "stadium_note": "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement."
+      "stadium_note": "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement.",
+      "edit_in_account": "Modifier dans mon compte"
     },
     "venue_labels": {
       "Domicile": "Nous recevons (Domicile)",
@@ -764,7 +768,7 @@
     "notifications": {
       "modification": "Match modifié ⚠️. Les détails (heure/lieu) pour le duel du {{date}} ont changé.",
       "cancellation": "Annulation du duel. La rencontre du {{date}} avec {{team}} a été annulée.",
-      "new_request_interactive": "Vous avez reçu une nouvelle demande de {{team}} pour le {{date}}.",
+      "new_request_interactive": "Vous avez reçu une demande de {{team}} pour votre match du {{date}}",
       "acceptance_player": "Duel Confirmé ! ✅ Votre rencontre du {{date}} est validée.",
       "rejection_player": "Demande refusée. {{team}} n'est pas disponible pour le {{date}}.",
       "refusal_organizer": "Demande refusée. Vous avez décliné l'invitation de {{team}}."
@@ -909,10 +913,7 @@
       "errorDelete": "Erreur lors de la suppression de l'utilisateur",
       "syncSuccess": "Permissions Auth0 synchronisées",
       "syncError": "Erreur synchronisation Auth0",
-      "noResourceServer": "API Auth0 non trouvée pour l'audience",
-      "protectionSuperAdmin": "Impossible de modifier le Super-Administrateur.",
-      "siretDetached": "SIRET détaché avec succès",
-      "siretPrimaryUpdated": "Club Principal mis à jour"
+      "noResourceServer": "API Auth0 non trouvée pour l'audience"
     },
     "confirmDetachPrimary": "⚠️ Êtes-vous sûr de vouloir détacher le SIRET principal ? L'utilisateur n'aura plus de club lié et devra en choisir un nouveau."
   },
@@ -949,8 +950,7 @@
       "share": "Partages",
       "admin": "Administration",
       "auth0": "Administration Auth0",
-      "coach": "Certification",
-      "role": "Sanctions"
+      "coach": "Certification"
     },
     "read_api": "Lire l'API",
     "write_api": "Écrire dans l'API",

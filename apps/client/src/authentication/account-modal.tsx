@@ -51,7 +51,7 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
             <ModalBody className="py-6 overflow-y-auto">
               <AccountSettings
                 onSaveSuccess={() => {
-                  if (!isLocked) onClose();
+                  onClose();
                 }}
               />
             </ModalBody>

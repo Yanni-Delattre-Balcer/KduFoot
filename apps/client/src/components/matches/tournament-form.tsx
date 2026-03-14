@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
@@ -41,6 +42,7 @@ export default function TournamentForm({
   const { t } = useTranslation();
   const { createMatch, updateMatch } = useMatches();
   const { user } = useUser();
+  const navigate = useNavigate();
 
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -206,7 +208,23 @@ export default function TournamentForm({
       const selectedDate = new Date(formData.match_date);
 
       if (selectedDate < today) {
-        newErrors.match_date = t("tournamentForm.alerts.past_date_error");
+        newErrors.match_date =
+          "Date invalide : Vous ne pouvez pas créer un match ou un tournoi dans le passé.";
+      } else if (formData.match_date === today.toISOString().split("T")[0]) {
+        // Rule of 2 hours delay
+        const [hours, minutes] = (formData.match_time || "00:00")
+          .split(":")
+          .map(Number);
+        const matchDateTime = new Date();
+        matchDateTime.setHours(hours, minutes, 0, 0);
+
+        const now = new Date();
+        const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+
+        if (matchDateTime < minTime) {
+          newErrors.match_time =
+            "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation.";
+        }
       }
     }
     if (!formData.match_time)
@@ -481,7 +499,7 @@ export default function TournamentForm({
                     classNames={{
                       inputWrapper: "bg-[#160d21] border-[#2a1b3d]",
                     }}
-                    label="Ville"
+                    label={t("matchForm.labels.city")}
                     size="sm"
                     value={formData.location_city}
                     variant="faded"
@@ -498,8 +516,8 @@ export default function TournamentForm({
                 <Input
                   isRequired
                   classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-                  label="Nom du tournoi"
-                  placeholder="Ex: Tournoi d'été Kdufoot"
+                  label={t("tournamentForm.labels.name")}
+                  placeholder={t("tournamentForm.labels.name_placeholder")}
                   size="sm"
                   value={formData.name}
                   variant="faded"
@@ -509,7 +527,7 @@ export default function TournamentForm({
               <Select
                 isRequired
                 classNames={{ trigger: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Catégorie"
+                label={t("matchForm.labels.category")}
                 selectedKeys={[formData.category]}
                 size="sm"
                 variant="faded"
@@ -524,7 +542,7 @@ export default function TournamentForm({
               <Select
                 isRequired
                 classNames={{ trigger: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Niveau"
+                label={t("matchForm.labels.level")}
                 selectedKeys={[formData.level]}
                 size="sm"
                 variant="faded"
@@ -549,7 +567,7 @@ export default function TournamentForm({
               />
               <Input
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Frais d'inscription (€)"
+                label={t("tournamentForm.labels.fee")}
                 size="sm"
                 type="number"
                 value={formData.registration_fee}
@@ -558,27 +576,27 @@ export default function TournamentForm({
               />
               <Select
                 classNames={{ trigger: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Genre"
+                label={t("matchForm.labels.gender")}
                 selectedKeys={[gender]}
                 size="sm"
                 variant="faded"
                 onChange={(e) => setGender(e.target.value)}
               >
-                <SelectItem key="Masculin">Masculin</SelectItem>
-                <SelectItem key="Féminin">Féminin</SelectItem>
-                <SelectItem key="Mixte">Mixte</SelectItem>
+                <SelectItem key="Masculin">{t("enums.gender.Masculin")}</SelectItem>
+                <SelectItem key="Féminin">{t("enums.gender.Féminin")}</SelectItem>
+                <SelectItem key="Mixte">{t("enums.gender.Mixte")}</SelectItem>
               </Select>
               <Select
                 isRequired
                 classNames={{ trigger: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Type terrain"
+                label={t("matchForm.labels.pitch_type")}
                 selectedKeys={[formData.pitch_type]}
                 size="sm"
                 variant="faded"
                 onChange={(e) => handleChange("pitch_type", e.target.value)}
               >
                 {PITCH_TYPES.map((type) => (
-                  <SelectItem key={type}>{type}</SelectItem>
+                  <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
                 ))}
               </Select>
             </div>
@@ -708,23 +726,23 @@ export default function TournamentForm({
             onValueChange={(v) => handleChange("notes", v)}
           />
 
-          <div className="flex justify-end gap-3 mt-4">
-            <Button
-              className="font-bold text-zinc-500"
-              variant="light"
-              onPress={onCancel}
-            >
-              Annuler
-            </Button>
-            <Button
-              className="bg-purple-600 font-black tracking-tighter px-12 rounded-xl shadow-lg shadow-purple-500/20"
-              color="primary"
-              isLoading={isSaving}
-              type="submit"
-            >
-              {initialData ? "Mettre à jour" : "Publier l'annonce"}
-            </Button>
-          </div>
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                className="font-bold text-zinc-500"
+                variant="light"
+                onPress={() => (onCancel ? onCancel() : navigate("/tournaments"))}
+              >
+                {t("matchForm.buttons.cancel")}
+              </Button>
+              <Button
+                className="bg-purple-600 font-black tracking-tighter px-12 rounded-xl shadow-lg shadow-purple-500/20"
+                color="primary"
+                isLoading={isSaving}
+                type="submit"
+              >
+                {initialData ? t("matchForm.buttons.update") : t("matchForm.buttons.create")}
+              </Button>
+            </div>
         </CardBody>
       </Card>
     </form>

@@ -97,6 +97,7 @@
   },
   "log-out-someone": "Log out {{name}}",
   "log-in": "Log in",
+  "refused": "Refused",
   "all_f": "All",
   "all_m": "All",
   "search_placeholder": "Search...",
@@ -200,7 +201,7 @@
   },
   "myExercises": "My Exercises",
   "mySessions": "My Sessions",
-  "myMatches": "My Friendly Matches",
+  "myMatches": "My Matches",
   "exercise": {
     "title": "Title",
     "synopsis": "Synopsis",
@@ -331,7 +332,7 @@
       "U15": "U15",
       "U16": "U16",
       "U17": "U17",
-      "U18": "U18 (U18 group)",
+      "U18": "U18",
       "U19": "U19",
       "U20": "U20",
       "Séniors": "Seniors",
@@ -339,10 +340,10 @@
       "Loisir": "Leisure"
     },
     "level": {
-      "Débutant": "Beginner level",
-      "Ligue": "League level",
-      "Régional": "Regional level",
-      "National": "National level",
+      "Débutant": "Beginner",
+      "Ligue": "League",
+      "Régional": "Regional",
+      "National": "National",
       "Pro": "Professional",
       "Ligue 1": "League 1",
       "Ligue 2": "League 2",
@@ -359,15 +360,15 @@
       "Autre": "Other"
     },
     "venue": {
-      "Domicile": "🏠 Home",
-      "Extérieur": "🚗 Away",
-      "Neutre": "📍 Neutral ground"
+      "Domicile": "🏠 Home (We host)",
+      "Extérieur": "🚗 Away (We travel)",
+      "Neutre": "📍 Neutral ground / To be defined"
     },
     "pitch": {
-      "Herbe": "Grass pitch",
-      "Synthétique": "Artificial pitch",
-      "Hybride": "Hybrid pitch",
-      "Stabilisé": "Stabilized pitch",
+      "Herbe": "Grass",
+      "Synthétique": "Artificial",
+      "Hybride": "Hybrid",
+      "Stabilisé": "Stabilized",
       "Indoor": "All surfaces",
       "Toutes surfaces": "All surfaces"
     },
@@ -417,9 +418,9 @@
     "unknown_club": "Unknown Club",
     "found": "friendly match(es) found",
     "found_tournament": "tournament(s) found",
-    "empty_title": "No matches available",
+    "empty_title": "No friendly matches found",
     "empty_title_tournament": "No tournaments found",
-    "empty_desc": "Adjust your filters or create a new friendly match.",
+    "empty_desc": "Try modifying your filters or create a new friendly match.",
     "empty_desc_tournament": "Adjust your filters or create a new friendly tournament."
   },
   "matchForm": {
@@ -436,11 +437,9 @@
       "venue": "Venue",
       "pitch_type": "Pitch type",
       "siret": "SIRET Number",
-      "location_address": "Stadium Address",
-      "address_placeholder": "Search for a stadium or address...",
-      "location_zip": "Zip code",
-      "location_city": "City",
-      "jersey_color": "Jersey color",
+      "address": "Stadium Address",
+      "zip": "Zip code",
+      "city": "City",
       "at": "at",
       "email": "Contact Email",
       "phone": "Phone",
@@ -450,7 +449,9 @@
       "auto": "Automatically filled",
       "more_info": "Additional information...",
       "free": "Free",
-      "stadium_note": "If your registered office address (linked to the SIRET) differs from the meeting place, please specify the exact stadium address in the event notes."
+      "stadium_note": "If your registered office address (linked to the SIRET) differs from the meeting place, please specify the exact stadium address in the event notes.",
+      "jersey_color": "Jersey Colors",
+      "edit_in_account": "Edit in my account"
     },
     "link_club": {
       "title": "Link your club (Irreversible Action)",
@@ -477,12 +478,8 @@
       "link_error": "Error linking the club. Check the SIRET.",
       "must_link": "You must first link your club via the SIRET number before creating a match.",
       "contact_required": "⚠️ CONTACT REQUIRED\n\nEmail and phone are essential for players to contact you.",
-      "date_required": "Match date is required.",
-      "time_required": "Match time is required.",
-      "venue_required": "Match venue is required.",
       "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future.",
-      "delete_success": "Match successfully deleted!",
-      "contact_success": "Your request has been successfully sent! 🚀"
+      "delete_success": "Match successfully deleted!"
     },
     "confirm": {
       "accepted": "Do you really want to accept this team?",
@@ -520,7 +517,6 @@
       "license_placeholder": "Enter your number",
       "hq_address": "HQ Address (Official)",
       "stadium_address": "Stadium Address (Required)",
-      "stadium_address_for": "Stadium Address ({{club}})",
       "stadium_placeholder": "E.g.: Sports Complex, 12 Flower St",
       "stadium_locked": "Stadium address is locked. Contact support for any changes.",
       "stadium_warning": "Warning: this address is essential for guiding players during matches.",
@@ -547,10 +543,6 @@
       "pitch_required": "This field is required (choose a pitch)",
       "stadium_required": "Stadium address is required.",
       "siret_required": "SIRET (14 digits) or SIREN (9 digits) number required.",
-      "format_required": "Match format is required.",
-      "email_invalid": "A valid email is required.",
-      "home_jersey_required": "Home jersey color is required.",
-      "away_jersey_required": "Away jersey color is required.",
       "form_incomplete": "Incomplete Form",
       "form_incomplete_desc": "Please fill in all mandatory fields in red to maintain or activate your access."
     },
@@ -592,10 +584,13 @@
     },
     "link_club": "Club link required to organize",
     "contact_title": "Contact & Additional Info",
+    "progress": "Tournament announcement preparation",
     "alerts": {
-      "create_success": "Tournament successfully created!",
-      "update_success": "Tournament successfully updated!",
-      "delete_success": "Tournament successfully deleted!"
+      "must_link": "You must first link your club via the SIRET number before creating a tournament.",
+      "create_success": "Your tournament has been successfully published!",
+      "update_success": "Your tournament has been successfully updated!",
+      "delete_success": "Tournament successfully deleted!",
+      "date_past": "⚠️ INVALID DATE\n\nYou cannot create a tournament in the past."
     }
   },
   "pricing": {
@@ -723,16 +718,15 @@
     },
     "confirm_delete": "Are you sure you want to delete this ad?",
     "toasts": {
-      "delete_success": "Ad deleted successfully",
-      "accept_success": "Request accepted",
-      "all_read_success": "All modifications have been validated"
+      "delete_success": "Ad deleted successfully"
     },
     "notifications": {
       "modification": "Match modification",
       "cancellation": "The scheduled match against {{team}} on {{date}} has been cancelled by the organizer",
-      "new_request_interactive": "You received a request from {{team}} for the match on {{date}} at {{time}}",
-      "acceptance_player": "Your match against {{team}} on {{date}} has been accepted by the organizer",
-      "rejection_player": "Your request for the match on {{date}} against {{team}} was refused"
+      "new_request_interactive": "You received a request from {{team}} for your match on {{date}}",
+      "acceptance_player": "Duel Confirmed! ✅ Your match on {{date}} is validated.",
+      "rejection_player": "Request refused. {{team}} is not available for the {{date}}.",
+      "refusal_organizer": "Request refused. You have declined the invitation from {{team}}."
     },
     "profile_modal": {
       "title": "Club Profile",
@@ -749,7 +743,6 @@
     "alerts": {
       "title": "Match update",
       "message": "The match against {{host_club_name}} has been updated!",
-      "success_discrete": "Action completed",
       "view_changes": "View changes",
       "h2_locked": "Event locked (H-2). Contact participants for any last-minute changes.",
       "specific": {
@@ -760,9 +753,9 @@
   },
   "choose_file": "Choose a file",
   "adminUsersPage": {
-    "pageTitle": "User and Permission Management",
-    "pageSubtitle": "Manage user access for KduFoot.",
-    "cacheTokenSuccess": "(Management token cached ✓)",
+    "pageTitle": "Users Management and Permissions",
+    "pageSubtitle": "Manage KduFoot users access.",
+    "cacheTokenSuccess": "(Management token in cache ✓)",
     "loadingUsers": "Loading users...",
     "colUser": "User",
     "colEmail": "Email",
@@ -770,11 +763,11 @@
     "colSubscription": "Subscription",
     "colLogins": "Logins",
     "colActions": "Actions",
-    "emptyUsers": "No users found",
+    "emptyUsers": "No user found",
     "btnPermissions": "Permissions",
     "btnDelete": "Delete",
     "btnSyncAuth0": "Sync Auth0",
-    "auth0UpToDate": "Auth0 synced",
+    "auth0UpToDate": "Auth0 up to date",
     "statusBanned": "🚫 BANNED",
     "statusCertified": "Certified",
     "statusAdmin": "Admin",
@@ -785,7 +778,7 @@
     "modalBanReasonLabel": "Ban Reason",
     "modalBanReasonPlaceholder": "Ex: Abusive behavior, spam...",
     "modalBanConfirm": "CONFIRM BAN",
-    "modalTitlePrefix": "Permissions of",
+    "modalTitlePrefix": "Permissions for",
     "modalProtected": "🛡️ PROTECTED",
     "statBans": "Number of Bans",
     "statSiretChanges": "SIRET Modifications",
@@ -826,25 +819,22 @@
     "modalBtnSaveModifications": "Save Modifications",
     "modalBtnClose": "Close",
     "modalLoadingPerms": "Loading permissions...",
-    "modalBtnSave": "Save Permissions",
+    "modalBtnSave": "Save permissions",
     "modalBtnCancel": "Cancel",
-    "confirmDeletePrefix": "Delete user {{userId}}?",
+    "confirmDeletePrefix": "Delete user {{userId}} ?",
     "toasts": {
       "errorLoadingUsers": "Error loading users",
-      "noManagementToken": "Management token unavailable",
+      "noManagementToken": "Failed to get Management token",
       "errorLoadingPerms": "Error loading permissions",
       "successUpdate": "Permissions successfully updated",
-      "errorUpdate": "Error updating permissions",
+      "errorUpdate": "Error while updating permissions",
       "cannotDeleteSelf": "You cannot delete your own account",
       "confirmDelete": "Delete user {{id}}?",
-      "successDelete": "User deleted successfully",
-      "errorDelete": "Error deleting user",
-      "syncSuccess": "Auth0 permissions synced",
+      "successDelete": "User successfully deleted",
+      "errorDelete": "Error while deleting user",
+      "syncSuccess": "Auth0 permissions synchronized",
       "syncError": "Auth0 sync error",
-      "noResourceServer": "Auth0 API not found for audience",
-      "protectionSuperAdmin": "Cannot modify the Super-Administrator.",
-      "siretDetached": "SIRET successfully detached",
-      "siretPrimaryUpdated": "Primary Club updated"
+      "noResourceServer": "Auth0 API not found for audience"
     },
     "confirmDetachPrimary": "⚠️ Are you sure you want to detach the primary SIRET? The user will no longer have a linked club and will need to choose a new one."
   },
@@ -881,8 +871,7 @@
       "share": "Shares",
       "admin": "Administration",
       "auth0": "Auth0 Administration",
-      "coach": "Certification",
-      "role": "Sanctions"
+      "coach": "Certification"
     },
     "read_api": "Read API",
     "write_api": "Write API",

@@ -581,15 +581,12 @@ export default function MatchDetailsPage() {
                 {match.jersey_color && (
                   <div className="bg-[#1c1c1f] rounded-3xl p-6 border border-white/5 flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] text-default-400 font-black tracking-widest mb-1">
-                        Couleurs de maillot
-                      </p>
-                      <p className="text-white font-bold">
-                        {t("matchForm.labels.jersey_color", "Principal")}
+                      <p className="text-[10px] text-default-400 font-black tracking-widest mb-1 uppercase">
+                        Couleur de maillot
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-white font-bold text-sm sm:text-base text-right">
+                    <div className="flex items-center gap-3">
+                      <p className="text-white font-black text-sm sm:text-base text-right">
                         {match.jersey_color}
                       </p>
                       <JerseyColorDots colors={match.jersey_color} size="lg" />

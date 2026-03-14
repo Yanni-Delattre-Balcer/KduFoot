@@ -618,7 +618,7 @@ export default function DashboardPage() {
                                   )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="font-black text-white text-sm leading-tight break-words tracking-tight">
+                                  <h3 className="font-black text-white text-base sm:text-lg leading-tight break-words tracking-tight">
                                     {request.requester_club_name}
                                   </h3>
                                   <div className="flex flex-wrap items-center gap-1.5 mt-2">
@@ -695,7 +695,7 @@ export default function DashboardPage() {
                             <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
                               <div className="flex items-center gap-1 text-[9px] text-default-400">
                                 <span className="text-default-600">👤</span>
-                                <span className="truncate">
+                                <span className="truncate font-bold">
                                   {request.requester_firstname &&
                                   request.requester_lastname
                                     ? `${request.requester_firstname} ${request.requester_lastname}`
@@ -704,7 +704,7 @@ export default function DashboardPage() {
                               </div>
                               <div className="flex items-center gap-1 text-[9px] text-default-400">
                                 <span className="text-default-600">📍</span>
-                                <span className="truncate">
+                                <span className="truncate font-bold text-xs">
                                   {request.requester_city ||
                                     request.location_city ||
                                     t("common:unknown_city", "Ville inconnue")}
@@ -712,7 +712,7 @@ export default function DashboardPage() {
                               </div>
                               <div className="flex items-center gap-1 text-[9px] text-default-400">
                                 <span className="text-default-600">🏅</span>
-                                <span>
+                                <span className="font-bold text-xs text-white">
                                   {request.requester_category
                                     ? t(
                                         `enums.category.${request.requester_category}`,
@@ -722,7 +722,7 @@ export default function DashboardPage() {
                               </div>
                               <div className="flex items-center gap-1 text-[9px] text-default-400">
                                 <span className="text-default-600">🛡️</span>
-                                <span>
+                                <span className="font-bold text-xs text-white">
                                   {request.requester_level
                                     ? t(
                                         `enums.level.${request.requester_level}`,
@@ -770,9 +770,9 @@ export default function DashboardPage() {
                                 )}
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-2 relative z-20">
+                            <div className="flex flex-col sm:flex-row gap-4 relative z-20">
                               <Button
-                                className="flex-1 font-black text-xs h-11 shadow-lg shadow-emerald-500/20"
+                                className="flex-1 font-black text-sm h-14 sm:h-11 shadow-lg shadow-emerald-500/20 w-full sm:w-auto"
                                 color="success"
                                 isLoading={
                                   actionLoading[
@@ -790,7 +790,7 @@ export default function DashboardPage() {
                                 Accepter
                               </Button>
                               <Button
-                                className="flex-1 font-black text-xs h-11 shadow-lg shadow-rose-500/20"
+                                className="flex-1 font-black text-sm h-14 sm:h-11 shadow-lg shadow-rose-500/20 w-full sm:w-auto"
                                 color="danger"
                                 isLoading={
                                   actionLoading[
@@ -1063,7 +1063,7 @@ export default function DashboardPage() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xl font-black text-white truncate">
+                        <h4 className="text-xl font-black text-white whitespace-normal break-words leading-tight">
                           {selectedClubProfile.requester_club_name ||
                             selectedClubProfile.host_club_name}
                         </h4>

@@ -2,6 +2,24 @@
   "success": "Succès",
   "warning": "Attention",
   "info": "Information",
+  "loading": "Chargement...",
+  "error": {
+    "title": "Erreur",
+    "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
+    "not_found": "Élément non trouvé",
+    "save_failed": "Erreur lors de la sauvegarde. Veuillez vérifier votre connexion.",
+    "delete_failed": "La suppression a échoué. Si le match est dans moins de 2h, il est verrouillé.",
+    "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
+    "loading_matches": "Erreur lors du chargement des matchs amicaux",
+    "loading_exercises": "Erreur lors du chargement des exercices",
+    "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
+    "invalid_date": "La date saisie est invalide ou déjà passée.",
+    "missing_fields": "Veuillez remplir tous les champs obligatoires.",
+    "technical_issue": "Problème Technique",
+    "bug_report": "Signaler un bug",
+    "feature_request": "Suggérer une fonctionnalité",
+    "other": "Autre"
+  },
   "user_banned_signal": "Signalement d'utilisateur banni",
   "cookie-consent-title": "Gestion des cookies",
   "cookie-policy": "Nous utilisons des cookies pour améliorer votre expérience.",
@@ -10,6 +28,7 @@
   "switch-to-dark-mode": "Passer en mode sombre",
   "switch-to-light-mode": "Passer en mode clair",
   "rejected": "Refusé",
+  "refused": "Refusé",
   "Genre": "Genre",
   "profile_incomplete": "Complète ton profil club pour postuler à ce match",
   "site": {
@@ -57,9 +76,10 @@
       "suffix": "pour le football amateur"
     },
     "buttons": {
-      "exercises": "Analyse Vidéo",
-      "match": "Chercher ou créer un match",
-      "tournament": "Chercher ou créer un tournoi"
+      "exercises": "Analyser une vidéo",
+      "sessions": "Trouver/créer un match / tournoi",
+      "find_match": "Trouver/créer un match",
+      "find_tournament": "Trouver/créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
@@ -104,21 +124,6 @@
   "equipment": "Matériel",
   "back": "Retour",
   "back_to_list": "Retour à la liste",
-  "loading": "Chargement...",
-  "edit": "Modifier",
-  "error": {
-    "title": "Erreur",
-    "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
-    "not_found": "Élément non trouvé",
-    "save_failed": "Erreur lors de la sauvegarde. Veuillez vérifier votre connexion.",
-    "delete_failed": "La suppression a échoué. Si le match est dans moins de 2h, il est verrouillé.",
-    "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
-    "loading_matches": "Erreur lors du chargement des matchs amicaux",
-    "loading_exercises": "Erreur lors du chargement des exercices",
-    "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
-    "invalid_date": "La date saisie est invalide ou déjà passée.",
-    "missing_fields": "Veuillez remplir tous les champs obligatoires."
-  },
   "video": {
     "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
     "analyze": "Analyser la vidéo",
@@ -175,6 +180,18 @@
     "technical_issue_desc": "Bugs, problèmes techniques...",
     "other_inquiry_desc": "Sponsors, publicité, partenariats..."
   },
+  "onboarding": {
+    "calendar": {
+      "title": "Synchroniser mon calendrier",
+      "description": "Synchronisez vos rencontres directement avec votre calendrier pour des rappels intelligents et un suivi en temps réel.",
+      "button": "Connecter mon calendrier",
+      "native": "Calendrier Natif",
+      "later": "Peut-être plus tard",
+      "dismiss": "C'est déjà fait / Ne plus me demander",
+      "toast_success": "Synchronisation calendrier lancée !",
+      "toast_error": "Échec de la synchronisation calendrier"
+    }
+  },
   "planner": {
     "en_cours": "En cours / À venir",
     "mes_annonces": "Mes Annonces",
@@ -193,9 +210,54 @@
     },
     "terminated": "Terminé"
   },
-  "myExercises": "Mes exercices",
-  "mySessions": "Mes Séances",
-  "myMatches": "Mes Matchs Amicaux",
+  "myExercises": {
+    "0": "M",
+    "1": "e",
+    "2": "s",
+    "3": " ",
+    "4": "e",
+    "5": "x",
+    "6": "e",
+    "7": "r",
+    "8": "c",
+    "9": "i",
+    "10": "c",
+    "11": "e",
+    "12": "s"
+  },
+  "mySessions": {
+    "0": "M",
+    "1": "e",
+    "2": "s",
+    "3": " ",
+    "4": "S",
+    "5": "é",
+    "6": "a",
+    "7": "n",
+    "8": "c",
+    "9": "e",
+    "10": "s"
+  },
+  "myMatches": {
+    "0": "M",
+    "1": "e",
+    "2": "s",
+    "3": " ",
+    "4": "M",
+    "5": "a",
+    "6": "t",
+    "7": "c",
+    "8": "h",
+    "9": "s",
+    "10": " ",
+    "11": "A",
+    "12": "m",
+    "13": "i",
+    "14": "c",
+    "15": "a",
+    "16": "u",
+    "17": "x"
+  },
   "exercise": {
     "title": "Titre",
     "title_label": "Titre de l'exercice",
@@ -340,7 +402,9 @@
       "U18": "U18",
       "U19": "U19",
       "U20": "U20",
-      "Seniors": "Séniors"
+      "Seniors": "Séniors",
+      "Vétérans": "Vétérans",
+      "Loisir": "Loisir"
     },
     "level": {
       "Débutant": "Débutant",
@@ -363,23 +427,22 @@
       "Autre": "Autre"
     },
     "venue": {
-      "Domicile": "🏠 Home",
-      "Extérieur": "🚗 Away",
-      "Neutre": "📍 Terrain neutre"
+      "Domicile": "Cherche à domicile",
+      "Extérieur": "Cherche à l'extérieur",
+      "Neutre": "Neutre"
     },
     "pitch": {
       "Herbe": "Herbe",
       "Synthétique": "Synthétique",
       "Hybride": "Hybride",
       "Stabilisé": "Stabilisé",
-      "Indoor": "Toutes surfaces",
-      "Toutes surfaces": "Toutes surfaces"
+      "Indoor": "Indoor"
     },
     "gender": {
       "Masculin": "Masculin",
       "Féminin": "Féminin",
       "Mixte": "Mixte",
-      "Non spécifié": "Non spécifié"
+      "Non spécifié": "Mixte"
     },
     "format": {
       "11v11": "11 vs 11",
@@ -422,10 +485,10 @@
     "unknown_club": "Club Inconnu",
     "found": "match(s) amical(aux) trouvé(s)",
     "found_tournament": "tournoi(s) trouvé(s)",
-    "empty_title": "Aucun match disponible",
+    "empty_title": "Aucun match amical trouvé",
     "empty_title_tournament": "Aucun tournoi trouvé",
-    "empty_desc": "Modifier vos filtres ou créez un nouveau match amical.",
-    "empty_desc_tournament": "Modifier vos filtres ou créez un nouveau tournoi amical."
+    "empty_desc": "Essayez de modifier vos filtres ou créez un nouveau match amical.",
+    "empty_desc_tournament": "Essayez de modifier vos filtres ou créez un nouveau tournoi amical."
   },
   "matchForm": {
     "title": "Informations du Match",
@@ -449,6 +512,7 @@
       "email": "Email de contact",
       "phone": "Téléphone",
       "notes": "Notes / Instructions",
+      "siret": "Numéro SIRET",
       "choose": "Choisir",
       "auto_siret": "Rempli automatiquement via le SIRET",
       "auto": "Rempli automatiquement",
@@ -493,7 +557,8 @@
       "link_success": "Club lié avec succès !",
       "create_success": "Annonce de match créée avec succès !",
       "update_success": "Match mis à jour avec succès !",
-      "delete_success": "Match supprimé avec succès !"
+      "delete_success": "Match supprimé avec succès !",
+      "contact_success": "Votre demande a été envoyée avec succès ! 🚀"
     },
     "confirm": {
       "accept": "Accepter cette demande ?",
@@ -744,12 +809,12 @@
       "all_read_success": "Toutes les modifications ont été validées"
     },
     "notifications": {
-      "modification": "Modification du match",
-      "cancellation": "Le match prévu contre {{team}} le {{date}} a été annulé par l'organisateur",
-      "new_request_interactive": "Vous avez reçu une demande de {{team}} pour le match du {{date}} à {{time}}",
-      "acceptance_player": "Votre match contre {{team}} le {{date}} a été accepté par l'organisateur",
-      "rejection_player": "Votre demande pour le match du {{date}} contre {{team}} a été refusée",
-      "withdrawal": "L'équipe {{team}} a annulé sa demande pour le match du {{date}} à {{time}}"
+      "modification": "Match modifié ⚠️. Les détails (heure/lieu) pour le duel du {{date}} ont changé.",
+      "cancellation": "Annulation du duel. La rencontre du {{date}} avec {{team}} a été annulée.",
+      "new_request_interactive": "Vous avez reçu une demande de {{team}} pour votre match du {{date}}",
+      "acceptance_player": "Duel Confirmé ! ✅ Votre rencontre du {{date}} est validée.",
+      "rejection_player": "Demande refusée. {{team}} n'est pas disponible pour le {{date}}.",
+      "refusal_organizer": "Demande refusée. Vous avez décliné l'invitation de {{team}}."
     },
     "profile_modal": {
       "title": "Profil du Club",
@@ -808,15 +873,6 @@
       "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations.",
       "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
     }
-  },
-  "common": {
-    "home": "Accueil",
-    "choose": "Choisir",
-    "not_provided": "Non renseigné",
-    "unknown_city": "Ville inconnue",
-    "unknown_date": "Date inconnue",
-    "unknown": "Inconnu",
-    "untitled": "Sans titre"
   },
   "adminUsersPage": {
     "pageTitle": "Gestion des utilisateurs et permissions",
@@ -900,10 +956,7 @@
       "errorDelete": "Erreur lors de la suppression de l'utilisateur",
       "syncSuccess": "Permissions Auth0 synchronisées",
       "syncError": "Erreur synchronisation Auth0",
-      "noResourceServer": "API Auth0 non trouvée pour l'audience",
-      "protectionSuperAdmin": "Impossible de modifier le Super-Administrateur.",
-      "siretDetached": "SIRET détaché avec succès",
-      "siretPrimaryUpdated": "Club Principal mis à jour"
+      "noResourceServer": "API Auth0 non trouvée pour l'audience"
     },
     "confirmDetachPrimary": "⚠️ Êtes-vous sûr de vouloir détacher le SIRET principal ? L'utilisateur n'aura plus de club lié et devra en choisir un nouveau."
   },
@@ -940,8 +993,7 @@
       "share": "Partages",
       "admin": "Administration",
       "auth0": "Administration Auth0",
-      "coach": "Certification",
-      "role": "Sanctions"
+      "coach": "Certification"
     },
     "read_api": "Lire l'API",
     "write_api": "Écrire dans l'API",

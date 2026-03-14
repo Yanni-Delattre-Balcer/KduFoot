@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
@@ -41,6 +42,7 @@ export default function MatchForm({
   const { t } = useTranslation();
   const { createMatch, updateMatch } = useMatches();
   const { user } = useUser();
+  const navigate = useNavigate();
 
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -219,7 +221,25 @@ export default function MatchForm({
       const selectedDate = new Date(formData.match_date);
 
       if (selectedDate < today) {
-        newErrors.match_date = t("matchForm.alerts.past_date_error");
+        newErrors.match_date = t(
+          "Date invalide : Vous ne pouvez pas créer un match ou un tournoi dans le passé.",
+        );
+      } else if (formData.match_date === today.toISOString().split("T")[0]) {
+        // Rule of 2 hours delay
+        const [hours, minutes] = (formData.match_time || "00:00")
+          .split(":")
+          .map(Number);
+        const matchDateTime = new Date();
+        matchDateTime.setHours(hours, minutes, 0, 0);
+
+        const now = new Date();
+        const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+
+        if (matchDateTime < minTime) {
+          newErrors.match_time = t(
+            "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation.",
+          );
+        }
       }
     }
     if (!formData.match_time)
@@ -481,9 +501,9 @@ export default function MatchForm({
                 variant="faded"
                 onChange={(e) => setGender(e.target.value)}
               >
-                <SelectItem key="Masculin">Masculin</SelectItem>
-                <SelectItem key="Féminin">Féminin</SelectItem>
-                <SelectItem key="Mixte">Mixte</SelectItem>
+                <SelectItem key="Masculin">{t("enums.gender.Masculin")}</SelectItem>
+                <SelectItem key="Féminin">{t("enums.gender.Féminin")}</SelectItem>
+                <SelectItem key="Mixte">{t("enums.gender.Mixte")}</SelectItem>
               </Select>
             </div>
 
@@ -493,7 +513,7 @@ export default function MatchForm({
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
                 errorMessage={errors.match_date}
                 isInvalid={!!errors.match_date}
-                label="Date"
+                label={t("matchForm.labels.date")}
                 min={
                   new Date(
                     new Date().getTime() -
@@ -511,7 +531,7 @@ export default function MatchForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Heure"
+                label={t("matchForm.labels.time")}
                 size="sm"
                 type="time"
                 value={formData.match_time}
@@ -521,28 +541,28 @@ export default function MatchForm({
               <Select
                 isRequired
                 classNames={{ trigger: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Lieu"
+                label={t("matchForm.labels.venue")}
                 selectedKeys={[formData.venue || ""]}
                 size="sm"
                 variant="faded"
                 onChange={(e) => handleChange("venue", e.target.value)}
               >
-                <SelectItem key="Domicile">Nous recevons (Domicile)</SelectItem>
+                <SelectItem key="Domicile">{t("enums.venue.Domicile")}</SelectItem>
                 <SelectItem key="Extérieur">
-                  Nous nous déplaçons (Extérieur)
+                  {t("enums.venue.Extérieur")}
                 </SelectItem>
               </Select>
               <Select
                 isRequired
                 classNames={{ trigger: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Type terrain"
+                label={t("matchForm.labels.pitch_type")}
                 selectedKeys={formData.pitch_type ? [formData.pitch_type] : []}
                 size="sm"
                 variant="faded"
                 onChange={(e) => handleChange("pitch_type", e.target.value)}
               >
                 {PITCH_TYPES.map((type) => (
-                  <SelectItem key={type}>{type}</SelectItem>
+                  <SelectItem key={type}>{t(`enums.pitch.${type}`)}</SelectItem>
                 ))}
               </Select>
             </div>
@@ -557,7 +577,7 @@ export default function MatchForm({
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-white font-bold pl-1">
-                    {formData.jersey_color || "Non spécifiée"}
+                    {formData.jersey_color || t("common:not_provided")}
                   </span>
                   {formData.jersey_color && (
                     <JerseyColorDots colors={formData.jersey_color} size="md" />
@@ -566,7 +586,7 @@ export default function MatchForm({
               </div>
               <div className="flex items-center gap-2 bg-violet-500/10 text-violet-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-violet-500/20 group-hover:bg-violet-500/20 transition-all">
                 <span>🔒</span>
-                <span className="mb-[1px]">Modifier dans mon compte</span>
+                <span className="mb-[1px]">{t("matchForm.labels.edit_in_account", "Modifier dans mon compte")}</span>
               </div>
             </div>
           </div>
@@ -575,7 +595,7 @@ export default function MatchForm({
           <div className="flex flex-col gap-2 mt-4">
             <div className="flex justify-center text-center px-4">
               <span className="text-[11px] font-black text-violet-300 tracking-[0.15em] leading-tight">
-                Preparation de l'annonce du match: 100%
+                {t("matchForm.progress")}: 100%
               </span>
             </div>
             <Progress
@@ -636,7 +656,7 @@ export default function MatchForm({
             <Button
               className="font-bold text-zinc-500"
               variant="light"
-              onPress={onCancel}
+              onPress={() => (onCancel ? onCancel() : navigate("/matches"))}
             >
               Annuler
             </Button>
