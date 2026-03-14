@@ -84,9 +84,10 @@
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
       "title": "👋 À propos",
-      "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1> — j'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
-      "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez un adversaire autour de chez vous en quelques clics.",
-      "footer": "Moins de recherche, plus de terrain."
+      "intro": "<0>Yanni</0>, étudiant en cybersécurité, <1>Réseaux & Télécommunications à Béthune</1> — J'ai créé Kdufoot pour aider les entraîneurs de football à <2>gagner du temps</2>.",
+      "features": "🎬 <0>Analyse Vidéo AI</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois Amicaux</0> — Trouvez un adversaire près de chez vous en quelques clics.",
+      "features_fallback": "⚽ Matchs & Tournois amicaux — Trouvez ou publiez vos propres matchs et tournois autour de chez vous.",
+      "footer": "Moins de recherche, plus de terrain. ⚽"
     },
     "cards": {
       "video": {
@@ -197,7 +198,6 @@
     "mes_annonces": "Mes Annonces",
     "requests": "Demandes",
     "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
-    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "deleted_success": "Supprimé avec succès",
     "no_active_match": "Aucune annonce de match active.",
     "no_active_tournament": "Aucune annonce de tournoi active.",
@@ -265,9 +265,13 @@
     "date": "Date",
     "time": "Heure",
     "send_request": "Envoyer une demande",
+    "create_warning": "Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.).",
+    "search_warning": "L'accès aux recherches détaillées est réservée aux profils complets.",
     "delete_confirmation": "Es-tu sûr de vouloir supprimer cette annonce ? Cette action est irréversible.",
     "accept_confirm": "Accepter l'équipe de {{clubName}} ?",
     "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",
+    "confirm_delete_admin": "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.",
+    "delete_success_admin": "Match supprimé. Les participants ont été notifiés de l'annulation.",
     "filters": {
       "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs de toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner votre recherche selon vos besoins."
     }
@@ -536,6 +540,7 @@
   "accountModal": {
     "alerts": {
       "update_success": "Votre profil a été mis à jour avec succès !",
+      "update_success_desc": "Vos modifications ont été prises en compte immédiatement.",
       "update_error": "Une erreur est survenue lors de la mise à jour de votre profil.",
       "club_linked_success": "Club certifié avec succès !"
     }
@@ -771,8 +776,8 @@
     },
     "notifications": {
       "modification": "Match modifié ⚠️",
-      "modification_message": "Votre duel du {{date}} a été modifié. Cliquez ici pour voir les détails.",
-      "cancellation": "Annulation du duel. La rencontre du {{date}} avec {{team}} a été annulée.",
+      "modification_message": "Votre {{type}} du {{date}} a été modifié. Cliquez ici pour voir les détails.",
+      "cancellation": "Annulation de votre {{type}}. La rencontre du {{date}} avec {{team}} a été annulée.",
       "new_request_interactive": "Vous avez reçu une demande pour votre {{type}} du {{date}}",
       "acceptance_player": "Confirmation ! ✅ Votre {{type}} du {{date}} est validé.",
       "rejection_player": "Demande refusée. {{team}} n'est pas disponible pour le {{date}}.",

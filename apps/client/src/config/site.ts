@@ -35,12 +35,7 @@ export const siteConfig = () => {
       label: i18next.t("nav.favorites"),
       href: "/favorites",
     },
-    {
-      label: showVideoAnalysis
-        ? i18next.t("nav.sessions")
-        : i18next.t("nav.sessions_public"),
-      href: "/sessions",
-    },
+
     {
       label: i18next.t("nav.matches", "Trouver/créer un match / tournoi"),
       href: "/matches",

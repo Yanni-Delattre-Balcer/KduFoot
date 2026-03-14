@@ -144,24 +144,27 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             const matchDetailUrl = `${kduFootUrl}/matches/${item.id || item.match_id}`;
 
             // --- Description enrichie (Plain text & HTML) ---
+            // Plain text description: avoid raw URLs where possible, but provide the GPS link separately for compatibility
             const descLines = [
                 `Type : ${typeLabel}`,
                 `Catégorie : ${category || 'N/A'}`,
                 `Niveau : ${level || 'N/A'}`,
                 `Lieu : ${location || 'N/A'}`,
                 `Position : ${venue}`,
-                `Suivez vos détails sur le site Kdufoot (${matchDetailUrl})`,
+                `Lien GPS : ${gpsLink}`,
+                `Détails : ${matchDetailUrl}`,
             ];
             const description = descLines.join('\\n');
 
             const htmlDescription = [
-                '<!DOCTYPE html><html><body>',
+                '<html><body>',
+                `<p><b>Événement Kdufoot</b></p>`,
                 `Type : <b>${typeLabel}</b><br>`,
                 `Catégorie : ${category || 'N/A'}<br>`,
                 `Niveau : ${level || 'N/A'}<br>`,
-                `Lieu : <a href="${gpsLink}">${location || 'N/A'}</a><br>`,
+                `Lieu : <a href="${gpsLink}"><b>${location || 'N/A'}</b></a><br>`,
                 `Position : ${venue}<br><br>`,
-                `<a href="${matchDetailUrl}">Suivez vos détails sur le site Kdufoot</a>`,
+                `<a href="${matchDetailUrl}">Voir l'annonce sur le site</a>`,
                 '</body></html>'
             ].join('');
 

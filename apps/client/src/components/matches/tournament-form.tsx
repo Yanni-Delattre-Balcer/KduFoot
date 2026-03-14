@@ -663,24 +663,61 @@ export default function TournamentForm({
             </div>
           </div>
 
-          {/* Progress Bar Section */}
-          <div className="flex flex-col gap-2 mt-4">
-            <div className="flex justify-center text-center px-4">
-              <span className="text-[11px] font-black text-purple-300 tracking-[0.15em] leading-tight">
-                {t("tournamentForm.labels.progress_announcement")}: 91%
-              </span>
-            </div>
-            <Progress
-              aria-label="Preparation"
-              className="h-2"
-              classNames={{
-                base: "bg-purple-900/20 rounded-full overflow-hidden",
-                indicator:
-                  "bg-gradient-to-r from-purple-600 to-purple-400 rounded-full",
-              }}
-              value={91}
-            />
-          </div>
+          {/* Progress Bar Container */}
+      <div className="flex flex-col gap-2 pt-2">
+        <div className="flex justify-between items-center bg-zinc-800/50 p-3 rounded-xl border border-white/5">
+          <p className="text-[10px] font-black tracking-[0.2em] text-default-400 uppercase">
+            {t("tournamentForm.labels.progress_announcement")}
+          </p>
+          <p className="text-xs font-black text-primary animate-pulse">
+            {(() => {
+              const fields = [
+                formData.name,
+                formData.max_teams,
+                formData.registration_fee, // Changed from price to registration_fee
+                formData.match_date, // Changed from date to match_date
+                formData.match_time, // Changed from time to match_time
+                formData.email, // Changed from contact_email to email
+                formData.notes,
+              ];
+              const filled = fields.filter(
+                (f) =>
+                  f !== undefined &&
+                  f !== null &&
+                  f.toString().trim().length > 0,
+              ).length;
+              return Math.round((filled / fields.length) * 100);
+            })()}
+            %
+          </p>
+        </div>
+        <Progress
+          aria-label="Progression"
+          className="h-2"
+          classNames={{
+            indicator: "bg-gradient-to-r from-purple-600 to-purple-400 rounded-full", // Corrected classNames
+            base: "bg-purple-900/20 rounded-full overflow-hidden", // Added base classNames
+          }}
+          value={(() => {
+            const fields = [
+              formData.name,
+              formData.max_teams,
+              formData.registration_fee, // Changed from price to registration_fee
+              formData.match_date, // Changed from date to match_date
+              formData.match_time, // Changed from time to match_time
+              formData.email, // Changed from contact_email to email
+              formData.notes,
+            ];
+            const filled = fields.filter(
+              (f) =>
+                f !== undefined &&
+                f !== null &&
+                f.toString().trim().length > 0,
+            ).length;
+            return Math.round((filled / fields.length) * 100);
+          })()}
+        />
+      </div>
         </CardBody>
       </Card>
 

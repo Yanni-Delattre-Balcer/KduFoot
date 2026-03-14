@@ -157,8 +157,8 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
               <button
                 className="text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] transition-colors py-2 uppercase tracking-wider"
                 onClick={() => {
-                  sessionStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
-                  window.dispatchEvent(new CustomEvent("kdufoot_auth_step_complete"));
+                  // sessionStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
+                  // window.dispatchEvent(new CustomEvent("kdufoot_auth_step_complete"));
                   onClose();
                 }}
               >

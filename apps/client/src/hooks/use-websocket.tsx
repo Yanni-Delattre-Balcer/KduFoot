@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSWRConfig } from "swr";
-import { addToast } from "@heroui/toast";
+import { addToast, closeAll } from "@heroui/toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -189,31 +189,35 @@ export function useWebSocketSync(
                       new CustomEvent("kdufoot_matches_updated"),
                     );
                   }
-                }
-                // Show the toast for participant (organizer already returned)
-                addToast({
-                  title: t("dashboard.notifications.modification"),
-                  description: (
-                    <div
-                      className="cursor-pointer w-full h-full"
-                      onClick={() =>
-                        navigate(`/matches/${payload.data?.match_id}`)
-                      }
-                    >
-                      {t("dashboard.notifications.modification_message", {
-                        date: payload.data?.match_date
-                          ? new Date(payload.data.match_date).toLocaleDateString(
-                              "fr-FR",
-                            )
-                          : "date inconnue",
-                      })}
-                    </div>
-                  ),
-                  color,
-                  variant: "flat",
-                  timeout: 6000,
-                });
 
+                  // Show the toast for participant (organizer already returned)
+                  closeAll();
+                  addToast({
+                    title: t("dashboard.notifications.modification"),
+                    description: (
+                      <div
+                        className="cursor-pointer w-full h-full"
+                        onClick={() =>
+                          navigate(`/matches/${payload.data?.match_id}`)
+                        }
+                      >
+                        {t("dashboard.notifications.modification_message", {
+                          date: payload.data?.match_date
+                            ? new Date(
+                                payload.data.match_date,
+                              ).toLocaleDateString("fr-FR")
+                            : "date inconnue",
+                          type: t(
+                            "enums.type." + (payload.data?.match_type || "match"),
+                          ).toLowerCase(),
+                        })}
+                      </div>
+                    ),
+                    color,
+                    variant: "flat",
+                    timeout: 5000,
+                  });
+                }
                 return;
               case "MATCH_CANCELLED":
                 // Message ciblés envoyés uniquement aux joueurs par le backend
@@ -226,6 +230,9 @@ export function useWebSocketSync(
                         "fr-FR",
                       )
                     : "date inconnue",
+                  type: t(
+                    "enums.type." + (payload.data?.match_type || "match"),
+                  ).toLowerCase(),
                 });
                 mutate(
                   (key) =>
@@ -251,6 +258,7 @@ export function useWebSocketSync(
                 window.dispatchEvent(
                   new CustomEvent("kdufoot_matches_updated"),
                 );
+                closeAll();
                 addToast({
                   title,
                   description: (
@@ -263,7 +271,7 @@ export function useWebSocketSync(
                   ),
                   color,
                   variant: "flat",
-                  timeout: 6000,
+                  timeout: 5000,
                 });
 
                 return;
@@ -295,6 +303,7 @@ export function useWebSocketSync(
                               payload.data.match_date,
                             ).toLocaleDateString("fr-FR")
                           : "date inconnue",
+                        type: t("enums.type." + (payload.data?.match_type || "match")).toLowerCase(),
                       },
                     );
                     mutate(
@@ -316,7 +325,8 @@ export function useWebSocketSync(
                     window.dispatchEvent(
                       new CustomEvent("kdufoot_matches_updated"),
                     );
-
+                    
+                    closeAll();
                     addToast({
                       title,
                       description: (
@@ -333,7 +343,7 @@ export function useWebSocketSync(
                       ),
                       color,
                       variant: "flat",
-                      timeout: 6000,
+                      timeout: 5000,
                     });
 
                     return; // Organizer gets interactive toast
@@ -400,6 +410,9 @@ export function useWebSocketSync(
                               payload.data.match_date,
                             ).toLocaleDateString("fr-FR")
                           : "date inconnue",
+                        type: t(
+                          "enums.type." + (payload.data?.match_type || "match"),
+                        ).toLowerCase(),
                       },
                     );
                     mutate(
@@ -412,43 +425,44 @@ export function useWebSocketSync(
                   } else {
                     return; // Random users ignore this
                   }
-                }
-                // Increment badge unread counter
-                {
-                  const uk = `kdufoot_unread_count_${userId || "guest"}`;
 
-                  localStorage.setItem(
-                    uk,
-                    String(parseInt(localStorage.getItem(uk) || "0") + 1),
+                  // Increment badge unread counter
+                  {
+                    const uk = `kdufoot_unread_count_${userId || "guest"}`;
+
+                    localStorage.setItem(
+                      uk,
+                      String(parseInt(localStorage.getItem(uk) || "0") + 1),
+                    );
+                  }
+                  window.dispatchEvent(
+                    new CustomEvent("kdufoot_matches_updated"),
                   );
+                  closeAll();
+                  addToast({
+                    title,
+                    description: (
+                      <div
+                        className="cursor-pointer w-full h-full"
+                        onClick={() => {
+                          const tab =
+                            payload.data?.match_type === "tournament"
+                              ? "participations"
+                              : "confirmed_matches";
+
+                          navigate(
+                            `/dashboard?tab=${tab}&highlight=${payload.data?.match_id}`,
+                          );
+                        }}
+                      >
+                        {description}
+                      </div>
+                    ),
+                    color,
+                    variant: "flat",
+                    timeout: 5000,
+                  });
                 }
-                window.dispatchEvent(
-                  new CustomEvent("kdufoot_matches_updated"),
-                );
-                addToast({
-                  title,
-                  description: (
-                    <div
-                      className="cursor-pointer w-full h-full"
-                      onClick={() => {
-                        const tab =
-                          payload.data?.match_type === "tournament"
-                            ? "participations"
-                            : "confirmed_matches";
-
-                        navigate(
-                          `/dashboard?tab=${tab}&highlight=${payload.data?.match_id}`,
-                        );
-                      }}
-                    >
-                      {description}
-                    </div>
-                  ),
-                  color,
-                  variant: "flat",
-                  timeout: 6000,
-                });
-
                 return;
               case "ENROLLMENT_REFUSED":
                 {
@@ -469,6 +483,9 @@ export function useWebSocketSync(
                               payload.data.match_date,
                             ).toLocaleDateString("fr-FR")
                           : "date inconnue",
+                        type: t(
+                          "enums.type." + (payload.data?.match_type || "match"),
+                        ).toLowerCase(),
                       },
                     );
                     mutate(
@@ -481,34 +498,35 @@ export function useWebSocketSync(
                   } else {
                     return; // Random users ignore this
                   }
-                }
-                // Increment badge unread counter
-                {
-                  const uk = `kdufoot_unread_count_${userId || "guest"}`;
 
-                  localStorage.setItem(
-                    uk,
-                    String(parseInt(localStorage.getItem(uk) || "0") + 1),
+                  // Increment badge unread counter
+                  {
+                    const uk = `kdufoot_unread_count_${userId || "guest"}`;
+
+                    localStorage.setItem(
+                      uk,
+                      String(parseInt(localStorage.getItem(uk) || "0") + 1),
+                    );
+                  }
+                  window.dispatchEvent(
+                    new CustomEvent("kdufoot_matches_updated"),
                   );
+                  closeAll();
+                  addToast({
+                    title,
+                    description: (
+                      <div
+                        className="cursor-pointer w-full h-full"
+                        onClick={() => navigate("/dashboard")}
+                      >
+                        {description}
+                      </div>
+                    ),
+                    color,
+                    variant: "flat",
+                    timeout: 5000,
+                  });
                 }
-                window.dispatchEvent(
-                  new CustomEvent("kdufoot_matches_updated"),
-                );
-                addToast({
-                  title,
-                  description: (
-                    <div
-                      className="cursor-pointer w-full h-full"
-                      onClick={() => navigate("/dashboard")}
-                    >
-                      {description}
-                    </div>
-                  ),
-                  color,
-                  variant: "flat",
-                  timeout: 6000,
-                });
-
                 return;
               case "TEAM_WITHDRAWAL":
                 color = "danger";
@@ -520,6 +538,9 @@ export function useWebSocketSync(
                         "fr-FR",
                       )
                     : "date inconnue",
+                  type: t(
+                    "enums.type." + (payload.data?.match_type || "match"),
+                  ).toLowerCase(),
                 });
                 mutate(
                   (key) =>
@@ -539,6 +560,7 @@ export function useWebSocketSync(
                 window.dispatchEvent(
                   new CustomEvent("kdufoot_matches_updated"),
                 );
+                closeAll();
                 addToast({
                   title,
                   description: (
@@ -551,7 +573,7 @@ export function useWebSocketSync(
                   ),
                   color,
                   variant: "flat",
-                  timeout: 6000,
+                  timeout: 5000,
                 });
 
                 return;
@@ -565,6 +587,9 @@ export function useWebSocketSync(
                         "fr-FR",
                       )
                     : "date inconnue",
+                  type: t(
+                    "enums.type." + (payload.data?.match_type || "match"),
+                  ).toLowerCase(),
                 });
                 mutate(
                   (key) =>
@@ -583,6 +608,7 @@ export function useWebSocketSync(
                 window.dispatchEvent(
                   new CustomEvent("kdufoot_matches_updated"),
                 );
+                closeAll();
                 addToast({
                   title,
                   description: (
@@ -595,11 +621,12 @@ export function useWebSocketSync(
                   ),
                   color,
                   variant: "flat",
-                  timeout: 6000,
+                  timeout: 5000,
                 });
 
                 return;
             }
+            closeAll();
             addToast({
               title,
               description: (
@@ -612,10 +639,12 @@ export function useWebSocketSync(
               ),
               color,
               variant: "flat",
-              timeout: 6000,
+              timeout: 5000,
             });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error("WebSocket message parsing error:", e);
+        }
       };
 
       ws.onclose = (event) => {

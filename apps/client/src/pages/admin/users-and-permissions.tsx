@@ -1247,13 +1247,12 @@ export default function UsersAndPermissionsPage() {
 
             {/* Desktop View: Table */}
             <Table
+              isHeaderSticky
               aria-label={t("adminUsersPage.pageTitle")}
-                            classNames={{
-                                base: "hidden sm:flex dark",
-                                wrapper: "bg-zinc-900 border border-white/10",
-                                th: "bg-zinc-800 text-default-400"
-                            }}
-                            selectionMode="none"
+              classNames={{
+                base: "max-h-[700px] overflow-x-auto",
+                table: "min-w-[800px]", // Increased min-width to force horizontal scroll container to work
+              }}
             >
               <TableHeader>
                 <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
@@ -1427,8 +1426,9 @@ export default function UsersAndPermissionsPage() {
           size="4xl"
           scrollBehavior="inside"
           classNames={{
-            base: "bg-zinc-900 border border-white/10 m-0 sm:m-auto w-full h-full sm:h-auto max-w-none sm:max-w-4xl rounded-none sm:rounded-3xl",
+            base: "bg-zinc-900 border border-white/10 m-0 sm:m-auto w-full h-[100dvh] sm:h-auto max-w-none sm:max-w-4xl rounded-none sm:rounded-3xl overflow-hidden",
             wrapper: "p-0 sm:p-4",
+            body: "overflow-x-hidden",
           }}
         >
           <ModalContent>
@@ -1439,7 +1439,7 @@ export default function UsersAndPermissionsPage() {
 
               return (
                 <>
-                  <ModalHeader className="flex flex-col gap-1 border-b border-white/5 pb-4">
+                  <ModalHeader className="flex flex-col md:flex-row items-center gap-4 bg-zinc-900 border-b border-white/10 p-4 sm:p-6">
                     <h2 className="text-xl font-bold flex items-center gap-2">
                       {t("adminUsersPage.modalTitlePrefix")}{" "}
                       <span className="text-primary text-2xl ml-1">
@@ -2043,11 +2043,11 @@ export default function UsersAndPermissionsPage() {
                       </>
                     )}
                   </ModalBody>
-                  <ModalFooter className="border-t border-white/5">
+                  <ModalFooter className="border-t border-white/5 flex flex-col sm:flex-row gap-3">
                     <Button
                       variant="flat"
                       size="lg"
-                      className="font-semibold text-default-600 bg-white/5"
+                      className="font-semibold text-default-600 bg-white/5 w-full sm:w-auto order-2 sm:order-1"
                       onPress={() => {
                         if (selectedUserId) {
                           setEditing((prev) => ({
@@ -2066,7 +2066,7 @@ export default function UsersAndPermissionsPage() {
                     <Button
                       color="primary"
                       size="lg"
-                      className="font-bold shadow-lg shadow-primary-500/30 ml-3"
+                      className="font-bold shadow-lg shadow-primary-500/30 w-full sm:w-auto order-1 sm:order-2"
                       onPress={() => savePermissions(selectedUserId as string)}
                       isLoading={savingUserId === selectedUserId}
                       isDisabled={
@@ -2095,10 +2095,10 @@ export default function UsersAndPermissionsPage() {
           <ModalContent>
             {(onClose) => (
               <>
-                <ModalHeader className="flex flex-col gap-1 text-red-500 font-black tracking-tight">
+                <ModalHeader className="flex flex-col gap-1 text-red-500 font-black tracking-tight p-4">
                   🔴 Bloquer l'utilisateur
                 </ModalHeader>
-                <ModalBody>
+                <ModalBody className="p-4 pt-2">
                   <p className="text-default-400 text-sm mb-2">
                     Voulez-vous vraiment bloquer l'utilisateur{" "}
                     <strong>{banTarget?.email}</strong> ?

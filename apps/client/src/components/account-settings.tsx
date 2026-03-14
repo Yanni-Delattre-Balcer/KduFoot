@@ -277,13 +277,28 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         picture: previewUrl || dbUser?.picture || authUser.picture,
       });
 
-      if (onSaveSuccess) onSaveSuccess();
-
-      // Systematic redirection to 'from' or defaults to '/matches'
-      navigate(from || "/matches");
-
+      // Refresh data immediately
       await refetch();
       await mutate("/api/me/context");
+
+      addToast({
+        title: t("accountModal.alerts.update_success", "Profil mis à jour"),
+        description: t(
+          "accountModal.alerts.update_success_desc",
+          "Vos modifications ont été enregistrées.",
+        ),
+        variant: "solid",
+        color: "success",
+      });
+
+      if (onSaveSuccess) {
+        onSaveSuccess();
+      }
+
+      // Only redirect if "from" is specified (e.g. onboarding flow)
+      if (from) {
+        navigate(from);
+      }
     } catch (error: any) {
       console.error("Update profile error:", error);
       addToast({

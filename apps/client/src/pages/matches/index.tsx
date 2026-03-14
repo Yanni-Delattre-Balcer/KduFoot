@@ -219,7 +219,7 @@ export default function MatchesPage() {
     async (matchId: string) => {
       if (
         !confirm(
-          "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.",
+          t("match.confirm_delete_admin", "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés."),
         )
       )
         return;
@@ -237,9 +237,9 @@ export default function MatchesPage() {
 
         if (!res.ok) throw new Error("Erreur lors de la suppression");
         addToast({
-          title: "Match supprimé",
+          title: t("match.delete_success_admin", "Match supprimé"),
           description:
-            "Le match a été supprimé. Les participants ont été notifiés de l'annulation.",
+            t("match.delete_success_desc_admin", "Le match a été supprimé. Les participants ont été notifiés de l'annulation."),
           variant: "solid",
           color: "success",
           timeout: 5000,
@@ -549,7 +549,7 @@ export default function MatchesPage() {
           id="results-container"
         >
           {view === "create" ? (
-            <DataWall message="Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.).">
+            <DataWall message={t("match.create_warning", "Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.).")}>
               {type === "match" ? (
                 <MatchForm onSuccess={handleCreateSuccess} />
               ) : (
@@ -557,7 +557,7 @@ export default function MatchesPage() {
               )}
             </DataWall>
           ) : (
-            <DataWall message="L'accès aux recherches détaillées est réservé aux profils complets.">
+            <DataWall message={t("match.search_warning", "L'accès aux recherches détaillées est réservé aux profils complets.")}>
               <div className="flex flex-col gap-5">
                 {/* Filter Section - Coordinated container */}
                 <Card

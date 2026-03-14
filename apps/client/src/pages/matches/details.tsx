@@ -58,7 +58,7 @@ const InfoItem = ({
     danger: "bg-rose-500/10 text-rose-400 border-rose-500/20",
     default: highlight
       ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
-      : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+      : "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
   };
 
   // Regex to remove emojis from the value if we already have a dedicated icon
@@ -338,7 +338,7 @@ export default function MatchDetailsPage() {
   return (
     <DefaultLayout>
       <DataWall>
-        <div className="container mx-auto max-w-7xl p-6 space-y-8 animate-appearance-in pb-24">
+        <div className="container mx-auto max-w-7xl px-2 sm:px-6 py-8 space-y-8 animate-appearance-in pb-24">
           {/* Header with Back Button */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <Button
@@ -418,13 +418,13 @@ export default function MatchDetailsPage() {
             )}
 
             {isAdmin && user?.id !== match.owner_id && (
-              <div className="flex flex-col sm:flex-row gap-2 bg-danger/5 p-2 rounded-2xl border border-danger/20 animate-pulse">
+              <div className="flex flex-col sm:flex-row gap-2 bg-danger/5 p-2 rounded-2xl border border-danger/20 animate-pulse w-full sm:w-auto">
                 <span className="text-xs sm:text-sm font-bold text-danger px-2 py-1">
                   Outils Modération (ADMIN)
                 </span>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row flex-1 gap-2 w-full">
                   <Button
-                    className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20"
+                    className="font-black uppercase tracking-tighter shadow-lg shadow-danger/20 flex-1 whitespace-nowrap"
                     color="danger"
                     size="sm"
                     startContent={
@@ -447,7 +447,7 @@ export default function MatchDetailsPage() {
                     Supprimer l'annonce
                   </Button>
                   <Button
-                    className="font-black tracking-tighter"
+                    className="font-black tracking-tighter flex-1 whitespace-nowrap"
                     color="danger"
                     isLoading={isBlocking}
                     size="sm"
@@ -635,7 +635,7 @@ export default function MatchDetailsPage() {
                   value={t(`enums.format.${match.format}`, match.format)}
                 />
                 <InfoItem
-                  color="danger"
+                  color="primary"
                   highlight={highlights.date}
                   icon="📅"
                   label="Date"
@@ -1164,10 +1164,10 @@ export default function MatchDetailsPage() {
             <ModalContent className="bg-[#1a1a1c] border border-white/10">
               {(onClose) => (
                 <>
-                  <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">
+                  <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter p-4 sm:p-6">
                     Retirer ma candidature
                   </ModalHeader>
-                  <ModalBody>
+                  <ModalBody className="p-4 pt-2 sm:p-6 sm:pt-2">
                     <p className="text-default-400 font-medium">
                       Es-tu sûr de vouloir retirer ta candidature pour ce match
                       ?
@@ -1204,10 +1204,10 @@ export default function MatchDetailsPage() {
             <ModalContent className="bg-[#1a1a1c] border border-white/10">
               {(onClose) => (
                 <>
-                  <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">
+                  <ModalHeader className="flex flex-col gap-1 text-red-500 font-black tracking-tighter p-4 sm:p-6">
                     Supprimer l'annonce
                   </ModalHeader>
-                  <ModalBody>
+                  <ModalBody className="p-4 pt-2 sm:p-6 sm:pt-2">
                     <p className="text-default-400 font-medium">
                       {match.type === "tournament"
                         ? t("match.confirm_delete_tournament", "Es-tu sûr de vouloir supprimer ce tournoi ?")

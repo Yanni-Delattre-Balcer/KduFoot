@@ -75,7 +75,8 @@
       "title": "👋 About",
       "intro": "<0>Yanni</0>, cybersecurity student, <1>Networks & Telecommunications in Béthune</1> — I created Kdufoot to help football coaches <2>save time</2>.",
       "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use drills.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in a few clicks.",
-      "footer": "Less searching, more playing."
+      "features_fallback": "⚽ Friendly Matches & Tournaments — Find or publish your own matches and tournaments around you.",
+      "footer": "Less searching, more playing. ⚽"
     },
     "cards": {
       "video": {
@@ -249,6 +250,10 @@
     "date": "Date",
     "time": "Time",
     "send_request": "Send Request",
+    "create_warning": "To create an ad, your profile must be 100% complete (Name, Club, Phone, etc.).",
+    "search_warning": "Access to detailed searches is reserved for complete profiles.",
+    "confirm_delete_admin": "⚠️ DELETE THIS MATCH?\n\nThis action is irreversible. The match and all its participations will be permanently deleted.",
+    "delete_success_admin": "Match deleted. Participants have been notified of the cancellation.",
     "filters": {
       "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
     }
@@ -497,6 +502,7 @@
   "accountModal": {
     "alerts": {
       "update_success": "Your profile has been successfully updated!",
+      "update_success_desc": "Your changes have been taken into account immediately.",
       "update_error": "An error occurred while updating your profile.",
       "club_linked_success": "Club successfully certified!"
     }

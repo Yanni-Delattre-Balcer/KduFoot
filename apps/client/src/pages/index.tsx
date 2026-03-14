@@ -52,7 +52,7 @@ export default function IndexPage() {
                 <p className="text-default-500 text-sm sm:text-base leading-relaxed break-words overflow-wrap-anywhere">
                   {showVideoAnalysis
                     ? t("homePage.description")
-                    : "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics."}
+                    : t("homePage.description_fallback", "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics.")}
                 </p>
               </div>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
@@ -152,16 +152,11 @@ export default function IndexPage() {
               </p>
             ) : (
               <p className="text-base text-default-500 leading-relaxed">
-                ⚽{" "}
-                <strong className="text-violet-500">
-                  Matchs & Tournois amicaux
-                </strong>{" "}
-                — Trouvez ou publiez vos propres matchs et tournois autour de
-                chez vous.
+                {t("homePage.about.features_fallback", "⚽ Matchs & Tournois amicaux — Trouvez ou publiez vos propres matchs et tournois autour de chez vous.")}
               </p>
             )}
             <p className="text-sm text-default-400 italic mt-2">
-              Moins de recherche, plus de terrain.&nbsp;⚽
+              {t("homePage.about.footer", "Moins de recherche, plus de terrain. ⚽")}
             </p>
           </CardBody>
         </Card>

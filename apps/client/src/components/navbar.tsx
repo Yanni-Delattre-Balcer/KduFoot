@@ -64,6 +64,13 @@ export const Navbar = () => {
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
     setIsMenuOpen(false);
+
+    // If already on the same page, just close the menu (HeroUI might need a slight delay or explicit close)
+    if (location.pathname === href) {
+      // Menu already closing via setIsMenuOpen(false)
+      return;
+    }
+
     if (href.startsWith("/matches") && location.pathname === "/matches") {
       e.preventDefault();
       const params = new URLSearchParams(location.search);
