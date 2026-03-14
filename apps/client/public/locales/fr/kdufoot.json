@@ -57,10 +57,9 @@
       "suffix": "pour le football amateur"
     },
     "buttons": {
-      "exercises": "Analyser une vidéo",
-      "sessions": "Trouver/créer un match / tournoi",
-      "find_match": "Trouver/créer un match",
-      "find_tournament": "Trouver/créer un tournoi"
+      "exercises": "Analyse Vidéo",
+      "match": "Chercher ou créer un match",
+      "tournament": "Chercher ou créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
@@ -749,7 +748,8 @@
       "cancellation": "Le match prévu contre {{team}} le {{date}} a été annulé par l'organisateur",
       "new_request_interactive": "Vous avez reçu une demande de {{team}} pour le match du {{date}} à {{time}}",
       "acceptance_player": "Votre match contre {{team}} le {{date}} a été accepté par l'organisateur",
-      "rejection_player": "Votre demande pour le match du {{date}} contre {{team}} a été refusée"
+      "rejection_player": "Votre demande pour le match du {{date}} contre {{team}} a été refusée",
+      "withdrawal": "L'équipe {{team}} a annulé sa demande pour le match du {{date}} à {{time}}"
     },
     "profile_modal": {
       "title": "Profil du Club",

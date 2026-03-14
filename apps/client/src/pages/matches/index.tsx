@@ -345,7 +345,7 @@ export default function MatchesPage() {
                                         if (view === 'find') handleManualSearch();
                                         else setView('find');
                                     }}
-                                    className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'find' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}
+                                    className={`w-full sm:w-auto sm:flex-none font-bold px-6 h-12 rounded-xl transition-all ${view === 'find' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}
                                     startContent={
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -359,7 +359,7 @@ export default function MatchesPage() {
                                     variant={view === 'create' ? "solid" : "flat"}
                                     color={view === 'create' ? (type === 'match' ? "secondary" : "default") : "default"}
                                     onPress={() => setView('create')}
-                                    className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}
+                                    className={`w-full sm:w-auto sm:flex-none font-bold px-6 h-12 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}
                                     startContent={
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

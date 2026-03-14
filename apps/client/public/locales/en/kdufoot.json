@@ -44,10 +44,9 @@
       "suffix": "assistant for amateur football"
     },
     "buttons": {
-      "exercises": "Analyze a video",
-      "sessions": "Find a match / tournament",
-      "find_match": "Find a match",
-      "find_tournament": "Find a tournament"
+      "exercises": "Video Analysis",
+      "match": "Find or create a match",
+      "tournament": "Find or create a tournament"
     },
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
     "about": {
@@ -726,6 +725,14 @@
         "date": "The match date has been changed.",
         "time": "The match time has been changed."
       }
+    },
+    "notifications": {
+      "modification": "Match update",
+      "cancellation": "The scheduled match against {{team}} on {{date}} has been cancelled by the organizer",
+      "new_request_interactive": "You received a request from {{team}} for the match on {{date}} at {{time}}",
+      "acceptance_player": "Your match against {{team}} on {{date}} has been accepted by the organizer",
+      "rejection_player": "Your request for the match on {{date}} against {{team}} was refused",
+      "withdrawal": "Team {{team}} has cancelled their request for the match on {{date}} at {{time}}"
     }
   },
   "choose_file": "Choose a file",

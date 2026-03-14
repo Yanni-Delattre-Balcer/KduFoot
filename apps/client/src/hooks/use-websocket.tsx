@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { addToast } from "@heroui/toast";
 import { useTranslation } from 'react-i18next';
-import { Button } from '@heroui/button';
-import { matchService } from '@/services/matches';
 import { useNavigate } from 'react-router-dom';
 
 export type WebSocketStatus = 'connected' | 'connecting' | 'disconnected';
@@ -192,7 +190,11 @@ export function useWebSocketSync(
                                     if (isOrganizer) {
                                         color = 'primary';
                                         title = t('dashboard.status.pending');
-                                        description = `Vous avez reçu une demande de ${payload.data?.applicant_club_name || 'un club'} pour le match du ${payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'}`;
+                                        description = t('dashboard.notifications.new_request_interactive', {
+                                            team: payload.data?.applicant_club_name || 'un club',
+                                            date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue',
+                                            time: payload.data?.match_time || ''
+                                        });
                                         mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                         // Increment badge unread counter
                                         {
@@ -204,51 +206,14 @@ export function useWebSocketSync(
                                         addToast({
                                             title,
                                             description: (
-                                                <div className="flex flex-col gap-3">
+                                                <div 
+                                                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                                                    onClick={() => navigate('/dashboard')}
+                                                >
                                                     <p>{description}</p>
-                                                    <div className="flex gap-2">
-                                                        <Button
-                                                            size="sm"
-                                                            color="success"
-                                                            variant="solid"
-                                                            className="font-black text-[10px]"
-                                                            onPress={async () => {
-                                                                if (token) {
-                                                                    await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'accepted', token);
-                                                                    mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                                                    window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                                                }
-                                                            }}
-                                                        >
-                                                            {t('dashboard.controls.accept').toUpperCase()}
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            color="default"
-                                                            variant="flat"
-                                                            className="font-black text-[10px] bg-white/20 text-white"
-                                                            onPress={() => {
-                                                                navigate('/dashboard');
-                                                            }}
-                                                        >
-                                                            {t('dashboard.controls.view').toUpperCase()}
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            color="danger"
-                                                            variant="solid"
-                                                            className="font-black text-[10px]"
-                                                            onPress={async () => {
-                                                                if (token) {
-                                                                    await matchService.updateRequestStatus(payload.data.match_id, payload.data.user_id, 'refused', token);
-                                                                    mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
-                                                                    window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-                                                                }
-                                                            }}
-                                                        >
-                                                            {t('dashboard.controls.refuse').toUpperCase()}
-                                                        </Button>
-                                                    </div>
+                                                    <p className="text-[10px] text-default-400 mt-1 italic">
+                                                        {t('dashboard.labels.view_profile')}
+                                                    </p>
                                                 </div>
                                             ),
                                             color,
@@ -331,7 +296,12 @@ export function useWebSocketSync(
                                 return;
                             case 'TEAM_WITHDRAWAL':
                                 color = 'danger';
-                                title = t('dashboard.status.refused');
+                                title = "Annulation";
+                                description = t('dashboard.notifications.withdrawal', {
+                                    team: payload.data?.applicant_club_name || 'Un club',
+                                    date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue',
+                                    time: payload.data?.match_time || ''
+                                });
                                 mutate((key) => typeof key === 'string' && key.includes('/api/dashboard'), (d: any) => d, { revalidate: true });
                                 // Increment badge unread counter
                                 {
