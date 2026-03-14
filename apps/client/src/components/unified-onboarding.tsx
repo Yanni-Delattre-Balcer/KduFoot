@@ -7,7 +7,7 @@ import { CombinedAuthModal } from "@/modals/combined-auth-modal";
 
 export const UnifiedOnboarding = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { user, isLoading: userLoading } = useUser();
+  const { isLoading: userLoading } = useUser();
   const {
     isStandalone,
     isPermanentlyDismissed,
@@ -17,7 +17,6 @@ export const UnifiedOnboarding = () => {
 
   const [activeStep, setActiveStep] = useState<"pwa" | "auth" | null>(null);
   const [pwaStepEvaluated, setPwaStepEvaluated] = useState(false);
-  const [installedThisSession, setInstalledThisSession] = useState(false);
 
   // Reactive Storage States
   const [authDismissed, setAuthDismissed] = useState(false);
@@ -46,14 +45,7 @@ export const UnifiedOnboarding = () => {
   }, [refreshDismissalState]);
 
   useEffect(() => {
-    if (
-      authLoading ||
-      userLoading ||
-      !isAuthenticated ||
-      installedThisSession
-    ) {
-      if (activeStep !== null && installedThisSession) setActiveStep(null);
-
+    if (authLoading || userLoading || !isAuthenticated) {
       return;
     }
 
@@ -62,7 +54,9 @@ export const UnifiedOnboarding = () => {
     // --- EVALUATION ---
     const needsPWA =
       isWeb && !isSessionDismissed && !isPermanentlyDismissed && canInstall;
-    const needsAuth = !user?.calendar_token && !authDismissed;
+    // La modale calendrier s'affiche tant que l'utilisateur n'a pas cliqué "Je l'ai déjà fait"
+    // On ne vérifie PAS calendar_token car il est auto-généré côté serveur
+    const needsAuth = !authDismissed;
 
     console.log("[Onboarding] Refreshing...", {
       activeStep,
@@ -71,7 +65,6 @@ export const UnifiedOnboarding = () => {
       pwaStepEvaluated,
       isStandalone,
       detailed: {
-        hasToken: !!user?.calendar_token,
         authDismissed,
         canInstall,
         isSessionDismissed,
@@ -106,34 +99,24 @@ export const UnifiedOnboarding = () => {
     isAuthenticated,
     authLoading,
     userLoading,
-    user?.calendar_token,
     isStandalone,
     isPermanentlyDismissed,
     isSessionDismissed,
     canInstall,
     pwaStepEvaluated,
     activeStep,
-    installedThisSession,
     authDismissed,
   ]);
 
   const handlePwaClose = (action: "installed" | "dismissed") => {
     console.log("[Onboarding] PWA Close Action:", action);
-    setActiveStep(null);
-    if (action === "installed") {
-      // CAS A: L'utilisateur a installé l'app sur le web.
-      // On passe quand même à l'étape suivante (Calendrier) selon la demande.
-      setInstalledThisSession(true);
-      setPwaStepEvaluated(true);
-    } else {
-      // CAS B: L'utilisateur a fait "Plus tard" ou "Déjà fait".
-      // On passe à l'étape suivante (Calendrier).
-      setPwaStepEvaluated(true);
-    }
+    // Marquer l'étape PWA comme terminée sans forcer activeStep à null.
+    // Le useEffect réévaluera immédiatement et ouvrira l'étape "auth" (Calendrier).
+    setPwaStepEvaluated(true);
   };
 
   const handleAuthClose = () => {
-    console.log("[Onboarding] Auth Close");
+    console.log("[Onboarding] Auth Close (Je l'ai déjà fait)");
     setActiveStep(null);
     refreshDismissalState();
   };

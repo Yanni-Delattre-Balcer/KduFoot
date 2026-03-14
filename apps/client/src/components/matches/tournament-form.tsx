@@ -247,8 +247,8 @@ export default function TournamentForm({
     if (!validate()) {
       // Afficher un warning global si la validation bloque (surtout pour les dates/heures passées)
       addToast({
-        title: t("error", "Erreur", { ns: "base" }),
-        description: t("matchForm.alerts.validation_failed", "Impossible de publier : Vérifiez les champs en rouge."),
+        title: t("matchForm.alerts.invalid_date_title", "Date ou heure invalide"),
+        description: t("matchForm.alerts.delay_short_error", "Par mesure d'organisation, vous devez publier votre match au moins 2 heures avant le coup d'envoi. Veuillez choisir un créneau ultérieur."),
         color: "danger",
       });
       return;

@@ -7,7 +7,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Calendar, ChevronRight } from "lucide-react";
+import { Calendar, ChevronRight, Check } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { addToast } from "@heroui/toast";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
   const { getAccessTokenSilently } = useAuth0();
   const { t } = useTranslation();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [hasSyncedOnce, setHasSyncedOnce] = useState(false);
 
   const handleCalendarSync = async () => {
     setIsSyncing(true);
@@ -45,33 +46,34 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           "[Calendar] Redirecting to universal webcal link:",
           finalUrl,
         );
+        // Ouvrir le lien webcal:// qui déclenche le sélecteur natif
+        // iOS → "S'abonner au calendrier ?"
+        // Android → "Ouvrir avec... Google Calendar / Outlook / etc."
         window.location.href = finalUrl;
+        setHasSyncedOnce(true);
         addToast({
-          title: t("onboarding.calendar.toast_success"),
+          title: t("onboarding.calendar.toast_success", "Lien calendrier ouvert !"),
+          description: t("onboarding.calendar.toast_success_desc", "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait »."),
           color: "success",
         });
       }
     } catch (error) {
       console.error("[Calendar] Failed to fetch calendar link:", error);
       addToast({
-        title: t("onboarding.calendar.toast_error"),
+        title: t("onboarding.calendar.toast_error", "Échec de la synchronisation"),
         color: "danger",
       });
     } finally {
       setIsSyncing(false);
-      onClose();
-      window.dispatchEvent(new CustomEvent("kdufoot_auth_step_complete"));
+      // NE PAS fermer la modale ici.
+      // L'utilisateur doit d'abord accepter l'abonnement dans son app calendrier
+      // puis cliquer sur "Je l'ai déjà fait" pour confirmer et fermer.
     }
   };
 
   const handleDismissPermanent = () => {
+    // C'est le SEUL moyen de fermer définitivement la modale
     localStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
-    window.dispatchEvent(new CustomEvent("kdufoot_auth_step_complete"));
-    onClose();
-  };
-
-  const handleDismissSession = () => {
-    sessionStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
     window.dispatchEvent(new CustomEvent("kdufoot_auth_step_complete"));
     onClose();
   };
@@ -90,7 +92,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
       size="md"
-      onClose={onClose}
+      onClose={() => {}} // Empêcher la fermeture par défaut
     >
       <ModalContent>
         <ModalHeader className="flex justify-center flex-col items-center gap-4 relative">
@@ -101,10 +103,10 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
         </ModalHeader>
         <ModalBody className="text-center px-6 sm:px-10">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight leading-tight">
-            {t("onboarding.calendar.title")}
+            {t("onboarding.calendar.title", "Synchronisez votre calendrier")}
           </h1>
           <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed max-w-[280px] sm:max-w-none mx-auto opacity-80">
-            {t("onboarding.calendar.description")}
+            {t("onboarding.calendar.description", "Ne manquez aucun match ! Synchronisez vos rencontres avec l'application calendrier de votre téléphone.")}
           </p>
 
           <div className="flex justify-center w-full mt-6">
@@ -116,7 +118,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
                   size={32}
                 />
                 <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-1">
-                  {t("onboarding.calendar.native")}
+                  {t("onboarding.calendar.native", "Calendrier natif")}
                 </span>
               </div>
             </div>
@@ -124,6 +126,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
         </ModalBody>
         <ModalFooter className="px-6 sm:px-10 pb-10">
             <div className="flex flex-col gap-4 w-full">
+              {/* Bouton principal : ouvre le lien webcal:// */}
               <Button
                 className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold tracking-tight w-full rounded-2xl h-14 text-base sm:text-lg shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
                 endContent={!isSyncing && <ChevronRight size={20} />}
@@ -131,24 +134,24 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
                 size="lg"
                 onPress={handleCalendarSync}
               >
-                {t("onboarding.calendar.button")}
+                {t("onboarding.calendar.button", "Synchroniser mon calendrier")}
               </Button>
 
-              <div className="flex items-center gap-4 px-2">
-                <button
-                  className="flex-1 text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] transition-colors py-2 uppercase tracking-wider"
-                  onClick={handleDismissSession}
-                >
-                  {t("onboarding.calendar.later", "Plus tard")}
-                </button>
-                <div className="w-[1px] h-3 bg-white/10" />
-                <button
-                  className="flex-1 text-zinc-400 hover:text-white font-bold text-[10px] transition-colors py-2 uppercase tracking-widest border border-white/5 bg-white/5 rounded-lg"
-                  onClick={handleDismissPermanent}
-                >
-                  {t("onboarding.calendar.dismiss", "Déjà fait / Ne plus me demander")}
-                </button>
-              </div>
+              {/* Bouton de confirmation : seul moyen de fermer la modale */}
+              <Button
+                className="w-full font-bold text-sm tracking-tight rounded-xl h-12 border-2 border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300 transition-all"
+                startContent={<Check size={18} />}
+                variant="flat"
+                onPress={handleDismissPermanent}
+              >
+                {t("onboarding.calendar.dismiss", "Je l'ai déjà fait")}
+              </Button>
+
+              {hasSyncedOnce && (
+                <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
+                  Après avoir accepté l'abonnement dans votre application calendrier, cliquez sur « Je l'ai déjà fait » ci-dessus.
+                </p>
+              )}
             </div>
         </ModalFooter>
       </ModalContent>

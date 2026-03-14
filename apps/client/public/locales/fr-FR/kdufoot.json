@@ -530,6 +530,9 @@
       "create_success": "Annonce de match créée avec succès !",
       "update_success": "Match mis à jour avec succès !",
       "delete_success": "Match supprimé avec succès !",
+      "validation_failed": "Impossible de publier : Vérifiez les champs en rouge.",
+      "invalid_date_title": "Date ou heure invalide",
+      "delay_short_error": "Par mesure d'organisation, vous devez publier votre match au moins 2 heures avant le coup d'envoi. Veuillez choisir un créneau ultérieur.",
       "contact_success": "Votre demande a été envoyée avec succès ! 🚀"
     },
     "confirm": {
