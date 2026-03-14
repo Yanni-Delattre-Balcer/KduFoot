@@ -17,27 +17,30 @@ export function usePWAInstall() {
     const [isSessionDismissed, setIsSessionDismissed] = useState(false);
 
     useEffect(() => {
-        // Check local storage for PERMANENT dismissal
-        const permanentlyDismissed = localStorage.getItem('kdufoot-pwa-permanent-dismiss') === 'true';
-        setIsPermanentlyDismissed(permanentlyDismissed);
+        const refreshStatus = () => {
+            // Check local storage for PERMANENT dismissal
+            const permanentlyDismissed = localStorage.getItem('kdufoot-pwa-permanent-dismiss') === 'true';
+            setIsPermanentlyDismissed(permanentlyDismissed);
 
-        // Check session storage for SESSION dismissal
-        const sessionDismissed = sessionStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
-        setIsSessionDismissed(sessionDismissed);
+            // Check session storage for SESSION dismissal
+            const sessionDismissed = sessionStorage.getItem('kdufoot-pwa-session-dismiss') === 'true';
+            setIsSessionDismissed(sessionDismissed);
 
-        // Find if already installed (strictly detected by the browser/OS)
-        const isStandaloneMatch = window.matchMedia('(display-mode: standalone)').matches
-            || (window.navigator as any).standalone
-            || document.referrer.includes('android-app://');
- 
-        setIsStandalone(isStandaloneMatch);
+            // Find if already installed
+            const isStandaloneMatch = window.matchMedia('(display-mode: standalone)').matches
+                || (window.navigator as any).standalone
+                || document.referrer.includes('android-app://');
+    
+            setIsStandalone(isStandaloneMatch);
+        };
 
-        // Detect iOS Safari (specifically not Chrome/Firefox on iOS)
+        refreshStatus();
+
+        // Detect iOS Safari
         const userAgent = window.navigator.userAgent.toLowerCase();
         const ios = /iphone|ipad|ipod/.test(userAgent) && !/chrome|crios|fxios/.test(userAgent);
         setIsIOS(ios);
 
-        // Quick check if the event already fired before React mounted
         if ((window as any).deferredPWAInstallPrompt) {
             setDeferredPrompt((window as any).deferredPWAInstallPrompt);
         }
@@ -49,9 +52,8 @@ export function usePWAInstall() {
         };
 
         window.addEventListener('beforeinstallprompt', handler);
+        window.addEventListener('kdufoot_pwa_step_complete', refreshStatus);
 
-        // Sync dismissal across tabs (Only local storage since session is tab-specific, 
-        // but here we might want all tabs of same session to hide it)
         const storageHandler = (e: StorageEvent) => {
             if (e.key === 'kdufoot-pwa-permanent-dismiss') {
                 setIsPermanentlyDismissed(e.newValue === 'true');
@@ -61,6 +63,7 @@ export function usePWAInstall() {
 
         return () => {
             window.removeEventListener('beforeinstallprompt', handler);
+            window.removeEventListener('kdufoot_pwa_step_complete', refreshStatus);
             window.removeEventListener('storage', storageHandler);
         };
     }, []);

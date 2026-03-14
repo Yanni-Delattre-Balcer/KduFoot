@@ -179,6 +179,18 @@
     "technical_issue_desc": "Bugs, problèmes techniques...",
     "other_inquiry_desc": "Sponsors, publicité, partenariats..."
   },
+  "onboarding": {
+    "calendar": {
+      "title": "Ne manquez aucun match !",
+      "description": "Synchronisez vos rencontres directement avec votre calendrier pour des rappels intelligents et un suivi en temps réel.",
+      "button": "Connecter mon calendrier",
+      "native": "Calendrier Natif",
+      "later": "Peut-être plus tard",
+      "dismiss": "Ne plus afficher",
+      "toast_success": "Synchronisation calendrier lancée !",
+      "toast_error": "Échec de la synchronisation calendrier"
+    }
+  },
   "planner": {
     "en_cours": "En cours / À venir",
     "mes_annonces": "Mes Annonces",

@@ -169,6 +169,18 @@
     "technical_issue_desc": "Bugs, technical issues...",
     "other_inquiry_desc": "Sponsors, advertising, partnerships..."
   },
+  "onboarding": {
+    "calendar": {
+      "title": "Don't miss any match!",
+      "description": "Sync your matches directly with your calendar for smart reminders and real-time tracking.",
+      "button": "Connect my calendar",
+      "native": "Native Calendar",
+      "later": "Maybe later",
+      "dismiss": "Don't show again",
+      "toast_success": "Calendar sync started!",
+      "toast_error": "Calendar sync failed"
+    }
+  },
   "planner": {
     "en_cours": "Ongoing / Upcoming",
     "mes_annonces": "My Ads",

@@ -5,6 +5,7 @@ import { Calendar, ChevronRight } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "@/services/api";
 import { addToast } from "@heroui/toast";
+import { useTranslation } from "react-i18next";
 
 interface CombinedAuthModalProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface CombinedAuthModalProps {
 
 export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, onClose }) => {
     const { getAccessTokenSilently } = useAuth0();
+    const { t } = useTranslation();
     const [isSyncing, setIsSyncing] = useState(false);
 
     const handleCalendarSync = async () => {
@@ -27,24 +29,27 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, on
                 
                 console.log("[Calendar] Redirecting to universal webcal link:", finalUrl);
                 window.location.href = finalUrl;
-                addToast({ title: "Synchronisation calendrier lancée !", color: "success" });
+                addToast({ title: t('onboarding.calendar.toast_success'), color: "success" });
             }
         } catch (error) {
             console.error("[Calendar] Failed to fetch calendar link:", error);
-            addToast({ title: "Échec de la synchronisation calendrier", color: "danger" });
+            addToast({ title: t('onboarding.calendar.toast_error'), color: "danger" });
         } finally {
             setIsSyncing(false);
             onClose();
+            window.dispatchEvent(new CustomEvent('kdufoot_auth_step_complete'));
         }
     };
 
     const handleDismissPermanent = () => {
         localStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
+        window.dispatchEvent(new CustomEvent('kdufoot_auth_step_complete'));
         onClose();
     };
 
     const handleDismissSession = () => {
         sessionStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
+        window.dispatchEvent(new CustomEvent('kdufoot_auth_step_complete'));
         onClose();
     };
 
@@ -73,10 +78,10 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, on
                 </ModalHeader>
                 <ModalBody className="text-center px-6 sm:px-10">
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight leading-tight">
-                        Ne manquez aucun match&nbsp;!
+                        {t('onboarding.calendar.title')}
                     </h1>
                     <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed max-w-[280px] sm:max-w-none mx-auto opacity-80">
-                        Synchronisez vos rencontres directement avec votre calendrier pour des rappels intelligents et un suivi en temps réel.
+                        {t('onboarding.calendar.description')}
                     </p>
 
                     <div className="flex justify-center w-full mt-6">
@@ -84,7 +89,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, on
                             <div className="absolute inset-0 bg-purple-500/20 blur-2xl group-hover:bg-purple-500/30 transition-colors rounded-full" />
                             <div className="relative flex flex-col items-center gap-3 p-5 sm:p-7 rounded-[2.5rem] bg-white/[0.03] backdrop-blur-md border border-white/10 w-full min-w-[140px] sm:min-w-[180px] hover:border-white/20 transition-all duration-300">
                                 <Calendar size={32} className="text-purple-400 group-hover:scale-110 transition-transform duration-500" />
-                                <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-1">Calendrier Natif</span>
+                                <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-1">{t('onboarding.calendar.native')}</span>
                             </div>
                         </div>
                     </div>
@@ -98,7 +103,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, on
                             size="lg"
                             endContent={!isSyncing && <ChevronRight size={20} />}
                         >
-                            Connecter mon calendrier
+                            {t('onboarding.calendar.button')}
                         </Button>
 
                         <div className="flex items-center gap-4 px-2">
@@ -106,14 +111,14 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, on
                                 onClick={handleDismissSession}
                                 className="flex-1 text-zinc-500 hover:text-zinc-300 font-semibold text-xs transition-colors py-2"
                             >
-                                Peut-être plus tard
+                                {t('onboarding.calendar.later')}
                             </button>
                             <div className="w-[1px] h-3 bg-white/10" />
                             <button
                                 onClick={handleDismissPermanent}
                                 className="flex-1 text-zinc-600 hover:text-zinc-400 font-semibold text-xs transition-colors py-2"
                             >
-                                Ne plus afficher
+                                {t('onboarding.calendar.dismiss')}
                             </button>
                         </div>
                     </div>
