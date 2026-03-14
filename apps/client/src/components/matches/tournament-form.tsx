@@ -289,23 +289,20 @@ export default function TournamentForm({
   const showLockedInfo = (type: "address" | "city" | "zip" | "jersey") => {
     if (type === "jersey") {
       addToast({
-        title: "Information",
-        description:
-          "Veuillez modifier la couleur de votre maillot dans votre compte.",
+        title: t("info"),
+        description: t("matchForm.labels.edit_in_account"),
         color: "warning",
       });
     } else if (type === "address") {
       addToast({
-        title: "Information",
-        description:
-          "Pour modifier l'adresse, rendez-vous dans l'onglet 'Mon Compte'. Elle sera mise à jour automatiquement.",
+        title: t("info"),
+        description: t("matchForm.alerts.must_link"),
         color: "primary",
       });
     } else {
       addToast({
-        title: "Information",
-        description:
-          "Cette information est liée à votre SIRET. Veuillez contacter le support pour la modifier.",
+        title: t("info"),
+        description: t("account.fields.stadium_locked"),
         color: "primary",
       });
     }
@@ -350,10 +347,10 @@ export default function TournamentForm({
           </div>
           <div className="flex flex-col">
             <p className="text-base font-black text-white tracking-tight leading-none mb-1">
-              Créer un tournoi amical
+              {t("tournamentForm.labels.name_form", "Créer un tournoi amical")}
             </p>
             <p className="text-[11px] text-zinc-400 font-medium">
-              Organisez une compétition et invitez des équipes.
+              {t("tournamentForm.labels.subtitle_form", "Organisez une compétition et invitez des équipes.")}
             </p>
           </div>
         </CardHeader>
@@ -380,7 +377,7 @@ export default function TournamentForm({
                 </div>
                 <div className="flex flex-col w-full min-w-0">
                   <span className="text-[10px] font-black text-emerald-500/70 tracking-tighter">
-                    Club lié
+                    {t("matchForm.labels.linked_club")}
                   </span>
                   {Array.isArray(user?.additional_sirets) &&
                   user.additional_sirets.length > 0 ? (
@@ -447,7 +444,7 @@ export default function TournamentForm({
                 size="sm"
                 variant="flat"
               >
-                Détacher (Admin)
+                {t("matchForm.buttons.unlink")}
               </Button>
             </div>
 
@@ -464,11 +461,11 @@ export default function TournamentForm({
                     <div className="flex items-center h-full">
                       <div className="bg-emerald-500 text-[#0f0717] text-[10px] sm:text-[11px] font-black px-2 py-1 rounded-full flex items-center gap-1 leading-none shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                         <span>🏟️</span>
-                        <span className="mb-[1px]">Stade</span>
+                        <span className="mb-[1px]">{t("matchForm.labels.stadium")}</span>
                       </div>
                     </div>
                   }
-                  label="Adresse du stade"
+                  label={t("matchForm.labels.address")}
                   size="sm"
                   value={formData.location_address}
                   variant="faded"
@@ -484,7 +481,7 @@ export default function TournamentForm({
                     classNames={{
                       inputWrapper: "bg-[#160d21] border-[#2a1b3d]",
                     }}
-                    label="Code Postal"
+                    label={t("matchForm.labels.zip")}
                     size="sm"
                     value={formData.location_zip}
                     variant="faded"
@@ -558,7 +555,7 @@ export default function TournamentForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Nombre d'équipes max"
+                label={t("tournamentForm.labels.max_teams")}
                 size="sm"
                 type="number"
                 value={formData.max_teams}
@@ -605,7 +602,7 @@ export default function TournamentForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Date de début"
+                label={t("tournamentForm.labels.date")}
                 min={
                   new Date(
                     new Date().getTime() -
@@ -623,7 +620,7 @@ export default function TournamentForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Heure de rendez-vous"
+                label={t("tournamentForm.labels.time")}
                 size="sm"
                 type="time"
                 value={formData.match_time}
@@ -633,7 +630,7 @@ export default function TournamentForm({
               <Input
                 isRequired
                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-                label="Heure de fin"
+                label={t("tournamentForm.labels.end_time")}
                 size="sm"
                 type="time"
                 value={formData.match_end_time}
@@ -652,7 +649,7 @@ export default function TournamentForm({
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-white font-bold pl-1">
-                    {formData.jersey_color || "Non spécifiée"}
+                    {formData.jersey_color || t("tournamentForm.labels.unspecified")}
                   </span>
                   {formData.jersey_color && (
                     <JerseyColorDots colors={formData.jersey_color} size="md" />
@@ -661,7 +658,7 @@ export default function TournamentForm({
               </div>
               <div className="flex items-center gap-2 bg-purple-500/10 text-purple-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-purple-500/20 group-hover:bg-purple-500/20 transition-all">
                 <span>🔒</span>
-                <span className="mb-[1px]">Modifier dans mon compte</span>
+                <span className="mb-[1px]">{t("matchForm.labels.edit_in_account")}</span>
               </div>
             </div>
           </div>
@@ -670,7 +667,7 @@ export default function TournamentForm({
           <div className="flex flex-col gap-2 mt-4">
             <div className="flex justify-center text-center px-4">
               <span className="text-[11px] font-black text-purple-300 tracking-[0.15em] leading-tight">
-                Preparation de l'annonce du tournoi: 91%
+                {t("tournamentForm.labels.progress_announcement")}: 91%
               </span>
             </div>
             <Progress
@@ -691,7 +688,7 @@ export default function TournamentForm({
       <Card className="shadow-none border-none bg-transparent">
         <CardHeader className="bg-[#160d21] rounded-t-2xl px-6 py-3 border-b border-white/5">
           <p className="text-sm font-black text-white tracking-tight">
-            Contact & Infos complémentaires
+            {t("tournamentForm.labels.contact_additional")}
           </p>
         </CardHeader>
         <CardBody className="bg-[#0f0717] rounded-b-2xl p-6 flex flex-col gap-4">
@@ -699,7 +696,7 @@ export default function TournamentForm({
             <Input
               isRequired
               classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-              label="Email de contact"
+              label={t("tournamentForm.labels.contact_email")}
               size="sm"
               type="email"
               value={formData.email}
@@ -709,7 +706,7 @@ export default function TournamentForm({
             <Input
               isRequired
               classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-              label="Téléphone"
+              label={t("matchForm.labels.phone")}
               size="sm"
               value={formData.phone}
               variant="faded"
@@ -718,9 +715,9 @@ export default function TournamentForm({
           </div>
           <Textarea
             classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-            label="Informations sur le tournoi"
+            label={t("tournamentForm.labels.notes")}
             minRows={3}
-            placeholder="Règlement, récompenses, restauration..."
+            placeholder={t("tournamentForm.labels.notes_placeholder")}
             value={formData.notes}
             variant="faded"
             onValueChange={(v) => handleChange("notes", v)}

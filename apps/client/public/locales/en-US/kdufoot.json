@@ -199,54 +199,9 @@
     },
     "terminated": "Terminated"
   },
-  "myExercises": {
-    "0": "M",
-    "1": "y",
-    "2": " ",
-    "3": "E",
-    "4": "x",
-    "5": "e",
-    "6": "r",
-    "7": "c",
-    "8": "i",
-    "9": "s",
-    "10": "e",
-    "11": "s"
-  },
-  "mySessions": {
-    "0": "M",
-    "1": "y",
-    "2": " ",
-    "3": "S",
-    "4": "e",
-    "5": "s",
-    "6": "s",
-    "7": "i",
-    "8": "o",
-    "9": "n",
-    "10": "s"
-  },
-  "myMatches": {
-    "0": "M",
-    "1": "y",
-    "2": " ",
-    "3": "F",
-    "4": "r",
-    "5": "i",
-    "6": "e",
-    "7": "n",
-    "8": "d",
-    "9": "l",
-    "10": "y",
-    "11": " ",
-    "12": "M",
-    "13": "a",
-    "14": "t",
-    "15": "c",
-    "16": "h",
-    "17": "e",
-    "18": "s"
-  },
+  "myExercises": "My Exercises",
+  "mySessions": "My Sessions",
+  "myMatches": "My Matches",
   "exercise": {
     "title": "Title",
     "synopsis": "Synopsis",
@@ -407,7 +362,7 @@
     "venue": {
       "Domicile": "🏠 Home (We host)",
       "Extérieur": "🚗 Away (We travel)",
-      "Neutre": "📍 Neutral ground"
+      "Neutre": "📍 Neutral ground / To be defined"
     },
     "pitch": {
       "Herbe": "Grass",
@@ -489,12 +444,19 @@
       "email": "Contact Email",
       "phone": "Phone",
       "notes": "Notes / Instructions",
+      "notes_placeholder": "Additional information...",
       "choose": "Choose",
       "auto_siret": "Automatically filled via SIRET",
       "auto": "Automatically filled",
       "more_info": "Additional information...",
       "free": "Free",
-      "stadium_note": "If your registered office address (linked to the SIRET) differs from the meeting place, please specify the exact stadium address in the event notes."
+      "stadium_note": "If your registered office address (linked to the SIRET) differs from the meeting place, please specify the exact stadium address in the event notes.",
+      "jersey_color": "Jersey Colors",
+      "edit_in_account": "Edit in my account",
+      "contact_notes": "Contact & Notes",
+      "linked_club": "Linked club",
+      "not_linked": "NOT LINKED",
+      "stadium": "Stadium"
     },
     "link_club": {
       "title": "Link your club (Irreversible Action)",
@@ -526,7 +488,9 @@
     },
     "confirm": {
       "accepted": "Do you really want to accept this team?",
-      "refused": "Do you really want to refuse this team?"
+      "refused": "Do you really want to refuse this team?",
+      "date_past_error": "Invalid date: You cannot create a match or tournament in the past.",
+      "delay_short_error": "Too short delay: A match must be created at least 2 hours before kickoff to allow organization."
     }
   },
   "accountModal": {
@@ -623,14 +587,12 @@
       "contact_email": "Contact Email",
       "notes": "Tournament information",
       "notes_placeholder": "Rules, rewards, catering...",
-      "publish": "Publish tournament"
-    },
-    "link_club": "Club link required to organize",
-    "contact_title": "Contact & Additional Info",
-    "alerts": {
-      "create_success": "Tournament successfully created!",
-      "update_success": "Tournament successfully updated!",
-      "delete_success": "Tournament successfully deleted!"
+      "publish": "Publish tournament",
+      "club_primary": "Primary Club",
+      "club_secondary": "Secondary Club",
+      "unspecified": "Unspecified",
+      "progress_announcement": "Tournament announcement preparation",
+      "contact_additional": "Contact & Additional Info"
     }
   },
   "pricing": {

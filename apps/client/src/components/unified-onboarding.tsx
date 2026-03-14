@@ -87,17 +87,20 @@ export const UnifiedOnboarding = () => {
       if (activeStep !== "pwa") setActiveStep("pwa");
     }
     // Step 2: Auth (if needed AND no PWA is in the way)
-    else if (needsAuth && activeStep === null) {
+    else if (needsAuth) {
       const pwaResolved = isStandalone || !needsPWA || pwaStepEvaluated;
 
-      if (pwaResolved) {
-        console.log("[Onboarding] Jumping to Auth");
+      if (pwaResolved && activeStep !== "auth") {
+        console.log("[Onboarding] Showing Auth/Calendar modal");
         setActiveStep("auth");
       }
     }
     // Cleanup
-    else if (!needsPWA && !needsAuth && activeStep !== null) {
-      setActiveStep(null);
+    else if (activeStep !== null) {
+      // If we don't need PWA and we don't need Auth, close
+      if (!needsPWA && !needsAuth) {
+        setActiveStep(null);
+      }
     }
   }, [
     isAuthenticated,

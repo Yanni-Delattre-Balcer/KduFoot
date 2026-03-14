@@ -123,33 +123,33 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           </div>
         </ModalBody>
         <ModalFooter className="px-6 sm:px-10 pb-10">
-          <div className="flex flex-col gap-4 w-full">
-            <Button
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold tracking-tight w-full rounded-2xl h-14 text-base sm:text-lg shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
-              endContent={!isSyncing && <ChevronRight size={20} />}
-              isLoading={isSyncing}
-              size="lg"
-              onPress={handleCalendarSync}
-            >
-              {t("onboarding.calendar.button")}
-            </Button>
+            <div className="flex flex-col gap-4 w-full">
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold tracking-tight w-full rounded-2xl h-14 text-base sm:text-lg shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                endContent={!isSyncing && <ChevronRight size={20} />}
+                isLoading={isSyncing}
+                size="lg"
+                onPress={handleCalendarSync}
+              >
+                {t("onboarding.calendar.button")}
+              </Button>
 
-            <div className="flex items-center gap-4 px-2">
-              <button
-                className="flex-1 text-zinc-500 hover:text-zinc-300 font-semibold text-xs transition-colors py-2"
-                onClick={handleDismissSession}
-              >
-                {t("onboarding.calendar.later")}
-              </button>
-              <div className="w-[1px] h-3 bg-white/10" />
-              <button
-                className="flex-1 text-zinc-600 hover:text-zinc-400 font-semibold text-xs transition-colors py-2"
-                onClick={handleDismissPermanent}
-              >
-                {t("onboarding.calendar.dismiss")}
-              </button>
+              <div className="flex items-center gap-4 px-2">
+                <button
+                  className="flex-1 text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] transition-colors py-2 uppercase tracking-wider"
+                  onClick={handleDismissSession}
+                >
+                  {t("onboarding.calendar.later", "Plus tard")}
+                </button>
+                <div className="w-[1px] h-3 bg-white/10" />
+                <button
+                  className="flex-1 text-zinc-400 hover:text-white font-bold text-[10px] transition-colors py-2 uppercase tracking-widest border border-white/5 bg-white/5 rounded-lg"
+                  onClick={handleDismissPermanent}
+                >
+                  {t("onboarding.calendar.dismiss", "Déjà fait / Ne plus me demander")}
+                </button>
+              </div>
             </div>
-          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

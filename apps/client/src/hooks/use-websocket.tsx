@@ -178,29 +178,6 @@ export function useWebSocketSync(
                     // Silent for organizer, the form submit API already handles the success toast!
                     return;
                   } else {
-                    color = "warning";
-                    title = t("dashboard.status.modification");
-                    description = t("dashboard.notifications.modification", {
-                      date: payload.data?.match_date
-                        ? new Date(payload.data.match_date).toLocaleDateString(
-                            "fr-FR",
-                          )
-                        : "date inconnue",
-                    });
-                    mutate(
-                      (key) =>
-                        typeof key === "string" &&
-                        key.startsWith("/api/matches"),
-                      (d: any) => d,
-                      { revalidate: true },
-                    );
-                    mutate(
-                      (key) =>
-                        typeof key === "string" &&
-                        key.startsWith("/api/dashboard"),
-                      (d: any) => d,
-                      { revalidate: true },
-                    );
                     // Increment badge unread counter in localStorage
                     const unreadKey = `kdufoot_unread_count_${userId || "guest"}`;
                     const current = parseInt(
@@ -215,8 +192,23 @@ export function useWebSocketSync(
                 }
                 // Show the toast for participant (organizer already returned)
                 addToast({
-                  title,
-                  description,
+                  title: t("dashboard.notifications.modification"),
+                  description: (
+                    <div
+                      className="cursor-pointer w-full h-full"
+                      onClick={() =>
+                        navigate(`/matches/${payload.data?.match_id}`)
+                      }
+                    >
+                      {t("dashboard.notifications.modification_message", {
+                        date: payload.data?.match_date
+                          ? new Date(payload.data.match_date).toLocaleDateString(
+                              "fr-FR",
+                            )
+                          : "date inconnue",
+                      })}
+                    </div>
+                  ),
                   color,
                   variant: "flat",
                   timeout: 6000,

@@ -444,6 +444,7 @@
       "email": "Contact Email",
       "phone": "Phone",
       "notes": "Notes / Instructions",
+      "notes_placeholder": "Additional information...",
       "choose": "Choose",
       "auto_siret": "Automatically filled via SIRET",
       "auto": "Automatically filled",
@@ -451,7 +452,11 @@
       "free": "Free",
       "stadium_note": "If your registered office address (linked to the SIRET) differs from the meeting place, please specify the exact stadium address in the event notes.",
       "jersey_color": "Jersey Colors",
-      "edit_in_account": "Edit in my account"
+      "edit_in_account": "Edit in my account",
+      "contact_notes": "Contact & Notes",
+      "linked_club": "Linked club",
+      "not_linked": "NOT LINKED",
+      "stadium": "Stadium"
     },
     "link_club": {
       "title": "Link your club (Irreversible Action)",
@@ -483,7 +488,9 @@
     },
     "confirm": {
       "accepted": "Do you really want to accept this team?",
-      "refused": "Do you really want to refuse this team?"
+      "refused": "Do you really want to refuse this team?",
+      "date_past_error": "Invalid date: You cannot create a match or tournament in the past.",
+      "delay_short_error": "Too short delay: A match must be created at least 2 hours before kickoff to allow organization."
     }
   },
   "accountModal": {
@@ -580,17 +587,12 @@
       "contact_email": "Contact Email",
       "notes": "Tournament information",
       "notes_placeholder": "Rules, rewards, catering...",
-      "publish": "Publish tournament"
-    },
-    "link_club": "Club link required to organize",
-    "contact_title": "Contact & Additional Info",
-    "progress": "Tournament announcement preparation",
-    "alerts": {
-      "must_link": "You must first link your club via the SIRET number before creating a tournament.",
-      "create_success": "Your tournament has been successfully published!",
-      "update_success": "Your tournament has been successfully updated!",
-      "delete_success": "Tournament successfully deleted!",
-      "date_past": "⚠️ INVALID DATE\n\nYou cannot create a tournament in the past."
+      "publish": "Publish tournament",
+      "club_primary": "Primary Club",
+      "club_secondary": "Secondary Club",
+      "unspecified": "Unspecified",
+      "progress_announcement": "Tournament announcement preparation",
+      "contact_additional": "Contact & Additional Info"
     }
   },
   "pricing": {
@@ -721,7 +723,8 @@
       "delete_success": "Ad deleted successfully"
     },
     "notifications": {
-      "modification": "Match modification",
+      "modification": "Match modified ⚠️",
+      "modification_message": "Your duel on {{date}} has been modified. Click here to see details.",
       "cancellation": "The scheduled match against {{team}} on {{date}} has been cancelled by the organizer",
       "new_request_interactive": "You received a request from {{team}} for your match on {{date}}",
       "acceptance_player": "Duel Confirmed! ✅ Your match on {{date}} is validated.",

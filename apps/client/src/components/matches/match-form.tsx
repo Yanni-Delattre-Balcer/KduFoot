@@ -221,9 +221,7 @@ export default function MatchForm({
       const selectedDate = new Date(formData.match_date);
 
       if (selectedDate < today) {
-        newErrors.match_date = t(
-          "Date invalide : Vous ne pouvez pas créer un match ou un tournoi dans le passé.",
-        );
+        newErrors.match_date = t("matchForm.alerts.date_past_error");
       } else if (formData.match_date === today.toISOString().split("T")[0]) {
         // Rule of 2 hours delay
         const [hours, minutes] = (formData.match_time || "00:00")
@@ -236,9 +234,7 @@ export default function MatchForm({
         const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
         if (matchDateTime < minTime) {
-          newErrors.match_time = t(
-            "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation.",
-          );
+          newErrors.match_time = t("matchForm.alerts.delay_short_error");
         }
       }
     }
@@ -300,23 +296,20 @@ export default function MatchForm({
   const showLockedInfo = (type: "address" | "city" | "zip" | "jersey") => {
     if (type === "jersey") {
       addToast({
-        title: "Information",
-        description:
-          "Veuillez modifier la couleur de votre maillot dans votre compte.",
+        title: t("info"),
+        description: t("matchForm.labels.edit_in_account"),
         color: "warning",
       });
     } else if (type === "address") {
       addToast({
-        title: "Information",
-        description:
-          "Pour modifier l'adresse, rendez-vous dans l'onglet 'Mon Compte'. Elle sera mise à jour automatiquement.",
+        title: t("info"),
+        description: t("matchForm.alerts.must_link"),
         color: "primary",
       });
     } else {
       addToast({
-        title: "Information",
-        description:
-          "Cette information est liée à votre SIRET. Veuillez contacter le support pour la modifier.",
+        title: t("info"),
+        description: t("account.fields.stadium_locked"),
         color: "primary",
       });
     }
@@ -375,10 +368,10 @@ export default function MatchForm({
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black text-emerald-500/70 tracking-tighter">
-                    Club lié
+                    {t("matchForm.labels.linked_club")}
                   </span>
                   <span className="text-sm font-black text-emerald-100 whitespace-normal break-words leading-tight">
-                    {user?.club?.name || "NON LIÉ"}
+                    {user?.club?.name || t("matchForm.labels.not_linked")}
                   </span>
                 </div>
               </div>
@@ -387,7 +380,7 @@ export default function MatchForm({
                 size="sm"
                 variant="flat"
               >
-                Détacher (Admin)
+                {t("matchForm.buttons.unlink")}
               </Button>
             </div>
 
@@ -404,11 +397,11 @@ export default function MatchForm({
                     <div className="flex items-center h-full">
                       <div className="bg-emerald-500 text-[#0f0717] text-[10px] sm:text-[11px] font-black px-2 py-1 rounded-full flex items-center gap-1 leading-none shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                         <span>🏟️</span>
-                        <span className="mb-[1px]">Stade</span>
+                        <span className="mb-[1px]">{t("matchForm.labels.stadium")}</span>
                       </div>
                     </div>
                   }
-                  label="Adresse du stade"
+                  label={t("matchForm.labels.address")}
                   size="sm"
                   value={formData.location_address}
                   variant="faded"
@@ -424,7 +417,7 @@ export default function MatchForm({
                     classNames={{
                       inputWrapper: "bg-[#160d21] border-[#2a1b3d]",
                     }}
-                    label="Code Postal"
+                    label={t("matchForm.labels.zip")}
                     size="sm"
                     value={formData.location_zip}
                     variant="faded"
@@ -439,7 +432,7 @@ export default function MatchForm({
                     classNames={{
                       inputWrapper: "bg-[#160d21] border-[#2a1b3d]",
                     }}
-                    label="Ville"
+                    label={t("matchForm.labels.city")}
                     size="sm"
                     value={formData.location_city}
                     variant="faded"
@@ -616,7 +609,7 @@ export default function MatchForm({
       <Card className="shadow-none border-none bg-transparent">
         <CardHeader className="bg-[#160d21] rounded-t-2xl px-6 py-3 border-b border-white/5">
           <p className="text-sm font-black text-white tracking-tight">
-            Contact & Notes
+            {t("matchForm.labels.contact_notes")}
           </p>
         </CardHeader>
         <CardBody className="bg-[#0f0717] rounded-b-2xl p-6 flex flex-col gap-4">
@@ -624,7 +617,7 @@ export default function MatchForm({
             <Input
               isRequired
               classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-              label="Email de contact"
+              label={t("matchForm.labels.email")}
               size="sm"
               type="email"
               value={formData.email}
@@ -634,7 +627,7 @@ export default function MatchForm({
             <Input
               isRequired
               classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-              label="Téléphone"
+              label={t("matchForm.labels.phone")}
               size="sm"
               value={formData.phone}
               variant="faded"
@@ -643,9 +636,9 @@ export default function MatchForm({
           </div>
           <Textarea
             classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
-            label="Notes / Instructions"
+            label={t("matchForm.labels.notes")}
             minRows={3}
-            placeholder="Informations complémentaires..."
+            placeholder={t("matchForm.labels.notes_placeholder")}
             value={formData.notes}
             variant="faded"
             onValueChange={(v) => handleChange("notes", v)}
@@ -658,7 +651,7 @@ export default function MatchForm({
               variant="light"
               onPress={() => (onCancel ? onCancel() : navigate("/matches"))}
             >
-              Annuler
+              {t("matchForm.buttons.cancel")}
             </Button>
             <Button
               className="bg-violet-600 font-black tracking-tighter px-12 rounded-xl shadow-lg shadow-violet-500/20"
@@ -666,7 +659,7 @@ export default function MatchForm({
               isLoading={isSaving}
               type="submit"
             >
-              {initialData ? "Mettre à jour" : "Publier l'annonce"}
+              {initialData ? t("matchForm.buttons.update") : t("matchForm.buttons.create")}
             </Button>
           </div>
         </CardBody>

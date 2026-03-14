@@ -399,7 +399,7 @@ export default function SessionPlannerPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                       <h2 className="text-xl font-black text-white tracking-tighter">
-                        {t("planner.en_cours", "En cours / À venir")}
+                        {t("planner.en_cours")}
                       </h2>
                     </div>
 
@@ -408,7 +408,7 @@ export default function SessionPlannerPage() {
                       <div className="space-y-6">
                         <div className="flex items-center gap-3 px-2">
                           <h3 className="text-lg font-bold text-white/70 tracking-tighter">
-                            {t("planner.mes_annonces", "Mes Annonces")}
+                            {t("planner.mes_annonces")}
                           </h3>
                           <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">
                             {
@@ -503,7 +503,7 @@ export default function SessionPlannerPage() {
                                     <div className="flex flex-col items-center gap-1">
                                       <span className="text-[10px] font-black text-primary tracking-tighter">
                                         {match.contacts_count || 0}{" "}
-                                        {t("planner.requests", "Demandes")}
+                                        {t("planner.requests")}
                                       </span>
                                     </div>
 
@@ -589,7 +589,7 @@ export default function SessionPlannerPage() {
                         <div className="space-y-6">
                           <div className="flex items-center gap-3 px-2">
                             <h3 className="text-lg font-bold text-white/70 tracking-tighter">
-                              {t("planner.demandes_recues", "Demandes Reçues")}
+                              {t("planner.demandes_recues")}
                             </h3>
                             {activeRequests.filter(
                               (r: any) => r.request_status === "pending",
@@ -767,10 +767,7 @@ export default function SessionPlannerPage() {
                                         to={`/matches/${request.match_id}`}
                                         variant="flat"
                                       >
-                                        {t(
-                                          "dashboard.controls.view",
-                                          "DÉTAILS",
-                                        ).toUpperCase()}
+                                        {t("dashboard.controls.view").toUpperCase()}
                                       </Button>
                                     </CardBody>
                                   </Card>
@@ -778,10 +775,7 @@ export default function SessionPlannerPage() {
                             </div>
                           ) : (
                             <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center text-default-500 font-medium text-sm">
-                              {t(
-                                "dashboard.empty.no_requests",
-                                "Aucune demande reçue.",
-                              )}
+                              {t("dashboard.empty.no_requests")}
                             </div>
                           )}
                         </div>
@@ -790,10 +784,7 @@ export default function SessionPlannerPage() {
                         <div className="space-y-6">
                           <div className="flex items-center gap-3 px-2">
                             <h3 className="text-lg font-bold text-white/70 tracking-tighter">
-                              {t(
-                                "planner.mes_candidatures",
-                                "Mes Candidatures",
-                              )}
+                              {t("planner.mes_candidatures")}
                             </h3>
                             <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">
                               {activeParticipations.length}

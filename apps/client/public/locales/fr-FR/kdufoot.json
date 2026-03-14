@@ -210,54 +210,9 @@
     },
     "terminated": "Terminé"
   },
-  "myExercises": {
-    "0": "M",
-    "1": "e",
-    "2": "s",
-    "3": " ",
-    "4": "e",
-    "5": "x",
-    "6": "e",
-    "7": "r",
-    "8": "c",
-    "9": "i",
-    "10": "c",
-    "11": "e",
-    "12": "s"
-  },
-  "mySessions": {
-    "0": "M",
-    "1": "e",
-    "2": "s",
-    "3": " ",
-    "4": "S",
-    "5": "é",
-    "6": "a",
-    "7": "n",
-    "8": "c",
-    "9": "e",
-    "10": "s"
-  },
-  "myMatches": {
-    "0": "M",
-    "1": "e",
-    "2": "s",
-    "3": " ",
-    "4": "M",
-    "5": "a",
-    "6": "t",
-    "7": "c",
-    "8": "h",
-    "9": "s",
-    "10": " ",
-    "11": "A",
-    "12": "m",
-    "13": "i",
-    "14": "c",
-    "15": "a",
-    "16": "u",
-    "17": "x"
-  },
+  "myExercises": "Mes Exercices",
+  "mySessions": "Mes Séances",
+  "myMatches": "Mes Matchs Amicaux",
   "exercise": {
     "title": "Titre",
     "title_label": "Titre de l'exercice",
@@ -427,22 +382,23 @@
       "Autre": "Autre"
     },
     "venue": {
-      "Domicile": "Cherche à domicile",
-      "Extérieur": "Cherche à l'extérieur",
-      "Neutre": "Neutre"
+      "Domicile": "Nous recevons (Domicile)",
+      "Extérieur": "Nous nous déplaçons (Extérieur)",
+      "Neutre": "Terrain neutre / À définir"
     },
     "pitch": {
       "Herbe": "Herbe",
       "Synthétique": "Synthétique",
       "Hybride": "Hybride",
       "Stabilisé": "Stabilisé",
-      "Indoor": "Indoor"
+      "Indoor": "Indoor",
+      "Toutes surfaces": "Toutes surfaces"
     },
     "gender": {
       "Masculin": "Masculin",
       "Féminin": "Féminin",
       "Mixte": "Mixte",
-      "Non spécifié": "Mixte"
+      "Non spécifié": "Non spécifié"
     },
     "format": {
       "11v11": "11 vs 11",
@@ -504,21 +460,27 @@
       "at": "à",
       "venue": "Lieu",
       "pitch_type": "Type terrain",
-      "location_address": "Adresse du stade",
+      "address": "Adresse du stade",
       "address_placeholder": "Rechercher un stade ou une adresse...",
-      "location_city": "Ville",
-      "location_zip": "Code postal",
+      "city": "Ville",
+      "zip": "Code postal",
       "jersey_color": "Couleur du maillot",
       "email": "Email de contact",
       "phone": "Téléphone",
       "notes": "Notes / Instructions",
+      "notes_placeholder": "Informations complémentaires...",
       "siret": "Numéro SIRET",
       "choose": "Choisir",
       "auto_siret": "Rempli automatiquement via le SIRET",
       "auto": "Rempli automatiquement",
       "more_info": "Informations complémentaires...",
       "free": "Gratuit",
-      "stadium_note": "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement."
+      "stadium_note": "Si l'adresse de votre siège social (liée au SIRET) diffère du lieu de la rencontre, veuillez préciser l'adresse exacte du stade dans les notes de l'événement.",
+      "edit_in_account": "Modifier dans mon compte",
+      "contact_notes": "Contact & Notes",
+      "linked_club": "Club lié",
+      "not_linked": "NON LIÉ",
+      "stadium": "Stade"
     },
     "venue_labels": {
       "Domicile": "Nous recevons (Domicile)",
@@ -564,7 +526,9 @@
       "accept": "Accepter cette demande ?",
       "refuse": "Refuser cette demande ?",
       "accepted": "Souhaitez-vous vraiment accepter cette équipe ?",
-      "refused": "Souhaitez-vous vraiment refuser cette équipe ?"
+      "refused": "Souhaitez-vous vraiment refuser cette équipe ?",
+      "date_past_error": "Date invalide : Vous ne pouvez pas créer un match ou un tournoi dans le passé.",
+      "delay_short_error": "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation."
     }
   },
   "accountModal": {
@@ -670,17 +634,12 @@
       "contact_email": "Email de contact",
       "notes": "Informations sur le tournoi",
       "notes_placeholder": "Règlement, récompenses, restauration...",
-      "publish": "Publier le tournoi"
-    },
-    "link_club": "Lien club requis pour organiser",
-    "contact_title": "Contact & Infos complémentaires",
-    "progress": "Préparation de l'annonce du tournoi",
-    "alerts": {
-      "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un tournoi.",
-      "create_success": "Votre tournoi a été publié avec succès !",
-      "update_success": "Votre tournoi a été mis à jour avec succès !",
-      "delete_success": "Le tournoi a été supprimé avec succès !",
-      "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un tournoi dans le passé."
+      "publish": "Publier le tournoi",
+      "club_primary": "Club Principal",
+      "club_secondary": "Club Secondaire",
+      "unspecified": "Non spécifiée",
+      "progress_announcement": "Preparation de l'annonce du tournoi",
+      "contact_additional": "Contact & Infos complémentaires"
     }
   },
   "pricing": {

@@ -19,7 +19,7 @@ import { addToast } from "@heroui/toast";
 import DataWall from "@/components/data-wall";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { useAuth, useUser } from "@/authentication";
-import { useMatch } from "@/hooks/use-matches";
+import { useMatch, useMyParticipations } from "@/hooks/use-matches";
 import DefaultLayout from "@/layouts/default";
 import { JerseyColorDots } from "@/components/jersey-color-dots";
 
@@ -34,19 +34,31 @@ const InfoItem = ({
   label,
   value,
   color,
+  highlight,
 }: {
   icon: string;
   label: string;
   value: string;
   color: "primary" | "secondary" | "success" | "warning" | "danger" | "default";
+  highlight?: boolean;
 }) => {
   const colorClasses = {
-    primary: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    secondary: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-    success: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    primary: highlight
+      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      : "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    secondary: highlight
+      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      : "bg-purple-500/10 text-purple-400 border-purple-500/20",
+    success: highlight
+      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    warning: highlight
+      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      : "bg-amber-500/10 text-amber-400 border-amber-500/20",
     danger: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-    default: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+    default: highlight
+      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      : "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
   };
 
   // Regex to remove emojis from the value if we already have a dedicated icon
@@ -126,6 +138,77 @@ export default function MatchDetailsPage() {
     onOpen: onCancelAcceptedOpen,
     onOpenChange: onCancelAcceptedOpenChange,
   } = useDisclosure();
+
+  // Red Alert Detection Logic
+  const { participations, markAsRead } = useMyParticipations();
+  const participation = participations?.find((p) => p.match_id === id);
+
+  const [knownData, setKnownData] = useState<Record<string, any>>(() => {
+    try {
+      const saved = localStorage.getItem("kdufoot_known_match_data");
+
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const matchKnownData = knownData[id || ""];
+  const isModified = participation?.notification_state === 1 && !!matchKnownData;
+
+  const highlights = {
+    date: isModified && match.match_date !== matchKnownData.date,
+    time: isModified && match.match_time !== matchKnownData.time,
+    venue: isModified && match.venue !== matchKnownData.venue,
+    pitch: isModified && match.pitch_type !== matchKnownData.pitch,
+    format: isModified && match.format !== matchKnownData.format,
+    category: isModified && match.category !== matchKnownData.category,
+    level: isModified && match.level !== matchKnownData.level,
+  };
+
+  const [isMarkingRead, setIsMarkingRead] = useState(false);
+
+  const handleMarkAsRead = async () => {
+    if (!id) return;
+    setIsMarkingRead(true);
+    try {
+      await markAsRead(id);
+
+      // Update knownData so changes are no longer detected
+      const nextKnown = {
+        ...knownData,
+        [id]: {
+          date: match.match_date,
+          time: match.match_time,
+          venue: match.venue,
+          format: match.format,
+          pitch: match.pitch_type,
+          category: match.category,
+          level: match.level,
+        },
+      };
+
+      localStorage.setItem("kdufoot_known_match_data", JSON.stringify(nextKnown));
+      setKnownData(nextKnown);
+
+      addToast({
+        title: t("common:success", "Succès"),
+        description: "Modifications validées",
+        color: "success",
+      });
+      // Optionally reload or just rely on state update if we had a setter for knownData
+      // Since knownData is from useState with an initializer, we might need a setter.
+    } catch (e) {
+      console.error(e);
+      addToast({
+        title: "Erreur",
+        description: "Impossible de valider les modifications",
+        color: "danger",
+      });
+    } finally {
+      setIsMarkingRead(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -517,12 +600,14 @@ export default function MatchDetailsPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <InfoItem
                   color="primary"
+                  highlight={highlights.category}
                   icon="⚽"
                   label="Catégorie"
                   value={t(`enums.category.${match.category}`)}
                 />
                 <InfoItem
                   color="secondary"
+                  highlight={highlights.level}
                   icon="⭐"
                   label="Niveau"
                   value={
@@ -533,6 +618,7 @@ export default function MatchDetailsPage() {
                 />
                 <InfoItem
                   color="success"
+                  highlight={highlights.pitch}
                   icon="🏟️"
                   label="Terrain"
                   value={
@@ -543,12 +629,14 @@ export default function MatchDetailsPage() {
                 />
                 <InfoItem
                   color="warning"
+                  highlight={highlights.format}
                   icon="👥"
                   label="Format"
                   value={t(`enums.format.${match.format}`, match.format)}
                 />
                 <InfoItem
                   color="danger"
+                  highlight={highlights.date}
                   icon="📅"
                   label="Date"
                   value={new Date(match.match_date).toLocaleDateString(
@@ -558,12 +646,14 @@ export default function MatchDetailsPage() {
                 />
                 <InfoItem
                   color="primary"
+                  highlight={highlights.time}
                   icon="🕒"
                   label="Horaire"
                   value={`${formatTime(match.match_time)}${match.match_end_time ? ` - ${formatTime(match.match_end_time)}` : ""}`}
                 />
                 <InfoItem
                   color="secondary"
+                  highlight={highlights.venue}
                   icon={match.venue === "Domicile" ? "🏠" : "🚗"}
                   label="Lieu"
                   value={t(`enums.venue.${match.venue}`)}
@@ -683,6 +773,28 @@ export default function MatchDetailsPage() {
                     </div>
                   ) : (
                     <>
+                      {isModified && (
+                        <div className="bg-rose-500/20 border-2 border-rose-500/30 p-5 rounded-[2rem] space-y-4 mb-6 animate-pulse shadow-[0_0_20px_rgba(244,63,94,0.4)]">
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-2xl animate-bounce">⚠️</span>
+                            <p className="text-rose-400 font-black text-center text-sm tracking-widest leading-tight">
+                              MATCH MODIFIÉ
+                            </p>
+                            <p className="text-rose-300 text-[10px] font-bold opacity-80 text-center">
+                              Certains détails ont changé
+                            </p>
+                          </div>
+                          <Button
+                            className="w-full font-black tracking-tighter h-12 rounded-2xl bg-rose-500 text-white shadow-lg shadow-rose-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            isLoading={isMarkingRead}
+                            variant="solid"
+                            onPress={handleMarkAsRead}
+                          >
+                            J'ai vu les changements
+                          </Button>
+                        </div>
+                      )}
+
                       {(() => {
                         const userContact = match.contacts?.find(
                           (c) => c.user_id === user?.id,
