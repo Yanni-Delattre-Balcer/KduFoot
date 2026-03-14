@@ -138,14 +138,10 @@ export function useWebSocketSync(
                                     } else {
                                         color = 'warning';
                                         title = t('dashboard.alerts.title');
-                                        description = (
-                                            <div className="cursor-pointer font-medium" onClick={() => navigate('/dashboard')}>
-                                                {t('dashboard.alerts.message', {
-                                                    team: payload.data?.host_club_name || 'un club',
-                                                    date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'
-                                                })}
-                                            </div>
-                                        );
+                                        description = t('dashboard.alerts.message', {
+                                            team: payload.data?.host_club_name || 'un club',
+                                            date: payload.data?.match_date ? new Date(payload.data.match_date).toLocaleDateString('fr-FR') : 'date inconnue'
+                                        });
                                         mutate((key) => typeof key === 'string' && key.startsWith('/api/matches'), (d: any) => d, { revalidate: true });
                                         mutate((key) => typeof key === 'string' && key.startsWith('/api/dashboard'), (d: any) => d, { revalidate: true });
                                         // Increment badge unread counter in localStorage
@@ -205,17 +201,7 @@ export function useWebSocketSync(
 
                                         addToast({
                                             title,
-                                            description: (
-                                                <div 
-                                                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                                                    onClick={() => navigate('/dashboard')}
-                                                >
-                                                    <p>{description}</p>
-                                                    <p className="text-[10px] text-default-400 mt-1 italic">
-                                                        {t('dashboard.labels.view_profile')}
-                                                    </p>
-                                                </div>
-                                            ),
+                                            description,
                                             color,
                                             variant: 'flat',
                                             timeout: 5000

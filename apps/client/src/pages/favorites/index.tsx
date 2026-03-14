@@ -206,7 +206,7 @@ export default function FavoritesPage() {
                                                         <Chip size="sm" variant="flat" color="secondary" className="font-semibold bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">{match.category}</Chip>
                                                         <Chip size="sm" variant="flat" color={match.venue === 'Domicile' ? 'success' : 'danger'}>{t(`enums.venue.${match.venue}`)}</Chip>
                                                     </div>
-                                                    <p className="font-bold text-lg text-default-900 group-hover:text-violet-600 transition-colors">vs {match.club.name}</p>
+                                                    <p className="font-bold text-lg text-default-900 group-hover:text-violet-600 transition-colors">{match.club.name}</p>
                                                     <div className="flex items-center gap-2 mt-2 text-sm text-default-600 font-medium">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -267,7 +267,7 @@ export default function FavoritesPage() {
                                                         <Chip size="sm" variant="flat" color="secondary" className="font-semibold bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">{match.category}</Chip>
                                                         <Chip size="sm" variant="flat" color={match.venue === 'Domicile' ? 'success' : 'danger'}>{t(`enums.venue.${match.venue}`)}</Chip>
                                                     </div>
-                                                    <p className="font-bold text-lg text-default-900 group-hover:text-purple-600 transition-colors">vs {match.club.name}</p>
+                                                    <p className="font-bold text-lg text-default-900 group-hover:text-purple-600 transition-colors">{match.club.name}</p>
                                                     <div className="flex items-center gap-2 mt-2 text-sm text-default-600 font-medium">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />

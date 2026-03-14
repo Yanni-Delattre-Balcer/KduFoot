@@ -8,7 +8,10 @@ import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+import { addToast } from '@heroui/toast';
+import { matchService } from '../../services/matches';
 import FootballClock from '../../components/football-clock';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { useUser } from '@/hooks/use-user';
@@ -56,7 +59,7 @@ export default function DashboardPage() {
     const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
     const { isLocked, user } = useUser();
     // 2. Demandes Reçues (Organisateur)
-    const { requests: incomingRequests, isLoading: isLoadingIncoming } = useIncomingRequests();
+    const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateRequests } = useIncomingRequests();
 
     // 3. Mes Participations (Candidat)
     const { participations: myParticipations, isLoading: isLoadingParticipations, markAsRead: markAsReadHook } = useMyParticipations();
@@ -66,6 +69,9 @@ export default function DashboardPage() {
     const [highlightedCardId, setHighlightedCardIdState] = useState<string | null>(null);
     const [selectedClubProfile, setSelectedClubProfile] = useState<any>(null);
     const [selectedTab, setSelectedTab] = useState<any>("requests");
+    const [searchParams] = useSearchParams();
+    const { getAccessTokenSilently } = useAuth0();
+    const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
     // Track last seen data to detect specific changes (Surgical Highlight)
     const [knownData, setKnownData] = useState<Record<string, any>>(() => {
@@ -107,8 +113,37 @@ export default function DashboardPage() {
     useEffect(() => {
         if (isLocked) {
             setSelectedTab("requests"); // Default tab when unlocked later
+        } else {
+            const tabParam = searchParams.get('tab');
+            if (tabParam && ["requests", "confirmed_matches", "participations"].includes(tabParam)) {
+                setSelectedTab(tabParam);
+            }
         }
-    }, [isLocked]);
+    }, [isLocked, searchParams]);
+
+    const handleRequestAction = async (matchId: string, userId: string, status: 'accepted' | 'refused') => {
+        const key = `${matchId}-${userId}`;
+        setActionLoading(prev => ({ ...prev, [key]: true }));
+        try {
+            const token = await getAccessTokenSilently();
+            await matchService.updateRequestStatus(matchId, userId, status, token);
+            addToast({
+                title: status === 'accepted' ? t('success') : t('refused'),
+                description: status === 'accepted' ? "Demande acceptée avec succès" : "Demande refusée",
+                color: status === 'accepted' ? "success" : "danger"
+            });
+            mutateRequests();
+        } catch (error: any) {
+            console.error("Action error:", error);
+            addToast({
+                title: "Erreur",
+                description: error.message || "Erreur lors de l'action",
+                color: "danger"
+            });
+        } finally {
+            setActionLoading(prev => ({ ...prev, [key]: false }));
+        }
+    };
 
 
 
@@ -447,20 +482,37 @@ export default function DashboardPage() {
                                                             )}
                                                         </div>
 
-                                                        <div className="flex flex-col gap-2 relative z-20">
+                                                        <div className="flex flex-col sm:flex-row gap-2 relative z-20">
                                                             <Button
                                                                 size="sm"
-                                                                variant="bordered"
-                                                                color="secondary"
-                                                                className="w-full font-bold text-sm h-11 border-secondary/30 text-secondary active:scale-95"
-                                                                onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}
+                                                                color="success"
+                                                                className="flex-1 font-black text-xs h-11 shadow-lg shadow-emerald-500/20"
+                                                                onPress={() => handleRequestAction(request.match_id, request.requester_user_id, 'accepted')}
+                                                                isLoading={actionLoading[`${request.match_id}-${request.requester_user_id}`]}
+                                                                startContent={<span className="text-sm">✅</span>}
                                                             >
-                                                                {t('dashboard.labels.view_club_profile')}
+                                                                Accepter
                                                             </Button>
-                                                            <p className="text-[10px] text-center text-default-400 mt-1 italic">
-                                                                {t('dashboard.alerts.click_to_manage', 'Cliquez sur le logo ou le nom pour gérer cette demande.')}
-                                                            </p>
+                                                            <Button
+                                                                size="sm"
+                                                                color="danger"
+                                                                className="flex-1 font-black text-xs h-11 shadow-lg shadow-rose-500/20"
+                                                                onPress={() => handleRequestAction(request.match_id, request.requester_user_id, 'refused')}
+                                                                isLoading={actionLoading[`${request.match_id}-${request.requester_user_id}`]}
+                                                                startContent={<span className="text-sm">❌</span>}
+                                                            >
+                                                                Refuser
+                                                            </Button>
                                                         </div>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="flat"
+                                                            color="secondary"
+                                                            className="w-full font-bold text-xs h-10 border-transparent text-secondary/70 hover:text-secondary"
+                                                            onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}
+                                                        >
+                                                            {t('dashboard.labels.view_club_profile')}
+                                                        </Button>
                                                     </div>
                                                 </CardBody>
                                             </Card>

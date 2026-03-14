@@ -275,7 +275,7 @@ export default function SessionPlannerPage() {
                                                                             <Chip size="sm" variant="flat" color={match.status === 'active' ? 'success' : 'default'} className="h-4 text-[9px] font-black">{match.status}</Chip>
                                                                         </div>
                                                                         <h3 className="font-bold text-white text-lg line-clamp-1">
-                                                                            {match.type === 'tournament' ? match.name : `${t('match.vs')} ${match.club?.name || '??'}`}
+                                                                            {match.type === 'tournament' ? match.name : (match.club?.name || '??')}
                                                                         </h3>
                                                                         <p className="text-xs text-default-500 font-medium truncate w-full">{match.club?.city} • {t(`enums.category.${match.category}`)}</p>
                                                                     </div>

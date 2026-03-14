@@ -41,17 +41,19 @@ export default function IndexPage() {
 
           <div className="relative flex flex-col md:flex-row items-center gap-6 py-8 px-6">
             {/* Left: Title & CTA */}
-            <div className="flex-1 flex flex-col items-center md:items-start gap-3 text-center md:text-left">
-              <h1 className="text-3xl lg:text-4xl font-bold">
+            <div className="flex-1 flex flex-col items-center md:items-start gap-4 text-center md:text-left w-full px-2 sm:px-4">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
                 <span className="text-white">Kdufoot</span>
               </h1>
-              <p className="text-default-500 text-base">
-                {showVideoAnalysis ? (
-                  t("homePage.description")
-                ) : (
-                  "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics."
-                )}
-              </p>
+              <div className="max-w-[280px] sm:max-w-md md:max-w-lg">
+                <p className="text-default-500 text-sm sm:text-base leading-relaxed break-words overflow-wrap-anywhere">
+                  {showVideoAnalysis ? (
+                    t("homePage.description")
+                  ) : (
+                    "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics."
+                  )}
+                </p>
+              </div>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                 {showVideoAnalysis && (
                   <Link

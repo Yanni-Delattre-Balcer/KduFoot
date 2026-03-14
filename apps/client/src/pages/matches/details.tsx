@@ -275,14 +275,14 @@ export default function MatchDetailsPage() {
                                             </div>
 
                                             <div className="w-full">
-                                                <h1 className="text-xl md:text-4xl font-black text-white leading-tight tracking-tighter mb-2 break-words [overflow-wrap:anywhere]">
+                                                <h1 className="text-xl md:text-3xl font-black text-white leading-tight tracking-tighter mb-2 break-words overflow-wrap-anywhere">
                                                     {isMasked ? 'MATCH MASQUÉ' : (match.type === 'tournament' ? match.name : match.club?.name)}
                                                 </h1>
                                                 <p className="flex items-center justify-center md:justify-start gap-2 text-default-400 font-bold tracking-widest text-[9px] md:text-xs">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-primary shrink-0">
                                                         <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
                                                     </svg>
-                                                    <span className="truncate whitespace-normal text-left">{isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}</span>
+                                                    <span className="whitespace-normal text-left overflow-wrap-anywhere">{isMasked ? 'VILLE MASQUÉE' : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}</span>
                                                 </p>
                                             </div>
 
@@ -290,7 +290,7 @@ export default function MatchDetailsPage() {
                                                 <div className="flex flex-col gap-3 pt-2">
                                                     <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-3">
                                                         <p className="text-[10px] text-default-400 font-black tracking-widest mb-1">Localisation précise</p>
-                                                        <p className="text-white font-bold text-sm break-words">{match.location_address || match.club?.address}</p>
+                                                        <p className="text-white font-bold text-sm break-words overflow-wrap-anywhere">{match.location_address || match.club?.address}</p>
                                                     </div>
                                                     <Button
                                                         variant="shadow"
@@ -443,7 +443,7 @@ export default function MatchDetailsPage() {
                                                     onPress={onCloseRegOpen}
                                                     startContent={<span className="text-xl">🔒</span>}
                                                 >
-                                                    Clôturer les inscriptions
+                                                    Fermer le tournoi
                                                 </Button>
                                             )}
                                         </div>
@@ -662,11 +662,11 @@ export default function MatchDetailsPage() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex-1 min-w-0 overflow-hidden">
-                                                                <p className="font-black text-white tracking-tighter leading-tight mb-1 overflow-x-auto whitespace-nowrap scrollbar-hide">{contact.club_name || 'Club intéressé'}</p>
+                                                                <p className="font-black text-white tracking-tighter leading-tight mb-1 break-words overflow-wrap-anywhere">{contact.club_name || 'Club intéressé'}</p>
                                                                 <div className="flex flex-col gap-0.5">
                                                                     <p className="text-[10px] text-default-500 font-bold tracking-widest">{new Date(contact.contacted_at).toLocaleDateString()}</p>
                                                                     {contact.message && (
-                                                                        <p className="text-[10px] text-primary font-black tracking-tighter italic opacity-80">{contact.message}</p>
+                                                                        <p className="text-[10px] text-primary font-black tracking-tighter italic opacity-80 break-words overflow-wrap-anywhere">{contact.message}</p>
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -679,7 +679,13 @@ export default function MatchDetailsPage() {
                                                         )}
                                                         
                                                         {isActionable && (
-                                                            <Button size="sm" color="primary" variant="shadow" className="font-black tracking-tighter w-full rounded-xl">
+                                                            <Button
+                                                                size="sm"
+                                                                color="primary"
+                                                                variant="shadow"
+                                                                className="font-black tracking-tighter w-full rounded-xl"
+                                                                onPress={() => navigate('/dashboard?tab=requests')}
+                                                            >
                                                                 Voir la demande
                                                             </Button>
                                                         )}
