@@ -622,8 +622,8 @@
     "delete_error": "Erreur lors de la suppression du compte"
   },
   "tournamentForm": {
-    "title": "Créer un Tournoi Amical",
-    "subtitle": "Organisez une compétition et invitez des équipes.",
+    "title": "Informations sur le tournoi",
+    "subtitle": "Remplissez ces informations pour créer votre tournoi.",
     "labels": {
       "name": "Nom du tournoi",
       "name_placeholder": "Ex: Tournoi d'été KduFoot",
@@ -773,8 +773,8 @@
       "modification": "Match modifié ⚠️",
       "modification_message": "Votre duel du {{date}} a été modifié. Cliquez ici pour voir les détails.",
       "cancellation": "Annulation du duel. La rencontre du {{date}} avec {{team}} a été annulée.",
-      "new_request_interactive": "Vous avez reçu une demande de {{team}} pour votre match du {{date}}",
-      "acceptance_player": "Duel Confirmé ! ✅ Votre rencontre du {{date}} est validée.",
+      "new_request_interactive": "Vous avez reçu une demande pour votre {{type}} du {{date}}",
+      "acceptance_player": "Confirmation ! ✅ Votre {{type}} du {{date}} est validé.",
       "rejection_player": "Demande refusée. {{team}} n'est pas disponible pour le {{date}}.",
       "refusal_organizer": "Demande refusée. Vous avez décliné l'invitation de {{team}}."
     },

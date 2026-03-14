@@ -41,20 +41,54 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             matchService.search({ ownerId: user.id })
         ]);
 
-        // Unique set of match IDs
+        // Match items to include in calendar
         const matchMap = new Map<string, any>();
 
-        // Organized matches
-        owned.matches.forEach(m => matchMap.set(m.id, m));
-
-        // Participations (only accepted)
-        participations.forEach(p => {
-            if (p.status === 'accepted' || p.request_status === 'accepted') {
-                matchMap.set(p.match_id || p.id, p);
+        // 1. Confirmed matches / teams where I am the HOST
+        incoming.forEach(r => {
+            if (r.status === 'accepted' || r.request_status === 'accepted') {
+                matchMap.set(r.match_id, {
+                    ...r,
+                    opponentName: r.requester_club_name
+                });
             }
         });
 
-        const items = Array.from(matchMap.values()).filter(m => m.status !== 'cancelled' && m.match_status !== 'cancelled');
+        // 2. Confirmed matches / teams where I am the GUEST
+        participations.forEach(p => {
+            if (p.status === 'accepted' || p.request_status === 'accepted') {
+                matchMap.set(p.match_id || p.id, {
+                    ...p,
+                    opponentName: p.host_club_name
+                });
+            }
+        });
+
+        // 3. Tournaments I ORGANIZED (always visible)
+        owned.matches.forEach(m => {
+            if (m.type === 'tournament') {
+                // Don't overwrite if already set via participation logic (though unlikely to be host and guest)
+                if (!matchMap.has(m.id)) {
+                    matchMap.set(m.id, m);
+                }
+            }
+        });
+
+        const items = Array.from(matchMap.values()).filter(m => {
+            const isCancelled = m.status === 'cancelled' || m.match_status === 'cancelled';
+            if (isCancelled) return false;
+
+            const type = m.match_type || m.type || 'match';
+            
+            // For tournaments, we show them as soon as they are created
+            if (type === 'tournament') return true;
+
+            // For matches, we only show them if they are confirmed
+            // At this point, everything in the map for 'match' type should be confirmed
+            // because of the filters above, but let's be safe.
+            const status = m.match_status || m.status || m.request_status;
+            return status === 'found' || status === 'accepted';
+        });
 
         const ics = [
             'BEGIN:VCALENDAR',
@@ -97,7 +131,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 const tournamentName = item.name || 'Sans nom';
                 summary = `Kdufoot : ${tournamentName}`;
             } else {
-                const opponentName = item.host_club_name || item.requester_club_name || item.club_name || 'Adversaire';
+                const opponentName = item.opponentName || item.host_club_name || item.requester_club_name || item.club_name || 'Adversaire';
                 summary = `Kdufoot : Match contre ${opponentName}`;
             }
 

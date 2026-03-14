@@ -63,6 +63,7 @@ export const Navbar = () => {
   }, []);
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
+    setIsMenuOpen(false);
     if (href.startsWith("/matches") && location.pathname === "/matches") {
       e.preventDefault();
       const params = new URLSearchParams(location.search);

@@ -214,6 +214,7 @@ export default function DashboardPage() {
           status === "accepted"
             ? t("dashboard.notifications.acceptance_player", {
                 date: matchDate,
+                type: t("enums.type." + request.match_type).toLowerCase(),
               })
             : t("dashboard.notifications.refusal_organizer", {
                 team: clubName,
@@ -771,42 +772,42 @@ export default function DashboardPage() {
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-4 relative z-20">
-                              <Button
-                                className="flex-1 font-black text-sm h-14 sm:h-11 shadow-lg shadow-emerald-500/20 w-full sm:w-auto"
-                                color="success"
-                                isLoading={
-                                  actionLoading[
-                                    `${request.match_id}-${request.requester_user_id}`
-                                  ]
-                                }
-                                size="sm"
-                                startContent={
-                                  <span className="text-sm">✅</span>
-                                }
-                                onPress={() =>
-                                  handleRequestAction(request, "accepted")
-                                }
-                              >
-                                Accepter
-                              </Button>
-                              <Button
-                                className="flex-1 font-black text-sm h-14 sm:h-11 shadow-lg shadow-rose-500/20 w-full sm:w-auto"
-                                color="danger"
-                                isLoading={
-                                  actionLoading[
-                                    `${request.match_id}-${request.requester_user_id}`
-                                  ]
-                                }
-                                size="sm"
-                                startContent={
-                                  <span className="text-sm">❌</span>
-                                }
-                                onPress={() =>
-                                  handleRequestAction(request, "refused")
-                                }
-                              >
-                                Refuser
-                              </Button>
+                                <Button
+                                  className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-emerald-500/20 w-full sm:w-auto text-lg"
+                                  color="success"
+                                  isLoading={
+                                    actionLoading[
+                                      `${request.match_id}-${request.requester_user_id}`
+                                    ]
+                                  }
+                                  size="lg"
+                                  startContent={
+                                    <span className="text-xl">✅</span>
+                                  }
+                                  onPress={() =>
+                                    handleRequestAction(request, "accepted")
+                                  }
+                                >
+                                  Accepter
+                                </Button>
+                                <Button
+                                  className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-rose-500/20 w-full sm:w-auto text-lg"
+                                  color="danger"
+                                  isLoading={
+                                    actionLoading[
+                                      `${request.match_id}-${request.requester_user_id}`
+                                    ]
+                                  }
+                                  size="lg"
+                                  startContent={
+                                    <span className="text-xl">❌</span>
+                                  }
+                                  onPress={() =>
+                                    handleRequestAction(request, "refused")
+                                  }
+                                >
+                                  Refuser
+                                </Button>
                             </div>
                             <Button
                               className="w-full font-bold text-xs h-10 border-transparent text-secondary/70 hover:text-secondary"

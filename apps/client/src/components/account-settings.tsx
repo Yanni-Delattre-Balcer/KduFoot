@@ -282,7 +282,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       // Systematic redirection to 'from' or defaults to '/matches'
       navigate(from || "/matches");
 
-      await getAccessToken({ cacheMode: "off" } as any);
       await refetch();
       await mutate("/api/me/context");
     } catch (error: any) {
