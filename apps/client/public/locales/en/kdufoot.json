@@ -1,6 +1,19 @@
 {
+  "success": "Success",
+  "warning": "Warning",
+  "info": "Information",
+  "user_banned_signal": "Banned user signal",
+  "cookie-consent-title": "Cookie Management",
+  "cookie-policy": "We use cookies to improve your experience.",
+  "accept-all": "Accept all",
+  "reject": "Reject",
+  "switch-to-dark-mode": "Switch to dark mode",
+  "switch-to-light-mode": "Switch to light mode",
+  "rejected": "Rejected",
+  "Genre": "Gender",
+  "profile_incomplete": "Complete your club profile to apply for this match",
   "site": {
-    "description": "Video analysis and training management platform for football."
+    "description": "Kdufoot brings together two essential tools for football coaches: AI-powered video analysis and friendly match searching between clubs."
   },
   "nav": {
     "home": "Home",
@@ -9,7 +22,7 @@
     "favorites": "Favorites",
     "sessions": "Match / Tournament / Exercise History",
     "sessions_public": "Match / Tournament History",
-    "matches": "Find a Match / Tournament",
+    "matches": "Find/create a match / tournament",
     "dashboard": "Dashboard",
     "pricing": "Pricing",
     "remerciements": "Acknowledgments",
@@ -85,6 +98,7 @@
   "duration": "Duration",
   "status": "Status",
   "summary": "Summary",
+  "details": "Details",
   "duration_total": "Total Duration",
   "players": "Players",
   "equipment": "Equipment",
@@ -94,7 +108,7 @@
   "edit": "Edit",
   "error": {
     "title": "Error",
-    "too_late_to_modify": "Too late! You can no longer modify this announcement online. Please contact the opposing coach by phone or email to notify them directly.",
+    "too_late_to_modify": "Too late! You can no longer modify this ad online. Please contact the opposing coach by phone or email to notify them directly.",
     "not_found": "Item not found",
     "save_failed": "Error during save. Please check your connection.",
     "delete_failed": "Deletion failed. If the match is in less than 2 hours, it is locked.",
@@ -115,21 +129,22 @@
     "error": "Error during analysis"
   },
   "exercises": {
+    "title": "Exercise Library",
     "emptyTitle": "No exercises yet",
     "emptySubtitle": "Analyze a video to generate your first exercises!",
     "noImage": "No image",
     "selected": "exercise(s)"
   },
   "training": {
-    "go": "My Training",
+    "remove": "Remove",
+    "add": "Add",
+    "go": "Let's go!",
     "empty": "No training in progress",
     "description": "Select exercises from the library to build your training session.",
     "go_exercises": "Discover exercises",
     "hero_stats": "{{count}} exercise(s) selected · Estimated duration: ~{{duration}} min",
     "hero_create": "Create your custom training session by adding exercises from the library.",
-    "add_exercises": "+ Add exercises",
-    "add": "Add",
-    "remove": "Remove"
+    "add_exercises": "+ Add exercises"
   },
   "favorites": {
     "title": "My Favorites",
@@ -183,8 +198,13 @@
   "myMatches": "My Friendly Matches",
   "exercise": {
     "title": "Title",
+    "title_label": "Exercise title",
     "synopsis": "Synopsis",
+    "info_general": "General Information",
     "themes": "Themes",
+    "players": "Players",
+    "dimensions": "Dimensions",
+    "equipment": "Equipment",
     "favorite": "Add to favorites",
     "unfavorite": "Remove from favorites",
     "addToSession": "Add to session",
@@ -206,27 +226,30 @@
     "create_title": "Create an exercise",
     "edit_title": "Modify the exercise",
     "create_button": "Create the exercise",
-    "noSynopsis": "No synopsis available.",
     "no_exercises_found": "No exercises found.",
+    "noSynopsis": "No synopsis available.",
     "untitled": "Untitled Exercise",
     "schema": "Tactic Diagram"
   },
   "match": {
     "vs": "vs",
+    "title": "Friendly Matches",
     "tab_matches": "Matches",
     "tab_tournaments": "Tournaments",
-    "title": "Friendly Matches",
     "tournament": "Tournament",
-    "create": "Create a friendly match",
-    "create_title": "CREATE A MATCH",
-    "edit_title": "UPDATE MATCH",
-    "create_tournament": "Create a friendly tournament",
-    "find": "Find a friendly match",
-    "find_tournament": "Find a friendly tournament",
+    "create": "Create a Match",
+    "create_title": "Create a match",
+    "edit_title": "Update match",
+    "create_tournament": "Create a Tournament",
+    "find": "Find a Match",
+    "find_tournament": "Find a Tournament",
     "format": "Format",
     "venue": "Venue",
     "date": "Date",
     "time": "Time",
+    "delete_confirmation": "Are you sure you want to delete this ad? This action is irreversible.",
+    "accept_confirm": "Accept the team from {{clubName}}?",
+    "refuse_confirm": "Are you sure you want to refuse this team?",
     "filters": {
       "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
     }
@@ -243,7 +266,7 @@
     "constraints": "Constraints",
     "info_general": "General Information",
     "name_label": "Session name",
-    "name_placeholder": "Ex: Technico-Tactical Session",
+    "name_placeholder": "E.g.: Technico-Tactical Session",
     "category_label": "Category",
     "choose_category": "Choose a category",
     "level_label": "Level",
@@ -266,11 +289,14 @@
     "create": "Plan a session",
     "description_sessions": "Organize and plan your training sessions to best prepare your players.",
     "description_matches": "Track your scheduled friendly matches and keep control of your sports calendar.",
-    "description_exercises": "Track your training sessions and video exercises.",
     "empty_sessions": "No scheduled sessions",
     "empty_matches": "No friendly matches",
     "not_scheduled": "Not scheduled",
     "opponent_default": "Opponent",
+    "description_exercises": "Track your training sessions and video exercises.",
+    "find_exercises": "Discover exercises",
+    "no_name": "Untitled session",
+    "all_levels": "All levels",
     "status": "Status"
   },
   "permissions": {
@@ -311,18 +337,16 @@
       "U15": "U15",
       "U16": "U16",
       "U17": "U17",
-      "U18": "U18 (U18 group)",
+      "U18": "U18",
       "U19": "U19",
       "U20": "U20",
-      "Séniors": "Seniors",
-      "Vétérans": "Veterans",
-      "Loisir": "Leisure"
+      "Seniors": "Seniors"
     },
     "level": {
-      "Débutant": "Beginner level",
-      "Ligue": "League level",
-      "Régional": "Regional level",
-      "National": "National level",
+      "Débutant": "Beginner",
+      "Ligue": "League",
+      "Régional": "Regional",
+      "National": "National",
       "Pro": "Professional",
       "Ligue 1": "League 1",
       "Ligue 2": "League 2",
@@ -344,10 +368,10 @@
       "Neutre": "📍 Neutral ground"
     },
     "pitch": {
-      "Herbe": "Grass pitch",
-      "Synthétique": "Artificial pitch",
-      "Hybride": "Hybrid pitch",
-      "Stabilisé": "Stabilized pitch",
+      "Herbe": "Grass",
+      "Synthétique": "Artificial",
+      "Hybride": "Hybrid",
+      "Stabilisé": "Stabilized",
       "Indoor": "All surfaces",
       "Toutes surfaces": "All surfaces"
     },
@@ -369,6 +393,7 @@
     }
   },
   "matchesPage": {
+    "title_tournament": "Friendly Tournaments",
     "description_find": "Browse available friendly matches near you. Use filters to refine your search and find the perfect opponent.",
     "description_create": "Post your friendly match announcement by filling in as many details as possible to attract the right clubs.",
     "description_find_tournament": "Discover friendly tournaments organized in your area. Register your team and participate in friendly competitions.",
@@ -397,8 +422,8 @@
     "unknown_club": "Unknown Club",
     "found": "friendly match(es) found",
     "found_tournament": "tournament(s) found",
-    "empty_title": "No matches available",
-    "empty_title_tournament": "No tournaments found",
+    "empty_title": "No match available",
+    "empty_title_tournament": "No tournament found",
     "empty_desc": "Adjust your filters or create a new friendly match.",
     "empty_desc_tournament": "Adjust your filters or create a new friendly tournament."
   },
@@ -413,16 +438,15 @@
       "gender": "Gender",
       "date": "Date",
       "time": "Time",
+      "at": "at",
       "venue": "Venue",
       "pitch_type": "Pitch type",
-      "siret": "SIRET Number",
-      "location_address": "Stadium Address",
+      "location_address": "Stadium address",
       "address_placeholder": "Search for a stadium or address...",
-      "location_zip": "Zip code",
       "location_city": "City",
+      "location_zip": "Zip code",
       "jersey_color": "Jersey color",
-      "at": "at",
-      "email": "Contact Email",
+      "email": "Contact email",
       "phone": "Phone",
       "notes": "Notes / Instructions",
       "choose": "Choose",
@@ -430,7 +454,11 @@
       "auto": "Automatically filled",
       "more_info": "Additional information...",
       "free": "Free",
-      "stadium_note": "If your registered office address (linked to the SIRET) differs from the meeting place, please specify the exact stadium address in the event notes."
+      "stadium_note": "If your headquarters address (linked to the SIRET) differs from the meeting place, please specify the exact stadium address in the event notes."
+    },
+    "venue_labels": {
+      "Domicile": "We host (Home)",
+      "Extérieur": "We travel (Away)"
     },
     "link_club": {
       "title": "Link your club (Irreversible Action)",
@@ -439,31 +467,37 @@
       "warning_final": "The club will be permanently associated with your account.",
       "warning_support": "If you need to change your club later, contact support: support.kdufoot@gmail.com",
       "warning_search": "Tip: Search for 'Your club name + SIRET' on the Internet to find it.",
-      "search_help": "To find your number, type on Google: \"SIRET + [Your exact club name]\". Example: \"SIRET RC Lens\".",
+      "search_help": "To find your number, search on Google: \"SIRET + [Your club's exact name]\". Example: \"SIRET RC Lens\".",
       "validate": "Validate and Link the club",
       "support": "In case of subsequent club change, contact support with proof.",
-      "linked": "Linked club"
+      "linked": "Club linked"
     },
-    "progress": "Match announcement preparation",
+    "progress": "Match ad preparation",
     "buttons": {
       "cancel": "Cancel",
       "create": "Create the match",
       "update": "Update",
-      "unlink": "Unlink (Admin)"
+      "unlink": "Detach (Admin)"
     },
     "alerts": {
       "siret_length": "The number must contain 9 (SIREN) or 14 (SIRET) digits.",
-      "link_confirm": "⚠️ WARNING: This action is IRREVERSIBLE.\n\nYour account will be permanently linked to this club.\nFor any subsequent changes, you will need to contact support with proof.\n\nDo you want to continue ?",
-      "link_error": "Error linking the club. Check the SIRET.",
+      "link_confirm": "⚠️ WARNING: This action is IRREVERSIBLE.\n\nYour account will be permanently linked to this club.\nFor any subsequent modification, you must contact support with proof.\n\nDo you want to continue?",
+      "link_error": "Error during club linking. Check the SIRET.",
       "must_link": "You must first link your club via the SIRET number before creating a match.",
-      "contact_required": "⚠️ CONTACT REQUIRED\n\nEmail and phone are essential for players to contact you.",
+      "contact_required": "⚠️ MANDATORY CONTACT\n\nEmail and phone are essential for players to contact you.",
       "date_required": "Match date is required.",
       "time_required": "Match time is required.",
       "venue_required": "Match venue is required.",
-      "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future.",
-      "delete_success": "Match successfully deleted!"
+      "date_past": "⚠️ INVALID DATE\n\nYou cannot create a match in the past.",
+      "date_far": "⚠️ INVALID DATE\n\nThe match date is too far away.",
+      "link_success": "Club linked successfully!",
+      "create_success": "Match ad created successfully!",
+      "update_success": "Match updated successfully!",
+      "delete_success": "Match deleted successfully!"
     },
     "confirm": {
+      "accept": "Accept this request?",
+      "refuse": "Refuse this request?",
       "accepted": "Do you really want to accept this team?",
       "refused": "Do you really want to refuse this team?"
     }
@@ -472,7 +506,7 @@
     "alerts": {
       "update_success": "Your profile has been successfully updated!",
       "update_error": "An error occurred while updating your profile.",
-      "club_linked_success": "Club successfully certified!"
+      "club_linked_success": "Club certified successfully!"
     }
   },
   "account": {
@@ -495,26 +529,30 @@
       "firstname": "First Name",
       "lastname": "Last Name",
       "phone": "Phone",
-      "license": "License Number",
+      "license": "License number",
       "license_placeholder": "Enter your number",
       "hq_address": "HQ Address (Official)",
-      "stadium_address": "Stadium Address (Required)",
+      "stadium_address": "Stadium Address (Mandatory)",
       "stadium_address_for": "Stadium Address ({{club}})",
-      "stadium_placeholder": "E.g.: Sports Complex, 12 Flower St",
-      "stadium_locked": "Stadium address is locked. Contact support for any changes.",
-      "stadium_warning": "Warning: this address is essential for guiding players during matches.",
+      "stadium_placeholder": "Ex: Sport Complex, 12 Flower St",
+      "stadium_locked": "The stadium address is locked. Contact support for any modification.",
+      "stadium_warning": "Warning: this address is essential to guide players during matches.",
       "category": "Category",
       "level": "Level",
-      "pitch": "Usual Pitch",
-      "colors": "Jersey Colors",
+      "pitch": "Usual pitch",
+      "home_jersey": "Home Jersey",
+      "home_jersey_placeholder": "Ex: Red and Black",
+      "away_jersey": "Away Jersey",
+      "away_jersey_placeholder": "Ex: White",
+      "colors": "Jersey color",
       "colors_placeholder": "Red and Black...",
-      "current_club": "Current Club",
+      "current_club": "Current club",
       "no_club": "No club linked",
-      "main_club": "Main Club",
+      "main_club": "Primary Club",
       "city": "City",
       "dept": "Department",
       "other_clubs": "My other linked clubs",
-      "nameless_club": "Unnamed Club"
+      "nameless_club": "Unnamed club"
     },
     "errors": {
       "firstname_required": "First name is required.",
@@ -530,16 +568,16 @@
       "email_invalid": "A valid email is required.",
       "home_jersey_required": "Home jersey color is required.",
       "away_jersey_required": "Away jersey color is required.",
-      "form_incomplete": "Incomplete Form",
+      "form_incomplete": "Incomplete form",
       "form_incomplete_desc": "Please fill in all mandatory fields in red to maintain or activate your access."
     },
     "support": {
       "title": "Need help?",
-      "description": "If you cannot find your club, if you coach in two different clubs, or if you change clubs, contact our support. For any other questions (registration, login, how the site works…), feel free to write to us as well."
+      "description": "If you cannot find your club, if you coach in two different clubs, or if you change clubs, contact our support. For any other question (registration, login, site operation...), feel free to write to us as well."
     },
     "siret": {
       "warning_title": "Warning: Once the SIRET is validated and the club is linked to your account, this action is irreversible.",
-      "warning_desc": "For any subsequent changes, you will need to contact technical support."
+      "warning_desc": "For any subsequent modification, you must contact technical support."
     },
     "buttons": {
       "save_changes": "Save changes",
@@ -549,32 +587,35 @@
       "contact_support": "📩 CONTACT SUPPORT"
     },
     "confirm_delete": "⚠️ WARNING: This action is irreversible.\n\nYour account as well as ALL your matches and tournaments will be permanently deleted.\n\nDo you really want to continue?",
-    "delete_success": "Account successfully deleted",
-    "delete_error": "Error deleting account"
+    "delete_success": "Account deleted successfully",
+    "delete_error": "Error during account deletion"
   },
   "tournamentForm": {
     "title": "Create a Friendly Tournament",
     "subtitle": "Organize a competition and invite teams.",
     "labels": {
-      "name": "Tournament Name",
-      "name_placeholder": "Ex: KduFoot Summer Cup",
-      "max_teams": "Max teams",
+      "name": "Tournament name",
+      "name_placeholder": "Ex: KduFoot Summer Tournament",
+      "max_teams": "Max number of teams",
       "fee": "Registration fee (€)",
       "fee_placeholder": "0 for free",
       "date": "Start date",
       "time": "Meeting time",
-      "end_time": "End Time",
-      "contact_email": "Contact Email",
+      "end_time": "End time",
+      "contact_email": "Contact email",
       "notes": "Tournament information",
       "notes_placeholder": "Rules, rewards, catering...",
       "publish": "Publish tournament"
     },
     "link_club": "Club link required to organize",
     "contact_title": "Contact & Additional Info",
+    "progress": "Tournament ad preparation",
     "alerts": {
-      "create_success": "Tournament successfully created!",
-      "update_success": "Tournament successfully updated!",
-      "delete_success": "Tournament successfully deleted!"
+      "must_link": "You must first link your club via the SIRET number before creating a tournament.",
+      "create_success": "Your tournament has been published successfully!",
+      "update_success": "Your tournament has been updated successfully!",
+      "delete_success": "The tournament has been deleted successfully!",
+      "date_past": "⚠️ INVALID DATE\n\nYou cannot create a tournament in the past."
     }
   },
   "pricing": {
@@ -597,9 +638,9 @@
         }
       },
       "starter": {
-        "name": "Rising Star",
+        "name": "Prospect",
         "price": "19€",
-        "cta": "Choose Rising Star",
+        "cta": "Choose Prospect",
         "features": {
           "0": "10 hours of video analysis",
           "1": "Full access to AI tools",
@@ -625,7 +666,7 @@
         "cta": "Become Elite",
         "features": {
           "0": "30 hours of video analysis",
-          "1": "Max AI (Top priority)",
+          "1": "Max AI (Absolute priority)",
           "2": "PDF Exports & Editing",
           "3": "Dedicated 24/7 support"
         }
@@ -639,15 +680,15 @@
     "away_label": "Away",
     "sections": {
       "locked_title": "Mandatory Configuration",
-      "locked_desc": "Your profile is not yet complete. To ensure platform security, access to the Dashboard is suspended until your information is 100% validated.",
+      "locked_desc": "Your profile is not yet complete. To guarantee platform security, access to the Dashboard is suspended until your information is 100% validated.",
       "modifications_title": "Action Required: Modifications Detected",
       "modifications_desc": "{{count}} match{{plural}} been modified by the organizer. Please check the details."
     },
     "tabs": {
-      "requests": "REQUESTS RECEIVED",
+      "requests": "Requests received",
       "organized": "My Organized Matches / Tournaments",
-      "participations": "CONFIRMED TOURNAMENTS",
-      "confirmed_matches": "CONFIRMED MATCHES",
+      "participations": "Confirmed tournaments",
+      "confirmed_matches": "Confirmed matches",
       "all": "All",
       "matches": "Matches",
       "tournaments": "Tournaments"
@@ -665,26 +706,22 @@
       "no_participation_match": "You haven't applied for any matches",
       "view_profile": "👤 View profile",
       "manage_registrations": "Manage requests",
-      "view_changes": "⚠️ View MODIFICATIONS"
+      "view_changes": "I HAVE SEEN THE MODIFICATIONS"
     },
-    "controls": {
-      "accept": "Accept",
-      "refuse": "Refuse",
-      "view": "Details",
-      "manage_registrations": "Manage requests",
-      "contact": "📞 Contact",
-      "itinerary": "📍 Itinerary",
-      "new": "New Ad"
+    "tournament": {
+      "pairings": "Pairings",
+      "edit_time": "Edit time",
+      "time_range_error": "Time must be between {{start}} and {{end}}",
+      "filling": "Tournament filling",
+      "registered_teams": "Registered teams",
+      "waiting_teams": "Waiting for teams...",
+      "close_registration": "Close registration"
     },
-    "status": {
-      "accepted": "Accepted",
-      "refused": "Refused",
-      "pending": "Pending",
-      "searching": "🔍 SEARCHING FOR OPPONENT",
-      "active": "🔍 SEARCHING FOR OPPONENT",
-      "completed": "Completed",
-      "full": "Full",
-      "open": "Open"
+    "match": {
+      "found": "Opponent found",
+      "filled": "Match full",
+      "searching": "Searching for opponent",
+      "filling": "Match filling"
     },
     "memo": {
       "title": "📋 My Creation History",
@@ -692,17 +729,27 @@
       "empty": "No events created yet."
     },
     "empty": {
-      "no_requests": "You have no pending requests at the moment.",
-      "no_organized": "You haven't posted any ads.",
-      "no_match": "No matches found for this filter.",
-      "no_tournament": "No tournaments found for this filter.",
       "requests": "You have no pending requests at the moment.",
-      "organized": "You haven't posted any ads.",
-      "participations": "You haven't applied for any matches."
+      "organized": "You haven't published any ads.",
+      "participations": "You haven't applied for any matches.",
+      "no_match": "No match found in this category.",
+      "no_tournament": "No tournament found in this category.",
+      "no_requests": "You have no pending requests at the moment.",
+      "no_organized": "You haven't published any ads."
     },
-    "confirm_delete": "Are you sure you want to delete this ad?",
+    "confirm_delete": "Do you really want to delete this ad?",
     "toasts": {
-      "delete_success": "Ad deleted successfully"
+      "accept_success": "Request accepted",
+      "delete_success": "Ad deleted successfully",
+      "all_read_success": "All modifications have been validated"
+    },
+    "notifications": {
+      "modification": "Match modification",
+      "cancellation": "The match scheduled against {{team}} on {{date}} was cancelled by the organizer",
+      "new_request_interactive": "You received a request from {{team}} for the match on {{date}} at {{time}}",
+      "acceptance_player": "Your match against {{team}} on {{date}} has been accepted by the organizer",
+      "rejection_player": "Your request for the match on {{date}} against {{team}} was refused",
+      "withdrawal": "Team {{team}} has cancelled its request for the match on {{date}} at {{time}}"
     },
     "profile_modal": {
       "title": "Club Profile",
@@ -716,30 +763,52 @@
       "unknown": "Unknown",
       "close": "Close"
     },
-    "alerts": {
-      "title": "Match update",
-      "message": "The match against {{host_club_name}} has been updated!",
-      "view_changes": "View changes",
-      "h2_locked": "Event locked (H-2). Contact participants for any last-minute changes.",
-      "specific": {
-        "date": "The match date has been changed.",
-        "time": "The match time has been changed."
-      }
+    "controls": {
+      "accept": "Accept",
+      "refuse": "Refuse",
+      "view": "Details",
+      "view_ad": "See ad",
+      "manage_registrations": "Manage requests",
+      "contact": "📞 Contact",
+      "itinerary": "📍 Itinerary",
+      "new": "New Ad",
+      "view_changes": "I HAVE SEEN THE MODIFICATIONS",
+      "mark_all_read": "Validate all"
     },
-    "notifications": {
-      "modification": "Match update",
-      "cancellation": "The scheduled match against {{team}} on {{date}} has been cancelled by the organizer",
-      "new_request_interactive": "You received a request from {{team}} for the match on {{date}} at {{time}}",
-      "acceptance_player": "Your match against {{team}} on {{date}} has been accepted by the organizer",
-      "rejection_player": "Your request for the match on {{date}} against {{team}} was refused",
-      "withdrawal": "Team {{team}} has cancelled their request for the match on {{date}} at {{time}}"
+    "status": {
+      "accepted": "Accepted",
+      "refused": "Refused",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "searching": "🔍 Searching for opponent",
+      "active": "🔍 Searching for opponent",
+      "completed": "Completed",
+      "full": "Full",
+      "open": "Open"
+    },
+    "alerts": {
+      "title": "Modification detected",
+      "message": "The match against {{team}} scheduled for {{date}} has been modified.",
+      "success_discrete": "Action performed",
+      "specific": {
+        "date": "The match date has been modified.",
+        "time": "The match time has been modified.",
+        "venue": "The match venue has been modified.",
+        "jerseys": "Jersey colors have been modified.",
+        "multiple": "Multiple match information has been modified."
+      },
+      "action_required": "Action Required: Modifications Detected",
+      "match_count": "{{count}} match has been modified by the organizer. Please check the details.",
+      "matches_count": "{{count}} matches have been modified by the organizer. Please check the details.",
+      "view_changes": "I have seen the changes",
+      "mark_as_read": "I understand, mark as read",
+      "verify": "Verify",
+      "action_required_short": "Modifications detected",
+      "attention": "Attention!",
+      "warning_desc": "The organizer ({{host_club_name}}) has modified the information.",
+      "h2_locked": "Event locked (H-2). Contact participants for any last-minute changes."
     }
   },
-  "choose_file": "Choose a file",
-  "technical_issue": "Technical Issue",
-  "bug_report": "Report a Bug",
-  "feature_request": "Request a Feature",
-  "other": "Other",
   "common": {
     "home": "Home",
     "choose": "Choose",
@@ -752,7 +821,7 @@
   "adminUsersPage": {
     "pageTitle": "User and Permission Management",
     "pageSubtitle": "Manage user access for KduFoot.",
-    "cacheTokenSuccess": "(Management token cached ✓)",
+    "cacheTokenSuccess": "(token Management in cache ✓)",
     "loadingUsers": "Loading users...",
     "colUser": "User",
     "colEmail": "Email",
@@ -770,9 +839,9 @@
     "statusAdmin": "Admin",
     "statusSuperAdmin": "S. Admin",
     "btnViewProfile": "View Profile",
-    "modalBanTitle": "🚫 Ban this User",
+    "modalBanTitle": "🚫 Ban this user",
     "modalBanDescription": "This action will <0>permanently delete</0> all matches and tournaments created by this user.",
-    "modalBanReasonLabel": "Ban Reason",
+    "modalBanReasonLabel": "Ban reason",
     "modalBanReasonPlaceholder": "Ex: Abusive behavior, spam...",
     "modalBanConfirm": "CONFIRM BAN",
     "modalTitlePrefix": "Permissions of",
@@ -788,35 +857,35 @@
     "secondaryClubs": "Secondary Clubs",
     "noSecondaryClubs": "No secondary clubs",
     "addSiretTitle": "➕ Add SIRET/SIREN",
-    "forceSiret": "Force (Any Business)",
+    "forceSiret": "Force (Any company)",
     "siretPlaceholder": "Ex: 123 456 789 (9) or 123 456 789 00012 (14)",
     "siretError": "9 or 14 digits required",
-    "btnAddAdditional": "Add Secondary",
-    "btnAddPrimary": "Add Primary",
+    "btnAddAdditional": "As additional",
+    "btnAddPrimary": "As Primary",
     "loadSiretsError": "Error loading SIRETs.",
-    "superPowersTitle": "⚙️ Admin Super-Powers (D1 Direct)",
+    "superPowersTitle": "Admin Super-Powers (D1 Direct)",
     "stadiumAddressLabel": "Physical Stadium Address",
     "stadiumAddressPlaceholder": "Sport Complex, 123 Victory St",
-    "stadiumAddressDesc": "Overrides user lock. Serves as default match address.",
+    "stadiumAddressDesc": "Overrides user lock. Used as default address for matches.",
     "blockCountLabel": "Ban Counter",
     "siretChangeCountLabel": "SIRET Changes",
-    "btnSaveD1": "💾 Save D1 Modifications",
+    "btnSaveD1": "💾 Save D1 modifications",
     "securitySectionTitle": "🛡️ Security & Account",
-    "btnUnblock": "Unblock User",
-    "btnBlock": "🚫 Block User",
-    "btnDeleteAccount": "Delete Account",
+    "btnUnblock": "Unblock user",
+    "btnBlock": "🚫 Block user",
+    "btnDeleteAccount": "Delete account",
     "permissionsSectionTitle": "🔑 User Permissions",
-    "quickAssignLabel": "Quick Assign:",
+    "quickAssignLabel": "Quick assignment:",
     "roleFree": "Free Subscriber",
     "rolePremium": "Premium Subscriber",
     "roleAdmin": "Administrator",
     "roleSuperAdmin": "Super Administrator",
     "roleBlocked": "🚫 BLOCKED",
-    "modalBtnCloseProfile": "Close Profile",
-    "modalBtnSaveModifications": "Save Modifications",
+    "modalBtnCloseProfile": "Close profile",
+    "modalBtnSaveModifications": "Save modifications",
     "modalBtnClose": "Close",
     "modalLoadingPerms": "Loading permissions...",
-    "modalBtnSave": "Save Permissions",
+    "modalBtnSave": "Save permissions",
     "modalBtnCancel": "Cancel",
     "confirmDeletePrefix": "Delete user {{userId}}?",
     "toasts": {
@@ -824,7 +893,7 @@
       "noManagementToken": "Management token unavailable",
       "errorLoadingPerms": "Error loading permissions",
       "successUpdate": "Permissions successfully updated",
-      "errorUpdate": "Error updating permissions",
+      "errorUpdate": "Error during permission update",
       "cannotDeleteSelf": "You cannot delete your own account",
       "confirmDelete": "Delete user {{id}}?",
       "successDelete": "User deleted successfully",
@@ -836,17 +905,17 @@
       "siretDetached": "SIRET successfully detached",
       "siretPrimaryUpdated": "Primary Club updated"
     },
-    "confirmDetachPrimary": "⚠️ Are you sure you want to detach the primary SIRET? The user will no longer have a linked club and will need to choose a new one."
+    "confirmDetachPrimary": "⚠️ Are you sure you want to detach the primary SIRET? The user will no longer have a linked club and will have to choose a new one."
   },
   "thank-you": {
     "title": "Acknowledgments",
     "ronan": {
       "name": "Ronan Le Meillat",
       "description": "I would like to especially thank Ronan Le Meillat for his invaluable help in developing this site. He helped me fix many errors and shared his deep expertise in web development.",
-      "support": "To support him, feel free to give stars to his GitHub repositories by clicking the SCTG logo below."
+      "support": "To support him, feel free to give stars to his company by clicking the SCTG logo below."
     },
     "github": {
-      "instructions": "How to do it? Once on the page, click on one of his project titles, then at the top right, you will see 'Star' with a small star logo. Click on it: when the star turns yellow, it's done!"
+      "instructions": "How to do it? Once on the page, click on one of his project titles, then at the top right, you will see 'Star' with a small star logo. Click it: when the star turns yellow, it's validated!"
     },
     "philippe": {
       "name": "Philippe Dubart"
@@ -855,7 +924,7 @@
       "name": "Franck Dubart"
     },
     "family": {
-      "description": "Thanks also to Philippe Dubart and Franck Dubart for their valuable support and their particularly enriching ideas, which have added real value to the KduFoot experience."
+      "description": "Thanks also to Philippe Dubart and Franck Dubart for their valuable support and their particularly enriching ideas, which have brought real added value to the KduFoot experience."
     }
   },
   "delete": "Delete",
@@ -892,14 +961,14 @@
     "sessions_share": "Share sessions",
     "matches_create": "Create matches",
     "matches_premium": "Premium matches",
-    "matches_contact": "Contact for matches",
+    "matches_contact": "Contact for match",
     "export_pdf": "Export to PDF",
     "export_video": "Export to video",
     "share_library": "Share library",
     "admin_users": "Manage users",
     "admin_exercises": "Manage exercises",
     "admin_matches": "Manage matches",
-    "admin_analytics": "ADM Analytics",
+    "admin_analytics": "ADM Statistics",
     "admin_billing": "Billing",
     "auth0_admin_api": "Auth0 API Access",
     "coach_certified": "Certified coach",
@@ -907,7 +976,7 @@
   },
   "error-updating-user": "Error updating user",
   "connectivity": {
-    "offline": "You are offline. Please check your connection.",
+    "offline": "You are offline. Check your connection.",
     "reconnecting": "Unstable connection, updating..."
   }
 }
