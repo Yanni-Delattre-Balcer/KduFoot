@@ -264,6 +264,7 @@
     "venue": "Lieu",
     "date": "Date",
     "time": "Heure",
+    "send_request": "Envoyer une demande",
     "delete_confirmation": "Es-tu sûr de vouloir supprimer cette annonce ? Cette action est irréversible.",
     "accept_confirm": "Accepter l'équipe de {{clubName}} ?",
     "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",

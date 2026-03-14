@@ -264,6 +264,7 @@
     "venue": "Lieu",
     "date": "Date",
     "time": "Heure",
+    "send_request": "Envoyer une demande",
     "delete_confirmation": "Es-tu sûr de vouloir supprimer cette annonce ? Cette action est irréversible.",
     "accept_confirm": "Accepter l'équipe de {{clubName}} ?",
     "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",
@@ -768,7 +769,8 @@
       "all_read_success": "Toutes les modifications ont été validées"
     },
     "notifications": {
-      "modification": "Match modifié ⚠️. Les détails (heure/lieu) pour le duel du {{date}} ont changé.",
+      "modification": "Match modifié ⚠️",
+      "modification_message": "Votre duel du {{date}} a été modifié. Cliquez ici pour voir les détails.",
       "cancellation": "Annulation du duel. La rencontre du {{date}} avec {{team}} a été annulée.",
       "new_request_interactive": "Vous avez reçu une demande de {{team}} pour votre match du {{date}}",
       "acceptance_player": "Duel Confirmé ! ✅ Votre rencontre du {{date}} est validée.",

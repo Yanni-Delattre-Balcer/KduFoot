@@ -64,6 +64,7 @@
   "unknown": "Unknown",
   "untitled": "Untitled",
   "error": {
+    "title": "Error",
     "not_found": "Item not found",
     "save_failed": "Error during save",
     "loading_sessions": "Error loading training sessions",

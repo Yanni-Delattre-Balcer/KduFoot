@@ -248,6 +248,7 @@
     "venue": "Venue",
     "date": "Date",
     "time": "Time",
+    "send_request": "Send Request",
     "filters": {
       "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
     }
@@ -746,6 +747,7 @@
     "alerts": {
       "title": "Match update",
       "message": "The match against {{host_club_name}} has been updated!",
+      "success_discrete": "Action completed",
       "view_changes": "View changes",
       "h2_locked": "Event locked (H-2). Contact participants for any last-minute changes.",
       "specific": {

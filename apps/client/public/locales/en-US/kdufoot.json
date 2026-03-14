@@ -248,6 +248,7 @@
     "venue": "Venue",
     "date": "Date",
     "time": "Time",
+    "send_request": "Send Request",
     "filters": {
       "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
     }
@@ -723,7 +724,8 @@
       "delete_success": "Ad deleted successfully"
     },
     "notifications": {
-      "modification": "Match modification",
+      "modification": "Match modified ⚠️",
+      "modification_message": "Your duel on {{date}} has been modified. Click here to see details.",
       "cancellation": "The scheduled match against {{team}} on {{date}} has been cancelled by the organizer",
       "new_request_interactive": "You received a request from {{team}} for your match on {{date}}",
       "acceptance_player": "Duel Confirmed! ✅ Your match on {{date}} is validated.",
@@ -745,6 +747,7 @@
     "alerts": {
       "title": "Match update",
       "message": "The match against {{host_club_name}} has been updated!",
+      "success_discrete": "Action completed",
       "view_changes": "View changes",
       "h2_locked": "Event locked (H-2). Contact participants for any last-minute changes.",
       "specific": {
@@ -807,9 +810,9 @@
     "siretChangeCountLabel": "SIRET Changes",
     "btnSaveD1": "💾 Save D1 Modifications",
     "securitySectionTitle": "🛡️ Security & Account",
-    "btnUnblock": "Unblock User",
-    "btnBlock": "🚫 Block User",
-    "btnDeleteAccount": "Delete Account",
+    "btnUnblock": "Débloquer l'utilisateur",
+    "btnBlock": "🚫 Bloquer l'utilisateur",
+    "btnDeleteAccount": "Supprimer le compte",
     "permissionsSectionTitle": "🔑 User Permissions",
     "quickAssignLabel": "Quick Assign:",
     "roleFree": "Free Subscriber",

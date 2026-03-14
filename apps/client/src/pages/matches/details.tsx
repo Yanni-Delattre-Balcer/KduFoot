@@ -389,7 +389,7 @@ export default function MatchDetailsPage() {
                   to={`/matches/${id}/edit`}
                   variant="flat"
                 >
-                  {t("edit")}
+                  {t("common:edit")}
                 </Button>
                 <Button
                   color="danger"
@@ -1004,7 +1004,7 @@ export default function MatchDetailsPage() {
                                         "A porté de l'intérêt en envoyant une demande",
                                     });
                                     addToast({
-                                      title: t("common:success"),
+                                      title: t("common:success", "Succès"),
                                       description: t(
                                         "matchForm.alerts.contact_success",
                                         { date: match.match_date },
@@ -1015,7 +1015,7 @@ export default function MatchDetailsPage() {
                                     });
                                   } catch (e: any) {
                                     addToast({
-                                      title: t("common:error"),
+                                      title: t("common:error.title", "Erreur"),
                                       description:
                                         e.message || "Erreur lors de l'envoi",
                                       variant: "flat",
