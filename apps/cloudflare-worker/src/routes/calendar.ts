@@ -77,14 +77,17 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             const level = item.level || item.match_level || '';
             const venue = item.venue || 'N/A';
 
-            // --- Location ---
-            let location = '';
-            if (venue === 'Domicile') {
-                location = item.stadium_address || item.location_address || '';
-            } else {
-                location = item.location_address || item.stadium_address || '';
+            // --- Location & Deduplication ---
+            let baseAddress = venue === 'Domicile'
+                ? (item.stadium_address || item.location_address || '')
+                : (item.location_address || item.stadium_address || '');
+
+            const city = (item.location_city || '').trim();
+            let location = baseAddress.trim();
+
+            if (city && !location.toLowerCase().includes(city.toLowerCase())) {
+                location += (location ? ', ' : '') + city;
             }
-            if (item.location_city) location += (location ? ', ' : '') + item.location_city;
 
             // --- Titre ---
             // Tournoi → "Kdufoot : [nom du tournoi]"
@@ -106,14 +109,14 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             const kduFootUrl = 'https://kdufoot.com';
             const matchDetailUrl = `${kduFootUrl}/matches/${item.id || item.match_id}`;
 
-            // --- Description enrichie ---
+            // --- Description enrichie (Plain text & HTML) ---
             const descLines = [
                 `Type : ${typeLabel}`,
                 `Catégorie : ${category || 'N/A'}`,
                 `Niveau : ${level || 'N/A'}`,
-                `Lieu : ${location || 'N/A'} (Lien GPS : ${gpsLink})`,
+                `Lieu : ${location || 'N/A'}`,
                 `Position : ${venue}`,
-                `Lien Direct : Suivez vos détails sur le site Kdufoot (${matchDetailUrl})`,
+                `Suivez vos détails sur le site Kdufoot (${matchDetailUrl})`,
             ];
             const description = descLines.join('\\n');
 
@@ -123,8 +126,8 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 `Catégorie : ${category || 'N/A'}<br>`,
                 `Niveau : ${level || 'N/A'}<br>`,
                 `Lieu : <a href="${gpsLink}">${location || 'N/A'}</a><br>`,
-                `Position : ${venue}<br>`,
-                `Lien Direct : <a href="${matchDetailUrl}">Suivez vos détails sur le site Kdufoot</a>`,
+                `Position : ${venue}<br><br>`,
+                `<a href="${matchDetailUrl}">Suivez vos détails sur le site Kdufoot</a>`,
                 '</body></html>'
             ].join('');
 

@@ -521,15 +521,16 @@
       "create_success": "Annonce de match créée avec succès !",
       "update_success": "Match mis à jour avec succès !",
       "delete_success": "Match supprimé avec succès !",
-      "contact_success": "Votre demande a été envoyée avec succès ! 🚀"
+      "contact_success": "Votre demande a été envoyée avec succès ! 🚀",
+      "date_past_error": "Impossible de publier : l'heure sélectionnée est dépassée.",
+      "delay_short_error": "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi.",
+      "validation_failed": "Formulaire incomplet"
     },
     "confirm": {
       "accept": "Accepter cette demande ?",
       "refuse": "Refuser cette demande ?",
       "accepted": "Souhaitez-vous vraiment accepter cette équipe ?",
-      "refused": "Souhaitez-vous vraiment refuser cette équipe ?",
-      "date_past_error": "Date invalide : Vous ne pouvez pas créer un match ou un tournoi dans le passé.",
-      "delay_short_error": "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation."
+      "refused": "Souhaitez-vous vraiment refuser cette équipe ?"
     }
   },
   "accountModal": {

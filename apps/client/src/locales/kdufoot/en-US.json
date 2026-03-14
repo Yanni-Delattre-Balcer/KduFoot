@@ -484,14 +484,14 @@
       "link_error": "Error linking the club. Check the SIRET.",
       "must_link": "You must first link your club via the SIRET number before creating a match.",
       "contact_required": "⚠️ CONTACT REQUIRED\n\nEmail and phone are essential for players to contact you.",
-      "date_far": "⚠️ INVALID DATE\n\nThe match date is too far in the future.",
-      "delete_success": "Match successfully deleted!"
+      "delete_success": "Match successfully deleted!",
+      "date_past_error": "Cannot publish: the selected time has passed.",
+      "delay_short_error": "Delay too short: A match must be created at least 2 hours before kickoff.",
+      "validation_failed": "Incomplete form"
     },
     "confirm": {
       "accepted": "Do you really want to accept this team?",
-      "refused": "Do you really want to refuse this team?",
-      "date_past_error": "Invalid date: You cannot create a match or tournament in the past.",
-      "delay_short_error": "Too short delay: A match must be created at least 2 hours before kickoff to allow organization."
+      "refused": "Do you really want to refuse this team?"
     }
   },
   "accountModal": {

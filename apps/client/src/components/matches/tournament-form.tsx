@@ -203,27 +203,15 @@ export default function TournamentForm({
       newErrors.match_date = "La date est obligatoire.";
     } else {
       const now = new Date();
-      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const [hours, minutes] = (formData.match_time || "00:00").split(":").map(Number);
+      const matchDateTime = new Date(`${formData.match_date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
 
-      if (formData.match_date < todayStr) {
-        newErrors.match_date = t("tournamentForm.alerts.date_past", "Date invalide : Vous ne pouvez pas créer un match ou un tournoi dans le passé.");
-      } else if (formData.match_date === todayStr) {
-        // Rule of 2 hours delay
-        const [hours, minutes] = (formData.match_time || "00:00")
-          .split(":")
-          .map(Number);
-        const matchDateTime = new Date();
-        matchDateTime.setHours(hours, minutes, 0, 0);
+      const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-        const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
-
-        if (matchDateTime < now) {
-          newErrors.match_time =
-            "Impossible de publier : l'heure sélectionnée est dépassée.";
-        } else if (matchDateTime < minTime) {
-          newErrors.match_time =
-            "Délai trop court : Un tournoi doit être créé au moins 2 heures avant le coup d'envoi pour permettre l'organisation.";
-        }
+      if (matchDateTime < now) {
+        newErrors.match_time = t("matchForm.alerts.date_past_error", "Impossible de publier : l'heure sélectionnée est dépassée.");
+      } else if (matchDateTime < minTime) {
+        newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un tournoi doit être créé au moins 2 heures avant le coup d'envoi.");
       }
     }
     if (!formData.match_time)
@@ -245,10 +233,9 @@ export default function TournamentForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) {
-      // Afficher un warning global si la validation bloque (surtout pour les dates/heures passées)
       addToast({
-        title: t("matchForm.alerts.invalid_date_title", "Date ou heure invalide"),
-        description: t("matchForm.alerts.delay_short_error", "Par mesure d'organisation, vous devez publier votre match au moins 2 heures avant le coup d'envoi. Veuillez choisir un créneau ultérieur."),
+        title: t("matchForm.alerts.validation_failed", "Formulaire incomplet"),
+        description: t("account.errors.form_incomplete_desc", "Veuillez remplir tous les champs obligatoires en rouge."),
         color: "danger",
       });
       return;

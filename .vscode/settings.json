@@ -14,8 +14,7 @@
     ".vscode/tailwind-directives.json"
   ],
   "i18n-ally.localesPaths": [
-    "apps/client/src/locales",
-    "apps/client/src/locales/kdufoot"
+    "apps/client/src/locales"
   ],
   "i18n-ally.pathMatcher": "{namespace}/{locale}.{ext}",
   "i18n-ally.namespace": true,
