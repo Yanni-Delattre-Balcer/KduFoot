@@ -1598,7 +1598,6 @@ export default function UsersAndPermissionsPage() {
                                                                                 size="sm"
                                                                                 variant="flat"
                                                                                 onPress={() => handleRemoveSiret(item.siret)}
-                                          }
                                         >
                                           {t("adminUsersPage.btnDetach")}
                                         </Button>
@@ -1770,7 +1769,6 @@ export default function UsersAndPermissionsPage() {
                                                                 value={adminStadiumAddress}
                                                                 variant="bordered"
                                                                 onValueChange={setAdminStadiumAddress}
-                                )}
                               />
                             </div>
                             <Input
