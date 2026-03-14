@@ -1,4 +1,11 @@
 {
+  "base": {
+    "success": "Succès",
+    "edit": "Mettre à jour",
+    "error": {
+      "title": "Erreur"
+    }
+  },
   "success": "Succès",
   "warning": "Attention",
   "info": "Information",
@@ -232,6 +239,8 @@
     "schema": "Schéma Tactic"
   },
   "match": {
+    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "vs": "vs",
     "title": "Matchs Amicaux",
     "tab_matches": "Matchs",

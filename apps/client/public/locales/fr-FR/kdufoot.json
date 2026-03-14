@@ -3,6 +3,13 @@
   "warning": "Attention",
   "info": "Information",
   "loading": "Chargement...",
+  "base": {
+    "success": "Succès",
+    "edit": "Mettre à jour",
+    "error": {
+      "title": "Erreur"
+    }
+  },
   "error": {
     "title": "Erreur",
     "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
@@ -249,6 +256,8 @@
     "schema": "Schéma Tactic"
   },
   "match": {
+    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "vs": "vs",
     "title": "Matchs Amicaux",
     "tab_matches": "Matchs",

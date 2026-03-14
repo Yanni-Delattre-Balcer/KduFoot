@@ -192,7 +192,7 @@ export default function MatchDetailsPage() {
       setKnownData(nextKnown);
 
       addToast({
-        title: t("success", "Succès", { ns: "base" }),
+        title: t("base.success", "Succès"),
         description: "Modifications validées",
         color: "success",
       });
@@ -240,7 +240,7 @@ export default function MatchDetailsPage() {
     try {
       await deleteMatch();
       addToast({
-        title: "Match supprimé",
+        title: match.type === "tournament" ? "Tournoi supprimé" : "Match supprimé",
         description: "L'annonce a été retirée avec succès",
         color: "success",
       });
@@ -249,10 +249,10 @@ export default function MatchDetailsPage() {
     } catch (error) {
       console.error("Failed to delete match", error);
       addToast({
-        title: "Erreur",
+        title: t("base.error.title", "Erreur"),
         description: t(
           "error.delete_failed",
-          "Erreur lors de la suppression du match",
+          match.type === "tournament" ? "Erreur lors de la suppression du tournoi" : "Erreur lors de la suppression du match",
         ),
         color: "danger",
       });
@@ -389,7 +389,7 @@ export default function MatchDetailsPage() {
                   to={`/matches/${id}/edit`}
                   variant="flat"
                 >
-                  {t("edit", "Mettre à jour", { ns: "base" })}
+                  {t("base.edit", "Mettre à jour")}
                 </Button>
                 <Button
                   color="danger"
@@ -970,7 +970,7 @@ export default function MatchDetailsPage() {
                                         "A porté de l'intérêt en envoyant une demande",
                                     });
                                     addToast({
-                                      title: t("success", "Succès", { ns: "base" }),
+                                      title: t("base.success", "Succès"),
                                       description: t(
                                         "matchForm.alerts.contact_success",
                                         { date: match.match_date },
@@ -981,7 +981,7 @@ export default function MatchDetailsPage() {
                                     });
                                   } catch (e: any) {
                                     addToast({
-                                      title: t("error.title", "Erreur", { ns: "base" }),
+                                      title: t("base.error.title", "Erreur"),
                                       description:
                                         e.message || "Erreur lors de l'envoi",
                                       variant: "flat",
