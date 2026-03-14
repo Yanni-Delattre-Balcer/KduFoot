@@ -1,112 +1,148 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth, useUser } from '@/authentication';
-import { usePWAInstall } from '@/hooks/use-pwa-install';
-import { PwaInstallModal } from '@/modals/pwa-install-modal';
-import { CombinedAuthModal } from '@/modals/combined-auth-modal';
+import { useState, useEffect, useCallback } from "react";
+
+import { useAuth, useUser } from "@/authentication";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
+import { PwaInstallModal } from "@/modals/pwa-install-modal";
+import { CombinedAuthModal } from "@/modals/combined-auth-modal";
 
 export const UnifiedOnboarding = () => {
-    const { isAuthenticated, isLoading: authLoading } = useAuth();
-    const { user, isLoading: userLoading } = useUser();
-    const { isStandalone, isPermanentlyDismissed, isSessionDismissed, canInstall } = usePWAInstall();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isLoading: userLoading } = useUser();
+  const {
+    isStandalone,
+    isPermanentlyDismissed,
+    isSessionDismissed,
+    canInstall,
+  } = usePWAInstall();
 
-    const [activeStep, setActiveStep] = useState<'pwa' | 'auth' | null>(null);
-    const [pwaStepEvaluated, setPwaStepEvaluated] = useState(false);
-    const [installedThisSession, setInstalledThisSession] = useState(false);
+  const [activeStep, setActiveStep] = useState<"pwa" | "auth" | null>(null);
+  const [pwaStepEvaluated, setPwaStepEvaluated] = useState(false);
+  const [installedThisSession, setInstalledThisSession] = useState(false);
 
-    // Reactive Storage States
-    const [authDismissed, setAuthDismissed] = useState(false);
+  // Reactive Storage States
+  const [authDismissed, setAuthDismissed] = useState(false);
 
-    const refreshDismissalState = useCallback(() => {
-        const isPerm = localStorage.getItem("kdufoot-auth-onboarding-dismissed") === "true";
-        const isSess = sessionStorage.getItem("kdufoot-auth-onboarding-dismissed") === "true";
-        setAuthDismissed(isPerm || isSess);
-    }, []);
+  const refreshDismissalState = useCallback(() => {
+    const isPerm =
+      localStorage.getItem("kdufoot-auth-onboarding-dismissed") === "true";
+    const isSess =
+      sessionStorage.getItem("kdufoot-auth-onboarding-dismissed") === "true";
 
-    useEffect(() => {
-        refreshDismissalState();
-        window.addEventListener('kdufoot_auth_step_complete', refreshDismissalState);
-        return () => window.removeEventListener('kdufoot_auth_step_complete', refreshDismissalState);
-    }, [refreshDismissalState]);
+    setAuthDismissed(isPerm || isSess);
+  }, []);
 
-    useEffect(() => {
-        if (authLoading || userLoading || !isAuthenticated || installedThisSession) {
-            if (activeStep !== null && installedThisSession) setActiveStep(null);
-            return;
-        }
-
-        const isWeb = !isStandalone;
-
-        // --- EVALUATION ---
-        const needsPWA = isWeb && !isSessionDismissed && !isPermanentlyDismissed && canInstall;
-        const needsAuth = !user?.calendar_token && !authDismissed;
-
-        console.log("[Onboarding] Refreshing...", { 
-            activeStep, 
-            needsPWA, 
-            needsAuth, 
-            pwaStepEvaluated, 
-            isStandalone,
-            detailed: {
-                hasToken: !!user?.calendar_token,
-                authDismissed,
-                canInstall,
-                isSessionDismissed,
-                isPermanentlyDismissed,
-                isStandalone
-            }
-        });
-
-        // --- STATE MACHINE ---
-        
-        // Step 1: PWA (only if needed and not yet evaluated)
-        if (needsPWA && !pwaStepEvaluated) {
-            if (activeStep !== 'pwa') setActiveStep('pwa');
-        } 
-        // Step 2: Auth (if needed AND no PWA is in the way)
-        else if (needsAuth && activeStep === null) {
-            const pwaResolved = isStandalone || !needsPWA || pwaStepEvaluated;
-            if (pwaResolved) {
-                console.log("[Onboarding] Jumping to Auth");
-                setActiveStep('auth');
-            }
-        }
-        // Cleanup
-        else if (!needsPWA && !needsAuth && activeStep !== null) {
-            setActiveStep(null);
-        }
-
-    }, [
-        isAuthenticated, authLoading, userLoading, user?.calendar_token,
-        isStandalone, isPermanentlyDismissed, isSessionDismissed, canInstall,
-        pwaStepEvaluated, activeStep, installedThisSession, authDismissed
-    ]);
-
-    const handlePwaClose = (action: 'installed' | 'dismissed') => {
-        console.log("[Onboarding] PWA Close Action:", action);
-        setActiveStep(null);
-        if (action === 'installed') {
-            // CAS A: L'utilisateur a installé l'app sur le web. 
-            // On s'arrête là pour cette session.
-            setInstalledThisSession(true);
-        } else {
-            // CAS B: L'utilisateur a fait "Plus tard" ou "Déjà fait".
-            // On passe à l'étape suivante (Calendrier).
-            setPwaStepEvaluated(true);
-        }
-    };
-
-    const handleAuthClose = () => {
-        console.log("[Onboarding] Auth Close");
-        setActiveStep(null);
-        refreshDismissalState();
-    };
-
-    if (!isAuthenticated) return null;
-
-    return (
-        <>
-            <PwaInstallModal isOpen={activeStep === 'pwa'} onClose={handlePwaClose} />
-            <CombinedAuthModal isOpen={activeStep === 'auth'} onClose={handleAuthClose} />
-        </>
+  useEffect(() => {
+    refreshDismissalState();
+    window.addEventListener(
+      "kdufoot_auth_step_complete",
+      refreshDismissalState,
     );
+
+    return () =>
+      window.removeEventListener(
+        "kdufoot_auth_step_complete",
+        refreshDismissalState,
+      );
+  }, [refreshDismissalState]);
+
+  useEffect(() => {
+    if (
+      authLoading ||
+      userLoading ||
+      !isAuthenticated ||
+      installedThisSession
+    ) {
+      if (activeStep !== null && installedThisSession) setActiveStep(null);
+
+      return;
+    }
+
+    const isWeb = !isStandalone;
+
+    // --- EVALUATION ---
+    const needsPWA =
+      isWeb && !isSessionDismissed && !isPermanentlyDismissed && canInstall;
+    const needsAuth = !user?.calendar_token && !authDismissed;
+
+    console.log("[Onboarding] Refreshing...", {
+      activeStep,
+      needsPWA,
+      needsAuth,
+      pwaStepEvaluated,
+      isStandalone,
+      detailed: {
+        hasToken: !!user?.calendar_token,
+        authDismissed,
+        canInstall,
+        isSessionDismissed,
+        isPermanentlyDismissed,
+        isStandalone,
+      },
+    });
+
+    // --- STATE MACHINE ---
+
+    // Step 1: PWA (only if needed and not yet evaluated)
+    if (needsPWA && !pwaStepEvaluated) {
+      if (activeStep !== "pwa") setActiveStep("pwa");
+    }
+    // Step 2: Auth (if needed AND no PWA is in the way)
+    else if (needsAuth && activeStep === null) {
+      const pwaResolved = isStandalone || !needsPWA || pwaStepEvaluated;
+
+      if (pwaResolved) {
+        console.log("[Onboarding] Jumping to Auth");
+        setActiveStep("auth");
+      }
+    }
+    // Cleanup
+    else if (!needsPWA && !needsAuth && activeStep !== null) {
+      setActiveStep(null);
+    }
+  }, [
+    isAuthenticated,
+    authLoading,
+    userLoading,
+    user?.calendar_token,
+    isStandalone,
+    isPermanentlyDismissed,
+    isSessionDismissed,
+    canInstall,
+    pwaStepEvaluated,
+    activeStep,
+    installedThisSession,
+    authDismissed,
+  ]);
+
+  const handlePwaClose = (action: "installed" | "dismissed") => {
+    console.log("[Onboarding] PWA Close Action:", action);
+    setActiveStep(null);
+    if (action === "installed") {
+      // CAS A: L'utilisateur a installé l'app sur le web.
+      // On s'arrête là pour cette session.
+      setInstalledThisSession(true);
+    } else {
+      // CAS B: L'utilisateur a fait "Plus tard" ou "Déjà fait".
+      // On passe à l'étape suivante (Calendrier).
+      setPwaStepEvaluated(true);
+    }
+  };
+
+  const handleAuthClose = () => {
+    console.log("[Onboarding] Auth Close");
+    setActiveStep(null);
+    refreshDismissalState();
+  };
+
+  if (!isAuthenticated) return null;
+
+  return (
+    <>
+      <PwaInstallModal isOpen={activeStep === "pwa"} onClose={handlePwaClose} />
+      <CombinedAuthModal
+        isOpen={activeStep === "auth"}
+        onClose={handleAuthClose}
+      />
+    </>
+  );
 };

@@ -1,236 +1,355 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
-import { usePWAInstall } from '@/hooks/use-pwa-install';
-import { useAuth } from '@/authentication/providers/use-auth';
+
+import { usePWAInstall } from "@/hooks/use-pwa-install";
+import { useAuth } from "@/authentication/providers/use-auth";
 
 export const PwaInstallBanner = () => {
-    const { deferredPrompt, isStandalone, isIOS, isPermanentlyDismissed, isSessionDismissed, installPWA, dismissPrompt } = usePWAInstall();
-    const { isAuthenticated, isLoading } = useAuth();
-    const [isVisible, setIsVisible] = useState(false);
-    const [showIOSHint, setShowIOSHint] = useState(false);
-    const [showPCHint, setShowPCHint] = useState(false);
+  const {
+    deferredPrompt,
+    isStandalone,
+    isIOS,
+    isPermanentlyDismissed,
+    isSessionDismissed,
+    installPWA,
+    dismissPrompt,
+  } = usePWAInstall();
+  const { isAuthenticated, isLoading } = useAuth();
+  const [isVisible, setIsVisible] = useState(false);
+  const [showIOSHint, setShowIOSHint] = useState(false);
+  const [showPCHint, setShowPCHint] = useState(false);
 
-    // Lock background scroll when a hint is open
-    useEffect(() => {
-        if (showIOSHint || showPCHint) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => { document.body.style.overflow = ''; };
-    }, [showIOSHint, showPCHint]);
+  // Lock background scroll when a hint is open
+  useEffect(() => {
+    if (showIOSHint || showPCHint) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
-    useEffect(() => {
-        // Strict visibility logic:
-        // - Don't show while loading or if not authenticated
-        // - Don't show if already installed (standalone)
-        // - Don't show if permanently dismissed ("Je l'ai déjà")
-        // - Don't show if session-dismissed ("Plus tard") — resets on next login
-        if (isLoading || !isAuthenticated || isStandalone || isPermanentlyDismissed || isSessionDismissed) {
-            setIsVisible(false);
-            return;
-        }
-
-        // Show only when authenticated and not dismissed in any way
-        setIsVisible(true);
-
-    }, [isAuthenticated, isLoading, isStandalone, isPermanentlyDismissed, isSessionDismissed]);
-
-    if (!isVisible) return null;
-
-    const handleInstallClick = () => {
-        if (isIOS) {
-            setShowIOSHint(true);
-        } else if (deferredPrompt) {
-            installPWA();
-        } else {
-            // Unlikely to happen normally but covers Chrome heuristic cooldowns
-            setShowPCHint(true);
-        }
+    return () => {
+      document.body.style.overflow = "";
     };
+  }, [showIOSHint, showPCHint]);
 
-    const handleDismissSession = () => {
-        dismissPrompt(false);
-        setIsVisible(false);
-    };
+  useEffect(() => {
+    // Strict visibility logic:
+    // - Don't show while loading or if not authenticated
+    // - Don't show if already installed (standalone)
+    // - Don't show if permanently dismissed ("Je l'ai déjà")
+    // - Don't show if session-dismissed ("Plus tard") — resets on next login
+    if (
+      isLoading ||
+      !isAuthenticated ||
+      isStandalone ||
+      isPermanentlyDismissed ||
+      isSessionDismissed
+    ) {
+      setIsVisible(false);
 
-    const handleDismissPermanent = () => {
-        dismissPrompt(true);
-        setIsVisible(false);
-    };
+      return;
+    }
 
-    return (
-        <>
-            {/* Standard Install Banner (Android/PC) */}
-            {!showIOSHint && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-appearance-in sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[420px]">
-                    <div className="absolute inset-0 sm:hidden" onClick={handleDismissSession} />
-                    <Card className="bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-0 overflow-hidden relative w-full">
-                        <div className="h-1.5 w-full bg-gradient-to-r from-primary via-primary/50 to-primary" />
+    // Show only when authenticated and not dismissed in any way
+    setIsVisible(true);
+  }, [
+    isAuthenticated,
+    isLoading,
+    isStandalone,
+    isPermanentlyDismissed,
+    isSessionDismissed,
+  ]);
 
-                        <div className="p-6 sm:p-8 flex flex-col items-center text-center gap-6">
-                            <div className="bg-black rounded-[2rem] p-4 border border-white/10 shadow-2xl relative group">
-                                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-75 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <img src="/android-chrome-192x192.png" alt="Kdufoot" className="w-16 h-16 object-contain relative z-10" />
-                            </div>
+  if (!isVisible) return null;
 
-                            <div className="space-y-2">
-                                <h3 className="text-2xl font-black text-white tracking-tighter italic leading-none">
-                                    Installer Kdufoot
-                                </h3>
-                                <p className="text-sm text-zinc-400 font-medium px-4">
-                                    Installez l'application mobile pour une expérience fluide et des notifications sportives en temps réel.
-                                </p>
-                            </div>
+  const handleInstallClick = () => {
+    if (isIOS) {
+      setShowIOSHint(true);
+    } else if (deferredPrompt) {
+      installPWA();
+    } else {
+      // Unlikely to happen normally but covers Chrome heuristic cooldowns
+      setShowPCHint(true);
+    }
+  };
 
-                            <div className="flex flex-col w-full gap-2 mt-2">
-                                <Button
-                                    size="lg"
-                                    color="primary"
-                                    className="font-black h-12 text-sm tracking-widest shadow-xl shadow-primary/20 w-full"
-                                    onPress={handleInstallClick}
-                                >
-                                    Installer
-                                </Button>
+  const handleDismissSession = () => {
+    dismissPrompt(false);
+    setIsVisible(false);
+  };
 
-                                <div className="grid grid-cols-2 gap-2">
-                                    <Button
-                                        size="sm"
-                                        variant="flat"
-                                        className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
-                                        onPress={handleDismissSession}
-                                    >
-                                        Plus tard
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="flat"
-                                        className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
-                                        onPress={handleDismissPermanent}
-                                    >
-                                        Je l'ai déjà
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </Card>
+  const handleDismissPermanent = () => {
+    dismissPrompt(true);
+    setIsVisible(false);
+  };
+
+  return (
+    <>
+      {/* Standard Install Banner (Android/PC) */}
+      {!showIOSHint && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-appearance-in sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[420px]">
+          <div
+            className="absolute inset-0 sm:hidden"
+            onClick={handleDismissSession}
+          />
+          <Card className="bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-0 overflow-hidden relative w-full">
+            <div className="h-1.5 w-full bg-gradient-to-r from-primary via-primary/50 to-primary" />
+
+            <div className="p-6 sm:p-8 flex flex-col items-center text-center gap-6">
+              <div className="bg-black rounded-[2rem] p-4 border border-white/10 shadow-2xl relative group">
+                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-75 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <img
+                  alt="Kdufoot"
+                  className="w-16 h-16 object-contain relative z-10"
+                  src="/android-chrome-192x192.png"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white tracking-tighter italic leading-none">
+                  Installer Kdufoot
+                </h3>
+                <p className="text-sm text-zinc-400 font-medium px-4">
+                  Installez l'application mobile pour une expérience fluide et
+                  des notifications sportives en temps réel.
+                </p>
+              </div>
+
+              <div className="flex flex-col w-full gap-2 mt-2">
+                <Button
+                  className="font-black h-12 text-sm tracking-widest shadow-xl shadow-primary/20 w-full"
+                  color="primary"
+                  size="lg"
+                  onPress={handleInstallClick}
+                >
+                  Installer
+                </Button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
+                    size="sm"
+                    variant="flat"
+                    onPress={handleDismissSession}
+                  >
+                    Plus tard
+                  </Button>
+                  <Button
+                    className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
+                    size="sm"
+                    variant="flat"
+                    onPress={handleDismissPermanent}
+                  >
+                    Je l'ai déjà
+                  </Button>
                 </div>
-            )}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
-            {/* iOS Specific Hint Popup */}
-            {showIOSHint && (
-                <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in overflow-y-auto overscroll-contain" onClick={() => { setShowIOSHint(false); handleDismissSession(); }}>
-                    <Card className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-6 space-y-6 shadow-[0_0_100px_rgba(var(--heroui-primary-rgb),0.2)] relative my-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex flex-col items-center text-center gap-4">
-                            <div className="w-20 h-20 rounded-3xl bg-black border-2 border-primary/40 p-2 shadow-2xl shadow-primary/20 shadow-inner">
-                                <img src="/apple-touch-icon.png" alt="Kdufoot" className="w-full h-full object-contain" />
-                            </div>
-                            <div className="space-y-1">
-                                <h2 className="text-2xl font-black text-white tracking-tighter italic leading-tight">Kdufoot Mobile</h2>
-                                <p className="text-[10px] text-primary font-black tracking-[0.2em]">Guide d'installation</p>
-                            </div>
-                        </div>
+      {/* iOS Specific Hint Popup */}
+      {showIOSHint && (
+        <div
+          className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in overflow-y-auto overscroll-contain"
+          onClick={() => {
+            setShowIOSHint(false);
+            handleDismissSession();
+          }}
+        >
+          <Card
+            className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-6 space-y-6 shadow-[0_0_100px_rgba(var(--heroui-primary-rgb),0.2)] relative my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-20 h-20 rounded-3xl bg-black border-2 border-primary/40 p-2 shadow-2xl shadow-primary/20 shadow-inner">
+                <img
+                  alt="Kdufoot"
+                  className="w-full h-full object-contain"
+                  src="/apple-touch-icon.png"
+                />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-2xl font-black text-white tracking-tighter italic leading-tight">
+                  Kdufoot Mobile
+                </h2>
+                <p className="text-[10px] text-primary font-black tracking-[0.2em]">
+                  Guide d'installation
+                </p>
+              </div>
+            </div>
 
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                    <span className="text-primary font-black text-xs">1</span>
-                                </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Ouvrez le site sur <span className="text-white font-bold">Safari</span>.</p>
-                            </div>
-
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                    <span className="text-primary font-black text-xs">1</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur l'icône <span className="text-blue-400 font-bold italic">Partager</span> (le carré avec la flèche vers le haut) en bas au centre.</p>
-                                    <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-blue-400">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                    <span className="text-primary font-black text-xs">2</span>
-                                </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Faites défiler le menu pour trouver le bouton <span className="text-white font-bold italic">"En savoir plus"</span>.</p>
-                            </div>
-
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                    <span className="text-primary font-black text-xs">3</span>
-                                </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Cliquez sur la ligne <span className="text-white font-bold italic">"Sur l'écran d'accueil"</span> (généralement la 5ème option).</p>
-                            </div>
-
-                            <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
-                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                                    <span className="text-primary font-black text-xs">4</span>
-                                </div>
-                                <p className="text-xs text-zinc-300 font-medium leading-relaxed">Appuyez sur <span className="text-white font-bold">"Ajouter"</span> en haut à droite.</p>
-                            </div>
-
-                            <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20 mt-2">
-                                <p className="text-[10px] text-green-400 font-bold text-center leading-tight">
-                                    Votre application Kdufoot est maintenant installée sur votre écran d'accueil, prête à l'emploi !
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <Button
-                                color="primary"
-                                className="w-full font-black tracking-widest h-12 text-sm shadow-xl shadow-primary/20"
-                                onPress={() => { setShowIOSHint(false); handleDismissSession(); }}
-                            >
-                                C'est compris !
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="flat"
-                                className="font-bold text-[10px] uppercase tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
-                                onPress={handleDismissPermanent}
-                            >
-                                JE L'AI DÉJÀ INSTALLÉE
-                            </Button>
-                        </div>
-                    </Card>
+            <div className="space-y-3">
+              <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="text-primary font-black text-xs">1</span>
                 </div>
-            )}
+                <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                  Ouvrez le site sur{" "}
+                  <span className="text-white font-bold">Safari</span>.
+                </p>
+              </div>
 
-            {/* PC/Android General Hint Popup (If native prompt is blocked) */}
-            {showPCHint && (
-                <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in" onClick={() => { setShowPCHint(false); handleDismissSession(); }}>
-                    <Card className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-8 space-y-6 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                        <div className="flex flex-col items-center text-center gap-4">
-                            <h2 className="text-xl font-black text-white italic">Comment l'installer ?</h2>
-                            <p className="text-sm text-zinc-400 font-medium">L'installation automatique est bloquée par votre navigateur actuel.</p>
-                        </div>
-
-                        <div className="bg-white/5 border border-white/10 p-4 rounded-xl space-y-3">
-                            <p className="text-sm text-zinc-300">
-                                Pour installer Kdufoot, cliquez sur l'icône <span className="font-bold text-white">Installer l'application</span> (qui ressemble souvent à un écran d'ordinateur ou à un plus ➕) située <span className="text-primary font-bold">à tout moment à droite de votre barre d'adresse en haut de la fenêtre.</span>
-                            </p>
-                            <p className="text-sm text-zinc-300">
-                                Sur Android Chrome, cherchez <span className="font-bold text-white">"Ajouter à l'écran d'accueil"</span> dans le menu du navigateur (les 3 petits points verticaux).
-                            </p>
-                        </div>
-
-                        <Button
-                            color="primary"
-                            className="w-full font-black tracking-widest h-12 text-sm"
-                            onPress={() => { setShowPCHint(false); handleDismissSession(); }}
-                        >
-                            J'ai compris
-                        </Button>
-                    </Card>
+              <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="text-primary font-black text-xs">1</span>
                 </div>
-            )}
-        </>
-    );
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                    Cliquez sur l'icône{" "}
+                    <span className="text-blue-400 font-bold italic">
+                      Partager
+                    </span>{" "}
+                    (le carré avec la flèche vers le haut) en bas au centre.
+                  </p>
+                  <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
+                    <svg
+                      className="w-4 h-4 text-blue-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="text-primary font-black text-xs">2</span>
+                </div>
+                <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                  Faites défiler le menu pour trouver le bouton{" "}
+                  <span className="text-white font-bold italic">
+                    "En savoir plus"
+                  </span>
+                  .
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="text-primary font-black text-xs">3</span>
+                </div>
+                <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                  Cliquez sur la ligne{" "}
+                  <span className="text-white font-bold italic">
+                    "Sur l'écran d'accueil"
+                  </span>{" "}
+                  (généralement la 5ème option).
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10 group hover:bg-white/10 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                  <span className="text-primary font-black text-xs">4</span>
+                </div>
+                <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                  Appuyez sur{" "}
+                  <span className="text-white font-bold">"Ajouter"</span> en
+                  haut à droite.
+                </p>
+              </div>
+
+              <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20 mt-2">
+                <p className="text-[10px] text-green-400 font-bold text-center leading-tight">
+                  Votre application Kdufoot est maintenant installée sur votre
+                  écran d'accueil, prête à l'emploi !
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Button
+                className="w-full font-black tracking-widest h-12 text-sm shadow-xl shadow-primary/20"
+                color="primary"
+                onPress={() => {
+                  setShowIOSHint(false);
+                  handleDismissSession();
+                }}
+              >
+                C'est compris !
+              </Button>
+              <Button
+                className="font-bold text-[10px] uppercase tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
+                size="sm"
+                variant="flat"
+                onPress={handleDismissPermanent}
+              >
+                JE L'AI DÉJÀ INSTALLÉE
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* PC/Android General Hint Popup (If native prompt is blocked) */}
+      {showPCHint && (
+        <div
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in"
+          onClick={() => {
+            setShowPCHint(false);
+            handleDismissSession();
+          }}
+        >
+          <Card
+            className="bg-zinc-900 border-2 border-white/10 w-full max-w-sm p-8 space-y-6 shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center gap-4">
+              <h2 className="text-xl font-black text-white italic">
+                Comment l'installer ?
+              </h2>
+              <p className="text-sm text-zinc-400 font-medium">
+                L'installation automatique est bloquée par votre navigateur
+                actuel.
+              </p>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 p-4 rounded-xl space-y-3">
+              <p className="text-sm text-zinc-300">
+                Pour installer Kdufoot, cliquez sur l'icône{" "}
+                <span className="font-bold text-white">
+                  Installer l'application
+                </span>{" "}
+                (qui ressemble souvent à un écran d'ordinateur ou à un plus ➕)
+                située{" "}
+                <span className="text-primary font-bold">
+                  à tout moment à droite de votre barre d'adresse en haut de la
+                  fenêtre.
+                </span>
+              </p>
+              <p className="text-sm text-zinc-300">
+                Sur Android Chrome, cherchez{" "}
+                <span className="font-bold text-white">
+                  "Ajouter à l'écran d'accueil"
+                </span>{" "}
+                dans le menu du navigateur (les 3 petits points verticaux).
+              </p>
+            </div>
+
+            <Button
+              className="w-full font-black tracking-widest h-12 text-sm"
+              color="primary"
+              onPress={() => {
+                setShowPCHint(false);
+                handleDismissSession();
+              }}
+            >
+              J'ai compris
+            </Button>
+          </Card>
+        </div>
+      )}
+    </>
+  );
 };

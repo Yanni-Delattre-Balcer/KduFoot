@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 /**
  * Hook to detect user inactivity.
@@ -6,46 +6,52 @@ import { useState, useEffect, useRef } from 'react';
  * @returns boolean indicating if the user is idle.
  */
 export function useIdle(timeoutMs: number = 60000) {
-    const [isIdle, setIsIdle] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isIdle, setIsIdle] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const resetTimeout = () => {
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
+  const resetTimeout = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
 
-        if (isIdle) {
-            setIsIdle(false);
-        }
+    if (isIdle) {
+      setIsIdle(false);
+    }
 
-        timeoutRef.current = setTimeout(() => {
-            setIsIdle(true);
-        }, timeoutMs);
+    timeoutRef.current = setTimeout(() => {
+      setIsIdle(true);
+    }, timeoutMs);
+  };
+
+  useEffect(() => {
+    const events = [
+      "mousemove",
+      "mousedown",
+      "keydown",
+      "scroll",
+      "touchstart",
+    ];
+
+    // Initialize timeout
+    resetTimeout();
+
+    const handleActivity = () => {
+      resetTimeout();
     };
 
-    useEffect(() => {
-        const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach((event) => {
+      window.addEventListener(event, handleActivity);
+    });
 
-        // Initialize timeout
-        resetTimeout();
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      events.forEach((event) => {
+        window.removeEventListener(event, handleActivity);
+      });
+    };
+  }, [isIdle, timeoutMs]);
 
-        const handleActivity = () => {
-            resetTimeout();
-        };
-
-        events.forEach(event => {
-            window.addEventListener(event, handleActivity);
-        });
-
-        return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
-            events.forEach(event => {
-                window.removeEventListener(event, handleActivity);
-            });
-        };
-    }, [isIdle, timeoutMs]);
-
-    return isIdle;
+  return isIdle;
 }

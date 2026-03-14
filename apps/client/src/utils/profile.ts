@@ -1,22 +1,39 @@
-import { User } from '@/types/user.types';
+import { User } from "@/types/user.types";
 
-export const isProfileComplete = (user: User | null, lenient: boolean = false): boolean => {
-    if (!user) return false;
+export const isProfileComplete = (
+  user: User | null,
+  lenient: boolean = false,
+): boolean => {
+  if (!user) return false;
 
-    // Configuration Club
-    const cleanSiret = user.siret?.replace(/\s/g, '') || "";
-    const hasFullClub = (cleanSiret.length === 9 || cleanSiret.length === 14) && (!!user.club?.name || !!user.club_id);
+  // Configuration Club
+  const cleanSiret = user.siret?.replace(/\s/g, "") || "";
+  const hasFullClub =
+    (cleanSiret.length === 9 || cleanSiret.length === 14) &&
+    (!!user.club?.name || !!user.club_id);
 
-    // Configuration Personnelle
-    const hasFullPersonalInfo = !!user.firstname && !!user.lastname && !!user.phone && !!user.license_id;
+  // Configuration Personnelle
+  const hasFullPersonalInfo =
+    !!user.firstname && !!user.lastname && !!user.phone && !!user.license_id;
 
-    // Configuration Sportive
-    const hasFullSportsProfile = !!user.category && !!user.level && !!user.home_jersey_color && !!user.away_jersey_color && !!user.stadium_address;
+  // Configuration Sportive
+  const hasFullSportsProfile =
+    !!user.category &&
+    !!user.level &&
+    !!user.home_jersey_color &&
+    !!user.away_jersey_color &&
+    !!user.stadium_address;
 
-    if (lenient) {
-        // En mode souple, on débloque le dashboard si les infos de base, club, stade et maillots sont là
-        return hasFullClub && hasFullPersonalInfo && !!user.stadium_address && !!user.home_jersey_color && !!user.away_jersey_color;
-    }
+  if (lenient) {
+    // En mode souple, on débloque le dashboard si les infos de base, club, stade et maillots sont là
+    return (
+      hasFullClub &&
+      hasFullPersonalInfo &&
+      !!user.stadium_address &&
+      !!user.home_jersey_color &&
+      !!user.away_jersey_color
+    );
+  }
 
-    return hasFullClub && hasFullPersonalInfo && hasFullSportsProfile;
+  return hasFullClub && hasFullPersonalInfo && hasFullSportsProfile;
 };

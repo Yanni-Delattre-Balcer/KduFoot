@@ -22,7 +22,7 @@ import type { NavigateOptions } from "react-router-dom";
 import { HeroUIProvider } from "@heroui/system";
 import { ToastProvider } from "@heroui/toast";
 import { useHref, useNavigate } from "react-router-dom";
-import { SWRConfig } from 'swr';
+import { SWRConfig } from "swr";
 
 declare module "@react-types/shared" {
   interface RouterConfig {
@@ -34,18 +34,20 @@ export function Provider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   return (
-    <SWRConfig value={{
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }}>
+    <SWRConfig
+      value={{
+        revalidateOnFocus: false,
+        revalidateOnReconnect: false,
+      }}
+    >
       <HeroUIProvider navigate={navigate} useHref={useHref}>
-        <ToastProvider 
-          placement="top-center" 
+        <ToastProvider
           maxVisibleToasts={1}
+          placement="top-center"
           toastProps={{
             classNames: {
-              base: "mt-[80px] sm:mt-0"
-            }
+              base: "mt-[80px] sm:mt-0",
+            },
           }}
         />
         {children}

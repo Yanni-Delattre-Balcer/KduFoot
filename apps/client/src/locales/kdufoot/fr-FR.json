@@ -181,12 +181,12 @@
   },
   "onboarding": {
     "calendar": {
-      "title": "Ne manquez aucun match !",
+      "title": "Synchroniser mon calendrier",
       "description": "Synchronisez vos rencontres directement avec votre calendrier pour des rappels intelligents et un suivi en temps réel.",
       "button": "Connecter mon calendrier",
       "native": "Calendrier Natif",
       "later": "Peut-être plus tard",
-      "dismiss": "Ne plus afficher",
+      "dismiss": "C'est déjà fait / Ne plus me demander",
       "toast_success": "Synchronisation calendrier lancée !",
       "toast_error": "Échec de la synchronisation calendrier"
     }
@@ -510,7 +510,8 @@
       "link_success": "Club lié avec succès !",
       "create_success": "Annonce de match créée avec succès !",
       "update_success": "Match mis à jour avec succès !",
-      "delete_success": "Match supprimé avec succès !"
+      "delete_success": "Match supprimé avec succès !",
+      "contact_success": "Votre demande pour le {{date}} a bien été envoyée."
     },
     "confirm": {
       "accept": "Accepter cette demande ?",
@@ -761,11 +762,12 @@
       "all_read_success": "Toutes les modifications ont été validées"
     },
     "notifications": {
-      "modification": "Modification du match",
-      "cancellation": "Le match prévu contre {{team}} le {{date}} a été annulé par l'organisateur",
-      "new_request_interactive": "Vous avez reçu une demande de {{team}} pour le match du {{date}} à {{time}}",
-      "acceptance_player": "Votre match contre {{team}} le {{date}} a été accepté par l'organisateur",
-      "rejection_player": "Votre demande pour le match du {{date}} contre {{team}} a été refusée"
+      "modification": "Match modifié ⚠️. Les détails (heure/lieu) pour le duel du {{date}} ont changé.",
+      "cancellation": "Annulation du duel. La rencontre du {{date}} avec {{team}} a été annulée.",
+      "new_request_interactive": "Vous avez reçu une nouvelle demande de {{team}} pour le {{date}}.",
+      "acceptance_player": "Duel Confirmé ! ✅ Votre rencontre du {{date}} est validée.",
+      "rejection_player": "Demande refusée. {{team}} n'est pas disponible pour le {{date}}.",
+      "refusal_organizer": "Demande refusée. Vous avez décliné l'invitation de {{team}}."
     },
     "profile_modal": {
       "title": "Profil du Club",

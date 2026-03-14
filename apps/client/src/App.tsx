@@ -17,12 +17,17 @@
  */
 import { Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
-import { SiteLoading } from "./components/site-loading";
-import { AuthenticationGuard, useAuth, UserSync, useUser, BlockedPage } from "./authentication";
 
+import { SiteLoading } from "./components/site-loading";
+import {
+  AuthenticationGuard,
+  useAuth,
+  UserSync,
+  useUser,
+  BlockedPage,
+} from "./authentication";
 import { PageNotFound } from "./pages/404";
 import { UnifiedOnboarding } from "./components/unified-onboarding";
-
 
 import IndexPage from "@/pages/index";
 import ApiPage from "@/pages/api";
@@ -47,7 +52,6 @@ import { showVideoAnalysis } from "@/config/site";
 import UsersAndPermissionsPage from "@/pages/admin/users-and-permissions";
 import AccountPage from "@/pages/account";
 
-
 function App() {
   const { isBlocked, isLoading: userLoading, user, blockReason } = useUser();
   const { isLoading: authLoading, isAuthenticated } = useAuth();
@@ -55,12 +59,19 @@ function App() {
   // Mobile Redirection Logic (SEO & Auth0 fix)
   useEffect(() => {
     const hostname = window.location.hostname;
+
     // Redirect if it's not the official domain (and not local dev)
-    if (hostname !== 'kdufoot.com' &&
-      hostname !== 'localhost' &&
-      hostname !== '127.0.0.1' &&
-      !hostname.includes('192.168.')) {
-      window.location.replace('https://kdufoot.com' + window.location.pathname + window.location.search);
+    if (
+      hostname !== "kdufoot.com" &&
+      hostname !== "localhost" &&
+      hostname !== "127.0.0.1" &&
+      !hostname.includes("192.168.")
+    ) {
+      window.location.replace(
+        "https://kdufoot.com" +
+          window.location.pathname +
+          window.location.search,
+      );
     }
   }, []);
 
@@ -69,8 +80,8 @@ function App() {
     return <BlockedPage isBlocked={true} reason={blockReason} />;
   }
 
-  // 2. CHARGEMENT / ÉTANCHÉITÉ : 
-  // On bloque le rendu si on attend l'auth. 
+  // 2. CHARGEMENT / ÉTANCHÉITÉ :
+  // On bloque le rendu si on attend l'auth.
   // Si on est authentifié, on exige d'avoir un profil 'user' chargé AVANT de montrer le site.
   // Cela empêche d'afficher le Dashboard si la requête context échoue (401/403).
   if (authLoading || (isAuthenticated && userLoading && !user)) {
@@ -101,20 +112,11 @@ function App() {
           <Route element={<PageNotFound />} path="*" />
           {showVideoAnalysis && (
             <>
-              <Route
-                element={<ExercisesPage />}
-                path="/exercises"
-              />
-              <Route
-                element={<TrainingPage />}
-                path="/training"
-              />
+              <Route element={<ExercisesPage />} path="/exercises" />
+              <Route element={<TrainingPage />} path="/training" />
             </>
           )}
-          <Route
-            element={<FavoritesPage />}
-            path="/favorites"
-          />
+          <Route element={<FavoritesPage />} path="/favorites" />
           {showVideoAnalysis && (
             <>
               <Route
@@ -126,15 +128,14 @@ function App() {
                 path="/exercises/:id/edit"
               />
               <Route
-                element={<AuthenticationGuard component={ExerciseDetailsPage} />}
+                element={
+                  <AuthenticationGuard component={ExerciseDetailsPage} />
+                }
                 path="/exercises/:id"
               />
             </>
           )}
-          <Route
-            element={<SessionPlannerPage />}
-            path="/sessions"
-          />
+          <Route element={<SessionPlannerPage />} path="/sessions" />
           <Route
             element={<AuthenticationGuard component={SessionEditPage} />}
             path="/sessions/new"
@@ -147,14 +148,8 @@ function App() {
             element={<AuthenticationGuard component={SessionDetailsPage} />}
             path="/sessions/:id"
           />
-          <Route
-            element={<DashboardPage />}
-            path="/dashboard"
-          />
-          <Route
-            element={<MatchesPage />}
-            path="/matches"
-          />
+          <Route element={<DashboardPage />} path="/dashboard" />
+          <Route element={<MatchesPage />} path="/matches" />
           <Route
             element={<AuthenticationGuard component={MatchEditPage} />}
             path="/matches/new"
@@ -163,16 +158,15 @@ function App() {
             element={<AuthenticationGuard component={MatchEditPage} />}
             path="/matches/:id/edit"
           />
-          <Route
-            element={<MatchDetailsPage />}
-            path="/matches/:id"
-          />
+          <Route element={<MatchDetailsPage />} path="/matches/:id" />
           <Route
             element={<AuthenticationGuard component={AccountPage} />}
             path="/account"
           />
           <Route
-            element={<AuthenticationGuard component={UsersAndPermissionsPage} />}
+            element={
+              <AuthenticationGuard component={UsersAndPermissionsPage} />
+            }
             path="/admin/users"
           />
         </Routes>

@@ -75,12 +75,9 @@ export const useDexProvider = (
           window.location.search.includes("code=") &&
           window.location.search.includes("state=")
         ) {
-
           try {
             // Process the callback
             const user = await userManager.signinRedirectCallback();
-
-            
 
             setUser(user);
             setIsAuthenticated(!!user?.access_token);
@@ -110,11 +107,9 @@ export const useDexProvider = (
             const currentUser = await userManager.getUser();
 
             if (currentUser && currentUser.access_token) {
-
               setUser(currentUser);
               setIsAuthenticated(true);
             } else {
-
               // Check if we should auto login
               const shouldAutoLogin =
                 import.meta.env.DEX_AUTO_LOGIN !== "false";
@@ -123,7 +118,6 @@ export const useDexProvider = (
                 shouldAutoLogin &&
                 !window.location.pathname.includes("/callback")
               ) {
-
                 // Store the current location to return after login
                 sessionStorage.setItem(
                   "redirect_after_login",
@@ -175,22 +169,19 @@ export const useDexProvider = (
     userManager.events.addUserLoaded(addUserSignedIn);
     userManager.events.addUserUnloaded(addUserSignedOut);
     // Also listen for token expiration
-    userManager.events.addAccessTokenExpiring(() => {
-    });
-    userManager.events.addAccessTokenExpired(() => {
-    });
+    userManager.events.addAccessTokenExpiring(() => {});
+    userManager.events.addAccessTokenExpired(() => {});
 
     return () => {
       userManager.events.removeUserLoaded(addUserSignedIn);
       userManager.events.removeUserUnloaded(addUserSignedOut);
-      userManager.events.removeAccessTokenExpiring(() => { });
-      userManager.events.removeAccessTokenExpired(() => { });
+      userManager.events.removeAccessTokenExpiring(() => {});
+      userManager.events.removeAccessTokenExpired(() => {});
     };
   }, [userManager]);
 
   const login = async (options?: LoginOptions): Promise<void> => {
     try {
-
       // Store the current path to redirect back after login
       if (window.location.pathname !== "/callback") {
         sessionStorage.setItem(
@@ -208,7 +199,6 @@ export const useDexProvider = (
 
   const logout = async (options?: LogoutOptions): Promise<void> => {
     try {
-
       // Clear any stored redirect paths
       sessionStorage.removeItem("redirect_after_login");
 
@@ -220,7 +210,6 @@ export const useDexProvider = (
             window.location.origin,
           ).toString(),
       });
-
     } catch (error) {
       console.error("Error during logout:", error);
       throw error;
@@ -234,7 +223,6 @@ export const useDexProvider = (
       const currentUser = await userManager.getUser();
 
       if (!currentUser || !currentUser.access_token) {
-
         // Token is missing - we should authenticate
         // But this might cause infinite loops if called repeatedly
         // So only redirect if it's an explicit token request (not background check)
@@ -250,11 +238,9 @@ export const useDexProvider = (
         currentUser.expires_at &&
         currentUser.expires_at < Date.now() / 1000
       ) {
-
         try {
           // Try to silently refresh the token
           const newUser = await userManager.signinSilent();
-
 
           return newUser?.access_token || null;
         } catch (silentError) {
@@ -262,7 +248,6 @@ export const useDexProvider = (
 
           // Silent refresh failed, redirect to login
           if (_options?.redirect !== false) {
-            
             login();
           }
 
@@ -468,11 +453,11 @@ export const useDexProvider = (
   // Map OIDC user to common AuthUser format
   const authUser: AuthUser | null = user
     ? {
-      name: user.profile.name,
-      nickname: user.profile.nickname || user.profile.preferred_username,
-      email: user.profile.email,
-      ...user.profile,
-    }
+        name: user.profile.name,
+        nickname: user.profile.nickname || user.profile.preferred_username,
+        email: user.profile.email,
+        ...user.profile,
+      }
     : null;
 
   return {

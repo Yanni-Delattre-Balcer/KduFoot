@@ -21,8 +21,9 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { jwtVerify, JWTPayload } from "jose";
-import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Mail, Handshake } from "lucide-react";
+
+import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
 import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
 import { ConnectivityStatus } from "@/components/connectivity-status";
@@ -51,6 +52,7 @@ export default function DefaultLayout({
             issuer: `https://${domain}/`,
             audience: import.meta.env.AUTH0_AUDIENCE,
           });
+
           setTokenPayload(payload);
         })
         .catch((err) => {
@@ -79,28 +81,28 @@ export default function DefaultLayout({
               <div className="flex flex-col gap-2">
                 <Button
                   as="a"
-                  href={`mailto:support.kdufoot@gmail.com?subject=${t('support.technical_issue_subject')}`}
                   className="w-full font-bold h-12 bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/20 text-blue-400 hover:border-blue-500/40 hover:bg-blue-600/20 transition-all shadow-[0_0_20px_rgba(59,130,246,0.1)] rounded-xl"
+                  href={`mailto:support.kdufoot@gmail.com?subject=${t("support.technical_issue_subject")}`}
                   startContent={<Mail size={18} strokeWidth={2.5} />}
                 >
-                  {t('support.technical_issue')}
+                  {t("support.technical_issue")}
                 </Button>
                 <p className="text-[10px] sm:text-xs text-center text-default-400 font-medium italic opacity-70 px-2 lg:px-0">
-                  {t('support.technical_issue_desc')}
+                  {t("support.technical_issue_desc")}
                 </p>
               </div>
 
               <div className="flex flex-col gap-2">
                 <Button
                   as="a"
-                  href={`mailto:support.kdufoot@gmail.com?subject=${t('support.other_inquiry_subject')}`}
                   className="w-full font-bold h-12 bg-default-100/50 border border-default-200/50 text-default-600 hover:bg-default-200/50 hover:text-default-700 transition-all rounded-xl"
+                  href={`mailto:support.kdufoot@gmail.com?subject=${t("support.other_inquiry_subject")}`}
                   startContent={<Handshake size={20} />}
                 >
-                  {t('support.other_inquiry')}
+                  {t("support.other_inquiry")}
                 </Button>
                 <p className="text-[10px] sm:text-xs text-center text-default-400 font-medium italic opacity-70 px-2 lg:px-0">
-                  {t('support.other_inquiry_desc')}
+                  {t("support.other_inquiry_desc")}
                 </p>
               </div>
             </div>
@@ -118,11 +120,11 @@ export default function DefaultLayout({
             {/* Floating trigger button — bottom-right on desktop */}
             <div className="fixed bottom-4 right-4 z-50">
               <Button
-                variant="flat"
-                size="sm"
+                aria-label={t("nav.userPrefix") + " " + user.name}
                 className="bg-background/80 backdrop-blur-xl border border-default-200 shadow-2xl px-4 font-bold text-xs"
+                size="sm"
+                variant="flat"
                 onPress={() => setIsModalOpen(true)}
-                aria-label={t('nav.userPrefix') + ' ' + user.name}
               >
                 {t("nav.userPrefix")} {user.name}
               </Button>
@@ -130,11 +132,11 @@ export default function DefaultLayout({
 
             {/* Technical info modal */}
             <UserTechnicalInfoModal
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              user={user}
               accessToken={accessToken}
+              isOpen={isModalOpen}
               tokenPayload={tokenPayload}
+              user={user}
+              onClose={() => setIsModalOpen(false)}
             />
           </>
         )}

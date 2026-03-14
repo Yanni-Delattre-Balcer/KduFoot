@@ -1,26 +1,30 @@
+import { Club } from "@/types/match.types";
 
-import { Club } from '@/types/match.types';
-
-const BASE_URL = '/api/clubs';
+const BASE_URL = "/api/clubs";
 
 export const clubService = {
-    search: async (query: string): Promise<Club[]> => {
-        if (!query || query.length < 3) return [];
+  search: async (query: string): Promise<Club[]> => {
+    if (!query || query.length < 3) return [];
 
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/search?q=${encodeURIComponent(query)}`);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}${BASE_URL}/search?q=${encodeURIComponent(query)}`,
+      );
 
-            if (!response.ok) {
-                // Return empty if failure to not break UI
-                console.error('Failed to search clubs');
-                return [];
-            }
+      if (!response.ok) {
+        // Return empty if failure to not break UI
+        console.error("Failed to search clubs");
 
-            const data = await response.json();
-            return data.clubs || [];
-        } catch (error) {
-            console.error('Club search error:', error);
-            return [];
-        }
+        return [];
+      }
+
+      const data = await response.json();
+
+      return data.clubs || [];
+    } catch (error) {
+      console.error("Club search error:", error);
+
+      return [];
     }
+  },
 };

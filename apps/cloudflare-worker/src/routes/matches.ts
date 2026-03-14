@@ -360,7 +360,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'MATCH_MODIFIED',
-                    message: `Match modifié. L'heure ou le lieu pour le ${match.match_date || ''} a changé.`,
+                    message: `Match modifié ⚠️. Les détails (heure/lieu) pour le duel du ${match.match_date || ''} ont changé.`,
                     targetUserIds: subs.map(s => s.auth0_sub),
                     data: {
                         match_id: params.id,
@@ -443,12 +443,10 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             
             if (subs.length > 0) {
-                const cancellationMessage = `Le créateur du match à ${match.club?.name || 'club inconnu'} le ${match.match_date || ''} a annulé sa candidature avec vous.`;
-
                 await broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'MATCH_CANCELLED',
-                    message: `Match annulé. La rencontre prévue le ${match.match_date || ''} a été supprimée.`,
+                    message: `Match annulé ❌. La rencontre du ${match.match_date || ''} contre ${match.club?.name || 'un club'} n'aura pas lieu.`,
                     targetUserIds: subs.map(s => s.auth0_sub),
                     data: {
                         match_id: params.id,
@@ -602,7 +600,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                     await broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: 'NEW_APPLICANT',
-                        message: 'Vous avez reçu une demande de match !',
+                        message: `Vous avez reçu une nouvelle demande de ${applicantClub?.name || 'un club'} pour le ${match?.match_date || ''}.`,
                         targetUserId: owner.auth0_sub,
                         data: {
                             match_id: params.id,
@@ -706,8 +704,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         type: 'NOTIFICATION',
                         notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
                         message: body.status === 'accepted' 
-                            ? `Match confirmé ! Votre demande pour le ${matchData?.match_date || ''} a été acceptée.` 
-                            : `Demande refusée. L'adversaire n'est pas disponible pour le ${matchData?.match_date || ''}.`,
+                            ? `Duel Confirmé ! ✅ Votre rencontre du ${matchData?.match_date || ''} est validée.` 
+                            : `Demande refusée. ${matchData?.club?.name || 'un club'} n'est pas disponible pour le ${matchData?.match_date || ''}.`,
                         targetUserId: applicant.auth0_sub,
                         data: {
                             match_id: params.matchId,
@@ -785,16 +783,20 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             if (success && params.userId === dbUser.id && matchInfo && matchInfo.owner_id !== dbUser.id) {
                 const owner = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(matchInfo.owner_id).first<{ auth0_sub: string }>();
                 if (owner) {
-                    const applicantUser = await env.DB.prepare('SELECT firstname FROM users WHERE id = ?').bind(dbUser.id).first<{ firstname: string }>();
+                    const applicantClub = await env.DB.prepare('SELECT c.name FROM clubs c JOIN users u ON u.club_id = c.id WHERE u.id = ?').bind(params.userId).first<{ name: string }>();
                     const matchData = await matchService.getById(params.matchId);
-                    const withdrawalMessage = `${applicantUser?.firstname || 'L\'utilisateur'} a annulé sa candidature pour le match à ${matchData?.club?.name || 'club inconnu'} le ${matchData?.match_date || ''}.`;
                     
                     await broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: 'TEAM_WITHDRAWAL',
                         targetUserId: owner.auth0_sub,
-                        message: `Désistement. Une équipe s'est retirée de la rencontre prévue le ${matchData?.match_date || ''}.`,
-                        data: { match_id: params.matchId }
+                        message: `Annulation du duel. La rencontre du ${matchData?.match_date || ''} avec ${applicantClub?.name || 'un club'} a été annulée.`,
+                        data: { 
+                            match_id: params.matchId,
+                            match_date: matchData?.match_date || '',
+                            match_time: matchData?.match_time || '',
+                            applicant_club_name: applicantClub?.name || 'un club'
+                        }
                     });
                 }
             } else if (success && params.userId !== dbUser.id && matchInfo && matchInfo.owner_id === dbUser.id) {
@@ -808,8 +810,13 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         type: 'NOTIFICATION',
                         notificationType: 'REQUEST_CANCELLED',
                         targetUserId: applicant.auth0_sub,
-                        message: `Match annulé. La rencontre prévue le ${matchData?.match_date || ''} a été supprimée.`,
-                        data: { match_id: params.matchId }
+                        message: `Annulation du duel. La rencontre du ${matchData?.match_date || ''} avec ${matchData?.club?.name || 'un club'} a été annulée.`,
+                        data: { 
+                            match_id: params.matchId,
+                            match_date: matchData?.match_date || '',
+                            match_time: matchData?.match_time || '',
+                            host_club_name: matchData?.club?.name || 'un club'
+                        }
                     });
                 }
             }

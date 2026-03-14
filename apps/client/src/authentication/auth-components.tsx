@@ -3,6 +3,12 @@
  * @license AGPL-3.0-or-later
  */
 
+import type {
+  Auth0ManagementTokenApiResponse,
+  Auth0User,
+  Auth0Permission,
+} from "../types/auth0.types";
+
 import { FC, ReactNode, useEffect, useState } from "react";
 import { mutate } from "swr";
 import { Button } from "@heroui/button";
@@ -11,11 +17,6 @@ import { Link } from "@heroui/link";
 import { useTranslation } from "react-i18next";
 
 import { SiteLoading } from "../components/site-loading";
-import type {
-  Auth0ManagementTokenApiResponse,
-  Auth0User,
-  Auth0Permission,
-} from "../types/auth0.types";
 
 import {
   useAuth,
@@ -31,8 +32,6 @@ import { AccountModal } from "./account-modal";
  */
 export function Profile() {
   const { user } = useAuth();
-
-  // eslint-disable-next-line no-console
 
   return (
     <Tooltip content={user?.nickname} delay={750}>
@@ -80,12 +79,12 @@ export const LoginButton: FC<{ text?: string }> = ({ text }) => {
 export const LoginLink: FC<{
   text?: string;
   color?:
-  | "primary"
-  | "foreground"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "danger";
+    | "primary"
+    | "foreground"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
 }> = ({ text, color }) => {
   const { isAuthenticated, login } = useAuth();
   const { t } = useTranslation();
@@ -175,12 +174,12 @@ interface LogoutLinkProps extends LogoutButtonProps {
    * Button color
    */
   color?:
-  | "primary"
-  | "foreground"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "danger";
+    | "primary"
+    | "foreground"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
 }
 
 /**
@@ -240,11 +239,11 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
   return isAuthenticated ? (
     <div className="flex items-center gap-2">
       <Button
-        onPress={() => setIsAccountModalOpen(true)}
-        variant="flat"
+        className="font-semibold text-default-700 bg-default-100/50 hover:bg-default-200/50"
         color="default"
         radius="full"
-        className="font-semibold text-default-700 bg-default-100/50 hover:bg-default-200/50"
+        variant="flat"
+        onPress={() => setIsAccountModalOpen(true)}
       >
         {t("auth.account")}
       </Button>
@@ -252,7 +251,10 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
         showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
         text={t("auth.logout")}
       />
-      <AccountModal isOpen={isAccountModalOpen} onOpenChange={setIsAccountModalOpen} />
+      <AccountModal
+        isOpen={isAccountModalOpen}
+        onOpenChange={setIsAccountModalOpen}
+      />
     </div>
   ) : (
     <LoginButton />
@@ -278,9 +280,9 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
   return isAuthenticated ? (
     <div className="flex flex-col gap-2">
       <Link
+        className="font-bold cursor-pointer"
         color="foreground"
         size="lg"
-        className="font-bold cursor-pointer"
         onPress={() => setIsAccountModalOpen(true)}
       >
         {t("auth.account")}
@@ -290,7 +292,10 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
         showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
         text={text}
       />
-      <AccountModal isOpen={isAccountModalOpen} onOpenChange={setIsAccountModalOpen} />
+      <AccountModal
+        isOpen={isAccountModalOpen}
+        onOpenChange={setIsAccountModalOpen}
+      />
     </div>
   ) : (
     <LoginLink />
@@ -400,18 +405,19 @@ export const useSecuredApi = () => {
     async (): Promise<Auth0ManagementTokenApiResponse> => {
       const apiBase =
         typeof import.meta !== "undefined" &&
-          (import.meta as any).env?.API_BASE_URL
+        (import.meta as any).env?.API_BASE_URL
           ? (import.meta as any).env.API_BASE_URL
           : "";
       const result = await postJson(`${apiBase}/api/__auth0/token`, {});
+
       return result as Auth0ManagementTokenApiResponse;
     };
 
   const auth0Domain =
     typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.VITE_AUTH0_DOMAIN
+    (import.meta as any).env?.VITE_AUTH0_DOMAIN
       ? (import.meta as any).env.VITE_AUTH0_DOMAIN
-      : (import.meta as any)?.env?.AUTH0_DOMAIN ?? "";
+      : ((import.meta as any)?.env?.AUTH0_DOMAIN ?? "");
 
   /**
    * Liste tous les utilisateurs depuis Auth0 Management API.
@@ -430,10 +436,12 @@ export const useSecuredApi = () => {
 
     if (!resp.ok) {
       const errorText = await resp.text().catch(() => "");
+
       throw new Error(errorText || `Auth0 API error: ${resp.status}`);
     }
 
     const contentType = resp.headers.get("Content-Type");
+
     if (!contentType || !contentType.includes("application/json")) {
       throw new Error("Invalid response format from Auth0: Expected JSON");
     }
@@ -460,7 +468,9 @@ export const useSecuredApi = () => {
         },
       },
     );
+
     if (!resp.ok) throw new Error(await resp.text());
+
     return resp.json();
   };
 
@@ -478,13 +488,13 @@ export const useSecuredApi = () => {
     if (permissionNames.length === 0) return;
     const apiBase =
       typeof import.meta !== "undefined" &&
-        (import.meta as any).env?.API_BASE_URL
+      (import.meta as any).env?.API_BASE_URL
         ? (import.meta as any).env.API_BASE_URL
         : "";
     const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
     const encodedId = encodeURIComponent(userId);
 
-    const permissionsPayload = permissionNames.map(name => ({
+    const permissionsPayload = permissionNames.map((name) => ({
       resource_server_identifier: audience,
       permission_name: name,
     }));
@@ -502,6 +512,7 @@ export const useSecuredApi = () => {
         }),
       },
     );
+
     if (!resp.ok) throw new Error(await resp.text());
   };
 
@@ -518,7 +529,7 @@ export const useSecuredApi = () => {
   ): Promise<void> => {
     const apiBase =
       typeof import.meta !== "undefined" &&
-        (import.meta as any).env?.API_BASE_URL
+      (import.meta as any).env?.API_BASE_URL
         ? (import.meta as any).env.API_BASE_URL
         : "";
     const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
@@ -541,6 +552,7 @@ export const useSecuredApi = () => {
         }),
       },
     );
+
     if (!resp.ok) throw new Error(await resp.text());
   };
 
@@ -558,13 +570,13 @@ export const useSecuredApi = () => {
     if (permissionNames.length === 0) return;
     const apiBase =
       typeof import.meta !== "undefined" &&
-        (import.meta as any).env?.API_BASE_URL
+      (import.meta as any).env?.API_BASE_URL
         ? (import.meta as any).env.API_BASE_URL
         : "";
     const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
     const encodedId = encodeURIComponent(userId);
 
-    const permissionsPayload = permissionNames.map(name => ({
+    const permissionsPayload = permissionNames.map((name) => ({
       resource_server_identifier: audience,
       permission_name: name,
     }));
@@ -582,6 +594,7 @@ export const useSecuredApi = () => {
         }),
       },
     );
+
     if (!resp.ok) throw new Error(await resp.text());
   };
 
@@ -598,7 +611,7 @@ export const useSecuredApi = () => {
   ): Promise<void> => {
     const apiBase =
       typeof import.meta !== "undefined" &&
-        (import.meta as any).env?.API_BASE_URL
+      (import.meta as any).env?.API_BASE_URL
         ? (import.meta as any).env.API_BASE_URL
         : "";
     const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
@@ -621,6 +634,7 @@ export const useSecuredApi = () => {
         }),
       },
     );
+
     if (!resp.ok) throw new Error(await resp.text());
   };
 
@@ -644,6 +658,7 @@ export const useSecuredApi = () => {
         },
       },
     );
+
     if (!resp.ok) throw new Error(await resp.text());
   };
 
@@ -651,18 +666,25 @@ export const useSecuredApi = () => {
    * Fetches the list of blocked users (their Auth0 subs and block reasons) from our backend D1 database.
    * This is necessary because D1 `is_blocked=1` is the single source of truth for blocking.
    */
-  const getD1BlockedUsers = async (skipCache: boolean = false): Promise<{ auth0_sub: string, block_reason: string | null }[]> => {
+  const getD1BlockedUsers = async (
+    skipCache: boolean = false,
+  ): Promise<{ auth0_sub: string; block_reason: string | null }[]> => {
     const apiBase =
       typeof import.meta !== "undefined" &&
-        (import.meta as any).env?.API_BASE_URL
+      (import.meta as any).env?.API_BASE_URL
         ? (import.meta as any).env.API_BASE_URL
         : "";
+
     try {
-      const url = skipCache ? `${apiBase}/api/admin/users/blocked?t=${Date.now()}` : `${apiBase}/api/admin/users/blocked`;
+      const url = skipCache
+        ? `${apiBase}/api/admin/users/blocked?t=${Date.now()}`
+        : `${apiBase}/api/admin/users/blocked`;
       const data = await getJson(url);
+
       if (data && data.success && Array.isArray(data.blockedSubs)) {
         return data.blockedSubs;
       }
+
       return [];
     } catch {
       return [];
@@ -680,7 +702,9 @@ export const useSecuredApi = () => {
         "Content-Type": "application/json",
       },
     });
+
     if (!resp.ok) throw new Error(await resp.text());
+
     return resp.json();
   };
 
@@ -710,6 +734,7 @@ export const useSecuredApi = () => {
         }),
       },
     );
+
     if (!resp.ok) throw new Error(await resp.text());
   };
 
@@ -732,8 +757,10 @@ export const useSecuredApi = () => {
         },
       },
     );
+
     if (!resp.ok) throw new Error(await resp.text());
     const data = await resp.json();
+
     return data.scopes ?? [];
   };
 
@@ -748,7 +775,10 @@ export const useSecuredApi = () => {
   ): Promise<{ value: string; description: string }[]> => {
     const servers = await getResourceServers(mgmtToken);
     const server = servers.find((s) => s.identifier === audience);
-    if (!server) throw new Error(`Resource server with audience ${audience} not found`);
+
+    if (!server)
+      throw new Error(`Resource server with audience ${audience} not found`);
+
     return getResourceServerScopes(mgmtToken, server.id);
   };
 
@@ -765,7 +795,10 @@ export const useSecuredApi = () => {
   ): Promise<void> => {
     const servers = await getResourceServers(mgmtToken);
     const server = servers.find((s) => s.identifier === audience);
-    if (!server) throw new Error(`Resource server with audience ${audience} not found`);
+
+    if (!server)
+      throw new Error(`Resource server with audience ${audience} not found`);
+
     return updateResourceServerScopes(mgmtToken, server.id, scopes);
   };
 
@@ -782,6 +815,7 @@ export const useSecuredApi = () => {
     targetScopes: { value: string; description: string }[],
   ): Promise<boolean> => {
     const currentScopes = await getResourceServerScopes(mgmtToken, id);
+
     if (currentScopes.length !== targetScopes.length) return false;
 
     const currentValues = new Set(currentScopes.map((s) => s.value));
@@ -791,6 +825,7 @@ export const useSecuredApi = () => {
     for (const val of targetValues) {
       if (!currentValues.has(val)) return false;
     }
+
     // Since lengths are equal, if all target are in current, they are identical
     return true;
   };
@@ -808,7 +843,10 @@ export const useSecuredApi = () => {
   ): Promise<boolean> => {
     const servers = await getResourceServers(mgmtToken);
     const server = servers.find((s) => s.identifier === audience);
-    if (!server) throw new Error(`Resource server with audience ${audience} not found`);
+
+    if (!server)
+      throw new Error(`Resource server with audience ${audience} not found`);
+
     return checkResourceServerScopes(mgmtToken, server.id, targetScopes);
   };
 
@@ -842,7 +880,10 @@ export const useSecuredApi = () => {
  * Composant de bannissement (Nuclear Guard)
  * Affiché immédiatement si l'utilisateur est bloqué.
  */
-export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlocked, reason }) => {
+export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({
+  isBlocked,
+  reason,
+}) => {
   const { logout } = useAuth();
 
   if (!isBlocked) return null;
@@ -852,8 +893,17 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlo
       <div className="max-w-lg w-full bg-zinc-900 border-2 border-red-600 shadow-2xl shadow-red-900/40 rounded-3xl p-6 sm:p-10 text-center flex flex-col items-center gap-5 animate-appearance-in">
         {/* Icon */}
         <div className="p-4 rounded-full bg-red-600/20 border-2 border-red-600/40">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-14 h-14 text-red-500">
-            <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+          <svg
+            className="w-14 h-14 text-red-500"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clipRule="evenodd"
+              d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z"
+              fillRule="evenodd"
+            />
           </svg>
         </div>
 
@@ -866,12 +916,15 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlo
         <div className="w-full bg-red-950/20 border border-red-800/20 rounded-2xl p-6">
           <p className="text-base sm:text-lg font-medium text-red-200 leading-relaxed mb-4">
             {reason ? (
-              <>Votre compte a été suspendu pour le motif suivant : <br /><span className="text-white font-bold">"{reason}"</span></>
+              <>
+                Votre compte a été suspendu pour le motif suivant : <br />
+                <span className="text-white font-bold">"{reason}"</span>
+              </>
             ) : (
               "Votre compte a été temporairement suspendu."
             )}
           </p>
-          <div className="h-px bg-red-800/20 w-full mb-4"></div>
+          <div className="h-px bg-red-800/20 w-full mb-4" />
           <p className="text-sm font-medium text-red-300/80 italic">
             Pour plus d'informations, veuillez contacter le support.
           </p>
@@ -880,26 +933,52 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlo
         {/* Actions */}
         <div className="flex flex-col gap-3 w-full mt-2">
           <a
-            href="mailto:support@kdufoot.com?subject=Demande%20de%20débannissement%20KduFoot"
             className="flex items-center justify-center gap-2 bg-white text-black font-black tracking-tight rounded-2xl h-12 text-sm shadow-lg hover:shadow-white/20 hover:scale-[1.02] transition-all w-full"
+            href="mailto:support@kdufoot.com?subject=Demande%20de%20débannissement%20KduFoot"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             CONTACTER LE SUPPORT
           </a>
           <button
-            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
             className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold tracking-tight rounded-2xl h-12 text-sm shadow-lg transition-all w-full cursor-pointer"
+            onClick={() =>
+              logout({ logoutParams: { returnTo: window.location.origin } })
+            }
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             DÉCONNEXION
           </button>
         </div>
 
-        <p className="text-xs sm:text-sm text-white/20 mt-2">support@kdufoot.com</p>
+        <p className="text-xs sm:text-sm text-white/20 mt-2">
+          support@kdufoot.com
+        </p>
       </div>
     </div>
   );
@@ -922,8 +1001,17 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({ isBlo
  * 5. On success, force a token refresh (`cacheMode: "off"`) and reload the page.
  * 6. The `sessionStorage` flag is cleaned up ONLY once the user is confirmed to have all permissions.
  */
-export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading, user, hasPermission, postJson, getAccessToken } = useAuth();
+export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const {
+    isAuthenticated,
+    isLoading,
+    user,
+    hasPermission,
+    postJson,
+    getAccessToken,
+  } = useAuth();
   const [isProvisioning, setIsProvisioning] = useState(false);
 
   useEffect(() => {
@@ -931,17 +1019,22 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({ childre
     if (isLoading || !isAuthenticated || isProvisioning) return;
 
     const userId = user?.sub;
+
     if (!userId) return;
 
     // 2. Configuration: Retrieve the list of target permissions from environment
     const autoPerms = (import.meta as any).env.AUTH0_AUTOMATIC_PERMISSIONS;
-    if (!autoPerms || !Array.isArray(autoPerms) || autoPerms.length === 0) return;
+
+    if (!autoPerms || !Array.isArray(autoPerms) || autoPerms.length === 0)
+      return;
 
     const checkAndProvision = async () => {
       // 3. Permission Detection: Check which target permissions are currently missing
       const missingPerms: string[] = [];
+
       for (const p of autoPerms) {
         const has = await hasPermission(p);
+
         if (!has) missingPerms.push(p);
       }
 
@@ -952,6 +1045,7 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({ childre
         if (sessionStorage.getItem(storageKey)) {
           sessionStorage.removeItem(storageKey);
         }
+
         return;
       }
 
@@ -962,7 +1056,10 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({ childre
       sessionStorage.setItem(storageKey, "true");
       try {
         const apiBase = (import.meta as any).env.API_BASE_URL || "";
-        const result = await postJson(`${apiBase}/api/__auth0/autopermissions`, {});
+        const result = await postJson(
+          `${apiBase}/api/__auth0/autopermissions`,
+          {},
+        );
 
         if (result.success) {
           // 6. Token Refresh: Bypass local cache to get the new JWT from Auth0 servers.
@@ -981,7 +1078,15 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({ childre
     };
 
     checkAndProvision();
-  }, [isAuthenticated, isLoading, user, hasPermission, postJson, getAccessToken, isProvisioning]);
+  }, [
+    isAuthenticated,
+    isLoading,
+    user,
+    hasPermission,
+    postJson,
+    getAccessToken,
+    isProvisioning,
+  ]);
 
   if (isProvisioning) {
     return <SiteLoading />;

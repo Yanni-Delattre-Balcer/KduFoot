@@ -36,7 +36,9 @@ export const siteConfig = () => {
       href: "/favorites",
     },
     {
-      label: showVideoAnalysis ? i18next.t("nav.sessions") : i18next.t("nav.sessions_public"),
+      label: showVideoAnalysis
+        ? i18next.t("nav.sessions")
+        : i18next.t("nav.sessions_public"),
       href: "/sessions",
     },
     {
@@ -55,9 +57,14 @@ export const siteConfig = () => {
 
   const filteredNavItems = showVideoAnalysis
     ? allNavItems
-    : allNavItems.filter((item) => item.href !== "/exercises" && item.href !== "/training" && item.href !== "/pricing");
+    : allNavItems.filter(
+        (item) =>
+          item.href !== "/exercises" &&
+          item.href !== "/training" &&
+          item.href !== "/pricing",
+      );
 
-  return ({
+  return {
     name: "KduFoot",
     needCookieConsent: true,
     description: i18next.t("site.description"),
@@ -69,5 +76,5 @@ export const siteConfig = () => {
       docs: "https://docs.kdufoot.com",
       discord: "https://discord.gg/kdufoot",
     },
-  });
+  };
 };

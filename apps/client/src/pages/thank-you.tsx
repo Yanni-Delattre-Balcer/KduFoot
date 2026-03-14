@@ -7,6 +7,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Link } from "@heroui/link";
 import { Card, CardHeader, CardBody } from "@heroui/card";
 import { Divider } from "@heroui/divider";
+
 import { title } from "@/components/primitives";
 import { StarIcon } from "@/components/icons";
 import DefaultLayout from "@/layouts/default";
@@ -31,7 +32,9 @@ export default function ThankYouPage() {
                 <p className="text-xl font-bold">
                   <Trans t={t}>thank-you.ronan.name</Trans>
                 </p>
-                <p className="text-small text-default-500">Expert Développement Web</p>
+                <p className="text-small text-default-500">
+                  Expert Développement Web
+                </p>
               </div>
             </CardHeader>
             <Divider />
@@ -47,13 +50,13 @@ export default function ThankYouPage() {
                   <Link
                     isExternal
                     aria-label="SCTG Development Repositories"
-                    href="https://github.com/orgs/sctg-development/repositories"
                     className="p-1 transition-transform hover:scale-110 overflow-hidden"
+                    href="https://github.com/orgs/sctg-development/repositories"
                   >
-                    <img 
-                      src="/sctg-logo.png" 
-                      alt="SCTG Logo" 
-                      className="w-16 h-16 object-contain" 
+                    <img
+                      alt="SCTG Logo"
+                      className="w-16 h-16 object-contain"
+                      src="/sctg-logo.png"
                     />
                   </Link>
                 </div>

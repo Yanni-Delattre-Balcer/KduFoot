@@ -66,6 +66,7 @@ export const getNameWithFallback = (user: AuthUser | null): string => {
   if (user?.given_name && user?.family_name) {
     return `${user.given_name} ${user.family_name}`;
   }
+
   return user?.name || user?.nickname || user?.sub || "";
 };
 

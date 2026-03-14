@@ -1,135 +1,213 @@
-import DefaultLayout from '@/layouts/default';
-import { useTranslation } from 'react-i18next';
-import { useTraining } from '@/contexts/training-context';
-import { Button } from '@heroui/button';
-import { Link } from 'react-router-dom';
-import { Card, CardBody, CardHeader } from '@heroui/card';
-import { Chip } from '@heroui/chip';
-import FootballClock from '@/components/football-clock';
-import DataWall from '@/components/data-wall';
+import { useTranslation } from "react-i18next";
+import { Button } from "@heroui/button";
+import { Link } from "react-router-dom";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Chip } from "@heroui/chip";
+
+import { useTraining } from "@/contexts/training-context";
+import DefaultLayout from "@/layouts/default";
+import FootballClock from "@/components/football-clock";
+import DataWall from "@/components/data-wall";
 
 export default function TrainingPage() {
-    const { t } = useTranslation();
-    const { selectedExercises, removeExercise } = useTraining();
+  const { t } = useTranslation();
+  const { selectedExercises, removeExercise } = useTraining();
 
-    return (
-        <DefaultLayout maxWidth="max-w-full">
-            <div className="flex flex-col gap-8 w-full px-4">
+  return (
+    <DefaultLayout maxWidth="max-w-full">
+      <div className="flex flex-col gap-8 w-full px-4">
+        {/* Hero - Mon Entraînement */}
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-green-600/15 via-emerald-500/10 to-teal-500/10 border border-[#17c964]/20">
+          {/* Grass stripes - standard green */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)",
+            }}
+          />
+          {/* Field center line + circle */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5" />
 
-                {/* Hero - Mon Entraînement */}
-                <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-green-600/15 via-emerald-500/10 to-teal-500/10 border border-[#17c964]/20">
-                    {/* Grass stripes - standard green */}
-                    <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(34,197,94,0.3) 40px, rgba(34,197,94,0.3) 80px)' }}></div>
-                    {/* Field center line + circle */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent"></div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5"></div>
+          {/* Football clock - top right */}
+          <div className="hidden md:block absolute top-4 right-4 z-10">
+            <FootballClock size={140} />
+          </div>
 
-                    {/* Football clock - top right */}
-                    <div className="hidden md:block absolute top-4 right-4 z-10">
-                        <FootballClock size={140} />
-                    </div>
-
-                    <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="p-3 rounded-2xl bg-[#17c964]/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-[#17c964]">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                </svg>
-                            </div>
-                            <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-[#17c964] to-[#12a150] tracking-tighter">
-                                {t('training.title', 'Mon Entraînement')}
-                            </h1>
-                        </div>
-                        {selectedExercises.length > 0 && (
-                            <p className="text-default-500 text-lg max-w-lg">
-                                {t('training.hero_stats', { count: selectedExercises.length, duration: selectedExercises.length * 15 })}
-                            </p>
-                        )}
-                        {selectedExercises.length === 0 && (
-                            <p className="text-default-500 text-lg max-w-lg">
-                                {t('training.hero_create')}
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-                <DataWall>
-                    {selectedExercises.length === 0 ? (
-                        <Card className="border border-green-500/20 bg-[#202221] overflow-hidden">
-                            <CardBody className="relative py-16 flex flex-col items-center gap-5 text-center">
-                                <div className="p-5 rounded-full bg-green-500/10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-14 h-14 text-[#17c964]">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="text-xl font-semibold text-default-700">
-                                        {t('training.empty')}
-                                    </p>
-                                    <p className="text-default-400 mt-2 max-w-md">
-                                        {t('training.description')}
-                                    </p>
-                                </div>
-                                <Button
-                                    as={Link}
-                                    to="/exercises"
-                                    color="success"
-                                    variant="shadow"
-                                    size="lg"
-                                    className="font-bold mt-2"
-                                    startContent={
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                        </svg>
-                                    }
-                                >
-                                    {t('training.go_exercises')}
-                                </Button>
-                            </CardBody>
-                        </Card>
-                    ) : (
-                        <div className="flex flex-col gap-4">
-                            {selectedExercises.map((exercise, index) => (
-                                <Card key={exercise.id} className="group hover:shadow-lg hover:shadow-green-500/10 transition-all bg-[#202221] border border-green-500/20 hover:border-green-500/40">
-                                    <CardHeader className="flex flex-row items-center gap-4 p-4">
-                                        <div className="shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-[#17c964]/20 to-[#12a150]/20 flex items-center justify-center">
-                                            <span className="font-bold text-[#17c964]">{index + 1}</span>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-bold text-lg truncate">{exercise.title}</h4>
-                                            <div className="flex gap-2 mt-1">
-                                                <Chip size="sm" variant="flat" color="primary">{exercise.category}</Chip>
-                                                {exercise.themes && <Chip size="sm" variant="flat" color="secondary">{exercise.themes}</Chip>}
-                                            </div>
-                                        </div>
-                                        <Button
-                                            isIconOnly
-                                            size="sm"
-                                            variant="flat"
-                                            color="danger"
-                                            onPress={() => removeExercise(exercise.id)}
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                            </svg>
-                                        </Button>
-                                    </CardHeader>
-                                </Card>
-                            ))}
-
-                            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 p-4 rounded-2xl bg-[#202221] border border-green-500/20 gap-4">
-                                <div className="text-center sm:text-left">
-                                    <p className="font-bold text-base sm:text-lg">{t('training.hero_stats', { count: selectedExercises.length, duration: selectedExercises.length * 15 })}</p>
-                                </div>
-                                <Button as={Link} to="/exercises" variant="flat" color="primary" size="sm" className="w-full sm:w-auto">
-                                    {t('training.add_exercises')}
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                </DataWall>
+          <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-3 rounded-2xl bg-[#17c964]/10">
+                <svg
+                  className="w-8 h-8 text-[#17c964]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-[#17c964] to-[#12a150] tracking-tighter">
+                {t("training.title", "Mon Entraînement")}
+              </h1>
             </div>
-        </DefaultLayout>
-    );
+            {selectedExercises.length > 0 && (
+              <p className="text-default-500 text-lg max-w-lg">
+                {t("training.hero_stats", {
+                  count: selectedExercises.length,
+                  duration: selectedExercises.length * 15,
+                })}
+              </p>
+            )}
+            {selectedExercises.length === 0 && (
+              <p className="text-default-500 text-lg max-w-lg">
+                {t("training.hero_create")}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <DataWall>
+          {selectedExercises.length === 0 ? (
+            <Card className="border border-green-500/20 bg-[#202221] overflow-hidden">
+              <CardBody className="relative py-16 flex flex-col items-center gap-5 text-center">
+                <div className="p-5 rounded-full bg-green-500/10">
+                  <svg
+                    className="w-14 h-14 text-[#17c964]"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1}
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xl font-semibold text-default-700">
+                    {t("training.empty")}
+                  </p>
+                  <p className="text-default-400 mt-2 max-w-md">
+                    {t("training.description")}
+                  </p>
+                </div>
+                <Button
+                  as={Link}
+                  className="font-bold mt-2"
+                  color="success"
+                  size="lg"
+                  startContent={
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 4.5v15m7.5-7.5h-15"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  }
+                  to="/exercises"
+                  variant="shadow"
+                >
+                  {t("training.go_exercises")}
+                </Button>
+              </CardBody>
+            </Card>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {selectedExercises.map((exercise, index) => (
+                <Card
+                  key={exercise.id}
+                  className="group hover:shadow-lg hover:shadow-green-500/10 transition-all bg-[#202221] border border-green-500/20 hover:border-green-500/40"
+                >
+                  <CardHeader className="flex flex-row items-center gap-4 p-4">
+                    <div className="shrink-0 w-10 h-10 rounded-xl bg-linear-to-br from-[#17c964]/20 to-[#12a150]/20 flex items-center justify-center">
+                      <span className="font-bold text-[#17c964]">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-lg truncate">
+                        {exercise.title}
+                      </h4>
+                      <div className="flex gap-2 mt-1">
+                        <Chip color="primary" size="sm" variant="flat">
+                          {exercise.category}
+                        </Chip>
+                        {exercise.themes && (
+                          <Chip color="secondary" size="sm" variant="flat">
+                            {exercise.themes}
+                          </Chip>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      isIconOnly
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      color="danger"
+                      size="sm"
+                      variant="flat"
+                      onPress={() => removeExercise(exercise.id)}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M6 18 18 6M6 6l12 12"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </Button>
+                  </CardHeader>
+                </Card>
+              ))}
+
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 p-4 rounded-2xl bg-[#202221] border border-green-500/20 gap-4">
+                <div className="text-center sm:text-left">
+                  <p className="font-bold text-base sm:text-lg">
+                    {t("training.hero_stats", {
+                      count: selectedExercises.length,
+                      duration: selectedExercises.length * 15,
+                    })}
+                  </p>
+                </div>
+                <Button
+                  as={Link}
+                  className="w-full sm:w-auto"
+                  color="primary"
+                  size="sm"
+                  to="/exercises"
+                  variant="flat"
+                >
+                  {t("training.add_exercises")}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DataWall>
+      </div>
+    </DefaultLayout>
+  );
 }

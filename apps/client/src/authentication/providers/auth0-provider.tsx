@@ -39,81 +39,94 @@ export const useAuth0Provider = (): AuthProvider => {
     logout: auth0Logout,
   } = useAuth0();
 
-  const login = useCallback(async (options?: LoginOptions): Promise<void> => {
-    return loginWithRedirect({
-      ...options,
-      authorizationParams: {
-        ...options?.authorizationParams,
-        redirect_uri: window.location.origin,
-      },
-    } as RedirectLoginOptions);
-  }, [loginWithRedirect]);
-
-  const logout = useCallback(async (options?: LogoutOptions): Promise<void> => {
-    const auth0Options: Auth0LogoutOptions = {
-      ...options,
-      logoutParams: {
-        ...options?.logoutParams,
-        returnTo: window.location.origin,
-      },
-    };
-
-    sessionStorage.clear();
-    auth0Logout(auth0Options);
-
-    return Promise.resolve();
-  }, [auth0Logout]);
-
-
-  const getAccessToken = useCallback(async (
-    options?: TokenOptions,
-  ): Promise<string | null> => {
-    try {
-      /**
-       * 'Audience' identifies the API the token is intended for.
-       * 'Scope' identifies the permissions the token should have.
-       */
-      const token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
-          scope: options?.scope || import.meta.env.AUTH0_SCOPE,
-        },
+  const login = useCallback(
+    async (options?: LoginOptions): Promise<void> => {
+      return loginWithRedirect({
         ...options,
-      });
+        authorizationParams: {
+          ...options?.authorizationParams,
+          redirect_uri: window.location.origin,
+        },
+      } as RedirectLoginOptions);
+    },
+    [loginWithRedirect],
+  );
 
-      return token;
-    } catch (error: any) {
-      // eslint-disable-next-line no-console
-      console.error("Error getting access token:", error);
+  const logout = useCallback(
+    async (options?: LogoutOptions): Promise<void> => {
+      const auth0Options: Auth0LogoutOptions = {
+        ...options,
+        logoutParams: {
+          ...options?.logoutParams,
+          returnTo: window.location.origin,
+        },
+      };
 
-      // If the error indicates we need to re-authenticate (e.g. missing refresh token, login required)
-      // we force a redirect to login.
-      const errorMessage = error?.message?.toLowerCase() || "";
-      if (
-        errorMessage.includes("login_required") ||
-        errorMessage.includes("missing refresh token") ||
-        errorMessage.includes("consent_required")
-      ) {
-        console.warn("Terminal authentication error detected. Redirecting to login...");
-        login();
+      sessionStorage.clear();
+      auth0Logout(auth0Options);
+
+      return Promise.resolve();
+    },
+    [auth0Logout],
+  );
+
+  const getAccessToken = useCallback(
+    async (options?: TokenOptions): Promise<string | null> => {
+      try {
+        /**
+         * 'Audience' identifies the API the token is intended for.
+         * 'Scope' identifies the permissions the token should have.
+         */
+        const token = await getAccessTokenSilently({
+          authorizationParams: {
+            audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
+            scope: options?.scope || import.meta.env.AUTH0_SCOPE,
+          },
+          ...options,
+        });
+
+        return token;
+      } catch (error: any) {
+        // eslint-disable-next-line no-console
+        console.error("Error getting access token:", error);
+
+        // If the error indicates we need to re-authenticate (e.g. missing refresh token, login required)
+        // we force a redirect to login.
+        const errorMessage = error?.message?.toLowerCase() || "";
+
+        if (
+          errorMessage.includes("login_required") ||
+          errorMessage.includes("missing refresh token") ||
+          errorMessage.includes("consent_required")
+        ) {
+          console.warn(
+            "Terminal authentication error detected. Redirecting to login...",
+          );
+          login();
+
+          return null;
+        }
+
+        // Only show the error toast once per session to avoid spam
+        const HAS_SHOWN_KEY = "kdufoot_session_error_shown";
+
+        if (!sessionStorage.getItem(HAS_SHOWN_KEY)) {
+          sessionStorage.setItem(HAS_SHOWN_KEY, "true");
+          addToast({
+            title: "Session expirée",
+            description:
+              "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
+            variant: "flat",
+            color: "danger",
+            timeout: 5000,
+          });
+        }
+
         return null;
       }
-
-      // Only show the error toast once per session to avoid spam
-      const HAS_SHOWN_KEY = 'kdufoot_session_error_shown';
-      if (!sessionStorage.getItem(HAS_SHOWN_KEY)) {
-        sessionStorage.setItem(HAS_SHOWN_KEY, 'true');
-        addToast({
-          title: "Session expirée",
-          description: "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
-          variant: 'flat',
-          color: 'danger',
-          timeout: 5000
-        });
-      }
-      return null;
-    }
-  }, [getAccessTokenSilently, login]);
+    },
+    [getAccessTokenSilently, login],
+  );
 
   // In-memory cache for permission checks keyed by `${permission}:${accessToken}`
   const permissionCheckCache = useMemo(() => new Map<string, boolean>(), []);
@@ -150,7 +163,7 @@ export const useAuth0Provider = (): AuthProvider => {
           payload.permissions.includes(permission);
 
         /**
-         * 'permissionCheckCache' stores the result so we don't have to 
+         * 'permissionCheckCache' stores the result so we don't have to
          * verify the JWT again for the same permission and token.
          */
         permissionCheckCache.set(cacheKey, result);
@@ -171,12 +184,24 @@ export const useAuth0Provider = (): AuthProvider => {
 
   const handleGlobalError = useCallback(async (response: Response) => {
     if (response.status === 403) {
-      const text = await response.clone().text().catch(() => "");
+      const text = await response
+        .clone()
+        .text()
+        .catch(() => "");
+
       try {
         const json = JSON.parse(text);
-        if (json.is_blocked || json.error === "403_FORBIDDEN" || (json.error && json.error.includes("suspendu"))) {
+
+        if (
+          json.is_blocked ||
+          json.error === "403_FORBIDDEN" ||
+          (json.error && json.error.includes("suspendu"))
+        ) {
           // Signal global pour le Nuclear Guard
-          const event = new CustomEvent("user_banned_signal", { detail: { reason: json.error || json.block_reason } });
+          const event = new CustomEvent("user_banned_signal", {
+            detail: { reason: json.error || json.block_reason },
+          });
+
           window.dispatchEvent(event);
         }
       } catch (e) {
@@ -207,13 +232,23 @@ export const useAuth0Provider = (): AuthProvider => {
             await handleGlobalError(apiResponse);
             const errorText = await apiResponse.text().catch(() => "");
             let errorJson: any = {};
+
             try {
-              if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+              if (
+                apiResponse.headers
+                  .get("Content-Type")
+                  ?.includes("application/json")
+              ) {
                 errorJson = JSON.parse(errorText);
               }
-            } catch (e) { /* ignore parse error */ }
+            } catch (e) {
+              /* ignore parse error */
+            }
 
-            const error = new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+            const error = new Error(
+              errorJson.error || `HTTP error! status: ${apiResponse.status}`,
+            );
+
             if (apiResponse.status === 403) {
               (error as any).status = 403;
               (error as any).isBlocked = true;
@@ -222,6 +257,7 @@ export const useAuth0Provider = (): AuthProvider => {
           }
 
           const contentType = apiResponse.headers.get("Content-Type");
+
           if (!contentType || !contentType.includes("application/json")) {
             throw new Error("Invalid response format: Expected JSON");
           }
@@ -271,15 +307,25 @@ export const useAuth0Provider = (): AuthProvider => {
           await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
           let errorJson: any = {};
+
           try {
-            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+            if (
+              apiResponse.headers
+                .get("Content-Type")
+                ?.includes("application/json")
+            ) {
               errorJson = JSON.parse(errorText);
             }
-          } catch (e) { /* ignore */ }
-          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+          } catch (e) {
+            /* ignore */
+          }
+          throw new Error(
+            errorJson.error || `HTTP error! status: ${apiResponse.status}`,
+          );
         }
 
         const contentType = apiResponse.headers.get("Content-Type");
+
         if (!contentType || !contentType.includes("application/json")) {
           throw new Error("Invalid response format: Expected JSON");
         }
@@ -312,15 +358,25 @@ export const useAuth0Provider = (): AuthProvider => {
           await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
           let errorJson: any = {};
+
           try {
-            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+            if (
+              apiResponse.headers
+                .get("Content-Type")
+                ?.includes("application/json")
+            ) {
               errorJson = JSON.parse(errorText);
             }
-          } catch (e) { /* ignore */ }
-          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+          } catch (e) {
+            /* ignore */
+          }
+          throw new Error(
+            errorJson.error || `HTTP error! status: ${apiResponse.status}`,
+          );
         }
 
         const contentType = apiResponse.headers.get("Content-Type");
+
         if (!contentType || !contentType.includes("application/json")) {
           throw new Error("Invalid response format: Expected JSON");
         }
@@ -352,15 +408,25 @@ export const useAuth0Provider = (): AuthProvider => {
           await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
           let errorJson: any = {};
+
           try {
-            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+            if (
+              apiResponse.headers
+                .get("Content-Type")
+                ?.includes("application/json")
+            ) {
               errorJson = JSON.parse(errorText);
             }
-          } catch (e) { /* ignore */ }
-          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+          } catch (e) {
+            /* ignore */
+          }
+          throw new Error(
+            errorJson.error || `HTTP error! status: ${apiResponse.status}`,
+          );
         }
 
         const contentType = apiResponse.headers.get("Content-Type");
+
         if (!contentType || !contentType.includes("application/json")) {
           throw new Error("Invalid response format: Expected JSON");
         }
@@ -393,15 +459,25 @@ export const useAuth0Provider = (): AuthProvider => {
           await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
           let errorJson: any = {};
+
           try {
-            if (apiResponse.headers.get("Content-Type")?.includes("application/json")) {
+            if (
+              apiResponse.headers
+                .get("Content-Type")
+                ?.includes("application/json")
+            ) {
               errorJson = JSON.parse(errorText);
             }
-          } catch (e) { /* ignore */ }
-          throw new Error(errorJson.error || `HTTP error! status: ${apiResponse.status}`);
+          } catch (e) {
+            /* ignore */
+          }
+          throw new Error(
+            errorJson.error || `HTTP error! status: ${apiResponse.status}`,
+          );
         }
 
         const contentType = apiResponse.headers.get("Content-Type");
+
         if (!contentType || !contentType.includes("application/json")) {
           throw new Error("Invalid response format: Expected JSON");
         }

@@ -52,7 +52,7 @@ export const CookieConsent: React.FC = () => {
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
-      /** 
+      /**
        * 'motionProps' allows us to define animations.
        * Here we make the modal slide up from the bottom when it appears.
        */

@@ -33,30 +33,70 @@ export const Logo: React.FC<IconSvgProps> = ({
     {...props}
   >
     <defs>
-      <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <linearGradient id="logo-gradient" x1="0%" x2="100%" y1="0%" y2="0%">
         <stop offset="0%" stopColor="#ef4444">
-          <animate attributeName="stop-color" values="#ef4444;#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444" dur="12s" repeatCount="indefinite" />
+          <animate
+            attributeName="stop-color"
+            dur="12s"
+            repeatCount="indefinite"
+            values="#ef4444;#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444"
+          />
         </stop>
         <stop offset="12.5%" stopColor="#f97316">
-          <animate attributeName="stop-color" values="#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316" dur="12s" repeatCount="indefinite" />
+          <animate
+            attributeName="stop-color"
+            dur="12s"
+            repeatCount="indefinite"
+            values="#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316"
+          />
         </stop>
         <stop offset="25%" stopColor="#f59e0b">
-          <animate attributeName="stop-color" values="#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b" dur="12s" repeatCount="indefinite" />
+          <animate
+            attributeName="stop-color"
+            dur="12s"
+            repeatCount="indefinite"
+            values="#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b"
+          />
         </stop>
         <stop offset="37.5%" stopColor="#10b981">
-          <animate attributeName="stop-color" values="#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b;#10b981" dur="12s" repeatCount="indefinite" />
+          <animate
+            attributeName="stop-color"
+            dur="12s"
+            repeatCount="indefinite"
+            values="#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b;#10b981"
+          />
         </stop>
         <stop offset="50%" stopColor="#06b6d4">
-          <animate attributeName="stop-color" values="#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b;#10b981;#06b6d4" dur="12s" repeatCount="indefinite" />
+          <animate
+            attributeName="stop-color"
+            dur="12s"
+            repeatCount="indefinite"
+            values="#06b6d4;#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b;#10b981;#06b6d4"
+          />
         </stop>
         <stop offset="62.5%" stopColor="#3b82f6">
-          <animate attributeName="stop-color" values="#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6" dur="12s" repeatCount="indefinite" />
+          <animate
+            attributeName="stop-color"
+            dur="12s"
+            repeatCount="indefinite"
+            values="#3b82f6;#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6"
+          />
         </stop>
         <stop offset="75%" stopColor="#8b5cf6">
-          <animate attributeName="stop-color" values="#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6" dur="12s" repeatCount="indefinite" />
+          <animate
+            attributeName="stop-color"
+            dur="12s"
+            repeatCount="indefinite"
+            values="#8b5cf6;#d946ef;#ef4444;#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6"
+          />
         </stop>
         <stop offset="100%" stopColor="#d946ef">
-          <animate attributeName="stop-color" values="#d946ef;#ef4444;#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef" dur="12s" repeatCount="indefinite" />
+          <animate
+            attributeName="stop-color"
+            dur="12s"
+            repeatCount="indefinite"
+            values="#d946ef;#ef4444;#f97316;#f59e0b;#10b981;#06b6d4;#3b82f6;#8b5cf6;#d946ef"
+          />
         </stop>
       </linearGradient>
     </defs>
