@@ -64,9 +64,9 @@ i18n
     fallbackLng: fallbackLng,
     debug: false,
 
-    ns: ["base", "kdufoot", "common"],
+    ns: ["kdufoot", "common"],
     defaultNS: "kdufoot",
-    fallbackNS: ["base", "common"],
+    fallbackNS: ["common"],
     nsSeparator: ':',
     interpolation: {
       escapeValue: false, // react already safes from xss

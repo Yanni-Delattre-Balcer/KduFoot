@@ -676,12 +676,6 @@
       }
     }
   },
-  "common": {
-    "home": "Home",
-    "not_provided": "Not provided",
-    "unknown_city": "Unknown city",
-    "unknown_date": "Unknown date"
-  },
   "adminUsersPage": {
     "pageTitle": "Users Management and Permissions",
     "pageSubtitle": "Manage KduFoot users access.",

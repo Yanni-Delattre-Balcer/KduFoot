@@ -601,8 +601,8 @@ export default function MatchDetailsPage() {
                                                                 }}
                                                                 isDisabled={isProfileIncomplete && !isMasked}
                                                             >
-                                                                {match.type === 'tournament' ? t('match.find_tournament').toUpperCase() : t('homePage.buttons.find_match').toUpperCase()}
-                                                            </Button>
+                                                                    {t('match.send_request')}
+                                                                </Button>
                                                         )}
                                                     </>
                                                 );

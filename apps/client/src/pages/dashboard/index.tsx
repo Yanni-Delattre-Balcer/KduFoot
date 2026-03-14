@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSWRConfig } from 'swr';
 import { LayoutDashboard } from 'lucide-react';
 import DefaultLayout from '@/layouts/default';
-import { useMatches } from '@/hooks/use-matches';
-import { matchService } from '@/services/matches';
-import { useAuth0 } from '@auth0/auth0-react';
 import { Card, CardBody } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Chip } from "@heroui/chip";
@@ -18,7 +14,6 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { useUser } from '@/hooks/use-user';
 import { useIncomingRequests, useMyParticipations } from '@/hooks/use-matches';
 import DataWall from '@/components/data-wall';
-import { addToast } from '@heroui/toast';
 import { JerseyColorDots } from '@/components/jersey-color-dots';
 import { ConfirmedTournamentCard } from './components/confirmed-tournament-card';
 import { ConfirmedMatchCard } from './components/confirmed-match-card';
@@ -58,27 +53,18 @@ const formatTimestampTime = (ts: number) => {
 
 export default function DashboardPage() {
     const { t } = useTranslation('kdufoot');
-    const { getAccessTokenSilently } = useAuth0();
-    const { mutate: globalMutate } = useSWRConfig();
-
-    // 1. Mes Annonces (Organisateur)
-    const { mutate: mutateAnnouncements } = useMatches({ ownerId: 'me', include_past: true });
-
+    const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
+    const { isLocked, user } = useUser();
     // 2. Demandes Reçues (Organisateur)
-    const { requests: incomingRequests, isLoading: isLoadingIncoming, mutate: mutateIncoming } = useIncomingRequests();
+    const { requests: incomingRequests, isLoading: isLoadingIncoming } = useIncomingRequests();
 
     // 3. Mes Participations (Candidat)
-    const { participations: myParticipations, isLoading: isLoadingParticipations, mutate: mutateParticipations, markAsRead: markAsReadHook } = useMyParticipations();
+    const { participations: myParticipations, isLoading: isLoadingParticipations, markAsRead: markAsReadHook } = useMyParticipations();
 
     // States
     const [requestsSubFilter, setRequestsSubFilter] = useState<'all' | 'match' | 'tournament'>('all');
     const [highlightedCardId, setHighlightedCardIdState] = useState<string | null>(null);
     const [selectedClubProfile, setSelectedClubProfile] = useState<any>(null);
-
-    // Modal state for 'Voir le profil'
-    const { isOpen: isProfileOpen, onOpen: onProfileOpen, onOpenChange: onProfileChange } = useDisclosure();
-    const { isLocked, user } = useUser();
-
     const [selectedTab, setSelectedTab] = useState<any>("requests");
 
     // Track last seen data to detect specific changes (Surgical Highlight)
@@ -138,44 +124,7 @@ export default function DashboardPage() {
         }
     };
 
-    const handleUpdateStatus = async (matchId: string, userId: string, status: 'accepted' | 'refused') => {
-        const confirmMsg = t(`matchForm.confirm.${status}`, { defaultValue: status === 'accepted' ? 'Souhaitez-vous vraiment accepter cette équipe ?' : 'Souhaitez-vous vraiment refuser cette équipe ?' });
-        if (!confirm(confirmMsg)) return;
-        try {
-            const token = await getAccessTokenSilently();
-            await matchService.updateRequestStatus(matchId, userId, status, token);
-            
-            // Force global refresh of all API data for maximum reliability
-            globalMutate((key) => typeof key === 'string' && key.startsWith('/api/'), undefined, { revalidate: true });
-
-            // Refresh all relevant hooks
-            mutateIncoming();
-            mutateAnnouncements();
-            mutateParticipations();
-            
-            // Trigger local update event
-            window.dispatchEvent(new CustomEvent('kdufoot_matches_updated'));
-        } catch (e: any) {
-            const rawMessage = e.message || "";
-            let cleanMessage = rawMessage;
-            try {
-                if (rawMessage.startsWith('{')) {
-                    const parsed = JSON.parse(rawMessage);
-                    cleanMessage = parsed.error || parsed.message || rawMessage;
-                }
-            } catch { /* ignore */ }
-
-            const errorMessage = cleanMessage === 'TOO_LATE_TO_MODIFY'
-                ? t('error.too_late_to_modify')
-                : (cleanMessage || t('error.save_failed'));
-
-            addToast({
-                title: t('error.title'),
-                description: errorMessage,
-                color: "danger"
-            });
-        }
-    };
+    // Status update logic moved to details page as per requirements
 
 
     const markAsRead = async (matchId: string) => {
@@ -295,6 +244,9 @@ export default function DashboardPage() {
     const modifiedTournamentIds = new Set(modifiedParticipations.filter(p => p.match_type === 'tournament').map(p => p.match_id));
     const modifiedMatchCount = modifiedMatchIds.size;
     const modifiedTournamentCount = modifiedTournamentIds.size;
+
+    // Badge Logic: counts for internal use if needed
+
 
     const renderSubFilters = (current: 'all' | 'match' | 'tournament', onChange: (v: 'all' | 'match' | 'tournament') => void) => (
         <div className="flex gap-2 p-1 rounded-xl bg-default-100/50 w-fit">
@@ -428,7 +380,7 @@ export default function DashboardPage() {
                                                     <div className="p-5 flex flex-col gap-4">
                                                         {/* Header: Club info + Status */}
                                                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                                            <Link to={`/matches/${request.match_id}`} className="flex items-center gap-3 w-full sm:w-auto hover:opacity-80 transition-opacity">
                                                                 <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20 shrink-0">
                                                                     {request.requester_club_logo ? (
                                                                         <Image src={request.requester_club_logo} className="object-contain w-10 h-10" />
@@ -450,7 +402,7 @@ export default function DashboardPage() {
                                                                         </Chip>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+                                                            </Link>
                                                             <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[120px] shrink-0">
                                                                 <Chip size="sm" color={request.request_status === 'accepted' ? 'success' : request.request_status === 'refused' ? 'danger' : 'warning'} variant="solid" className="font-black text-[9px] shadow-sm whitespace-nowrap">
                                                                     {t('dashboard.status.' + request.request_status)}
@@ -495,44 +447,20 @@ export default function DashboardPage() {
                                                             )}
                                                         </div>
 
-                                                        {/* Action Buttons */}
-                                                        {request.request_status === 'pending' ? (
-                                                            <div className="flex flex-col gap-2 relative z-20">
-                                                                <div className="flex flex-col sm:flex-row gap-2">
-                                                                    <Button
-                                                                        size="sm"
-                                                                        color="success"
-                                                                        className="w-full sm:flex-1 font-black text-sm h-12 shadow-md shadow-success/20 active:scale-95"
-                                                                        onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'accepted'); }}
-                                                                    >
-                                                                        ✓ {t('dashboard.controls.accept')}
-                                                                    </Button>
-                                                                    <Button
-                                                                        size="sm"
-                                                                        variant="flat"
-                                                                        color="danger"
-                                                                        className="w-full sm:flex-1 font-black text-sm h-12 active:scale-95"
-                                                                        onPress={() => { handleUpdateStatus(request.match_id, request.user_id, 'refused'); }}
-                                                                    >
-                                                                        ✕ {t('dashboard.controls.refuse')}
-                                                                    </Button>
-                                                                </div>
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="bordered"
-                                                                    color="secondary"
-                                                                    className="w-full font-bold text-sm h-11 border-secondary/30 text-secondary active:scale-95"
-                                                                    onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}
-                                                                >
-                                                                    {t('dashboard.labels.view_club_profile')}
-                                                                </Button>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex flex-col sm:flex-row gap-2 w-full relative z-20">
-                                                                <Button size="sm" variant="flat" className="w-full sm:flex-1 text-sm font-bold h-11 active:scale-95" as={Link} to={`/matches/${request.match_id}`} onClick={(e) => e.stopPropagation()}>{t('dashboard.controls.view')}</Button>
-                                                                <Button size="sm" variant="bordered" color="secondary" className="w-full sm:flex-1 text-sm font-bold h-11 border-secondary/30 active:scale-95" onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}>{t('dashboard.labels.view_profile')}</Button>
-                                                            </div>
-                                                        )}
+                                                        <div className="flex flex-col gap-2 relative z-20">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="bordered"
+                                                                color="secondary"
+                                                                className="w-full font-bold text-sm h-11 border-secondary/30 text-secondary active:scale-95"
+                                                                onPress={() => { setSelectedClubProfile(request); onProfileOpen(); }}
+                                                            >
+                                                                {t('dashboard.labels.view_club_profile')}
+                                                            </Button>
+                                                            <p className="text-[10px] text-center text-default-400 mt-1 italic">
+                                                                {t('dashboard.alerts.click_to_manage', 'Cliquez sur le logo ou le nom pour gérer cette demande.')}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </CardBody>
                                             </Card>

@@ -55,7 +55,8 @@
     "alerts": {
       "link_success": "Club lié avec succès !",
       "create_success": "Annonce créée avec succès !",
-      "update_success": "Match mis à jour avec succès !"
+      "update_success": "Match mis à jour avec succès !",
+      "past_date_error": "Impossible de créer un match à une date passée"
     }
   },
   "match": {
@@ -83,7 +84,8 @@
   },
   "tournamentForm": {
     "alerts": {
-      "create_success": "Tournoi publié avec succès !"
+      "create_success": "Tournoi publié avec succès !",
+      "past_date_error": "Impossible de créer un tournoi à une date passée"
     }
   },
   "accountModal": {

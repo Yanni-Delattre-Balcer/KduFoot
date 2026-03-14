@@ -336,38 +336,31 @@ export default function MatchesPage() {
                                 </Button>
                             </div>
 
-                            <div className="relative z-20 flex flex-col sm:flex-row justify-center gap-3 p-1.5 rounded-2xl bg-default-100/50 backdrop-blur-md w-full sm:w-auto border border-white/5">
-                                <Button
-                                    size="lg"
-                                    variant={view === 'find' ? "solid" : "light"}
-                                    color={view === 'find' ? (type === 'match' ? "secondary" : "default") : "default"}
-                                    onPress={() => {
-                                        setView('find');
-                                    }}
-                                    className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'find' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200"}`}
-                                    startContent={
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                        </svg>
-                                    }
-                                >
-                                    {type === 'match' ? t('match.find') : t('match.find_tournament')}{isMasked && ' 🔒'}
-                                </Button>
+                            <div className="flex flex-wrap gap-3 justify-center">
                                 <Button
                                     size="lg"
                                     variant={view === 'create' ? "solid" : "light"}
                                     color={view === 'create' ? (type === 'match' ? "secondary" : "default") : "default"}
                                     onPress={() => {
-                                        setView('create');
+                                        setView(view === 'create' ? 'find' : 'create');
                                     }}
-                                    className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200"}`}
+                                    className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}
                                     startContent={
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                        </svg>
+                                        view === 'create' ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                        )
                                     }
                                 >
-                                    {type === 'match' ? t('match.create') : t('match.create_tournament')}{isMasked && ' 🔒'}
+                                    {view === 'create' 
+                                        ? (type === 'match' ? t('match.find') : t('match.find_tournament'))
+                                        : (type === 'match' ? t('match.create') : t('match.create_tournament'))
+                                    }{isMasked && ' 🔒'}
                                 </Button>
                             </div>
                         </div>

@@ -1,6 +1,7 @@
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { AccountSettings } from "@/components/account-settings";
 import { useUser } from "@/hooks/use-user";
+import { useTranslation } from "react-i18next";
 import { isProfileComplete } from "@/utils/profile";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { useMemo } from "react";
@@ -11,6 +12,7 @@ interface AccountModalProps {
 }
 
 export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
+    const { t } = useTranslation();
     const { user } = useUser();
     const { isVisitor } = useWelcomeGateway();
 
@@ -36,10 +38,10 @@ export const AccountModal = ({ isOpen, onOpenChange }: AccountModalProps) => {
                     <>
                         <ModalHeader className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
-                                <span>Mon Compte</span>
+                                <span>{t('auth.account')}</span>
                                 {isLocked && (
                                     <span className="text-xs sm:text-sm bg-danger/10 text-danger px-2 py-0.5 rounded-full animate-pulse border border-danger/20 font-black">
-                                        Configuration Requise
+                                        {t('account.errors.form_incomplete')}
                                     </span>
                                 )}
                             </div>

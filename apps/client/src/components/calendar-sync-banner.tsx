@@ -70,7 +70,8 @@ export const CalendarSyncBanner: React.FC = () => {
         try {
             const data = await api.get("/api/users/me/calendar-link", getAccessTokenSilently);
             if (data && (data as any).url) {
-                window.location.href = (data as any).url;
+                const finalUrl = (data as any).url.replace(/^https?:\/\//, 'webcal://');
+                window.location.href = finalUrl;
                 addToast({ title: "Synchronisation calendrier lancée !", color: "success" });
             }
         } catch (error) {

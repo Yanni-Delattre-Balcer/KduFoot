@@ -68,9 +68,9 @@
     "exercises": "Analyse Vidéo",
     "training": "Mon Entraînement",
     "favorites": "Favoris",
-    "sessions": "Historique Match / Tournoi / Exercice",
-    "sessions_public": "Historique Match / Tournoi",
-    "matches": "Trouver un match / tournoi",
+    "sessions": "Historique Match ou Tournoi",
+    "sessions_public": "Historique Match ou Tournoi",
+    "matches": "Trouver un match ou tournoi",
     "dashboard": "Tableau de Bord",
     "pricing": "Tarifs",
     "remerciements": "Remerciements",
@@ -117,6 +117,11 @@
   "back_to_list": "Retour à la liste",
   "loading": "Chargement...",
   "edit": "Modifier",
+  "not_provided": "Non renseigné",
+  "unknown_city": "Ville inconnue",
+  "unknown_date": "Date inconnue",
+  "unknown": "Inconnu",
+  "untitled": "Sans titre",
   "video": {
     "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
     "analyze": "Analyser la vidéo",
@@ -153,7 +158,8 @@
     "empty_matches": "Aucun match favori",
     "empty_matches_desc": "Vos matchs likés apparaîtront ici.",
     "discover_exercises": "Découvrir les exercices",
-    "find_matches": "Trouver un match / tournoi"
+    "find_matches": "Trouver un match / tournoi",
+    "remove": "Retirer des favoris"
   },
   "myExercises": "Mes exercices",
   "mySessions": "Mes Séances",
@@ -296,7 +302,6 @@
       "Synthétique": "Synthétique",
       "Hybride": "Hybride",
       "Stabilisé": "Stabilisé",
-      "Toutes surfaces": "Toutes surfaces",
       "Indoor": "Indoor"
     },
     "gender": {
@@ -452,5 +457,11 @@
     "auth0_admin_api": "Accès API Auth0",
     "coach_certified": "Coach certifié"
   },
-  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur"
+  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur",
+  "choose": "Choisir",
+  "matchForm": {
+    "labels": {
+      "siret": "SIRET"
+    }
+  }
 }

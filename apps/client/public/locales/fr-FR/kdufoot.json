@@ -1,7 +1,26 @@
 {
+  "home": "Accueil",
   "success": "Succès",
   "warning": "Attention",
   "info": "Information",
+  "loading": "Chargement...",
+  "error": {
+    "title": "Erreur",
+    "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
+    "not_found": "Élément non trouvé",
+    "save_failed": "Erreur lors de la sauvegarde. Veuillez vérifier votre connexion.",
+    "delete_failed": "La suppression a échoué. Si le match est dans moins de 2h, il est verrouillé.",
+    "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
+    "loading_matches": "Erreur lors du chargement des matchs amicaux",
+    "loading_exercises": "Erreur lors du chargement des exercices",
+    "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
+    "invalid_date": "La date saisie est invalide ou déjà passée.",
+    "missing_fields": "Veuillez remplir tous les champs obligatoires.",
+    "technical_issue": "Problème Technique",
+    "bug_report": "Signaler un bug",
+    "feature_request": "Suggérer une fonctionnalité",
+    "other": "Autre"
+  },
   "user_banned_signal": "Signalement d'utilisateur banni",
   "cookie-consent-title": "Gestion des cookies",
   "cookie-policy": "Nous utilisons des cookies pour améliorer votre expérience.",
@@ -22,7 +41,7 @@
     "favorites": "Favoris",
     "sessions": "Historique Match / Tournoi / Exercice",
     "sessions_public": "Historique Match / Tournoi",
-    "matches": "Trouver/créer un match / tournoi",
+    "matches": "Trouver ou créer un match / tournoi",
     "dashboard": "Tableau de Bord",
     "pricing": "Tarifs",
     "remerciements": "Remerciements",
@@ -37,8 +56,8 @@
       "accessToken": "Access Token (Bearer)",
       "loading": "Chargement..."
     },
-    "find_match": "Trouver/créer un match",
-    "find_tournament": "Trouver/créer un tournoi"
+    "find_match": "Trouver ou créer un match",
+    "find_tournament": "Trouver ou créer un tournoi"
   },
   "auth": {
     "logout": "Se déconnecter",
@@ -58,9 +77,9 @@
     },
     "buttons": {
       "exercises": "Analyser une vidéo",
-      "sessions": "Trouver/créer un match / tournoi",
-      "find_match": "Trouver/créer un match",
-      "find_tournament": "Trouver/créer un tournoi"
+      "sessions": "Trouver ou créer un match / tournoi",
+      "find_match": "Trouver ou créer un match",
+      "find_tournament": "Trouver ou créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
@@ -105,21 +124,6 @@
   "equipment": "Matériel",
   "back": "Retour",
   "back_to_list": "Retour à la liste",
-  "loading": "Chargement...",
-  "edit": "Modifier",
-  "error": {
-    "title": "Erreur",
-    "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
-    "not_found": "Élément non trouvé",
-    "save_failed": "Erreur lors de la sauvegarde. Veuillez vérifier votre connexion.",
-    "delete_failed": "La suppression a échoué. Si le match est dans moins de 2h, il est verrouillé.",
-    "loading_sessions": "Erreur lors du chargement des séances d'entraînement",
-    "loading_matches": "Erreur lors du chargement des matchs amicaux",
-    "loading_exercises": "Erreur lors du chargement des exercices",
-    "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
-    "invalid_date": "La date saisie est invalide ou déjà passée.",
-    "missing_fields": "Veuillez remplir tous les champs obligatoires."
-  },
   "video": {
     "urlPlaceholder": "Colle le lien de ta vidéo YouTube, TikTok, Insta, etc.",
     "analyze": "Analyser la vidéo",
@@ -244,6 +248,7 @@
     "create_tournament": "Créer un Tournoi",
     "find": "Chercher un Match",
     "find_tournament": "Chercher un Tournoi",
+    "send_request": "Envoyer une demande",
     "format": "Format",
     "venue": "Lieu",
     "date": "Date",
@@ -451,6 +456,7 @@
       "phone": "Téléphone",
       "notes": "Notes / Instructions",
       "choose": "Choisir",
+      "siret": "SIRET",
       "auto_siret": "Rempli automatiquement via le SIRET",
       "auto": "Rempli automatiquement",
       "more_info": "Informations complémentaires...",
@@ -769,14 +775,14 @@
       "view": "Détails",
       "view_ad": "Voir l'annonce",
       "manage_registrations": "Gérer les demandes",
-      "contact": "📞 Contacter",
+      "contact": "📞 Envoyer une demande",
       "itinerary": "📍 Itinéraire",
       "new": "Nouvelle Annonce",
       "view_changes": "J'AI VU LES MODIFICATIONS",
       "mark_all_read": "Tout valider"
     },
     "status": {
-      "accepted": "Accepté",
+      "accepted": "Duel Confirmé ! ✅",
       "refused": "Refusé",
       "pending": "En attente",
       "cancelled": "Annulé",
@@ -808,15 +814,6 @@
       "warning_desc": "L'organisateur ({{host_club_name}}) a modifié les informations.",
       "h2_locked": "Événement verrouillé (H-2). Contactez les participants pour tout changement de dernière minute."
     }
-  },
-  "common": {
-    "home": "Accueil",
-    "choose": "Choisir",
-    "not_provided": "Non renseigné",
-    "unknown_city": "Ville inconnue",
-    "unknown_date": "Date inconnue",
-    "unknown": "Inconnu",
-    "untitled": "Sans titre"
   },
   "adminUsersPage": {
     "pageTitle": "Gestion des utilisateurs et permissions",

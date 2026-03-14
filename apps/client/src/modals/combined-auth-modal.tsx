@@ -23,7 +23,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({ isOpen, on
             console.log("[Calendar] Fetching sync link...");
             const data = await api.get("/api/users/me/calendar-link", getAccessTokenSilently);
             if (data && (data as any).url) {
-                const finalUrl = (data as any).url;
+                const finalUrl = (data as any).url.replace(/^https?:\/\//, 'webcal://');
                 
                 console.log("[Calendar] Redirecting to universal webcal link:", finalUrl);
                 window.location.href = finalUrl;

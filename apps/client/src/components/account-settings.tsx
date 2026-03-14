@@ -752,25 +752,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 </div>
 
                 <div className="w-full flex md:w-auto flex-col gap-3 mt-8 pt-6 border-t border-white/10">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <Button
-                            as="a"
-                            href={`mailto:support@kdufoot.com?subject=${t('support.technical_issue_subject', 'Problème Technique - Kdufoot')}`}
-                            variant="flat"
-                            className="bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 font-bold flex-1 h-12"
-                        >
-                            🛠️ {t('support.technical_issue')}
-                        </Button>
-                        <Button
-                            as="a"
-                            href={`mailto:support@kdufoot.com?subject=${t('support.other_inquiry_subject', 'Autre Demande - Kdufoot')}`}
-                            variant="flat"
-                            className="bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 font-bold flex-1 h-12"
-                        >
-                            📩 {t('support.other_inquiry')}
-                        </Button>
-                    </div>
-
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Button
                             color="primary"

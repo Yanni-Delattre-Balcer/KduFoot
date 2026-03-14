@@ -157,7 +157,16 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
         if (!formData.category) newErrors.category = t('account.errors.category_required');
         if (!formData.level) newErrors.level = t('account.errors.level_required');
         if (!formData.format) newErrors.format = t('account.errors.format_required');
-        if (!formData.match_date) newErrors.match_date = t('matchForm.alerts.date_required');
+        if (!formData.match_date) {
+            newErrors.match_date = t('matchForm.alerts.date_required');
+        } else {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDate = new Date(formData.match_date);
+            if (selectedDate < today) {
+                newErrors.match_date = t('matchForm.alerts.past_date_error');
+            }
+        }
         if (!formData.match_time) newErrors.match_time = t('matchForm.alerts.time_required');
         if (!formData.venue) newErrors.venue = t('matchForm.alerts.venue_required');
         if (!formData.pitch_type) newErrors.pitch_type = t('account.errors.pitch_required');

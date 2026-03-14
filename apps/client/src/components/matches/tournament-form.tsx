@@ -157,7 +157,16 @@ export default function TournamentForm({ initialData, onSuccess, onCancel }: Tou
         if (!formData.category) newErrors.category = "La catégorie est obligatoire.";
         if (!formData.level) newErrors.level = "Le niveau est obligatoire.";
         if (!formData.max_teams) newErrors.max_teams = "Le nombre d'équipes est obligatoire.";
-        if (!formData.match_date) newErrors.match_date = "La date est obligatoire.";
+        if (!formData.match_date) {
+            newErrors.match_date = "La date est obligatoire.";
+        } else {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDate = new Date(formData.match_date);
+            if (selectedDate < today) {
+                newErrors.match_date = t('tournamentForm.alerts.past_date_error');
+            }
+        }
         if (!formData.match_time) newErrors.match_time = "L'heure de début est obligatoire.";
         if (!formData.match_end_time) newErrors.match_end_time = "L'heure de fin est obligatoire.";
         if (!formData.pitch_type) newErrors.pitch_type = "Le type de terrain est obligatoire.";

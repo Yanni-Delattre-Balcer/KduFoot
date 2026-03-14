@@ -73,38 +73,9 @@ export default function DefaultLayout({
       </main>
       <footer className="relative w-full border-t border-default-100 bg-background/80 backdrop-blur-md mt-auto">
         <div className="container mx-auto px-6 py-8 flex flex-col items-center gap-6">
-          <div className="flex flex-row items-center justify-center gap-4 md:gap-12 w-full">
-            <div className="flex flex-col items-center gap-2 group">
-              <Button
-                as="a"
-                href={`mailto:support@kdufoot.com?subject=${t('support.technical_issue_subject')}`}
-                variant="flat"
-                color="warning"
-                size="md"
-                className="font-black tracking-tighter text-xs h-10 px-6 shadow-lg shadow-warning/5 border border-warning/10 hover:scale-105 transition-transform"
-                startContent={<span>🛠️</span>}
-              >
-                {t('support.need_help')}
-              </Button>
-              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-warning-500 transition-colors">{t('support.technical_issue_desc')}</span>
-            </div>
-
-            <div className="h-10 w-px bg-default-200/30"></div>
-
-            <div className="flex flex-col items-center gap-2 group">
-              <Button
-                as="a"
-                href={`mailto:contact@kdufoot.com?subject=${t('support.other_inquiry_subject')}`}
-                variant="flat"
-                color="primary"
-                size="md"
-                className="font-black tracking-tighter text-xs h-10 px-6 shadow-lg shadow-primary/5 border border-primary/10 hover:scale-105 transition-transform"
-                startContent={<span>✉️</span>}
-              >
-                {t('support.other_inquiry')}
-              </Button>
-              <span className="text-[10px] sm:text-xs text-default-400 font-medium italic group-hover:text-primary-500 transition-colors">{t('support.other_inquiry_desc')}</span>
-            </div>
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-xs font-bold text-default-600 tracking-tight">{t('support.other_inquiry')}</span>
+            <span className="text-[10px] sm:text-xs text-default-400 font-medium italic whitespace-nowrap">{t('support.other_inquiry_desc')}</span>
           </div>
 
           <div className="pt-4 pb-12 sm:pb-0 border-t border-default-100 w-full text-center">
