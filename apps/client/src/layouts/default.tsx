@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { jwtVerify, JWTPayload } from "jose";
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
+import { Mail, Handshake } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
 import { ConnectivityStatus } from "@/components/connectivity-status";
@@ -72,10 +73,37 @@ export default function DefaultLayout({
         {children}
       </main>
       <footer className="relative w-full border-t border-default-100 bg-background/80 backdrop-blur-md mt-auto">
-        <div className="container mx-auto px-6 py-8 flex flex-col items-center gap-6">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs font-bold text-default-600 tracking-tight">{t('support.other_inquiry')}</span>
-            <span className="text-[10px] sm:text-xs text-default-400 font-medium italic whitespace-nowrap">{t('support.other_inquiry_desc')}</span>
+        <div className="container mx-auto px-6 py-10 flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-8 w-full max-w-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full px-4">
+              <div className="flex flex-col gap-2">
+                <Button
+                  as="a"
+                  href={`mailto:support.kdufoot@gmail.com?subject=${t('support.technical_issue_subject')}`}
+                  className="w-full font-bold h-12 bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/20 text-blue-400 hover:border-blue-500/40 hover:bg-blue-600/20 transition-all shadow-[0_0_20px_rgba(59,130,246,0.1)] rounded-xl"
+                  startContent={<Mail size={18} strokeWidth={2.5} />}
+                >
+                  {t('support.technical_issue')}
+                </Button>
+                <p className="text-[10px] sm:text-xs text-center text-default-400 font-medium italic opacity-70 px-2 lg:px-0">
+                  {t('support.technical_issue_desc')}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Button
+                  as="a"
+                  href={`mailto:support.kdufoot@gmail.com?subject=${t('support.other_inquiry_subject')}`}
+                  className="w-full font-bold h-12 bg-default-100/50 border border-default-200/50 text-default-600 hover:bg-default-200/50 hover:text-default-700 transition-all rounded-xl"
+                  startContent={<Handshake size={20} />}
+                >
+                  {t('support.other_inquiry')}
+                </Button>
+                <p className="text-[10px] sm:text-xs text-center text-default-400 font-medium italic opacity-70 px-2 lg:px-0">
+                  {t('support.other_inquiry_desc')}
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="pt-4 pb-12 sm:pb-0 border-t border-default-100 w-full text-center">

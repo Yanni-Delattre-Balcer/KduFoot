@@ -60,7 +60,7 @@ export default function MatchesPage() {
     // Auto-scroll logic
     useEffect(() => {
         const scrollRequested = searchParams.get('scroll') === 'true';
-        
+
         // Case 1: Scroll to results list ONLY if 'scroll' param is present (e.g. from Home)
         if (view === 'find' && scrollRequested) {
             const timer = setTimeout(() => {
@@ -164,12 +164,12 @@ export default function MatchesPage() {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (!res.ok) throw new Error('Erreur lors de la suppression');
-            addToast({ 
-                title: 'Match supprimé', 
-                description: 'Le match a été supprimé. Les participants ont été notifiés de l\'annulation.', 
-                variant: 'solid', 
-                color: 'success', 
-                timeout: 5000 
+            addToast({
+                title: 'Match supprimé',
+                description: 'Le match a été supprimé. Les participants ont été notifiés de l\'annulation.',
+                variant: 'solid',
+                color: 'success',
+                timeout: 5000
             });
             // Global invalidation: refresh ALL /api/matches keys across all views
             globalMutate(
@@ -339,28 +339,34 @@ export default function MatchesPage() {
                             <div className="flex flex-wrap gap-3 justify-center">
                                 <Button
                                     size="lg"
-                                    variant={view === 'create' ? "solid" : "light"}
-                                    color={view === 'create' ? (type === 'match' ? "secondary" : "default") : "default"}
+                                    variant={view === 'find' ? "solid" : "flat"}
+                                    color={view === 'find' ? (type === 'match' ? "secondary" : "default") : "default"}
                                     onPress={() => {
-                                        setView(view === 'create' ? 'find' : 'create');
+                                        if (view === 'find') handleManualSearch();
+                                        else setView('find');
                                     }}
-                                    className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}
+                                    className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'find' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}
                                     startContent={
-                                        view === 'create' ? (
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                            </svg>
-                                        ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                            </svg>
-                                        )
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                        </svg>
                                     }
                                 >
-                                    {view === 'create' 
-                                        ? (type === 'match' ? t('match.find') : t('match.find_tournament'))
-                                        : (type === 'match' ? t('match.create') : t('match.create_tournament'))
-                                    }{isMasked && ' 🔒'}
+                                    {type === 'match' ? t('match.find') : t('match.find_tournament')}
+                                </Button>
+                                <Button
+                                    size="lg"
+                                    variant={view === 'create' ? "solid" : "flat"}
+                                    color={view === 'create' ? (type === 'match' ? "secondary" : "default") : "default"}
+                                    onPress={() => setView('create')}
+                                    className={`flex-1 sm:flex-none font-bold px-8 h-12 rounded-xl transition-all ${view === 'create' ? (type === 'match' ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}
+                                    startContent={
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    }
+                                >
+                                    {type === 'match' ? t('match.create') : t('match.create_tournament')}{isMasked && ' 🔒'}
                                 </Button>
                             </div>
                         </div>
@@ -562,21 +568,6 @@ export default function MatchesPage() {
                                             />
                                         </div>
                                     </CardBody>
-                                    <CardFooter className="px-5 pb-5 pt-0">
-                                        <Button
-                                            color="secondary"
-                                            variant="shadow"
-                                            className="w-full font-black tracking-widest h-14 text-lg shadow-violet-500/30"
-                                            onPress={handleManualSearch}
-                                            startContent={
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                                                </svg>
-                                            }
-                                        >
-                                            {type === 'match' ? t('homePage.buttons.find_match') : t('match.find_tournament')}
-                                        </Button>
-                                    </CardFooter>
                                 </Card>
 
                                 {/* Display Mode Toggle */}
@@ -665,6 +656,7 @@ export default function MatchesPage() {
                                                         <button
                                                             key={day}
                                                             onClick={() => count > 0 ? handleDayClick(dateKey) : undefined}
+
                                                             className={`
                                                                 h-16 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all text-sm relative border border-white/5
                                                                 ${isSelected ? 'bg-violet-500/30 border-2 border-violet-500 shadow-lg shadow-violet-500/20' : ''}

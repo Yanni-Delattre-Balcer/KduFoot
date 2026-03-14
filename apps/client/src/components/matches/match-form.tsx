@@ -363,6 +363,8 @@ export default function MatchForm({ initialData, onSuccess, onCancel }: MatchFor
                                 classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
                                 size="sm"
                                 min={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0]}
+                                isInvalid={!!errors.match_date}
+                                errorMessage={errors.match_date}
                             />
                             <Input
                                 type="time"

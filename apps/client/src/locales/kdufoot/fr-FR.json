@@ -453,6 +453,7 @@
       "email": "Email de contact",
       "phone": "Téléphone",
       "notes": "Notes / Instructions",
+      "siret": "Numéro SIRET",
       "choose": "Choisir",
       "auto_siret": "Rempli automatiquement via le SIRET",
       "auto": "Rempli automatiquement",
