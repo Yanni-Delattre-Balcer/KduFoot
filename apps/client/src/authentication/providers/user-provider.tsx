@@ -26,6 +26,7 @@ interface UserContextType {
   linkClub: (siret: string) => Promise<any>;
   unlinkClub: () => Promise<void>;
   updateUser: (data: Partial<User>) => Promise<any>;
+  resetCalendarSync: () => Promise<void>;
   blockUser: (
     userId: string,
     isBlocked: boolean,
@@ -174,19 +175,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     isAuthenticated && (!user || !isProfileComplete(user, true)) && !isBlocked;
 
   const needsCalendarReSync = useMemo(() => {
-    if (!user || user.calendar_dismissed) return false;
+    if (!user) return false;
     
-    // Si pas encore synchronisé (last_calendar_sync_at est à 0 ou n'existe pas)
-    // On demande tout le temps (car pas désactivé par dismissed)
-    if (!user.last_calendar_sync_at || user.last_calendar_sync_at === 0) {
-      return true;
-    }
-
-    const oneDayInSeconds = 24 * 60 * 60;
-    const nowInSeconds = Math.floor(Date.now() / 1000);
-
-    // Si synchronisé mais plus d'activité depuis 24 heures
-    return (nowInSeconds - user.last_calendar_sync_at) > oneDayInSeconds;
+    // Si pas encore synchronisé, on demande tout le temps
+    return !user.has_synced_calendar;
   }, [user]);
 
   const isAdmin = user?.email === "yannidelattrebalcer.artois@gmail.com";
@@ -217,6 +209,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     await mutate(CONTEXT_KEY);
 
     return resData;
+  };
+
+  const resetCalendarSync = async () => {
+    await updateUser({ has_synced_calendar: false } as any);
+    // Supprimer aussi le flag de session pour forcer l'affichage immédiat
+    sessionStorage.removeItem("kdufoot-calendar-suppressed");
   };
 
   const blockUser = async (
@@ -251,6 +249,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isOnline,
       syncStatus,
       notifications,
+      resetCalendarSync,
       last_calendar_sync_at: user?.last_calendar_sync_at,
       needsCalendarReSync,
       isAccountModalOpen,
@@ -267,6 +266,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isOnline,
       syncStatus,
       notifications,
+      resetCalendarSync,
       needsCalendarReSync,
       logout,
       isAccountModalOpen,

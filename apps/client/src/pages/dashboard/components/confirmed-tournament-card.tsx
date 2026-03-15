@@ -54,18 +54,19 @@ export const ConfirmedTournamentCard = ({
   const remainingTeamsCount = Math.max(0, part.accepted_count - 3);
 
   const isModification = part.notification_state === 1;
+  // Role-based overall styling
   const borderClass = isModification
     ? highlighted
       ? "border-danger ring-4 ring-danger/30 shadow-danger/20"
       : "border-danger/50 bg-zinc-900/90 shadow-danger/10"
-    : "border-purple-400/40 bg-zinc-900/90 shadow-xl hover:shadow-purple-500/20";
+    : "border-violet-500/40 bg-zinc-900/90 shadow-xl hover:shadow-violet-500/20";
 
   return (
     <Card
       className={`overflow-hidden border transition-all duration-300 col-span-full ${borderClass} group`}
       id={`card-${part.match_id}`}
     >
-      <div className="absolute inset-0 bg-linear-to-br from-purple-600/10 via-transparent to-transparent opacity-50" />
+      <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50" />
       <CardBody className="p-0">
         <div className="flex flex-col 2xl:flex-row">
           {/* Left Section: Info & Progress */}
@@ -80,14 +81,17 @@ export const ConfirmedTournamentCard = ({
                     />
                   ) : (
                     <span className="text-white font-black text-2xl">
-                      {part.host_club_name?.charAt(0)}
+                      {(part.host_club_name || part.name || "T").charAt(0)}
                     </span>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
-                    {part.host_club_name}
+                    {part.name || part.host_club_name}
                   </h3>
+                  <p className="text-[10px] sm:text-xs font-bold text-default-400 mt-1 uppercase tracking-wider">
+                    {part.accepted_count || 0} {t("dashboard.tournament.registered_teams", "équipes inscrites")}
+                  </p>
                   <div className="flex flex-wrap items-center gap-3 mt-2">
                     <Chip
                       className="font-black text-[10px] sm:text-xs tracking-wider h-auto py-0.5 whitespace-normal"
@@ -95,7 +99,7 @@ export const ConfirmedTournamentCard = ({
                       size="sm"
                       variant="flat"
                     >
-                      🏆 {part.name || t("enums.type.tournament")}
+                      🏆 {t("enums.type.tournament")}
                     </Chip>
                     <Chip
                       className="h-5 text-[9px] font-black shrink-0"
@@ -107,7 +111,7 @@ export const ConfirmedTournamentCard = ({
                     </Chip>
                     {(part.host_home_jersey_color ||
                       part.host_away_jersey_color) && (
-                      <div className="flex gap-2 items-center bg-white/5 px-2 py-0.5 rounded-lg border border-white/10 group-hover:border-purple-500/30 transition-colors">
+                      <div className="flex gap-2 items-center bg-white/5 px-2 py-0.5 rounded-lg border border-white/10 group-hover:border-violet-500/30 transition-colors">
                         {part.host_home_jersey_color && (
                           <JerseyColorDots
                             colors={part.host_home_jersey_color}
@@ -180,7 +184,7 @@ export const ConfirmedTournamentCard = ({
                   size="sm"
                   variant="dot"
                 >
-                  {part.match_format || "5x5"}
+                  {part.match_format || part.format || "5x5"}
                 </Chip>
               </div>
               <div
@@ -210,7 +214,6 @@ export const ConfirmedTournamentCard = ({
                 <p
                   className={`text-sm font-bold ${isPitchChanged || highlighted ? "text-danger" : "text-white"}`}
                 >
-
                   {part.match_pitch_type ||
                   part.opponent_pitch_type ||
                   part.pitch_type
@@ -224,7 +227,7 @@ export const ConfirmedTournamentCard = ({
 
             <div className="space-y-2">
               <div className="flex justify-between items-end">
-                <p className="text-sm font-black text-purple-400 tracking-widest">
+                <p className="text-sm font-black text-violet-400 tracking-widest">
                   {t("dashboard.tournament.filling", "Remplissage du tournoi")}
                 </p>
                 <p className="text-xs font-bold text-white">
@@ -238,7 +241,7 @@ export const ConfirmedTournamentCard = ({
                 )}
                 className="max-w-md"
                 classNames={{
-                  indicator: "bg-linear-to-r from-purple-500 to-pink-500",
+                  indicator: "bg-linear-to-r from-violet-500 to-indigo-500",
                 }}
                 color="secondary"
                 size="md"
@@ -276,7 +279,7 @@ export const ConfirmedTournamentCard = ({
                   </div>
                 ))}
                 {remainingTeamsCount > 0 && (
-                  <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-purple-500 flex items-center justify-center z-[1]">
+                  <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-violet-500 flex items-center justify-center z-[1]">
                     <span className="text-xs sm:text-sm font-black text-white">
                       +{remainingTeamsCount}
                     </span>
@@ -308,10 +311,10 @@ export const ConfirmedTournamentCard = ({
                   )}
                 </Button>
               )}
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   as={Link}
-                  className="w-full sm:flex-1 font-bold text-sm h-10 active:scale-95 bg-white/5"
+                  className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 bg-white/5"
                   color="default"
                   size="sm"
                   to={`/matches/${part.match_id}`}
@@ -321,7 +324,7 @@ export const ConfirmedTournamentCard = ({
                 </Button>
                 <Button
                   as="a"
-                  className="w-full sm:flex-1 font-black text-[10px] h-10 active:scale-95 shadow-sm"
+                  className="flex-1 min-w-[120px] font-black text-[10px] h-12 active:scale-95 shadow-sm"
                   color="primary"
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${part.opponent_stadium_address || part.location_address || part.host_stadium_address}, ${part.opponent_city || part.location_city || part.host_city}`)}`}
                   rel="noopener noreferrer"
@@ -333,7 +336,7 @@ export const ConfirmedTournamentCard = ({
                 </Button>
                 <Button
                   as="a"
-                  className="w-full sm:flex-1 font-bold text-sm h-10 active:scale-95 shadow-md shadow-purple-500/20"
+                  className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 shadow-md shadow-violet-500/20"
                   color="secondary"
                   href={`tel:${part.host_phone || part.opponent_phone}`}
                   size="sm"
@@ -343,7 +346,7 @@ export const ConfirmedTournamentCard = ({
                 </Button>
                 {onWithdraw && (
                   <Button
-                    className="w-full sm:flex-1 font-bold text-xs h-10 active:scale-95 border border-danger/20 hover:bg-danger/10"
+                    className="flex-1 min-w-[120px] font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10"
                     color="danger"
                     isLoading={isWithdrawing}
                     size="sm"

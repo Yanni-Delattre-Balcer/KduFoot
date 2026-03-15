@@ -270,15 +270,10 @@ export const useAuth0Provider = (): AuthProvider => {
 
         try {
           const data = await promise;
-
-          // keep the resolved promise in cache (could also replace by data)
-          requestCacheRef.current.set(cacheKey, Promise.resolve(data));
-
           return data;
-        } catch (err) {
-          // remove failed promise from cache
+        } finally {
+          // remove from cache so next call is a fresh fetch
           requestCacheRef.current.delete(cacheKey);
-          throw err;
         }
       } catch (error) {
         // eslint-disable-next-line no-console

@@ -20,7 +20,6 @@ import { SiteLoading } from "../components/site-loading";
 
 import {
   useAuth,
-  getNameWithFallback,
   withAuthentication,
 } from "./providers/use-auth";
 import { useUser } from "./providers/user-provider";
@@ -31,11 +30,17 @@ import { AccountModal } from "./account-modal";
  * @returns The user's name with a tooltip showing their username
  */
 export function Profile() {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
+  const { user: dbUser } = useUser();
+
+  const name =
+    dbUser?.firstname && dbUser?.lastname
+      ? `${dbUser.firstname} ${dbUser.lastname}`
+      : dbUser?.firstname || dbUser?.lastname || authUser?.name;
 
   return (
-    <Tooltip content={user?.nickname} delay={750}>
-      <span>{user?.name}</span>
+    <Tooltip content={authUser?.nickname} delay={750}>
+      <span>{name}</span>
     </Tooltip>
   );
 }
@@ -131,21 +136,27 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
   showButtonIfNotAuthenticated = false,
   text,
 }) => {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user: authUser } = useAuth();
+  const { user: dbUser } = useUser();
   const { t } = useTranslation();
 
   if (!text) {
     text = t("auth.logout");
   }
 
+  const name =
+    dbUser?.firstname && dbUser?.lastname
+      ? `${dbUser.firstname} ${dbUser.lastname}`
+      : dbUser?.firstname || dbUser?.lastname || authUser?.name || "";
+
   return (
     (isAuthenticated || showButtonIfNotAuthenticated) && (
       <Tooltip
         content={t("auth.user-details", {
-          name: user?.name || "",
-          nickname: user?.nickname || "",
-          email: user?.email || "",
-          sub: user?.sub || "",
+          name: name,
+          nickname: authUser?.nickname || "",
+          email: authUser?.email || "",
+          sub: authUser?.sub || "",
         })}
         delay={750}
       >
@@ -194,12 +205,18 @@ export const LogoutLink: FC<LogoutLinkProps> = ({
   text,
   color,
 }) => {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user: authUser } = useAuth();
+  const { user: dbUser } = useUser();
   const { t } = useTranslation();
+
+  const name =
+    dbUser?.firstname && dbUser?.lastname
+      ? `${dbUser.firstname} ${dbUser.lastname}`
+      : dbUser?.firstname || dbUser?.lastname || authUser?.name || "";
 
   if (!text) {
     text = t("log-out-someone", {
-      name: getNameWithFallback(user),
+      name: name,
     });
   }
 

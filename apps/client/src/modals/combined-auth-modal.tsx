@@ -151,12 +151,14 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
             )}
 
             {/* Bouton "Pas maintenant" : fermeture pour la session actuelle */}
-            <button
-              className="text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] transition-colors py-2 uppercase tracking-wider"
-              onClick={() => onClose()}
+            <Button
+              className="text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] tracking-wider"
+              size="sm"
+              variant="light"
+              onPress={() => onClose()}
             >
               {t("onboarding.calendar.later")}
-            </button>
+            </Button>
           </div>
         </ModalFooter>
       </ModalContent>

@@ -126,7 +126,7 @@ export const UnifiedOnboarding = () => {
     if (isPermanent) {
       // Persistent dismissal in database
       try {
-        await updateUser({ calendar_dismissed: true });
+        await updateUser({ has_synced_calendar: true });
       } catch (e) {
         console.error("Failed to persist calendar dismissal", e);
       }

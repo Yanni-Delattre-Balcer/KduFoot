@@ -52,20 +52,20 @@ export const OrganizedTournamentCard = ({
                     />
                   ) : (
                     <span className="text-white font-black text-2xl">
-                      {match.club?.name?.charAt(0)}
+                      {(match.club?.name || match.name || "T").charAt(0)}
                     </span>
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-black text-violet-400 text-xl sm:text-2xl lg:text-3xl leading-tight tracking-tighter group-hover:text-violet-300 transition-colors break-words">
-                    {t("enums.type.tournament")}
+                  <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
+                    {match.name || match.club?.name}
                   </h3>
-                  <p className="text-white/70 text-xs sm:text-sm font-bold tracking-widest break-words leading-tight">
-                    {match.name || match.club?.name || "??"}
+                  <p className="text-[10px] sm:text-xs font-bold text-default-400 mt-1 uppercase tracking-wider">
+                    {match.accepted_count || 0} {t("dashboard.tournament.registered_teams", "équipes inscrites")}
                   </p>
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <div className="flex flex-wrap items-center gap-3 mt-2">
                     <Chip
-                      className="font-black text-[9px] sm:text-xs tracking-wider h-auto py-0.5 whitespace-normal"
+                      className="font-black text-[10px] sm:text-xs tracking-wider h-auto py-0.5 whitespace-normal"
                       color="secondary"
                       size="sm"
                       variant="flat"
@@ -89,7 +89,7 @@ export const OrganizedTournamentCard = ({
               </div>
               <div className="flex justify-start sm:justify-end w-full sm:w-auto sm:max-w-[200px] shrink-0">
                 <Chip
-                  className="font-black text-[10px] sm:text-sm py-3 shadow-lg shadow-violet-500/30 whitespace-normal text-center h-auto min-h-8"
+                  className="font-black text-xs sm:text-sm py-3 shadow-lg shadow-violet-500/30 w-full"
                   color={match.status === "active" ? "secondary" : "default"}
                   size="sm"
                   variant="solid"
@@ -145,7 +145,7 @@ export const OrganizedTournamentCard = ({
 
             <div className="space-y-2">
               <div className="flex justify-between items-end">
-                <p className="text-sm font-black text-purple-400 tracking-widest">
+                <p className="text-sm font-black text-violet-400 tracking-widest">
                   {t("dashboard.tournament.filling", "Remplissage du tournoi")}
                 </p>
                 <p className="text-xs font-bold text-white">
@@ -159,7 +159,7 @@ export const OrganizedTournamentCard = ({
                 )}
                 className="max-w-md"
                 classNames={{
-                  indicator: "bg-linear-to-r from-purple-500 to-pink-500",
+                  indicator: "bg-linear-to-r from-violet-500 to-indigo-500",
                 }}
                 color="secondary"
                 size="md"
@@ -198,7 +198,7 @@ export const OrganizedTournamentCard = ({
                   </div>
                 ))}
                 {remainingTeamsCount > 0 && (
-                  <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-purple-500 flex items-center justify-center z-[1]">
+                  <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-violet-500 flex items-center justify-center z-[1]">
                     <span className="text-xs sm:text-sm font-black text-white">
                       +{remainingTeamsCount}
                     </span>
@@ -248,7 +248,7 @@ export const OrganizedTournamentCard = ({
                     </Button>
                   </div>
                   <Button
-                    className="w-full font-bold text-sm h-10 active:scale-95 shadow-md shadow-secondary/20"
+                    className="w-full font-bold text-sm h-12 active:scale-95 shadow-md shadow-violet-500/20"
                     color={match.status === "found" ? "default" : "secondary"}
                     isDisabled={match.status === "found" || isSaving}
                     size="sm"
@@ -269,7 +269,7 @@ export const OrganizedTournamentCard = ({
                   </Button>
                   <Button
                     as={Link}
-                    className="w-full font-bold text-sm h-10 active:scale-95 border border-white/10"
+                    className="w-full font-bold text-sm h-12 active:scale-95 border border-white/10"
                     size="sm"
                     to={`/matches/${match.id}`}
                     variant="flat"

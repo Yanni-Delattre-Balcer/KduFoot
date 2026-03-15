@@ -12,10 +12,13 @@ export const UserSync = () => {
       syncedRef.current = user.sub;
 
       postJson(`${import.meta.env.API_BASE_URL}/api/users/sync`, user)
-        .then((res: any) => {
+        .then(async (res: any) => {
           if (res.success) {
+            const { mutate } = await import("swr");
+            await mutate("/api/me/context");
           } else {
             console.error("User sync returned error:", res.error);
+            syncedRef.current = null; // Re-autorise la synchro car elle a échoué côté serveur
           }
         })
         .catch((err: any) => {

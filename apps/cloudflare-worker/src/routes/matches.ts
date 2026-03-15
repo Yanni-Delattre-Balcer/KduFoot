@@ -574,13 +574,13 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         } catch (e) {
             return Response.json({ success: false, error: 'Token decoding failed' }, { status: 400, headers: router.corsHeaders });
         }
-        const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type, club_colors FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string, level: string, category: string, pitch_type: string, club_colors: string }>();
+        const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string, level: string, category: string, pitch_type: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         // Security check: Profile must be 100% complete
-        if (!dbUser.level || !dbUser.category || !dbUser.pitch_type || !dbUser.club_colors) {
+        if (!dbUser.level || !dbUser.category || !dbUser.pitch_type) {
             return Response.json({
                 success: false,
                 error: 'Profil incomplet : Veuillez renseigner votre niveau, catégorie, type de terrain et couleurs dans votre compte.'

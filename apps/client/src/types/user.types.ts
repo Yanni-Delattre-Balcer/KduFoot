@@ -12,7 +12,6 @@ export interface User {
   category?: string | null;
   level?: string | null;
   pitch_type?: string | null;
-  club_colors?: string | null;
   home_jersey_color?: string | null;
   away_jersey_color?: string | null;
   stadium_address?: string | null;
@@ -42,7 +41,7 @@ export interface User {
   created_at: number;
   updated_at: number;
   last_calendar_sync_at: number;
-  calendar_dismissed: boolean;
+  has_synced_calendar: boolean;
   block_count: number;
   club?: Club;
 }

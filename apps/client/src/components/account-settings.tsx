@@ -4,7 +4,7 @@ import { Image } from "@heroui/image";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import * as faceapi from "face-api.js";
 import { useTranslation } from "react-i18next";
 import { mutate } from "swr";
@@ -25,13 +25,14 @@ interface AccountSettingsProps {
 }
 
 export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
+  const baseId = useId();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const from = searchParams.get("from") || (location.state as any)?.from;
   const { user: authUser, getAccessToken, logout, deleteJson } = useAuth();
-  const { user: dbUser, updateUser, linkClub, unlinkClub, refetch } = useUser();
+  const { user: dbUser, updateUser, linkClub, unlinkClub, refetch, resetCalendarSync } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -52,6 +53,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isInitialized, setIsInitialized] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isResettingCalendar, setIsResettingCalendar] = useState(false);
 
   const formatPhoneNumber = (value: string) => {
     let raw = value.replace(/\D/g, "");
@@ -348,6 +350,29 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     }
   };
 
+  const handleResetCalendar = async () => {
+    if (!confirm(t("account.sync.reset_confirm"))) {
+      return;
+    }
+
+    setIsResettingCalendar(true);
+    try {
+      await resetCalendarSync();
+      addToast({
+        title: t("account.sync.reset_success"),
+        color: "success",
+      });
+    } catch (e: any) {
+      addToast({
+        title: t("account.sync.reset_error"),
+        description: e.message,
+        color: "danger",
+      });
+    } finally {
+      setIsResettingCalendar(false);
+    }
+  };
+
   const handleLinkSiret = async () => {
     const cleanSiret = siret.replace(/\s/g, "").trim();
 
@@ -456,7 +481,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
         <div className="text-center w-full overflow-hidden">
           <h3 className="text-lg sm:text-2xl font-bold truncate hover:overflow-x-auto whitespace-nowrap scrollbar-hide">
-            {authUser.name}
+            {dbUser?.firstname && dbUser?.lastname
+              ? `${dbUser.firstname} ${dbUser.lastname}`
+              : dbUser?.firstname || dbUser?.lastname || authUser.name}
           </h3>
           <div className="flex items-center justify-center gap-2 mt-1">
             <Chip
@@ -487,7 +514,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                   <Input
                     isRequired
                     aria-label={t("account.fields.firstname")}
-                    id="acc_firstname"
+                    autoComplete="given-name"
+                    errorMessage={errors.firstname}
+                    id={`${baseId}_firstname`}
                     isInvalid={!!errors.firstname}
                     label={t("account.fields.firstname")}
                     name="acc_firstname"
@@ -500,15 +529,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                         setErrors((prev) => ({ ...prev, firstname: "" }));
                     }}
                   />
-                  {errors.firstname && (
-                    <p className="text-xs font-bold pl-1">{errors.firstname}</p>
-                  )}
                 </div>
                 <div className="space-y-1">
                   <Input
                     isRequired
                     aria-label={t("account.fields.lastname")}
-                    id="acc_lastname"
+                    autoComplete="family-name"
+                    errorMessage={errors.lastname}
+                    id={`${baseId}_lastname`}
                     isInvalid={!!errors.lastname}
                     label={t("account.fields.lastname")}
                     name="acc_lastname"
@@ -521,16 +549,15 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                         setErrors((prev) => ({ ...prev, lastname: "" }));
                     }}
                   />
-                  {errors.lastname && (
-                    <p className="text-xs font-bold pl-1">{errors.lastname}</p>
-                  )}
                 </div>
               </div>
               <div className="space-y-1">
                 <Input
                   isRequired
                   aria-label={t("account.fields.phone")}
-                  id="acc_phone"
+                  autoComplete="tel"
+                  errorMessage={errors.phone}
+                  id={`${baseId}_phone`}
                   isInvalid={!!errors.phone}
                   label={t("account.fields.phone")}
                   name="acc_phone"
@@ -544,15 +571,13 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       setErrors((prev) => ({ ...prev, phone: "" }));
                   }}
                 />
-                {errors.phone && (
-                  <p className="text-xs font-bold pl-1">{errors.phone}</p>
-                )}
               </div>
               <div className="space-y-1">
                 <Input
                   isRequired
                   aria-label={t("account.fields.license")}
-                  id="acc_license"
+                  errorMessage={errors.licenseId}
+                  id={`${baseId}_license`}
                   isInvalid={!!errors.licenseId}
                   label={t("account.fields.license")}
                   name="acc_license"
@@ -566,9 +591,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       setErrors((prev) => ({ ...prev, licenseId: "" }));
                   }}
                 />
-                {errors.licenseId && (
-                  <p className="text-xs font-bold pl-1">{errors.licenseId}</p>
-                )}
               </div>
               <div className="space-y-1">
                 <Input
@@ -578,7 +600,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     inputWrapper: "bg-default-200/30",
                     label: "font-bold text-default-500 whitespace-nowrap",
                   }}
-                  id="acc_hq_address"
+                  id={`${baseId}_hq_address`}
                   label={t("account.fields.hq_address")}
                   name="acc_hq_address"
                   size="sm"
@@ -590,12 +612,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 <Input
                   isRequired
                   aria-label={t("account.fields.stadium_address")}
+                  autoComplete="street-address"
                   classNames={{
                     description: "text-[10px] text-primary-500 font-medium",
                     label: "font-black text-primary whitespace-nowrap",
                   }}
                   description={t("account.fields.stadium_warning")}
-                  id="acc_stadium_address"
+                  errorMessage={errors.stadiumAddress}
+                  id={`${baseId}_stadium_address`}
                   isInvalid={!!errors.stadiumAddress}
                   label={t("account.fields.stadium_address")}
                   name="acc_stadium_address"
@@ -609,11 +633,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       setErrors((prev) => ({ ...prev, stadiumAddress: "" }));
                   }}
                 />
-                {errors.stadiumAddress && (
-                  <p className="text-xs text-danger font-bold pl-1">
-                    {errors.stadiumAddress}
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -626,7 +645,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
               <div className="space-y-1">
                 <Select
                   aria-label={t("account.fields.category")}
-                  id="acc_category"
+                  errorMessage={errors.category}
+                  id={`${baseId}_category`}
                   isInvalid={!!errors.category}
                   label={t("account.fields.category")}
                   name="acc_category"
@@ -649,14 +669,12 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </SelectItem>
                   ))}
                 </Select>
-                {errors.category && (
-                  <p className="text-xs font-bold pl-1">{errors.category}</p>
-                )}
               </div>
               <div className="space-y-1">
                 <Select
                   aria-label={t("account.fields.level")}
-                  id="acc_level"
+                  errorMessage={errors.level}
+                  id={`${baseId}_level`}
                   isInvalid={!!errors.level}
                   label={t("account.fields.level")}
                   name="acc_level"
@@ -676,18 +694,16 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </SelectItem>
                   ))}
                 </Select>
-                {errors.level && (
-                  <p className="text-xs font-bold pl-1">{errors.level}</p>
-                )}
               </div>
               <div className="space-y-1">
                 <Input
                   isRequired
                   aria-label={t("account.fields.home_jersey")}
+                  errorMessage={errors.homeJerseyColor}
                   endContent={
                     <JerseyColorDots colors={homeJerseyColor} size="md" />
                   }
-                  id="acc_home_jersey"
+                  id={`${baseId}_home_jersey`}
                   isInvalid={!!errors.homeJerseyColor}
                   label={t(
                     "account.fields.home_jersey",
@@ -707,20 +723,16 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       setErrors((prev) => ({ ...prev, homeJerseyColor: "" }));
                   }}
                 />
-                {errors.homeJerseyColor && (
-                  <p className="text-xs font-bold pl-1 text-danger">
-                    {errors.homeJerseyColor}
-                  </p>
-                )}
               </div>
               <div className="space-y-1">
                 <Input
                   isRequired
                   aria-label={t("account.fields.away_jersey")}
+                  errorMessage={errors.awayJerseyColor}
                   endContent={
                     <JerseyColorDots colors={awayJerseyColor} size="md" />
                   }
-                  id="acc_away_jersey"
+                  id={`${baseId}_away_jersey`}
                   isInvalid={!!errors.awayJerseyColor}
                   label={t(
                     "account.fields.away_jersey",
@@ -740,11 +752,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       setErrors((prev) => ({ ...prev, awayJerseyColor: "" }));
                   }}
                 />
-                {errors.awayJerseyColor && (
-                  <p className="text-xs font-bold pl-1 text-danger">
-                    {errors.awayJerseyColor}
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -779,7 +786,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       <Input
                         aria-label="Siret (14 chiffres) ou Siren (9 chiffres)"
                         className="w-full max-w-full"
-                        id="acc_siret"
+                        errorMessage={errors.siret}
+                        id={`${baseId}_siret`}
                         isDisabled={!!dbUser?.club_id}
                         isInvalid={!!errors.siret}
                         label={
@@ -803,11 +811,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                           }
                         }}
                       />
-                      {errors.siret && (
-                        <p className="text-xs font-bold pl-1 animate-shake">
-                          {errors.siret}
-                        </p>
-                      )}
                     </div>
                     {!dbUser?.club_id ? (
                       <Button
@@ -910,13 +913,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 "account.fields.stadium_address_for",
                                 { club: s.name },
                               )}
+                              autoComplete="street-address"
                               classNames={{
                                 label:
                                   "text-[10px] font-bold text-primary-400 tracking-tight",
                                 input: "text-xs",
                                 inputWrapper: "h-9 min-h-9",
                               }}
-                              id={`acc_stadium_address_${s.siret}`}
+                              id={`${baseId}_stadium_address_${s.siret}`}
                               label={t("account.fields.stadium_address_for", {
                                 club: s.name,
                               })}
@@ -974,6 +978,35 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                     </p>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-sm font-bold text-default-400 ml-1 mt-2">
+              {t("account.sections.sync")}
+            </p>
+            <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-white">
+                    {t("onboarding.calendar.title")}
+                  </p>
+                  <p className="text-xs text-default-500 mt-1">
+                    {dbUser?.has_synced_calendar 
+                      ? t("success") + " : " + t("onboarding.calendar.native")
+                      : t("dashboard.status.pending")}
+                  </p>
+                </div>
+                <Button
+                  className="font-bold text-xs h-10 border border-white/10 w-full sm:w-auto"
+                  color="secondary"
+                  isLoading={isResettingCalendar}
+                  variant="flat"
+                  onPress={handleResetCalendar}
+                >
+                  {t("account.buttons.reset_calendar")}
+                </Button>
               </div>
             </div>
           </div>

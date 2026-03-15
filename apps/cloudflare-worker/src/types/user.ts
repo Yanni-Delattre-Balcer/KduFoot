@@ -14,7 +14,6 @@ export interface User {
     category?: string | null;
     level?: string | null;
     pitch_type?: string | null;
-    club_colors?: string | null;
     home_jersey_color?: string | null;
     away_jersey_color?: string | null;
     stadium_address?: string | null;
@@ -27,8 +26,8 @@ export interface User {
     additional_sirets?: (string | { siret: string; stadium_address?: string | null })[] | null;
     calendar_token?: string | null;
     push_subscription?: string | null;
+    has_synced_calendar: boolean;
     last_calendar_sync_at: number;
-    calendar_dismissed: boolean;
     block_count: number;
 
     siret_change_count: number;
@@ -56,7 +55,6 @@ export interface UpdateUserDto {
     category?: string;
     level?: string;
     pitch_type?: string;
-    club_colors?: string;
     home_jersey_color?: string;
     away_jersey_color?: string;
     stadium_address?: string;
@@ -67,8 +65,8 @@ export interface UpdateUserDto {
     additional_sirets?: (string | { siret: string; stadium_address?: string | null })[];
     calendar_token?: string;
     push_subscription?: string | null;
+    has_synced_calendar?: boolean;
     last_calendar_sync_at?: number;
-    calendar_dismissed?: boolean;
     block_count?: number;
 
     siret_change_count?: number;

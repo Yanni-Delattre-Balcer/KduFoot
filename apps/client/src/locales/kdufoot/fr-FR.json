@@ -570,7 +570,8 @@
     "sections": {
       "identity": "Identité & Contact",
       "sports_profile": "Profil Sportif (Requis pour créer des annonces)",
-      "club_location": "Club & Localisation"
+      "club_location": "Club & Localisation",
+      "sync": "Synchronisation"
     },
     "fields": {
       "firstname": "Prénom",
@@ -630,8 +631,14 @@
       "save_changes": "Enregistrer les modifications",
       "save_and_continue": "Enregistrer et continuer",
       "delete_account": "Supprimer mon compte",
+      "reset_calendar": "Réinitialiser ma synchronisation calendrier",
       "validate_club": "VALIDER MON CLUB",
       "contact_support": "📩 CONTACTER LE SUPPORT"
+    },
+    "sync": {
+      "reset_confirm": "Voulez-vous réinitialiser votre synchronisation calendrier ?\n\nCela fera réapparaître la page d'installation lors de votre prochaine connexion pour que vous puissiez vous réabonner.",
+      "reset_success": "Synchronisation réinitialisée. La page d'installation va réapparaître.",
+      "reset_error": "Erreur lors de la réinitialisation de la synchronisation."
     },
     "confirm_delete": "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?",
     "delete_success": "Compte supprimé avec succès",
