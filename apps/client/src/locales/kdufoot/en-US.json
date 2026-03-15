@@ -189,7 +189,12 @@
       "dismiss": "I've already done it",
       "toast_success": "Calendar link opened!",
       "toast_success_desc": "Accept the subscription in your calendar app, then click 'I've already done it'.",
-      "toast_error": "Calendar sync failed"
+      "toast_error": "Calendar sync failed",
+      "instructions_android": "Choose your default calendar app to complete synchronization.",
+      "copy_link": "Copy calendar link",
+      "manual_notice": "If automatic opening fails, copy the link and paste it manually in your calendar settings (Add by URL).",
+      "add_google": "Add to Google Calendar",
+      "link_copied": "Link copied to clipboard!"
     }
   },
   "planner": {

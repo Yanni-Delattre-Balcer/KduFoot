@@ -184,7 +184,7 @@ export const ConfirmedTournamentCard = ({
                   size="sm"
                   variant="dot"
                 >
-                  {part.match_format || part.format || "5x5"}
+                  {(t("enums.format." + (part.match_format || part.format || "5v5"), part.match_format || part.format || "5v5") as string)}
                 </Chip>
               </div>
               <div

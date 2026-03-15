@@ -200,7 +200,12 @@
       "dismiss": "Je l'ai déjà fait",
       "toast_success": "Lien calendrier ouvert !",
       "toast_success_desc": "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait ».",
-      "toast_error": "Échec de la synchronisation calendrier"
+      "toast_error": "Échec de la synchronisation calendrier",
+      "instructions_android": "Choisissez votre application de calendrier par défaut pour terminer la synchronisation.",
+      "copy_link": "Copier le lien du calendrier",
+      "manual_notice": "Si l'ouverture automatique échoue, copiez le lien et collez-le manuellement dans vos paramètres d'agenda (Ajouter par URL).",
+      "add_google": "Ajouter à Google Calendar",
+      "link_copied": "Lien copié dans le presse-papier !"
     }
   },
   "planner": {
@@ -281,7 +286,7 @@
     "accept_confirm": "Accepter l'équipe de {{clubName}} ?",
     "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",
     "confirm_delete_admin": "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.",
-    "delete_success_admin": "Match supprimé. Les participants ont été notifiés de l'annulation.",
+    "delete_success_admin": "{{matchType}} supprimé. Les participants ont été notifiés de l'annulation.",
     "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
     "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "filters": {
@@ -536,7 +541,7 @@
       "link_success": "Club lié avec succès !",
       "create_success": "Annonce de match créée avec succès !",
       "update_success": "Match mis à jour avec succès !",
-      "delete_success": "Match supprimé avec succès !",
+      "delete_success": "{{matchType}} supprimé avec succès !",
       "contact_success": "Votre demande a été envoyée avec succès ! 🚀",
       "date_past_error": "Impossible de publier : l'heure sélectionnée est dépassée.",
       "delay_short_error": "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi.",
@@ -796,7 +801,7 @@
     "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
     "toasts": {
       "accept_success": "Demande acceptée",
-      "delete_success": "Annonce supprimée avec succès",
+      "delete_success": "Votre {{matchType}} a été supprimé avec succès",
       "delete_success_desc": "L'annonce a été retirée avec succès",
       "all_read_success": "Toutes les modifications ont été validées"
     },

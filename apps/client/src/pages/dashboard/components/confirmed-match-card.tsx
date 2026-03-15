@@ -187,7 +187,7 @@ export const ConfirmedMatchCard = ({
                   size="sm"
                   variant="dot"
                 >
-                  {match.format || match.match_format || "11v11"}
+                  {(t("enums.format." + (match.format || match.match_format || "11v11"), match.format || match.match_format || "11v11") as string)}
                 </Chip>
               </div>
               <div
