@@ -193,7 +193,11 @@ export function useWebSocketSync(
                   // Show the toast for participant (organizer already returned)
                   closeAll();
                   addToast({
-                    title: t("dashboard.notifications.modification"),
+                    title: t("dashboard.notifications.modification", {
+                      matchType: t(
+                        "enums.type." + (payload.data?.match_type || "match"),
+                      ).toLowerCase(),
+                    }),
                     description: (
                       <div
                         className="cursor-pointer w-full h-full"
@@ -222,7 +226,11 @@ export function useWebSocketSync(
               case "MATCH_CANCELLED":
                 // Message ciblés envoyés uniquement aux joueurs par le backend
                 color = "danger";
-                title = "Annulation";
+                title = t("dashboard.notifications.cancellation_title", {
+                  matchType: t(
+                    "enums.type." + (payload.data?.match_type || "match"),
+                  ).toLowerCase(),
+                });
                 description = t("dashboard.notifications.cancellation", {
                   team: payload.data?.host_club_name || "un club",
                   date: payload.data?.match_date

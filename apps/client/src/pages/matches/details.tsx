@@ -244,8 +244,10 @@ export default function MatchDetailsPage() {
     try {
       await deleteMatch();
       addToast({
-        title: match.type === "tournament" ? "Tournoi supprimé" : "Match supprimé",
-        description: "L'annonce a été retirée avec succès",
+        title: t("dashboard.toasts.delete_success", "Annonce supprimée", {
+          matchType: t("enums.type." + match.type).toLowerCase()
+        }),
+        description: t("dashboard.toasts.delete_success_desc", "L'annonce a été retirée avec succès"),
         color: "success",
       });
       onDeleteOpenChange(); // Close modal on success
@@ -255,8 +257,11 @@ export default function MatchDetailsPage() {
       addToast({
         title: t("base.error.title", "Erreur"),
         description: t(
-          "error.delete_failed",
+          "error.delete_failed_with_type",
           match.type === "tournament" ? "Erreur lors de la suppression du tournoi" : "Erreur lors de la suppression du match",
+          {
+            matchType: t("enums.type." + match.type).toLowerCase()
+          }
         ),
         color: "danger",
       });

@@ -196,9 +196,9 @@
       "button": "Synchroniser mon calendrier",
       "native": "Calendrier Natif",
       "later": "Pas maintenant",
-      "dismiss": "Ne plus demander",
+      "dismiss": "Je l'ai déjà fait",
       "toast_success": "Lien calendrier ouvert !",
-      "toast_success_desc": "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Ne plus demander » si vous ne voulez plus voir ce message.",
+      "toast_success_desc": "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait ».",
       "toast_error": "Échec de la synchronisation calendrier"
     }
   },
@@ -786,8 +786,9 @@
       "all_read_success": "Toutes les modifications ont été validées"
     },
     "notifications": {
-      "modification": "Match modifié ⚠️",
+      "modification": "{{matchType}} modifié ⚠️",
       "modification_message": "Votre {{matchType}} du {{date}} a été modifié. Cliquez ici pour voir les détails.",
+      "cancellation_title": "Annulation de {{matchType}}",
       "cancellation": "Annulation de votre {{matchType}}. La rencontre du {{date}} avec {{team}} a été annulée.",
       "new_request_interactive": "Vous avez reçu une demande pour votre {{matchType}} du {{date}}",
       "acceptance_player": "Confirmation ! ✅ Votre {{matchType}} du {{date}} est validé.",
@@ -802,7 +803,7 @@
       "email": "Email",
       "city": "Ville",
       "request_date": "Date de la demande",
-      "for_match_on": "Pour le match du",
+      "for_match_on": "Pour votre {{matchType}} du",
       "unknown": "Inconnue",
       "close": "Fermer"
     },
@@ -831,18 +832,18 @@
     },
     "alerts": {
       "title": "Modification détectée",
-      "message": "Le match contre {{team}} prévu le {{date}} a été modifié.",
+      "message": "Votre {{matchType}} contre {{team}} prévu le {{date}} a été modifié.",
       "success_discrete": "Action effectuée",
       "specific": {
-        "date": "La date du match a été modifiée.",
-        "time": "L'heure du match a été modifiée.",
-        "venue": "Le lieu du match a été modifié.",
-        "jerseys": "Les couleurs de maillots ont été modifiées.",
-        "multiple": "Plusieurs informations du match ont été modifiées."
+        "date": "La date de votre {{matchType}} a été modifiée.",
+        "time": "L'heure de votre {{matchType}} a été modifiée.",
+        "venue": "Le lieu de votre {{matchType}} a été modifié.",
+        "jerseys": "Les couleurs de maillots de votre {{matchType}} ont été modifiées.",
+        "multiple": "Plusieurs informations de votre {{matchType}} ont été modifiées."
       },
       "action_required": "Action Requise : Modifications Détectées",
-      "match_count": "{{count}} match a été modifié par l'organisateur. Veuillez vérifier les détails.",
-      "matches_count": "{{count}} matchs ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
+      "match_count": "{{count}} {{matchType}} a été modifié par l'organisateur. Veuillez vérifier les détails.",
+      "matches_count": "{{count}} {{matchType}}s ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
       "view_changes": "J'ai vu les changements",
       "mark_as_read": "J'ai compris, marquer comme lu",
       "verify": "Vérifier",

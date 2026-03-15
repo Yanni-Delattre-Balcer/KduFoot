@@ -527,6 +527,8 @@
     },
     "fields": {
       "firstname": "First Name",
+      "dismiss": "I've already done it",
+      "toast_success_desc": "Accept the subscription in your calendar app, then click 'I've already done it'.",
       "lastname": "Last Name",
       "phone": "Phone",
       "license": "License number",
@@ -694,7 +696,7 @@
       "tournaments": "Tournaments"
     },
     "labels": {
-      "for_event": "For your {{type}}",
+      "for_event": "For your {{matchType}}",
       "view_club_profile": "👤 View club profile",
       "search_match": "Search for a match",
       "search_tournament": "Search for a tournament",
@@ -744,12 +746,13 @@
       "all_read_success": "All modifications have been validated"
     },
     "notifications": {
-      "modification": "Match modification",
-      "cancellation": "The match scheduled against {{team}} on {{date}} was cancelled by the organizer",
-      "new_request_interactive": "You received a request from {{team}} for the match on {{date}} at {{time}}",
-      "acceptance_player": "Your match against {{team}} on {{date}} has been accepted by the organizer",
-      "rejection_player": "Your request for the match on {{date}} against {{team}} was refused",
-      "withdrawal": "Team {{team}} has cancelled its request for the match on {{date}} at {{time}}"
+      "modification": "{{matchType}} modified ⚠️",
+      "cancellation_title": "{{matchType}} Cancelled",
+      "cancellation": "The {{matchType}} scheduled against {{team}} on {{date}} was cancelled by the organizer",
+      "new_request_interactive": "You received a request from {{team}} for the {{matchType}} on {{date}} at {{time}}",
+      "acceptance_player": "Your {{matchType}} against {{team}} on {{date}} has been accepted by the organizer",
+      "rejection_player": "Your request for the {{matchType}} on {{date}} against {{team}} was refused",
+      "withdrawal": "Team {{team}} has cancelled its request for the {{matchType}} on {{date}} at {{time}}"
     },
     "profile_modal": {
       "title": "Club Profile",
@@ -759,7 +762,7 @@
       "email": "Email",
       "city": "City",
       "request_date": "Request date",
-      "for_match_on": "For the match on",
+      "for_match_on": "For your {{matchType}} on",
       "unknown": "Unknown",
       "close": "Close"
     },
@@ -787,19 +790,19 @@
       "open": "Open"
     },
     "alerts": {
-      "title": "Modification detected",
-      "message": "The match against {{team}} scheduled for {{date}} has been modified.",
+      "title": "{{matchType}} modification",
+      "message": "The {{matchType}} against {{team}} scheduled for {{date}} has been modified.",
       "success_discrete": "Action performed",
       "specific": {
-        "date": "The match date has been modified.",
-        "time": "The match time has been modified.",
-        "venue": "The match venue has been modified.",
-        "jerseys": "Jersey colors have been modified.",
-        "multiple": "Multiple match information has been modified."
+        "date": "The {{matchType}} date has been modified.",
+        "time": "The {{matchType}} time has been modified.",
+        "venue": "The {{matchType}} venue has been modified.",
+        "jerseys": "Jersey colors for the {{matchType}} have been modified.",
+        "multiple": "Multiple {{matchType}} information has been modified."
       },
       "action_required": "Action Required: Modifications Detected",
-      "match_count": "{{count}} match has been modified by the organizer. Please check the details.",
-      "matches_count": "{{count}} matches have been modified by the organizer. Please check the details.",
+      "match_count": "{{count}} {{matchType}} has been modified by the organizer. Please check the details.",
+      "matches_count": "{{count}} {{matchType}}s have been modified by the organizer. Please check the details.",
       "view_changes": "I have seen the changes",
       "mark_as_read": "I understand, mark as read",
       "verify": "Verify",

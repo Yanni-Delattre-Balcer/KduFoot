@@ -602,7 +602,7 @@
       "tournaments": "Tournaments"
     },
     "labels": {
-      "for_event": "For your {{type}}",
+      "for_event": "For your {{matchType}}",
       "view_club_profile": "👤 View club profile",
       "search_match": "Search for a match",
       "search_tournament": "Search for a tournament",
@@ -661,7 +661,7 @@
       "email": "Email",
       "city": "City",
       "request_date": "Request date",
-      "for_match_on": "For the match on",
+      "for_match_on": "For your {{matchType}} on",
       "unknown": "Unknown",
       "close": "Close"
     },

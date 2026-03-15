@@ -194,8 +194,9 @@
       "button": "Connecter mon calendrier",
       "native": "Calendrier Natif",
       "later": "Peut-être plus tard",
-      "dismiss": "C'est déjà fait / Ne plus me demander",
-      "toast_success": "Synchronisation calendrier lancée !",
+      "dismiss": "Je l'ai déjà fait",
+      "toast_success": "Lien calendrier ouvert !",
+      "toast_success_desc": "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait ».",
       "toast_error": "Échec de la synchronisation calendrier"
     }
   },
@@ -739,7 +740,7 @@
       "tournaments": "Tournois"
     },
     "labels": {
-      "for_event": "Pour votre {{type}}",
+      "for_event": "Pour votre {{matchType}}",
       "view_club_profile": "👤 Voir le profil du club",
       "search_match": "Rechercher un match",
       "search_tournament": "Rechercher un tournoi",
@@ -789,11 +790,12 @@
       "all_read_success": "Toutes les modifications ont été validées"
     },
     "notifications": {
-      "modification": "Match modifié ⚠️",
-      "modification_message": "Votre duel du {{date}} a été modifié. Cliquez ici pour voir les détails.",
-      "cancellation": "Annulation du duel. La rencontre du {{date}} avec {{team}} a été annulée.",
-      "new_request_interactive": "Vous avez reçu une demande pour votre {{type}} du {{date}}",
-      "acceptance_player": "Confirmation ! ✅ Votre {{type}} du {{date}} est validé.",
+      "modification": "{{matchType}} modifié ⚠️",
+      "modification_message": "Votre {{matchType}} du {{date}} a été modifié. Cliquez ici pour voir les détails.",
+      "cancellation_title": "Annulation de {{matchType}}",
+      "cancellation": "Annulation de votre {{matchType}}. La rencontre du {{date}} avec {{team}} a été annulée.",
+      "new_request_interactive": "Vous avez reçu une demande pour votre {{matchType}} du {{date}}",
+      "acceptance_player": "Confirmation ! ✅ Votre {{matchType}} du {{date}} est validé.",
       "rejection_player": "Demande refusée. {{team}} n'est pas disponible pour le {{date}}.",
       "refusal_organizer": "Demande refusée. Vous avez décliné l'invitation de {{team}}."
     },
@@ -805,7 +807,7 @@
       "email": "Email",
       "city": "Ville",
       "request_date": "Date de la demande",
-      "for_match_on": "Pour le match du",
+      "for_match_on": "Pour votre {{matchType}} du",
       "unknown": "Inconnue",
       "close": "Fermer"
     },
@@ -837,15 +839,15 @@
       "message": "Le match contre {{team}} prévu le {{date}} a été modifié.",
       "success_discrete": "Action effectuée",
       "specific": {
-        "date": "La date du match a été modifiée.",
-        "time": "L'heure du match a été modifiée.",
-        "venue": "Le lieu du match a été modifié.",
-        "jerseys": "Les couleurs de maillots ont été modifiées.",
-        "multiple": "Plusieurs informations du match ont été modifiées."
+        "date": "La date de votre {{matchType}} a été modifiée.",
+        "time": "L'heure de votre {{matchType}} a été modifiée.",
+        "venue": "Le lieu de votre {{matchType}} a été modifié.",
+        "jerseys": "Les couleurs de maillots de votre {{matchType}} ont été modifiées.",
+        "multiple": "Plusieurs informations de votre {{matchType}} ont été modifiées."
       },
       "action_required": "Action Requise : Modifications Détectées",
-      "match_count": "{{count}} match a été modifié par l'organisateur. Veuillez vérifier les détails.",
-      "matches_count": "{{count}} matchs ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
+      "match_count": "{{count}} {{matchType}} a été modifié par l'organisateur. Veuillez vérifier les détails.",
+      "matches_count": "{{count}} {{matchType}}s ont été modifiés par l'organisateur. Veuillez vérifier les détails.",
       "view_changes": "J'ai vu les changements",
       "mark_as_read": "J'ai compris, marquer comme lu",
       "verify": "Vérifier",

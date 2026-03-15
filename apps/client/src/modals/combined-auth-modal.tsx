@@ -141,12 +141,12 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
               variant="flat"
               onPress={handleDismissRefused}
             >
-              {t("onboarding.calendar.dismiss")}
+              {t("onboarding.calendar.dismiss", "Je l'ai déjà fait")}
             </Button>
 
             {hasSyncedOnce && (
               <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
-                {t("onboarding.calendar.toast_success_desc")}
+                {t("onboarding.calendar.toast_success_desc", "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait ».")}
               </p>
             )}
 

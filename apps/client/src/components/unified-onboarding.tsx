@@ -63,10 +63,7 @@ export const UnifiedOnboarding = () => {
     // --- EVALUATION ---
     const needsPWA =
       isWeb && !isSessionDismissed && !isPermanentlyDismissed && canInstall;
-    const needsAuth =
-      ((!authDismissed && !localAuthSuppressed) ||
-        (needsCalendarReSync && !localAuthSuppressed)) &&
-      isAuthenticated;
+    const needsAuth = needsCalendarReSync && !localAuthSuppressed && isAuthenticated;
 
     console.log("[Onboarding] Refreshing...", {
       activeStep,

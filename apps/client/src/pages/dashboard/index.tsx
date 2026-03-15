@@ -740,7 +740,7 @@ export default function DashboardPage() {
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-bold text-default-400 tracking-widest">
                                     {t("dashboard.labels.for_event", {
-                                      type:
+                                      matchType:
                                         request.match_type === "tournament"
                                           ? t(
                                               "enums.type.tournament",
@@ -1205,7 +1205,12 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-default-500 tracking-tighter font-bold text-[9px]">
-                          {t("dashboard.profile_modal.for_match_on")}
+                          {t("dashboard.profile_modal.for_match_on", {
+                            matchType: t(
+                              "enums.type." +
+                                (selectedClubProfile.match_type || "match"),
+                            ).toLowerCase(),
+                          })}
                         </span>
                         <span className="text-warning-500 font-black">
                           {formatDate(selectedClubProfile.match_date)}{" "}

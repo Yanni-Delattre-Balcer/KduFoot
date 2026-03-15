@@ -185,9 +185,9 @@
       "button": "Sync my calendar",
       "native": "Native Calendar",
       "later": "Not now",
-      "dismiss": "Don't ask again",
+      "dismiss": "I've already done it",
       "toast_success": "Calendar link opened!",
-      "toast_success_desc": "Accept the subscription in your calendar app, then click \"Don't ask again\" if you don't want to see this message anymore.",
+      "toast_success_desc": "Accept the subscription in your calendar app, then click 'I've already done it'.",
       "toast_error": "Calendar sync failed"
     }
   },
@@ -759,11 +759,12 @@
       "delete_success": "Ad deleted successfully"
     },
     "notifications": {
-      "modification": "Match modified ⚠️",
-      "modification_message": "Your duel on {{date}} has been modified. Click here to see details.",
-      "cancellation": "The scheduled match against {{team}} on {{date}} has been cancelled by the organizer",
-      "new_request_interactive": "You received a request from {{team}} for your match on {{date}}",
-      "acceptance_player": "Duel Confirmed! ✅ Your match on {{date}} is validated.",
+      "modification": "{{matchType}} modified ⚠️",
+      "modification_message": "Your {{matchType}} on {{date}} has been modified. Click here to see details.",
+      "cancellation_title": "{{matchType}} Cancelled",
+      "cancellation": "The scheduled {{matchType}} against {{team}} on {{date}} has been cancelled by the organizer",
+      "new_request_interactive": "You received a request from {{team}} for your {{matchType}} on {{date}}",
+      "acceptance_player": "Duel Confirmed! ✅ Your {{matchType}} on {{date}} is validated.",
       "rejection_player": "Request refused. {{team}} is not available for the {{date}}.",
       "refusal_organizer": "Request refused. You have declined the invitation from {{team}}."
     },
@@ -775,19 +776,19 @@
       "email": "Email",
       "city": "City",
       "request_date": "Request date",
-      "for_match_on": "For the match on",
+      "for_match_on": "For your {{matchType}} on",
       "unknown": "Unknown",
       "close": "Close"
     },
     "alerts": {
-      "title": "Match update",
-      "message": "The match against {{host_club_name}} has been updated!",
+      "title": "{{matchType}} update",
+      "message": "Your {{matchType}} against {{host_club_name}} has been updated!",
       "success_discrete": "Action completed",
       "view_changes": "View changes",
       "h2_locked": "Event locked (H-2). Contact participants for any last-minute changes.",
       "specific": {
-        "date": "The match date has been changed.",
-        "time": "The match time has been changed."
+        "date": "The {{matchType}} date has been changed.",
+        "time": "The {{matchType}} time has been changed."
       }
     }
   },
