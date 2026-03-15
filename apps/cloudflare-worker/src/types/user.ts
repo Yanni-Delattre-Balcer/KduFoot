@@ -1,3 +1,4 @@
+import { Club } from './match';
 
 export interface User {
     id: string;
@@ -33,6 +34,7 @@ export interface User {
     siret_change_count: number;
     created_at: number;
     updated_at: number;
+    club?: Club;
 }
 
 export interface CreateUserDto {
