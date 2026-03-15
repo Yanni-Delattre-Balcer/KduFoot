@@ -182,11 +182,12 @@
     "calendar": {
       "title": "Don't miss any match!",
       "description": "Sync your matches directly with your calendar for smart reminders and real-time tracking.",
-      "button": "Connect my calendar",
+      "button": "Sync my calendar",
       "native": "Native Calendar",
-      "later": "Maybe later",
-      "dismiss": "No, I don't want to",
-      "toast_success": "Calendar sync started!",
+      "later": "Not now",
+      "dismiss": "Don't ask again",
+      "toast_success": "Calendar link opened!",
+      "toast_success_desc": "Accept the subscription in your calendar app, then click \"Don't ask again\" if you don't want to see this message anymore.",
       "toast_error": "Calendar sync failed"
     }
   },

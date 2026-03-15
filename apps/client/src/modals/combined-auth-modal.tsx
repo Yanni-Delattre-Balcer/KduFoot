@@ -123,45 +123,41 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           </div>
         </ModalBody>
         <ModalFooter className="px-6 sm:px-10 pb-10">
-            <div className="flex flex-col gap-4 w-full">
-              {/* Bouton principal : ouvre le lien webcal:// */}
-              <Button
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold tracking-tight w-full rounded-2xl h-14 text-base sm:text-lg shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
-                endContent={!isSyncing && <ChevronRight size={20} />}
-                isLoading={isSyncing}
-                size="lg"
-                onPress={handleCalendarSync}
-              >
-                {t("onboarding.calendar.button", "Synchroniser mon calendrier")}
-              </Button>
+          <div className="flex flex-col gap-4 w-full">
+            {/* Bouton principal : ouvre le lien webcal:// */}
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold tracking-tight w-full rounded-2xl h-14 text-base sm:text-lg shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+              endContent={!isSyncing && <ChevronRight size={20} />}
+              isLoading={isSyncing}
+              size="lg"
+              onPress={handleCalendarSync}
+            >
+              {t("onboarding.calendar.button")}
+            </Button>
 
-              {/* Bouton de confirmation : seul moyen de fermer la modale */}
-              <Button
-                className="w-full font-bold text-sm tracking-tight rounded-xl h-12 border-2 border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200 transition-all"
-                variant="flat"
-                onPress={handleDismissRefused}
-              >
-                {t("onboarding.calendar.dismiss")}
-              </Button>
+            {/* Bouton de confirmation : fermeture définitive */}
+            <Button
+              className="w-full font-bold text-sm tracking-tight rounded-xl h-12 border-2 border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200 transition-all"
+              variant="flat"
+              onPress={handleDismissRefused}
+            >
+              {t("onboarding.calendar.dismiss")}
+            </Button>
 
-              {hasSyncedOnce && (
-                <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
-                  Après avoir accepté l'abonnement dans votre application calendrier, cliquez sur « Je l'ai déjà fait » ci-dessus.
-                </p>
-              )}
+            {hasSyncedOnce && (
+              <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
+                {t("onboarding.calendar.toast_success_desc")}
+              </p>
+            )}
 
-              {/* Bouton "Pas maintenant" : ferme pour cette session uniquement */}
-              <button
-                className="text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] transition-colors py-2 uppercase tracking-wider"
-                onClick={() => {
-                  // sessionStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
-                  // window.dispatchEvent(new CustomEvent("kdufoot_auth_step_complete"));
-                  onClose();
-                }}
-              >
-                Pas maintenant
-              </button>
-            </div>
+            {/* Bouton "Pas maintenant" : fermeture pour la session actuelle */}
+            <button
+              className="text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] transition-colors py-2 uppercase tracking-wider"
+              onClick={() => onClose()}
+            >
+              {t("onboarding.calendar.later")}
+            </button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

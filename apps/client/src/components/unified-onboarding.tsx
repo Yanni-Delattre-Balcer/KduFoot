@@ -26,7 +26,9 @@ export const UnifiedOnboarding = () => {
 
   // Reactive Storage States
   const [authDismissed, setAuthDismissed] = useState(false);
-  const [localAuthSuppressed, setLocalAuthSuppressed] = useState(false);
+  const [localAuthSuppressed, setLocalAuthSuppressed] = useState(
+    sessionStorage.getItem("kdufoot-calendar-suppressed") === "true",
+  );
 
   const refreshDismissalState = useCallback(() => {
     const isPerm =
@@ -61,14 +63,14 @@ export const UnifiedOnboarding = () => {
     // --- EVALUATION ---
     const needsPWA =
       isWeb && !isSessionDismissed && !isPermanentlyDismissed && canInstall;
-    // La modale calendrier s'affiche tant que l'utilisateur n'a pas cliqué "Je l'ai déjà fait"
-    // On ne vérifie PAS calendar_token car il est auto-généré côté serveur
-    // RÉAPPARITION AUTO : Si needsCalendarReSync est vrai, on ignore authDismissed (localStorage)
+    // La modale calendrier s'affiche tant que l'utilisateur n'a pas cliqué sur "Ne plus demander" (DB)
+    // OU si la session n'est pas supprimée localement via "Pas maintenant"
+    const isLocalSuppressed = sessionStorage.getItem("kdufoot-calendar-suppressed") === "true";
+    
     const needsAuth =
-      ((!authDismissed && !localAuthSuppressed) ||
-        (needsCalendarReSync && !localAuthSuppressed)) &&
+      ((!authDismissed && !isLocalSuppressed) ||
+        (needsCalendarReSync && !isLocalSuppressed)) &&
       isAuthenticated;
-
 
     console.log("[Onboarding] Refreshing...", {
       activeStep,
@@ -78,11 +80,10 @@ export const UnifiedOnboarding = () => {
       isStandalone,
       detailed: {
         authDismissed,
-        localAuthSuppressed,
+        isLocalSuppressed,
         canInstall,
         isSessionDismissed,
         isPermanentlyDismissed,
-        isStandalone,
       },
     });
 
@@ -119,13 +120,11 @@ export const UnifiedOnboarding = () => {
     pwaStepEvaluated,
     activeStep,
     authDismissed,
-    localAuthSuppressed,
+    needsCalendarReSync,
   ]);
 
   const handlePwaClose = (action: "installed" | "dismissed") => {
     console.log("[Onboarding] PWA Close Action:", action);
-    // Marquer l'étape PWA comme terminée sans forcer activeStep à null.
-    // Le useEffect réévaluera immédiatement et ouvrira l'étape "auth" (Calendrier).
     setPwaStepEvaluated(true);
   };
 
@@ -139,7 +138,8 @@ export const UnifiedOnboarding = () => {
         console.error("Failed to persist calendar dismissal", e);
       }
     } else {
-      // "Pas maintenant" : On masque juste pour cette session du composant (jusqu'à F5)
+      // "Pas maintenant" : Session storage (jusqu'à la fermeture du navigateur/onglet)
+      sessionStorage.setItem("kdufoot-calendar-suppressed", "true");
       setLocalAuthSuppressed(true);
     }
     setActiveStep(null);

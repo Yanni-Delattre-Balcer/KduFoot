@@ -193,11 +193,12 @@
     "calendar": {
       "title": "Synchroniser mon calendrier",
       "description": "Synchronisez vos rencontres directement avec votre calendrier pour des rappels intelligents et un suivi en temps réel.",
-      "button": "Connecter mon calendrier",
+      "button": "Synchroniser mon calendrier",
       "native": "Calendrier Natif",
-      "later": "Peut-être plus tard",
-      "dismiss": "Non, je ne veux pas",
-      "toast_success": "Synchronisation calendrier lancée !",
+      "later": "Pas maintenant",
+      "dismiss": "Ne plus demander",
+      "toast_success": "Lien calendrier ouvert !",
+      "toast_success_desc": "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Ne plus demander » si vous ne voulez plus voir ce message.",
       "toast_error": "Échec de la synchronisation calendrier"
     }
   },
