@@ -41,7 +41,11 @@ export interface User {
     | null;
   created_at: number;
   updated_at: number;
-  club?: Club; // Computed/Joined field if needed
+  last_calendar_sync_at: number;
+  calendar_dismissed: boolean;
+  block_count: number;
+ // Computed/Joined field if needed
+
 }
 
 export interface Club {

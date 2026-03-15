@@ -7,8 +7,14 @@ import { CombinedAuthModal } from "@/modals/combined-auth-modal";
 
 export const UnifiedOnboarding = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isLoading: userLoading } = useUser();
   const {
+    isLoading: userLoading,
+    needsCalendarReSync,
+    updateUser,
+  } = useUser();
+
+  const {
+
     isStandalone,
     isPermanentlyDismissed,
     isSessionDismissed,
@@ -20,6 +26,7 @@ export const UnifiedOnboarding = () => {
 
   // Reactive Storage States
   const [authDismissed, setAuthDismissed] = useState(false);
+  const [localAuthSuppressed, setLocalAuthSuppressed] = useState(false);
 
   const refreshDismissalState = useCallback(() => {
     const isPerm =
@@ -56,7 +63,12 @@ export const UnifiedOnboarding = () => {
       isWeb && !isSessionDismissed && !isPermanentlyDismissed && canInstall;
     // La modale calendrier s'affiche tant que l'utilisateur n'a pas cliqué "Je l'ai déjà fait"
     // On ne vérifie PAS calendar_token car il est auto-généré côté serveur
-    const needsAuth = !authDismissed;
+    // RÉAPPARITION AUTO : Si needsCalendarReSync est vrai, on ignore authDismissed (localStorage)
+    const needsAuth =
+      ((!authDismissed && !localAuthSuppressed) ||
+        (needsCalendarReSync && !localAuthSuppressed)) &&
+      isAuthenticated;
+
 
     console.log("[Onboarding] Refreshing...", {
       activeStep,
@@ -66,6 +78,7 @@ export const UnifiedOnboarding = () => {
       isStandalone,
       detailed: {
         authDismissed,
+        localAuthSuppressed,
         canInstall,
         isSessionDismissed,
         isPermanentlyDismissed,
@@ -106,6 +119,7 @@ export const UnifiedOnboarding = () => {
     pwaStepEvaluated,
     activeStep,
     authDismissed,
+    localAuthSuppressed,
   ]);
 
   const handlePwaClose = (action: "installed" | "dismissed") => {
@@ -115,10 +129,20 @@ export const UnifiedOnboarding = () => {
     setPwaStepEvaluated(true);
   };
 
-  const handleAuthClose = () => {
-    console.log("[Onboarding] Auth Close (Je l'ai déjà fait)");
+  const handleAuthClose = async (isPermanent?: boolean) => {
+    console.log("[Onboarding] Auth Close. Permanent:", isPermanent);
+    if (isPermanent) {
+      // Persistent dismissal in database
+      try {
+        await updateUser({ calendar_dismissed: true });
+      } catch (e) {
+        console.error("Failed to persist calendar dismissal", e);
+      }
+    } else {
+      // "Pas maintenant" : On masque juste pour cette session du composant (jusqu'à F5)
+      setLocalAuthSuppressed(true);
+    }
     setActiveStep(null);
-    refreshDismissalState();
   };
 
   if (!isAuthenticated) return null;

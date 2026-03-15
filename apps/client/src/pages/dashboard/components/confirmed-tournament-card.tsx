@@ -208,8 +208,9 @@ export const ConfirmedTournamentCard = ({
                   {t("matchForm.labels.pitch_type", "Terrain")}
                 </p>
                 <p
-                  className={`text-sm font-bold truncate ${isPitchChanged || highlighted ? "text-danger" : "text-white"}`}
+                  className={`text-sm font-bold ${isPitchChanged || highlighted ? "text-danger" : "text-white"}`}
                 >
+
                   {part.match_pitch_type ||
                   part.opponent_pitch_type ||
                   part.pitch_type

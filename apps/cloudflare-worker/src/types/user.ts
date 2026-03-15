@@ -26,7 +26,10 @@ export interface User {
     additional_sirets?: (string | { siret: string; stadium_address?: string | null })[] | null;
     calendar_token?: string | null;
     push_subscription?: string | null;
+    last_calendar_sync_at: number;
+    calendar_dismissed: boolean;
     block_count: number;
+
     siret_change_count: number;
     created_at: number;
     updated_at: number;
@@ -62,6 +65,9 @@ export interface UpdateUserDto {
     additional_sirets?: (string | { siret: string; stadium_address?: string | null })[];
     calendar_token?: string;
     push_subscription?: string | null;
+    last_calendar_sync_at?: number;
+    calendar_dismissed?: boolean;
     block_count?: number;
+
     siret_change_count?: number;
 }

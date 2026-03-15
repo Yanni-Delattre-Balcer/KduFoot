@@ -1,8 +1,16 @@
 {
+  "confirm": "Confirmer",
   "success": "Succès",
   "warning": "Attention",
   "info": "Information",
   "loading": "Chargement...",
+  "base": {
+    "success": "Succès",
+    "edit": "Mettre à jour",
+    "error": {
+      "title": "Erreur"
+    }
+  },
   "error": {
     "title": "Erreur",
     "too_late_to_modify": "Trop tard ! Vous ne pouvez plus modifier cette annonce en ligne. Veuillez contacter l'entraîneur adverse par téléphone ou mail pour le prévenir directement.",
@@ -188,7 +196,7 @@
       "button": "Connecter mon calendrier",
       "native": "Calendrier Natif",
       "later": "Peut-être plus tard",
-      "dismiss": "C'est déjà fait / Ne plus me demander",
+      "dismiss": "Non, je ne veux pas",
       "toast_success": "Synchronisation calendrier lancée !",
       "toast_error": "Échec de la synchronisation calendrier"
     }
@@ -272,6 +280,8 @@
     "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",
     "confirm_delete_admin": "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.",
     "delete_success_admin": "Match supprimé. Les participants ont été notifiés de l'annulation.",
+    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "filters": {
       "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs de toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner votre recherche selon vos besoins."
     }
@@ -725,7 +735,7 @@
       "tournaments": "Tournois"
     },
     "labels": {
-      "for_event": "Pour votre {{type}}",
+      "for_event": "Pour votre {{matchType}}",
       "view_club_profile": "👤 Voir le profil du club",
       "search_match": "Rechercher un match",
       "search_tournament": "Rechercher un tournoi",
@@ -776,10 +786,10 @@
     },
     "notifications": {
       "modification": "Match modifié ⚠️",
-      "modification_message": "Votre {{type}} du {{date}} a été modifié. Cliquez ici pour voir les détails.",
-      "cancellation": "Annulation de votre {{type}}. La rencontre du {{date}} avec {{team}} a été annulée.",
-      "new_request_interactive": "Vous avez reçu une demande pour votre {{type}} du {{date}}",
-      "acceptance_player": "Confirmation ! ✅ Votre {{type}} du {{date}} est validé.",
+      "modification_message": "Votre {{matchType}} du {{date}} a été modifié. Cliquez ici pour voir les détails.",
+      "cancellation": "Annulation de votre {{matchType}}. La rencontre du {{date}} avec {{team}} a été annulée.",
+      "new_request_interactive": "Vous avez reçu une demande pour votre {{matchType}} du {{date}}",
+      "acceptance_player": "Confirmation ! ✅ Votre {{matchType}} du {{date}} est validé.",
       "rejection_player": "Demande refusée. {{team}} n'est pas disponible pour le {{date}}.",
       "refusal_organizer": "Demande refusée. Vous avez décliné l'invitation de {{team}}."
     },

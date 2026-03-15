@@ -43,7 +43,10 @@ interface UserContextType {
     pendingRequests: number;
     modifiedParticipations: number;
   };
+  last_calendar_sync_at?: number;
+  needsCalendarReSync: boolean;
   isAccountModalOpen: boolean;
+
   setIsAccountModalOpen: (open: boolean) => void;
 }
 
@@ -170,7 +173,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const isLocked =
     isAuthenticated && (!user || !isProfileComplete(user, true)) && !isBlocked;
 
+  const needsCalendarReSync = useMemo(() => {
+    if (!user || user.calendar_dismissed) return false;
+    
+    // Si pas encore synchronisé (last_calendar_sync_at est à 0 ou n'existe pas)
+    // On demande tout le temps (car pas désactivé par dismissed)
+    if (!user.last_calendar_sync_at || user.last_calendar_sync_at === 0) {
+      return true;
+    }
+
+    const oneDayInSeconds = 24 * 60 * 60;
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+
+    // Si synchronisé mais plus d'activité depuis 24 heures
+    return (nowInSeconds - user.last_calendar_sync_at) > oneDayInSeconds;
+  }, [user]);
+
   const isAdmin = user?.email === "yannidelattrebalcer.artois@gmail.com";
+
 
   const linkClub = async (siret: string) => {
     const resData = await postJson(
@@ -231,6 +251,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isOnline,
       syncStatus,
       notifications,
+      last_calendar_sync_at: user?.last_calendar_sync_at,
+      needsCalendarReSync,
       isAccountModalOpen,
       setIsAccountModalOpen,
     }),
@@ -245,9 +267,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
       isOnline,
       syncStatus,
       notifications,
+      needsCalendarReSync,
       logout,
       isAccountModalOpen,
     ],
+
   );
 
   if (isLoading && isAuthenticated && !isBlocked && !user) {

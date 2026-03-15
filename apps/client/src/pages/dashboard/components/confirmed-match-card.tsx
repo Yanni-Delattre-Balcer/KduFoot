@@ -268,9 +268,10 @@ export const ConfirmedMatchCard = ({
                       </span>
                     )}
                   </div>
-                  <span className="text-[9px] font-bold text-default-400 truncate max-w-[60px]">
+                  <span className="text-[9px] font-bold text-default-400 break-words text-center">
                     {opponentClubName}
                   </span>
+
                 </div>
               </div>
             </div>

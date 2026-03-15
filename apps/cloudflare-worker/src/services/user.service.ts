@@ -153,4 +153,12 @@ export class UserService {
             .run();
         return result.success;
     }
+
+    async updateLastCalendarSyncAt(userId: string): Promise<void> {
+        await this.db
+            .prepare('UPDATE users SET last_calendar_sync_at = unixepoch() WHERE id = ?')
+            .bind(userId)
+            .run();
+    }
 }
+

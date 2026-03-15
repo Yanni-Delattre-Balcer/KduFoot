@@ -7,7 +7,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Calendar, ChevronRight, Check } from "lucide-react";
+import { Calendar, ChevronRight } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { addToast } from "@heroui/toast";
 import { useTranslation } from "react-i18next";
@@ -16,7 +16,7 @@ import { api } from "@/services/api";
 
 interface CombinedAuthModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (isPermanent?: boolean) => void;
 }
 
 export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
@@ -71,11 +71,9 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
     }
   };
 
-  const handleDismissPermanent = () => {
-    // C'est le SEUL moyen de fermer définitivement la modale
-    localStorage.setItem("kdufoot-auth-onboarding-dismissed", "true");
-    window.dispatchEvent(new CustomEvent("kdufoot_auth_step_complete"));
-    onClose();
+  const handleDismissRefused = () => {
+    // C'est le SEUL moyen de fermer définitivement la modale (via la DB)
+    onClose(true);
   };
 
   return (
@@ -139,12 +137,11 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
 
               {/* Bouton de confirmation : seul moyen de fermer la modale */}
               <Button
-                className="w-full font-bold text-sm tracking-tight rounded-xl h-12 border-2 border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:text-green-300 transition-all"
-                startContent={<Check size={18} />}
+                className="w-full font-bold text-sm tracking-tight rounded-xl h-12 border-2 border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200 transition-all"
                 variant="flat"
-                onPress={handleDismissPermanent}
+                onPress={handleDismissRefused}
               >
-                {t("onboarding.calendar.dismiss", "Je l'ai déjà fait")}
+                {t("onboarding.calendar.dismiss")}
               </Button>
 
               {hasSyncedOnce && (

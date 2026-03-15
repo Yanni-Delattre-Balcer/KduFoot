@@ -1,8 +1,16 @@
 {
   "success": "Success",
+  "confirm": "Confirm",
   "warning": "Warning",
   "info": "Information",
   "loading": "Loading...",
+  "base": {
+    "success": "Success",
+    "edit": "Update",
+    "error": {
+      "title": "Error"
+    }
+  },
   "error": {
     "title": "Error",
     "too_late_to_modify": "Too late! You can no longer modify this announcement online. Please contact the opposing coach by phone or email to notify them directly.",
@@ -177,7 +185,7 @@
       "button": "Connect my calendar",
       "native": "Native Calendar",
       "later": "Maybe later",
-      "dismiss": "Don't show again",
+      "dismiss": "No, I don't want to",
       "toast_success": "Calendar sync started!",
       "toast_error": "Calendar sync failed"
     }
@@ -254,6 +262,8 @@
     "search_warning": "Access to detailed searches is reserved for complete profiles.",
     "confirm_delete_admin": "⚠️ DELETE THIS MATCH?\n\nThis action is irreversible. The match and all its participations will be permanently deleted.",
     "delete_success_admin": "Match deleted. Participants have been notified of the cancellation.",
+    "confirm_delete_tournament": "Are you sure you want to delete this tournament?",
+    "confirm_delete_match": "Are you sure you want to delete this match?",
     "filters": {
       "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
     }
@@ -678,7 +688,7 @@
       "tournaments": "Tournaments"
     },
     "labels": {
-      "for_event": "For your {{type}}",
+      "for_event": "For your {{matchType}}",
       "view_club_profile": "👤 View club profile",
       "search_match": "Search for a match",
       "search_tournament": "Search for a tournament",

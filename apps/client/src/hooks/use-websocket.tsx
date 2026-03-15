@@ -207,7 +207,7 @@ export function useWebSocketSync(
                                 payload.data.match_date,
                               ).toLocaleDateString("fr-FR")
                             : "date inconnue",
-                          type: t(
+                          matchType: t(
                             "enums.type." + (payload.data?.match_type || "match"),
                           ).toLowerCase(),
                         })}
@@ -230,7 +230,7 @@ export function useWebSocketSync(
                         "fr-FR",
                       )
                     : "date inconnue",
-                  type: t(
+                  matchType: t(
                     "enums.type." + (payload.data?.match_type || "match"),
                   ).toLowerCase(),
                 });
@@ -303,7 +303,9 @@ export function useWebSocketSync(
                               payload.data.match_date,
                             ).toLocaleDateString("fr-FR")
                           : "date inconnue",
-                        type: t("enums.type." + (payload.data?.match_type || "match")).toLowerCase(),
+                        matchType: t(
+                          "enums.type." + (payload.data?.match_type || "match"),
+                        ).toLowerCase(),
                       },
                     );
                     mutate(
@@ -410,7 +412,7 @@ export function useWebSocketSync(
                               payload.data.match_date,
                             ).toLocaleDateString("fr-FR")
                           : "date inconnue",
-                        type: t(
+                        matchType: t(
                           "enums.type." + (payload.data?.match_type || "match"),
                         ).toLowerCase(),
                       },
@@ -483,7 +485,7 @@ export function useWebSocketSync(
                               payload.data.match_date,
                             ).toLocaleDateString("fr-FR")
                           : "date inconnue",
-                        type: t(
+                        matchType: t(
                           "enums.type." + (payload.data?.match_type || "match"),
                         ).toLowerCase(),
                       },
@@ -538,7 +540,7 @@ export function useWebSocketSync(
                         "fr-FR",
                       )
                     : "date inconnue",
-                  type: t(
+                  matchType: t(
                     "enums.type." + (payload.data?.match_type || "match"),
                   ).toLowerCase(),
                 });
@@ -587,7 +589,7 @@ export function useWebSocketSync(
                         "fr-FR",
                       )
                     : "date inconnue",
-                  type: t(
+                  matchType: t(
                     "enums.type." + (payload.data?.match_type || "match"),
                   ).toLowerCase(),
                 });
@@ -708,3 +710,4 @@ export function useWebSocketSync(
 
   return { status };
 }
+

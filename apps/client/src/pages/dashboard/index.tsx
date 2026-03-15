@@ -214,7 +214,7 @@ export default function DashboardPage() {
           status === "accepted"
             ? t("dashboard.notifications.acceptance_player", {
                 date: matchDate,
-                type: t("enums.type." + request.match_type).toLowerCase(),
+                matchType: t("enums.type." + (request.match_type || "match")).toLowerCase(),
               })
             : t("dashboard.notifications.refusal_organizer", {
                 team: clubName,
@@ -696,7 +696,7 @@ export default function DashboardPage() {
                             <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
                               <div className="flex items-center gap-1 text-[9px] text-default-400">
                                 <span className="text-default-600">👤</span>
-                                <span className="truncate font-bold">
+                                <span className="font-bold">
                                   {request.requester_firstname &&
                                   request.requester_lastname
                                     ? `${request.requester_firstname} ${request.requester_lastname}`
@@ -705,11 +705,12 @@ export default function DashboardPage() {
                               </div>
                               <div className="flex items-center gap-1 text-[9px] text-default-400">
                                 <span className="text-default-600">📍</span>
-                                <span className="truncate font-bold text-xs">
+                                <span className="font-bold text-xs">
                                   {request.requester_city ||
                                     request.location_city ||
                                     t("common:unknown_city", "Ville inconnue")}
                                 </span>
+
                               </div>
                               <div className="flex items-center gap-1 text-[9px] text-default-400">
                                 <span className="text-default-600">🏅</span>

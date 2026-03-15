@@ -33,6 +33,10 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             return new Response('Invalid token', { status: 404, headers: router.corsHeaders });
         }
 
+        // Log the sync activity
+        await userService.updateLastCalendarSyncAt(user.id);
+
+
         // Fetch matches (organized or as accepted participant)
         // Note: For organized matches, we use search.
         const [incoming, participations, owned] = await Promise.all([
