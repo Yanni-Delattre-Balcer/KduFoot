@@ -5,6 +5,7 @@ import { ChevronRight, X, Calendar } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useLocation } from "react-router-dom";
 import { addToast } from "@heroui/toast";
+import { useTranslation } from "react-i18next";
 
 import { api } from "../services/api";
 import { useUser } from "../authentication";
@@ -16,6 +17,9 @@ export const CalendarSyncBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isStep1Active, setIsStep1Active] = useState(true);
+  const { t } = useTranslation("kdufoot");
+
+  const isAndroid = /Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     const checkStep1 = () => {
@@ -76,9 +80,9 @@ export const CalendarSyncBanner: React.FC = () => {
     checkVisibility();
   }, [user?.calendar_token, isStep1Active]);
 
-  const handleCalendarSync = async () => {
+  const handleCalendarSync = async (type: "default" | "google" | "copy" = "default") => {
     setIsSyncing(true);
-    console.log("[Calendar] Starting synchronization from banner...");
+    console.log(`[Calendar] Starting synchronization (${type}) from banner...`);
 
     try {
       const data = await api.get(
@@ -87,18 +91,32 @@ export const CalendarSyncBanner: React.FC = () => {
       );
 
       if (data && (data as any).url) {
-        const finalUrl = (data as any).url.replace(/^https?:\/\//, "webcal://");
+        const url = (data as any).url;
 
-        window.location.href = finalUrl;
-        addToast({
-          title: "Synchronisation calendrier lancée !",
-          color: "success",
-        });
+        if (type === "google") {
+          const googleUrl = `https://www.google.com/calendar/render?cid=${encodeURIComponent(url.replace(/^webcal:\/\//, "https://"))}`;
+          window.open(googleUrl, "_blank");
+        } else if (type === "copy") {
+          await navigator.clipboard.writeText(url.replace(/^webcal:\/\//, "https://"));
+          addToast({
+            title: t("onboarding.calendar.link_copied"),
+            color: "success",
+          });
+        } else {
+          const finalUrl = url.replace(/^https?:\/\//, "webcal://");
+          window.location.href = finalUrl;
+          addToast({
+            title: isAndroid 
+              ? t("onboarding.calendar.instructions_android")
+              : t("onboarding.calendar.toast_success"),
+            color: "success",
+          });
+        }
       }
     } catch (error) {
       console.error("Failed to fetch calendar link", error);
       addToast({
-        title: "Échec de la synchronisation calendrier",
+        title: t("onboarding.calendar.toast_error"),
         color: "danger",
       });
     } finally {
@@ -139,7 +157,7 @@ export const CalendarSyncBanner: React.FC = () => {
             </div>
             <div>
               <h3 className="font-bold text-white tracking-tight">
-                Sync Calendrier
+                {t("onboarding.calendar.title")}
               </h3>
               <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mt-0.5">
                 Nouveauté
@@ -158,27 +176,62 @@ export const CalendarSyncBanner: React.FC = () => {
         </div>
 
         <p className="text-sm text-white/70 leading-relaxed">
-          Ne manquez aucun match ! Synchronisez vos rencontres directement avec
-          l'application calendrier de votre téléphone.
+          {isAndroid 
+            ? t("onboarding.calendar.instructions_android")
+            : t("onboarding.calendar.description")}
         </p>
 
         <div className="flex flex-col gap-2.5 mt-2">
-          <Button
-            className="w-full font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
-            color="secondary"
-            endContent={
-              !isSyncing && (
-                <ChevronRight
-                  className="group-hover:translate-x-0.5 transition-transform"
-                  size={18}
-                />
-              )
-            }
-            isLoading={isSyncing}
-            onPress={handleCalendarSync}
-          >
-            Connecter mon calendrier
-          </Button>
+          {isAndroid ? (
+            <>
+              <Button
+                className="w-full font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
+                color="secondary"
+                isLoading={isSyncing}
+                onPress={() => handleCalendarSync("google")}
+              >
+                {t("onboarding.calendar.add_google")}
+              </Button>
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 font-bold text-xs h-10 bg-white/10 hover:bg-white/20 text-white"
+                  variant="flat"
+                  isLoading={isSyncing}
+                  onPress={() => handleCalendarSync("default")}
+                >
+                  Lancer l'app
+                </Button>
+                <Button
+                  className="flex-1 font-bold text-xs h-10 bg-white/10 hover:bg-white/20 text-white"
+                  variant="flat"
+                  isLoading={isSyncing}
+                  onPress={() => handleCalendarSync("copy")}
+                >
+                  {t("onboarding.calendar.copy_link")}
+                </Button>
+              </div>
+              <p className="text-[9px] text-white/40 italic text-center px-2">
+                {t("onboarding.calendar.manual_notice")}
+              </p>
+            </>
+          ) : (
+            <Button
+              className="w-full font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
+              color="secondary"
+              endContent={
+                !isSyncing && (
+                  <ChevronRight
+                    className="group-hover:translate-x-0.5 transition-transform"
+                    size={18}
+                  />
+                )
+              }
+              isLoading={isSyncing}
+              onPress={() => handleCalendarSync("default")}
+            >
+              {t("onboarding.calendar.button")}
+            </Button>
+          )}
 
           <div className="flex gap-2">
             <Button
@@ -186,14 +239,14 @@ export const CalendarSyncBanner: React.FC = () => {
               variant="flat"
               onPress={handleDismiss}
             >
-              Pas maintenant
+              {t("onboarding.calendar.later")}
             </Button>
             <Button
               className="flex-1 font-bold text-xs h-9 text-white/40 hover:text-white/60"
               variant="light"
               onPress={handleNever}
             >
-              Je ne veux pas
+              {isAndroid ? "Plus tard" : t("onboarding.calendar.dismiss")}
             </Button>
           </div>
         </div>
