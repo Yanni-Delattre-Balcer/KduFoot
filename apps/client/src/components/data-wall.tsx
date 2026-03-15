@@ -216,8 +216,8 @@ export const DataWall: React.FC<DataWallProps> = ({
               "Complétez votre profil Coach pour accéder à ces données"}
           </h2>
 
-          <p className="text-white/40 text-sm sm:text-xs font-medium leading-relaxed">
-            Renseignez votre Nom, Club, Téléphone, SIRET, etc. pour débloquer
+          <p className="text-white/40 text-[10px] sm:text-xs font-medium leading-relaxed">
+            Renseignez votre Identité, Club, Sportif et Équipement pour débloquer
             l'accès complet.
           </p>
 

@@ -812,11 +812,7 @@ export default function MatchDetailsPage() {
                         const userContact = match.contacts?.find(
                           (c) => c.user_id === user?.id,
                         );
-                        const isProfileIncomplete =
-                          !user?.level ||
-                          !user?.category ||
-                          !user?.pitch_type ||
-                          !(user as any)?.club_colors;
+                        const isProfileIncomplete = !profileComplete;
 
                         // STATE: Accepted → show only "DUEL CONFIRMÉ" block
                         if (userContact?.status === "accepted") {
@@ -950,7 +946,7 @@ export default function MatchDetailsPage() {
                                 color={
                                   isProfileIncomplete ? "default" : "primary"
                                 }
-                                isDisabled={isProfileIncomplete && !isMasked}
+                                isDisabled={isProfileIncomplete}
                                 onPress={async () => {
                                   if (isMasked) {
                                     openGateway(
