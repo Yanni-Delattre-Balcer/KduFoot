@@ -26,7 +26,8 @@
     "technical_issue": "Problème Technique",
     "bug_report": "Signaler un bug",
     "feature_request": "Suggérer une fonctionnalité",
-    "other": "Autre"
+    "other": "Autre",
+    "delete_failed_with_type": "Impossible de supprimer {{matchType}}. Veuillez réessayer."
   },
   "user_banned_signal": "Signalement d'utilisateur banni",
   "cookie-consent-title": "Gestion des cookies",
@@ -790,6 +791,7 @@
     "toasts": {
       "accept_success": "Demande acceptée",
       "delete_success": "Annonce supprimée avec succès",
+      "delete_success_desc": "L'annonce a été retirée avec succès",
       "all_read_success": "Toutes les modifications ont été validées"
     },
     "notifications": {

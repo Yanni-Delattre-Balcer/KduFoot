@@ -42,7 +42,7 @@ export interface User {
   updated_at: number;
   last_calendar_sync_at: number;
   has_synced_calendar: boolean;
-  block_count: number;
+  club_colors?: string | null;
   club?: Club;
 }
 

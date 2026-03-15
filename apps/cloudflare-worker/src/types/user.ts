@@ -29,6 +29,7 @@ export interface User {
     has_synced_calendar: boolean;
     last_calendar_sync_at: number;
     block_count: number;
+    club_colors?: string | null;
 
     siret_change_count: number;
     created_at: number;

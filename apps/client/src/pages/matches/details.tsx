@@ -816,7 +816,7 @@ export default function MatchDetailsPage() {
                           !user?.level ||
                           !user?.category ||
                           !user?.pitch_type ||
-                          !user?.club_colors;
+                          !(user as any)?.club_colors;
 
                         // STATE: Accepted → show only "DUEL CONFIRMÉ" block
                         if (userContact?.status === "accepted") {

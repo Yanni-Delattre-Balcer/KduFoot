@@ -26,7 +26,8 @@
     "technical_issue": "Technical Issue",
     "bug_report": "Report a bug",
     "feature_request": "Suggest a feature",
-    "other": "Other"
+    "other": "Other",
+    "delete_failed_with_type": "Failed to delete {{matchType}}. Please try again."
   },
   "site": {
     "description": "Video analysis and training management platform for football."
@@ -756,7 +757,8 @@
     },
     "confirm_delete": "Are you sure you want to delete this ad?",
     "toasts": {
-      "delete_success": "Ad deleted successfully"
+      "delete_success": "Ad deleted successfully",
+      "delete_success_desc": "The announcement has been successfully removed"
     },
     "notifications": {
       "modification": "{{matchType}} modified ⚠️",
