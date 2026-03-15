@@ -63,13 +63,9 @@ export const UnifiedOnboarding = () => {
     // --- EVALUATION ---
     const needsPWA =
       isWeb && !isSessionDismissed && !isPermanentlyDismissed && canInstall;
-    // La modale calendrier s'affiche tant que l'utilisateur n'a pas cliqué sur "Ne plus demander" (DB)
-    // OU si la session n'est pas supprimée localement via "Pas maintenant"
-    const isLocalSuppressed = sessionStorage.getItem("kdufoot-calendar-suppressed") === "true";
-    
     const needsAuth =
-      ((!authDismissed && !isLocalSuppressed) ||
-        (needsCalendarReSync && !isLocalSuppressed)) &&
+      ((!authDismissed && !localAuthSuppressed) ||
+        (needsCalendarReSync && !localAuthSuppressed)) &&
       isAuthenticated;
 
     console.log("[Onboarding] Refreshing...", {
@@ -80,7 +76,7 @@ export const UnifiedOnboarding = () => {
       isStandalone,
       detailed: {
         authDismissed,
-        isLocalSuppressed,
+        localAuthSuppressed,
         canInstall,
         isSessionDismissed,
         isPermanentlyDismissed,
