@@ -213,8 +213,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const resetCalendarSync = async () => {
     await updateUser({ has_synced_calendar: false } as any);
-    // Supprimer aussi le flag de session pour forcer l'affichage immédiat
+    // Supprimer aussi les flags de session/local pour forcer l'affichage immédiat
     sessionStorage.removeItem("kdufoot-calendar-suppressed");
+    localStorage.removeItem("kdufoot-calendar-never-ask");
+    // Dispatch event to force UnifiedOnboarding to refresh its local state
+    window.dispatchEvent(new CustomEvent("kdufoot_calendar_status_changed"));
   };
 
   const blockUser = async (

@@ -16,7 +16,7 @@ import { api } from "@/services/api";
 
 interface CombinedAuthModalProps {
   isOpen: boolean;
-  onClose: (isPermanent?: boolean) => void;
+  onClose: (reason?: "permanent" | "never") => void;
 }
 
 export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
@@ -73,7 +73,12 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
 
   const handleDismissRefused = () => {
     // C'est le SEUL moyen de fermer définitivement la modale (via la DB)
-    onClose(true);
+    onClose("permanent");
+  };
+
+  const handleNeverAskAgain = () => {
+    // Ne plus demander au démarrage (flag local)
+    onClose("never");
   };
 
   return (
@@ -150,14 +155,24 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
               </p>
             )}
 
-            {/* Bouton "Pas maintenant" : fermeture pour la session actuelle */}
+            {/* Bouton "Ne plus me demander" : fermeture définitive pour cet appareil */}
             <Button
               className="text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] tracking-wider"
               size="sm"
               variant="light"
+              onPress={handleNeverAskAgain}
+            >
+              {t("onboarding.calendar.never_ask", "Ne plus me demander")}
+            </Button>
+
+            {/* Bouton "Pas maintenant" : fermeture pour la session actuelle */}
+            <Button
+              className="text-zinc-500 hover:text-red-400 font-semibold text-[9px] tracking-widest opacity-50 hover:opacity-100"
+              size="sm"
+              variant="light"
               onPress={() => onClose()}
             >
-              {t("onboarding.calendar.later")}
+              {t("onboarding.calendar.later", "Plus tard")}
             </Button>
           </div>
         </ModalFooter>

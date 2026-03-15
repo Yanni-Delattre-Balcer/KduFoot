@@ -280,9 +280,36 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
         const payload = JSON.parse(atob(token.split('.')[1]));
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type, license_id, firstname, lastname, phone, stadium_address, home_jersey_color, away_jersey_color, location, club_id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ 
+            id: string, 
+            level: string, 
+            category: string, 
+            pitch_type: string, 
+            license_id: string,
+            firstname: string,
+            lastname: string,
+            phone: string,
+            stadium_address: string,
+            home_jersey_color: string,
+            away_jersey_color: string,
+            location: string,
+            club_id: string
+        }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        // Security check: Profile must be complete (Identity, Sports, Location, Equipment)
+        const isComplete = dbUser.firstname && dbUser.lastname && dbUser.phone && 
+                          dbUser.license_id && dbUser.category && dbUser.level && 
+                          dbUser.stadium_address && dbUser.home_jersey_color && dbUser.away_jersey_color &&
+                          dbUser.location && dbUser.club_id;
+
+        if (!isComplete) {
+            return Response.json({
+                success: false,
+                error: 'Profil incomplet : Veuillez renseigner tous les champs obligatoires (Identité, Sportif, Localisation, Équipement) dans votre compte avant de publier un match.'
+            }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         const dto = await request.json() as CreateMatchDto;
@@ -574,16 +601,35 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         } catch (e) {
             return Response.json({ success: false, error: 'Token decoding failed' }, { status: 400, headers: router.corsHeaders });
         }
-        const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string, level: string, category: string, pitch_type: string }>();
+        const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type, license_id, firstname, lastname, phone, stadium_address, home_jersey_color, away_jersey_color, location, club_id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ 
+            id: string, 
+            level: string, 
+            category: string, 
+            pitch_type: string, 
+            license_id: string,
+            firstname: string,
+            lastname: string,
+            phone: string,
+            stadium_address: string,
+            home_jersey_color: string,
+            away_jersey_color: string,
+            location: string,
+            club_id: string
+        }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        // Security check: Profile must be 100% complete
-        if (!dbUser.level || !dbUser.category || !dbUser.pitch_type) {
+        // Security check: Profile must be complete (Identity, Sports, Location, Equipment)
+        const isComplete = dbUser.firstname && dbUser.lastname && dbUser.phone && 
+                          dbUser.license_id && dbUser.category && dbUser.level && 
+                          dbUser.stadium_address && dbUser.home_jersey_color && dbUser.away_jersey_color &&
+                          dbUser.location && dbUser.club_id;
+
+        if (!isComplete) {
             return Response.json({
                 success: false,
-                error: 'Profil incomplet : Veuillez renseigner votre niveau, catégorie, type de terrain et couleurs dans votre compte.'
+                error: 'Profil incomplet : Veuillez renseigner tous les champs obligatoires (Identité, Sportif, Localisation, Équipement) dans votre compte.'
             }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 

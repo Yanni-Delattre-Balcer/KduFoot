@@ -27,7 +27,8 @@ export const UnifiedOnboarding = () => {
   // Reactive Storage States
   const [authDismissed, setAuthDismissed] = useState(false);
   const [localAuthSuppressed, setLocalAuthSuppressed] = useState(
-    sessionStorage.getItem("kdufoot-calendar-suppressed") === "true",
+    sessionStorage.getItem("kdufoot-calendar-suppressed") === "true" ||
+    localStorage.getItem("kdufoot-calendar-never-ask") === "true",
   );
 
   const refreshDismissalState = useCallback(() => {
@@ -41,16 +42,32 @@ export const UnifiedOnboarding = () => {
 
   useEffect(() => {
     refreshDismissalState();
+    const handleStatusChange = () => {
+      setLocalAuthSuppressed(
+        sessionStorage.getItem("kdufoot-calendar-suppressed") === "true" ||
+        localStorage.getItem("kdufoot-calendar-never-ask") === "true"
+      );
+    };
+
     window.addEventListener(
       "kdufoot_auth_step_complete",
       refreshDismissalState,
     );
+    window.addEventListener(
+      "kdufoot_calendar_status_changed",
+      handleStatusChange,
+    );
 
-    return () =>
+    return () => {
       window.removeEventListener(
         "kdufoot_auth_step_complete",
         refreshDismissalState,
       );
+      window.removeEventListener(
+        "kdufoot_calendar_status_changed",
+        handleStatusChange,
+      );
+    };
   }, [refreshDismissalState]);
 
   useEffect(() => {
@@ -121,17 +138,21 @@ export const UnifiedOnboarding = () => {
     setPwaStepEvaluated(true);
   };
 
-  const handleAuthClose = async (isPermanent?: boolean) => {
-    console.log("[Onboarding] Auth Close. Permanent:", isPermanent);
-    if (isPermanent) {
-      // Persistent dismissal in database
+  const handleAuthClose = async (reason?: "permanent" | "never") => {
+    console.log("[Onboarding] Auth Close. Reason:", reason);
+    if (reason === "permanent") {
+      // Persistent dismissal in database (legacy)
       try {
         await updateUser({ has_synced_calendar: true });
       } catch (e) {
         console.error("Failed to persist calendar dismissal", e);
       }
+    } else if (reason === "never") {
+      // "Ne plus me demander" : Local storage persistent
+      localStorage.setItem("kdufoot-calendar-never-ask", "true");
+      setLocalAuthSuppressed(true);
     } else {
-      // "Pas maintenant" : Session storage (jusqu'à la fermeture du navigateur/onglet)
+      // "Pas maintenant" : Session storage
       sessionStorage.setItem("kdufoot-calendar-suppressed", "true");
       setLocalAuthSuppressed(true);
     }

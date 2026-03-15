@@ -6,34 +6,33 @@ export const isProfileComplete = (
 ): boolean => {
   if (!user) return false;
 
-  // Configuration Club
-  const cleanSiret = user.siret?.replace(/\s/g, "") || "";
-  const hasFullClub =
-    (cleanSiret.length === 9 || cleanSiret.length === 14) &&
-    (!!user.club?.name || !!user.club_id);
+  // 1. Identité : Prénom, Nom, Téléphone
+  const hasFullIdentity = !!user.firstname && !!user.lastname && !!user.phone;
 
-  // Configuration Personnelle
-  const hasFullPersonalInfo =
-    !!user.firstname && !!user.lastname && !!user.phone && !!user.license_id;
+  // 2. Sportif : Numéro de licence, Catégorie, Niveau
+  const hasFullSportsInfo = !!user.license_id && !!user.category && !!user.level;
 
-  // Configuration Sportive
-  const hasFullSportsProfile =
-    !!user.category &&
-    !!user.level &&
-    !!user.home_jersey_color &&
-    !!user.away_jersey_color &&
+  // 3. Localisation : Nom du club, Ville, Adresse du stade
+  // Note: club.name est souvent renseigné via club_id
+  const hasFullLocation =
+    (!!user.club?.name || !!user.club_id) &&
+    !!user.location &&
     !!user.stadium_address;
 
+  // 4. Équipement : Couleur maillot Domicile, Couleur maillot Extérieur
+  const hasFullEquipment = !!user.home_jersey_color && !!user.away_jersey_color;
+
+  const isComplete =
+    hasFullIdentity &&
+    hasFullSportsInfo &&
+    hasFullLocation &&
+    hasFullEquipment;
+
   if (lenient) {
-    // En mode souple, on débloque le dashboard si les infos de base, club, stade et maillots sont là
-    return (
-      hasFullClub &&
-      hasFullPersonalInfo &&
-      !!user.stadium_address &&
-      !!user.home_jersey_color &&
-      !!user.away_jersey_color
-    );
+    // En mode souple, on peut être moins strict sur certains champs si besoin, 
+    // mais pour l'instant on suit la règle unifiée demandée.
+    return isComplete;
   }
 
-  return hasFullClub && hasFullPersonalInfo && hasFullSportsProfile;
+  return isComplete;
 };
