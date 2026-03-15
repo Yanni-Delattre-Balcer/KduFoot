@@ -19,6 +19,8 @@ interface ConfirmedMatchCardProps {
     pitch?: string;
   };
   onMarkAsRead: (matchId: string) => void;
+  onWithdraw: () => void;
+  isWithdrawing?: boolean;
   formatDate: (date: string) => string;
   formatTime: (time: string) => string;
 }
@@ -28,6 +30,8 @@ export const ConfirmedMatchCard = ({
   highlighted,
   knownData,
   onMarkAsRead,
+  onWithdraw,
+  isWithdrawing,
   formatDate,
   formatTime,
 }: ConfirmedMatchCardProps) => {
@@ -287,15 +291,29 @@ export const ConfirmedMatchCard = ({
                   )}
                 </Button>
               )}
-                <Button
-                  as={Link}
-                  className="w-full font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10"
-                  size="md"
-                  to={`/matches/${match.match_id}`}
-                  variant="flat"
-                >
-                  {t("dashboard.controls.view")}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    as={Link}
+                    className="flex-1 font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10"
+                    size="md"
+                    to={`/matches/${match.match_id}`}
+                    variant="flat"
+                  >
+                    {t("dashboard.controls.view")}
+                  </Button>
+                  {isParticipant && onWithdraw && (
+                    <Button
+                      className="flex-1 font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10"
+                      color="danger"
+                      isLoading={isWithdrawing}
+                      size="sm"
+                      variant="light"
+                      onPress={onWithdraw}
+                    >
+                      Se désister
+                    </Button>
+                  )}
+                </div>
             </div>
           </div>
         </div>
