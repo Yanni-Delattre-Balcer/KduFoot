@@ -209,12 +209,15 @@ export default function TournamentForm({
       if (selectedDate < todayStr) {
         newErrors.match_date = t("matchForm.alerts.date_past_error", "Date passée : Le tournoi ne peut pas être dans le passé.");
       } else if (selectedDate === todayStr) {
-        const [hours, minutes] = (formData.match_time || "00:00").split(":").map(Number);
-        const matchDateTime = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
-        const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+        // Restriction de 2h uniquement pour AUJOURD'HUI
+        if (formData.match_time) {
+          const [hours, minutes] = formData.match_time.split(":").map(Number);
+          const matchDateTime = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
+          const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-        if (matchDateTime < minTime) {
-          newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un tournoi aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.");
+          if (matchDateTime < minTime) {
+            newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un tournoi aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.");
+          }
         }
       }
     }
@@ -345,10 +348,10 @@ export default function TournamentForm({
           </div>
           <div className="flex flex-col">
             <p className="text-base font-black text-white tracking-tight leading-none mb-1">
-              {t("tournamentForm.labels.name_form", "Créer un tournoi amical")}
+              {t("tournamentForm.labels.name_form", "Information du tournoi")}
             </p>
             <p className="text-[11px] text-zinc-400 font-medium">
-              {t("tournamentForm.labels.subtitle_form", "Organisez une compétition et invitez des équipes.")}
+              {t("tournamentForm.labels.subtitle_form", "Informations détails de votre tournoi")}
             </p>
           </div>
         </CardHeader>
@@ -506,8 +509,8 @@ export default function TournamentForm({
 
           {/* Main match details grid (Mix grid) */}
           <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="md:col-span-1 lg:col-span-1">
                 <Input
                   isRequired
                   classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
@@ -545,6 +548,19 @@ export default function TournamentForm({
               >
                 {Object.values(Level).map((lvl) => (
                   <SelectItem key={lvl}>{t(`enums.level.${lvl}`)}</SelectItem>
+                ))}
+              </Select>
+              <Select
+                isRequired
+                classNames={{ trigger: "bg-[#160d21] border-[#2a1b3d]" }}
+                label={t("matchForm.labels.format")}
+                selectedKeys={[formData.format]}
+                size="sm"
+                variant="faded"
+                onChange={(e) => handleChange("format", e.target.value)}
+              >
+                {["5v5", "7v7", "8v8", "11v11"].map((f) => (
+                  <SelectItem key={f}>{f}</SelectItem>
                 ))}
               </Select>
             </div>
@@ -682,7 +698,6 @@ export default function TournamentForm({
                 formData.match_date, // Changed from date to match_date
                 formData.match_time, // Changed from time to match_time
                 formData.email, // Changed from contact_email to email
-                formData.notes,
               ];
               const filled = fields.filter(
                 (f) =>
@@ -710,7 +725,6 @@ export default function TournamentForm({
               formData.match_date, // Changed from date to match_date
               formData.match_time, // Changed from time to match_time
               formData.email, // Changed from contact_email to email
-              formData.notes,
             ];
             const filled = fields.filter(
               (f) =>

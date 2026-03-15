@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Spinner } from "@heroui/spinner";
@@ -37,29 +37,31 @@ const InfoItem = ({
   value,
   color,
   highlight,
+  showPulse,
 }: {
   icon: string;
   label: string;
   value: string;
   color: "primary" | "secondary" | "success" | "warning" | "danger" | "default";
   highlight?: boolean;
+  showPulse?: boolean;
 }) => {
   const colorClasses = {
     primary: highlight
-      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      ? `bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] ${showPulse ? "animate-pulse" : ""}`
       : "bg-blue-500/10 text-blue-400 border-blue-500/20",
     secondary: highlight
-      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      ? `bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] ${showPulse ? "animate-pulse" : ""}`
       : "bg-purple-500/10 text-purple-400 border-purple-500/20",
     success: highlight
-      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      ? `bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] ${showPulse ? "animate-pulse" : ""}`
       : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     warning: highlight
-      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      ? `bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] ${showPulse ? "animate-pulse" : ""}`
       : "bg-amber-500/10 text-amber-400 border-amber-500/20",
     danger: "bg-rose-500/10 text-rose-400 border-rose-500/20",
     default: highlight
-      ? "bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+      ? `bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] ${showPulse ? "animate-pulse" : ""}`
       : "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
   };
 
@@ -160,14 +162,29 @@ export default function MatchDetailsPage() {
   const matchKnownData = knownData[id || ""];
   const isModified = participation?.notification_state === 1;
 
+  const [showPulse, setShowPulse] = useState(true);
+
+  // Stop pulse after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowPulse(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const isDifferent = (val1: any, val2: any) => {
+    if (!val1 && !val2) return false;
+    const s1 = String(val1 || "").trim().toLowerCase();
+    const s2 = String(val2 || "").trim().toLowerCase();
+    return s1 !== s2;
+  };
+
   const highlights = {
-    date: isModified && !!matchKnownData && match.match_date !== matchKnownData.date,
-    time: isModified && !!matchKnownData && match.match_time?.slice(0, 5) !== matchKnownData.time?.slice(0, 5),
-    venue: isModified && !!matchKnownData && match.venue !== matchKnownData.venue,
-    pitch: isModified && !!matchKnownData && match.pitch_type !== matchKnownData.pitch,
-    format: isModified && !!matchKnownData && match.format !== matchKnownData.format,
-    category: isModified && !!matchKnownData && match.category !== matchKnownData.category,
-    level: isModified && !!matchKnownData && match.level !== matchKnownData.level,
+    date: isModified && !!matchKnownData && isDifferent(match.match_date, matchKnownData.date),
+    time: isModified && !!matchKnownData && isDifferent(match.match_time?.slice(0, 5), matchKnownData.time?.slice(0, 5)),
+    venue: isModified && !!matchKnownData && isDifferent(match.venue, matchKnownData.venue),
+    pitch: isModified && !!matchKnownData && isDifferent(match.pitch_type, matchKnownData.pitch),
+    format: isModified && !!matchKnownData && isDifferent(match.format, matchKnownData.format),
+    category: isModified && !!matchKnownData && isDifferent(match.category, matchKnownData.category),
+    level: isModified && !!matchKnownData && isDifferent(match.level, matchKnownData.level),
   };
 
   const [isMarkingRead, setIsMarkingRead] = useState(false);
@@ -592,8 +609,8 @@ export default function MatchDetailsPage() {
                               match.club?.longitude &&
                               (!match.location_address ||
                                 match.location_address === match.club.address)
-                                ? `https://www.google.com/maps/dir/?api=1&destination=${match.club.latitude},${match.club.longitude}`
-                                : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${match.location_address || match.club?.address || ""}, ${match.location_city || match.club?.city || ""}`.trim().replace(/^,/, "").trim())}`
+                                ? `https://www.google.com/maps/search/?api=1&query=${match.club.latitude},${match.club.longitude}`
+                                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${match.location_address || match.club?.address || ""}, ${match.location_zip || match.club?.zip || ""} ${match.location_city || match.club?.city || ""}`.trim().replace(/^,/, "").trim())}`
                             }
                             rel="noopener noreferrer"
                             startContent={<span className="text-xl">📍</span>}
@@ -616,6 +633,7 @@ export default function MatchDetailsPage() {
                   highlight={highlights.category}
                   icon="⚽"
                   label="Catégorie"
+                  showPulse={showPulse}
                   value={t(`enums.category.${match.category}`)}
                 />
                 <InfoItem
@@ -623,6 +641,7 @@ export default function MatchDetailsPage() {
                   highlight={highlights.level}
                   icon="⭐"
                   label="Niveau"
+                  showPulse={showPulse}
                   value={
                     match.level
                       ? t(`enums.level.${match.level}`)
@@ -634,6 +653,7 @@ export default function MatchDetailsPage() {
                   highlight={highlights.pitch}
                   icon="🏟️"
                   label="Terrain"
+                  showPulse={showPulse}
                   value={
                     match.pitch_type
                       ? t(`enums.pitch.${match.pitch_type}`)
@@ -645,6 +665,7 @@ export default function MatchDetailsPage() {
                   highlight={highlights.format}
                   icon="👥"
                   label="Format"
+                  showPulse={showPulse}
                   value={t(`enums.format.${match.format}`, match.format)}
                 />
                 <InfoItem
@@ -652,6 +673,7 @@ export default function MatchDetailsPage() {
                   highlight={highlights.date}
                   icon="📅"
                   label="Date"
+                  showPulse={showPulse}
                   value={new Date(match.match_date).toLocaleDateString(
                     "fr-FR",
                     { day: "numeric", month: "long" },
@@ -662,6 +684,7 @@ export default function MatchDetailsPage() {
                   highlight={highlights.time}
                   icon="🕒"
                   label="Horaire"
+                  showPulse={showPulse}
                   value={`${formatTime(match.match_time)}${match.match_end_time ? ` - ${formatTime(match.match_end_time)}` : ""}`}
                 />
                 <InfoItem
@@ -669,6 +692,7 @@ export default function MatchDetailsPage() {
                   highlight={highlights.venue}
                   icon={match.venue === "Domicile" ? "🏠" : "🚗"}
                   label="Lieu"
+                  showPulse={showPulse}
                   value={t(`enums.venue.${match.venue}`)}
                 />
                 <InfoItem
@@ -819,7 +843,7 @@ export default function MatchDetailsPage() {
                           return (
                             <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-4 animate-appearance-in">
                               <p className="text-emerald-400 font-black text-center text-sm tracking-widest flex items-center justify-center gap-2">
-                                DUEL CONFIRMÉ ! ✅
+                                RENCONTRE CONFIRMÉE ! ✅
                               </p>
                               <div className="grid grid-cols-2 gap-2 mt-2">
                                 <Button
@@ -1407,7 +1431,7 @@ export default function MatchDetailsPage() {
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium">
-                      Attention : Vous allez annuler {match.type === "tournament" ? "ce tournoi confirme" : "ce duel"}. L'adversaire sera
+                      Attention : Vous allez annuler {match.type === "tournament" ? "ce tournoi confirmé" : "ce duel"}. L'adversaire sera
                       notifié et l'annonce redeviendra ouverte. Continuer ?
                     </p>
                   </ModalBody>

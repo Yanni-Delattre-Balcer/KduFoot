@@ -21,8 +21,6 @@ interface ConfirmedMatchCardProps {
   onMarkAsRead: (matchId: string) => void;
   formatDate: (date: string) => string;
   formatTime: (time: string) => string;
-  onWithdraw?: () => void;
-  isWithdrawing?: boolean;
 }
 
 export const ConfirmedMatchCard = ({
@@ -32,8 +30,6 @@ export const ConfirmedMatchCard = ({
   onMarkAsRead,
   formatDate,
   formatTime,
-  onWithdraw,
-  isWithdrawing,
 }: ConfirmedMatchCardProps) => {
   const { t } = useTranslation("kdufoot");
 
@@ -291,51 +287,15 @@ export const ConfirmedMatchCard = ({
                   )}
                 </Button>
               )}
-              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   as={Link}
-                  className="w-full sm:flex-1 font-bold text-sm h-10 bg-white/5 active:scale-95"
-                  size="sm"
+                  className="w-full font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10"
+                  size="md"
                   to={`/matches/${match.match_id}`}
                   variant="flat"
                 >
                   {t("dashboard.controls.view")}
                 </Button>
-                <Button
-                  as="a"
-                  className="w-full sm:flex-1 font-black text-[10px] h-10 active:scale-95 shadow-sm"
-                  color="primary"
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${!match.isUserHome && match.opponent_stadium_address ? match.opponent_stadium_address : match.location_address}, ${!match.isUserHome && match.opponent_city ? match.opponent_city : match.location_city}`)}`}
-                  rel="noopener noreferrer"
-                  size="sm"
-                  target="_blank"
-                  variant="flat"
-                >
-                  {t("dashboard.controls.itinerary")}
-                </Button>
-                <Button
-                  as="a"
-                  className="w-full sm:flex-1 font-bold text-sm h-10 active:scale-95 shadow-md shadow-violet-500/20"
-                  color="secondary"
-                  href={`tel:${match.opponent_phone}`}
-                  size="sm"
-                  variant="solid"
-                >
-                  {t("dashboard.controls.contact")}
-                </Button>
-                {match._source === "participant" && onWithdraw && (
-                  <Button
-                    className="w-full sm:flex-1 font-bold text-xs h-10 active:scale-95 border border-danger/20 hover:bg-danger/10"
-                    color="danger"
-                    isLoading={isWithdrawing}
-                    size="sm"
-                    variant="light"
-                    onPress={onWithdraw}
-                  >
-                    Se désister
-                  </Button>
-                )}
-              </div>
             </div>
           </div>
         </div>

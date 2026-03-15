@@ -611,7 +611,13 @@
       "club_secondary": "Secondary Club",
       "unspecified": "Unspecified",
       "progress_announcement": "Tournament announcement preparation",
-      "contact_additional": "Contact & Additional Info"
+      "contact_additional": "Contact & Additional Info",
+      "name_form": "Tournament Name",
+      "subtitle_form": "Detailed information about your tournament",
+      "update": "Update tournament"
+    },
+    "alerts": {
+      "create_success": "Tournament created successfully!"
     }
   },
   "pricing": {

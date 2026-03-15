@@ -222,12 +222,15 @@ export default function MatchForm({
       if (selectedDate < todayStr) {
         newErrors.match_date = t("matchForm.alerts.date_past_error", "Date passée : Le match ne peut pas être dans le passé.");
       } else if (selectedDate === todayStr) {
-        const [hours, minutes] = (formData.match_time || "00:00").split(":").map(Number);
-        const matchDateTime = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
-        const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+        // Restriction de 2h uniquement pour AUJOURD'HUI
+        if (formData.match_time) {
+          const [hours, minutes] = formData.match_time.split(":").map(Number);
+          const matchDateTime = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
+          const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-        if (matchDateTime < minTime) {
-          newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un match aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.");
+          if (matchDateTime < minTime) {
+            newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un match aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.");
+          }
         }
       }
     }
