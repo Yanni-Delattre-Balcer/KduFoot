@@ -203,15 +203,19 @@ export default function TournamentForm({
       newErrors.match_date = "La date est obligatoire.";
     } else {
       const now = new Date();
-      const [hours, minutes] = (formData.match_time || "00:00").split(":").map(Number);
-      const matchDateTime = new Date(`${formData.match_date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
+      const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const selectedDate = formData.match_date;
 
-      const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      if (selectedDate < todayStr) {
+        newErrors.match_date = t("matchForm.alerts.date_past_error", "Date passée : Le tournoi ne peut pas être dans le passé.");
+      } else if (selectedDate === todayStr) {
+        const [hours, minutes] = (formData.match_time || "00:00").split(":").map(Number);
+        const matchDateTime = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
+        const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-      if (matchDateTime < now) {
-        newErrors.match_time = t("matchForm.alerts.date_past_error", "Impossible de publier : l'heure sélectionnée est dépassée.");
-      } else if (matchDateTime < minTime) {
-        newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un tournoi doit être créé au moins 2 heures avant le coup d'envoi.");
+        if (matchDateTime < minTime) {
+          newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un tournoi aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.");
+        }
       }
     }
     if (!formData.match_time)
