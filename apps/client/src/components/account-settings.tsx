@@ -359,7 +359,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     try {
       await resetCalendarSync();
       addToast({
-        title: t("account.sync.reset_success"),
+        title: t("success"),
+        description: t("account.sync.reset_success"),
         color: "success",
       });
     } catch (e: any) {

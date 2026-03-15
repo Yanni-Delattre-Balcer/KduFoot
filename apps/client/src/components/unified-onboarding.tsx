@@ -131,6 +131,7 @@ export const UnifiedOnboarding = () => {
     activeStep,
     authDismissed,
     needsCalendarReSync,
+    localAuthSuppressed,
   ]);
 
   const handlePwaClose = (action: "installed" | "dismissed") => {

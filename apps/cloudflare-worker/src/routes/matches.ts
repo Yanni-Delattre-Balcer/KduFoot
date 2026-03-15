@@ -397,7 +397,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         match_time: match.match_time,
                         host_club_name: match.club?.name || '',
                         host_user_id: payload.sub, // Use Auth0 Sub
-                        owner_id: payload.sub
+                        owner_id: payload.sub,
+                        match_type: match.type
                     }
                 });
             }
@@ -484,7 +485,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         match_date: match.match_date || '',
                         match_time: match.match_time || '',
                         host_club_name: match.club?.name || '',
-                        owner_id: payload.sub // Auth0 Sub
+                        owner_id: payload.sub, // Auth0 Sub
+                        match_type: match.type
                     }
                 });
             }
@@ -661,7 +663,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                             host_club_name: match?.club?.name || '',
                             applicant_club_name: applicantClub?.name || '',
                             user_id: payload.sub, // Auth0 Sub
-                            owner_id: owner.auth0_sub
+                            owner_id: owner.auth0_sub,
+                            match_type: match?.type
                         }
                     });
                 }
@@ -765,7 +768,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                             match_date: matchData?.match_date || '',
                             match_time: matchData?.match_time || '',
                             host_club_name: matchData?.club?.name || '',
-                            owner_id: payload.sub // Auth0 Sub
+                            owner_id: payload.sub, // Auth0 Sub
+                            match_type: matchData?.type
                         }
                     });
                 }
@@ -849,7 +853,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                             match_id: params.matchId,
                             match_date: matchData?.match_date || '',
                             match_time: matchData?.match_time || '',
-                            applicant_club_name: applicantClub?.name || 'un club'
+                            applicant_club_name: applicantClub?.name || 'un club',
+                            match_type: matchData?.type
                         }
                     });
                 }
@@ -871,7 +876,8 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                             match_id: params.matchId,
                             match_date: matchData?.match_date || '',
                             match_time: matchData?.match_time || '',
-                            host_club_name: matchData?.club?.name || 'un club'
+                            host_club_name: matchData?.club?.name || 'un club',
+                            match_type: matchData?.type
                         }
                     });
                 }
