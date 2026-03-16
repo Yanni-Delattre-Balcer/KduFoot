@@ -171,7 +171,7 @@ export default function MatchDetailsPage() {
   }, []);
 
   const isDifferent = (val1: any, val2: any) => {
-    if (!val1 && !val2) return false;
+    if (!val1 || !val2) return false;
     const s1 = String(val1 || "").trim().toLowerCase();
     const s2 = String(val2 || "").trim().toLowerCase();
     return s1 !== s2;
@@ -312,10 +312,19 @@ export default function MatchDetailsPage() {
       onAdminDeleteOpenChange();
       addToast({
         title: t("match.delete_success_admin", "{{matchType}} supprimé", {
-          matchType: t("enums.type." + match.type)
+          matchType: t("enums.type." + (match.type || "match")),
         }),
-        description: t("match.delete_success_desc_admin", "Les participants ont été notifiés de l'annulation."),
+        description: t(
+          "match.delete_success_desc_admin",
+          "Les participants ont été notifiés de l'annulation.",
+        ),
+        classNames: {
+          description: "line-clamp-none whitespace-normal",
+          title: "line-clamp-none whitespace-normal",
+        },
+        variant: "solid",
         color: "success",
+        timeout: 5000,
       });
       navigate("/matches");
     } catch (error: any) {
@@ -908,8 +917,8 @@ export default function MatchDetailsPage() {
                                 onPress={onCancelOpen}
                               >
                                 {match.type === "tournament"
-                                  ? "Se désister du tournoi"
-                                  : "Se désister du match"}
+                                  ? t("match.withdraw_tournament")
+                                  : t("match.withdraw_match")}
                               </Button>
                             </div>
                           );
@@ -989,7 +998,7 @@ export default function MatchDetailsPage() {
                             )}
 
                             {userContact?.message ===
-                            "A porté de l'intérêt en envoyant une demande" ? (
+                            t("match.contact_tracking_message") ? (
                               <Button
                                 className="w-full font-black tracking-tighter h-12 shadow-lg shadow-danger/20 border border-danger/20"
                                 color="danger"
@@ -1034,7 +1043,7 @@ export default function MatchDetailsPage() {
                                   try {
                                     await contactMatch({
                                       message:
-                                        "A porté de l'intérêt en envoyant une demande",
+                                        t("match.contact_tracking_message"),
                                     });
                                     addToast({
                                       title: t("base.success", "Succès"),
@@ -1081,13 +1090,16 @@ export default function MatchDetailsPage() {
                       <span className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center text-xl shadow-lg shadow-primary/10">
                         🤝
                       </span>
-                      Suivi des Contacts
+                      {t("match.contact_tracking")}
                     </h2>
                     <p className="text-default-500 font-medium opacity-80 pl-0 md:pl-12">
-                      Dépêchez-vous de candidater pour ce match, il y a déjà{" "}
-                      {match.contacts?.length || 0} club
-                      {(match.contacts?.length || 0) > 1 ? "s" : ""} qui ont
-                      candidaté ou porté de l'intérêt pour ce match.
+                      {match.contacts?.length === 0
+                        ? t("match.contact_tracking_desc_zero")
+                        : match.contacts?.length === 1
+                          ? t("match.contact_tracking_desc_one")
+                          : t("match.contact_tracking_desc_other", {
+                              count: match.contacts?.length || 0,
+                            })}
                     </p>
                   </div>
                   <Chip
@@ -1096,18 +1108,22 @@ export default function MatchDetailsPage() {
                     size="lg"
                     variant="shadow"
                   >
-                    {match.contacts?.length || 0} Intérêt
-                    {(match.contacts?.length || 0) > 1 ? "s" : ""}
+                    {match.contacts?.length === 0
+                      ? t("match.interest_count_zero")
+                      : match.contacts?.length === 1
+                        ? t("match.interest_count_one", { count: 1 })
+                        : t("match.interest_count_other", {
+                            count: match.contacts?.length || 0,
+                          })}
                   </Chip>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {match.contacts && match.contacts.length > 0 ? (
                     match.contacts.map((contact, index) => {
-                      const isActionable =
-                        user?.id === match.owner_id &&
-                        contact.message ===
-                          "A porté de l'intérêt en envoyant une demande";
+                        const isActionable =
+                          user?.id === match.owner_id &&
+                          contact.message === t("match.contact_tracking_message");
                       const statusConfig = {
                         accepted: {
                           border: "border-emerald-500/50",

@@ -273,6 +273,19 @@
     "confirm_delete_match": "Are you sure you want to delete this match?",
     "filters": {
       "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
+    },
+    "withdraw_match": "Withdraw from match",
+    "withdraw_tournament": "Withdraw from tournament",
+    "contact_tracking": "Contact Tracking",
+    "interest_count_zero": "0 Interest",
+    "interest_count_one": "{{count}} Interest",
+    "interest_count_other": "{{count}} Interests",
+    "contact_tracking_desc_zero": "Be the first to apply for this match!",
+    "contact_tracking_desc_one": "Hurry up and apply, there is already 1 club that showed interest.",
+    "contact_tracking_desc_other": "Hurry up and apply, there are already {{count}} clubs that showed interest.",
+    "contact_tracking_message": "Showed interest by sending a request",
+    "status": {
+      "pending": "Pending"
     }
   },
   "session": {
@@ -332,6 +345,10 @@
     "certifiedCoach": "Certified Coach"
   },
   "enums": {
+    "type": {
+      "match": "Match",
+      "tournament": "Tournament"
+    },
     "theme": {
       "TECHNIQUE": "Technique",
       "PHYSIQUE": "Physical",
@@ -406,10 +423,6 @@
       "8v8": "8 vs 8",
       "5v5": "5 vs 5",
       "Futsal": "Futsal"
-    },
-    "type": {
-      "match": "Match",
-      "tournament": "Tournament"
     }
   },
   "matchesPage": {

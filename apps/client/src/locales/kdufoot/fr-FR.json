@@ -65,8 +65,8 @@
       "accessToken": "Access Token (Bearer)",
       "loading": "Chargement..."
     },
-    "find_match": "Trouver/créer un match",
-    "find_tournament": "Trouver/créer un tournoi"
+    "find_match": "Trouver ou créer un match",
+    "find_tournament": "Trouver ou créer un tournoi"
   },
   "auth": {
     "logout": "Se déconnecter",
@@ -87,8 +87,8 @@
     "buttons": {
       "exercises": "Analyser une vidéo",
       "sessions": "Trouver/créer un match / tournoi",
-      "find_match": "Trouver/créer un match",
-      "find_tournament": "Trouver/créer un tournoi"
+      "find_match": "Trouver ou créer un match",
+      "find_tournament": "Trouver ou créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
@@ -96,7 +96,7 @@
       "intro": "<0>Yanni</0>, étudiant en cybersécurité, <1>Réseaux & Télécommunications à Béthune</1> — J'ai créé Kdufoot pour aider les entraîneurs de football à <2>gagner du temps</2>.",
       "features": "🎬 <0>Analyse Vidéo AI</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois Amicaux</0> — Trouvez un adversaire près de chez vous en quelques clics.",
       "features_fallback": "⚽ Matchs & Tournois amicaux — Trouvez ou publiez vos propres matchs et tournois autour de chez vous.",
-      "footer": "Moins de recherche, plus de terrain. ⚽"
+      "footer": "Moins de recherches, plus de jeu. ⚽"
     },
     "cards": {
       "video": {
@@ -290,7 +290,20 @@
     "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
     "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "filters": {
-      "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs de toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner votre recherche selon vos besoins."
+      "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs sur toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner selon vos besoins."
+    },
+    "withdraw_match": "Se désister du match",
+    "withdraw_tournament": "Se désister du tournoi",
+    "contact_tracking": "Suivi des Contacts",
+    "interest_count_zero": "0 Intérêt",
+    "interest_count_one": "{{count}} Intérêt",
+    "interest_count_other": "{{count}} Intérêts",
+    "contact_tracking_desc_zero": "Soyez le premier à candidater pour cette rencontre !",
+    "contact_tracking_desc_one": "Dépêchez-vous de candidater, il y a déjà 1 club qui a porté de l'intérêt.",
+    "contact_tracking_desc_other": "Dépêchez-vous de candidater, il y a déjà {{count}} clubs qui ont porté de l'intérêt.",
+    "contact_tracking_message": "A porté de l'intérêt en envoyant une demande",
+    "status": {
+      "pending": "En attente"
     }
   },
   "session": {
@@ -353,6 +366,10 @@
     "certifiedCoach": "Coach Certifié"
   },
   "enums": {
+    "type": {
+      "match": "Match",
+      "tournament": "Tournoi"
+    },
     "theme": {
       "TECHNIQUE": "Technique",
       "PHYSIQUE": "Physique",
@@ -427,10 +444,6 @@
       "8v8": "8 vs 8",
       "5v5": "5 vs 5",
       "Futsal": "Futsal"
-    },
-    "type": {
-      "match": "Match",
-      "tournament": "Tournoi"
     }
   },
   "matchesPage": {

@@ -46,19 +46,18 @@ export const ConfirmedMatchCard = ({
 
   // Surgical Highlights calculation rely on knownData
   const previousState = knownData;
+  const isDifferent = (val1: any, val2: any) => {
+    if (!val1 || !val2) return false;
+    return String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase();
+  };
+
   const showSurgical = isParticipant && isModification && previousState;
 
-  const isDateChanged =
-    showSurgical && previousState?.date !== match.match_date;
-  const isTimeChanged =
-    showSurgical && previousState?.time !== match.match_time;
-  const isVenueChanged = showSurgical && previousState?.venue !== match.venue;
-  const isFormatChanged =
-    showSurgical &&
-    previousState?.format !== (match.match_format || match.format);
-  const isPitchChanged =
-    showSurgical &&
-    previousState?.pitch !== (match.match_pitch_type || match.pitch_type);
+  const isDateChanged = showSurgical && isDifferent(previousState?.date, match.match_date);
+  const isTimeChanged = showSurgical && isDifferent(previousState?.time, match.match_time);
+  const isVenueChanged = showSurgical && isDifferent(previousState?.venue, match.venue);
+  const isFormatChanged = showSurgical && isDifferent(previousState?.format, match.match_format || match.format);
+  const isPitchChanged = showSurgical && isDifferent(previousState?.pitch, match.match_pitch_type || match.pitch_type);
 
   // Role-based overall styling
   const borderClass =
@@ -148,9 +147,7 @@ export const ConfirmedMatchCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors ${isDateChanged ? "bg-danger/20 border-danger animate-pulse" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isDateChanged ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("matchForm.labels.date", "Date")}
                 </p>
                 <p
@@ -162,9 +159,7 @@ export const ConfirmedMatchCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors ${isTimeChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isTimeChanged ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("matchForm.labels.time", "Heure")}
                 </p>
                 <p
@@ -176,9 +171,7 @@ export const ConfirmedMatchCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? "bg-danger/20 border-danger animate-pulse" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isFormatChanged ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("matchForm.labels.format", "Format")}
                 </p>
                 <Chip
@@ -193,9 +186,7 @@ export const ConfirmedMatchCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors ${isPitchChanged ? "bg-danger/20 border-danger animate-pulse" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isPitchChanged ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("matchForm.labels.pitch_type", "Terrain")}
                 </p>
                 <p
@@ -310,7 +301,7 @@ export const ConfirmedMatchCard = ({
                       variant="light"
                       onPress={onWithdraw}
                     >
-                      Se désister
+                    {t("match.withdraw_match")}
                     </Button>
                   )}
                 </div>

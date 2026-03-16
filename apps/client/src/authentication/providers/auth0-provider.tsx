@@ -114,8 +114,7 @@ export const useAuth0Provider = (): AuthProvider => {
           sessionStorage.setItem(HAS_SHOWN_KEY, "true");
           addToast({
             title: "Session expirée",
-            description:
-              "Veuillez vous deconnecter et vous reconnecter s'il vous plait",
+            description: "Veuillez vous reconnecter s'il vous plaît",
             variant: "flat",
             color: "danger",
             timeout: 5000,

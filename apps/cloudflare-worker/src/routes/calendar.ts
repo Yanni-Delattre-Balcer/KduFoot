@@ -132,10 +132,10 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             // Match  → "Kdufoot : Match contre [nom du club adverse]"
             let summary = '';
             if (typeRaw === 'tournament') {
-                const tournamentName = item.name || 'Sans nom';
+                const tournamentName = item.tournament_name || item.match_title || item.name || 'Tournoi';
                 summary = `Kdufoot : ${tournamentName}`;
             } else {
-                const opponentName = item.opponentName || item.host_club_name || item.requester_club_name || item.club_name || 'Adversaire';
+                const opponentName = item.match_title || item.opponentName || item.host_club_name || item.requester_club_name || item.club_name || 'Adversaire';
                 summary = `Kdufoot : Match contre ${opponentName}`;
             }
 
@@ -155,9 +155,15 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 `Niveau : ${level || 'N/A'}`,
                 `Lieu : ${location || 'N/A'}`,
                 `Position : ${venue}`,
-                `Lien GPS : ${gpsLink}`,
-                `Détails : ${matchDetailUrl}`,
             ];
+            
+            // Only add GPS link if location doesn't seem to contain an address (basic check)
+            if (!location || location.trim() === 'N/A' || location.trim() === '') {
+                descLines.push(`Lien GPS : ${gpsLink}`);
+            }
+
+            descLines.push('', `Retrouvez tous les détails ici : ${matchDetailUrl}`);
+
             const description = descLines.join('\\n');
 
             const htmlDescription = [
@@ -168,7 +174,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 `Niveau : ${level || 'N/A'}<br>`,
                 `Lieu : <a href="${gpsLink}"><b>${location || 'N/A'}</b></a><br>`,
                 `Position : ${venue}<br><br>`,
-                `<a href="${matchDetailUrl}">Voir l'annonce sur le site</a>`,
+                `<a href="${matchDetailUrl}">Retrouvez tous les détails ici : ${matchDetailUrl}</a>`,
                 '</body></html>'
             ].join('');
 

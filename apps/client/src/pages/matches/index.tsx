@@ -242,6 +242,10 @@ export default function MatchesPage() {
             matchType: t("enums.type." + (deletedMatch?.type || "match"))
           }),
           description: t("match.delete_success_desc_admin", "Les participants ont été notifiés de l'annulation."),
+          classNames: {
+            description: "line-clamp-none whitespace-normal block",
+            title: "line-clamp-none whitespace-normal block",
+          },
           variant: "solid",
           color: "success",
           timeout: 5000,

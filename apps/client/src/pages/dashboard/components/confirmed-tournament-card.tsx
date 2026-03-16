@@ -36,17 +36,16 @@ export const ConfirmedTournamentCard = ({
   // Use knownData for surgical highlights
   const previousState = knownData ? knownData[part.match_id] : null;
 
+  const isDifferent = (val1: any, val2: any) => {
+    if (!val1 || !val2) return false;
+    return String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase();
+  };
+
   const showSurgical = part.notification_state === 1 && previousState;
-  const isDateChanged = showSurgical && previousState?.date !== part.match_date;
-  const isNewTimeChanged =
-    isTimeChanged || (showSurgical && previousState?.time !== part.match_time);
-  const isFormatChanged =
-    showSurgical &&
-    previousState?.format !== (part.match_format || part.format);
-  const isPitchChanged =
-    showSurgical &&
-    previousState?.pitch !==
-      (part.match_pitch_type || part.opponent_pitch_type || part.pitch_type);
+  const isDateChanged = showSurgical && isDifferent(previousState?.date, part.match_date);
+  const isNewTimeChanged = isTimeChanged || (showSurgical && isDifferent(previousState?.time, part.match_time));
+  const isFormatChanged = showSurgical && isDifferent(previousState?.format, part.match_format || part.format);
+  const isPitchChanged = showSurgical && isDifferent(previousState?.pitch, part.match_pitch_type || part.opponent_pitch_type || part.pitch_type);
 
   // Mock/Real teams logos (limit to 3)
   const teams = part.accepted_teams || [];
@@ -145,9 +144,7 @@ export const ConfirmedTournamentCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors ${isDateChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isDateChanged || highlighted ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("matchForm.labels.date", "Date")}
                 </p>
                 <p
@@ -159,9 +156,7 @@ export const ConfirmedTournamentCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors ${highlighted || isNewTimeChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${highlighted || isNewTimeChanged ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("matchForm.labels.time", "Heure")}
                 </p>
                 <p
@@ -173,9 +168,7 @@ export const ConfirmedTournamentCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isFormatChanged || highlighted ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("matchForm.labels.format", "Format")}
                 </p>
                 <Chip
@@ -190,9 +183,7 @@ export const ConfirmedTournamentCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors ${highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${highlighted ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("tournamentForm.labels.fee", "Frais")}
                 </p>
                 <p
@@ -206,9 +197,7 @@ export const ConfirmedTournamentCard = ({
               <div
                 className={`rounded-xl p-3 border transition-colors col-span-2 sm:col-span-1 ${isPitchChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
               >
-                <p
-                  className={`text-xs sm:text-sm font-black tracking-widest mb-1 ${isPitchChanged || highlighted ? "text-danger" : "text-default-400"}`}
-                >
+                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                   {t("matchForm.labels.pitch_type", "Terrain")}
                 </p>
                 <p
@@ -353,7 +342,7 @@ export const ConfirmedTournamentCard = ({
                     variant="light"
                     onPress={onWithdraw}
                   >
-                    Se désister
+                    {t("match.withdraw_tournament")}
                   </Button>
                 )}
               </div>
