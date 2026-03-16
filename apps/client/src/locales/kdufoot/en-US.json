@@ -401,10 +401,9 @@
       "Autre": "Other"
     },
     "venue": {
-      "Domicile": "🏠 Home (We host)",
-      "Extérieur": "🚗 Away (We travel)",
-      "Neutre": "📍 Neutral ground / To be defined",
-      "Peu importe": "Any"
+      "Domicile": "🏟️ We host (Home)",
+      "Extérieur": "🚌 We travel (Away)",
+      "Peu importe": "Doesn't matter"
     },
     "pitch": {
       "Herbe": "Grass",
@@ -632,8 +631,8 @@
       "unspecified": "Unspecified",
       "progress_announcement": "Tournament announcement preparation",
       "contact_additional": "Contact & Additional Info",
-      "name_form": "Tournament Name",
-      "subtitle_form": "Detailed information about your tournament",
+      "name_form": "Tournament Information",
+      "subtitle_form": "Tournament details",
       "update": "Update tournament"
     },
     "alerts": {

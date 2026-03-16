@@ -686,8 +686,8 @@
       "unspecified": "Non spécifiée",
       "progress_announcement": "Preparation de l'annonce du tournoi",
       "contact_additional": "Contact & Infos complémentaires",
-      "name_form": "Nom de votre tournoi",
-      "subtitle_form": "Informations détails de votre tournoi",
+      "name_form": "Information du Tournoi",
+      "subtitle_form": "Détail du tournoi",
       "update": "Mettre à jour le tournoi"
     },
     "alerts": {

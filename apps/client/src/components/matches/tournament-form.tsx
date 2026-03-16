@@ -355,10 +355,10 @@ export default function TournamentForm({
           </div>
           <div className="flex flex-col">
             <p className="text-base font-black text-white tracking-tight leading-none mb-1">
-              {t("tournamentForm.labels.name_form", "Information du tournoi")}
+              {t("tournamentForm.labels.name_form", "Information du Tournoi")}
             </p>
             <p className="text-[11px] text-zinc-400 font-medium">
-              {t("tournamentForm.labels.subtitle_form", "Informations détails de votre tournoi")}
+              {t("tournamentForm.labels.subtitle_form", "Détail du tournoi")}
             </p>
           </div>
         </CardHeader>

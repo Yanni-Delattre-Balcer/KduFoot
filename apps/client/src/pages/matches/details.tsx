@@ -1093,13 +1093,9 @@ export default function MatchDetailsPage() {
                       {t("match.contact_tracking")}
                     </h2>
                     <p className="text-default-500 font-medium opacity-80 pl-0 md:pl-12">
-                      {match.contacts?.length === 0
-                        ? t("match.contact_tracking_desc_zero")
-                        : match.contacts?.length === 1
-                          ? t("match.contact_tracking_desc_one")
-                          : t("match.contact_tracking_desc_other", {
-                              count: match.contacts?.length || 0,
-                            })}
+                      {t("match.contact_tracking_desc", {
+                        count: match.contacts?.length || 0,
+                      })}
                     </p>
                   </div>
                   <Chip
@@ -1108,13 +1104,9 @@ export default function MatchDetailsPage() {
                     size="lg"
                     variant="shadow"
                   >
-                    {match.contacts?.length === 0
-                      ? t("match.interest_count_zero")
-                      : match.contacts?.length === 1
-                        ? t("match.interest_count_one", { count: 1 })
-                        : t("match.interest_count_other", {
-                            count: match.contacts?.length || 0,
-                          })}
+                    {t("match.interest_count", {
+                      count: match.contacts?.length || 0,
+                    })}
                   </Chip>
                 </div>
 
