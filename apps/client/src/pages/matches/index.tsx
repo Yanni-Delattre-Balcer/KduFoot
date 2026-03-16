@@ -33,7 +33,7 @@ const PITCH_TYPES: PitchType[] = [
   "Stabilisé",
   "Toutes surfaces",
 ];
-const VENUES: Venue[] = ["Peu importe", "Domicile", "Extérieur"];
+const VENUES: (Venue | "Peu importe")[] = ["Peu importe", "Domicile", "Extérieur"];
 
 import MatchForm from "@/components/matches/match-form";
 import TournamentForm from "@/components/matches/tournament-form";

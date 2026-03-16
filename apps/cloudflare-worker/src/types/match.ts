@@ -42,7 +42,7 @@ export interface Match {
     match_date: string;
     match_time: string;
     match_end_time?: string;
-    venue: 'Domicile' | 'Extérieur' | 'Neutre';
+    venue: 'Domicile' | 'Extérieur';
     location_address?: string;
     location_city?: string;
     location_zip?: string;
@@ -74,7 +74,7 @@ export interface CreateMatchDto {
     match_date: string;
     match_time: string;
     match_end_time?: string;
-    venue: 'Domicile' | 'Extérieur' | 'Neutre';
+    venue: 'Domicile' | 'Extérieur';
     location_address?: string;
     location_city?: string;
     location_zip?: string;

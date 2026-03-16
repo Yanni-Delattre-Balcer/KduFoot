@@ -359,7 +359,7 @@ export class MatchService {
             query += ' AND m.format = ?';
             params.push(filters.format);
         }
-        if (filters.venue) {
+        if (filters.venue && filters.venue !== 'Peu importe') {
             let searchVenue = filters.venue;
             if (filters.venue === 'Domicile') searchVenue = 'Extérieur';
             else if (filters.venue === 'Extérieur') searchVenue = 'Domicile';
