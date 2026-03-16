@@ -238,9 +238,10 @@ export default function MatchesPage() {
         if (!res.ok) throw new Error("Erreur lors de la suppression");
         const deletedMatch = matches.find(m => m.id === matchId);
         addToast({
-          title: t("match.delete_success_admin", "{{matchType}} supprimé. Les participants ont été notifiés de l'annulation.", {
+          title: t("match.delete_success_admin", "{{matchType}} supprimé", {
             matchType: t("enums.type." + (deletedMatch?.type || "match"))
           }),
+          description: t("match.delete_success_desc_admin", "Les participants ont été notifiés de l'annulation."),
           variant: "solid",
           color: "success",
           timeout: 5000,

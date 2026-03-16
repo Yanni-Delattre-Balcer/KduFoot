@@ -311,9 +311,10 @@ export default function MatchDetailsPage() {
       await adminDeleteMatch();
       onAdminDeleteOpenChange();
       addToast({
-        title: t("match.delete_success_admin", "{{matchType}} supprimé. Les participants ont été notifiés de l'annulation.", {
+        title: t("match.delete_success_admin", "{{matchType}} supprimé", {
           matchType: t("enums.type." + match.type)
         }),
+        description: t("match.delete_success_desc_admin", "Les participants ont été notifiés de l'annulation."),
         color: "success",
       });
       navigate("/matches");
