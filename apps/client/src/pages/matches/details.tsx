@@ -261,10 +261,10 @@ export default function MatchDetailsPage() {
     try {
       await deleteMatch();
       addToast({
-        title: t("dashboard.toasts.delete_success", "Annonce supprimée", {
+        title: t("dashboard.toasts.delete_success", "Votre {{matchType}} a été supprimé avec succès", {
           matchType: t("enums.type." + match.type).toLowerCase()
         }),
-        description: t("dashboard.toasts.delete_success_desc", "L'annonce a été retirée avec succès"),
+        description: t("dashboard.toasts.delete_success_desc", "L'annonce a été retirée avec succès."),
         color: "success",
       });
       onDeleteOpenChange(); // Close modal on success
@@ -310,6 +310,12 @@ export default function MatchDetailsPage() {
     try {
       await adminDeleteMatch();
       onAdminDeleteOpenChange();
+      addToast({
+        title: t("match.delete_success_admin", "{{matchType}} supprimé. Les participants ont été notifiés de l'annulation.", {
+          matchType: t("enums.type." + match.type)
+        }),
+        color: "success",
+      });
       navigate("/matches");
     } catch (error: any) {
       console.error("Admin delete failed", error);
@@ -702,6 +708,33 @@ export default function MatchDetailsPage() {
                   value={t(`enums.gender.${gender}`)}
                 />
               </div>
+
+              {/* Banner "J'ai vu les modifications" */}
+              {isModified && Object.values(highlights).some(Boolean) && (
+                <div className="bg-danger/10 border-2 border-danger/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 animate-appearance-in shadow-lg shadow-danger/10">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl animate-bounce">⚠️</span>
+                    <div>
+                      <p className="text-sm font-black text-danger tracking-tight">
+                        {t("details.modification_alert_title", "Des modifications ont été apportées")}
+                      </p>
+                      <p className="text-[10px] text-danger/70 font-medium">
+                        {t("details.modification_alert_desc", "Les champs en rouge ont été modifiés par l'organisateur.")}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    className="font-black text-sm tracking-tight shadow-lg shadow-danger/20 h-11 px-6 shrink-0 w-full sm:w-auto"
+                    color="danger"
+                    isLoading={isMarkingRead}
+                    size="sm"
+                    variant="solid"
+                    onPress={handleMarkAsRead}
+                  >
+                    {t("dashboard.controls.view_changes", "J'AI VU LES MODIFICATIONS")}
+                  </Button>
+                </div>
+              )}
 
               {/* Additional Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -7,7 +7,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Calendar, ChevronRight } from "lucide-react";
+import { Calendar, ChevronRight, Copy } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { addToast } from "@heroui/toast";
 import { useTranslation } from "react-i18next";
@@ -27,6 +27,23 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
   const { t } = useTranslation();
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasSyncedOnce, setHasSyncedOnce] = useState(false);
+  const [calendarUrl, setCalendarUrl] = useState<string | null>(null);
+
+  const isAndroid = /android/i.test(navigator.userAgent);
+
+  const handleCopyLink = async () => {
+    if (!calendarUrl) return;
+    try {
+      await navigator.clipboard.writeText(calendarUrl);
+      addToast({
+        title: t("onboarding.calendar.copy_success", "Lien copié !"),
+        description: t("onboarding.calendar.copy_success_desc", "Collez-le dans votre application calendrier pour vous abonner."),
+        color: "success",
+      });
+    } catch {
+      addToast({ title: "Erreur", description: "Impossible de copier le lien.", color: "danger" });
+    }
+  };
 
   const handleCalendarSync = async () => {
     setIsSyncing(true);
@@ -40,22 +57,26 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
       );
 
       if (data && (data as any).url) {
-        const finalUrl = (data as any).url.replace(/^https?:\/\//, "webcal://");
+        const rawUrl = (data as any).url;
 
-        console.log(
-          "[Calendar] Redirecting to universal webcal link:",
-          finalUrl,
-        );
-        // Ouvrir le lien webcal:// qui déclenche le sélecteur natif
-        // iOS → "S'abonner au calendrier ?"
-        // Android → "Ouvrir avec... Google Calendar / Outlook / etc."
-        window.location.href = finalUrl;
+        // Save the raw URL for the "copy" fallback
+        setCalendarUrl(rawUrl);
         setHasSyncedOnce(true);
-        addToast({
-          title: t("onboarding.calendar.toast_success", "Lien calendrier ouvert !"),
-          description: t("onboarding.calendar.toast_success_desc", "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait »."),
-          color: "success",
-        });
+
+        if (isAndroid) {
+          // Android: Use Google Calendar subscription URL which triggers the app chooser
+          const httpsUrl = rawUrl.replace(/^webcal:\/\//, "https://");
+          const googleCalUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(httpsUrl)}`;
+
+          console.log("[Calendar] Android detected, opening Google Calendar intent:", googleCalUrl);
+          window.open(googleCalUrl, "_blank");
+        } else {
+          // iOS / Desktop: webcal:// works natively
+          const webcalUrl = rawUrl.replace(/^https?:\/\//, "webcal://");
+
+          console.log("[Calendar] iOS/Desktop, opening webcal link:", webcalUrl);
+          window.location.href = webcalUrl;
+        }
       }
     } catch (error) {
       console.error("[Calendar] Failed to fetch calendar link:", error);
@@ -65,9 +86,6 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
       });
     } finally {
       setIsSyncing(false);
-      // NE PAS fermer la modale ici.
-      // L'utilisateur doit d'abord accepter l'abonnement dans son app calendrier
-      // puis cliquer sur "Je l'ai déjà fait" pour confirmer et fermer.
     }
   };
 
@@ -150,9 +168,19 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
             </Button>
 
             {hasSyncedOnce && (
-              <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
-                {t("onboarding.calendar.toast_success_desc", "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait ».")}
-              </p>
+              <>
+                <Button
+                  className="w-full font-bold text-sm tracking-tight rounded-xl h-12 border-2 border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all"
+                  startContent={<Copy size={16} />}
+                  variant="flat"
+                  onPress={handleCopyLink}
+                >
+                  {t("onboarding.calendar.copy_link", "📋 Copier le lien du calendrier")}
+                </Button>
+                <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
+                  {t("onboarding.calendar.help_text", "Si le calendrier ne s'est pas ouvert automatiquement, copiez le lien et collez-le dans votre application calendrier.")}
+                </p>
+              </>
             )}
 
             {/* Bouton "Ne plus me demander" : fermeture définitive pour cet appareil */}

@@ -181,6 +181,13 @@ export default function MatchForm({
     if (errors[field as string]) {
       setErrors((prev) => ({ ...prev, [field as string]: "" }));
     }
+    // Date and time are interdependent (2h check), clear the other's error too
+    if (field === "match_date" && errors.match_time) {
+      setErrors((prev) => ({ ...prev, match_time: "" }));
+    }
+    if (field === "match_time" && errors.match_date) {
+      setErrors((prev) => ({ ...prev, match_date: "" }));
+    }
     if (field === "phone") {
       const formatted = formatPhoneNumber(value);
 

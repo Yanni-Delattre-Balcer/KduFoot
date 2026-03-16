@@ -133,25 +133,40 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                 </div>
                 <div className="space-y-1">
                   <h2 className="text-2xl font-black text-white tracking-tighter italic leading-tight">
-                    Safari iOS
+                    Installer KduFoot sur votre iPhone
                   </h2>
                   <p className="text-[10px] text-primary font-black tracking-[0.2em]">
-                    Guide d'installation
+                    Guide d'installation Safari
                   </p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                {/* Étape 1 */}
+                <div className="flex items-start gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
                     <span className="text-primary font-black text-xs">1</span>
                   </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                      Ouvrez le site sur{" "}
+                      <span className="text-blue-400 font-bold italic">Safari</span>{" "}
+                      et cliquez sur les trois petits points{" "}
+                      <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500/20 rounded-lg border border-blue-500/30 text-blue-400 font-bold text-[10px]">⋯</span>{" "}
+                      ou l'icône de partage en bas de votre écran.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Étape 2 */}
+                <div className="flex items-start gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                    <span className="text-primary font-black text-xs">2</span>
+                  </div>
                   <div className="flex items-center gap-2">
-                    <p className="text-xs text-zinc-300 font-medium">
-                      Cliquez sur l'icône{" "}
-                      <span className="text-blue-400 font-bold italic">
-                        Partager
-                      </span>
+                    <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                      Dans le menu qui s'ouvre, appuyez sur{" "}
+                      <span className="text-white font-bold italic">Partager</span>
                     </p>
                     <div className="bg-blue-500/20 p-1 rounded-lg border border-blue-500/30">
                       <svg
@@ -171,16 +186,47 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+
+                {/* Étape 3 */}
+                <div className="flex items-start gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                    <span className="text-primary font-black text-xs">2</span>
+                    <span className="text-primary font-black text-xs">3</span>
                   </div>
                   <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                    Puis sélectionnez{" "}
-                    <span className="text-white font-bold italic">
-                      "Sur l'écran d'accueil"
-                    </span>
-                    .
+                    Faites défiler les options vers le bas et cliquez sur{" "}
+                    <span className="text-white font-bold italic">En voir plus</span>{" "}
+                    <span className="inline-flex items-center justify-center w-5 h-5 bg-zinc-700/50 rounded border border-white/10 text-zinc-300 font-bold text-[10px]">⌄</span>
+                  </p>
+                </div>
+
+                {/* Étape 4 */}
+                <div className="flex items-start gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                    <span className="text-primary font-black text-xs">4</span>
+                  </div>
+                  <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                    Cherchez et cliquez sur{" "}
+                    <span className="text-white font-bold italic">Sur l'écran d'accueil</span>{" "}
+                    <span className="inline-flex items-center justify-center w-5 h-5 bg-emerald-500/20 rounded border border-emerald-500/30 text-emerald-400 font-bold text-sm">⊕</span>
+                  </p>
+                </div>
+
+                {/* Étape 5 */}
+                <div className="flex items-start gap-4 bg-white/5 p-3 rounded-2xl border border-white/10">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                    <span className="text-primary font-black text-xs">5</span>
+                  </div>
+                  <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                    Enfin, appuyez sur{" "}
+                    <span className="text-blue-400 font-bold italic">Ajouter</span>{" "}
+                    en haut à droite.
+                  </p>
+                </div>
+
+                {/* Résultat */}
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 mt-2">
+                  <p className="text-xs text-emerald-400 font-bold text-center leading-relaxed">
+                    ✨ L'application est maintenant installée sur votre téléphone comme une app classique !
                   </p>
                 </div>
               </div>

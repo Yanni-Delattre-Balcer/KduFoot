@@ -183,6 +183,13 @@ export default function TournamentForm({
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
+    // Date and time are interdependent (2h check), clear the other's error too
+    if (field === "match_date" && errors.match_time) {
+      setErrors((prev) => ({ ...prev, match_time: "" }));
+    }
+    if (field === "match_time" && errors.match_date) {
+      setErrors((prev) => ({ ...prev, match_date: "" }));
+    }
     if (field === "phone") {
       setFormData((prev) => ({ ...prev, [field]: formatPhoneNumber(value) }));
     } else {
