@@ -4,7 +4,6 @@
  */
 
 import { Trans, useTranslation } from "react-i18next";
-import { Link } from "@heroui/link";
 import { Card, CardHeader, CardBody } from "@heroui/card";
 import { Divider } from "@heroui/divider";
 
@@ -47,18 +46,19 @@ export default function ThankYouPage() {
                   <Trans t={t}>thank-you.ronan.support</Trans>
                 </p>
                 <div className="flex justify-center items-center gap-4 py-2">
-                  <Link
-                    isExternal
+                  <a
                     aria-label="SCTG Development Repositories"
-                    className="p-1 transition-transform hover:scale-110 overflow-hidden"
+                    className="p-1 transition-transform hover:scale-110 overflow-hidden inline-block"
                     href="https://github.com/orgs/sctg-development/repositories"
+                    rel="noopener noreferrer"
+                    target="_blank"
                   >
                     <img
                       alt="SCTG Logo"
                       className="w-16 h-16 object-contain"
                       src="/sctg-logo.png"
                     />
-                  </Link>
+                  </a>
                 </div>
                 <p className="text-xs italic text-default-600 mt-1 flex items-center gap-2">
                   <StarIcon className="text-warning" />

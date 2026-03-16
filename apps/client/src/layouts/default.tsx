@@ -96,7 +96,7 @@ export default function DefaultLayout({
                 <Button
                   as="a"
                   className="w-full font-bold h-12 bg-default-100/50 border border-default-200/50 text-default-600 hover:bg-default-200/50 hover:text-default-700 transition-all rounded-xl"
-                  href={`mailto:support@kdufoot.com?subject=${t("support.other_inquiry_subject")}`}
+                  href={`mailto:contact@kdufoot.com?subject=${t("support.other_inquiry_subject")}`}
                   startContent={<Handshake size={20} />}
                 >
                   {t("support.other_inquiry")}

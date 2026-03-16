@@ -403,6 +403,7 @@
     "venue": {
       "Domicile": "🏟️ We host (Home)",
       "Extérieur": "🚌 We travel (Away)",
+      "Neutre": "Neutral ground / To be defined",
       "Peu importe": "Doesn't matter"
     },
     "pitch": {

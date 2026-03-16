@@ -188,6 +188,12 @@ export const Navbar = () => {
         className="flex basis-1 items-end justify-end pr-1 h-full pb-2"
         justify="end"
       >
+        <NavbarItem className="sm:hidden flex items-end pb-1">
+          <LanguageSwitch
+            availableLanguages={availableLanguages}
+            icon={I18nIcon}
+          />
+        </NavbarItem>
         <NavbarMenuToggle
           className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
           icon={(isOpen) => (
@@ -208,10 +214,6 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarMenu className="bg-background/95 backdrop-blur-md pt-6 border-t border-default-100">
-        <LanguageSwitch
-          availableLanguages={availableLanguages}
-          icon={I18nIcon}
-        />
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig().navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>

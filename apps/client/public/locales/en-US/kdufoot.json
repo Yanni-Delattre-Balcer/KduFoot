@@ -1,8 +1,16 @@
 {
   "success": "Success",
+  "confirm": "Confirm",
   "warning": "Warning",
   "info": "Information",
   "loading": "Loading...",
+  "base": {
+    "success": "Success",
+    "edit": "Update",
+    "error": {
+      "title": "Error"
+    }
+  },
   "error": {
     "title": "Error",
     "too_late_to_modify": "Too late! You can no longer modify this announcement online. Please contact the opposing coach by phone or email to notify them directly.",
@@ -18,7 +26,8 @@
     "technical_issue": "Technical Issue",
     "bug_report": "Report a bug",
     "feature_request": "Suggest a feature",
-    "other": "Other"
+    "other": "Other",
+    "delete_failed_with_type": "Failed to delete {{matchType}}. Please try again."
   },
   "site": {
     "description": "Video analysis and training management platform for football."
@@ -75,7 +84,8 @@
       "title": "👋 About",
       "intro": "<0>Yanni</0>, cybersecurity student, <1>Networks & Telecommunications in Béthune</1> — I created Kdufoot to help football coaches <2>save time</2>.",
       "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use drills.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in a few clicks.",
-      "footer": "Less searching, more playing."
+      "features_fallback": "⚽ Friendly Matches & Tournaments — Find or publish your own matches and tournaments around you.",
+      "footer": "Less searching, more playing. ⚽"
     },
     "cards": {
       "video": {
@@ -177,9 +187,15 @@
       "native": "Native Calendar",
       "later": "Maybe later",
       "dismiss": "I've already done it",
+      "never_ask": "Never ask again",
+      "toast_success": "Calendar link opened!",
       "toast_success_desc": "Accept the subscription in your calendar app, then click 'I've already done it'.",
-      "toast_success": "Calendar sync started!",
-      "toast_error": "Calendar sync failed"
+      "toast_error": "Calendar sync failed",
+      "instructions_android": "Choose your default calendar app to complete synchronization.",
+      "copy_link": "Copy calendar link",
+      "manual_notice": "If automatic opening fails, copy the link and paste it manually in your calendar settings (Add by URL).",
+      "add_google": "Add to Google Calendar",
+      "link_copied": "Link copied to clipboard!"
     }
   },
   "planner": {
@@ -250,8 +266,27 @@
     "date": "Date",
     "time": "Time",
     "send_request": "Send Request",
+    "create_warning": "To create an ad, your profile must be 100% complete (Name, Club, Phone, etc.).",
+    "search_warning": "Access to detailed searches is reserved for complete profiles.",
+    "confirm_delete_admin": "⚠️ DELETE THIS MATCH?\n\nThis action is irreversible. The match and all its participations will be permanently deleted.",
+    "delete_success_admin": "Match deleted. Participants have been notified of the cancellation.",
+    "confirm_delete_tournament": "Are you sure you want to delete this tournament?",
+    "confirm_delete_match": "Are you sure you want to delete this match?",
     "filters": {
       "explanation": "No filter is mandatory. For example, you can leave the city blank to see matches in the entire region, or specify your criteria (category, level...) to refine your search according to your needs."
+    },
+    "withdraw_match": "Withdraw from match",
+    "withdraw_tournament": "Withdraw from tournament",
+    "contact_tracking": "Contact Tracking",
+    "interest_count_zero": "0 Interest",
+    "interest_count_one": "{{count}} Interest",
+    "interest_count_other": "{{count}} Interests",
+    "contact_tracking_desc_zero": "Be the first to apply for this match!",
+    "contact_tracking_desc_one": "Hurry up and apply, there is already 1 club that showed interest.",
+    "contact_tracking_desc_other": "Hurry up and apply, there are already {{count}} clubs that showed interest.",
+    "contact_tracking_message": "Showed interest by sending a request",
+    "status": {
+      "pending": "Pending"
     }
   },
   "session": {
@@ -311,6 +346,10 @@
     "certifiedCoach": "Certified Coach"
   },
   "enums": {
+    "type": {
+      "match": "Match",
+      "tournament": "Tournament"
+    },
     "theme": {
       "TECHNIQUE": "Technique",
       "PHYSIQUE": "Physical",
@@ -362,9 +401,10 @@
       "Autre": "Other"
     },
     "venue": {
-      "Domicile": "🏠 Home (We host)",
-      "Extérieur": "🚗 Away (We travel)",
-      "Neutre": "📍 Neutral ground / To be defined"
+      "Domicile": "🏟️ We host (Home)",
+      "Extérieur": "🚌 We travel (Away)",
+      "Neutre": "Neutral ground / To be defined",
+      "Peu importe": "Doesn't matter"
     },
     "pitch": {
       "Herbe": "Grass",
@@ -385,10 +425,6 @@
       "8v8": "8 vs 8",
       "5v5": "5 vs 5",
       "Futsal": "Futsal"
-    },
-    "type": {
-      "match": "Match",
-      "tournament": "Tournament"
     }
   },
   "matchesPage": {
@@ -465,7 +501,7 @@
       "warning_siret": "The SIRET number can only be entered once.",
       "warning_auto": "The address, zip code, and city will then be automatically filled.",
       "warning_final": "The club will be permanently associated with your account.",
-      "warning_support": "If you need to change your club later, contact support: support.kdufoot@gmail.com",
+      "warning_support": "If you need to change your club later, contact support: support@kdufoot.com",
       "warning_search": "Tip: Search for 'Your club name + SIRET' on the Internet to find it.",
       "search_help": "To find your number, type on Google: \"SIRET + [Your exact club name]\". Example: \"SIRET RC Lens\".",
       "validate": "Validate and Link the club",
@@ -498,6 +534,7 @@
   "accountModal": {
     "alerts": {
       "update_success": "Your profile has been successfully updated!",
+      "update_success_desc": "Your changes have been taken into account immediately.",
       "update_error": "An error occurred while updating your profile.",
       "club_linked_success": "Club successfully certified!"
     }
@@ -594,7 +631,13 @@
       "club_secondary": "Secondary Club",
       "unspecified": "Unspecified",
       "progress_announcement": "Tournament announcement preparation",
-      "contact_additional": "Contact & Additional Info"
+      "contact_additional": "Contact & Additional Info",
+      "name_form": "Tournament Information",
+      "subtitle_form": "Tournament details",
+      "update": "Update tournament"
+    },
+    "alerts": {
+      "create_success": "Tournament created successfully!"
     }
   },
   "pricing": {
@@ -740,7 +783,8 @@
     },
     "confirm_delete": "Are you sure you want to delete this ad?",
     "toasts": {
-      "delete_success": "Ad deleted successfully"
+      "delete_success": "Ad deleted successfully",
+      "delete_success_desc": "The announcement has been successfully removed"
     },
     "notifications": {
       "modification": "{{matchType}} modified ⚠️",
@@ -748,7 +792,7 @@
       "cancellation_title": "{{matchType}} Cancelled",
       "cancellation": "The scheduled {{matchType}} against {{team}} on {{date}} has been cancelled by the organizer",
       "new_request_interactive": "You received a request from {{team}} for your {{matchType}} on {{date}}",
-      "acceptance_player": "Confirmed! ✅ Your {{matchType}} on {{date}} is validated.",
+      "acceptance_player": "Duel Confirmed! ✅ Your {{matchType}} on {{date}} is validated.",
       "rejection_player": "Request refused. {{team}} is not available for the {{date}}.",
       "refusal_organizer": "Request refused. You have declined the invitation from {{team}}."
     },
@@ -797,6 +841,7 @@
     "statusCertified": "Certified",
     "statusAdmin": "Admin",
     "statusSuperAdmin": "S. Admin",
+    "statusCreator": "Site Creator",
     "btnViewProfile": "View Profile",
     "modalBanTitle": "🚫 Ban this User",
     "modalBanDescription": "This action will <0>permanently delete</0> all matches and tournaments created by this user.",
@@ -830,9 +875,9 @@
     "siretChangeCountLabel": "SIRET Changes",
     "btnSaveD1": "💾 Save D1 Modifications",
     "securitySectionTitle": "🛡️ Security & Account",
-    "btnUnblock": "Débloquer l'utilisateur",
-    "btnBlock": "🚫 Bloquer l'utilisateur",
-    "btnDeleteAccount": "Supprimer le compte",
+    "btnUnblock": "Unblock User",
+    "btnBlock": "🚫 Block User",
+    "btnDeleteAccount": "Delete Account",
     "permissionsSectionTitle": "🔑 User Permissions",
     "quickAssignLabel": "Quick Assign:",
     "roleFree": "Free Subscriber",

@@ -1,4 +1,5 @@
 {
+  "confirm": "Confirmer",
   "success": "Succès",
   "warning": "Attention",
   "info": "Information",
@@ -25,7 +26,8 @@
     "technical_issue": "Problème Technique",
     "bug_report": "Signaler un bug",
     "feature_request": "Suggérer une fonctionnalité",
-    "other": "Autre"
+    "other": "Autre",
+    "delete_failed_with_type": "Impossible de supprimer {{matchType}}. Veuillez réessayer."
   },
   "user_banned_signal": "Signalement d'utilisateur banni",
   "cookie-consent-title": "Gestion des cookies",
@@ -63,8 +65,8 @@
       "accessToken": "Access Token (Bearer)",
       "loading": "Chargement..."
     },
-    "find_match": "Trouver/créer un match",
-    "find_tournament": "Trouver/créer un tournoi"
+    "find_match": "Trouver ou créer un match",
+    "find_tournament": "Trouver ou créer un tournoi"
   },
   "auth": {
     "logout": "Se déconnecter",
@@ -85,15 +87,16 @@
     "buttons": {
       "exercises": "Analyser une vidéo",
       "sessions": "Trouver/créer un match / tournoi",
-      "find_match": "Trouver/créer un match",
-      "find_tournament": "Trouver/créer un tournoi"
+      "find_match": "Trouver ou créer un match",
+      "find_tournament": "Trouver ou créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
       "title": "👋 À propos",
-      "intro": "<0>Yanni</0>, étudiant en cybersécurité, cursus <1>Réseaux & Télécommunications à Béthune</1> — j'ai créé Kdufoot pour aider les éducateurs de football à <2>gagner du temps</2>.",
-      "features": "🎬 <0>Analyse vidéo par IA</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois amicaux</1> — Trouvez un adversaire autour de chez vous en quelques clics.",
-      "footer": "Moins de recherche, plus de terrain."
+      "intro": "<0>Yanni</0>, étudiant en cybersécurité, <1>Réseaux & Télécommunications à Béthune</1> — J'ai créé Kdufoot pour aider les entraîneurs de football à <2>gagner du temps</2>.",
+      "features": "🎬 <0>Analyse Vidéo AI</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois Amicaux</0> — Trouvez un adversaire près de chez vous en quelques clics.",
+      "features_fallback": "⚽ Matchs & Tournois amicaux — Trouvez ou publiez vos propres matchs et tournois autour de chez vous.",
+      "footer": "Moins de recherches, plus de jeu. ⚽"
     },
     "cards": {
       "video": {
@@ -195,9 +198,15 @@
       "native": "Calendrier Natif",
       "later": "Peut-être plus tard",
       "dismiss": "Je l'ai déjà fait",
+      "never_ask": "Ne plus me demander",
       "toast_success": "Lien calendrier ouvert !",
       "toast_success_desc": "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait ».",
-      "toast_error": "Échec de la synchronisation calendrier"
+      "toast_error": "Échec de la synchronisation calendrier",
+      "instructions_android": "Choisissez votre application de calendrier par défaut pour terminer la synchronisation.",
+      "copy_link": "Copier le lien du calendrier",
+      "manual_notice": "Si l'ouverture automatique échoue, copiez le lien et collez-le manuellement dans vos paramètres d'agenda (Ajouter par URL).",
+      "add_google": "Ajouter à Google Calendar",
+      "link_copied": "Lien copié dans le presse-papier !"
     }
   },
   "planner": {
@@ -205,7 +214,6 @@
     "mes_annonces": "Mes Annonces",
     "requests": "Demandes",
     "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
-    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "deleted_success": "Supprimé avec succès",
     "no_active_match": "Aucune annonce de match active.",
     "no_active_tournament": "Aucune annonce de tournoi active.",
@@ -257,8 +265,6 @@
     "schema": "Schéma Tactic"
   },
   "match": {
-    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
-    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "vs": "vs",
     "title": "Matchs Amicaux",
     "tab_matches": "Matchs",
@@ -275,11 +281,30 @@
     "date": "Date",
     "time": "Heure",
     "send_request": "Envoyer une demande",
+    "create_warning": "Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.).",
+    "search_warning": "L'accès aux recherches détaillées est réservée aux profils complets.",
     "delete_confirmation": "Es-tu sûr de vouloir supprimer cette annonce ? Cette action est irréversible.",
     "accept_confirm": "Accepter l'équipe de {{clubName}} ?",
     "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",
+    "confirm_delete_admin": "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.",
+    "delete_success_admin": "{{matchType}} supprimé. Les participants ont été notifiés de l'annulation.",
+    "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "filters": {
-      "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs de toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner votre recherche selon vos besoins."
+      "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs sur toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner selon vos besoins."
+    },
+    "withdraw_match": "Se désister du match",
+    "withdraw_tournament": "Se désister du tournoi",
+    "contact_tracking": "Suivi des Contacts",
+    "interest_count_zero": "0 Intérêt",
+    "interest_count_one": "{{count}} Intérêt",
+    "interest_count_other": "{{count}} Intérêts",
+    "contact_tracking_desc_zero": "Soyez le premier à candidater pour cette rencontre !",
+    "contact_tracking_desc_one": "Dépêchez-vous de candidater, il y a déjà 1 club qui a porté de l'intérêt.",
+    "contact_tracking_desc_other": "Dépêchez-vous de candidater, il y a déjà {{count}} clubs qui ont porté de l'intérêt.",
+    "contact_tracking_message": "A porté de l'intérêt en envoyant une demande",
+    "status": {
+      "pending": "En attente"
     }
   },
   "session": {
@@ -342,6 +367,10 @@
     "certifiedCoach": "Coach Certifié"
   },
   "enums": {
+    "type": {
+      "match": "Match",
+      "tournament": "Tournoi"
+    },
     "theme": {
       "TECHNIQUE": "Technique",
       "PHYSIQUE": "Physique",
@@ -395,7 +424,8 @@
     "venue": {
       "Domicile": "Nous recevons (Domicile)",
       "Extérieur": "Nous nous déplaçons (Extérieur)",
-      "Neutre": "Terrain neutre / À définir"
+      "Neutre": "Terrain neutre / À définir",
+      "Peu importe": "Peu importe"
     },
     "pitch": {
       "Herbe": "Herbe",
@@ -416,10 +446,6 @@
       "8v8": "8 vs 8",
       "5v5": "5 vs 5",
       "Futsal": "Futsal"
-    },
-    "type": {
-      "match": "Match",
-      "tournament": "Tournoi"
     }
   },
   "matchesPage": {
@@ -502,7 +528,7 @@
       "warning_siret": "Le numéro SIRET ne peut être renseigné qu'une seule fois.",
       "warning_auto": "L'adresse, le code postal et la ville seront alors automatiquement remplis.",
       "warning_final": "Le club sera définitivement associé à votre compte.",
-      "warning_support": "Si vous devez changer de club par la suite, contactez le support : support.kdufoot@gmail.com",
+      "warning_support": "Si vous devez changer de club par la suite, contactez le support : support@kdufoot.com",
       "warning_search": "Astuce : Cherchez 'Nom de votre club + SIRET' sur Internet pour le trouver.",
       "search_help": "Pour trouver votre numéro, tapez sur Google : \"SIRET + [Nom exact de votre club]\". Exemple : \"SIRET RC Lens\".",
       "validate": "Valider et Lier le club",
@@ -530,7 +556,7 @@
       "link_success": "Club lié avec succès !",
       "create_success": "Annonce de match créée avec succès !",
       "update_success": "Match mis à jour avec succès !",
-      "delete_success": "Match supprimé avec succès !",
+      "delete_success": "{{matchType}} supprimé avec succès !",
       "contact_success": "Votre demande a été envoyée avec succès ! 🚀",
       "date_past_error": "Impossible de publier : l'heure sélectionnée est dépassée.",
       "delay_short_error": "Délai trop court : Un match doit être créé au moins 2 heures avant le coup d'envoi.",
@@ -546,6 +572,7 @@
   "accountModal": {
     "alerts": {
       "update_success": "Votre profil a été mis à jour avec succès !",
+      "update_success_desc": "Vos modifications ont été prises en compte immédiatement.",
       "update_error": "Une erreur est survenue lors de la mise à jour de votre profil.",
       "club_linked_success": "Club certifié avec succès !"
     }
@@ -630,8 +657,8 @@
       "contact_support": "📩 CONTACTER LE SUPPORT"
     },
     "sync": {
-      "reset_confirm": "Voulez-vous réinitialiser votre synchronisation calendrier ?\n\nCela fera réapparaître la page d'installation lors de votre prochaine connexion pour que vous puissiez vous réabonner.",
-      "reset_success": "Synchronisation réinitialisée. La page d'installation va réapparaître.",
+      "reset_confirm": "Voulez-vous modifier votre synchronisation ?\n\nVotre page de synchronisation va se réouvrir pour vous permettre de vous connecter.",
+      "reset_success": "Action enregistrée. La page de synchronisation va se réouvrir.",
       "reset_error": "Erreur lors de la réinitialisation de la synchronisation."
     },
     "confirm_delete": "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?",
@@ -659,16 +686,12 @@
       "unspecified": "Non spécifiée",
       "progress_announcement": "Preparation de l'annonce du tournoi",
       "contact_additional": "Contact & Infos complémentaires",
-      "update": "Mettre à jour le tournoi",
-      "name_form": "Nom du Tournoi",
-      "subtitle_form": "Sous-titre de l'annonce"
+      "name_form": "Information du Tournoi",
+      "subtitle_form": "Détail du tournoi",
+      "update": "Mettre à jour le tournoi"
     },
     "alerts": {
-      "must_link": "Vous devez d'abord lier votre club via le numéro SIRET avant de créer un tournoi.",
-      "create_success": "Votre tournoi a été publié avec succès !",
-      "update_success": "Votre tournoi a été mis à jour avec succès !",
-      "delete_success": "Le tournoi a été supprimé avec succès !",
-      "date_past": "⚠️ DATE INVALIDE\n\nVous ne pouvez pas créer un tournoi dans le passé."
+      "create_success": "Tournoi créé avec succès !"
     }
   },
   "pricing": {
@@ -793,7 +816,8 @@
     "confirm_delete": "Voulez-vous vraiment supprimer cette annonce ?",
     "toasts": {
       "accept_success": "Demande acceptée",
-      "delete_success": "Annonce supprimée avec succès",
+      "delete_success": "Votre {{matchType}} a été supprimé avec succès",
+      "delete_success_desc": "L'annonce a été retirée avec succès",
       "all_read_success": "Toutes les modifications ont été validées"
     },
     "notifications": {
@@ -843,7 +867,7 @@
     },
     "alerts": {
       "title": "Modification détectée",
-      "message": "Le match contre {{team}} prévu le {{date}} a été modifié.",
+      "message": "Votre {{matchType}} contre {{team}} prévu le {{date}} a été modifié.",
       "success_discrete": "Action effectuée",
       "specific": {
         "date": "La date de votre {{matchType}} a été modifiée.",
@@ -883,7 +907,8 @@
     "statusBanned": "🚫 BANNI",
     "statusCertified": "Certifié",
     "statusAdmin": "Admin",
-    "statusSuperAdmin": "S. Admin",
+    "statusSuperAdmin": "Créateur du site",
+    "statusCreator": "Créateur du site",
     "btnViewProfile": "Voir le Profil",
     "modalBanTitle": "🚫 Bannir cet utilisateur",
     "modalBanDescription": "Cette action va <0>supprimer définitivement</0> tous les matchs et tournois créés par cet utilisateur.",
