@@ -8,8 +8,8 @@ export const UserSync = () => {
 
   useEffect(() => {
     if (isAuthenticated && user && user.sub && syncedRef.current !== user.sub) {
-      // Avoid double calls if user object reference changes but sub is same
-      syncedRef.current = user.sub;
+      const currentSub = user.sub;
+      syncedRef.current = currentSub;
 
       postJson(`${import.meta.env.API_BASE_URL}/api/users/sync`, user)
         .then(async (res: any) => {
@@ -18,20 +18,20 @@ export const UserSync = () => {
             await mutate("/api/me/context");
           } else {
             console.error("User sync returned error:", res.error);
-            syncedRef.current = null; // Re-autorise la synchro car elle a échoué côté serveur
+            // Don't reset immediately to avoid infinite loop on persistent errors
           }
         })
         .catch((err: any) => {
           console.error("User sync failed", err);
-          // Reset to allow retry? Or maybe use React Query logic later.
-          syncedRef.current = null;
+          // If we fail, we don't want to loop. We'll let the next mount or user change deal with it.
+          // Or we could implement a backoff. For now, just logging is safer.
         });
     } else if (!isAuthenticated) {
       // Clear PWA session dismissal on logout so it reappears next time
       localStorage.removeItem("kdufoot-pwa-session-dismiss");
       syncedRef.current = null;
     }
-  }, [isAuthenticated, user, postJson]);
+  }, [isAuthenticated, user?.sub, postJson]); // Only depend on sub, not the whole user object
 
   return null;
 };

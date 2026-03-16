@@ -183,10 +183,11 @@
     "calendar": {
       "title": "Don't miss any match!",
       "description": "Sync your matches directly with your calendar for smart reminders and real-time tracking.",
-      "button": "Sync my calendar",
+      "button": "Connect my calendar",
       "native": "Native Calendar",
-      "later": "Not now",
+      "later": "Maybe later",
       "dismiss": "I've already done it",
+      "never_ask": "Never ask again",
       "toast_success": "Calendar link opened!",
       "toast_success_desc": "Accept the subscription in your calendar app, then click 'I've already done it'.",
       "toast_error": "Calendar sync failed",
@@ -402,7 +403,8 @@
     "venue": {
       "Domicile": "🏠 Home (We host)",
       "Extérieur": "🚗 Away (We travel)",
-      "Neutre": "📍 Neutral ground / To be defined"
+      "Neutre": "📍 Neutral ground / To be defined",
+      "Peu importe": "Any"
     },
     "pitch": {
       "Herbe": "Grass",
@@ -499,7 +501,7 @@
       "warning_siret": "The SIRET number can only be entered once.",
       "warning_auto": "The address, zip code, and city will then be automatically filled.",
       "warning_final": "The club will be permanently associated with your account.",
-      "warning_support": "If you need to change your club later, contact support: support.kdufoot@gmail.com",
+      "warning_support": "If you need to change your club later, contact support: support@kdufoot.com",
       "warning_search": "Tip: Search for 'Your club name + SIRET' on the Internet to find it.",
       "search_help": "To find your number, type on Google: \"SIRET + [Your exact club name]\". Example: \"SIRET RC Lens\".",
       "validate": "Validate and Link the club",
@@ -839,6 +841,7 @@
     "statusCertified": "Certified",
     "statusAdmin": "Admin",
     "statusSuperAdmin": "S. Admin",
+    "statusCreator": "Site Creator",
     "btnViewProfile": "View Profile",
     "modalBanTitle": "🚫 Ban this User",
     "modalBanDescription": "This action will <0>permanently delete</0> all matches and tournaments created by this user.",

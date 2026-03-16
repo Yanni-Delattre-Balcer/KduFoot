@@ -124,10 +124,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
   );
 
   const user = data?.user || null;
-  const notifications = data?.notifications || {
-    pendingRequests: 0,
-    modifiedParticipations: 0,
-  };
+  const notifications = useMemo(
+    () =>
+      data?.notifications || {
+        pendingRequests: 0,
+        modifiedParticipations: 0,
+      },
+    [data?.notifications],
+  );
   const profileComplete = isProfileComplete(user);
 
   const [wsToken, setWsToken] = useState<string | null>(null);
@@ -152,12 +156,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
         (error && error.message?.includes("Permission refusée")) ||
         (error && error.message?.includes("401"))));
 
+  const handleBanStatusChange = useCallback((status: BanStatus) => {
+    setLocalBanOverride(status);
+  }, []);
+
   const { status: syncStatus } = useWebSocketSync(
     isAuthenticated,
     user?.auth0_sub,
-    (status: BanStatus) => {
-      setLocalBanOverride(status);
-    },
+    handleBanStatusChange,
     wsToken,
     isBlocked,
   );

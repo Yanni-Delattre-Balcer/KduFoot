@@ -183,24 +183,24 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
               </>
             )}
 
+            {/* Bouton "Pas maintenant" : fermeture pour la session actuelle */}
+            <Button
+              className="text-zinc-500 hover:text-white font-semibold text-[10px] tracking-wider mt-2"
+              size="sm"
+              variant="light"
+              onPress={() => onClose()}
+            >
+              {t("onboarding.calendar.later", "Peut-être plus tard")}
+            </Button>
+
             {/* Bouton "Ne plus me demander" : fermeture définitive pour cet appareil */}
             <Button
-              className="text-zinc-500 hover:text-zinc-300 font-semibold text-[10px] tracking-wider"
+              className="text-zinc-500/50 hover:text-zinc-400 font-medium text-[9px] tracking-widest leading-none mt-1"
               size="sm"
               variant="light"
               onPress={handleNeverAskAgain}
             >
               {t("onboarding.calendar.never_ask", "Ne plus me demander")}
-            </Button>
-
-            {/* Bouton "Pas maintenant" : fermeture pour la session actuelle */}
-            <Button
-              className="text-zinc-500 hover:text-red-400 font-semibold text-[9px] tracking-widest opacity-50 hover:opacity-100"
-              size="sm"
-              variant="light"
-              onPress={() => onClose()}
-            >
-              {t("onboarding.calendar.later", "Plus tard")}
             </Button>
           </div>
         </ModalFooter>

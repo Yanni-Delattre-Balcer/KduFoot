@@ -24,6 +24,8 @@ interface AccountSettingsProps {
   onSaveSuccess?: () => void;
 }
 
+const STORAGE_KEY = "kdufoot_pending_profile";
+
 export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const baseId = useId();
   const { t } = useTranslation();
@@ -118,16 +120,25 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   // Sync properties from dbUser when it loads
   useEffect(() => {
     if (dbUser && !isInitialized) {
-      setFirstname(dbUser.firstname || "");
-      setLastname(dbUser.lastname || "");
-      setLicenseId(dbUser.license_id || "");
-      setLevel(dbUser.level || "");
-      setCategory(dbUser.category || "");
-      setHomeJerseyColor(dbUser.home_jersey_color || "");
-      setAwayJerseyColor(dbUser.away_jersey_color || "");
-      setPhone(formatPhoneNumber(dbUser.phone || ""));
-      setSiret(formatSiret(dbUser.siret || ""));
-      setStadiumAddress(dbUser.stadium_address || "");
+      // Check for local storage data as fallback for missing/incomplete fields
+      let localData: any = {};
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) localData = JSON.parse(saved);
+      } catch (e) {
+        console.warn("Failed to parse local profile data", e);
+      }
+
+      setFirstname(localData.firstname || dbUser.firstname || "");
+      setLastname(localData.lastname || dbUser.lastname || "");
+      setLicenseId(localData.licenseId || dbUser.license_id || "");
+      setLevel(localData.level || dbUser.level || "");
+      setCategory(localData.category || dbUser.category || "");
+      setHomeJerseyColor(localData.homeJerseyColor || dbUser.home_jersey_color || "");
+      setAwayJerseyColor(localData.awayJerseyColor || dbUser.away_jersey_color || "");
+      setPhone(formatPhoneNumber(localData.phone || dbUser.phone || ""));
+      setSiret(formatSiret(localData.siret || dbUser.siret || ""));
+      setStadiumAddress(localData.stadiumAddress || dbUser.stadium_address || "");
 
       // Initialize additional stadium addresses
       const addAddr: Record<string, string> = {};
@@ -143,6 +154,38 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       setIsInitialized(true);
     }
   }, [dbUser, isInitialized]);
+
+  // Auto-save to localStorage
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const profileData = {
+      firstname,
+      lastname,
+      licenseId,
+      level,
+      category,
+      homeJerseyColor,
+      awayJerseyColor,
+      phone,
+      siret,
+      stadiumAddress,
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(profileData));
+  }, [
+    isInitialized,
+    firstname,
+    lastname,
+    licenseId,
+    level,
+    category,
+    homeJerseyColor,
+    awayJerseyColor,
+    phone,
+    siret,
+    stadiumAddress,
+  ]);
 
   if (!authUser) return null;
 
@@ -167,20 +210,25 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         console.warn(t("account.avatar.no_face"));
       }
 
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // We wrap FileReader in a promise to ensure finally runs AFTER everything is done
+      await new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewUrl(reader.result as string);
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
     } catch (error) {
       console.error("Face detection error:", error);
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file!);
+      await new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewUrl(reader.result as string);
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -278,6 +326,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         }),
         picture: previewUrl || dbUser?.picture || authUser.picture,
       });
+
+      // Clear local storage after successful save
+      localStorage.removeItem(STORAGE_KEY);
 
       // Refresh data immediately
       await refetch();
@@ -391,6 +442,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     setIsSaving(true);
     try {
       await linkClub(cleanSiret);
+      // Clear local storage if we linked a club (this is part of the crucial onboarding data)
+      localStorage.removeItem(STORAGE_KEY);
       await getAccessToken({ cacheMode: "off" } as any);
       await refetch();
       await mutate("/api/me/context");
@@ -835,6 +888,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                             if (
                               confirm("Détacher le club ? (Admin uniquement)")
                             ) {
+                              setIsSaving(true);
                               try {
                                 await unlinkClub();
                                 addToast({
@@ -843,6 +897,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                 });
                               } catch (e: any) {
                                 addToast({ title: e.message, color: "danger" });
+                              } finally {
+                                setIsSaving(false);
                               }
                             }
                           }}

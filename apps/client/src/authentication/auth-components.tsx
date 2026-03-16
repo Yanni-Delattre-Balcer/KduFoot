@@ -25,6 +25,22 @@ import {
 import { useUser } from "./providers/user-provider";
 import { AccountModal } from "./account-modal";
 
+// Cache for Auth0 Management API calls (5 minutes TTL)
+const AUTH0_CACHE_TTL = 300000;
+const mgmtCache: Record<string, { data: any; timestamp: number }> = {};
+
+const getFromCache = (key: string) => {
+  const cached = mgmtCache[key];
+  if (cached && Date.now() - cached.timestamp < AUTH0_CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
+};
+
+const setToCache = (key: string, data: any) => {
+  mgmtCache[key] = { data, timestamp: Date.now() };
+};
+
 /**
  * Renders the user's profile name with a tooltip showing their username.
  * @returns The user's name with a tooltip showing their username
@@ -441,6 +457,10 @@ export const useSecuredApi = () => {
    * @param mgmtToken Token Auth0 Management API obtenu via getAuth0ManagementToken()
    */
   const listAuth0Users = async (mgmtToken: string): Promise<Auth0User[]> => {
+    const cacheKey = "users_list";
+    const cached = getFromCache(cacheKey);
+    if (cached) return cached;
+
     const resp = await fetch(
       `https://${auth0Domain}/api/v2/users?per_page=100&include_totals=false`,
       {
@@ -463,7 +483,9 @@ export const useSecuredApi = () => {
       throw new Error("Invalid response format from Auth0: Expected JSON");
     }
 
-    return resp.json();
+    const data = await resp.json();
+    setToCache(cacheKey, data);
+    return data;
   };
 
   /**
@@ -616,6 +638,32 @@ export const useSecuredApi = () => {
   };
 
   /**
+   * Update an Auth0 user's app_metadata
+   * @param mgmtToken Token Auth0 Management API
+   * @param userId Auth0 user ID
+   * @param metadata The app_metadata object to merge/update
+   */
+  const updateUserAppMetadata = async (
+    mgmtToken: string,
+    userId: string,
+    metadata: any,
+  ): Promise<void> => {
+    const encodedId = encodeURIComponent(userId);
+    const resp = await fetch(`https://${auth0Domain}/api/v2/users/${encodedId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${mgmtToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        app_metadata: metadata,
+      }),
+    });
+
+    if (!resp.ok) throw new Error(await resp.text());
+  };
+
+  /**
    * Remove a permission from an Auth0 user
    * @param mgmtToken Token Auth0 Management API
    * @param userId Auth0 user ID (ex: auth0|xxx)
@@ -713,6 +761,10 @@ export const useSecuredApi = () => {
    * @param mgmtToken Token Auth0 Management API
    */
   const getResourceServers = async (mgmtToken: string): Promise<any[]> => {
+    const cacheKey = "resource_servers";
+    const cached = getFromCache(cacheKey);
+    if (cached) return cached;
+
     const resp = await fetch(`https://${auth0Domain}/api/v2/resource-servers`, {
       headers: {
         Authorization: `Bearer ${mgmtToken}`,
@@ -722,7 +774,9 @@ export const useSecuredApi = () => {
 
     if (!resp.ok) throw new Error(await resp.text());
 
-    return resp.json();
+    const data = await resp.json();
+    setToCache(cacheKey, data);
+    return data;
   };
 
   /**
@@ -764,6 +818,10 @@ export const useSecuredApi = () => {
     mgmtToken: string,
     id: string,
   ): Promise<{ value: string; description: string }[]> => {
+    const cacheKey = `resource_server_scopes_${id}`;
+    const cached = getFromCache(cacheKey);
+    if (cached) return cached;
+
     const encodedId = encodeURIComponent(id);
     const resp = await fetch(
       `https://${auth0Domain}/api/v2/resource-servers/${encodedId}`,
@@ -777,8 +835,10 @@ export const useSecuredApi = () => {
 
     if (!resp.ok) throw new Error(await resp.text());
     const data = await resp.json();
+    const scopes = data.scopes ?? [];
 
-    return data.scopes ?? [];
+    setToCache(cacheKey, scopes);
+    return scopes;
   };
 
   /**
@@ -867,31 +927,69 @@ export const useSecuredApi = () => {
     return checkResourceServerScopes(mgmtToken, server.id, targetScopes);
   };
 
-  return {
-    getJson,
-    postJson,
-    deleteJson,
-    hasPermission,
-    putJson,
-    // Auth0 Management API
-    getAuth0ManagementToken,
-    listAuth0Users,
-    getUserPermissions,
-    addPermissionToUser,
-    addPermissionsToUser,
-    removePermissionFromUser,
-    removePermissionsFromUser,
-    deleteAuth0User,
-    getResourceServers,
-    updateResourceServerScopes,
-    getResourceServerScopes,
-    getResourcesServerScopesWithAudience,
-    updateResourceServerScopesWithAudience,
-    getD1BlockedUsers,
-    checkResourceServerScopes,
-    checkResourceServerScopesWithAudience,
+    /**
+     * Fetches metadata for all D1 users (blocked status, club names, etc.)
+     */
+    const getD1UserMetadata = async (
+      skipCache: boolean = false,
+    ): Promise<
+      {
+        auth0_sub: string;
+        is_blocked: boolean;
+        block_reason: string | null;
+        siret: string | null;
+        club_name: string | null;
+      }[]
+    > => {
+      const apiBase =
+        typeof import.meta !== "undefined" &&
+        (import.meta as any).env?.API_BASE_URL
+          ? (import.meta as any).env.API_BASE_URL
+          : "";
+
+      try {
+        const url = skipCache
+          ? `${apiBase}/api/admin/users/metadata?t=${Date.now()}`
+          : `${apiBase}/api/admin/users/metadata`;
+        const data = await getJson(url);
+
+        if (data && data.success && Array.isArray(data.metadata)) {
+          return data.metadata;
+        }
+
+        return [];
+      } catch {
+        return [];
+      }
+    };
+
+    return {
+      getJson,
+      postJson,
+      deleteJson,
+      hasPermission,
+      putJson,
+      // Auth0 Management API
+      getAuth0ManagementToken,
+      listAuth0Users,
+      getUserPermissions,
+      addPermissionToUser,
+      addPermissionsToUser,
+      removePermissionFromUser,
+      removePermissionsFromUser,
+      deleteAuth0User,
+      getResourceServers,
+      updateResourceServerScopes,
+      getResourceServerScopes,
+      getResourcesServerScopesWithAudience,
+      updateResourceServerScopesWithAudience,
+      getD1BlockedUsers,
+      getD1UserMetadata,
+      checkResourceServerScopes,
+      checkResourceServerScopesWithAudience,
+      updateUserAppMetadata,
+    };
   };
-};
 
 /**
  * Composant de bannissement (Nuclear Guard)

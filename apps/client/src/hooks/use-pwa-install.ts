@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -55,6 +55,9 @@ export function usePWAInstall() {
     }
 
     const handler = (e: Event) => {
+      // Avoid redundant updates if we already have the same prompt
+      if ((window as any).deferredPWAInstallPrompt === e) return;
+      
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       (window as any).deferredPWAInstallPrompt = e;
@@ -106,7 +109,7 @@ export function usePWAInstall() {
     window.dispatchEvent(new CustomEvent("kdufoot_pwa_step_complete"));
   };
 
-  return {
+  return useMemo(() => ({
     deferredPrompt,
     isStandalone,
     isIOS,
@@ -119,5 +122,11 @@ export function usePWAInstall() {
       !isPermanentlyDismissed &&
       !isSessionDismissed &&
       !isStandalone,
-  };
+  }), [
+    deferredPrompt,
+    isStandalone,
+    isIOS,
+    isPermanentlyDismissed,
+    isSessionDismissed,
+  ]);
 }

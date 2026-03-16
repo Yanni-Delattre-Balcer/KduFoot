@@ -194,10 +194,11 @@
     "calendar": {
       "title": "Synchroniser mon calendrier",
       "description": "Synchronisez vos rencontres directement avec votre calendrier pour des rappels intelligents et un suivi en temps réel.",
-      "button": "Synchroniser mon calendrier",
+      "button": "Connecter mon calendrier",
       "native": "Calendrier Natif",
-      "later": "Pas maintenant",
+      "later": "Peut-être plus tard",
       "dismiss": "Je l'ai déjà fait",
+      "never_ask": "Ne plus me demander",
       "toast_success": "Lien calendrier ouvert !",
       "toast_success_desc": "Acceptez l'abonnement dans votre application calendrier, puis cliquez sur « Je l'ai déjà fait ».",
       "toast_error": "Échec de la synchronisation calendrier",
@@ -423,7 +424,8 @@
     "venue": {
       "Domicile": "Nous recevons (Domicile)",
       "Extérieur": "Nous nous déplaçons (Extérieur)",
-      "Neutre": "Terrain neutre / À définir"
+      "Neutre": "Terrain neutre / À définir",
+      "Peu importe": "Peu importe"
     },
     "pitch": {
       "Herbe": "Herbe",
@@ -526,7 +528,7 @@
       "warning_siret": "Le numéro SIRET ne peut être renseigné qu'une seule fois.",
       "warning_auto": "L'adresse, le code postal et la ville seront alors automatiquement remplis.",
       "warning_final": "Le club sera définitivement associé à votre compte.",
-      "warning_support": "Si vous devez changer de club par la suite, contactez le support : support.kdufoot@gmail.com",
+      "warning_support": "Si vous devez changer de club par la suite, contactez le support : support@kdufoot.com",
       "warning_search": "Astuce : Cherchez 'Nom de votre club + SIRET' sur Internet pour le trouver.",
       "search_help": "Pour trouver votre numéro, tapez sur Google : \"SIRET + [Nom exact de votre club]\". Exemple : \"SIRET RC Lens\".",
       "validate": "Valider et Lier le club",
@@ -905,7 +907,8 @@
     "statusBanned": "🚫 BANNI",
     "statusCertified": "Certifié",
     "statusAdmin": "Admin",
-    "statusSuperAdmin": "S. Admin",
+    "statusSuperAdmin": "Créateur du site",
+    "statusCreator": "Créateur du site",
     "btnViewProfile": "Voir le Profil",
     "modalBanTitle": "🚫 Bannir cet utilisateur",
     "modalBanDescription": "Cette action va <0>supprimer définitivement</0> tous les matchs et tournois créés par cet utilisateur.",

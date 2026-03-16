@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
-import { ChevronRight, X, Calendar } from "lucide-react";
+import { X, Calendar } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useLocation } from "react-router-dom";
 import { addToast } from "@heroui/toast";
@@ -181,74 +181,53 @@ export const CalendarSyncBanner: React.FC = () => {
             : t("onboarding.calendar.description")}
         </p>
 
-        <div className="flex flex-col gap-2.5 mt-2">
-          {isAndroid ? (
-            <>
-              <Button
-                className="w-full font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
-                color="secondary"
-                isLoading={isSyncing}
-                onPress={() => handleCalendarSync("google")}
-              >
-                {t("onboarding.calendar.add_google")}
-              </Button>
-              <div className="flex gap-2">
-                <Button
-                  className="flex-1 font-bold text-xs h-10 bg-white/10 hover:bg-white/20 text-white"
-                  variant="flat"
-                  isLoading={isSyncing}
-                  onPress={() => handleCalendarSync("default")}
-                >
-                  Lancer l'app
-                </Button>
-                <Button
-                  className="flex-1 font-bold text-xs h-10 bg-white/10 hover:bg-white/20 text-white"
-                  variant="flat"
-                  isLoading={isSyncing}
-                  onPress={() => handleCalendarSync("copy")}
-                >
-                  {t("onboarding.calendar.copy_link")}
-                </Button>
-              </div>
-              <p className="text-[9px] text-white/40 italic text-center px-2">
-                {t("onboarding.calendar.manual_notice")}
-              </p>
-            </>
-          ) : (
+        <div className="flex flex-col gap-3 mt-2">
+          <div className="flex gap-2.5">
             <Button
-              className="w-full font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
+              className="flex-[2] font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
               color="secondary"
-              endContent={
-                !isSyncing && (
-                  <ChevronRight
-                    className="group-hover:translate-x-0.5 transition-transform"
-                    size={18}
-                  />
-                )
-              }
               isLoading={isSyncing}
-              onPress={() => handleCalendarSync("default")}
+              onPress={() => handleCalendarSync(isAndroid ? "google" : "default")}
             >
-              {t("onboarding.calendar.button")}
-            </Button>
-          )}
-
-          <div className="flex gap-2">
-            <Button
-              className="flex-1 font-bold text-xs h-9 bg-white/5 hover:bg-white/10 text-white/70"
-              variant="flat"
-              onPress={handleDismiss}
-            >
-              {t("onboarding.calendar.later")}
+              {isAndroid ? t("onboarding.calendar.add_google") : t("onboarding.calendar.button")}
             </Button>
             <Button
-              className="flex-1 font-bold text-xs h-9 text-white/40 hover:text-white/60"
-              variant="light"
+              className="flex-1 font-bold text-xs h-12 border-white/10 text-white/40 hover:text-white/60"
+              variant="bordered"
               onPress={handleNever}
             >
-              {isAndroid ? "Plus tard" : t("onboarding.calendar.dismiss")}
+              {t("onboarding.calendar.dismiss")}
             </Button>
           </div>
+
+          <Button
+            className="w-full font-bold text-xs h-9 bg-white/5 hover:bg-white/10 text-white/60"
+            variant="flat"
+            onPress={handleDismiss}
+          >
+            {t("onboarding.calendar.later")}
+          </Button>
+          
+          {isAndroid && (
+             <div className="flex gap-2">
+               <Button
+                 className="flex-1 font-bold text-[10px] h-8 bg-white/5 text-white/40"
+                 variant="flat"
+                 size="sm"
+                 onPress={() => handleCalendarSync("default")}
+               >
+                 App Directe
+               </Button>
+               <Button
+                 className="flex-1 font-bold text-[10px] h-8 bg-white/5 text-white/40"
+                 variant="flat"
+                 size="sm"
+                 onPress={() => handleCalendarSync("copy")}
+               >
+                 {t("onboarding.calendar.copy_link")}
+               </Button>
+             </div>
+          )}
         </div>
       </CardBody>
     </Card>

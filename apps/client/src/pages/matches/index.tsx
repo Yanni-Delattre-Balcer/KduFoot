@@ -33,7 +33,7 @@ const PITCH_TYPES: PitchType[] = [
   "Stabilisé",
   "Toutes surfaces",
 ];
-const VENUES: Venue[] = ["Domicile", "Extérieur"];
+const VENUES: Venue[] = ["Peu importe", "Domicile", "Extérieur"];
 
 import MatchForm from "@/components/matches/match-form";
 import TournamentForm from "@/components/matches/tournament-form";
@@ -130,7 +130,9 @@ export default function MatchesPage() {
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [filters, setFilters] = useState<MatchFilters>({});
+  const [filters, setFilters] = useState<MatchFilters>({
+    venue: "Peu importe",
+  });
   const [radiusKm, setRadiusKm] = useState<number>(0); // 0 = pas de filtre distance
 
   // Build filters with user coordinates when radius is active
@@ -277,7 +279,9 @@ export default function MatchesPage() {
   };
 
   const clearFilters = () => {
-    setFilters({});
+    setFilters({
+      venue: "Peu importe",
+    });
     setRadiusKm(0);
   };
 
@@ -510,6 +514,7 @@ export default function MatchesPage() {
                   {type === "match"
                     ? t("match.find")
                     : t("match.find_tournament")}
+                  {isMasked && " 🔒"}
                 </Button>
                 <Button
                   className={`w-full sm:w-auto sm:flex-none font-bold px-6 h-12 rounded-xl transition-all ${view === "create" ? (type === "match" ? "bg-linear-to-r from-violet-800 via-violet-700 to-violet-600 text-white shadow-lg shadow-violet-800/40" : "bg-purple-300 text-purple-950 shadow-lg shadow-purple-300/40") : "text-default-500 hover:bg-default-200 border border-white/10"}`}

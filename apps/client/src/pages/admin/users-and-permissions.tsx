@@ -42,6 +42,7 @@ import { useUser } from "@/hooks/use-user";
 import { Permission } from "@/types/permissions";
 
 const SUPER_ADMIN_EMAIL = "yannidelattrebalcer.artois@gmail.com";
+const SUPREME_MASTER_ID = "6f62d717-2136-49d7-8c51-fee07eaeebce";
 
 // ─── Permissions KduFoot à gérer dans l'interface (Généré dynamiquement) ─────
 const getKdufootPermissions = (t: any) => {
@@ -100,13 +101,14 @@ export default function UsersAndPermissionsPage() {
   const {
     getAuth0ManagementToken,
     listAuth0Users,
+    getD1UserMetadata,
     getUserPermissions,
     addPermissionsToUser,
     removePermissionsFromUser,
     deleteAuth0User,
     checkResourceServerScopesWithAudience,
     updateResourceServerScopesWithAudience,
-    getD1BlockedUsers,
+    updateUserAppMetadata,
   } = useSecuredApi();
 
   const [mgmtToken, setMgmtToken] = useState<string | null>(null);
@@ -152,6 +154,8 @@ export default function UsersAndPermissionsPage() {
 
   // Race condition protection for loadUsers
   const lastRequestTimestamp = useRef<number>(0);
+  const isSyncChecked = useRef<boolean>(false);
+  const lastLoadUsersCall = useRef<number>(0);
 
   const formatSiret = (value: string) => {
     let raw = value.replace(/\D/g, "");
@@ -173,6 +177,8 @@ export default function UsersAndPermissionsPage() {
    * Helper to verify if Auth0 Resource Server scopes are synchronized with the local Permission enum.
    */
   const checkSyncStatus = async (token: string) => {
+    if (isSyncChecked.current) return;
+    isSyncChecked.current = true;
     try {
       const audience = import.meta.env.AUTH0_AUDIENCE;
       const targetScopes = Object.values(Permission).map((val) => {
@@ -197,16 +203,23 @@ export default function UsersAndPermissionsPage() {
   };
 
   const loadUsers = async (token: string, silent: boolean = false) => {
+    // Throttle calls: maximum one call every 2 seconds
+    const now = Date.now();
+    if (now - lastLoadUsersCall.current < 2000) {
+      console.log("[Admin] loadUsers throttled (call too frequent)");
+      return;
+    }
+    lastLoadUsersCall.current = now;
+
     if (!silent) setLoadingUsers(true);
     const requestTimestamp = Date.now();
 
     lastRequestTimestamp.current = requestTimestamp;
-
     try {
-      const [u, blockedIds] = await Promise.all([
+      const [u, userMetadata] = await Promise.all([
         listAuth0Users(token),
         // Add a cache-buster to ensure we get fresh data from D1
-        getD1BlockedUsers(true),
+        getD1UserMetadata(true),
       ]);
 
       // If a newer request has started, ignore this one
@@ -216,49 +229,35 @@ export default function UsersAndPermissionsPage() {
 
       // Merge the D1 blocked status and Auth0 data
       const mergedUsers = (u ?? []).map((user) => {
-        const blockData = blockedIds.find((b) => b.auth0_sub === user.user_id);
+        const metadata = userMetadata.find((m) => m.auth0_sub === user.user_id);
+        const isBlockedInD1 = metadata?.is_blocked === true;
 
-        // FORCE consistency: D1 (blockedIds) is our immediate Source of Truth.
-        // Auth0 metadata is eventually consistent and can be stale for a few seconds.
-        if (blockData) {
-          const currentPerms = user.app_metadata?.permissions || [];
-          const hasBlockedPerm = currentPerms.includes(Permission.ROLE_BLOCKED);
+        const currentPerms = user.app_metadata?.permissions || [];
+        const hasBlockedPerm = currentPerms.includes(Permission.ROLE_BLOCKED);
 
-          // Log if we find a mismatch
-          if (!hasBlockedPerm) {
-          }
+        const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL || user.user_id === SUPREME_MASTER_ID;
+        let updatedPerms = currentPerms;
 
-          return {
-            ...user,
-            blocked: true,
-            block_reason: blockData.block_reason,
-            app_metadata: {
-              ...user.app_metadata,
-              permissions: hasBlockedPerm
-                ? currentPerms
-                : [...currentPerms, Permission.ROLE_BLOCKED],
-            },
-          };
-        } else {
-          // Not in D1 = Not blocked. Filter out any stale Auth0 block permissions.
-          const currentPerms = user.app_metadata?.permissions || [];
-          const hasStalePerm = currentPerms.includes(Permission.ROLE_BLOCKED);
-
-          if (hasStalePerm) {
-          }
-
-          return {
-            ...user,
-            blocked: false,
-            block_reason: null,
-            app_metadata: {
-              ...user.app_metadata,
-              permissions: currentPerms.filter(
-                (p) => p !== Permission.ROLE_BLOCKED,
-              ),
-            },
-          };
+        if (isSuperAdmin) {
+          // Injection de toutes les permissions pour le Super Admin dans l'UI
+          // On exclut explicitement ROLE_BLOCKED sinon il apparaît barré en rouge !
+          updatedPerms = Object.values(Permission).filter(p => p !== Permission.ROLE_BLOCKED);
+        } else if (isBlockedInD1 && !hasBlockedPerm) {
+          updatedPerms = [...currentPerms, Permission.ROLE_BLOCKED];
+        } else if (!isBlockedInD1 && hasBlockedPerm) {
+          updatedPerms = currentPerms.filter((p) => p !== Permission.ROLE_BLOCKED);
         }
+
+        return {
+          ...user,
+          blocked: isSuperAdmin ? false : isBlockedInD1,
+          block_reason: isSuperAdmin ? null : (metadata?.block_reason || null),
+          club_name: metadata?.club_name || null,
+          app_metadata: {
+            ...user.app_metadata,
+            permissions: updatedPerms,
+          },
+        };
       });
 
       setUsers(mergedUsers);
@@ -342,10 +341,18 @@ export default function UsersAndPermissionsPage() {
         permState[perm.key] = permNames.includes(perm.value);
       }
 
-      // Force role_blocked based on our D1 truth instead of Auth0
-      const userInList = users.find((u) => u.user_id === userId);
+      const targetUserForEditing = users.find((u) => u.user_id === userId);
 
-      permState["role_blocked"] = !!userInList?.blocked;
+      // Injection de toutes les permissions pour le Super Admin dans le modal d'édition
+      if (targetUserForEditing?.email === SUPER_ADMIN_EMAIL) {
+        Object.values(Permission).forEach(p => {
+          if (p === Permission.ROLE_BLOCKED) return;
+          const key = (p as string).replace(/:/g, "_");
+          permState[key] = true;
+        });
+      } else {
+        permState["role_blocked"] = !!targetUserForEditing?.blocked;
+      }
 
       setEditing((prev) => ({ ...prev, [userId]: permState }));
     } catch (err) {
@@ -550,6 +557,21 @@ export default function UsersAndPermissionsPage() {
       if (toRemove.length > 0) {
         await removePermissionsFromUser(mgmtToken, userId, toRemove);
       }
+
+      // ─── CRITICAL: Sync with app_metadata ──────────────────────────
+      // The UI (listAuth0Users) reads permissions from app_metadata.
+      // We MUST keep them in sync so changes "stick" in the UI.
+      const finalPerms = Object.entries(edits)
+        .filter(([key, active]) => active && key !== "role_blocked")
+        .map(([key]) => {
+          const p = KDUFOOT_PERMISSIONS.find((k) => k.key === key);
+          return p ? p.value : null;
+        })
+        .filter(Boolean) as string[];
+
+      await updateUserAppMetadata(mgmtToken, userId, {
+        permissions: finalPerms,
+      });
 
       addToast({
         title: t("success"),
@@ -1033,10 +1055,20 @@ export default function UsersAndPermissionsPage() {
   };
 
   // ─── Filtrage des utilisateurs par rôle ──────────────────────────────────
-  const getIsAdmin = (u: Auth0User) =>
-    u.app_metadata?.permissions?.includes("auth0:admin:api") ||
-    u.app_metadata?.permissions?.includes("auth0:superadmin") ||
-    u.email === SUPER_ADMIN_EMAIL;
+  const getIsAdmin = (u: Auth0User) => {
+    const perms = u.app_metadata?.permissions || [];
+    const isMasterOrSuper =
+      u.user_id === SUPREME_MASTER_ID || u.email === SUPER_ADMIN_EMAIL;
+
+    return (
+      isMasterOrSuper ||
+      perms.includes("auth0:admin:api") ||
+      perms.includes("auth0:superadmin") ||
+      perms.some(
+        (p: string) => p.startsWith("admin:") || p.startsWith("auth0:"),
+      )
+    );
+  };
 
   const filteredUsers = users.filter((u) => {
     const hasBlockedRole =
@@ -1163,24 +1195,26 @@ export default function UsersAndPermissionsPage() {
                   u.app_metadata?.permissions?.includes(
                     Permission.ROLE_BLOCKED,
                   ) || u.blocked;
-                const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL;
+                const isSupremeMaster = u.user_id === SUPREME_MASTER_ID;
+                const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL || isSupremeMaster;
 
                 return (
                   <Card
                     key={u.user_id}
                     className={`bg-zinc-900 border border-white/10 p-4 ${isUserBlocked ? "border-l-4 border-l-red-600 bg-red-950/20" : ""}`}
                   >
-                    <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex flex-col gap-3 mb-4">
+                      {/* Ligne 1: Avatar + Nom/Email */}
                       <div className="flex items-center gap-3">
                         {u.picture && (
                           <img
                             src={u.picture}
                             alt={u.name}
                             referrerPolicy="no-referrer"
-                            className={`w-12 h-12 rounded-full border-2 border-white/5 ${isUserBlocked ? "opacity-40 grayscale" : ""}`}
+                            className={`w-12 h-12 rounded-full border-2 border-white/5 shrink-0 ${isUserBlocked ? "opacity-40 grayscale" : ""}`}
                           />
                         )}
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p
                             className={`font-black text-base truncate ${isUserBlocked ? "text-red-400 line-through" : "text-white"}`}
                           >
@@ -1191,15 +1225,31 @@ export default function UsersAndPermissionsPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
+
+                      {/* Ligne 2: Étiquettes (Chips) - Responsive Wrap */}
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
                         {isSuperAdmin && (
                           <Chip
                             size="sm"
-                            color="warning"
+                            color="success"
                             variant="solid"
-                            className="h-5 text-[10px] font-bold"
+                            className="h-5 text-[10px] sm:text-xs font-bold px-2"
+                            title={t("adminUsersPage.statusCreator")}
                           >
-                            Base Admin
+                            <span className="hidden sm:inline">
+                              Créateur du site
+                            </span>
+                            <span className="inline sm:hidden">Créateur</span>
+                          </Chip>
+                        )}
+                        {!isSuperAdmin && getIsAdmin(u) && (
+                          <Chip
+                            size="sm"
+                            color="primary"
+                            variant="solid"
+                            className="h-5 text-[10px] sm:text-xs font-bold px-2"
+                          >
+                            Admin
                           </Chip>
                         )}
                         {isUserBlocked && (
@@ -1210,6 +1260,17 @@ export default function UsersAndPermissionsPage() {
                             className="h-5 text-[10px] font-black"
                           >
                             🚫 Banni
+                          </Chip>
+                        )}
+                        {u.club_name && !isSuperAdmin && (
+                          <Chip
+                            size="sm"
+                            color="success"
+                            variant="flat"
+                            className="h-5 text-[10px] font-bold max-w-full truncate"
+                            title={u.club_name}
+                          >
+                            🏠 {u.club_name}
                           </Chip>
                         )}
                         {!isUserBlocked && !isSuperAdmin && (
@@ -1257,6 +1318,7 @@ export default function UsersAndPermissionsPage() {
               <TableHeader>
                 <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
                 <TableColumn>{t("adminUsersPage.colEmail")}</TableColumn>
+                <TableColumn>Club</TableColumn>
                 <TableColumn>{t("adminUsersPage.colRole")}</TableColumn>
                 <TableColumn>{t("adminUsersPage.colSubscription")}</TableColumn>
                 <TableColumn>{t("adminUsersPage.colLogins")}</TableColumn>
@@ -1264,11 +1326,12 @@ export default function UsersAndPermissionsPage() {
               </TableHeader>
               <TableBody emptyContent={t("adminUsersPage.emptyUsers")}>
                 {filteredUsers.map((u) => {
+                  const isSupremeMaster = u.user_id === SUPREME_MASTER_ID;
                   const isUserBlocked =
                     u.app_metadata?.permissions?.includes(
                       Permission.ROLE_BLOCKED,
                     ) || u.blocked;
-                  const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL;
+                  const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL || isSupremeMaster;
 
                   return (
                     <TableRow
@@ -1314,30 +1377,46 @@ export default function UsersAndPermissionsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
+                        {u.club_name && !isSupremeMaster ? (
+                          <Chip
+                            size="sm"
+                            color="success"
+                            variant="flat"
+                            className="h-5 text-[10px] sm:text-xs font-bold max-w-[100px] lg:max-w-[200px] truncate"
+                            title={u.club_name}
+                          >
+                            🏠 {u.club_name}
+                          </Chip>
+                        ) : u.club_name && isSupremeMaster ? null : (
+                          <span className="text-[10px] text-default-400 italic">
+                            Non lié
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {isSuperAdmin && (
                             <Chip
                               size="sm"
-                              color="warning"
+                              color="success"
+                              variant="solid"
+                              className="h-5 text-xs font-bold px-2"
+                              title={t("adminUsersPage.statusCreator")}
+                            >
+                              <span className="hidden lg:inline">Créateur du site</span>
+                              <span className="inline lg:hidden">Créateur</span>
+                            </Chip>
+                          )}
+                          {!isSuperAdmin && getIsAdmin(u) && (
+                            <Chip
+                              size="sm"
+                              color="primary"
                               variant="solid"
                               className="h-5 text-xs sm:text-sm font-bold"
                             >
-                              {t("adminUsersPage.statusSuperAdmin")}
+                              {t("adminUsersPage.statusAdmin")}
                             </Chip>
                           )}
-                          {u.app_metadata?.permissions?.includes(
-                            "auth0:admin:api",
-                          ) &&
-                            !isSuperAdmin && (
-                              <Chip
-                                size="sm"
-                                color="primary"
-                                variant="solid"
-                                className="h-5 text-xs sm:text-sm font-bold"
-                              >
-                                {t("adminUsersPage.statusAdmin")}
-                              </Chip>
-                            )}
                           {isUserBlocked && (
                             <Chip
                               size="sm"
@@ -1395,7 +1474,7 @@ export default function UsersAndPermissionsPage() {
                             onPress={() => openUserEditing(u.user_id)}
                             isDisabled={
                               !mgmtToken ||
-                              (isSuperAdmin && u.user_id !== currentUserId)
+                              (isSuperAdmin && u.user_id !== currentUserId && currentUserId !== SUPREME_MASTER_ID)
                             }
                             className="font-bold px-6"
                           >
@@ -1442,17 +1521,19 @@ export default function UsersAndPermissionsPage() {
                   <ModalHeader className="flex flex-col md:flex-row items-center gap-4 bg-zinc-900 border-b border-white/10 p-4 sm:p-6">
                     <h2 className="text-xl font-bold flex items-center gap-2">
                       {t("adminUsersPage.modalTitlePrefix")}{" "}
-                      <span className="text-primary text-2xl ml-1">
+                      <span className="text-primary text-2xl ml-1 truncate max-w-[200px] sm:max-w-none">
                         {targetUser?.name ?? selectedUserId}
                       </span>
-                      {targetUser?.email === SUPER_ADMIN_EMAIL && (
+                      {(targetUser?.email === SUPER_ADMIN_EMAIL || targetUser?.user_id === SUPREME_MASTER_ID) && (
                         <Chip
                           size="sm"
                           color="warning"
                           variant="solid"
-                          className="ml-2 h-5 text-xs sm:text-sm font-bold"
+                          className="ml-2 h-5 text-xs font-bold"
                         >
-                          {t("adminUsersPage.modalProtected")}
+                          {targetUser?.user_id === SUPREME_MASTER_ID 
+                            ? t("adminUsersPage.statusCreator") 
+                            : t("adminUsersPage.modalProtected")}
                         </Chip>
                       )}
                     </h2>

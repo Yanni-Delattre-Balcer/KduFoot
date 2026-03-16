@@ -82,7 +82,7 @@ export default function DefaultLayout({
                 <Button
                   as="a"
                   className="w-full font-bold h-12 bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/20 text-blue-400 hover:border-blue-500/40 hover:bg-blue-600/20 transition-all shadow-[0_0_20px_rgba(59,130,246,0.1)] rounded-xl"
-                  href={`mailto:support.kdufoot@gmail.com?subject=${t("support.technical_issue_subject")}`}
+                  href={`mailto:support@kdufoot.com?subject=${t("support.technical_issue_subject")}`}
                   startContent={<Mail size={18} strokeWidth={2.5} />}
                 >
                   {t("support.technical_issue")}
@@ -96,7 +96,7 @@ export default function DefaultLayout({
                 <Button
                   as="a"
                   className="w-full font-bold h-12 bg-default-100/50 border border-default-200/50 text-default-600 hover:bg-default-200/50 hover:text-default-700 transition-all rounded-xl"
-                  href={`mailto:support.kdufoot@gmail.com?subject=${t("support.other_inquiry_subject")}`}
+                  href={`mailto:support@kdufoot.com?subject=${t("support.other_inquiry_subject")}`}
                   startContent={<Handshake size={20} />}
                 >
                   {t("support.other_inquiry")}

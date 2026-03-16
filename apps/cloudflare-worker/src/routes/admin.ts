@@ -3,11 +3,13 @@ import { Router } from './router';
 import { Env } from '../types/env';
 import { UserService } from '../services/user.service';
 import { MatchService } from '../services/match.service';
+import { checkPermissions } from '../auth0';
 import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
 import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast';
 
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
+const SUPREME_MASTER_ID = '6f62d717-2136-49d7-8c51-fee07eaeebce';
 
 export const setupAdminRoutes = (router: Router, env: Env) => {
     const userService = new UserService(env.DB);
@@ -38,8 +40,25 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
     };
 
     const checkAdmin = async (request: Request): Promise<boolean> => {
-        const email = await getCallerEmail(request);
-        return email === SUPER_ADMIN_EMAIL;
+        const [email, d1Id] = await Promise.all([
+            getCallerEmail(request),
+            getCallerD1Id(request)
+        ]);
+        
+        if (email === SUPER_ADMIN_EMAIL || d1Id === SUPREME_MASTER_ID) {
+            return true;
+        }
+
+        // Allow any user with the Auth0 Admin API permission
+        try {
+            const authHeader = request.headers.get('Authorization');
+            if (!authHeader) return false;
+            const token = authHeader.substring(7);
+            const { access } = await checkPermissions(token, [Permission.ADMIN_AUTH0], env);
+            return access;
+        } catch {
+            return false;
+        }
     };
 
     /**
@@ -100,11 +119,12 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
 
         if (!targetUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
-        if ((targetUser as any).email === SUPER_ADMIN_EMAIL) {
-            return Response.json({ success: false, error: 'Impossible de supprimer le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
+        const d1Id = (targetUser as any).id as string;
+
+        if (d1Id === SUPREME_MASTER_ID || (targetUser as any).email === SUPER_ADMIN_EMAIL) {
+            return Response.json({ success: false, error: 'Impossible de supprimer le Maître Suprême ou le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
         }
 
-        const d1Id = (targetUser as any).id as string;
         try {
             await userService.deleteUser(d1Id);
             await broadcastDataChanged(env);
@@ -115,23 +135,43 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
     });
 
     /**
-     * GET /api/admin/users/blocked
-     * Returns an array of objects { auth0_sub, block_reason } for all users blocked in D1.
+     * GET /api/admin/users/metadata
+     * Returns an array of objects { auth0_sub, is_blocked, block_reason, club_name, siret } 
+     * for all users registered in D1.
      */
-    router.get('/api/admin/users/blocked', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
+    router.get('/api/admin/users/metadata', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.ADMIN_AUTH0);
         if (!permissionCheck.hasPermission) {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: router.corsHeaders });
         }
 
+        // We already check Permission.ADMIN_AUTH0 above, but checkAdmin provides email/id based immunity checks elsewere,
+        // so we keep it here for consistency if needed, but broaden it.
         if (!await checkAdmin(request)) {
             return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
         }
 
         try {
-            const blockedUsers = await env.DB.prepare('SELECT auth0_sub, block_reason FROM users WHERE is_blocked = 1').all<{ auth0_sub: string, block_reason: string | null }>();
-            const subs = blockedUsers.results?.map(u => ({ auth0_sub: u.auth0_sub, block_reason: u.block_reason })) || [];
-            return Response.json({ success: true, blockedSubs: subs }, { headers: router.corsHeaders });
+            const results = await env.DB.prepare(`
+                SELECT 
+                    u.auth0_sub, 
+                    u.is_blocked, 
+                    u.block_reason, 
+                    u.siret,
+                    c.name as club_name
+                FROM users u
+                LEFT JOIN clubs c ON u.club_id = c.id
+            `).all<{ auth0_sub: string; is_blocked: number; block_reason: string | null; siret: string | null; club_name: string | null }>();
+
+            const metadata = results.results?.map(u => ({
+                auth0_sub: u.auth0_sub,
+                is_blocked: !!u.is_blocked,
+                block_reason: u.block_reason,
+                siret: u.siret,
+                club_name: u.club_name
+            })) || [];
+
+            return Response.json({ success: true, metadata }, { headers: router.corsHeaders });
         } catch (e: any) {
             return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
         }
@@ -174,8 +214,8 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
         // Use the D1 id for all subsequent operations
         const d1Id = (targetUser as any).id as string;
 
-        if ((targetUser as any).email === SUPER_ADMIN_EMAIL) {
-            return Response.json({ success: false, error: 'Impossible de bloquer le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
+        if (d1Id === SUPREME_MASTER_ID || (targetUser as any).email === SUPER_ADMIN_EMAIL) {
+            return Response.json({ success: false, error: 'Impossible de bloquer le Maître Suprême ou le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
         }
 
         const body: { is_blocked: boolean; block_reason?: string } = await request.json();

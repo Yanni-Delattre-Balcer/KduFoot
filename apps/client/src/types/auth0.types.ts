@@ -25,6 +25,7 @@ export interface Auth0User {
     club_id?: string;
     siret?: string;
   };
+  club_name?: string | null;
 }
 
 export interface Auth0Role {
