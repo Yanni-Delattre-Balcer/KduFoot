@@ -1,17 +1,16 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Spinner } from "@heroui/spinner";
 import { Link } from "react-router-dom";
 import { Chip } from "@heroui/chip";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useMemo } from "react";
 
 import FootballClock from "../../components/football-clock";
 import { showVideoAnalysis } from "../../config/site";
 
-import { Match } from "@/types/match.types";
-import { Exercise } from "@/types/exercise.types";
 import { useMatches } from "@/hooks/use-matches";
 import { useExercises } from "@/hooks/use-exercises";
 import { useFavorites } from "@/hooks/use-favorites";
@@ -30,35 +29,20 @@ export default function FavoritesPage() {
     showVideoAnalysis ? "exercises" : "matches",
   );
 
-  const [favExercises, setFavExercises] = useState<Exercise[]>([]);
-  const [favMatches, setFavMatches] = useState<Match[]>([]);
-  const [favTournaments, setFavTournaments] = useState<Match[]>([]);
+  const favExercises = useMemo(() => {
+    if (!isAuthenticated || !exercises || !favorites?.exercises) return [];
+    return exercises.filter((e) => favorites.exercises.includes(e.id));
+  }, [exercises, favorites?.exercises, isAuthenticated]);
 
-  useEffect(() => {
-    if (isAuthenticated && exercises && favorites?.exercises) {
-      setFavExercises(
-        exercises.filter((e) => favorites.exercises.includes(e.id)),
-      );
-    } else if (!isAuthenticated) {
-      setFavExercises([]);
-    }
-  }, [exercises, favorites, isAuthenticated]);
+  const favMatches = useMemo(() => {
+    if (!isAuthenticated || !matches || !favorites?.matches) return [];
+    return matches.filter((m) => favorites.matches.includes(m.id));
+  }, [matches, favorites?.matches, isAuthenticated]);
 
-  useEffect(() => {
-    if (isAuthenticated && matches && favorites) {
-      if (favorites.matches) {
-        setFavMatches(matches.filter((m) => favorites.matches.includes(m.id)));
-      }
-      if (favorites.tournaments) {
-        setFavTournaments(
-          matches.filter((m) => favorites.tournaments.includes(m.id)),
-        );
-      }
-    } else if (!isAuthenticated) {
-      setFavMatches([]);
-      setFavTournaments([]);
-    }
-  }, [matches, favorites, isAuthenticated]);
+  const favTournaments = useMemo(() => {
+    if (!isAuthenticated || !matches || !favorites?.tournaments) return [];
+    return matches.filter((m) => favorites.tournaments.includes(m.id));
+  }, [matches, favorites?.tournaments, isAuthenticated]);
 
   return (
     <DefaultLayout maxWidth="max-w-full">

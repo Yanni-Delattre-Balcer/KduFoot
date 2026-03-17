@@ -10,6 +10,8 @@ import {
   ExerciseFilters,
 } from "../types/exercise.types";
 
+const EMPTY_ARRAY: any[] = [];
+
 export function useExercises(filters?: ExerciseFilters) {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
@@ -81,8 +83,8 @@ export function useExercises(filters?: ExerciseFilters) {
   );
 
   return {
-    exercises: (data?.exercises as Exercise[]) || [],
-    total: (data?.total as number) || 0,
+    exercises: (data?.exercises as Exercise[]) ?? EMPTY_ARRAY,
+    total: (data?.total as number) ?? 0,
     isLoading,
     isError: error,
     createExercise,

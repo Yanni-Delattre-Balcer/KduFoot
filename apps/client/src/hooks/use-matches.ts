@@ -11,6 +11,8 @@ import {
   ContactMatchDto,
 } from "../types/match.types";
 
+const EMPTY_ARRAY: any[] = [];
+
 export function useMatches(filters?: MatchFilters) {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const { mutate: globalMutate } = useSWRConfig();
@@ -162,8 +164,8 @@ export function useMatches(filters?: MatchFilters) {
   );
 
   return {
-    matches: (data?.matches as Match[]) || [],
-    total: (data?.total as number) || 0,
+    matches: (data?.matches as Match[]) ?? EMPTY_ARRAY,
+    total: (data?.total as number) ?? 0,
     isLoading,
     isError: error,
     createMatch,
@@ -319,8 +321,8 @@ export function useIncomingRequests() {
   );
 
   return {
-    requests: (data?.requests as any[]) || [],
-    pendingCount: ((data?.requests as any[]) || []).filter(
+    requests: (data?.requests as any[]) ?? EMPTY_ARRAY,
+    pendingCount: ((data?.requests as any[]) ?? EMPTY_ARRAY).filter(
       (r) => r.request_status === "pending",
     ).length,
     isLoading,
@@ -359,8 +361,8 @@ export function useMyParticipations() {
   );
 
   return {
-    participations: (data?.participations as any[]) || [],
-    modifiedCount: ((data?.participations as any[]) || []).filter(
+    participations: (data?.participations as any[]) ?? EMPTY_ARRAY,
+    modifiedCount: ((data?.participations as any[]) ?? EMPTY_ARRAY).filter(
       (p) => p.notification_state === 1,
     ).length,
     isLoading,
