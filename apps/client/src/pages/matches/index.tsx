@@ -1173,7 +1173,7 @@ export default function MatchesPage() {
                                   className={`font-bold text-xl ${diff.name ? "text-red-500" : "text-default-900"} group-hover:text-violet-200 transition-colors tracking-tight break-words whitespace-normal w-full`}
                                 >
                                   {isMasked
-                                    ? "CLUB MASQUÉ"
+                                    ? t("matchesPage.masked_club")
                                     : match.club?.name ||
                                       t("matchesPage.unknown_club")}
                                 </h4>
@@ -1209,7 +1209,7 @@ export default function MatchesPage() {
                                       >
                                         {match.registration_fee > 0
                                           ? `${match.registration_fee} €`
-                                          : "Gratuit"}
+                                          : t("matchForm.labels.free")}
                                       </Chip>
                                     )}
                                   <Chip
@@ -1244,15 +1244,15 @@ export default function MatchesPage() {
                                     variant="flat"
                                   >
                                     {match.venue === "Domicile"
-                                      ? "🏠 REÇOIT"
-                                      : "🚗 SE DÉPLACE"}
+                                      ? t("badges.venue.home")
+                                      : t("badges.venue.away")}
                                   </Chip>
                                 </div>
                                 <p
                                   className={`text-small ${diff.location_city ? "text-red-500 font-bold" : "text-default-500"} font-medium`}
                                 >
                                   {isMasked
-                                    ? "VILLE MASQUÉE"
+                                    ? t("matchesPage.masked_city")
                                     : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
                                 </p>
                               </div>
@@ -1338,7 +1338,7 @@ export default function MatchesPage() {
                                   variant="flat"
                                   onPress={() => handleAcceptChanges(match)}
                                 >
-                                  ✅ J'AI VU ET J'ACCEPTE LES CHANGEMENTS
+                                  {t("details.buttons.accept_changes")}
                                 </Button>
                               )}
                               <div className="flex gap-2 w-full items-center">
@@ -1408,7 +1408,7 @@ export default function MatchesPage() {
                                   to={`/matches/${match.id}`}
                                   variant="solid"
                                 >
-                                  DÉTAILS
+                                  {t("cards.buttons.details")}
                                 </Button>
                                 {isAdmin && (
                                   <Button
@@ -1418,7 +1418,7 @@ export default function MatchesPage() {
                                     variant="solid"
                                     onPress={() => adminDeleteMatch(match.id)}
                                   >
-                                    🗑️ SUPPRIMER
+                                    {t("details.buttons.delete")}
                                   </Button>
                                 )}
                               </div>

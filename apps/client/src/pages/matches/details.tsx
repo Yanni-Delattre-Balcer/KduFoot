@@ -237,7 +237,7 @@ export default function MatchDetailsPage() {
 
       addToast({
         title: t("base.success", "Succès"),
-        description: "Modifications validées",
+        description: t("details.status.confirmed_accepted"),
         color: "success",
       });
       // Optionally reload or just rely on state update if we had a setter for knownData
@@ -488,7 +488,7 @@ export default function MatchDetailsPage() {
             {isAdmin && user?.id !== match.owner_id && (
               <div className="flex flex-col sm:flex-row gap-2 bg-danger/5 p-2 rounded-2xl border border-danger/20 animate-pulse w-full sm:w-auto">
                 <span className="text-xs sm:text-sm font-bold text-danger px-2 py-1">
-                  Outils Modération (ADMIN)
+                  {t("details.admin.moderation_tools")}
                 </span>
                 <div className="flex flex-col sm:flex-row flex-1 gap-2 w-full p-2">
                   <Button
@@ -514,7 +514,7 @@ export default function MatchDetailsPage() {
                       </svg>
                     }
                   >
-                    Supprimer l'annonce
+                    {t("details.buttons.delete_ad")}
                   </Button>
                   <Button
                     className="font-black tracking-tighter flex-1 h-20 text-lg shadow-xl"
@@ -538,7 +538,7 @@ export default function MatchDetailsPage() {
                       </svg>
                     }
                   >
-                    Bloquer l'utilisateur
+                    {t("details.buttons.block_user")}
                   </Button>
 
                 </div>
@@ -587,8 +587,8 @@ export default function MatchDetailsPage() {
                           variant="shadow"
                         >
                           {match.type === "tournament"
-                            ? "🏆 TOURNOI"
-                            : "⚽ MATCH AMICAL"}
+                            ? `🏆 ${t("enums.type.tournament").toUpperCase()}`
+                            : `⚽ ${t("enums.type.match").toUpperCase()} AMICAL`}
                         </Chip>
                         {match.status === "found" && (
                           <Chip
@@ -739,7 +739,7 @@ export default function MatchDetailsPage() {
                 <InfoItem
                   color="default"
                   icon="⚤"
-                  label="Genre"
+                  label={t("details.labels.gender")}
                   value={t(`enums.gender.${gender}`)}
                 />
               </div>
@@ -777,7 +777,7 @@ export default function MatchDetailsPage() {
                   <div className="bg-[#1c1c1f] rounded-3xl p-6 border border-white/5 flex items-center justify-between">
                     <div>
                       <p className="text-[10px] text-default-400 font-black tracking-widest mb-1 uppercase">
-                        Couleur de maillot
+                        {t("details.labels.jersey_color")}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -792,11 +792,11 @@ export default function MatchDetailsPage() {
                   <div className="bg-[#1c1c1f] rounded-3xl p-6 border border-white/5 flex items-center justify-between">
                     <div>
                       <p className="text-[10px] text-default-400 font-black tracking-widest mb-1">
-                        Inscriptions
+                        {t("details.labels.registrations")}
                       </p>
                       <p className="text-white font-bold">
                         {(match.accepted_count || 0) + 1} / {match.max_teams}{" "}
-                        Équipes confirmées
+                        {t("details.labels.confirmed_teams")}
                       </p>
                     </div>
                     <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary flex items-center justify-center font-black text-xs text-primary">
@@ -845,8 +845,8 @@ export default function MatchDetailsPage() {
                             onPress={onCancelAcceptedOpen}
                           >
                             {match.type === "tournament"
-                              ? "Annuler le tournoi"
-                              : "Annuler le duel"}
+                              ? t("details.buttons.cancel_tournament", "Annuler le tournoi")
+                              : t("details.buttons.cancel_duel", "Annuler le duel")}
                           </Button>
                         </div>
                       ) : (
@@ -861,7 +861,7 @@ export default function MatchDetailsPage() {
                         to={`/matches/${id}/edit`}
                         variant="shadow"
                       >
-                        Modifier l'annonce
+                        {t("details.buttons.edit_ad")}
                       </Button>
                       {match.type === "tournament" &&
                         match.status === "active" && (
@@ -872,7 +872,7 @@ export default function MatchDetailsPage() {
                             variant="shadow"
                             onPress={onCloseRegOpen}
                           >
-                            Fermer le tournoi
+                            {t("details.buttons.close_tournament")}
                           </Button>
                         )}
                     </div>
@@ -911,7 +911,7 @@ export default function MatchDetailsPage() {
                           return (
                             <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-4 animate-appearance-in">
                               <p className="text-emerald-400 font-black text-center text-sm tracking-widest flex items-center justify-center gap-2">
-                                RENCONTRE CONFIRMÉE ! ✅
+                                {t("details.status.confirmed")}
                               </p>
                               <div className="grid grid-cols-2 gap-2 mt-2">
                                 <Button
@@ -922,7 +922,7 @@ export default function MatchDetailsPage() {
                                     (window.location.href = `tel:${match.phone}`)
                                   }
                                 >
-                                  📞 Appeler
+                                  {t("details.buttons.call")}
                                 </Button>
                                 <Button
                                   className="font-black tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
@@ -932,7 +932,7 @@ export default function MatchDetailsPage() {
                                     (window.location.href = `mailto:${match.email}`)
                                   }
                                 >
-                                  ✉️ Email
+                                  {t("details.buttons.email")}
                                 </Button>
                               </div>
                               <Button
@@ -954,7 +954,7 @@ export default function MatchDetailsPage() {
                           return (
                             <div className="p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl">
                               <p className="text-danger font-black text-center text-sm tracking-tighter">
-                                Demande Refusée
+                                {t("details.status.refused")}
                               </p>
                             </div>
                           );
@@ -964,7 +964,7 @@ export default function MatchDetailsPage() {
                         return (
                           <>
                             <p className="text-default-300 text-sm text-center">
-                              Vous souhaitez faire participer votre équipe ?
+                              {t("details.labels.participate_prompt")}
                             </p>
 
                             <div className="grid grid-cols-2 gap-2 mt-2">
@@ -983,7 +983,7 @@ export default function MatchDetailsPage() {
                                   window.location.href = `tel:${match.phone}`;
                                 }}
                               >
-                                📞 Appeler
+                                {t("details.buttons.call")}
                               </Button>
                               <Button
                                 className="font-black tracking-tighter h-12 border border-secondary/20 shadow-lg shadow-secondary/10"
@@ -1000,7 +1000,7 @@ export default function MatchDetailsPage() {
                                   window.location.href = `mailto:${match.email}`;
                                 }}
                               >
-                                ✉️ Email
+                                {t("details.buttons.email")}
                               </Button>
                             </div>
                             <div className="relative flex items-center py-2">
@@ -1030,7 +1030,7 @@ export default function MatchDetailsPage() {
                                 variant="shadow"
                                 onPress={onCancelOpen}
                               >
-                                🗑️ Annuler ma demande
+                                {t("details.buttons.cancel_request")}
                               </Button>
                             ) : (
                               <Button
@@ -1246,7 +1246,7 @@ export default function MatchDetailsPage() {
                         🌑
                       </div>
                       <p className="text-default-400 font-black tracking-widest text-sm max-w-[200px] md:max-w-none">
-                        Aucune candidature pour le moment
+                        {t("details.status.no_applications")}
                       </p>
                     </div>
                   )}
@@ -1310,7 +1310,7 @@ export default function MatchDetailsPage() {
                     <p className="text-default-400 font-medium">
                       {match.type === "tournament"
                         ? t("match.confirm_delete_tournament", "Es-tu sûr de vouloir supprimer ce tournoi ?")
-                        : t("match.confirm_delete_match", "Es-tu sûr de vouloir supprimer ce match ?")} Cette action est irréversible.
+                        : t("match.confirm_delete_match", "Es-tu sûr de vouloir supprimer ce match ?")} {t("details.modal.irreversible", "Cette action est irréversible.")}
                     </p>
                   </ModalBody>
                   <ModalFooter>
@@ -1327,7 +1327,7 @@ export default function MatchDetailsPage() {
                       isLoading={isDeleting}
                       onPress={handleDelete}
                     >
-                      Confirmer la suppression
+                      {t("details.modal.delete_confirm")}
                     </Button>
                   </ModalFooter>
                 </>
@@ -1349,8 +1349,7 @@ export default function MatchDetailsPage() {
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium italic">
-                      ⚠️ Attention : En tant qu'administrateur, vous allez
-                      supprimer cette annonce. L'action est définitive.
+                      {t("details.modal.admin_delete_desc", "⚠️ Attention : En tant qu'administrateur, vous allez supprimer cette annonce. L'action est définitive.")}
                     </p>
                   </ModalBody>
                   <ModalFooter>
@@ -1359,7 +1358,7 @@ export default function MatchDetailsPage() {
                       variant="light"
                       onPress={onClose}
                     >
-                      Annuler
+                      {t("cancel")}
                     </Button>
                     <Button
                       className="font-black tracking-tighter shadow-lg shadow-danger/20"
@@ -1367,7 +1366,7 @@ export default function MatchDetailsPage() {
                       isLoading={isAdminDeleting}
                       onPress={handleAdminDelete}
                     >
-                      Supprimer définitivement
+                      {t("details.modal.admin_delete_confirm")}
                     </Button>
                   </ModalFooter>
                 </>
@@ -1389,8 +1388,7 @@ export default function MatchDetailsPage() {
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium mb-2">
-                      Voulez-vous vraiment BLOQUER cet utilisateur ? Il ne
-                      pourra plus accéder à la plateforme.
+                      {t("details.modal.block_desc")}
                     </p>
                     <Textarea
                       isRequired
@@ -1409,7 +1407,7 @@ export default function MatchDetailsPage() {
                       variant="light"
                       onPress={onClose}
                     >
-                      Annuler
+                      {t("cancel")}
                     </Button>
                     <Button
                       className="font-black tracking-tighter shadow-lg shadow-danger/20"
@@ -1442,8 +1440,7 @@ export default function MatchDetailsPage() {
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium">
-                      Voulez-vous clôturer manuellement les inscriptions pour ce
-                      tournoi ?
+                      {t("details.modal.close_registrations_desc")}
                     </p>
                   </ModalBody>
                   <ModalFooter>
@@ -1452,7 +1449,7 @@ export default function MatchDetailsPage() {
                       variant="light"
                       onPress={onClose}
                     >
-                      Annuler
+                      {t("cancel")}
                     </Button>
                     <Button
                       className="font-black tracking-tighter shadow-lg shadow-success/20"
@@ -1461,22 +1458,22 @@ export default function MatchDetailsPage() {
                         try {
                           await closeRegistrations();
                           addToast({
-                            title: "Succès",
-                            description: "Inscriptions closes",
+                            title: t("success"),
+                            description: t("details.modal.closed_success", "Inscriptions closes"),
                             color: "success",
                           });
                           onClose();
                         } catch (e) {
                           addToast({
-                            title: "Erreur",
-                            description: "Action impossible",
+                            title: t("error.title"),
+                            description: t("error.action_impossible", "Action impossible"),
                             color: "danger",
                           });
                         }
                       }}
-                    >
-                      Clôturer
-                    </Button>
+                      >
+                        {t("details.buttons.close")}
+                      </Button>
                   </ModalFooter>
                 </>
               )}
@@ -1506,7 +1503,7 @@ export default function MatchDetailsPage() {
                       variant="light"
                       onPress={onClose}
                     >
-                      Annuler
+                      {t("cancel")}
                     </Button>
                     <Button
                       className="font-black tracking-tighter shadow-lg shadow-danger/20"
@@ -1524,7 +1521,7 @@ export default function MatchDetailsPage() {
                         onClose();
                       }}
                     >
-                      Confirmer l'annulation
+                      {t("details.modal.withdraw_confirm")}
                     </Button>
                   </ModalFooter>
                 </>

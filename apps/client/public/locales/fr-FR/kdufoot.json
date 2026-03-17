@@ -25,6 +25,7 @@
     "server_error": "Le serveur ne répond pas. Réessayez dans quelques instants.",
     "invalid_date": "La date saisie est invalide ou déjà passée.",
     "missing_fields": "Veuillez remplir tous les champs obligatoires.",
+    "action_impossible": "Action impossible",
     "technical_issue": "Problème Technique",
     "bug_report": "Signaler un bug",
     "feature_request": "Suggérer une fonctionnalité",
@@ -89,13 +90,14 @@
     "buttons": {
       "exercises": "Analyser une vidéo",
       "sessions": "Trouver/créer un match / tournoi",
-      "find_match": "Trouver ou créer un match",
-      "find_tournament": "Trouver ou créer un tournoi"
+      "match": "Trouver ou créer un match",
+      "tournament": "Trouver ou créer un tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
       "title": "👋 À propos",
       "intro": "<0>Yanni</0>, étudiant en cybersécurité, <1>Réseaux & Télécommunications à Béthune</1> — J'ai créé Kdufoot pour aider les entraîneurs de football à <2>gagner du temps</2>.",
+      "subtitle": "Matchs & Tournois amicaux",
       "features": "🎬 <0>Analyse Vidéo AI</0> — Collez un lien, obtenez des exercices prêts à l'emploi.<br/>⚽ <1>Matchs & Tournois Amicaux</0> — Trouvez un adversaire près de chez vous en quelques clics.",
       "features_fallback": "⚽ Matchs & Tournois amicaux — Trouvez ou publiez vos propres matchs et tournois autour de chez vous.",
       "footer": "Moins de recherches, plus de jeu. ⚽"
@@ -130,7 +132,74 @@
   "duration": "Durée",
   "status": "Statut",
   "summary": "Résumé",
-  "details": "Détails",
+  "details": {
+    "title": "Détails",
+    "labels": {
+      "organizer_management": "Gestion de l'organisateur",
+      "precised_location": "Localisation précise",
+      "jersey_color": "Couleur de maillot",
+      "category": "Catégorie",
+      "level": "Niveau",
+      "pitch": "Terrain",
+      "format": "Format",
+      "date": "Date",
+      "time": "Heure",
+      "venue": "Lieu",
+      "participate_prompt": "Vous souhaitez faire participer votre équipe ?",
+      "confirmed_teams": "Équipes confirmées"
+    },
+    "buttons": {
+      "itinerary": "Itinéraire",
+      "call": "📞 Appeler",
+      "email": "✉️ Email",
+      "view_changes": "J'ai vu les changements",
+      "view_request": "Voir la demande",
+      "accept_changes": "✅ J'AI VU ET J'ACCEPTE LES CHANGEMENTS",
+      "delete": "🗑️ SUPPRIMER",
+      "close": "Clôturer",
+      "cancel_tournament": "Annuler le tournoi",
+      "cancel_duel": "Annuler le duel",
+      "edit_ad": "Modifier l'annonce",
+      "close_tournament": "Fermer le tournoi",
+      "cancel_request": "🗑️ Annuler ma demande"
+    },
+    "status": {
+      "masked": "CLUB MASQUÉ",
+      "city_masked": "VILLE MASQUÉE",
+      "confirmed": "RENCONTRE CONFIRMÉE ! ✅",
+      "refused": "Demande Refusée",
+      "accepted": "Acceptée",
+      "withdrawn": "Désistement",
+      "modified": "MATCH MODIFIÉ",
+      "modified_desc": "Certains détails ont changé",
+      "no_applications": "Aucune candidature pour le moment",
+      "confirmed_accepted": "Modifications validées"
+    },
+    "modal": {
+      "withdraw_title": "Annuler ma demande",
+      "withdraw_desc": "Voulez-vous vraiment annuler votre demande ?",
+      "withdraw_confirm": "Confirmer l'annulation",
+      "delete_confirm": "Confirmer la suppression",
+      "admin_delete_confirm": "Supprimer définitivement",
+      "block_reason_label": "Raison du blocage",
+      "block_reason_placeholder": "Saisissez la raison du blocage (ex: Comportement inapproprié, multiples désistements...)",
+      "block_desc": "Voulez-vous vraiment BLOQUER cet utilisateur ? Il ne pourra plus accéder à la plateforme.",
+      "block_confirm": "Bloquer définitivement",
+      "close_registrations_desc": "Voulez-vous clôturer manuellement les inscriptions pour ce tournoi ?",
+      "closed_success": "Inscriptions closes",
+      "irreversible": "Cette action est irréversible.",
+      "admin_delete_desc": "⚠️ Attention : En tant qu'administrateur, vous allez supprimer cette annonce. L'action est définitive.",
+      "cancel_confirmed_title": "Annuler la rencontre",
+      "cancel_confirmed_desc": "Voulez-vous vraiment annuler cette rencontre confirmée ? L'autre club sera notifié."
+    },
+    "admin": {
+      "delete_ad": "Supprimer l'annonce",
+      "moderation_tools": "Outils de modération (ADMIN)",
+      "block_user": "Bloquer l'utilisateur"
+    },
+    "modification_alert_title": "Des modifications ont été apportées",
+    "modification_alert_desc": "Les champs en rouge ont été modifiés par l'organisateur."
+  },
   "duration_total": "Durée Totale",
   "players": "Joueurs",
   "equipment": "Matériel",
@@ -366,7 +435,11 @@
     "upgrade": "Passer à {{plan}} pour débloquer cette fonctionnalité"
   },
   "badges": {
-    "certifiedCoach": "Coach Certifié"
+    "certifiedCoach": "Coach Certifié",
+    "venue": {
+      "home": "🏠 REÇOIT",
+      "away": "🚗 SE DÉPLACE"
+    }
   },
   "enums": {
     "type": {
@@ -478,6 +551,8 @@
     },
     "my_creation": "Ma création",
     "unknown_club": "Club Inconnu",
+    "masked_club": "CLUB MASQUÉ",
+    "masked_city": "VILLE MASQUÉE",
     "found": "match(s) amical(aux) trouvé(s)",
     "found_tournament": "tournoi(s) trouvé(s)",
     "empty_title": "Aucun match amical trouvé",
@@ -1048,5 +1123,11 @@
   "connectivity": {
     "offline": "Vous êtes hors ligne. Vérifiez votre connexion.",
     "reconnecting": "Connexion instable, mise à jour en cours..."
+  }
+,
+  "cards": {
+    "buttons": {
+      "details": "DÉTAILS"
+    }
   }
 }

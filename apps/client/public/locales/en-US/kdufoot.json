@@ -23,6 +23,7 @@
     "server_error": "Server is not responding. Please try again in a few moments.",
     "invalid_date": "The entered date is invalid or already passed.",
     "missing_fields": "Please fill in all mandatory fields.",
+    "action_impossible": "Action impossible",
     "technical_issue": "Technical Issue",
     "bug_report": "Report a bug",
     "feature_request": "Suggest a feature",
@@ -76,13 +77,14 @@
     "buttons": {
       "exercises": "Analyze a video",
       "sessions": "Find a match / tournament",
-      "find_match": "Find a match",
-      "find_tournament": "Find a tournament"
+      "match": "Find a match",
+      "tournament": "Find a tournament"
     },
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
     "about": {
       "title": "👋 About",
       "intro": "<0>Yanni</0>, cybersecurity student, <1>Networks & Telecommunications in Béthune</1> — I created Kdufoot to help football coaches <2>save time</2>.",
+      "subtitle": "Friendly Matches & Tournaments",
       "features": "🎬 <0>AI Video Analysis</0> — Paste a link, get ready-to-use drills.<br/>⚽ <1>Friendly Matches & Tournaments</1> — Find an opponent near you in a few clicks.",
       "features_fallback": "⚽ Friendly Matches & Tournaments — Find or publish your own matches and tournaments around you.",
       "footer": "Less searching, more playing. ⚽"
@@ -118,6 +120,74 @@
   "duration": "Duration",
   "status": "Status",
   "summary": "Summary",
+  "details": {
+    "title": "Details",
+    "labels": {
+      "organizer_management": "Organizer Management",
+      "precised_location": "Precise location",
+      "jersey_color": "Jersey Color",
+      "category": "Category",
+      "level": "Level",
+      "pitch": "Pitch",
+      "format": "Format",
+      "date": "Date",
+      "time": "Time",
+      "venue": "Venue",
+      "participate_prompt": "Want to sign up your team?",
+      "confirmed_teams": "Confirmed teams"
+    },
+    "buttons": {
+      "itinerary": "Itinerary",
+      "call": "📞 Call",
+      "email": "✉️ Email",
+      "view_changes": "I've seen the changes",
+      "view_request": "View request",
+      "accept_changes": "✅ I'VE SEEN AND ACCEPT THE CHANGES",
+      "delete": "🗑️ DELETE",
+      "close": "Close",
+      "cancel_tournament": "Cancel tournament",
+      "cancel_duel": "Cancel duel",
+      "edit_ad": "Edit announcement",
+      "close_tournament": "Close tournament",
+      "cancel_request": "🗑️ Cancel my request"
+    },
+    "status": {
+      "masked": "MASKED CLUB",
+      "city_masked": "MASKED CITY",
+      "confirmed": "MEETING CONFIRMED ! ✅",
+      "refused": "Request Refused",
+      "accepted": "Accepted",
+      "withdrawn": "Withdrawn",
+      "modified": "MATCH MODIFIED",
+      "modified_desc": "Some details have changed",
+      "no_applications": "No applications yet",
+      "confirmed_accepted": "Changes validated"
+    },
+    "modal": {
+      "withdraw_title": "Cancel my request",
+      "withdraw_desc": "Do you really want to cancel your request?",
+      "withdraw_confirm": "Confirm cancellation",
+      "delete_confirm": "Confirm deletion",
+      "admin_delete_confirm": "Permanently delete",
+      "block_reason_label": "Block reason",
+      "block_reason_placeholder": "Enter the reason for blocking (e.g. Inappropriate behavior, multiple withdrawals...)",
+      "block_desc": "Do you really want to BLOCK this user? They will no longer be able to access the platform.",
+      "block_confirm": "Block permanently",
+      "close_registrations_desc": "Do you want to manually close registrations for this tournament?",
+      "closed_success": "Registrations closed",
+      "irreversible": "This action is irreversible.",
+      "admin_delete_desc": "⚠️ Warning: As an administrator, you are going to delete this ad. This action is final.",
+      "cancel_confirmed_title": "Cancel meeting",
+      "cancel_confirmed_desc": "Do you really want to cancel this confirmed meeting? The other club will be notified."
+    },
+    "admin": {
+      "delete_ad": "Delete announcement",
+      "moderation_tools": "Moderation Tools (ADMIN)",
+      "block_user": "Block user"
+    },
+    "modification_alert_title": "Changes have been made",
+    "modification_alert_desc": "Fields in red have been modified by the organizer."
+  },
   "duration_total": "Total Duration",
   "players": "Players",
   "equipment": "Equipment",
@@ -343,7 +413,11 @@
     "upgrade": "Upgrade to {{plan}} to unlock this feature"
   },
   "badges": {
-    "certifiedCoach": "Certified Coach"
+    "certifiedCoach": "Certified Coach",
+    "venue": {
+      "home": "🏠 HOME",
+      "away": "🚗 AWAY"
+    }
   },
   "enums": {
     "type": {
@@ -454,6 +528,8 @@
     },
     "my_creation": "My creation",
     "unknown_club": "Unknown Club",
+    "masked_club": "MASKED CLUB",
+    "masked_city": "MASKED CITY",
     "found": "friendly match(es) found",
     "found_tournament": "tournament(s) found",
     "empty_title": "No friendly matches found",
@@ -979,5 +1055,11 @@
   "connectivity": {
     "offline": "You are offline. Please check your connection.",
     "reconnecting": "Unstable connection, updating..."
+  }
+,
+  "cards": {
+    "buttons": {
+      "details": "DETAILS"
+    }
   }
 }
