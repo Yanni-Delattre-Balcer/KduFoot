@@ -159,9 +159,7 @@ export default function MatchDetailsPage() {
     }
   });
 
-  const matchKnownData = knownData[id || ""];
-  const isOwner = user?.id === match.owner_id;
-  const isModified = !isOwner && participation?.notification_state === 1;
+
 
   const [showPulse, setShowPulse] = useState(true);
 
@@ -178,15 +176,7 @@ export default function MatchDetailsPage() {
     return s1 !== s2;
   };
 
-  const highlights = {
-    date: isModified && !!matchKnownData && isDifferent(match.match_date, matchKnownData.date),
-    time: isModified && !!matchKnownData && isDifferent(match.match_time?.slice(0, 5), matchKnownData.time?.slice(0, 5)),
-    venue: isModified && !!matchKnownData && isDifferent(match.venue, matchKnownData.venue),
-    pitch: isModified && !!matchKnownData && isDifferent(match.pitch_type, matchKnownData.pitch),
-    format: isModified && !!matchKnownData && isDifferent(match.format, matchKnownData.format),
-    category: isModified && !!matchKnownData && isDifferent(match.category, matchKnownData.category),
-    level: isModified && !!matchKnownData && isDifferent(match.level, matchKnownData.level),
-  };
+
 
   const [isMarkingRead, setIsMarkingRead] = useState(false);
 
@@ -256,6 +246,22 @@ export default function MatchDetailsPage() {
       </DefaultLayout>
     );
   }
+
+  // Logic that depends on 'match' being defined
+  const matchKnownData = knownData[id || ""];
+  const isOwner = user?.id === match.owner_id;
+  const isModified = !isOwner && participation?.notification_state === 1;
+
+  const highlights = {
+    date: isModified && !!matchKnownData && isDifferent(match.match_date, matchKnownData.date),
+    time: isModified && !!matchKnownData && isDifferent(match.match_time?.slice(0, 5), matchKnownData.time?.slice(0, 5)),
+    venue: isModified && !!matchKnownData && isDifferent(match.venue, matchKnownData.venue),
+    pitch: isModified && !!matchKnownData && isDifferent(match.pitch_type, matchKnownData.pitch),
+    format: isModified && !!matchKnownData && isDifferent(match.format, matchKnownData.format),
+    category: isModified && !!matchKnownData && isDifferent(match.category, matchKnownData.category),
+    level: isModified && !!matchKnownData && isDifferent(match.level, matchKnownData.level),
+  };
+
 
   const handleDelete = async () => {
     setIsDeleting(true);
