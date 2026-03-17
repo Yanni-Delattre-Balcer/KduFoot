@@ -118,10 +118,7 @@ function App() {
                 <Route element={<TrainingPage />} path="/training" />
               </>
             )}
-            <Route
-              element={<AuthenticationGuard component={FavoritesPage} />}
-              path="/favorites"
-            />
+            <Route element={<FavoritesPage />} path="/favorites" />
             {showVideoAnalysis && (
               <>
                 <Route
@@ -153,10 +150,7 @@ function App() {
               element={<AuthenticationGuard component={SessionDetailsPage} />}
               path="/sessions/:id"
             />
-            <Route
-              element={<AuthenticationGuard component={DashboardPage} />}
-              path="/dashboard"
-            />
+            <Route element={<DashboardPage />} path="/dashboard" />
             <Route element={<MatchesPage />} path="/matches" />
             <Route
               element={<AuthenticationGuard component={MatchEditPage} />}
