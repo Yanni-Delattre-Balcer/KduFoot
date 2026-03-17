@@ -5,7 +5,6 @@ import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { useState, useRef, useEffect, useId } from "react";
-import * as faceapi from "face-api.js";
 import { useTranslation } from "react-i18next";
 import { mutate } from "swr";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
@@ -37,7 +36,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const { user: dbUser, updateUser, linkClub, unlinkClub, refetch, resetCalendarSync } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [licenseId, setLicenseId] = useState("");
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
@@ -99,23 +97,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     return formatted;
   };
 
-  // Load face-api models on mount
-  useEffect(() => {
-    const loadModels = async () => {
-      try {
-        const MODEL_URL = import.meta.env.VITE_FACEAPI_MODELS_URL;
 
-        if (!MODEL_URL) return;
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        ]);
-      } catch (error) {
-        console.warn("Failed to load face-api models:", error);
-      }
-    };
-
-    loadModels();
-  }, []);
 
   // Sync properties from dbUser when it loads
   useEffect(() => {
@@ -193,44 +175,67 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     fileInputRef.current?.click();
   };
 
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          // Maximum dimensions
+          const MAX_WIDTH = 400;
+          const MAX_HEIGHT = 400;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG with 0.7 quality
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
-    setIsAnalyzing(true);
     try {
-      const img = await faceapi.bufferToImage(file);
-      const detections = await faceapi.detectAllFaces(
-        img,
-        new faceapi.TinyFaceDetectorOptions(),
-      );
+      // Compress and resize image
+      const compressedDataUrl = await compressImage(file);
+      setPreviewUrl(compressedDataUrl);
 
-      if (detections.length === 0) {
-        console.warn(t("account.avatar.no_face"));
-      }
-
-      // We wrap FileReader in a promise to ensure finally runs AFTER everything is done
-      await new Promise<void>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPreviewUrl(reader.result as string);
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
     } catch (error) {
-      console.error("Face detection error:", error);
-      await new Promise<void>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPreviewUrl(reader.result as string);
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
-    } finally {
-      setIsAnalyzing(false);
+      console.error("Image processing error:", error);
+      // Fallback: use legacy FileReader if compression fails
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -497,17 +502,11 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         >
           <Image
             alt={authUser.name}
-            className={`w-24 h-24 rounded-full object-cover border-4 border-primary/20 ${isAnalyzing ? "opacity-50" : ""}`}
+            className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
             src={previewUrl || dbUser?.picture || authUser.picture}
           />
           <div className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 shadow-lg border-2 border-white z-20">
-            {isAnalyzing ? (
-              <div
-                aria-label={t("account.avatar.analyzing")}
-                className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
-              />
-            ) : (
-              <svg
+            <svg
                 aria-hidden="true"
                 className="w-4 h-4"
                 fill="none"
@@ -522,13 +521,10 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                   strokeLinejoin="round"
                 />
               </svg>
-            )}
           </div>
           <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-15">
             <span className="text-white text-xs font-bold">
-              {isAnalyzing
-                ? t("account.avatar.analyzing")
-                : t("account.avatar.change")}
+              {t("account.avatar.change")}
             </span>
           </div>
         </div>

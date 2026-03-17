@@ -23,6 +23,7 @@ interface ConfirmedMatchCardProps {
   isWithdrawing?: boolean;
   formatDate: (date: string) => string;
   formatTime: (time: string) => string;
+  userId?: string;
 }
 
 export const ConfirmedMatchCard = ({
@@ -34,6 +35,7 @@ export const ConfirmedMatchCard = ({
   isWithdrawing,
   formatDate,
   formatTime,
+  userId,
 }: ConfirmedMatchCardProps) => {
   const { t } = useTranslation("kdufoot");
 
@@ -51,7 +53,8 @@ export const ConfirmedMatchCard = ({
     return String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase();
   };
 
-  const showSurgical = isParticipant && isModification && previousState;
+  const isOwner = match.owner_id === userId || match.is_organizer;
+  const showSurgical = !isOwner && isParticipant && isModification && previousState;
 
   const isDateChanged = showSurgical && isDifferent(previousState?.date, match.match_date);
   const isTimeChanged = showSurgical && isDifferent(previousState?.time, match.match_time);
@@ -61,7 +64,7 @@ export const ConfirmedMatchCard = ({
 
   // Role-based overall styling
   const borderClass =
-    isParticipant && isModification
+    !isOwner && isParticipant && isModification
       ? highlighted
         ? "border-danger ring-4 ring-danger/30 shadow-danger/20"
         : "border-danger/50 bg-zinc-900/90 shadow-danger/10"
@@ -148,7 +151,7 @@ export const ConfirmedMatchCard = ({
                 className={`rounded-xl p-3 border transition-colors ${isDateChanged ? "bg-danger/20 border-danger animate-pulse" : "bg-white/5 border-white/5"}`}
               >
                 <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("matchForm.labels.date", "Date")}
+                  {t("details.labels.date", "Date")}
                 </p>
                 <p
                   className={`text-sm font-bold ${isDateChanged ? "text-danger" : "text-white"}`}
@@ -160,7 +163,7 @@ export const ConfirmedMatchCard = ({
                 className={`rounded-xl p-3 border transition-colors ${isTimeChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : "bg-white/5 border-white/5"}`}
               >
                 <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("matchForm.labels.time", "Heure")}
+                  {t("details.labels.time", "Heure")}
                 </p>
                 <p
                   className={`text-sm font-bold ${isTimeChanged ? "text-danger" : "text-white"}`}
@@ -172,7 +175,7 @@ export const ConfirmedMatchCard = ({
                 className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? "bg-danger/20 border-danger animate-pulse" : "bg-white/5 border-white/5"}`}
               >
                 <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("matchForm.labels.format", "Format")}
+                  {t("details.labels.format", "Format")}
                 </p>
                 <Chip
                   className="font-black text-xs border-none p-0"
@@ -187,7 +190,7 @@ export const ConfirmedMatchCard = ({
                 className={`rounded-xl p-3 border transition-colors ${isPitchChanged ? "bg-danger/20 border-danger animate-pulse" : "bg-white/5 border-white/5"}`}
               >
                 <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("matchForm.labels.pitch_type", "Terrain")}
+                  {t("details.labels.pitch", "Terrain")}
                 </p>
                 <p
                   className={`text-sm font-bold break-words ${isPitchChanged ? "text-danger" : "text-white"}`}

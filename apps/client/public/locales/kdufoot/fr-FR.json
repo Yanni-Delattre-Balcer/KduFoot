@@ -88,7 +88,9 @@
       "exercises": "Analyser une vidéo",
       "sessions": "Trouver/créer un match / tournoi",
       "find_match": "Trouver ou créer un match",
-      "find_tournament": "Trouver ou créer un tournoi"
+      "find_tournament": "Trouver ou créer un tournoi",
+      "match": "Match",
+      "tournament": "Tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
@@ -640,6 +642,7 @@
       "form_incomplete": "Formulaire incomplet",
       "form_incomplete_desc": "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès."
     },
+
     "support": {
       "title": "Besoin d'aide ?",
       "description": "Si vous ne trouvez pas votre club, si vous entraînez dans deux clubs différents, ou si vous changez de club, contactez notre support. Pour toute autre question (inscription, connexion, fonctionnement du site…), n'hésitez pas à nous écrire également."
@@ -657,9 +660,11 @@
       "contact_support": "📩 CONTACTER LE SUPPORT"
     },
     "sync": {
-      "reset_confirm": "Voulez-vous modifier votre synchronisation ?\n\nVotre page de synchronisation va se réouvrir pour vous permettre de vous connecter.",
-      "reset_success": "Action enregistrée. La page de synchronisation va se réouvrir.",
-      "reset_error": "Erreur lors de la réinitialisation de la synchronisation."
+      "active": "Calendrier Synchronisé ✅",
+      "disabled": "Calendrier non connecté ❌",
+      "reset_confirm": "Voulez-vous vraiment désactiver la synchronisation du calendrier ?",
+      "reset_success": "Synchronisation désactivée.",
+      "reset_error": "Erreur lors de la désactivation."
     },
     "confirm_delete": "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?",
     "delete_success": "Compte supprimé avec succès",

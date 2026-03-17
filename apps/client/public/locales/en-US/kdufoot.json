@@ -590,7 +590,8 @@
       "stadium_required": "Stadium address is required.",
       "siret_required": "SIRET (14 digits) or SIREN (9 digits) number required.",
       "form_incomplete": "Incomplete Form",
-      "form_incomplete_desc": "Please fill in all mandatory fields in red to maintain or activate your access."
+      "form_incomplete_desc": "Please fill in all mandatory fields in red to maintain or activate your access.",
+      "precised_location": "Please enter your city or an address to be visible."
     },
     "support": {
       "title": "Need help?",

@@ -18,6 +18,7 @@ interface ConfirmedTournamentCardProps {
   formatTime: (time: string) => string;
   onWithdraw?: () => void;
   isWithdrawing?: boolean;
+  userId?: string;
 }
 
 export const ConfirmedTournamentCard = ({
@@ -30,6 +31,7 @@ export const ConfirmedTournamentCard = ({
   formatTime,
   onWithdraw,
   isWithdrawing,
+  userId,
 }: ConfirmedTournamentCardProps) => {
   const { t } = useTranslation("kdufoot");
 
@@ -59,6 +61,8 @@ export const ConfirmedTournamentCard = ({
       ? "border-danger ring-4 ring-danger/30 shadow-danger/20"
       : "border-danger/50 bg-zinc-900/90 shadow-danger/10"
     : "border-violet-500/40 bg-zinc-900/90 shadow-xl hover:shadow-violet-500/20";
+
+  const isOwner = userId === part.owner_id;
 
   return (
     <Card
@@ -333,7 +337,7 @@ export const ConfirmedTournamentCard = ({
                 >
                   {t("dashboard.controls.contact")}
                 </Button>
-                {onWithdraw && (
+                {onWithdraw && !isOwner && (
                   <Button
                     className="flex-1 min-w-[120px] font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10"
                     color="danger"

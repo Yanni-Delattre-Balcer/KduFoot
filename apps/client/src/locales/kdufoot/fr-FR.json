@@ -88,7 +88,9 @@
       "exercises": "Analyser une vidéo",
       "sessions": "Trouver/créer un match / tournoi",
       "find_match": "Trouver ou créer un match",
-      "find_tournament": "Trouver ou créer un tournoi"
+      "find_tournament": "Trouver ou créer un tournoi",
+      "match": "Match",
+      "tournament": "Tournoi"
     },
     "description": "Analyse vidéo par IA & matchs amicaux entre clubs — deux outils, une seule plateforme.",
     "about": {
@@ -217,6 +219,7 @@
     "deleted_success": "Supprimé avec succès",
     "no_active_match": "Aucune annonce de match active.",
     "no_active_tournament": "Aucune annonce de tournoi active.",
+    "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",
     "demandes_recues": "Demandes Reçues",
     "mes_candidatures": "Mes Candidatures",
     "my_club_default": "Mon Club",
@@ -442,9 +445,10 @@
       "Non spécifié": "Non spécifié"
     },
     "format": {
-      "11v11": "11 vs 11",
-      "8v8": "8 vs 8",
-      "5v5": "5 vs 5",
+      "11v11": "11 contre 11",
+      "8v8": "8 contre 8",
+      "7v7": "7 contre 7",
+      "5v5": "5 contre 5",
       "Futsal": "Futsal"
     }
   },
@@ -638,11 +642,67 @@
       "home_jersey_required": "La couleur du maillot domicile est obligatoire.",
       "away_jersey_required": "La couleur du maillot extérieur est obligatoire.",
       "form_incomplete": "Formulaire incomplet",
-      "form_incomplete_desc": "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès."
+      "form_incomplete_desc": "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès.",
+      "precised_location": "Localisation précise"
     },
+
     "support": {
       "title": "Besoin d'aide ?",
-      "description": "Si vous ne trouvez pas votre club, si vous entraînez dans deux clubs différents, ou si vous changez de club, contactez notre support. Pour toute autre question (inscription, connexion, fonctionnement du site…), n'hésitez pas à nous écrire également."
+      "description": "Si vous ne trouvez pas votre club, si vous entraînez dans deux clubs différents, ou si vous changez de club, contactez notre support. Pour toute autre question (inscription, connexion, fonctionnement du site…), n'hésitez pas à nous écrire également.",
+      "technical_issue": "PROBLÈME TECHNIQUE ?",
+      "other_inquiry": "AUTRE DEMANDE ?"
+    },
+    "details": {
+      "status": {
+        "confirmed": "RENCONTRE CONFIRMÉE ! ✅",
+        "modified": "MATCH MODIFIÉ",
+        "modified_desc": "Certains détails ont changé",
+        "masked": "MATCH MASQUÉ",
+        "city_masked": "VILLE MASQUÉE",
+        "withdrawn": "Désistement",
+        "refused": "Demande refusée",
+        "accepted": "Équipe inscrite"
+      },
+      "labels": {
+        "precised_location": "Localisation précise",
+        "category": "Catégorie",
+        "level": "Niveau",
+        "pitch": "Terrain",
+        "format": "Format",
+        "date": "Date",
+        "time": "Horaire",
+        "venue": "Lieu",
+        "gender": "Genre",
+        "jersey_color": "Couleur de maillot",
+        "registrations": "Inscriptions",
+        "confirmed_teams": "Équipes confirmées",
+        "organizer_management": "Gestion de l'organisateur",
+        "modification_alert_title": "Des modifications ont été apportées",
+        "modification_alert_desc": "Les champs en rouge ont été modifiés par l'organisateur.",
+        "wish_to_participate": "Vous souhaitez faire participer votre équipe ?"
+      },
+      "buttons": {
+        "itinerary": "Itinéraire",
+        "call": "Appeler",
+        "email": "Email",
+        "withdraw_my_request": "🗑️ Annuler ma demande",
+        "view_changes": "J'AI VU LES MODIFICATIONS"
+      },
+      "modal": {
+        "withdraw_title": "Retirer ma candidature",
+        "withdraw_desc": "Es-tu sûr de vouloir retirer ta candidature pour ce match ?",
+        "withdraw_confirm": "Oui, retirer",
+        "cancel_confirmed_title": "Annuler le duel confirmé",
+        "cancel_confirmed_desc": "Attention : Vous allez annuler ce duel. L'adversaire sera notifié et l'annonce redeviendra ouverte. Continuer ?",
+        "block_user_title": "Bloquer l'utilisateur",
+        "block_reason_label": "Raison du blocage",
+        "block_confirm": "Bloquer"
+      },
+      "admin": {
+        "moderation_tools": "Outils Modération (ADMIN)",
+        "delete_ad": "Supprimer l'annonce",
+        "block_user": "Bloquer l'utilisateur"
+      }
     },
     "siret": {
       "warning_title": "Attention : Une fois le SIRET validé et le club lié à votre compte, cette action est irréversible.",
@@ -657,9 +717,11 @@
       "contact_support": "📩 CONTACTER LE SUPPORT"
     },
     "sync": {
-      "reset_confirm": "Voulez-vous modifier votre synchronisation ?\n\nVotre page de synchronisation va se réouvrir pour vous permettre de vous connecter.",
-      "reset_success": "Action enregistrée. La page de synchronisation va se réouvrir.",
-      "reset_error": "Erreur lors de la réinitialisation de la synchronisation."
+      "active": "Calendrier Synchronisé ✅",
+      "disabled": "Calendrier non connecté ❌",
+      "reset_confirm": "Voulez-vous vraiment désactiver la synchronisation du calendrier ?",
+      "reset_success": "Synchronisation désactivée.",
+      "reset_error": "Erreur lors de la désactivation."
     },
     "confirm_delete": "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?",
     "delete_success": "Compte supprimé avec succès",

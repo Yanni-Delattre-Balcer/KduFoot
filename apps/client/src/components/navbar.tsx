@@ -213,8 +213,8 @@ export const Navbar = () => {
         />
       </NavbarContent>
 
-      <NavbarMenu className="bg-background/95 backdrop-blur-md pt-6 border-t border-default-100">
-        <div className="mx-4 mt-2 flex flex-col gap-2">
+      <NavbarMenu className="bg-background/95 backdrop-blur-md pt-20 border-t border-default-100">
+        <div className="mx-4 flex flex-col gap-2">
           {siteConfig().navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
               <LinkUniversal

@@ -85,7 +85,9 @@
       "exercises": "Analyze a video",
       "sessions": "Find a match / tournament",
       "find_match": "Find a match",
-      "find_tournament": "Find a tournament"
+      "find_tournament": "Find a tournament",
+      "match": "Match",
+      "tournament": "Tournament"
     },
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
     "about": {
@@ -626,9 +628,11 @@
       "nameless_club": "Unnamed Club"
     },
     "sync": {
-      "reset_confirm": "Do you want to change your synchronization?\n\nYour synchronization page will reopen to allow you to connect.",
-      "reset_success": "Action saved. The synchronization page will reopen.",
-      "reset_error": "Error resetting synchronization."
+      "active": "Calendar Synced ✅",
+      "disabled": "Calendar not connected ❌",
+      "reset_confirm": "Do you really want to disable calendar synchronization?",
+      "reset_success": "Synchronization disabled.",
+      "reset_error": "Error during deactivation."
     },
     "errors": {
       "firstname_required": "First name is required.",

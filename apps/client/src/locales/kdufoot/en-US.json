@@ -85,7 +85,9 @@
       "exercises": "Analyze a video",
       "sessions": "Find a match / tournament",
       "find_match": "Find a match",
-      "find_tournament": "Find a tournament"
+      "find_tournament": "Find a tournament",
+      "match": "Match",
+      "tournament": "Tournament"
     },
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
     "about": {
@@ -446,6 +448,7 @@
     "format": {
       "11v11": "11 vs 11",
       "8v8": "8 vs 8",
+      "7v7": "7 vs 7",
       "5v5": "5 vs 5",
       "Futsal": "Futsal"
     }
@@ -596,6 +599,58 @@
       "club_location": "Club & Location",
       "sync": "Synchronization"
     },
+    "details": {
+      "status": {
+        "confirmed": "MATCH CONFIRMED! ✅",
+        "modified": "MATCH MODIFIED",
+        "modified_desc": "Some details have changed",
+        "masked": "MASKED MATCH",
+        "city_masked": "CITY MASKED",
+        "withdrawn": "Withdrawn",
+        "refused": "Request refused",
+        "accepted": "Team registered"
+      },
+      "labels": {
+        "precised_location": "Precise Location",
+        "category": "Category",
+        "level": "Level",
+        "pitch": "Pitch",
+        "format": "Format",
+        "date": "Date",
+        "time": "Time",
+        "venue": "Venue",
+        "gender": "Gender",
+        "jersey_color": "Jersey Color",
+        "registrations": "Registrations",
+        "confirmed_teams": "Confirmed Teams",
+        "organizer_management": "Organizer Management",
+        "modification_alert_title": "Changes have been made",
+        "modification_alert_desc": "Fields in red have been modified by the organizer.",
+        "wish_to_participate": "Do you want to involve your team?"
+      },
+      "buttons": {
+        "itinerary": "Get Directions",
+        "call": "Call",
+        "email": "Email",
+        "withdraw_my_request": "🗑️ Cancel my request",
+        "view_changes": "I'VE SEEN THE CHANGES"
+      },
+      "modal": {
+        "withdraw_title": "Withdraw my application",
+        "withdraw_desc": "Are you sure you want to withdraw your application for this match?",
+        "withdraw_confirm": "Yes, withdraw",
+        "cancel_confirmed_title": "Cancel confirmed match",
+        "cancel_confirmed_desc": "Warning: You are about to cancel this confirmed match. The opponent will be notified and the ad will open again. Continue?",
+        "block_user_title": "Block User",
+        "block_reason_label": "Block Reason",
+        "block_confirm": "Block"
+      },
+      "admin": {
+        "moderation_tools": "Moderation Tools (ADMIN)",
+        "delete_ad": "Delete Ad",
+        "block_user": "Block User"
+      }
+    },
     "fields": {
       "firstname": "First Name",
       "lastname": "Last Name",
@@ -626,9 +681,11 @@
       "nameless_club": "Unnamed Club"
     },
     "sync": {
-      "reset_confirm": "Do you want to change your synchronization?\n\nYour synchronization page will reopen to allow you to connect.",
-      "reset_success": "Action saved. The synchronization page will reopen.",
-      "reset_error": "Error resetting synchronization."
+      "active": "Calendar Synced ✅",
+      "disabled": "Calendar not connected ❌",
+      "reset_confirm": "Do you really want to disable calendar synchronization?",
+      "reset_success": "Synchronization disabled.",
+      "reset_error": "Error during deactivation."
     },
     "errors": {
       "firstname_required": "First name is required.",

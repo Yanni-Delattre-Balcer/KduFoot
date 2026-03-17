@@ -31,12 +31,12 @@ import DataWall from "@/components/data-wall";
 import { JerseyColorDots } from "@/components/jersey-color-dots";
 import DefaultLayout from "@/layouts/default";
 
-const formatDate = (dateStr: string) => {
+const formatDate = (dateStr: string, locale: string = "fr-FR") => {
   try {
     const [year, month, day] = dateStr.split("-");
     const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
 
-    return new Intl.DateTimeFormat("fr-FR", {
+    return new Intl.DateTimeFormat(locale, {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -52,11 +52,11 @@ const formatTime = (timeStr: string) => {
   return timeStr.replace(":", "h");
 };
 
-const formatTimestamp = (ts: number, t: any) => {
+const formatTimestamp = (ts: number, t: any, locale: string = "fr-FR") => {
   try {
     const date = new Date(ts * 1000);
 
-    return new Intl.DateTimeFormat("fr-FR", {
+    return new Intl.DateTimeFormat(locale, {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -66,11 +66,11 @@ const formatTimestamp = (ts: number, t: any) => {
   }
 };
 
-const formatTimestampTime = (ts: number) => {
+const formatTimestampTime = (ts: number, locale: string = "fr-FR") => {
   try {
     const date = new Date(ts * 1000);
 
-    return date.toLocaleTimeString("fr-FR", {
+    return date.toLocaleTimeString(locale, {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -80,7 +80,7 @@ const formatTimestampTime = (ts: number) => {
 };
 
 export default function DashboardPage() {
-  const { t } = useTranslation("kdufoot");
+  const { t, i18n } = useTranslation("kdufoot");
   const {
     isOpen: isProfileOpen,
     onOpen: onProfileOpen,
@@ -201,7 +201,7 @@ export default function DashboardPage() {
       match_date: matchDate,
       requester_club_name: clubName,
     } = request;
-    const key = `${matchId}-${userId}`;
+    const key = `${matchId}-${userId}-${status}`;
 
     setActionLoading((prev) => ({ ...prev, [key]: true }));
     try {
@@ -225,8 +225,8 @@ export default function DashboardPage() {
     } catch (error: any) {
       console.error("Action error:", error);
       addToast({
-        title: "Erreur",
-        description: error.message || "Erreur lors de l'action",
+        title: t("base.error.title", "Erreur"),
+        description: error.message || t("base.error.action_failed", "Erreur lors de l'action"),
         color: "danger",
       });
     } finally {
@@ -253,8 +253,8 @@ export default function DashboardPage() {
     } catch (error: any) {
       console.error("Action error:", error);
       addToast({
-        title: "Erreur",
-        description: error.message || "Erreur lors du désistement",
+        title: t("base.error.title", "Erreur"),
+        description: error.message || t("base.error.action_failed", "Erreur lors du désistement"),
         color: "danger",
       });
     } finally {
@@ -352,20 +352,14 @@ export default function DashboardPage() {
       opponent_city: r.requester_city,
       opponent_category: r.requester_category,
       opponent_level: r.requester_level,
-      category: r.category,
-      level: r.level,
-      opponent_firstname: r.requester_firstname,
-      opponent_lastname: r.requester_lastname,
-      opponent_phone: r.requester_phone,
-      opponent_email: r.requester_email,
-      opponent_pitch_type: r.requester_pitch_type || r.host_pitch_type,
-      opponent_club_colors: r.requester_club_colors,
-      opponent_stadium_address: r.requester_stadium_address,
       opponent_club_address: r.requester_club_address,
       // If organizer created match as 'home', organizer plays at home
       isUserHome: r.match_type === "tournament" || r.venue === "Domicile",
       max_teams: r.match_max_teams,
       accepted_count: r.accepted_count,
+      format: r.match_format || r.format,
+      category: r.match_category || r.category,
+      level: r.match_level || r.level,
     }));
 
   const acceptedParticipations = (myParticipations || [])
@@ -383,13 +377,6 @@ export default function DashboardPage() {
       opponent_city: p.host_city || p.location_city,
       opponent_category: p.host_category || p.match_category,
       opponent_level: p.host_level || p.match_level,
-      category: p.match_category || p.category,
-      level: p.match_level || p.level,
-      opponent_firstname: p.host_firstname,
-      opponent_lastname: p.host_lastname,
-      opponent_phone: p.host_phone,
-      opponent_email: p.host_email,
-      opponent_pitch_type: p.match_pitch_type || p.host_pitch_type,
       opponent_club_colors: p.host_club_colors,
       opponent_stadium_address: p.host_stadium_address,
       // If organizer created match as 'away', organizer plays away, so participant plays at home.
@@ -398,6 +385,9 @@ export default function DashboardPage() {
         p.match_type === "tournament" ? false : p.venue === "Extérieur",
       max_teams: p.match_max_teams,
       accepted_count: p.accepted_count,
+      format: p.match_format || p.format,
+      category: p.match_category || p.category,
+      level: p.match_level || p.level,
     }));
 
   const allConfirmedMatches = [
@@ -749,7 +739,7 @@ export default function DashboardPage() {
                                     })}
                                   </span>
                                   <span className="text-sm font-black text-white mt-0.5">
-                                    {formatDate(request.match_date)} à{" "}
+                                    {formatDate(request.match_date, i18n.language)} à{" "}
                                     {formatTime(request.match_time)}
                                   </span>
                                 </div>
@@ -778,7 +768,7 @@ export default function DashboardPage() {
                                   color="success"
                                   isLoading={
                                     actionLoading[
-                                      `${request.match_id}-${request.requester_user_id}`
+                                      `${request.match_id}-${request.requester_user_id}-accepted`
                                     ]
                                   }
                                   size="lg"
@@ -789,14 +779,14 @@ export default function DashboardPage() {
                                     handleRequestAction(request, "accepted")
                                   }
                                 >
-                                  Accepter
+                                  {t("dashboard.controls.accept", "Accepter")}
                                 </Button>
                                 <Button
                                   className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-rose-500/20 w-full sm:w-auto text-lg"
                                   color="danger"
                                   isLoading={
                                     actionLoading[
-                                      `${request.match_id}-${request.requester_user_id}`
+                                      `${request.match_id}-${request.requester_user_id}-refused`
                                     ]
                                   }
                                   size="lg"
@@ -807,7 +797,7 @@ export default function DashboardPage() {
                                     handleRequestAction(request, "refused")
                                   }
                                 >
-                                  Refuser
+                                  {t("dashboard.controls.refuse", "Refuser")}
                                 </Button>
                             </div>
                             <Button
@@ -910,6 +900,7 @@ export default function DashboardPage() {
                         onWithdraw={() =>
                           handleWithdraw(cm.match_id, user?.id || "")
                         }
+                        userId={user?.id}
                       />
                     ))
                   ) : (
@@ -994,6 +985,7 @@ export default function DashboardPage() {
                         onWithdraw={() =>
                           handleWithdraw(part.match_id, user?.id || "")
                         }
+                        userId={user?.id}
                       />
                     ))
                   ) : (

@@ -91,7 +91,7 @@ const InfoItem = ({
 
 export default function MatchDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, profileComplete, isAdmin, blockUser } = useUser();
   const { isAuthenticated } = useAuth();
@@ -160,7 +160,8 @@ export default function MatchDetailsPage() {
   });
 
   const matchKnownData = knownData[id || ""];
-  const isModified = participation?.notification_state === 1;
+  const isOwner = user?.id === match.owner_id;
+  const isModified = !isOwner && participation?.notification_state === 1;
 
   const [showPulse, setShowPulse] = useState(true);
 
@@ -580,7 +581,7 @@ export default function MatchDetailsPage() {
                       <div className="w-full">
                         <h1 className="text-xl md:text-3xl font-black text-white leading-tight tracking-tighter mb-2 break-words overflow-wrap-anywhere">
                           {isMasked
-                            ? "MATCH MASQUÉ"
+                            ? t("details.status.masked")
                             : match.type === "tournament"
                               ? match.name
                               : match.club?.name}
@@ -600,7 +601,7 @@ export default function MatchDetailsPage() {
                           </svg>
                           <span className="whitespace-normal text-left overflow-wrap-anywhere">
                             {isMasked
-                              ? "VILLE MASQUÉE"
+                              ? t("details.status.city_masked")
                               : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
                           </span>
                         </p>
@@ -610,7 +611,7 @@ export default function MatchDetailsPage() {
                         <div className="flex flex-col gap-3 pt-2">
                           <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-3">
                             <p className="text-[10px] text-default-400 font-black tracking-widest mb-1">
-                              Localisation précise
+                              {t("details.labels.precised_location")}
                             </p>
                             <p className="text-white font-bold text-sm break-words overflow-wrap-anywhere">
                               {match.location_address || match.club?.address}
@@ -633,7 +634,7 @@ export default function MatchDetailsPage() {
                             target="_blank"
                             variant="shadow"
                           >
-                            Itinéraire
+                            {t("details.buttons.itinerary")}
                           </Button>
                         </div>
                       )}
@@ -648,7 +649,7 @@ export default function MatchDetailsPage() {
                   color="primary"
                   highlight={highlights.category}
                   icon="⚽"
-                  label="Catégorie"
+                  label={t("details.labels.category")}
                   showPulse={showPulse}
                   value={t(`enums.category.${match.category}`)}
                 />
@@ -656,31 +657,31 @@ export default function MatchDetailsPage() {
                   color="secondary"
                   highlight={highlights.level}
                   icon="⭐"
-                  label="Niveau"
+                  label={t("details.labels.level")}
                   showPulse={showPulse}
                   value={
                     match.level
                       ? t(`enums.level.${match.level}`)
-                      : "Non spécifié"
+                      : t("common:not_provided", "Non renseigné")
                   }
                 />
                 <InfoItem
                   color="success"
                   highlight={highlights.pitch}
                   icon="🏟️"
-                  label="Terrain"
+                  label={t("details.labels.pitch")}
                   showPulse={showPulse}
                   value={
                     match.pitch_type
                       ? t(`enums.pitch.${match.pitch_type}`)
-                      : "Toutes surfaces"
+                      : t("enums.pitch.all")
                   }
                 />
                 <InfoItem
                   color="warning"
                   highlight={highlights.format}
                   icon="👥"
-                  label="Format"
+                  label={t("details.labels.format")}
                   showPulse={showPulse}
                   value={t(`enums.format.${match.format}`, match.format)}
                 />
@@ -688,10 +689,10 @@ export default function MatchDetailsPage() {
                   color="primary"
                   highlight={highlights.date}
                   icon="📅"
-                  label="Date"
+                  label={t("details.labels.date")}
                   showPulse={showPulse}
                   value={new Date(match.match_date).toLocaleDateString(
-                    "fr-FR",
+                    i18n.language,
                     { day: "numeric", month: "long" },
                   )}
                 />
@@ -699,7 +700,7 @@ export default function MatchDetailsPage() {
                   color="primary"
                   highlight={highlights.time}
                   icon="🕒"
-                  label="Horaire"
+                  label={t("details.labels.time")}
                   showPulse={showPulse}
                   value={`${formatTime(match.match_time)}${match.match_end_time ? ` - ${formatTime(match.match_end_time)}` : ""}`}
                 />
@@ -707,7 +708,7 @@ export default function MatchDetailsPage() {
                   color="secondary"
                   highlight={highlights.venue}
                   icon={match.venue === "Domicile" ? "🏠" : "🚗"}
-                  label="Lieu"
+                  label={t("details.labels.venue")}
                   showPulse={showPulse}
                   value={t(`enums.venue.${match.venue}`)}
                 />
@@ -803,7 +804,7 @@ export default function MatchDetailsPage() {
             <div className="flex flex-col gap-4">
               <Card className="shadow-2xl border-none bg-linear-to-br from-primary/10 to-secondary/10 overflow-hidden">
                 <CardHeader className="font-black bg-primary/20 text-white justify-center tracking-widest text-xs py-3 border-b border-white/5">
-                  Action Requise
+                  {t("details.labels.organizer_management")}
                 </CardHeader>
                 <CardBody className="gap-6 p-8">
                   {user?.id === match.owner_id ? (
@@ -811,7 +812,7 @@ export default function MatchDetailsPage() {
                       {match.contacts?.some((c) => c.status === "accepted") ? (
                         <div className="bg-emerald-500/20 border-2 border-emerald-500/30 p-5 rounded-[2rem] space-y-4 mb-4 animate-appearance-in">
                           <p className="text-emerald-400 font-black text-center text-sm tracking-widest flex items-center justify-center gap-2">
-                            Confirmé ✅
+                            {t("details.status.confirmed")}
                           </p>
                           <Button
                             className="w-full font-black tracking-tighter h-12 rounded-2xl shadow-lg shadow-rose-500/20"
@@ -826,7 +827,7 @@ export default function MatchDetailsPage() {
                         </div>
                       ) : (
                         <p className="text-default-400 text-sm font-bold tracking-wide opacity-60">
-                          Gestion de l'organisateur
+                          {t("details.labels.organizer_management")}
                         </p>
                       )}
                       <Button
@@ -858,10 +859,10 @@ export default function MatchDetailsPage() {
                           <div className="flex flex-col items-center gap-2">
                             <span className="text-2xl animate-bounce">⚠️</span>
                             <p className="text-rose-400 font-black text-center text-sm tracking-widest leading-tight">
-                              MATCH MODIFIÉ
+                              {t("details.status.modified", "MATCH MODIFIÉ")}
                             </p>
                             <p className="text-rose-300 text-[10px] font-bold opacity-80 text-center">
-                              Certains détails ont changé
+                              {t("details.status.modified_desc", "Certains détails ont changé")}
                             </p>
                           </div>
                           <Button
@@ -870,7 +871,7 @@ export default function MatchDetailsPage() {
                             variant="solid"
                             onPress={handleMarkAsRead}
                           >
-                            J'ai vu les changements
+                            {t("details.buttons.view_changes", "J'ai vu les changements")}
                           </Button>
                         </div>
                       )}
@@ -1191,10 +1192,10 @@ export default function MatchDetailsPage() {
                                 className={`py-1.5 px-3 rounded-xl border border-current/20 font-black text-[10px] text-center tracking-widest ${statusConfig.color}`}
                               >
                                 {contact.status === "accepted"
-                                  ? "Équipe inscrite"
+                                  ? t("details.status.accepted")
                                   : contact.status === "refused"
-                                    ? "Demande refusée"
-                                    : "Désistement"}
+                                    ? t("details.status.refused")
+                                    : t("details.status.withdrawn")}
                               </div>
                             )}
 
@@ -1208,7 +1209,7 @@ export default function MatchDetailsPage() {
                                   navigate("/dashboard?tab=requests")
                                 }
                               >
-                                Voir la demande
+                                {t("details.buttons.view_request", "Voir la demande")}
                               </Button>
                             )}
                           </CardBody>
@@ -1240,12 +1241,11 @@ export default function MatchDetailsPage() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter p-4 sm:p-6">
-                    Retirer ma candidature
+                    {t("details.modal.withdraw_title")}
                   </ModalHeader>
                   <ModalBody className="p-4 pt-2 sm:p-6 sm:pt-2">
                     <p className="text-default-400 font-medium">
-                      Es-tu sûr de vouloir retirer ta candidature pour ce match
-                      ?
+                      {t("details.modal.withdraw_desc")}
                     </p>
                   </ModalBody>
                   <ModalFooter>
@@ -1262,7 +1262,7 @@ export default function MatchDetailsPage() {
                       isLoading={isCancelling}
                       onPress={handleCancelRequest}
                     >
-                      Oui, retirer
+                      {t("details.modal.withdraw_confirm")}
                     </Button>
                   </ModalFooter>
                 </>
@@ -1280,7 +1280,7 @@ export default function MatchDetailsPage() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1 text-red-500 font-black tracking-tighter p-4 sm:p-6">
-                    Supprimer l'annonce
+                    {t("details.admin.delete_ad")}
                   </ModalHeader>
                   <ModalBody className="p-4 pt-2 sm:p-6 sm:pt-2">
                     <p className="text-default-400 font-medium">
@@ -1321,7 +1321,7 @@ export default function MatchDetailsPage() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">
-                    Suppression Modérateur (Admin)
+                    {t("details.admin.moderation_tools")}
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium italic">
@@ -1361,7 +1361,7 @@ export default function MatchDetailsPage() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">
-                    Bloquer l'utilisateur
+                    {t("details.admin.block_user")}
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium mb-2">
@@ -1371,8 +1371,8 @@ export default function MatchDetailsPage() {
                     <Textarea
                       isRequired
                       className="mt-2"
-                      label="Raison du blocage"
-                      placeholder="Saisissez la raison du blocage (ex: Comportement inapproprié, multiples désistements...)"
+                      label={t("details.modal.block_reason_label")}
+                      placeholder={t("details.modal.block_reason_placeholder", "Saisissez la raison du blocage (ex: Comportement inapproprié, multiples désistements...)")}
                       value={blockReason}
                       variant="bordered"
                       onValueChange={setBlockReason}
@@ -1396,7 +1396,7 @@ export default function MatchDetailsPage() {
                         onClose();
                       }}
                     >
-                      Bloquer
+                      {t("details.modal.block_confirm")}
                     </Button>
                   </ModalFooter>
                 </>
@@ -1414,7 +1414,7 @@ export default function MatchDetailsPage() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">
-                    Clôturer les inscriptions
+                    {t("details.labels.registrations")}
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium">
@@ -1469,12 +1469,11 @@ export default function MatchDetailsPage() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1 text-white font-black tracking-tighter">
-                    {match.type === "tournament" ? "Annuler le tournoi confirmé" : "Annuler le duel confirmé"}
+                    {t("details.modal.cancel_confirmed_title")}
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium">
-                      Attention : Vous allez annuler {match.type === "tournament" ? "ce tournoi confirmé" : "ce duel"}. L'adversaire sera
-                      notifié et l'annonce redeviendra ouverte. Continuer ?
+                      {t("details.modal.cancel_confirmed_desc")}
                     </p>
                   </ModalBody>
                   <ModalFooter>

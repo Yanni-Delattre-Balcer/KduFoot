@@ -4,6 +4,8 @@
   "warning": "Attention",
   "info": "Information",
   "loading": "Chargement...",
+  "edit": "Modifier",
+  "choose_file": "Choisir un fichier",
   "base": {
     "success": "Succès",
     "edit": "Mettre à jour",
@@ -638,7 +640,8 @@
       "home_jersey_required": "La couleur du maillot domicile est obligatoire.",
       "away_jersey_required": "La couleur du maillot extérieur est obligatoire.",
       "form_incomplete": "Formulaire incomplet",
-      "form_incomplete_desc": "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès."
+      "form_incomplete_desc": "Veuillez remplir tous les champs obligatoires en rouge pour maintenir ou activer votre accès.",
+      "precised_location": "Veuillez renseigner votre ville ou une adresse pour être visible."
     },
     "support": {
       "title": "Besoin d'aide ?",
