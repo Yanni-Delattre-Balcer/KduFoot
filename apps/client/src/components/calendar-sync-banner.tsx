@@ -160,7 +160,7 @@ export const CalendarSyncBanner: React.FC = () => {
                 {t("onboarding.calendar.title")}
               </h3>
               <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mt-0.5">
-                Nouveauté
+                {t("onboarding.calendar.new_feature", "Nouveauté")}
               </p>
             </div>
           </div>

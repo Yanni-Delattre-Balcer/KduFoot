@@ -41,7 +41,6 @@
   "switch-to-light-mode": "Passer en mode clair",
   "rejected": "Refusé",
   "refused": "Refusé",
-  "Genre": "Genre",
   "profile_incomplete": "Complète ton profil club pour postuler à ce match",
   "site": {
     "description": "Kdufoot réunit deux outils essentiels pour les éducateurs de football : l'analyse vidéo pilotée par IA et la recherche de matchs amicaux entre clubs."
@@ -138,6 +137,7 @@
       "organizer_management": "Gestion de l'organisateur",
       "precised_location": "Localisation précise",
       "jersey_color": "Couleur de maillot",
+      "gender": "Genre",
       "category": "Catégorie",
       "level": "Niveau",
       "pitch": "Terrain",
@@ -259,11 +259,12 @@
     "other_inquiry_subject": "Autre Demande - Kdufoot",
     "need_help": "Besoin d'aide ?",
     "technical_issue_desc": "Bugs, problèmes techniques...",
-    "other_inquiry_desc": "Sponsors, publicité, partenariats..."
+    "other_inquiry_desc": "Sponsors, publicités, partenariats..."
   },
   "onboarding": {
     "calendar": {
-      "title": "Synchroniser mon calendrier",
+      "title": "Synchronisation Calendrier",
+      "new_feature": "Nouveauté",
       "description": "Synchronisez vos rencontres directement avec votre calendrier pour des rappels intelligents et un suivi en temps réel.",
       "button": "Connecter mon calendrier",
       "native": "Calendrier Natif",

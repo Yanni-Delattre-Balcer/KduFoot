@@ -77,8 +77,8 @@
     "buttons": {
       "exercises": "Analyze a video",
       "sessions": "Find a match / tournament",
-      "match": "Find a match",
-      "tournament": "Find a tournament"
+      "match": "Find or create a match",
+      "tournament": "Find or create a tournament"
     },
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
     "about": {
@@ -126,6 +126,7 @@
       "organizer_management": "Organizer Management",
       "precised_location": "Precise location",
       "jersey_color": "Jersey Color",
+      "gender": "Gender",
       "category": "Category",
       "level": "Level",
       "pitch": "Pitch",
@@ -251,9 +252,10 @@
   },
   "onboarding": {
     "calendar": {
-      "title": "Don't miss any match!",
-      "description": "Sync your matches directly with your calendar for smart reminders and real-time tracking.",
-      "button": "Connect my calendar",
+      "title": "Synchronization",
+      "new_feature": "New",
+      "description": "Calendar not connected",
+      "button": "Sync now",
       "native": "Native Calendar",
       "later": "Maybe later",
       "dismiss": "I've already done it",
