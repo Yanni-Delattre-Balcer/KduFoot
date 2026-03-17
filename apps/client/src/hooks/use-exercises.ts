@@ -11,7 +11,7 @@ import {
 } from "../types/exercise.types";
 
 export function useExercises(filters?: ExerciseFilters) {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   const fetcher = async (url: string) => {
     let token: string | null = null;
@@ -45,7 +45,10 @@ export function useExercises(filters?: ExerciseFilters) {
 
   const key = `/api/exercises?${query.toString()}`;
 
-  const { data, error, isLoading, mutate } = useSWR(key, fetcher);
+  const { data, error, isLoading, mutate } = useSWR(
+    isAuthenticated ? key : null,
+    fetcher,
+  );
 
   const createExercise = useCallback(
     async (dto: CreateExerciseDto) => {
@@ -89,7 +92,7 @@ export function useExercises(filters?: ExerciseFilters) {
 }
 
 export function useExercise(id: string | null) {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   const fetcher = async (url: string) => {
     let token: string | null = null;
@@ -114,7 +117,7 @@ export function useExercise(id: string | null) {
   };
 
   const { data, error, isLoading } = useSWR(
-    id ? `/api/exercises/${id}` : null,
+    isAuthenticated && id ? `/api/exercises/${id}` : null,
     fetcher,
   );
 

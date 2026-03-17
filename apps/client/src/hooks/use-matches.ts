@@ -12,7 +12,7 @@ import {
 } from "../types/match.types";
 
 export function useMatches(filters?: MatchFilters) {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const { mutate: globalMutate } = useSWRConfig();
 
   const fetcher = async (url: string) => {
@@ -49,7 +49,10 @@ export function useMatches(filters?: MatchFilters) {
 
   const key = `/api/matches?${query.toString()}`;
 
-  const { data, error, isLoading, mutate } = useSWR(key, fetcher);
+  const { data, error, isLoading, mutate } = useSWR(
+    isAuthenticated ? key : null,
+    fetcher,
+  );
 
   const createMatch = useCallback(
     async (dto: CreateMatchDto) => {
@@ -173,7 +176,7 @@ export function useMatches(filters?: MatchFilters) {
 }
 
 export function useMatch(id: string | null) {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   const fetcher = async (url: string) => {
     let token: string | null = null;
@@ -200,7 +203,7 @@ export function useMatch(id: string | null) {
   };
 
   const { data, error, isLoading, mutate } = useSWR(
-    id ? `/api/matches/${id}` : null,
+    isAuthenticated && id ? `/api/matches/${id}` : null,
     fetcher,
   );
 
