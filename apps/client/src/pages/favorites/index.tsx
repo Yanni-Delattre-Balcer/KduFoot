@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Spinner } from "@heroui/spinner";
 import { Link } from "react-router-dom";
 import { Chip } from "@heroui/chip";
+import { useAuth0 } from "@auth0/auth0-react";
 
 import FootballClock from "../../components/football-clock";
 import { showVideoAnalysis } from "../../config/site";
@@ -19,6 +20,7 @@ import DataWall from "@/components/data-wall";
 
 export default function FavoritesPage() {
   const { t, i18n } = useTranslation();
+  const { isAuthenticated } = useAuth0();
   const { favorites, toggleFavorite } = useFavorites();
   const { exercises, isLoading: loadingEx } = useExercises();
   const { matches, isLoading: loadingMatches } = useMatches();
@@ -33,23 +35,30 @@ export default function FavoritesPage() {
   const [favTournaments, setFavTournaments] = useState<Match[]>([]);
 
   useEffect(() => {
-    if (exercises && favorites?.exercises) {
+    if (isAuthenticated && exercises && favorites?.exercises) {
       setFavExercises(
         exercises.filter((e) => favorites.exercises.includes(e.id)),
       );
+    } else if (!isAuthenticated) {
+      setFavExercises([]);
     }
-  }, [exercises, favorites]);
+  }, [exercises, favorites, isAuthenticated]);
 
   useEffect(() => {
-    if (matches && favorites?.matches) {
-      setFavMatches(matches.filter((m) => favorites.matches.includes(m.id)));
+    if (isAuthenticated && matches && favorites) {
+      if (favorites.matches) {
+        setFavMatches(matches.filter((m) => favorites.matches.includes(m.id)));
+      }
+      if (favorites.tournaments) {
+        setFavTournaments(
+          matches.filter((m) => favorites.tournaments.includes(m.id)),
+        );
+      }
+    } else if (!isAuthenticated) {
+      setFavMatches([]);
+      setFavTournaments([]);
     }
-    if (matches && favorites?.tournaments) {
-      setFavTournaments(
-        matches.filter((m) => favorites.tournaments.includes(m.id)),
-      );
-    }
-  }, [matches, favorites]);
+  }, [matches, favorites, isAuthenticated]);
 
   return (
     <DefaultLayout maxWidth="max-w-full">
