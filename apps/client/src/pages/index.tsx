@@ -50,9 +50,7 @@ export default function IndexPage() {
               </h1>
               <div className="max-w-[280px] sm:max-w-md md:max-w-lg">
                 <p className="text-default-500 text-sm sm:text-base leading-relaxed break-words overflow-wrap-anywhere">
-                  {showVideoAnalysis
-                    ? t("homePage.description")
-                    : t("homePage.description_fallback", "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics.")}
+                  {t("homePage.hero.description", "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics.")}
                 </p>
               </div>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">

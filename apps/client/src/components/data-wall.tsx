@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 
@@ -14,6 +15,7 @@ export const DataWall: React.FC<DataWallProps> = ({
   message: customMessage,
   children,
 }) => {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading: isAuthLoading, login } = useAuth();
   const {
     isLoading: isProfileLoading,
@@ -41,7 +43,7 @@ export const DataWall: React.FC<DataWallProps> = ({
           <div className="flex items-center gap-3">
             <Spinner color="white" size="sm" />
             <span className="text-sm font-black tracking-tighter text-white/80">
-              Vérification du profil...
+              {t("data_wall.checking_profile")}
             </span>
           </div>
         </div>
@@ -62,14 +64,14 @@ export const DataWall: React.FC<DataWallProps> = ({
           <div className="pointer-events-auto bg-black/60 border border-white/10 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-3 backdrop-blur-md max-w-md">
             <span className="text-lg">🔒</span>
             <span className="text-sm font-bold text-white/70 leading-tight">
-              Connectez-vous pour accéder aux données.
+              {t("data_wall.login_to_access")}
             </span>
             <Button
               className="bg-white/20 text-white font-bold text-xs sm:text-sm tracking-tight rounded-xl h-7 px-3 shrink-0 border border-white/10 hover:bg-white/30 transition-colors"
               size="sm"
               onPress={() => login()}
             >
-              Connexion
+              {t("data_wall.login_button")}
             </Button>
           </div>
         </div>
@@ -102,11 +104,11 @@ export const DataWall: React.FC<DataWallProps> = ({
           </div>
 
           <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white text-center leading-tight max-w-md tracking-tight mb-2">
-            Pour accéder à ces données, veuillez vous connecter à votre compte
+            {t("data_wall.main_title")}
           </h2>
 
           <p className="text-white/40 text-xs sm:text-sm font-medium mb-6 sm:mb-8 text-center">
-            Rejoignez la communauté KduFoot en quelques secondes.
+            {t("data_wall.subtitle")}
           </p>
 
           <div className="flex flex-col gap-3 w-full max-w-xs">
@@ -117,7 +119,7 @@ export const DataWall: React.FC<DataWallProps> = ({
                 login({ authorizationParams: { screen_hint: "signup" } })
               }
             >
-              S'inscrire
+              {t("data_wall.signup")}
             </Button>
 
             <Button
@@ -126,13 +128,13 @@ export const DataWall: React.FC<DataWallProps> = ({
               variant="bordered"
               onPress={() => login()}
             >
-              Se connecter
+              {t("data_wall.login")}
             </Button>
 
             <div className="flex items-center gap-3 w-full my-1">
               <div className="h-px bg-white/20 flex-1" />
               <span className="text-xs sm:text-sm font-bold text-white/30 tracking-widest">
-                ou
+                {t("data_wall.or")}
               </span>
               <div className="h-px bg-white/20 flex-1" />
             </div>
@@ -165,7 +167,7 @@ export const DataWall: React.FC<DataWallProps> = ({
                 login({ authorizationParams: { connection: "google-oauth2" } })
               }
             >
-              Continuer avec Google
+              {t("data_wall.google")}
             </Button>
           </div>
 
@@ -177,7 +179,7 @@ export const DataWall: React.FC<DataWallProps> = ({
               setDismissed(true);
             }}
           >
-            Continuer comme visiteur
+            {t("data_wall.visitor")}
           </Button>
         </div>
       </div>
@@ -212,13 +214,11 @@ export const DataWall: React.FC<DataWallProps> = ({
           </div>
 
           <h2 className="text-base sm:text-xl font-black text-white leading-snug tracking-tight">
-            {customMessage ||
-              "Complétez votre profil Coach pour accéder à ces données"}
+            {customMessage || t("data_wall.complete_profile")}
           </h2>
 
           <p className="text-white/40 text-[10px] sm:text-xs font-medium leading-relaxed">
-            Renseignez votre Identité, Club, Sportif et Équipement pour débloquer
-            l'accès complet.
+            {t("data_wall.complete_profile_desc")}
           </p>
 
           <Button
@@ -226,7 +226,7 @@ export const DataWall: React.FC<DataWallProps> = ({
             size="lg"
             onPress={() => setIsAccountModalOpen(true)}
           >
-            Remplir mon profil
+            {t("data_wall.fill_profile_button")}
           </Button>
         </div>
       </div>

@@ -29,6 +29,7 @@ import {
 import { PageNotFound } from "./pages/404";
 import { UnifiedOnboarding } from "./components/unified-onboarding";
 
+import { ErrorBoundary } from "./components/error-boundary";
 import IndexPage from "@/pages/index";
 import ApiPage from "@/pages/api";
 import PricingPage from "@/pages/pricing/index";
@@ -89,89 +90,91 @@ function App() {
   }
 
   return (
-    <Suspense fallback={<SiteLoading />}>
-      <TrainingProvider>
-        <UserSync />
-        <UnifiedOnboarding />
-        <Routes>
-          <Route element={<IndexPage />} path="/" />
-          <Route
-            element={<AuthenticationGuard component={ApiPage} />}
-            path="/api"
-          />
-          <Route
-            element={<AuthenticationGuard component={PricingPage} />}
-            path="/pricing"
-          />
-          <Route
-            element={<AuthenticationGuard component={BlogPage} />}
-            path="/blog"
-          />
-          <Route element={<AboutPage />} path="/about" />
-          <Route element={<ThankYouPage />} path="/remerciements" />
-          <Route element={<PageNotFound />} path="*" />
-          {showVideoAnalysis && (
-            <>
-              <Route element={<ExercisesPage />} path="/exercises" />
-              <Route element={<TrainingPage />} path="/training" />
-            </>
-          )}
-          <Route element={<FavoritesPage />} path="/favorites" />
-          {showVideoAnalysis && (
-            <>
-              <Route
-                element={<AuthenticationGuard component={ExerciseEditPage} />}
-                path="/exercises/new"
-              />
-              <Route
-                element={<AuthenticationGuard component={ExerciseEditPage} />}
-                path="/exercises/:id/edit"
-              />
-              <Route
-                element={
-                  <AuthenticationGuard component={ExerciseDetailsPage} />
-                }
-                path="/exercises/:id"
-              />
-            </>
-          )}
-          <Route element={<SessionPlannerPage />} path="/sessions" />
-          <Route
-            element={<AuthenticationGuard component={SessionEditPage} />}
-            path="/sessions/new"
-          />
-          <Route
-            element={<AuthenticationGuard component={SessionEditPage} />}
-            path="/sessions/:id/edit"
-          />
-          <Route
-            element={<AuthenticationGuard component={SessionDetailsPage} />}
-            path="/sessions/:id"
-          />
-          <Route element={<DashboardPage />} path="/dashboard" />
-          <Route element={<MatchesPage />} path="/matches" />
-          <Route
-            element={<AuthenticationGuard component={MatchEditPage} />}
-            path="/matches/new"
-          />
-          <Route
-            element={<AuthenticationGuard component={MatchEditPage} />}
-            path="/matches/:id/edit"
-          />
-          <Route element={<MatchDetailsPage />} path="/matches/:id" />
-          <Route
-            element={<AuthenticationGuard component={AccountPage} />}
-            path="/account"
-          />
-          <Route
-            element={
-              <AuthenticationGuard component={UsersAndPermissionsPage} />
-            }
-            path="/admin/users"
-          />
-        </Routes>
-      </TrainingProvider>
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<SiteLoading />}>
+        <TrainingProvider>
+          <UserSync />
+          <UnifiedOnboarding />
+          <Routes>
+            <Route element={<IndexPage />} path="/" />
+            <Route
+              element={<AuthenticationGuard component={ApiPage} />}
+              path="/api"
+            />
+            <Route
+              element={<AuthenticationGuard component={PricingPage} />}
+              path="/pricing"
+            />
+            <Route
+              element={<AuthenticationGuard component={BlogPage} />}
+              path="/blog"
+            />
+            <Route element={<AboutPage />} path="/about" />
+            <Route element={<ThankYouPage />} path="/remerciements" />
+            <Route element={<PageNotFound />} path="*" />
+            {showVideoAnalysis && (
+              <>
+                <Route element={<ExercisesPage />} path="/exercises" />
+                <Route element={<TrainingPage />} path="/training" />
+              </>
+            )}
+            <Route element={<FavoritesPage />} path="/favorites" />
+            {showVideoAnalysis && (
+              <>
+                <Route
+                  element={<AuthenticationGuard component={ExerciseEditPage} />}
+                  path="/exercises/new"
+                />
+                <Route
+                  element={<AuthenticationGuard component={ExerciseEditPage} />}
+                  path="/exercises/:id/edit"
+                />
+                <Route
+                  element={
+                    <AuthenticationGuard component={ExerciseDetailsPage} />
+                  }
+                  path="/exercises/:id"
+                />
+              </>
+            )}
+            <Route element={<SessionPlannerPage />} path="/sessions" />
+            <Route
+              element={<AuthenticationGuard component={SessionEditPage} />}
+              path="/sessions/new"
+            />
+            <Route
+              element={<AuthenticationGuard component={SessionEditPage} />}
+              path="/sessions/:id/edit"
+            />
+            <Route
+              element={<AuthenticationGuard component={SessionDetailsPage} />}
+              path="/sessions/:id"
+            />
+            <Route element={<DashboardPage />} path="/dashboard" />
+            <Route element={<MatchesPage />} path="/matches" />
+            <Route
+              element={<AuthenticationGuard component={MatchEditPage} />}
+              path="/matches/new"
+            />
+            <Route
+              element={<AuthenticationGuard component={MatchEditPage} />}
+              path="/matches/:id/edit"
+            />
+            <Route element={<MatchDetailsPage />} path="/matches/:id" />
+            <Route
+              element={<AuthenticationGuard component={AccountPage} />}
+              path="/account"
+            />
+            <Route
+              element={
+                <AuthenticationGuard component={UsersAndPermissionsPage} />
+              }
+              path="/admin/users"
+            />
+          </Routes>
+        </TrainingProvider>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

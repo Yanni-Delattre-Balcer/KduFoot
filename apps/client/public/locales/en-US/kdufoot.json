@@ -74,6 +74,9 @@
       "highlight": "Intelligent",
       "suffix": "assistant for amateur football"
     },
+    "hero": {
+      "description": "Kdufoot helps you find or publish friendly matches and tournaments around you in just a few clicks."
+    },
     "buttons": {
       "exercises": "Analyze a video",
       "sessions": "Find a match / tournament",
@@ -249,6 +252,21 @@
     "need_help": "Need help?",
     "technical_issue_desc": "Bugs, technical issues...",
     "other_inquiry_desc": "Sponsors, advertising, partnerships..."
+  },
+  "data_wall": {
+    "checking_profile": "Checking profile...",
+    "login_to_access": "Log in to access data.",
+    "login_button": "Log in",
+    "main_title": "To access this data, please log in to your account",
+    "subtitle": "Join the KduFoot community in seconds.",
+    "signup": "Sign up",
+    "login": "Log in",
+    "or": "or",
+    "google": "Continue with Google",
+    "visitor": "Continue as visitor",
+    "complete_profile": "Complete your Coach profile to access this data",
+    "complete_profile_desc": "Fill in your Identity, Club, Sports and Equipment to unlock full access.",
+    "fill_profile_button": "Fill my profile"
   },
   "onboarding": {
     "calendar": {

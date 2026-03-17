@@ -86,6 +86,9 @@
       "highlight": "Intelligent",
       "suffix": "pour le football amateur"
     },
+    "hero": {
+      "description": "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics."
+    },
     "buttons": {
       "exercises": "Analyser une vidéo",
       "sessions": "Trouver/créer un match / tournoi",
@@ -260,6 +263,21 @@
     "need_help": "Besoin d'aide ?",
     "technical_issue_desc": "Bugs, problèmes techniques...",
     "other_inquiry_desc": "Sponsors, publicités, partenariats..."
+  },
+  "data_wall": {
+    "checking_profile": "Vérification du profil...",
+    "login_to_access": "Connectez-vous pour accéder aux données.",
+    "login_button": "Connexion",
+    "main_title": "Pour accéder à ces données, veuillez vous connecter à votre compte",
+    "subtitle": "Rejoignez la communauté KduFoot en quelques secondes.",
+    "signup": "S'inscrire",
+    "login": "Se connecter",
+    "or": "ou",
+    "google": "Continuer avec Google",
+    "visitor": "Continuer comme visiteur",
+    "complete_profile": "Complétez votre profil Coach pour accéder à ces données",
+    "complete_profile_desc": "Renseignez votre Identité, Club, Sportif et Équipement pour débloquer l'accès complet.",
+    "fill_profile_button": "Remplir mon profil"
   },
   "onboarding": {
     "calendar": {
