@@ -159,7 +159,44 @@ export default function MatchDetailsPage() {
     }
   });
 
+  const isDifferent = (val1: any, val2: any) => {
+    if (!val1 || !val2) return false;
+    const s1 = String(val1 || "").trim().toLowerCase();
+    const s2 = String(val2 || "").trim().toLowerCase();
+    return s1 !== s2;
+  };
 
+  const matchKnownData = knownData[id || ""];
+  const isOwner = user?.id === match?.owner_id;
+  const isModified = !isOwner && participation?.notification_state === 1;
+
+  const highlights = {
+    date:
+      isModified &&
+      !!matchKnownData &&
+      isDifferent(match?.match_date, matchKnownData.date),
+    time:
+      isModified &&
+      !!matchKnownData &&
+      isDifferent(
+        match?.match_time?.slice(0, 5),
+        matchKnownData.time?.slice(0, 5),
+      ),
+    venue:
+      isModified && !!matchKnownData && isDifferent(match?.venue, matchKnownData.venue),
+    pitch:
+      isModified &&
+      !!matchKnownData &&
+      isDifferent(match?.pitch_type, matchKnownData.pitch),
+    format:
+      isModified && !!matchKnownData && isDifferent(match?.format, matchKnownData.format),
+    category:
+      isModified &&
+      !!matchKnownData &&
+      isDifferent(match?.category, matchKnownData.category),
+    level:
+      isModified && !!matchKnownData && isDifferent(match?.level, matchKnownData.level),
+  };
 
   const [showPulse, setShowPulse] = useState(true);
 
@@ -169,12 +206,7 @@ export default function MatchDetailsPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const isDifferent = (val1: any, val2: any) => {
-    if (!val1 || !val2) return false;
-    const s1 = String(val1 || "").trim().toLowerCase();
-    const s2 = String(val2 || "").trim().toLowerCase();
-    return s1 !== s2;
-  };
+
 
 
 
@@ -247,20 +279,6 @@ export default function MatchDetailsPage() {
     );
   }
 
-  // Logic that depends on 'match' being defined
-  const matchKnownData = knownData[id || ""];
-  const isOwner = user?.id === match.owner_id;
-  const isModified = !isOwner && participation?.notification_state === 1;
-
-  const highlights = {
-    date: isModified && !!matchKnownData && isDifferent(match.match_date, matchKnownData.date),
-    time: isModified && !!matchKnownData && isDifferent(match.match_time?.slice(0, 5), matchKnownData.time?.slice(0, 5)),
-    venue: isModified && !!matchKnownData && isDifferent(match.venue, matchKnownData.venue),
-    pitch: isModified && !!matchKnownData && isDifferent(match.pitch_type, matchKnownData.pitch),
-    format: isModified && !!matchKnownData && isDifferent(match.format, matchKnownData.format),
-    category: isModified && !!matchKnownData && isDifferent(match.category, matchKnownData.category),
-    level: isModified && !!matchKnownData && isDifferent(match.level, matchKnownData.level),
-  };
 
 
   const handleDelete = async () => {
