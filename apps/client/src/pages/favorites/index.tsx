@@ -17,7 +17,6 @@ import { useFavorites } from "@/hooks/use-favorites";
 import DefaultLayout from "@/layouts/default";
 import DataWall from "@/components/data-wall";
 import { ErrorBoundary } from "@/components/error-boundary";
-import { UnauthenticatedView } from "@/components/unauthenticated-view";
 
 export default function FavoritesPage() {
   const { t, i18n } = useTranslation();
@@ -46,16 +45,12 @@ export default function FavoritesPage() {
     return matches.filter((m) => favorites.tournaments.includes(m.id));
   }, [matches, favorites?.tournaments, isAuthenticated]);
 
-  if (!isAuthenticated) {
-    return <UnauthenticatedView title={t("nav.favorites")} />;
-  }
-
   return (
     <ErrorBoundary>
       <DefaultLayout maxWidth="max-w-full">
-      <section className="flex flex-col gap-6 w-full px-4">
-        {/* Hero - Mes Favoris */}
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-cyan-600/15 via-sky-500/10 to-blue-500/10 border border-cyan-500/20">
+        <section className="flex flex-col gap-8 w-full px-4 pt-2 pb-8 bg-black min-h-screen">
+          {/* Hero - Mes Favoris */}
+          <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-cyan-600/15 via-sky-500/10 to-blue-500/10 border border-cyan-500/20 mb-2">
           {/* Grass stripes - standard green */}
           <div
             className="absolute inset-0 opacity-[0.03]"
@@ -68,12 +63,11 @@ export default function FavoritesPage() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-linear-to-b from-transparent via-white/5 to-transparent" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-full border border-white/5" />
 
-          {/* Football clock - top right */}
           <div className="hidden md:block absolute top-4 right-4 z-10">
             <FootballClock size={140} />
           </div>
 
-          <div className="relative flex flex-col items-center gap-6 py-14 px-6 text-center">
+          <div className="relative flex flex-col items-center gap-6 py-12 px-8">
             <div className="flex flex-col items-center gap-4">
               <div className="p-3 rounded-2xl bg-cyan-500/10">
                 <svg
@@ -95,7 +89,7 @@ export default function FavoritesPage() {
                 {t("nav.favorites")}
               </h1>
             </div>
-            <p className="text-default-500 text-lg max-w-lg">
+            <p className="text-default-500 text-lg max-w-md mx-auto text-center">
               {view === "exercises"
                 ? t("favorites.description_exercises")
                 : t("favorites.description_matches")}
