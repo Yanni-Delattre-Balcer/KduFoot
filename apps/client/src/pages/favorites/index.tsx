@@ -16,6 +16,8 @@ import { useExercises } from "@/hooks/use-exercises";
 import { useFavorites } from "@/hooks/use-favorites";
 import DefaultLayout from "@/layouts/default";
 import DataWall from "@/components/data-wall";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { UnauthenticatedView } from "@/components/unauthenticated-view";
 
 export default function FavoritesPage() {
   const { t, i18n } = useTranslation();
@@ -44,8 +46,13 @@ export default function FavoritesPage() {
     return matches.filter((m) => favorites.tournaments.includes(m.id));
   }, [matches, favorites?.tournaments, isAuthenticated]);
 
+  if (!isAuthenticated) {
+    return <UnauthenticatedView title={t("nav.favorites")} />;
+  }
+
   return (
-    <DefaultLayout maxWidth="max-w-full">
+    <ErrorBoundary>
+      <DefaultLayout maxWidth="max-w-full">
       <section className="flex flex-col gap-6 w-full px-4">
         {/* Hero - Mes Favoris */}
         <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-cyan-600/15 via-sky-500/10 to-blue-500/10 border border-cyan-500/20">
@@ -565,5 +572,6 @@ export default function FavoritesPage() {
         </DataWall>
       </section>
     </DefaultLayout>
+    </ErrorBoundary>
   );
 }
