@@ -831,6 +831,12 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       )}
                     </p>
                   )}
+                  {!dbUser?.club_id && (
+                    <p className="text-xs text-default-500 leading-relaxed order-1 mt-1">
+                      💼{" "}
+                      {t("matchForm.link_club.enterprise_help")}
+                    </p>
+                  )}
                   <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start order-2">
                     <div className="flex-1 flex flex-col gap-1">
                       <Input

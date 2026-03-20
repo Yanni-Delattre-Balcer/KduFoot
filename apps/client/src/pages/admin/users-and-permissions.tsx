@@ -37,7 +37,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Input } from "@heroui/input";
 
 import DefaultLayout from "@/layouts/default";
-import { useSecuredApi } from "@/authentication";
+import { useSecuredApi, updateUserInCache } from "@/authentication";
 import { useUser } from "@/hooks/use-user";
 import { Permission } from "@/types/permissions";
 
@@ -319,21 +319,11 @@ export default function UsersAndPermissionsPage() {
     setForceSiret(false);
     loadSirets(userId);
     try {
-      const perms: Auth0Permission[] = await getUserPermissions(
-        mgmtToken,
-        userId,
-      );
-      const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? "";
-      const permNames = perms
-        .filter((p) => {
-          if (!audience) return true;
-          const rs = p.resource_server_identifier ?? "";
-
-          return (
-            rs === audience || rs.includes(audience) || audience.includes(rs)
-          );
-        })
-        .map((p) => p.permission_name);
+      // Instead of relying on a slow Auth0 fetch which has indexing delays (eventual consistency),
+      // we use the directly managed React state which guarantees up-to-date data
+      // thanks to our optimistic UI updates.
+      const targetUserForEditing = users.find((u) => u.user_id === userId);
+      const permNames = targetUserForEditing?.app_metadata?.permissions || [];
 
       const permState: Record<string, boolean> = {};
 
@@ -341,11 +331,9 @@ export default function UsersAndPermissionsPage() {
         permState[perm.key] = permNames.includes(perm.value);
       }
 
-      const targetUserForEditing = users.find((u) => u.user_id === userId);
-
       // Injection de toutes les permissions pour le Super Admin dans le modal d'édition
       if (targetUserForEditing?.email === SUPER_ADMIN_EMAIL) {
-        Object.values(Permission).forEach(p => {
+        Object.values(Permission).forEach((p) => {
           if (p === Permission.ROLE_BLOCKED) return;
           const key = (p as string).replace(/:/g, "_");
           permState[key] = true;
@@ -627,8 +615,36 @@ export default function UsersAndPermissionsPage() {
       setEditing((prev) => ({ ...prev, [userId]: {} }));
       setSelectedUserId(null);
 
-      // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
-      if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
+      updateUserInCache(userId, (u: any) => {
+        const prevPerms = u.app_metadata?.permissions || [];
+        let updatedPerms = prevPerms.filter((p: string) => !toRemove.includes(p));
+        toAdd.forEach((newP) => {
+          if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
+        });
+
+        let newBlockedState = u.blocked;
+        let newBlockReason = u.block_reason;
+
+        if (handleBlockLogic) {
+          newBlockedState = targetBlockState;
+          newBlockReason = targetBlockState ? "Suspension administrative" : null;
+          if (targetBlockState && !updatedPerms.includes(Permission.ROLE_BLOCKED)) {
+            updatedPerms.push(Permission.ROLE_BLOCKED);
+          } else if (!targetBlockState) {
+            updatedPerms = updatedPerms.filter((p: string) => p !== Permission.ROLE_BLOCKED);
+          }
+        }
+
+        return {
+          ...u,
+          blocked: newBlockedState,
+          block_reason: newBlockReason,
+          app_metadata: {
+            ...u.app_metadata,
+            permissions: updatedPerms,
+          },
+        };
+      });
     } catch (err) {
       console.error(err);
       addToast({
@@ -753,8 +769,15 @@ export default function UsersAndPermissionsPage() {
       // Action de bannissement réelle (inclut mutate(CONTEXT_KEY))
       await blockUser(d1UserId, true, finalReason);
 
-      // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
-      if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
+      updateUserInCache(d1UserId, (u: any) => ({
+        ...u,
+        blocked: true,
+        block_reason: finalReason,
+        app_metadata: {
+          ...u.app_metadata,
+          permissions: [Permission.ROLE_BLOCKED],
+        },
+      }));
     } catch (err: any) {
       addToast({ title: "Erreur", description: err.message, color: "danger" });
     }
@@ -955,8 +978,9 @@ export default function UsersAndPermissionsPage() {
       await blockUser(d1UserId, false);
 
       // 2. Restaurer les permissions de base Auth0 (Abonné Free)
+      let freePerms: Permission[] = [];
       if (mgmtToken) {
-        const freePerms = [
+        freePerms = [
           Permission.READ_API,
           Permission.WRITE_API,
           Permission.EXERCISES_READ,
@@ -976,8 +1000,15 @@ export default function UsersAndPermissionsPage() {
         color: "success",
       });
 
-      // Silent refresh with a 1s delay to avoid race conditions with D1/Auth0 indexing
-      if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
+      updateUserInCache(d1UserId, (u: any) => ({
+        ...u,
+        blocked: false,
+        block_reason: null,
+        app_metadata: {
+          ...u.app_metadata,
+          permissions: Array.from(new Set([...(u.app_metadata?.permissions || []), ...freePerms])),
+        },
+      }));
     } catch (err: any) {
       addToast({
         title: "Erreur",

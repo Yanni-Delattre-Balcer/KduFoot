@@ -5,8 +5,11 @@ import { UserService } from '../services/user.service';
 import { CreateUserDto, UpdateUserDto } from '../types/user';
 import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
+import { checkPermissions } from '../auth0';
 import { validateClubSiret } from '../utils/siret.validator';
 import { broadcastDataChanged } from '../utils/broadcast';
+
+const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
 export const setupUserRoutes = (router: Router, env: Env) => {
     const userService = new UserService(env.DB);
@@ -404,10 +407,20 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
             const clubName = entreprise.nom_complet || entreprise.nom_raison_sociale || 'Club inconnu';
 
-            // SECURITY: SIRET Filtering (Strict Additions)
-            const validation = validateClubSiret(entreprise.activite_principale, clubName);
-            if (!validation.isValid) {
-                return Response.json({ success: false, error: validation.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            // SECURITY: SIRET Filtering — Admin/Super-Admin bypass NAF/APE check
+            let isAdminUser = user.email === SUPER_ADMIN_EMAIL;
+            if (!isAdminUser) {
+                try {
+                    const { access } = await checkPermissions(token, [Permission.ADMIN_AUTH0], env);
+                    isAdminUser = access;
+                } catch { /* not admin */ }
+            }
+
+            if (!isAdminUser) {
+                const validation = validateClubSiret(entreprise.activite_principale, clubName);
+                if (!validation.isValid) {
+                    return Response.json({ success: false, error: validation.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                }
             }
 
             const clubAddress = siege.adresse || '';

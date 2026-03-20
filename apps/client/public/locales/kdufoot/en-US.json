@@ -537,7 +537,8 @@
       "search_help": "To find your number, type on Google: \"SIRET + [Your exact club name]\". Example: \"SIRET RC Lens\".",
       "validate": "Validate and Link the club",
       "support": "In case of subsequent club change, contact support with proof.",
-      "linked": "Linked club"
+      "linked": "Linked club",
+      "enterprise_help": "If you are a company and want to organize matches between employees, you can use your SIRET. Contact us to unlock your access."
     },
     "progress": "Match announcement preparation",
     "buttons": {

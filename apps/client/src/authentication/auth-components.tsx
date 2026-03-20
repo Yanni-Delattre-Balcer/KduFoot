@@ -41,6 +41,27 @@ const setToCache = (key: string, data: any) => {
   mgmtCache[key] = { data, timestamp: Date.now() };
 };
 
+const deleteFromCache = (key: string) => {
+  delete mgmtCache[key];
+};
+
+/**
+ * Clears the cached user list so that the next loadUsers() call
+ * fetches fresh data from Auth0 Management API.
+ * Call this after saving permissions or blocking/unblocking users.
+ */
+export const clearUserListCache = () => {
+  deleteFromCache("users_list");
+};
+
+export const updateUserInCache = (userId: string, updateFn: (user: any) => any) => {
+  const cached = getFromCache("users_list");
+  if (cached && Array.isArray(cached)) {
+    const updated = cached.map((u) => (u.user_id === userId ? updateFn(u) : u));
+    setToCache("users_list", updated);
+  }
+};
+
 /**
  * Renders the user's profile name with a tooltip showing their username.
  * @returns The user's name with a tooltip showing their username

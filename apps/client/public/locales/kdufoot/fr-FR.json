@@ -535,7 +535,8 @@
       "search_help": "Pour trouver votre numéro, tapez sur Google : \"SIRET + [Nom exact de votre club]\". Exemple : \"SIRET RC Lens\".",
       "validate": "Valider et Lier le club",
       "support": "En cas de changement de club ultérieur, contactez le support avec justificatifs.",
-      "linked": "Club lié"
+      "linked": "Club lié",
+      "enterprise_help": "Si vous êtes une entreprise et que vous souhaitez organiser des matchs entre collaborateurs, vous pouvez utiliser votre SIRET. Contactez-nous pour débloquer votre accès."
     },
     "progress": "Préparation de l'annonce du match",
     "buttons": {
