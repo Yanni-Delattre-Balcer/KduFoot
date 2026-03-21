@@ -61,6 +61,7 @@ export const verifyToken = async (
 	const { payload } = await jose.jwtVerify(token, JWKS, {
 		issuer: `https://${env.AUTH0_DOMAIN}/`,
 		audience: env.AUTH0_AUDIENCE,
+		algorithms: ["RS256"],
 	});
 
 	return payload;

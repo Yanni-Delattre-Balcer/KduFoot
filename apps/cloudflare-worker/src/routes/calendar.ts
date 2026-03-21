@@ -69,7 +69,7 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
         });
 
         // 3. Tournaments I ORGANIZED (always visible)
-        owned.matches.forEach(m => {
+        owned.data.forEach(m => {
             if (m.type === 'tournament') {
                 // Don't overwrite if already set via participation logic (though unlikely to be host and guest)
                 if (!matchMap.has(m.id)) {

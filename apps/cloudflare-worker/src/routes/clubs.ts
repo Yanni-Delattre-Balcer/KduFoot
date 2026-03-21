@@ -49,7 +49,8 @@ export const setupClubRoutes = (router: Router, env: Env) => {
         }
 
         const clubs = await clubService.searchClubs(query);
-        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        const cacheHeaders = { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400" };
+        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, ...cacheHeaders, "Content-Type": "application/json" } });
     });
 
     /**
@@ -94,6 +95,7 @@ export const setupClubRoutes = (router: Router, env: Env) => {
         }
 
         const clubs = await clubService.getClubByCity(city);
-        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        const cacheHeaders = { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400" };
+        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, ...cacheHeaders, "Content-Type": "application/json" } });
     });
 };

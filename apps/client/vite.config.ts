@@ -93,6 +93,11 @@ export default defineConfig(({ mode }) => {
   );
 
   return {
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/test-setup.ts',
+    },
     envDir: "../../",
     base: env.VITE_BASE_PATH || "/",
     define: {

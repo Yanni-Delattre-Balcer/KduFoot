@@ -188,6 +188,16 @@ export const useAuth0Provider = (): AuthProvider => {
   const requestCacheRef = useRef<Map<string, Promise<any>>>(new Map());
 
   const handleGlobalError = useCallback(async (response: Response) => {
+    if (response.status === 429) {
+      addToast({
+        title: "Forte affluence",
+        description: "Nos serveurs sont très sollicités. Veuillez patienter un instant.",
+        variant: "flat",
+        color: "warning",
+        timeout: 5000,
+      });
+    }
+    
     if (response.status === 403) {
       const text = await response
         .clone()

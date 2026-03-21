@@ -87,8 +87,10 @@ export function useSessions(filters?: SessionFilters) {
   );
 
   return {
-    sessions: (data?.sessions as TrainingSession[]) || [],
-    total: (data?.total as number) || 0,
+    sessions: (data?.data as TrainingSession[]) ?? (data?.sessions as TrainingSession[]) ?? [],
+    nextCursor: (data?.nextCursor as string | null) ?? null,
+    hasMore: (data?.hasMore as boolean) ?? false,
+    total: (data?.total as number) ?? 0,
     isLoading,
     isError: error,
     createSession,

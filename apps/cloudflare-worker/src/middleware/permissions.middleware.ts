@@ -37,9 +37,23 @@ export async function checkPermission(
      */
     if (payload?.sub) {
         try {
-            const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ is_blocked: number, block_reason: string }>();
-            if (dbUser && dbUser.is_blocked === 1) {
-                return { hasPermission: false, reason: dbUser.block_reason || 'Utilisateur bloqué', statusCode: 403 };
+            const cacheKey = `user:blocked:${payload.sub}`;
+            const cachedStatus = await env.KV_CACHE.get(cacheKey);
+            
+            if (cachedStatus !== null) {
+                if (cachedStatus === '1') {
+                    return { hasPermission: false, reason: 'Utilisateur bloqué', statusCode: 403 };
+                }
+            } else {
+                const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ is_blocked: number, block_reason: string }>();
+                const isBlocked = dbUser && dbUser.is_blocked === 1;
+                
+                // Cache the status for 1 hour to reduce D1 pressure
+                await env.KV_CACHE.put(cacheKey, isBlocked ? '1' : '0', { expirationTtl: 3600 });
+                
+                if (isBlocked) {
+                    return { hasPermission: false, reason: dbUser?.block_reason || 'Utilisateur bloqué', statusCode: 403 };
+                }
             }
         } catch (error) {
             console.error('Error checking blocked status:', error);
@@ -54,7 +68,7 @@ export async function checkPermission(
      */
     const quotaCheck = await checkQuota(request, env, permission, token, payload);
 
-    return quotaCheck.hasPermission ? { hasPermission: true, quota: quotaCheck.quota } : quotaCheck;
+    return quotaCheck.hasPermission ? { hasPermission: true, quota: quotaCheck.quota, payload } : quotaCheck;
 }
 
 async function checkQuota(

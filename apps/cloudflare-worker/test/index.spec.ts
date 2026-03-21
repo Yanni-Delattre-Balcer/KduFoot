@@ -35,17 +35,17 @@ describe('Hello World worker', () => {
 
 		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
 		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
+		expect(await response.text()).toMatchInlineSnapshot(`"KduFoot API is running"`);
 	});
 
 	it('responds with Hello World! (integration style)', async () => {
 		const response = await SELF.fetch('https://example.com');
 
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
+		expect(await response.text()).toMatchInlineSnapshot(`"KduFoot API is running"`);
 	});
 
 	// check with a fake JWKT token
-	it('responds with Hello World! (integration style)', async () => {
+	it('responds with Hello World! (integration style) with fake token', async () => {
 		const request = new IncomingRequest('http://example.com', {
 			headers: {
 				Authorization: 'Bearer fake-jwt-token',
@@ -53,8 +53,15 @@ describe('Hello World worker', () => {
 		});
 		const ctx = createExecutionContext();
 		const response = await worker.fetch(request, env, ctx);
-
 		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
+		expect(await response.text()).toMatchInlineSnapshot(`"KduFoot API is running"`);
+	});
+
+	it('responds with 401 on /api/me/export without token', async () => {
+		const request = new IncomingRequest('http://example.com/api/me/export');
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
+		expect(response.status).toBe(401);
 	});
 });

@@ -7,7 +7,6 @@ import { Button } from "@heroui/button";
 import { Link, useSearchParams } from "react-router-dom";
 import { Chip } from "@heroui/chip";
 import { Select, SelectItem } from "@heroui/select";
-import { Spinner } from "@heroui/spinner";
 import { Input } from "@heroui/input";
 
 import FootballClock from "../../components/football-clock";
@@ -41,6 +40,7 @@ import DataWall from "@/components/data-wall";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { useAuth } from "@/authentication";
+import { MatchListSkeleton } from "@/components/skeletons/match-skeleton";
 
 export default function MatchesPage() {
   const { t, i18n } = useTranslation();
@@ -1137,6 +1137,10 @@ export default function MatchesPage() {
                       </div>
                     )}
 
+                    {isLoading && filteredMatches.length === 0 && (
+                      <MatchListSkeleton />
+                    )}
+
                     <div
                       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                       id="results-list"
@@ -1152,7 +1156,7 @@ export default function MatchesPage() {
                           >
                             <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
                               {user?.id === match.owner_id && (
-                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-500 to-amber-500 text-white text-xs sm:text-sm font-bold px-2 py-0.5 rounded-full shadow-lg">
+                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-600 to-amber-700 text-white text-xs sm:text-sm font-bold px-2 py-0.5 rounded-full shadow-lg">
                                   <svg
                                     className="w-3 h-3"
                                     fill="currentColor"
@@ -1428,15 +1432,7 @@ export default function MatchesPage() {
                       })}
                     </div>
 
-                    {isLoading && filteredMatches.length === 0 && (
-                      <div className="flex justify-center py-20">
-                        <Spinner
-                          aria-label={t("loading")}
-                          color="secondary"
-                          size="lg"
-                        />
-                      </div>
-                    )}
+
 
                     {!isLoading && filteredMatches.length === 0 && !isError && (
                       <Card className="border border-violet-800/50 bg-[#232120] overflow-hidden">

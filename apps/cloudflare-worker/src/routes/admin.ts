@@ -11,7 +11,7 @@ import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast'
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 const SUPREME_MASTER_ID = '6f62d717-2136-49d7-8c51-fee07eaeebce';
 
-export const setupAdminRoutes = (router: Router, env: Env) => {
+export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
     const userService = new UserService(env.DB);
     const matchService = new MatchService(env.DB);
 
@@ -24,7 +24,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
             const authHeader = request.headers.get('Authorization');
             if (!authHeader) return null;
             const token = authHeader.substring(7);
-            const payload = JSON.parse(atob(token.split('.')[1]));
+            const payload = (request as any).user || {};
 
             // Try direct email claim first (may exist in some configurations)
             if (payload.email) return payload.email;
@@ -68,7 +68,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
         try {
             const authHeader = request.headers.get('Authorization')!;
             const token = authHeader.substring(7);
-            const payload = JSON.parse(atob(token.split('.')[1]));
+            const payload = (request as any).user || {};
             const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
             return dbUser?.id || null;
         } catch {
@@ -97,7 +97,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             return Response.json({ success: true, message: 'Match deleted by admin' }, { headers: router.corsHeaders });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     });
 
@@ -130,7 +130,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             return Response.json({ success: true, message: 'User deleted from D1' }, { headers: router.corsHeaders });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     });
 
@@ -145,13 +145,18 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: router.corsHeaders });
         }
 
-        // We already check Permission.ADMIN_AUTH0 above, but checkAdmin provides email/id based immunity checks elsewere,
-        // so we keep it here for consistency if needed, but broaden it.
         if (!await checkAdmin(request)) {
             return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
         }
 
+        const url = new URL(request.url);
+        const limit = parseInt(url.searchParams.get('limit') || '50');
+        const offset = parseInt(url.searchParams.get('offset') || '0');
+
         try {
+            const countRes = await env.DB.prepare('SELECT count(*) as total FROM users').first<{ total: number }>();
+            const total = countRes?.total || 0;
+
             const results = await env.DB.prepare(`
                 SELECT 
                     u.auth0_sub, 
@@ -161,7 +166,8 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
                     c.name as club_name
                 FROM users u
                 LEFT JOIN clubs c ON u.club_id = c.id
-            `).all<{ auth0_sub: string; is_blocked: number; block_reason: string | null; siret: string | null; club_name: string | null }>();
+                LIMIT ? OFFSET ?
+            `).bind(limit, offset).all<{ auth0_sub: string; is_blocked: number; block_reason: string | null; siret: string | null; club_name: string | null }>();
 
             const metadata = results.results?.map(u => ({
                 auth0_sub: u.auth0_sub,
@@ -171,9 +177,9 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
                 club_name: u.club_name
             })) || [];
 
-            return Response.json({ success: true, metadata }, { headers: router.corsHeaders });
+            return Response.json({ success: true, metadata, pagination: { total, limit, offset } }, { headers: router.corsHeaders });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     });
 
@@ -228,8 +234,8 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
                 await env.DB.prepare('UPDATE users SET block_count = block_count + 1 WHERE id = ?').bind(d1Id).run();
             }
 
-            await broadcastDataChanged(env);
-            await broadcastNotification(env, {
+            ctx.waitUntil(broadcastDataChanged(env));
+            ctx.waitUntil(broadcastNotification(env, {
                 type: 'NOTIFICATION',
                 notificationType: body.is_blocked ? 'USER_BANNED' : 'USER_UNBANNED',
                 targetUserId: (targetUser as any).auth0_sub,
@@ -237,10 +243,10 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
                     ? (body.block_reason || 'Aucun motif spécifié')
                     : 'Votre compte a été débloqué.',
                 data: { reason: body.block_reason }
-            });
+            }));
             return Response.json({ success: true, message: `User ${body.is_blocked ? 'blocked' : 'unblocked'}` }, { headers: router.corsHeaders });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     });
 
@@ -271,7 +277,8 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             return Response.json({ success: true, user: updated }, { headers: router.corsHeaders });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: router.corsHeaders });
+            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -348,16 +355,10 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
         }
 
         // Return updated list with names for immediate UI update
-        const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
+        const clubService = new (await import('../services/club.service')).ClubService(env);
         const additionalWithNames = await Promise.all(sirets.map(async (s) => {
-            try {
-                const r = await fetch(`${SIRET_API_URL}?q=${s}&page=1&per_page=1`);
-                if (r.ok) {
-                    const d: any = await r.json();
-                    return { siret: s, name: d.results?.[0]?.nom_complet || 'Inconnu' };
-                }
-            } catch (e) { }
-            return { siret: s, name: 'Chargement...' };
+            const validation = await clubService.validateSiret(s);
+            return { siret: s, name: validation.clubName || 'Inconnu' };
         }));
 
         return Response.json({
@@ -435,7 +436,7 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
                 }
             }
         } catch (e: any) {
-            if (!body.force) return Response.json({ success: false, error: e.message }, { status: 400, headers: router.corsHeaders });
+            if (!body.force) return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: router.corsHeaders });
         }
 
         // Create or get club ID
@@ -573,43 +574,28 @@ export const setupAdminRoutes = (router: Router, env: Env) => {
         }
 
         // Fetch names for all SIRETs
-        const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
+        const clubService = new (await import('../services/club.service')).ClubService(env);
 
-        const primary_siret = user.siret;
         let primary_name = null;
-        if (primary_siret) {
-            try {
-                const r = await fetch(`${SIRET_API_URL}?q=${primary_siret}&page=1&per_page=1`);
-                if (r.ok) {
-                    const d: any = await r.json();
-                    primary_name = d.results?.[0]?.nom_complet || primary_siret;
-                }
-            } catch (e) { }
+        if (user.siret) {
+            const validation = await clubService.validateSiret(user.siret);
+            primary_name = validation.clubName || user.siret;
         }
 
         const additionalWithNames = await Promise.all(additional_sirets_raw.map(async (s) => {
             const currentSiret = typeof s === 'string' ? s : s.siret;
             const currentStadium = typeof s === 'object' ? s.stadium_address : null;
-            try {
-                const r = await fetch(`${SIRET_API_URL}?q=${currentSiret}&page=1&per_page=1`);
-                if (r.ok) {
-                    const d: any = await r.json();
-                    return {
-                        siret: currentSiret,
-                        name: d.results?.[0]?.nom_complet || currentSiret,
-                        city: d.results?.[0]?.siege?.libelle_commune || '',
-                        zip: d.results?.[0]?.siege?.code_postal || '',
-                        address: d.results?.[0]?.siege?.adresse || '',
-                        stadium_address: currentStadium
-                    };
-                }
-            } catch (e) { }
-            return { siret: currentSiret, name: currentSiret, stadium_address: currentStadium };
+            const validation = await clubService.validateSiret(currentSiret);
+            return {
+                siret: currentSiret,
+                name: validation.clubName || currentSiret,
+                stadium_address: currentStadium
+            };
         }));
 
         return Response.json({
             success: true,
-            primary_siret,
+            primary_siret: user.siret,
             primary_name,
             stadium_address: user.stadium_address,
             additional_sirets: additionalWithNames,

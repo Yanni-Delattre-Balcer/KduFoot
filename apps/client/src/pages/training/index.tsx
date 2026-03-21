@@ -159,6 +159,7 @@ export default function TrainingPage() {
                     </div>
                     <Button
                       isIconOnly
+                      aria-label={t("common.remove", "Supprimer")}
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                       color="danger"
                       size="sm"

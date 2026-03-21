@@ -8,6 +8,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 
 import { useExercise } from "@/hooks/use-exercises";
 import DefaultLayout from "@/layouts/default";
+import { sanitizeSvg } from "@/utils/sanitize";
 
 export default function ExerciseDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -144,7 +145,9 @@ export default function ExerciseDetailsPage() {
             </CardHeader>
             <CardBody className="flex items-center justify-center bg-white p-4">
               <div
-                dangerouslySetInnerHTML={{ __html: exercise.svg_schema }}
+                dangerouslySetInnerHTML={{ 
+                  __html: sanitizeSvg(exercise.svg_schema) 
+                }}
                 className="w-full max-w-2xl"
               />
             </CardBody>

@@ -78,7 +78,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
             theme: url.searchParams.get('theme') || undefined,
             userId: url.searchParams.get('userId') || undefined, // Filter by specific user
             limit: parseInt(url.searchParams.get('limit') || '20'),
-            offset: parseInt(url.searchParams.get('offset') || '0'),
+            cursor: url.searchParams.get('cursor') || undefined,
         };
 
         const result = await exerciseService.search(filters);
@@ -177,7 +177,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7); // Remove "Bearer " prefix
-        const payload = JSON.parse(atob(token.split('.')[1])); // Decode the middle part (Payload) of the JWT
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
 
         /**
          * Auth0 provides a 'sub' (subject) which is a unique string for the user.
@@ -195,7 +195,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
             const exercise = await exerciseService.create(dbUser.id, dto);
             return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -243,7 +243,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
@@ -257,7 +257,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
             return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -296,7 +296,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
@@ -308,7 +308,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 };

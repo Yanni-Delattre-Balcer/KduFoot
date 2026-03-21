@@ -85,7 +85,7 @@ export const CookieConsent: React.FC = () => {
         <ModalBody className="text-small font-normal text-default-700">
           <Trans i18nKey="cookie-consent" t={t} />
           &nbsp;
-          <Link className="text-small" href="#">
+          <Link className="text-small" href="/privacy">
             {t("cookie-policy")}
           </Link>
         </ModalBody>

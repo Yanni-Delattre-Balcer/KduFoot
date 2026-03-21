@@ -48,13 +48,8 @@ export class SessionService {
     }
 
     async getById(id: string): Promise<{ session: TrainingSession, exercises: SessionExercise[] } | null> {
-        const session = await this.db.prepare('SELECT * FROM training_sessions WHERE id = ?').bind(id).first<TrainingSession>();
-        if (!session) return null;
-
-        // Fetch exercises
-        // We also want to join with exercises table to get details
-        // D1 join syntax is standard SQL
-        const { results } = await this.db.prepare(
+        const sessionQuery = this.db.prepare('SELECT * FROM training_sessions WHERE id = ? AND deleted_at IS NULL').bind(id);
+        const exercisesQuery = this.db.prepare(
             `SELECT 
             se.session_id, se.exercise_id, se.order_index, se.duration as se_duration, se.players as se_players, se.adapted_data,
             e.id as e_id, e.user_id as e_user_id, e.title, e.synopsis, e.svg_schema, e.themes, 
@@ -64,20 +59,14 @@ export class SessionService {
          JOIN exercises e ON se.exercise_id = e.id 
          WHERE se.session_id = ? 
          ORDER BY se.order_index ASC`
-        ).bind(id).all();
+        ).bind(id);
 
-        // Map results to SessionExercise structure with embedded Exercise
-        // NOTE: SELECT * from joined tables will collide on ID and other fields.
-        // Proper way requires explicit column aliasing or careful extraction.
-        // For simplicity, let's assume raw results containing all columns.
-        // But since 'id' collides, 'exercises.id' might overwrite 'session_exercises... wait session_exercises has composite PK, no single ID.
-        // Exercises has ID.
+        const [sessionRes, exercisesRes] = await this.db.batch([sessionQuery, exercisesQuery]);
+        
+        const session = sessionRes.results[0] as TrainingSession;
+        if (!session) return null;
 
-        // Better query: select se specific columns, and e specific columns?
-        // Or just 2 queries if we want clean types. Or aliasing.
-
-        const exercises: SessionExercise[] = results.map((row: any) => {
-            // Construct Exercise object
+        const exercises: SessionExercise[] = exercisesRes.results.map((row: any) => {
             const exercise: Exercise = {
                 id: row.e_id,
                 user_id: row.e_user_id,
@@ -87,13 +76,12 @@ export class SessionService {
                 themes: row.themes,
                 created_at: row.e_created_at,
                 updated_at: row.e_updated_at,
-                // ... map other fields
                 nb_joueurs: row.nb_joueurs,
                 dimensions: row.dimensions,
                 materiel: row.materiel,
                 category: row.category,
                 level: row.level,
-                duration: row.e_duration, // careful with name collision if both have duration
+                duration: row.e_duration,
                 video_url: row.video_url,
                 thumbnail_url: row.thumbnail_url,
                 video_start_seconds: row.video_start_seconds
@@ -103,7 +91,7 @@ export class SessionService {
                 session_id: row.session_id,
                 exercise_id: row.exercise_id,
                 order_index: row.order_index,
-                duration: row.se_duration, // this is session_exercise duration
+                duration: row.se_duration,
                 players: row.se_players,
                 adapted_data: row.adapted_data,
                 exercise
@@ -114,15 +102,20 @@ export class SessionService {
     }
 
     async update(id: string, userId: string, dto: UpdateSessionDto): Promise<boolean> {
-        const existing = await this.db.prepare('SELECT user_id FROM training_sessions WHERE id = ?').bind(id).first<{ user_id: string }>();
+        const existing = await this.db.prepare('SELECT user_id FROM training_sessions WHERE id = ? AND deleted_at IS NULL').bind(id).first<{ user_id: string }>();
         if (!existing) return false;
         if (existing.user_id !== userId) throw new Error('Unauthorized');
 
         const now = Math.floor(Date.now() / 1000);
         const statements: any[] = [];
 
+        const allowedKeys = [
+            'name', 'category', 'level', 'total_duration', 
+            'constraints', 'status', 'scheduled_date'
+        ] as const;
+
         // Update main session fields
-        const keys = Object.keys(dto).filter(k => k !== 'exercises') as (keyof UpdateSessionDto)[];
+        const keys = Object.keys(dto).filter(k => allowedKeys.includes(k as any)) as (keyof UpdateSessionDto)[];
         if (keys.length > 0) {
             const setClauses: string[] = [];
             const values: any[] = [];
@@ -169,16 +162,16 @@ export class SessionService {
     }
 
     async delete(id: string, userId: string): Promise<boolean> {
-        const existing = await this.db.prepare('SELECT user_id FROM training_sessions WHERE id = ?').bind(id).first<{ user_id: string }>();
+        const existing = await this.db.prepare('SELECT user_id FROM training_sessions WHERE id = ? AND deleted_at IS NULL').bind(id).first<{ user_id: string }>();
         if (!existing) return false;
         if (existing.user_id !== userId) throw new Error('Unauthorized');
 
-        await this.db.prepare('DELETE FROM training_sessions WHERE id = ?').bind(id).run();
+        await this.db.prepare('UPDATE training_sessions SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?').bind(id).run();
         return true;
     }
 
-    async search(filters: SessionFilters): Promise<{ sessions: TrainingSession[], total: number }> {
-        let query = 'SELECT * FROM training_sessions WHERE 1=1';
+    async search(filters: SessionFilters): Promise<{ data: TrainingSession[], nextCursor: string | null, hasMore: boolean }> {
+        let query = 'SELECT id, user_id, name, category, level, total_duration, constraints, status, scheduled_date, created_at, updated_at FROM training_sessions WHERE deleted_at IS NULL';
         const params: any[] = [];
 
         if (filters.userId) {
@@ -201,18 +194,37 @@ export class SessionService {
             params.push(filters.to);
         }
 
-        query += ' ORDER BY scheduled_date ASC, created_at DESC'; // Upcoming first?
+        if (filters.cursor) {
+            try {
+                const cursorData = JSON.parse(atob(filters.cursor));
+                if (cursorData.scheduled_date && cursorData.id) {
+                    query += " AND (scheduled_date > ? OR (scheduled_date = ? AND id > ?))";
+                    params.push(cursorData.scheduled_date, cursorData.scheduled_date, cursorData.id);
+                }
+            } catch (e) { }
+        }
+
+        query += ' ORDER BY scheduled_date ASC, id ASC';
 
         if (filters.limit) {
             query += ' LIMIT ?';
-            params.push(filters.limit);
-        }
-        if (filters.offset) {
-            query += ' OFFSET ?';
-            params.push(filters.offset);
+            params.push(filters.limit + 1);
         }
 
         const { results } = await this.db.prepare(query).bind(...params).all<TrainingSession>();
-        return { sessions: results, total: results.length };
+
+        let hasMore = false;
+        if (filters.limit && results.length > filters.limit) {
+            hasMore = true;
+            results.pop();
+        }
+
+        let nextCursor: string | null = null;
+        if (hasMore && results.length > 0) {
+            const lastItem = results[results.length - 1];
+            nextCursor = btoa(JSON.stringify({ scheduled_date: lastItem.scheduled_date, id: lastItem.id }));
+        }
+
+        return { data: results, nextCursor, hasMore };
     }
 }

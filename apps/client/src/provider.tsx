@@ -38,6 +38,19 @@ export function Provider({ children }: { children: React.ReactNode }) {
       value={{
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
+        keepPreviousData: true,
+        onError: (error) => {
+          if (error?.status === 429) {
+            import("@heroui/toast").then(({ addToast }) => {
+              addToast({
+                title: "Forte affluence",
+                description: "Le serveur est saturé. La page sera actualisée automatiquement quand ce sera passé.",
+                color: "warning",
+                timeout: 5000,
+              });
+            });
+          }
+        }
       }}
     >
       <HeroUIProvider navigate={navigate} useHref={useHref}>

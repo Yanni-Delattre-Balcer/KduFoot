@@ -14,6 +14,7 @@ import FootballClock from "../../components/football-clock";
 import { useUser } from "../../hooks/use-user";
 import { useWelcomeGateway } from "../../contexts/welcome-gateway-context";
 import DataWall from "../../components/data-wall";
+import { ExerciseListSkeleton } from "../../components/skeletons/exercise-skeleton";
 
 export default function ExercisesPage() {
   const { t } = useTranslation();
@@ -22,7 +23,7 @@ export default function ExercisesPage() {
   const isInTraining = (id: string) =>
     selectedExercises.some((e) => e.id === id);
 
-  const { exercises, isError } = useExercises({});
+  const { exercises, isError, isLoading } = useExercises({});
   const { isLocked } = useUser();
   const { isVisitor, openGateway } = useWelcomeGateway();
 
@@ -229,6 +230,10 @@ export default function ExercisesPage() {
                 {exercises.length}
               </Chip>
             </div>
+
+            {isLoading && exercises.length === 0 && (
+              <ExerciseListSkeleton />
+            )}
 
             {isError && (
               <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">

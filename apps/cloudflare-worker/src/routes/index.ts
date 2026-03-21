@@ -170,7 +170,7 @@ import { Env } from "../types/env";
  * Main function to configure all application routes.
  * It takes a router instance and the environment configuration.
  */
-export const setupRoutes = (router: Router, env: Env) => {
+export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
 	/**
 	 * @openapi
 	 * /api/__auth0/token:
@@ -218,7 +218,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 				);
 			} catch (error) {
 				return new Response(
-					JSON.stringify({ success: false, error: String(error) }),
+					JSON.stringify({ success: false, error: 'Internal server error' }),
 					{
 						status: 500,
 						headers: { ...router.corsHeaders, "Content-Type": "application/json" },
@@ -259,7 +259,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 	 */
 	router.post(
 		"/api/__auth0/autopermissions",
-		async (request) => {
+		async (request, env, ctx) => {
 			try {
 				const autoPermsStr = env.AUTH0_AUTOMATIC_PERMISSIONS || "";
 				if (!autoPermsStr) {
@@ -293,7 +293,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 				});
 			} catch (error) {
 				return new Response(
-					JSON.stringify({ success: false, error: String(error) }),
+					JSON.stringify({ success: false, error: 'Internal server error' }),
 					{
 						status: 500,
 						headers: { ...router.corsHeaders, "Content-Type": "application/json" },
@@ -318,6 +318,22 @@ export const setupRoutes = (router: Router, env: Env) => {
 	 *     description: Upgrade to a WebSocket connection. Managed by the WEBSOCKET_HUB Durable Object.
 	 */
 	router.get("/api/ws", async (request: any): Promise<any> => {
+		const token = new URL(request.url).searchParams.get("token") || request.headers.get("Authorization")?.split(" ")[1];
+		
+		const { checkPermissions } = await import("../auth0");
+		const { access } = await checkPermissions(
+			token || "",
+			env.READ_PERMISSION,
+			env,
+		);
+
+		if (!access) {
+			return new Response(JSON.stringify({ success: false, error: "Insufficient permissions" }), {
+				status: 403,
+				headers: { ...router.corsHeaders, "Content-Type": "application/json" }
+			});
+		}
+
 		const id = env.WEBSOCKET_HUB.idFromName("global-hub");
 		const hub = env.WEBSOCKET_HUB.get(id) as any;
 		return hub.fetch(request as any) as any;
@@ -328,8 +344,8 @@ export const setupRoutes = (router: Router, env: Env) => {
 	setupClubRoutes(router, env);
 	setupExerciseRoutes(router, env);
 	setupSessionRoutes(router, env);
-	setupMatchRoutes(router, env);
-	setupAdminRoutes(router, env);
+	setupMatchRoutes(router, env, ctx);
+	setupAdminRoutes(router, env, ctx);
 	setupCalendarRoutes(router, env);
 	// Preserve the original root response for backwards compatibility
 	router.get("/", async () => {
@@ -416,12 +432,12 @@ export const setupRoutes = (router: Router, env: Env) => {
 				headers: { ...router.corsHeaders, "Content-Type": "application/json" },
 			});
 		} catch (e: any) {
-			return new Response(JSON.stringify({ success: false, error: e.message }), {
+			return new Response(JSON.stringify({ success: false, error: 'Internal server error' }), {
 				status: 500,
 				headers: { ...router.corsHeaders, "Content-Type": "application/json" },
 			});
 		}
-	});
+	}, env.ADMIN_AUTH0_PERMISSION);
 
 	/**
 	 * @openapi
@@ -470,7 +486,7 @@ export const setupRoutes = (router: Router, env: Env) => {
 	 */
 	router.get(
 		"/api/test-push",
-		async (request) => {
+		async (request, env, ctx) => {
 			const sub = router.jwtPayload.sub;
 			if (!sub) return Response.json({ success: false, error: 'Unauthorized' }, { status: 401, headers: router.corsHeaders });
 
@@ -482,13 +498,13 @@ export const setupRoutes = (router: Router, env: Env) => {
 			const subscription = JSON.parse(user.push_subscription);
 			const { broadcastNotification } = await import("../utils/broadcast");
 			
-			await broadcastNotification(env, {
+			ctx.waitUntil(broadcastNotification(env, {
 				type: 'NOTIFICATION',
 				notificationType: 'ENROLLMENT_ACCEPTED', // Use an existing type to trigger push
 				message: 'Test de notification Push KduFoot ! ' + new Date().toLocaleTimeString(),
 				targetUserId: sub,
 				data: { test: true }
-			});
+			}));
 
 			return Response.json({ success: true, message: 'Push test triggered' }, { headers: router.corsHeaders });
 		},

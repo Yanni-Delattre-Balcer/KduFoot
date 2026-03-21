@@ -59,6 +59,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
       size="md"
+      aria-labelledby="pwa-modal-title"
       onClose={() => onClose("dismissed")}
     >
       <ModalContent>
@@ -78,7 +79,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-white tracking-tighter italic leading-none">
+                  <h3 id="pwa-modal-title" className="text-2xl font-black text-white tracking-tighter italic leading-none">
                     Installer Kdufoot
                   </h3>
                   <p className="text-sm text-zinc-400 font-medium px-4">

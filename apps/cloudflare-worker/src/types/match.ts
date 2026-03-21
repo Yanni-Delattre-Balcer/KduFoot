@@ -115,7 +115,7 @@ export interface MatchFilters {
     from?: string; // Range
     to?: string;
     limit?: number;
-    offset?: number;
+    cursor?: string;
     ownerId?: string; // My matches
     // Distance filtering
     radius_km?: number;

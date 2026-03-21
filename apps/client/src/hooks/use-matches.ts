@@ -65,12 +65,13 @@ export function useMatches(filters?: MatchFilters) {
 
       mutate(
         (currentData: any) => {
-          if (!currentData || !currentData.matches) return currentData;
+          if (!currentData || (!currentData.data && !currentData.matches)) return currentData;
 
+          const currentList = currentData.data || currentData.matches || [];
           return {
             ...currentData,
-            matches: [newMatch, ...currentData.matches],
-            total: currentData.total + 1,
+            data: [newMatch, ...currentList],
+            total: (currentData.total || 0) + 1,
           };
         },
         false, // Do not immediately send a GET request behind since we just added it
@@ -106,12 +107,13 @@ export function useMatches(filters?: MatchFilters) {
       // Optimistic UI: Remove match from the current cache instantly
       mutate(
         (currentData: any) => {
-          if (!currentData || !currentData.matches) return currentData;
+          if (!currentData || (!currentData.data && !currentData.matches)) return currentData;
 
+          const currentList = currentData.data || currentData.matches || [];
           return {
             ...currentData,
-            matches: currentData.matches.filter((m: Match) => m.id !== id),
-            total: currentData.total - 1,
+            data: currentList.filter((m: Match) => m.id !== id),
+            total: (currentData.total || 0) - 1,
           };
         },
         false, // Do not revalidate immediately
@@ -145,11 +147,12 @@ export function useMatches(filters?: MatchFilters) {
 
       await matchService.closeRegistrations(id, token);
       mutate((currentData: any) => {
-        if (!currentData || !currentData.matches) return currentData;
+        if (!currentData || (!currentData.data && !currentData.matches)) return currentData;
 
+        const currentList = currentData.data || currentData.matches || [];
         return {
           ...currentData,
-          matches: currentData.matches.map((m: Match) =>
+          data: currentList.map((m: Match) =>
             m.id === id ? { ...m, status: "found" } : m,
           ),
         };
@@ -164,7 +167,9 @@ export function useMatches(filters?: MatchFilters) {
   );
 
   return {
-    matches: (data?.matches as Match[]) ?? EMPTY_ARRAY,
+    matches: (data?.data as Match[]) ?? (data?.matches as Match[]) ?? EMPTY_ARRAY,
+    nextCursor: (data?.nextCursor as string | null) ?? null,
+    hasMore: (data?.hasMore as boolean) ?? false,
     total: (data?.total as number) ?? 0,
     isLoading,
     isError: error,

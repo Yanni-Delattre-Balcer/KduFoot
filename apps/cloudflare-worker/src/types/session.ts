@@ -49,7 +49,7 @@ export interface SessionFilters {
     status?: string;
     userId?: string;
     limit?: number;
-    offset?: number;
+    cursor?: string;
     from?: string; // Date range
     to?: string;
 }

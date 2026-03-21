@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { SiteLoading } from "./components/site-loading";
@@ -30,10 +30,9 @@ import { PageNotFound } from "./pages/404";
 import { UnifiedOnboarding } from "./components/unified-onboarding";
 
 import { ErrorBoundary } from "./components/error-boundary";
+import { OfflineStatus } from "./components/offline-status";
 import IndexPage from "@/pages/index";
 import ApiPage from "@/pages/api";
-import PricingPage from "@/pages/pricing/index";
-import BlogPage from "@/pages/blog";
 import AboutPage from "@/pages/about";
 import ThankYouPage from "@/pages/thank-you";
 import ExercisesPage from "@/pages/exercises";
@@ -50,8 +49,11 @@ import FavoritesPage from "@/pages/favorites";
 import TrainingPage from "@/pages/training";
 import { TrainingProvider } from "@/contexts/training-context";
 import { showVideoAnalysis } from "@/config/site";
-import UsersAndPermissionsPage from "@/pages/admin/users-and-permissions";
-import AccountPage from "@/pages/account";
+
+const PricingPage = React.lazy(() => import("@/pages/pricing/index"));
+const BlogPage = React.lazy(() => import("@/pages/blog"));
+const UsersAndPermissionsPage = React.lazy(() => import("@/pages/admin/users-and-permissions"));
+const AccountPageLazy = React.lazy(() => import("@/pages/account"));
 
 function App() {
   const { isBlocked, isLoading: userLoading, user, blockReason } = useUser();
@@ -93,6 +95,7 @@ function App() {
     <ErrorBoundary>
       <Suspense fallback={<SiteLoading />}>
         <TrainingProvider>
+          <OfflineStatus />
           <UserSync />
           <UnifiedOnboarding />
           <Routes>
@@ -162,7 +165,7 @@ function App() {
             />
             <Route element={<MatchDetailsPage />} path="/matches/:id" />
             <Route
-              element={<AuthenticationGuard component={AccountPage} />}
+              element={<AuthenticationGuard component={AccountPageLazy} />}
               path="/account"
             />
             <Route

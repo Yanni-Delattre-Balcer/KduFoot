@@ -19,6 +19,8 @@ import { showVideoAnalysis } from "@/config/site";
 import { useMatchRequests } from "@/hooks/use-match-requests";
 import { useUser } from "@/hooks/use-user";
 import DataWall from "@/components/data-wall";
+import { SessionListSkeleton } from "@/components/skeletons/session-skeleton";
+import { MatchListSkeleton } from "@/components/skeletons/match-skeleton";
 
 export default function SessionPlannerPage() {
   const { t, i18n } = useTranslation();
@@ -27,7 +29,7 @@ export default function SessionPlannerPage() {
   const [view, setView] = useState<"exercises" | "matches" | "tournaments">(
     showVideoAnalysis ? "exercises" : "matches",
   );
-  const { sessions, isError: isErrorSessions } = useSessions();
+  const { sessions, isError: isErrorSessions, isLoading: isLoadingSessions } = useSessions();
   const {
     matches,
     isLoading: isLoadingMatches,
@@ -281,6 +283,10 @@ export default function SessionPlannerPage() {
           <div className="animate-appearance-in">
             {view === "exercises" && (
               <div className="flex flex-col gap-4">
+                {isLoadingSessions && sessions.length === 0 && (
+                  <SessionListSkeleton />
+                )}
+
                 {isErrorSessions && (
                   <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">
                     {t("error.loading_sessions")}
@@ -422,9 +428,7 @@ export default function SessionPlannerPage() {
                         </div>
 
                         {isLoadingMatches ? (
-                          <div className="flex justify-center py-6 px-4">
-                            <Spinner color="secondary" />
-                          </div>
+                          <MatchListSkeleton />
                         ) : activeMatches.filter((m: any) =>
                             view === "matches"
                               ? m.type === "match"

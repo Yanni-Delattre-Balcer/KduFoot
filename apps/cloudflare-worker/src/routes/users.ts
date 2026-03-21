@@ -8,6 +8,7 @@ import { checkPermission } from '../middleware/permissions.middleware';
 import { checkPermissions } from '../auth0';
 import { validateClubSiret } from '../utils/siret.validator';
 import { broadcastDataChanged } from '../utils/broadcast';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
@@ -86,7 +87,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: true, user }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             console.error('User Sync Error:', e);
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -125,7 +126,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const sub = payload.sub;
 
         const user = await userService.getUserByAuth0Sub(sub);
@@ -202,21 +203,58 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const sub = payload.sub;
 
-        const user = await userService.getUserByAuth0Sub(sub);
-        if (!user) {
+        // 1. Prepare all queries for batch execution
+        const userQuery = env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(sub);
+        
+        const [userRes] = await Promise.all([userQuery.first<any>()]);
+        if (!userRes) {
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
+        const user = userService.parseUser(userRes)!;
 
-        let club = null;
+        // 2. Prepare second batch (Club + Notifications)
+        const queries = [];
         if (user.club_id) {
-            club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
+            queries.push(env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id));
         }
+        
+        const { MatchService } = await import('../services/match.service');
+        const matchService = new MatchService(env.DB);
+        
+        // Notifications queries (extracted from matchService.getNotificationCounts logic for batching)
+        const incomingReqsQuery = env.DB.prepare(`
+            SELECT COUNT(*) as count FROM match_contacts mc 
+            JOIN matches m ON mc.match_id = m.id 
+            WHERE m.owner_id = ? AND mc.status = 'pending' AND COALESCE(mc.notification_state, 1) = 1
+        `).bind(user.id);
+        
+        const updatesQuery = env.DB.prepare(`
+            SELECT COUNT(*) as count FROM match_contacts mc
+            WHERE mc.user_id = ? AND mc.status IN ('accepted', 'refused') AND COALESCE(mc.notification_state, 0) = 1
+        `).bind(user.id);
 
+        queries.push(incomingReqsQuery);
+        queries.push(updatesQuery);
+
+        const results = await env.DB.batch(queries);
+        
+        let club = null;
+        let notifications = { incoming_requests: 0, updates: 0, total: 0 };
+        
+        if (user.club_id) {
+            club = results[0].results[0];
+            notifications.incoming_requests = (results[1].results[0] as any).count;
+            notifications.updates = (results[2].results[0] as any).count;
+        } else {
+            notifications.incoming_requests = (results[0].results[0] as any).count;
+            notifications.updates = (results[1].results[0] as any).count;
+        }
+        notifications.total = notifications.incoming_requests + notifications.updates;
+
+        // Handle additional clubs separately (they might involve external API calls)
         let additional_clubs: any[] = [];
         if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
             additional_clubs = await Promise.all(user.additional_sirets.map(async (item: any) => {
@@ -250,13 +288,9 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                     }
                 } catch (e) { }
 
-                return { id: siret, siret, name: siret, stadium_address }; // Fallback to siret as ID if API fails
+                return { id: siret, siret, name: siret, stadium_address };
             }));
         }
-
-        const { MatchService } = await import('../services/match.service');
-        const matchService = new MatchService(env.DB);
-        const notifications = await matchService.getNotificationCounts(user.id);
 
         return Response.json({
             success: true,
@@ -309,7 +343,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const sub = payload.sub;
 
         const user = await userService.getUserByAuth0Sub(sub);
@@ -319,16 +353,22 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const body: UpdateUserDto = await request.json();
 
-        // Safety: regular users cannot change their subscription or admin counters
-        delete body.subscription;
-        delete (body as any).block_count;
-        delete (body as any).siret_change_count;
+        // Safety: regular users cannot change their critical fields
+        const forbiddenKeys = [
+            'id', 'auth0_sub', 'email', 'subscription', 'is_blocked', 
+            'block_count', 'siret_change_count', 'calendar_token', 
+            'block_reason', 'created_at', 'updated_at'
+        ];
+        
+        for (const key of forbiddenKeys) {
+            delete (body as any)[key];
+        }
 
         try {
             const updated = await userService.updateUser(user.id, body);
             return Response.json({ success: true, user: updated }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -373,7 +413,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const sub = payload.sub;
 
         const user = await userService.getUserByAuth0Sub(sub);
@@ -462,7 +502,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             console.error('Link Club Error:', e);
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -485,23 +525,17 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *         description: Forbidden - Lacks administrative privileges.
      */
     router.post('/api/users/unlink-club', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
+        const permissionCheck = await checkPermission(request, env, Permission.ADMIN_AUTH0);
         if (!permissionCheck.hasPermission) {
             return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const sub = payload.sub;
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        if (user.email !== 'yannidelattrebalcer.artois@gmail.com') {
-            return Response.json({ success: false, error: 'Seul l\'administrateur peut effectuer cette action.' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         try {
@@ -513,7 +547,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
             return Response.json({ success: true, message: 'Club détaché avec succès.' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -548,7 +582,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const sub = payload.sub;
 
         const user = await userService.getUserByAuth0Sub(sub);
@@ -560,7 +594,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             await userService.deleteUser(user.id);
             return Response.json({ success: true, message: 'Account deleted' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -582,5 +616,126 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         const webcalUrl = `webcal://${url.host}/api/calendar/${token}.ics`;
 
         return Response.json({ success: true, url: webcalUrl }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+    }, Permission.READ_API);
+
+    /**
+     * @openapi
+     * /api/me/export:
+     *   get:
+     *     tags:
+     *       - User Management
+     *     summary: Export user data as PDF
+     *     description: Generates a PDF containing the user's profile, match history, and statistics.
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: PDF file containing user data.
+     *         content:
+     *           application/pdf:
+     *             schema:
+     *               type: string
+     *               format: binary
+     */
+    router.get('/api/me/export', async (request: Request) => {
+        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
+        const sub = payload.sub;
+
+        const user = await userService.getUserByAuth0Sub(sub);
+        if (!user) {
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        try {
+            const data = await userService.exportUserData(user.id);
+            
+            // Create a new PDF document
+            const pdfDoc = await PDFDocument.create();
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+            
+            let page = pdfDoc.addPage([595.28, 841.89]); // A4
+            const { width, height } = page.getSize();
+            let y = height - 50;
+
+            // Header
+            page.drawText('KduFoot - Export de Données (RGPD)', { x: 50, y, size: 20, font: fontBold, color: rgb(0, 0, 0.5) });
+            y -= 30;
+            page.drawText(`Date d'export : ${new Date().toLocaleString('fr-FR')}`, { x: 50, y, size: 10, font });
+            y -= 40;
+
+            // Section: Profil
+            page.drawText('1. PROFIL UTILISATEUR', { x: 50, y, size: 14, font: fontBold });
+            y -= 25;
+            page.drawText(`Nom : ${data.profile.lastname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
+            y -= 15;
+            page.drawText(`Prénom : ${data.profile.firstname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
+            y -= 15;
+            page.drawText(`Email : ${data.profile.email}`, { x: 70, y, size: 11, font });
+            y -= 15;
+            page.drawText(`Licence : ${data.profile.license_id || 'Non spécifiée'}`, { x: 70, y, size: 11, font });
+            y -= 15;
+            page.drawText(`Club : ${data.profile.siret || 'Aucun club lié'}`, { x: 70, y, size: 11, font });
+            y -= 40;
+
+            // Section: Statistiques
+            page.drawText('2. RÉSUMÉ D\'ACTIVITÉ', { x: 50, y, size: 14, font: fontBold });
+            y -= 25;
+            page.drawText(`Matchs créés : ${data.matches.length}`, { x: 70, y, size: 11, font });
+            y -= 15;
+            page.drawText(`Participations : ${data.match_applications.length}`, { x: 70, y, size: 11, font });
+            y -= 15;
+            page.drawText(`Séances d'entraînement : ${data.training_sessions.length}`, { x: 70, y, size: 11, font });
+            y -= 15;
+            page.drawText(`Exercices créés : ${data.created_exercises.length}`, { x: 70, y, size: 11, font });
+            y -= 40;
+
+            // Section: Matchs (Table-like)
+            if (data.matches.length > 0) {
+                page.drawText('3. HISTORIQUE DES MATCHS CRÉÉS', { x: 50, y, size: 14, font: fontBold });
+                y -= 25;
+                
+                // Header table
+                page.drawText('Date', { x: 70, y, size: 10, font: fontBold });
+                page.drawText('Type', { x: 170, y, size: 10, font: fontBold });
+                page.drawText('Lieu', { x: 270, y, size: 10, font: fontBold });
+                y -= 15;
+                page.drawLine({ start: { x: 70, y }, end: { x: 520, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
+                y -= 15;
+
+                for (const match of data.matches.slice(0, 15)) { // Limit to avoid page overflow for now
+                    if (y < 50) {
+                         page = pdfDoc.addPage([595.28, 841.89]);
+                         y = height - 50;
+                    }
+                    const matchDate = match.match_date ? new Date(match.match_date).toLocaleDateString('fr-FR') : 'N/A';
+                    page.drawText(matchDate, { x: 70, y, size: 9, font });
+                    page.drawText(match.match_type || 'Amical', { x: 170, y, size: 9, font });
+                    const location = match.address ? (match.address.length > 30 ? match.address.substring(0, 27) + '...' : match.address) : 'N/A';
+                    page.drawText(location, { x: 270, y, size: 9, font });
+                    y -= 15;
+                }
+            }
+
+            const pdfBytes = await pdfDoc.save();
+            
+            return new Response(pdfBytes, {
+                status: 200,
+                headers: {
+                    ...router.corsHeaders,
+                    "Content-Type": "application/pdf",
+                    "Content-Disposition": 'attachment; filename="mes-donnees-kdufoot.pdf"',
+                    "Content-Length": pdfBytes.length.toString()
+                }
+            });
+        } catch (e: any) {
+            console.error('Export PDF Error:', e);
+            return Response.json({ success: false, error: 'Internal server error during PDF generation' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
     }, Permission.READ_API);
 };

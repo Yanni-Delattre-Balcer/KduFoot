@@ -86,7 +86,7 @@ export interface ExerciseFilters {
   level?: Level;
   theme?: Theme;
   limit?: number;
-  offset?: number;
+  cursor?: string;
 }
 
 export interface AdaptationConstraints {

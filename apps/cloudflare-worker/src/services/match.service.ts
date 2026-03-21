@@ -60,7 +60,15 @@ export class MatchService {
             throw new Error('TOO_LATE_TO_MODIFY');
         }
 
-        const keys = Object.keys(dto) as (keyof UpdateMatchDto)[];
+        const allowedKeys = [
+            'club_id', 'type', 'name', 'category', 'level', 'format', 
+            'match_date', 'match_time', 'match_end_time', 'venue', 
+            'location_address', 'location_city', 'location_zip', 
+            'pitch_type', 'jersey_color', 'email', 'phone', 'notes', 
+            'max_teams', 'registration_fee', 'status'
+        ] as const;
+
+        const keys = Object.keys(dto).filter(k => allowedKeys.includes(k as any)) as (keyof UpdateMatchDto)[];
         if (keys.length === 0) return existing;
 
         const setClauses: string[] = [];
@@ -97,7 +105,7 @@ export class MatchService {
 
         // D1 SQLite requires explicit PRAGMA to enforce ON DELETE CASCADE
         await this.db.prepare('PRAGMA foreign_keys = ON;').run();
-        await this.db.prepare('DELETE FROM matches WHERE id = ?').bind(id).run();
+        await this.db.prepare('UPDATE matches SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?').bind(id).run();
         return true;
     }
 
@@ -119,36 +127,74 @@ export class MatchService {
         return this.getById(id);
     }
 
+    async updateScore(matchId: string, userId: string, scoreA: number, scoreB: number): Promise<boolean> {
+        const existing = await this.db.prepare('SELECT owner_id, score_a, score_b FROM matches WHERE id = ? AND deleted_at IS NULL').bind(matchId).first<{ owner_id: string, score_a: number | null, score_b: number | null }>();
+        if (!existing) return false;
+        if (existing.owner_id !== userId) throw new Error('Unauthorized');
+
+        const auditId = uuidv4();
+        
+        await this.db.batch([
+            this.db.prepare(`
+                INSERT INTO score_updates (id, match_id, admin_user_id, old_score_a, old_score_b, new_score_a, new_score_b, updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            `).bind(auditId, matchId, userId, existing.score_a, existing.score_b, scoreA, scoreB),
+            
+            this.db.prepare(`
+                UPDATE matches SET score_a = ?, score_b = ? WHERE id = ?
+            `).bind(scoreA, scoreB, matchId)
+        ]);
+
+        return true;
+    }
+
     async getById(id: string): Promise<Match | null> {
-        const result = await this.db.prepare(`
+        const fetchMatch = this.db.prepare(`
             SELECT m.*, 
                    c.name as club_name, c.city as club_city, c.zip as club_zip, c.logo_url as club_logo_url,
                    c.address as club_address, c.latitude as club_latitude, c.longitude as club_longitude
             FROM matches m 
             LEFT JOIN clubs c ON m.club_id = c.id 
-            WHERE m.id = ?
-        `).bind(id).first<any>();
+            WHERE m.id = ? AND m.deleted_at IS NULL
+        `).bind(id);
 
-        if (!result) return null;
-
-        // Fetch contacts for this match with club info
-        const { results: contacts } = await this.db.prepare(`
+        const fetchContacts = this.db.prepare(`
             SELECT mc.*, u.id as user_id, c.id as club_id, c.name as club_name
             FROM match_contacts mc
             LEFT JOIN users u ON mc.user_id = u.id
             LEFT JOIN clubs c ON u.club_id = c.id
             WHERE mc.match_id = ?
             ORDER BY mc.contacted_at DESC
-        `).bind(id).all<any>();
+        `).bind(id);
 
-        // Count accepted teams
-        const acceptedCountResult = await this.db.prepare(`
+        const fetchAcceptedCount = await this.db.prepare(`
             SELECT COUNT(*) as count FROM match_contacts WHERE match_id = ? AND status = 'accepted'
-        `).bind(id).first<{ count: number }>();
+        `).bind(id);
+
+        const fetchPairings = this.db.prepare(`
+            SELECT tp.*, 
+                   c_a.name as team_a_club_name, c_a.logo_url as team_a_club_logo,
+                   c_b.name as team_b_club_name, c_b.logo_url as team_b_club_logo
+            FROM tournament_pairings tp
+            LEFT JOIN clubs c_a ON tp.team_a_club_id = c_a.id
+            LEFT JOIN clubs c_b ON tp.team_b_club_id = c_b.id
+            WHERE tp.match_id = ?
+            ORDER BY tp.scheduled_time ASC
+        `).bind(id);
+
+        const [matchRes, contactsRes, acceptedRes, pairingsRes] = await this.db.batch<any>([
+            fetchMatch,
+            fetchContacts,
+            fetchAcceptedCount,
+            fetchPairings
+        ]);
+
+        const result = matchRes.results[0];
+        if (!result) return null;
 
         const match = this.mapRowToMatch(result);
-        match.accepted_count = acceptedCountResult?.count || 0;
-        match.contacts = contacts.map(c => ({
+        match.accepted_count = (acceptedRes.results[0] as any)?.count || 0;
+        match.contacts = contactsRes.results.map(c => ({
             user_id: c.user_id,
             club_id: c.club_id,
             club_name: c.club_name,
@@ -158,7 +204,13 @@ export class MatchService {
         }));
 
         if (match.type === 'tournament') {
-            match.pairings = await this.getPairings(id);
+            match.pairings = pairingsRes.results.map(r => ({
+                ...r,
+                team_a_club_name: r.team_a_club_name,
+                team_a_club_logo: r.team_a_club_logo,
+                team_b_club_name: r.team_b_club_name,
+                team_b_club_logo: r.team_b_club_logo
+            }));
         }
 
         return match;
@@ -170,9 +222,10 @@ export class MatchService {
                    c_a.name as team_a_club_name, c_a.logo_url as team_a_club_logo,
                    c_b.name as team_b_club_name, c_b.logo_url as team_b_club_logo
             FROM tournament_pairings tp
+            JOIN matches m ON tp.match_id = m.id
             LEFT JOIN clubs c_a ON tp.team_a_club_id = c_a.id
             LEFT JOIN clubs c_b ON tp.team_b_club_id = c_b.id
-            WHERE tp.match_id = ?
+            WHERE tp.match_id = ? AND m.deleted_at IS NULL
             ORDER BY tp.scheduled_time ASC
         `).bind(matchId).all<any>();
 
@@ -191,7 +244,7 @@ export class MatchService {
             SELECT tp.*, m.owner_id, m.match_time, m.match_end_time 
             FROM tournament_pairings tp
             JOIN matches m ON tp.match_id = m.id
-            WHERE tp.id = ?
+            WHERE tp.id = ? AND m.deleted_at IS NULL
         `).bind(pairingId).first<any>();
 
         if (!pairing) throw new Error('Pairing not found');
@@ -318,18 +371,18 @@ export class MatchService {
         return distanceMap;
     }
 
-    async search(filters: MatchFilters, googleMapsApiKey?: string): Promise<{ matches: any[], total: number }> {
+    async search(filters: MatchFilters, googleMapsApiKey?: string): Promise<{ data: any[], nextCursor: string | null, hasMore: boolean }> {
         const wantDistance = filters.radius_km && filters.user_lat != null && filters.user_lng != null;
 
         // Always join clubs now to get names
         const selectClause = `
-            m.*, 
+            m.id, m.owner_id, m.club_id, m.type, m.name, m.category, m.level, m.format, m.match_date, m.match_time, m.venue, m.location_city, m.pitch_type, m.status,
             c.name as club_name, c.city as club_city, c.zip as club_zip, c.logo_url as club_logo_url,
             c.address as club_address, c.latitude as club_latitude, c.longitude as club_longitude
         `;
         const fromClause = 'matches m LEFT JOIN clubs c ON m.club_id = c.id';
 
-        let query = `SELECT ${selectClause} FROM ${fromClause} WHERE 1=1`;
+        let query = `SELECT ${selectClause} FROM ${fromClause} WHERE m.deleted_at IS NULL`;
         const params: any[] = [];
 
         if (filters.ownerId) {
@@ -433,17 +486,24 @@ export class MatchService {
             params.push(filters.user_lng! - lngDelta, filters.user_lng! + lngDelta);
         }
 
-        query += ' ORDER BY m.match_date ASC';
+        // Add cursor constraint before ordering
+        if (!wantDistance && filters.cursor) {
+            try {
+                const cursorData = JSON.parse(atob(filters.cursor));
+                if (cursorData.date && cursorData.id) {
+                    query += " AND (m.match_date > ? OR (m.match_date = ? AND m.id > ?))";
+                    params.push(cursorData.date, cursorData.date, cursorData.id);
+                }
+            } catch (e) { }
+        }
+
+        query += ' ORDER BY m.match_date ASC, m.id ASC';
 
         // When doing distance filtering, get more results first, then filter by distance
         if (!wantDistance) {
             if (filters.limit) {
                 query += ' LIMIT ?';
-                params.push(filters.limit);
-            }
-            if (filters.offset) {
-                query += ' OFFSET ?';
-                params.push(filters.offset);
+                params.push(filters.limit + 1); // Ask +1 to check if there is more
             }
         } else {
             query += ' LIMIT 100'; // Cap for distance API calls
@@ -451,12 +511,21 @@ export class MatchService {
 
         const { results } = await this.db.prepare(query).bind(...params).all<any>();
 
-        // Map results to objects
         let mappedResults = results.map(row => this.mapRowToMatch(row));
 
-        // If no distance filtering, return mapped
-        if (!wantDistance || !mappedResults.length) {
-            return { matches: mappedResults, total: results.length };
+        // If no distance filtering, return cursor format
+        if (!wantDistance) {
+            let hasMore = false;
+            if (filters.limit && mappedResults.length > filters.limit) {
+                hasMore = true;
+                mappedResults.pop();
+            }
+            let nextCursor: string | null = null;
+            if (hasMore && mappedResults.length > 0) {
+                const lastItem = mappedResults[mappedResults.length - 1];
+                nextCursor = btoa(JSON.stringify({ date: lastItem.match_date, id: lastItem.id }));
+            }
+            return { data: mappedResults, nextCursor, hasMore };
         }
 
         // Build destinations array for matches that have coordinates
@@ -502,7 +571,8 @@ export class MatchService {
         // Sort by distance
         filtered.sort((a, b) => (a.distance_km || 0) - (b.distance_km || 0));
 
-        return { matches: filtered, total: filtered.length };
+        // Fallback for GMaps distance matrix: assume no pagination supported here
+        return { data: filtered, nextCursor: null, hasMore: false };
     }
 
     async contact(matchId: string, userId: string, dto: ContactMatchDto): Promise<boolean> {
@@ -591,9 +661,25 @@ export class MatchService {
             // Pour l'instant on laisse libre pour corriger le bug 400.
         }
 
-        await this.db.prepare(
-            'UPDATE match_contacts SET status = ? WHERE match_id = ? AND user_id = ?'
-        ).bind(status, matchId, requestUserId).run();
+        if (status === 'accepted') {
+            const updateResult = await this.db.prepare(`
+                UPDATE match_contacts 
+                SET status = 'accepted' 
+                WHERE match_id = ? AND user_id = ? 
+                AND (
+                    SELECT COUNT(*) FROM match_contacts WHERE match_id = ? AND status = 'accepted'
+                ) < COALESCE((SELECT max_teams FROM matches WHERE id = ?), 99999)
+            `).bind(matchId, requestUserId, matchId, matchId).run();
+
+            if (updateResult.meta.changes === 0) {
+                // If 0 changes, the capacity limit was likely hit (or already accepted). Prevent further logic and bubble up 409.
+                throw new Error('409_CONFLICT');
+            }
+        } else {
+            await this.db.prepare(
+                'UPDATE match_contacts SET status = ? WHERE match_id = ? AND user_id = ?'
+            ).bind(status, matchId, requestUserId).run();
+        }
 
         // If accepted, mark match as found (closed)
         if (status === 'accepted') {

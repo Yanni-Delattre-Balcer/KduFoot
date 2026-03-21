@@ -43,6 +43,6 @@ export interface ExerciseFilters {
     theme?: string;
     search?: string;
     limit?: number;
-    offset?: number;
+    cursor?: string;
     userId?: string; // To filter by my exercises vs all (if public library exists)
 }

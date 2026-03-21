@@ -30,11 +30,11 @@ export { WebSocketHub } from "./durable_objects/WebSocketHub";
 // NOTE: We now use a small Router class to organize routes and permission checks.
 
 export default {
-	async fetch(request: Request, env: any): Promise<Response> {
+	async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
 		const router = new Router(env);
 
-		setupRoutes(router, env as import("./types/env").Env);
+		setupRoutes(router, env as import("./types/env").Env, ctx);
 
-		return await router.handleRequest(request, env);
+		return await router.handleRequest(request, env, ctx);
 	},
 } satisfies ExportedHandler<any>;

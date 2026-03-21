@@ -31,6 +31,7 @@ import { Env } from "../types/env";
 type RouteHandler = (
 	request: Request & { params: Record<string, string>; user?: any },
 	env: Env,
+	ctx: ExecutionContext,
 ) => Promise<Response>;
 
 interface Route {
@@ -51,7 +52,7 @@ export class Router {
 	constructor(env: Env) {
 		this.corsHeaders = {
 			"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-			"Access-Control-Allow-Origin": env.CORS_ORIGIN || "*",
+			"Access-Control-Allow-Origin": env.CORS_ORIGIN || "https://kdufoot.com",
 			"Access-Control-Allow-Headers": "Content-Type, Authorization",
 			"Content-Type": "application/json",
 		};
@@ -138,25 +139,44 @@ export class Router {
 		}
 	}
 
+	private addSecurityHeaders(response: Response): Response {
+		// Do not add security headers to WebSocket upgrade responses (101 Switching Protocols)
+		// as it would break the connection.
+		if (response.status === 101) return response;
+
+		const newHeaders = new Headers(response.headers);
+		newHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+		newHeaders.set("X-Frame-Options", "DENY");
+		newHeaders.set("X-Content-Type-Options", "nosniff");
+		newHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+		newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+		
+		return new Response(response.body, { 
+			status: response.status,
+			statusText: response.statusText,
+			headers: newHeaders 
+		});
+	}
+
 	async handleUnauthorizedRequest(): Promise<Response> {
-		return new Response(
+		return this.addSecurityHeaders(new Response(
 			JSON.stringify({ success: false, error: "Unauthorized" }),
 			{
 				status: 403,
 				headers: { "Content-Type": "application/json" },
 			},
-		);
+		));
 	}
 
-	async handleRequest(request: Request, env: Env): Promise<Response> {
+	async handleRequest(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		if (request.method === "OPTIONS") {
-			return new Response(null, {
+			return this.addSecurityHeaders(new Response(null, {
 				status: 204,
 				headers: {
 					...this.corsHeaders,
 					"Access-Control-Allow-Credentials": "true",
 				},
-			});
+			}));
 		}
 
 		const url = new URL(request.url);
@@ -173,7 +193,7 @@ export class Router {
 				const { success } = await env.RATE_LIMITER.limit({ key: rateLimitKey });
 
 				if (!success) {
-					return new Response(
+					return this.addSecurityHeaders(new Response(
 						JSON.stringify(`429 Failure – rate limit exceeded for ${pathname}`),
 						{
 							status: 429,
@@ -185,7 +205,7 @@ export class Router {
 								"Retry-After": "60",
 							},
 						},
-					);
+					));
 				}
 			}
 		} catch (e) {
@@ -229,7 +249,7 @@ export class Router {
 
 			if (route.permission !== undefined) {
 				if (!request.headers.has("Authorization")) {
-					return new Response(
+					return this.addSecurityHeaders(new Response(
 						JSON.stringify({
 							success: false,
 							error: "Authentication required",
@@ -238,13 +258,13 @@ export class Router {
 							status: 401,
 							headers: { ...this.corsHeaders },
 						},
-					);
+					));
 				}
 
 				const token = request.headers.get("Authorization")?.split(" ")[1];
 
 				if (!token) {
-					return new Response(
+					return this.addSecurityHeaders(new Response(
 						JSON.stringify({
 							success: false,
 							error: "Invalid authorization header",
@@ -253,7 +273,7 @@ export class Router {
 							status: 401,
 							headers: { ...this.corsHeaders },
 						},
-					);
+					));
 				}
 
 				const { access, payload, permissions } = await checkPermissions(
@@ -266,7 +286,7 @@ export class Router {
 				this.jwtPayload = payload;
 
 				if (!access) {
-					return new Response(
+					return this.addSecurityHeaders(new Response(
 						JSON.stringify({
 							success: false,
 							error: "Insufficient permissions",
@@ -275,7 +295,7 @@ export class Router {
 							status: 403,
 							headers: { ...this.corsHeaders },
 						},
-					);
+					));
 				}
 
 				(request as any).user = payload;
@@ -286,7 +306,7 @@ export class Router {
 					try {
 						const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(userId).first();
 						if (dbUser && (dbUser as any).is_blocked) {
-							return new Response(
+							return this.addSecurityHeaders(new Response(
 								JSON.stringify({
 									success: false,
 									error: "Votre compte a été suspendu pour le motif suivant : " + ((dbUser as any).block_reason || "Aucun motif spécifié"),
@@ -297,7 +317,7 @@ export class Router {
 									status: 403,
 									headers: { ...this.corsHeaders },
 								},
-							);
+							));
 						}
 					} catch (e) {
 						// eslint-disable-next-line no-console
@@ -309,36 +329,37 @@ export class Router {
 
 			(request as any).params = match;
 
-			try {
-				return await route.handler(
-					request as Request & { params: Record<string, string>; user?: any },
-					env,
-				);
-			} catch (error: any) {
-				// eslint-disable-next-line no-console
-				console.error("Route handler error:", error);
+				try {
+					const response = await route.handler(
+						request as Request & { params: Record<string, string>; user?: any },
+						env,
+						ctx,
+					);
+					return this.addSecurityHeaders(response);
+				} catch (error: any) {
+					// eslint-disable-next-line no-console
+					console.error("Route handler error:", error);
 
-				return new Response(
-					JSON.stringify({
-						success: false,
-						error: "Internal server error",
-						details: error.message || String(error) // TEMPORAIRE: Pour le débug en production
-					}),
-					{
-						status: 500,
-						headers: { ...this.corsHeaders },
-					},
-				);
+					return this.addSecurityHeaders(new Response(
+						JSON.stringify({
+							success: false,
+							error: "Internal server error"
+						}),
+						{
+							status: 500,
+							headers: { ...this.corsHeaders },
+						},
+					));
+				}
 			}
-		}
 
-		return new Response(
-			JSON.stringify({ success: false, error: "Not found" }),
-			{
-				status: 404,
-				headers: { ...this.corsHeaders },
-			},
-		);
+			return this.addSecurityHeaders(new Response(
+				JSON.stringify({ success: false, error: "Not found" }),
+				{
+					status: 404,
+					headers: { ...this.corsHeaders },
+				},
+			));
 	}
 
 	private matchPath(

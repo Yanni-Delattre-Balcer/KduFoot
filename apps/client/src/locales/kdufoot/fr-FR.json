@@ -711,6 +711,7 @@
     "buttons": {
       "save_changes": "Enregistrer les modifications",
       "save_and_continue": "Enregistrer et continuer",
+      "export_data": "Exporter mes données (JSON)",
       "delete_account": "Supprimer mon compte",
       "reset_calendar": "Réinitialiser ma synchronisation calendrier",
       "validate_club": "VALIDER MON CLUB",

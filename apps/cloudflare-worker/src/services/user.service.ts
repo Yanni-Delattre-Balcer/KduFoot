@@ -28,7 +28,7 @@ export class UserService {
         return this.parseUser(result);
     }
 
-    private parseUser(user: any): User | null {
+    public parseUser(user: any): User | null {
         if (!user) return null;
         if (typeof user.additional_sirets === 'string') {
             try {
@@ -45,30 +45,20 @@ export class UserService {
     }
 
     async createOrUpdateUser(dto: CreateUserDto): Promise<User> {
-        const existing = await this.getUserByAuth0Sub(dto.auth0_sub);
-
-        if (existing) {
-            // Update basic info on login if needed (e.g. email change? mainly updated_at)
-            const updated = await this.db
-                .prepare('UPDATE users SET updated_at = unixepoch() WHERE id = ? RETURNING *')
-                .bind(existing.id)
-                .first<User>();
-            return this.parseUser(updated)!;
-        }
-
-        // Create new user
         const id = uuidv4();
         const calendar_token = uuidv4();
-        const result = await this.db
-            .prepare(
-                `INSERT INTO users (
-          id, auth0_sub, email, firstname, lastname, subscription, calendar_token, push_subscription
-        ) VALUES (
-          ?, ?, ?, ?, ?, 'Free', ?, NULL
-        ) RETURNING *`
-            )
-            .bind(id, dto.auth0_sub, dto.email, dto.firstname, dto.lastname, calendar_token)
-            .first<User>();
+        
+        // Use UPSERT (INSERT ... ON CONFLICT) to handle create or update in one call
+        const result = await this.db.prepare(`
+            INSERT INTO users (id, auth0_sub, email, firstname, lastname, subscription, calendar_token, updated_at)
+            VALUES (?, ?, ?, ?, ?, 'Free', ?, unixepoch())
+            ON CONFLICT(auth0_sub) DO UPDATE SET
+                email = EXCLUDED.email,
+                firstname = EXCLUDED.firstname,
+                lastname = EXCLUDED.lastname,
+                updated_at = unixepoch()
+            RETURNING *
+        `).bind(id, dto.auth0_sub, dto.email, dto.firstname, dto.lastname, calendar_token).first<User>();
 
         return this.parseUser(result)!;
     }
@@ -79,7 +69,17 @@ export class UserService {
          * Since we don't know which fields the user wants to update (email? name?),
          * we build the SQL string programmatically.
          */
-        const keys = Object.keys(dto) as (keyof UpdateUserDto)[];
+        const allowedKeys = [
+            'firstname', 'lastname', 'club_id', 'siret', 'location', 
+            'phone', 'license_id', 'category', 'level', 'pitch_type', 
+            'home_jersey_color', 'away_jersey_color', 'stadium_address', 
+            'latitude', 'longitude', 'picture', 'subscription', 
+            'additional_sirets', 'calendar_token', 'push_subscription', 
+            'has_synced_calendar', 'last_calendar_sync_at', 'block_count', 
+            'siret_change_count'
+        ] as const;
+
+        const keys = Object.keys(dto).filter(k => allowedKeys.includes(k as any)) as (keyof UpdateUserDto)[];
         if (keys.length === 0) return this.getUserById(id);
 
         const setClause = keys.map((key) => `${key} = ?`).join(', ');
@@ -104,7 +104,7 @@ export class UserService {
     async setBlockedStatus(id: string, isBlocked: boolean, reason?: string): Promise<boolean> {
         if (isBlocked) {
             // 1. Delete all matches owned by this user (cascade: contacts/pairings cleaned by FK)
-            await this.db.prepare('DELETE FROM matches WHERE owner_id = ?').bind(id).run();
+            await this.db.prepare('UPDATE matches SET deleted_at = CURRENT_TIMESTAMP WHERE owner_id = ?').bind(id).run();
 
             // 2. Delete all match contacts where the blocked user is the requester
             await this.db.prepare('DELETE FROM match_contacts WHERE user_id = ?').bind(id).run();
@@ -159,6 +159,32 @@ export class UserService {
             .prepare('UPDATE users SET last_calendar_sync_at = unixepoch() WHERE id = ?')
             .bind(userId)
             .run();
+    }
+
+    async exportUserData(userId: string): Promise<any> {
+        // Prepare queries for all user-related data
+        const profileQuery = this.db.prepare('SELECT * FROM users WHERE id = ?').bind(userId);
+        const matchesQuery = this.db.prepare('SELECT * FROM matches WHERE owner_id = ?').bind(userId);
+        const participationsQuery = this.db.prepare('SELECT * FROM match_contacts WHERE user_id = ?').bind(userId);
+        const sessionsQuery = this.db.prepare('SELECT * FROM training_sessions WHERE user_id = ?').bind(userId);
+        const exercisesQuery = this.db.prepare('SELECT * FROM exercises WHERE user_id = ?').bind(userId);
+
+        const results = await this.db.batch([
+            profileQuery,
+            matchesQuery,
+            participationsQuery,
+            sessionsQuery,
+            exercisesQuery
+        ]);
+
+        return {
+            profile: this.parseUser(results[0].results[0]),
+            matches: results[1].results,
+            match_applications: results[2].results,
+            training_sessions: results[3].results,
+            created_exercises: results[4].results,
+            exported_at: Math.floor(Date.now() / 1000)
+        };
     }
 }
 

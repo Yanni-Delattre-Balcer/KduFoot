@@ -52,6 +52,7 @@ export interface PermissionCheck {
     reason?: string;
     statusCode?: number;
     quota?: QuotaInfo;
+    payload?: any;
 }
 
 export interface QuotaInfo {

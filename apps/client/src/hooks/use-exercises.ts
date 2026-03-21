@@ -83,7 +83,9 @@ export function useExercises(filters?: ExerciseFilters) {
   );
 
   return {
-    exercises: (data?.exercises as Exercise[]) ?? EMPTY_ARRAY,
+    exercises: (data?.data as Exercise[]) ?? (data?.exercises as Exercise[]) ?? EMPTY_ARRAY,
+    nextCursor: (data?.nextCursor as string | null) ?? null,
+    hasMore: (data?.hasMore as boolean) ?? false,
     total: (data?.total as number) ?? 0,
     isLoading,
     isError: error,

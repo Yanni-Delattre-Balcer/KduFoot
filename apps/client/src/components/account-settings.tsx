@@ -3,21 +3,16 @@ import { addToast } from "@heroui/toast";
 import { Image } from "@heroui/image";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { useState, useRef, useEffect, useId } from "react";
+import React, { useState, useRef, useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { mutate } from "swr";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 
-import { JerseyColorDots } from "./jersey-color-dots";
+import { IdentitySection } from "./account/identity-section";
+import { SportsProfileSection } from "./account/sports-profile-section";
 
-import { Level } from "@/types/match.types";
-import { Category } from "@/types/exercise.types";
 import { useUser } from "@/hooks/use-user";
 import { useAuth } from "@/authentication/providers/use-auth";
-
-const CATEGORIES = Object.values(Category);
-const LEVELS = Object.values(Level);
 
 interface AccountSettingsProps {
   onSaveSuccess?: () => void;
@@ -31,8 +26,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const from = searchParams.get("from") || (location.state as any)?.from;
-  const { user: authUser, getAccessToken, logout, deleteJson } = useAuth();
+  const from = searchParams.get("from") || (location.state as { from?: string })?.from;
+  const { user: authUser, getAccessToken, logout } = useAuth();
   const { user: dbUser, updateUser, linkClub, unlinkClub, refetch, resetCalendarSync } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -53,6 +48,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isInitialized, setIsInitialized] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [isResettingCalendar, setIsResettingCalendar] = useState(false);
 
   const formatPhoneNumber = (value: string) => {
@@ -373,36 +369,60 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm(t("account.confirm_delete"))) {
-      return;
-    }
+    if (confirm(t("account.confirm_delete"))) {
+      setIsDeleting(true);
+      try {
+        const token = await getAccessToken();
+        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/me/delete`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    setIsDeleting(true);
+        if (!res.ok) throw new Error(t("account.delete_error"));
+        addToast({
+          title: t("account.delete_success"),
+          color: "success",
+        });
+        logout({ logoutParams: { returnTo: window.location.origin } });
+      } catch (e: any) {
+        addToast({ title: e.message, color: "danger" });
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+
+  const handleExportData = async () => {
+    setIsExporting(true);
     try {
-      await deleteJson(`${import.meta.env.API_BASE_URL}/api/users/me`);
-      addToast({
-        title: t("success"),
-        description: t("account.delete_success"),
-        variant: "flat",
-        color: "success",
-      });
-      await logout({
-        logoutParams: {
-          returnTo: window.location.origin,
+      const token = await getAccessToken();
+      const res = await fetch(`${import.meta.env.API_BASE_URL}/api/me/export`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       });
-    } catch (error: any) {
-      console.error("Delete account error:", error);
+
+      if (!res.ok) throw new Error("Erreur lors de l'export");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mes-donnees-kdufoot_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
       addToast({
-        title: t("error.title"),
-        description:
-          error.message ||
-          t("account.delete_error", "Erreur lors de la suppression du compte"),
-        variant: "flat",
-        color: "danger",
+        title: "Export réussi",
+        color: "success",
       });
+    } catch (e: any) {
+      addToast({ title: e.message, color: "danger" });
     } finally {
-      setIsDeleting(false);
+      setIsExporting(false);
     }
   };
 
@@ -547,264 +567,38 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 : t("account.subscription.free_account")}
             </Chip>
           </div>
-        </div>
+               <div className="w-full space-y-8">
+          <IdentitySection
+            baseId={baseId}
+            email={authUser.email || ""}
+            errors={errors}
+            firstname={firstname}
+            handlePhoneChange={handlePhoneChange}
+            hqAddress={dbUser?.club?.address || ""}
+            lastname={lastname}
+            licenseId={licenseId}
+            phone={phone}
+            setErrors={setErrors}
+            setFirstname={setFirstname}
+            setLastname={setLastname}
+            setLicenseId={setLicenseId}
+            setStadiumAddress={setStadiumAddress}
+            stadiumAddress={stadiumAddress}
+          />
 
-        <div className="w-full space-y-8">
-          <div className="space-y-3">
-            <p className="text-sm font-bold text-default-400 ml-1">
-              {t("account.sections.identity")}
-            </p>
-            <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-default-500">Email</span>
-                <span className="font-medium">{authUser.email}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Input
-                    isRequired
-                    aria-label={t("account.fields.firstname")}
-                    autoComplete="given-name"
-                    errorMessage={errors.firstname}
-                    id={`${baseId}_firstname`}
-                    isInvalid={!!errors.firstname}
-                    label={t("account.fields.firstname")}
-                    name="acc_firstname"
-                    size="sm"
-                    value={firstname}
-                    variant="bordered"
-                    onValueChange={(v) => {
-                      setFirstname(v);
-                      if (errors.firstname)
-                        setErrors((prev) => ({ ...prev, firstname: "" }));
-                    }}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Input
-                    isRequired
-                    aria-label={t("account.fields.lastname")}
-                    autoComplete="family-name"
-                    errorMessage={errors.lastname}
-                    id={`${baseId}_lastname`}
-                    isInvalid={!!errors.lastname}
-                    label={t("account.fields.lastname")}
-                    name="acc_lastname"
-                    size="sm"
-                    value={lastname}
-                    variant="bordered"
-                    onValueChange={(v) => {
-                      setLastname(v);
-                      if (errors.lastname)
-                        setErrors((prev) => ({ ...prev, lastname: "" }));
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Input
-                  isRequired
-                  aria-label={t("account.fields.phone")}
-                  autoComplete="tel"
-                  errorMessage={errors.phone}
-                  id={`${baseId}_phone`}
-                  isInvalid={!!errors.phone}
-                  label={t("account.fields.phone")}
-                  name="acc_phone"
-                  placeholder="+33 6 12 34 56 78"
-                  size="sm"
-                  value={phone}
-                  variant="bordered"
-                  onValueChange={(v) => {
-                    handlePhoneChange(v);
-                    if (errors.phone)
-                      setErrors((prev) => ({ ...prev, phone: "" }));
-                  }}
-                />
-              </div>
-              <div className="space-y-1">
-                <Input
-                  isRequired
-                  aria-label={t("account.fields.license")}
-                  errorMessage={errors.licenseId}
-                  id={`${baseId}_license`}
-                  isInvalid={!!errors.licenseId}
-                  label={t("account.fields.license")}
-                  name="acc_license"
-                  placeholder={t("account.fields.license_placeholder")}
-                  size="sm"
-                  value={licenseId}
-                  variant="bordered"
-                  onValueChange={(v) => {
-                    setLicenseId(v);
-                    if (errors.licenseId)
-                      setErrors((prev) => ({ ...prev, licenseId: "" }));
-                  }}
-                />
-              </div>
-              <div className="space-y-1">
-                <Input
-                  isDisabled
-                  aria-label={t("account.fields.hq_address")}
-                  classNames={{
-                    inputWrapper: "bg-default-200/30",
-                    label: "font-bold text-default-500 whitespace-nowrap",
-                  }}
-                  id={`${baseId}_hq_address`}
-                  label={t("account.fields.hq_address")}
-                  name="acc_hq_address"
-                  size="sm"
-                  value={dbUser?.club?.address || "--"}
-                  variant="flat"
-                />
-              </div>
-              <div className="space-y-1">
-                <Input
-                  isRequired
-                  aria-label={t("account.fields.stadium_address")}
-                  autoComplete="street-address"
-                  classNames={{
-                    description: "text-[10px] text-primary-500 font-medium",
-                    label: "font-black text-primary whitespace-nowrap",
-                  }}
-                  description={t("account.fields.stadium_warning")}
-                  errorMessage={errors.stadiumAddress}
-                  id={`${baseId}_stadium_address`}
-                  isInvalid={!!errors.stadiumAddress}
-                  label={t("account.fields.stadium_address")}
-                  name="acc_stadium_address"
-                  placeholder={t("account.fields.stadium_placeholder")}
-                  size="sm"
-                  value={stadiumAddress}
-                  variant="bordered"
-                  onValueChange={(v) => {
-                    setStadiumAddress(v);
-                    if (errors.stadiumAddress)
-                      setErrors((prev) => ({ ...prev, stadiumAddress: "" }));
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-sm font-bold text-default-400 ml-1 mt-2">
-              {t("account.sections.sports_profile")}
-            </p>
-            <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Select
-                  aria-label={t("account.fields.category")}
-                  errorMessage={errors.category}
-                  id={`${baseId}_category`}
-                  isInvalid={!!errors.category}
-                  label={t("account.fields.category")}
-                  name="acc_category"
-                  placeholder={t("common:choose", "Choisir...")}
-                  selectedKeys={category ? [category] : []}
-                  size="sm"
-                  variant="bordered"
-                  onChange={(e) => {
-                    setCategory(e.target.value);
-                    if (errors.category)
-                      setErrors((prev) => ({ ...prev, category: "" }));
-                  }}
-                >
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem
-                      key={cat}
-                      textValue={t(`enums.category.${cat}`)}
-                    >
-                      {t(`enums.category.${cat}`)}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Select
-                  aria-label={t("account.fields.level")}
-                  errorMessage={errors.level}
-                  id={`${baseId}_level`}
-                  isInvalid={!!errors.level}
-                  label={t("account.fields.level")}
-                  name="acc_level"
-                  placeholder={t("common:choose", "Choisir...")}
-                  selectedKeys={level ? [level] : []}
-                  size="sm"
-                  variant="bordered"
-                  onChange={(e) => {
-                    setLevel(e.target.value);
-                    if (errors.level)
-                      setErrors((prev) => ({ ...prev, level: "" }));
-                  }}
-                >
-                  {LEVELS.map((lvl) => (
-                    <SelectItem key={lvl} textValue={t(`enums.level.${lvl}`)}>
-                      {t(`enums.level.${lvl}`)}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Input
-                  isRequired
-                  aria-label={t("account.fields.home_jersey")}
-                  errorMessage={errors.homeJerseyColor}
-                  endContent={
-                    <JerseyColorDots colors={homeJerseyColor} size="md" />
-                  }
-                  id={`${baseId}_home_jersey`}
-                  isInvalid={!!errors.homeJerseyColor}
-                  label={t(
-                    "account.fields.home_jersey",
-                    "Couleur maillot Domicile",
-                  )}
-                  name="acc_home_jersey"
-                  placeholder={t(
-                    "account.fields.home_jersey_placeholder",
-                    "Ex: Rouge et Blanc",
-                  )}
-                  size="sm"
-                  value={homeJerseyColor}
-                  variant="bordered"
-                  onValueChange={(v) => {
-                    setHomeJerseyColor(v);
-                    if (errors.homeJerseyColor)
-                      setErrors((prev) => ({ ...prev, homeJerseyColor: "" }));
-                  }}
-                />
-              </div>
-              <div className="space-y-1">
-                <Input
-                  isRequired
-                  aria-label={t("account.fields.away_jersey")}
-                  errorMessage={errors.awayJerseyColor}
-                  endContent={
-                    <JerseyColorDots colors={awayJerseyColor} size="md" />
-                  }
-                  id={`${baseId}_away_jersey`}
-                  isInvalid={!!errors.awayJerseyColor}
-                  label={t(
-                    "account.fields.away_jersey",
-                    "Couleur maillot Extérieur",
-                  )}
-                  name="acc_away_jersey"
-                  placeholder={t(
-                    "account.fields.away_jersey_placeholder",
-                    "Ex: Bleu",
-                  )}
-                  size="sm"
-                  value={awayJerseyColor}
-                  variant="bordered"
-                  onValueChange={(v) => {
-                    setAwayJerseyColor(v);
-                    if (errors.awayJerseyColor)
-                      setErrors((prev) => ({ ...prev, awayJerseyColor: "" }));
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <SportsProfileSection
+            awayJerseyColor={awayJerseyColor}
+            baseId={baseId}
+            category={category}
+            errors={errors}
+            homeJerseyColor={homeJerseyColor}
+            level={level}
+            setAwayJerseyColor={setAwayJerseyColor}
+            setCategory={setCategory}
+            setErrors={setErrors}
+            setHomeJerseyColor={setHomeJerseyColor}
+            setLevel={setLevel}
+          />    </div>
 
           <div className="space-y-3">
             <p className="text-sm font-bold text-default-400 ml-1 mt-2">
@@ -863,7 +657,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                           if (cleaned.length <= 14) {
                             setSiret(v);
                             if (errors.siret)
-                              setErrors((prev) => ({ ...prev, siret: "" }));
+                              setErrors((prev: Record<string, string>) => ({ ...prev, siret: "" }));
                           }
                         }}
                       />
@@ -897,8 +691,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                   title: "Club détaché",
                                   color: "success",
                                 });
-                              } catch (e: any) {
-                                addToast({ title: e.message, color: "danger" });
+                              } catch (e: unknown) {
+                                addToast({ title: e instanceof Error ? e.message : String(e), color: "danger" });
                               } finally {
                                 setIsSaving(false);
                               }
@@ -945,7 +739,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       <p className="text-[10px] font-bold text-default-400 tracking-widest mb-1">
                         {t("account.fields.other_clubs")}
                       </p>
-                      {dbUser.additional_clubs.map((s: any, idx: number) => (
+                      {dbUser.additional_clubs.map((s: { name?: string; city?: string; zip?: string; siret: string }, idx: number) => (
                         <div
                           key={idx}
                           className="bg-white/5 p-4 rounded-xl border border-white/10 flex flex-col gap-3"
@@ -1094,8 +888,19 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
             <Button
               className="font-bold px-8 w-full sm:w-auto tracking-wider order-2 sm:ml-auto"
+              color="secondary"
+              isDisabled={isSaving || isDeleting}
+              isLoading={isExporting}
+              variant="flat"
+              onPress={handleExportData}
+            >
+              {t("account.buttons.export_data_pdf", "Télécharger mes données (PDF)")}
+            </Button>
+
+            <Button
+              className="font-bold px-8 w-full sm:w-auto tracking-wider order-3"
               color="danger"
-              isDisabled={isSaving}
+              isDisabled={isSaving || isExporting}
               isLoading={isDeleting}
               variant="bordered"
               onPress={handleDeleteAccount}

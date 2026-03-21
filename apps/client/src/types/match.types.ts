@@ -152,7 +152,7 @@ export interface MatchFilters {
   user_lat?: number;
   user_lng?: number;
   limit?: number;
-  offset?: number;
+  cursor?: string;
   notes?: string;
   ownerId?: string;
   include_past?: boolean;

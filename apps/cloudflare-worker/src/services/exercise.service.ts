@@ -44,7 +44,13 @@ export class ExerciseService {
         if (!existing) return null;
         if (existing.user_id !== userId) throw new Error('Unauthorized');
 
-        const keys = Object.keys(dto) as (keyof UpdateExerciseDto)[];
+        const allowedKeys = [
+            'title', 'synopsis', 'svg_schema', 'themes', 'nb_joueurs', 
+            'dimensions', 'materiel', 'category', 'level', 'duration', 
+            'video_url', 'thumbnail_url', 'video_start_seconds'
+        ] as const;
+
+        const keys = Object.keys(dto).filter(k => allowedKeys.includes(k as any)) as (keyof UpdateExerciseDto)[];
         if (keys.length === 0) return existing;
 
         const setClauses: string[] = [];
@@ -86,7 +92,7 @@ export class ExerciseService {
         return await this.db.prepare('SELECT * FROM exercises WHERE id = ?').bind(id).first<Exercise>();
     }
 
-    async search(filters: ExerciseFilters): Promise<{ exercises: Exercise[]; total: number }> {
+    async search(filters: ExerciseFilters): Promise<{ data: Exercise[], nextCursor: string | null, hasMore: boolean }> {
         let query = 'SELECT * FROM exercises WHERE 1=1';
         const params: any[] = [];
 
@@ -118,24 +124,37 @@ export class ExerciseService {
             params.push(`%${filters.theme}%`);
         }
 
-        // Count total before pagination
-        // Note: This is an approximation or requires a separate count query
-        // For simplicity, we'll just fetch results with limit
+        if (filters.cursor) {
+            try {
+                const cursorData = JSON.parse(atob(filters.cursor));
+                if (cursorData.created_at && cursorData.id) {
+                    query += " AND (created_at < ? OR (created_at = ? AND id < ?))";
+                    params.push(cursorData.created_at, cursorData.created_at, cursorData.id);
+                }
+            } catch (e) { }
+        }
 
-        query += ' ORDER BY created_at DESC';
+        query += ' ORDER BY created_at DESC, id DESC';
 
         if (filters.limit) {
             query += ' LIMIT ?';
-            params.push(filters.limit);
-        }
-
-        if (filters.offset) {
-            query += ' OFFSET ?';
-            params.push(filters.offset);
+            params.push(filters.limit + 1);
         }
 
         const { results } = await this.db.prepare(query).bind(...params).all<Exercise>();
 
-        return { exercises: results, total: results.length }; // Total is partial here, ideally proper count
+        let hasMore = false;
+        if (filters.limit && results.length > filters.limit) {
+            hasMore = true;
+            results.pop();
+        }
+
+        let nextCursor: string | null = null;
+        if (hasMore && results.length > 0) {
+            const lastItem = results[results.length - 1];
+            nextCursor = btoa(JSON.stringify({ created_at: lastItem.created_at, id: lastItem.id }));
+        }
+
+        return { data: results, nextCursor, hasMore };
     }
 }

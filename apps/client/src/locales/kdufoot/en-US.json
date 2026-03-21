@@ -371,6 +371,9 @@
     "certifiedCoach": "Certified Coach"
   },
   "enums": {
+    "common": {
+      "offline_mode": "Offline Mode - Connection lost"
+    },
     "type": {
       "match": "Match",
       "tournament": "Tournament"
@@ -715,6 +718,7 @@
     "buttons": {
       "save_changes": "Save changes",
       "save_and_continue": "Save and continue",
+      "export_data": "Export my data (JSON)",
       "delete_account": "Delete my account",
       "reset_calendar": "Reset my calendar synchronization",
       "validate_club": "VALIDATE MY CLUB",

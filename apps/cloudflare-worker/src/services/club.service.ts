@@ -86,6 +86,10 @@ export class ClubService {
     }
 
     async validateSiret(siret: string): Promise<{ isValid: boolean; clubName?: string; error?: string }> {
+        const cacheKey = `siret:validate:${siret}`;
+        const cached = await this.env.KV_CACHE.get<{ isValid: boolean; clubName?: string; error?: string }>(cacheKey, 'json');
+        if (cached) return cached;
+
         try {
             const params = new URLSearchParams({
                 q: siret,
@@ -108,11 +112,16 @@ export class ClubService {
             const { validateClubSiret } = await import('../utils/siret.validator');
             const validation = validateClubSiret(ape, clubName);
 
-            if (!validation.isValid) {
-                return { isValid: false, error: validation.reason, clubName };
-            }
+            const result = validation.isValid 
+                ? { isValid: true, clubName }
+                : { isValid: false, error: validation.reason, clubName };
 
-            return { isValid: true, clubName };
+            // Cache the result for 7 days
+            await this.env.KV_CACHE.put(cacheKey, JSON.stringify(result), {
+                expirationTtl: ClubService.CACHE_TTL
+            });
+
+            return result;
         } catch (error) {
             console.error('Error validating SIRET:', error);
             return { isValid: false, error: "Erreur lors de la validation du SIRET." };

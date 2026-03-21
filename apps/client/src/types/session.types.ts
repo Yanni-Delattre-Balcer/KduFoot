@@ -75,5 +75,5 @@ export interface SessionFilters {
   from?: string;
   to?: string;
   limit?: number;
-  offset?: number;
+  cursor?: string;
 }

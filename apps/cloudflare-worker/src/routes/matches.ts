@@ -6,7 +6,7 @@ import { Permission } from '../types/permissions';
 import { checkPermission } from '../middleware/permissions.middleware';
 import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast';
 
-export const setupMatchRoutes = (router: Router, env: Env) => {
+export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
     const matchService = new MatchService(env.DB);
 
     /**
@@ -72,7 +72,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         let currentUserId: string | null = null;
         if (authHeader && authHeader.startsWith('Bearer ')) {
             const token = authHeader.substring(7);
-            const payload = JSON.parse(atob(token.split('.')[1]));
+            const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
             const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
             if (dbUser) currentUserId = dbUser.id;
         }
@@ -91,7 +91,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             ownerId: url.searchParams.get('ownerId') || undefined,
             include_past: url.searchParams.get('include_past') === 'true',
             limit: parseInt(url.searchParams.get('limit') || '50'),
-            offset: parseInt(url.searchParams.get('offset') || '0'),
+            cursor: url.searchParams.get('cursor') || undefined,
             radius_km: radiusParam ? parseFloat(radiusParam) : undefined,
             user_lat: userLatParam ? parseFloat(userLatParam) : undefined,
             user_lng: userLngParam ? parseFloat(userLngParam) : undefined,
@@ -109,28 +109,29 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         // OPTIMISATION KV : LECTURE GRATUITE ILLIMITÉE (DISABLED FOR REAL-TIME SYNC)
         // ==========================================
         const cacheKey = `matches:search:${url.search}`;
-        /*
         if (env.KV_CACHE && !filters.ownerId) {
             const cachedMatches = await env.KV_CACHE.get(cacheKey, 'json');
             if (cachedMatches) {
                 return Response.json({ success: true, ...(cachedMatches as any), _source: 'KV' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             }
         }
-        */
 
         const result = await matchService.search(filters, env.GOOGLE_MAPS_API_KEY);
 
         // ==========================================
         // SAUVEGARDE KV (TTL: 60s pour décharger D1) (DISABLED FOR REAL-TIME SYNC)
         // ==========================================
-        /*
         if (env.KV_CACHE && !filters.ownerId) {
             // TTL 60s : Pendant 60s, les 25000 users liront la valeur KV en cache (0 requête D1)
             await env.KV_CACHE.put(cacheKey, JSON.stringify(result), { expirationTtl: 60 });
         }
-        */
 
-        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        const isPublicSearch = !authHeader && !filters.ownerId;
+        const cacheHeaders = isPublicSearch 
+            ? { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=86400" } 
+            : { "Cache-Control": "private, no-cache, no-store, must-revalidate" };
+
+        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, ...cacheHeaders, "Content-Type": "application/json" } });
     });
 
     /**
@@ -155,7 +156,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -187,7 +188,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -279,7 +280,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const dbUser = await env.DB.prepare('SELECT id, level, category, pitch_type, license_id, firstname, lastname, phone, stadium_address, home_jersey_color, away_jersey_color, location, club_id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ 
             id: string, 
             level: string, 
@@ -319,7 +320,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -362,7 +363,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -373,7 +374,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
         try {
             const match = await matchService.update(params.id, dbUser.id, dto);
             if (!match) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            await broadcastDataChanged(env);
+            ctx.waitUntil(broadcastDataChanged(env));
 
             // Fetch all accepted participants using their Auth0 Sub for targeted notifications
             const { results: subs } = await env.DB.prepare(`
@@ -384,7 +385,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             `).bind(params.id).all<{ auth0_sub: string }>();
 
             if (subs.length > 0) {
-                await broadcastNotification(env, {
+                ctx.waitUntil(broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'MATCH_MODIFIED',
                     message: match.type === 'tournament' 
@@ -400,12 +401,12 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
                         owner_id: payload.sub,
                         match_type: match.type
                     }
-                });
+                }));
             }
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -493,7 +494,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -550,7 +551,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             return Response.json({ success: true, match }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: e.message }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -671,7 +672,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             }
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -776,7 +777,9 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             }
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            const statusCode = e.message === '409_CONFLICT' ? 409 : 400;
+            const errorMsg = e.message === '409_CONFLICT' ? 'Tournament is full' : 'Internal server error';
+            return Response.json({ success: false, error: errorMsg }, { status: statusCode, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -885,7 +888,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
             return Response.json({ success }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -917,7 +920,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
 
         const authHeader = request.headers.get('Authorization')!;
         const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -981,9 +984,11 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
      */
     router.patch('/api/matches/pairings/<pairingId>', async (request: Request) => {
         const params = (request as any).params as { pairingId: string };
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: router.corsHeaders });
+        }
+        const payload = permissionCheck.payload;
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
 
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
@@ -994,7 +999,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 
@@ -1018,9 +1023,11 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
      */
     router.post('/api/matches/<id>/pairings/generate', async (request: Request) => {
         const params = (request as any).params as { id: string };
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const permissionCheck = await checkPermission(request, env, Permission.MATCHES_CREATE);
+        if (!permissionCheck.hasPermission) {
+            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: router.corsHeaders });
+        }
+        const payload = permissionCheck.payload;
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
 
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
@@ -1030,7 +1037,7 @@ export const setupMatchRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
             return Response.json({ success: true, pairings }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
-            return Response.json({ success: false, error: e.message }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     });
 };

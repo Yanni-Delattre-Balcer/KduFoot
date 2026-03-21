@@ -113,6 +113,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
       size="md"
+      aria-labelledby="auth-modal-title"
       onClose={() => {}} // Empêcher la fermeture par défaut
     >
       <ModalContent>
@@ -123,7 +124,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           </div>
         </ModalHeader>
         <ModalBody className="text-center px-6 sm:px-10">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight leading-tight">
+          <h1 id="auth-modal-title" className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight leading-tight">
             {t("onboarding.calendar.title", "Synchronisez votre calendrier")}
           </h1>
           <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed max-w-[280px] sm:max-w-none mx-auto opacity-80">
