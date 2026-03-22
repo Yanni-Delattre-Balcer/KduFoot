@@ -60,6 +60,18 @@ jobs:
         run: |
           npm install
 
+      - name: Type Check (Worker)
+        run: npm run type-check
+        working-directory: apps/cloudflare-worker
+
+      - name: Run Tests (Worker)
+        run: npm test -- --passWithNoTests
+        working-directory: apps/cloudflare-worker
+
+      - name: Lint (Worker)
+        run: npm run lint -- --max-warnings=0 || true
+        working-directory: apps/cloudflare-worker
+
       - name: Create .env file
         run: |
           echo "DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}" > .env

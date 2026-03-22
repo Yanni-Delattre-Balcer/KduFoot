@@ -174,7 +174,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
             const session = await sessionService.create(dbUser.id, dto);
             await broadcastDataChanged(env);
             return Response.json({ success: true, session }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.SESSIONS_CREATE);
@@ -229,8 +229,8 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
             if (env.KV_CACHE) await env.KV_CACHE.delete(`session:${id}`);
             await broadcastDataChanged(env);
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
-            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: unknown) {
+            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.SESSIONS_CREATE);
@@ -269,8 +269,8 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
-            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: unknown) {
+            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.SESSIONS_CREATE);

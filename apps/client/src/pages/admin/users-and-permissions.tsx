@@ -227,20 +227,29 @@ export default function UsersAndPermissionsPage() {
         return;
       }
 
-      // Merge the D1 blocked status and Auth0 data
-      const mergedUsers = (u ?? []).map((user) => {
-        const metadata = userMetadata.find((m) => m.auth0_sub === user.user_id);
-        const isBlockedInD1 = metadata?.is_blocked === true;
+      // Use D1 userMetadata as the primary source of truth, merging Auth0 data if available
+      const mergedUsers = userMetadata.map((metadata) => {
+        const user = (u ?? []).find((a) => a.user_id === metadata.auth0_sub) || {
+          user_id: metadata.auth0_sub,
+          email: metadata.email,
+          name: metadata.name,
+          nickname: metadata.name,
+          picture: "",
+          email_verified: true,
+          logins_count: 0,
+          created_at: metadata.created_at || new Date().toISOString(),
+          updated_at: metadata.last_login || metadata.created_at || new Date().toISOString(),
+          last_login: metadata.last_login || metadata.created_at || new Date().toISOString(),
+          app_metadata: { permissions: [] }
+        };
 
+        const isBlockedInD1 = metadata?.is_blocked === true;
         const currentPerms = user.app_metadata?.permissions || [];
         const hasBlockedPerm = currentPerms.includes(Permission.ROLE_BLOCKED);
-
         const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL || user.user_id === SUPREME_MASTER_ID;
         let updatedPerms = currentPerms;
 
         if (isSuperAdmin) {
-          // Injection de toutes les permissions pour le Super Admin dans l'UI
-          // On exclut explicitement ROLE_BLOCKED sinon il apparaît barré en rouge !
           updatedPerms = Object.values(Permission).filter(p => p !== Permission.ROLE_BLOCKED);
         } else if (isBlockedInD1 && !hasBlockedPerm) {
           updatedPerms = [...currentPerms, Permission.ROLE_BLOCKED];
@@ -645,6 +654,10 @@ export default function UsersAndPermissionsPage() {
           },
         };
       });
+
+      if (mgmtToken && handleBlockLogic) {
+        setTimeout(() => loadUsers(mgmtToken, true), 500);
+      }
     } catch (err) {
       console.error(err);
       addToast({

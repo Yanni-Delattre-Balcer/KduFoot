@@ -35,6 +35,19 @@ export interface Club {
     longitude: number | null;
 }
 
+/** Row returned by SELECT is_blocked, block_reason FROM users */
+export interface BlockedUserRow {
+    is_blocked: number;
+    block_reason: string | null;
+}
+
+/** JWT payload shape from Auth0 */
+export interface Auth0JwtPayload {
+    sub?: string;
+    permissions?: string[];
+    [key: string]: unknown;
+}
+
 export interface User {
     id: string;
     auth0_sub: string;
@@ -53,7 +66,7 @@ export interface User {
     block_count: number;
     block_reason: string | null;
     siret: string | null;
-    additional_sirets: string | any[] | null;
+    additional_sirets: string | string[] | null;
     siret_change_count: number;
     home_jersey_color: string | null;
     away_jersey_color: string | null;
@@ -61,3 +74,4 @@ export interface User {
     created_at: number;
     updated_at: number;
 }
+

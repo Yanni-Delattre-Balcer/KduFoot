@@ -38,7 +38,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
             const pairings = await tournamentService.generatePairings(params.id, dbUser.id);
             ctx.waitUntil(broadcastDataChanged(env));
             return Response.json({ success: true, pairings }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CREATE);
@@ -60,7 +60,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
             await tournamentService.updatePairingTime(params.pairingId, dbUser.id, body.scheduled_time);
             ctx.waitUntil(broadcastDataChanged(env));
             return Response.json({ success: true }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CREATE);
@@ -81,7 +81,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
             const match = await tournamentService.closeRegistrations(params.id, dbUser.id);
             ctx.waitUntil(broadcastDataChanged(env));
             return Response.json({ success: true, match }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CREATE);
@@ -105,7 +105,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
             await tournamentService.updateScore(params.id, dbUser.id, validation.data.score_a, validation.data.score_b);
             ctx.waitUntil(broadcastDataChanged(env));
             return Response.json({ success: true }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CREATE);

@@ -19,8 +19,8 @@ export class ParticipationService {
                 'INSERT INTO match_contacts (match_id, user_id, message, contacted_at, status) VALUES (?, ?, ?, ?, ?)'
             ).bind(matchId, userId, dto.message, Math.floor(Date.now() / 1000), 'pending').run();
             return true;
-        } catch (e: any) {
-            if (e.message.includes('UNIQUE constraint failed')) return true;
+        } catch (e: unknown) {
+            if (e instanceof Error && e.message.includes('UNIQUE constraint failed')) return true;
             throw e;
         }
     }

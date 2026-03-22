@@ -66,34 +66,35 @@ export class SessionService {
         const session = sessionRes.results[0] as TrainingSession;
         if (!session) return null;
 
-        const exercises: SessionExercise[] = exercisesRes.results.map((row: any) => {
+        const exercises: SessionExercise[] = exercisesRes.results.map((r: unknown) => {
+            const row = r as Record<string, unknown>;
             const exercise: Exercise = {
-                id: row.e_id,
-                user_id: row.e_user_id,
-                title: row.title,
-                synopsis: row.synopsis,
-                svg_schema: row.svg_schema,
-                themes: row.themes,
-                created_at: row.e_created_at,
-                updated_at: row.e_updated_at,
-                nb_joueurs: row.nb_joueurs,
-                dimensions: row.dimensions,
-                materiel: row.materiel,
-                category: row.category,
-                level: row.level,
-                duration: row.e_duration,
-                video_url: row.video_url,
-                thumbnail_url: row.thumbnail_url,
-                video_start_seconds: row.video_start_seconds
+                id: row.e_id as string,
+                user_id: row.e_user_id as string,
+                title: row.title as string,
+                synopsis: row.synopsis as string,
+                svg_schema: row.svg_schema as string,
+                themes: row.themes as string,
+                created_at: row.e_created_at as number,
+                updated_at: row.e_updated_at as number,
+                nb_joueurs: row.nb_joueurs as string,
+                dimensions: row.dimensions as string,
+                materiel: row.materiel as string,
+                category: row.category as string,
+                level: row.level as string,
+                duration: row.e_duration as string | undefined,
+                video_url: row.video_url as string | undefined,
+                thumbnail_url: row.thumbnail_url as string | undefined,
+                video_start_seconds: row.video_start_seconds as number | undefined
             };
 
             return {
-                session_id: row.session_id,
-                exercise_id: row.exercise_id,
-                order_index: row.order_index,
-                duration: row.se_duration,
-                players: row.se_players,
-                adapted_data: row.adapted_data,
+                session_id: row.session_id as string,
+                exercise_id: row.exercise_id as string,
+                order_index: row.order_index as number,
+                duration: row.se_duration as number,
+                players: row.se_players as number,
+                adapted_data: row.adapted_data as string | undefined,
                 exercise
             };
         });
@@ -107,7 +108,7 @@ export class SessionService {
         if (existing.user_id !== userId) throw new Error('Unauthorized');
 
         const now = Math.floor(Date.now() / 1000);
-        const statements: any[] = [];
+        const statements: import("@cloudflare/workers-types").D1PreparedStatement[] = [];
 
         const allowedKeys = [
             'name', 'category', 'level', 'total_duration', 
@@ -118,7 +119,7 @@ export class SessionService {
         const keys = Object.keys(dto).filter(k => allowedKeys.includes(k as any)) as (keyof UpdateSessionDto)[];
         if (keys.length > 0) {
             const setClauses: string[] = [];
-            const values: any[] = [];
+            const values: unknown[] = [];
             for (const key of keys) {
                 if (key === 'constraints') {
                     setClauses.push(`constraints = ?`);
@@ -172,7 +173,7 @@ export class SessionService {
 
     async search(filters: SessionFilters): Promise<{ data: TrainingSession[], nextCursor: string | null, hasMore: boolean }> {
         let query = 'SELECT id, user_id, name, category, level, total_duration, constraints, status, scheduled_date, created_at, updated_at FROM training_sessions WHERE deleted_at IS NULL';
-        const params: any[] = [];
+        const params: unknown[] = [];
 
         if (filters.userId) {
             query += ' AND user_id = ?';

@@ -54,7 +54,7 @@ export class ExerciseService {
         if (keys.length === 0) return existing;
 
         const setClauses: string[] = [];
-        const values: any[] = [];
+        const values: unknown[] = [];
 
         for (const key of keys) {
             if (key === 'themes') {
@@ -94,7 +94,7 @@ export class ExerciseService {
 
     async search(filters: ExerciseFilters): Promise<{ data: Exercise[], nextCursor: string | null, hasMore: boolean }> {
         let query = 'SELECT * FROM exercises WHERE 1=1';
-        const params: any[] = [];
+        const params: unknown[] = [];
 
         if (filters.userId) {
             query += ' AND user_id = ?';

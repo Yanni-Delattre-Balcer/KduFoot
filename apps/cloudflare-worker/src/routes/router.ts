@@ -27,6 +27,7 @@ import { JWTPayload } from "jose";
 
 import { checkPermissions } from "../auth0";
 import { Env } from "../types/env";
+import { BlockedUserRow } from "../types";
 import { ErrorHandler } from "../utils/error-handler";
 
 export type AuthenticatedRequest = Request & { params: Record<string, string>; user?: JWTPayload };
@@ -262,8 +263,8 @@ export class Router {
 				const userId = payload.sub;
 				if (userId) {
 					try {
-						const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(userId).first();
-						if (dbUser && (dbUser as any).is_blocked) {
+						const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(userId).first<BlockedUserRow>();
+						if (dbUser && dbUser.is_blocked) {
 							return this.addSecurityHeaders(new Response(
 								JSON.stringify({
 									success: false,
@@ -292,7 +293,7 @@ export class Router {
 					ctx,
 				);
 				return this.addSecurityHeaders(response);
-			} catch (error: any) {
+			} catch (error: unknown) {
 				return ErrorHandler.handle(error, this.corsHeaders);
 			}
 		}

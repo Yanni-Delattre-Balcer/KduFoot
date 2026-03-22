@@ -955,11 +955,18 @@ export const useSecuredApi = () => {
       skipCache: boolean = false,
     ): Promise<
       {
+        id: string;
         auth0_sub: string;
+        email: string;
+        name: string;
+        club_id: string | null;
         is_blocked: boolean;
         block_reason: string | null;
         siret: string | null;
         club_name: string | null;
+        created_at: string;
+        last_login: string | null;
+        role: string;
       }[]
     > => {
       const apiBase =

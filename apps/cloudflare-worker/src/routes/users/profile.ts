@@ -1,118 +1,19 @@
-
-import { Router } from './router';
-import { Env } from '../types/env';
-import { UserService } from '../services/user.service';
-import { CreateUserDto, UpdateUserDto } from '../types/user';
-import { Permission } from '../types/permissions';
-import { checkPermission } from '../middleware/permissions.middleware';
-import { checkPermissions } from '../auth0';
-import { validateClubSiret } from '../utils/siret.validator';
-import { broadcastDataChanged } from '../utils/broadcast';
-import { AuthenticatedRequest } from './router';
+import { Router, AuthenticatedRequest } from '../router';
+import { Env } from '../../types/env';
+import { UserService } from '../../services/user.service';
+import { UpdateUserDto } from '../../types/user';
+import { Permission } from '../../types/permissions';
+import { checkPermissions } from '../../auth0';
+import { validateClubSiret } from '../../utils/siret.validator';
+import { broadcastDataChanged } from '../../utils/broadcast';
 
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
-export const setupUserRoutes = (router: Router, env: Env) => {
+export const setupProfileRoutes = (router: Router, env: Env) => {
     const userService = new UserService(env.DB);
 
     /**
-     * @openapi
-     * /api/users/sync:
-     *   post:
-     *     tags:
-     *       - User Management
-     *     summary: Synchronize Auth0 profile with the local database
-     *     description: >
-     *       Synchronizes user information from an Auth0 identification token into the local KduFoot database (Cloudflare D1).
-     *       This ensures that subsequent operations (like creating exercises) can correctly reference the local user ID.
-     *       It should be called at every login to keep the local profile (name, picture, email) up to date.
-     *       Requires a valid JWT.
-     *     security:
-     *       - bearerAuth: []
-     *     requestBody:
-     *       description: User profile data from Auth0.
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             required:
-     *               - sub
-     *               - email
-     *             properties:
-     *               sub: { type: string, description: "The Auth0 unique subject identifier." }
-     *               email: { type: string, description: "User's email address." }
-     *               given_name: { type: string, description: "User's first name." }
-     *               family_name: { type: string, description: "User's last name." }
-     *               picture: { type: string, description: "URL to the user's profile picture." }
-     *     responses:
-     *       200:
-     *         description: User profile successfully synchronized.
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 success: { type: boolean }
-     *                 user: { $ref: '#/components/schemas/User' }
-     *       400:
-     *         description: Bad Request - Missing mandatory user data (sub or email).
-     *       401:
-     *         description: Unauthorized - Invalid or missing JWT.
-     *       500:
-     *         description: Internal Server Error - Failed to update the database.
-     */
-    router.post('/api/users/sync', async (request: Request, env: Env) => {
-
-        const body: any = await request.json();
-
-        if (!body.sub || !body.email) {
-            return Response.json({ success: false, error: 'Missing user data' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const dto: CreateUserDto = {
-            auth0_sub: body.sub,
-            email: body.email,
-            firstname: body.given_name || body.name || 'User',
-            lastname: body.family_name || '',
-            picture: body.picture
-        };
-
-        try {
-            const user = await userService.createOrUpdateUser(dto);
-            return Response.json({ success: true, user }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
-            console.error('User Sync Error:', e);
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-    }, Permission.READ_API);
-
-    /**
-     * @openapi
-     * /api/users/me:
-     *   get:
-     *     tags:
-     *       - User Management
-     *     summary: Retrieve the current user's profile
-     *     description: >
-     *       Fetches the complete profile and club association for the currently authenticated user.
-     *       The user is identified via the 'sub' claim in the provided JWT.
-     *     security:
-     *       - bearerAuth: []
-     *     responses:
-     *       200:
-     *         description: The user's detailed profile, including associated club info if linked.
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 success: { type: boolean }
-     *                 user: { $ref: '#/components/schemas/User' }
-     *       404:
-     *         description: Not Found - User record not found in the local database. User sync may be required.
-     *       401:
-     *         description: Unauthorized - Invalid or missing JWT.
+     * GET /api/users/me
      */
     router.get('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
@@ -127,20 +28,22 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
         }
 
-        let additional_clubs: any[] = [];
+        let additional_clubs: import("../../types").Club[] = [];
         if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
-            additional_clubs = await Promise.all(user.additional_sirets.map(async (item: any) => {
-                const siret = typeof item === 'string' ? item : item.siret;
-                const stadium_address = typeof item === 'object' ? item.stadium_address : null;
+            additional_clubs = await Promise.all(user.additional_sirets.map(async (item: unknown) => {
+                const itemObj = item as { siret?: string; stadium_address?: string };
+                // Keep strictly typed logic here using fallback
+                const siret = typeof item === 'string' ? item : (itemObj.siret || '');
+                const stadium_address = typeof item === 'object' && item !== null ? itemObj.stadium_address : undefined;
 
                 const dbClub = await env.DB.prepare('SELECT id, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(siret).first<{ id: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number }>();
-                if (dbClub) return { id: dbClub.id, siret, name: dbClub.name, city: dbClub.city, zip: dbClub.zip, address: dbClub.address, latitude: dbClub.latitude, longitude: dbClub.longitude, stadium_address };
+                if (dbClub) return { ...dbClub, siret, stadium_address } as import("../../types").Club;
 
                 try {
                     const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
                     const r = await fetch(`${SIRET_API_URL}?q=${siret}&page=1&per_page=1`);
                     if (r.ok) {
-                        const d: any = await r.json();
+                        const d = await r.json() as import("../../types").SiretApiResponse;
                         if (d.results && d.results.length > 0) {
                             const rData = d.results[0];
                             const newId = crypto.randomUUID();
@@ -148,19 +51,19 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                             const city = rData.siege?.libelle_commune || '';
                             const zip = rData.siege?.code_postal || '';
                             const address = rData.siege?.adresse || '';
-                            const lat = rData.siege?.latitude ? parseFloat(rData.siege.latitude) : null;
-                            const lng = rData.siege?.longitude ? parseFloat(rData.siege.longitude) : null;
+                            const lat = rData.siege?.latitude ? parseFloat(rData.siege.latitude) : 0;
+                            const lng = rData.siege?.longitude ? parseFloat(rData.siege.longitude) : 0;
 
                             await env.DB.prepare(
                                 'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())'
                             ).bind(newId, siret, name, city, address, zip, lat, lng).run();
 
-                            return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address };
+                            return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address } as import("../../types").Club;
                         }
                     }
                 } catch (e) { }
 
-                return { id: siret, siret, name: siret, stadium_address }; // Fallback to siret as ID if API fails
+                return { id: crypto.randomUUID(), siret, name: siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address } as import("../../types").Club;
             }));
         }
 
@@ -168,22 +71,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     }, Permission.READ_API);
 
     /**
-     * @openapi
-     * /api/me/context:
-     *   get:
-     *     tags:
-     *       - User Management
-     *     summary: Retrieve complete user context (Profile + Notifications)
-     *     description: >
-     *       Aggregates user profile, club association, and notification counts in a single "one-shot" request.
-     *       Designed to minimize KV reads and API calls during initial application load.
-     *     security:
-     *       - bearerAuth: []
-     *     responses:
-     *       200:
-     *         description: Complete user context.
-     *       404:
-     *         description: User not found.
+     * GET /api/me/context
      */
     router.get('/api/me/context', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
@@ -203,10 +91,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             queries.push(env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id));
         }
         
-        const { MatchService } = await import('../services/match.service');
-        const matchService = new MatchService(env.DB);
-        
-        // Notifications queries (extracted from matchService.getNotificationCounts logic for batching)
+        // Notifications queries
         const incomingReqsQuery = env.DB.prepare(`
             SELECT COUNT(*) as count FROM match_contacts mc 
             JOIN matches m ON mc.match_id = m.id 
@@ -236,21 +121,22 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
         notifications.total = notifications.incoming_requests + notifications.updates;
 
-        // Handle additional clubs separately (they might involve external API calls)
-        let additional_clubs: any[] = [];
+        // Handle additional clubs separately
+        let additional_clubs: import("../../types").Club[] = [];
         if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
-            additional_clubs = await Promise.all(user.additional_sirets.map(async (item: any) => {
-                const siret = typeof item === 'string' ? item : item.siret;
-                const stadium_address = typeof item === 'object' ? item.stadium_address : null;
+            additional_clubs = await Promise.all(user.additional_sirets.map(async (item: unknown) => {
+                const itemObj = item as { siret?: string; stadium_address?: string };
+                const siret = typeof item === 'string' ? item : (itemObj.siret || '');
+                const stadium_address = typeof item === 'object' && item !== null ? itemObj.stadium_address : undefined;
 
                 const dbClub = await env.DB.prepare('SELECT id, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(siret).first<{ id: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number }>();
-                if (dbClub) return { id: dbClub.id, siret, name: dbClub.name, city: dbClub.city, zip: dbClub.zip, address: dbClub.address, latitude: dbClub.latitude, longitude: dbClub.longitude, stadium_address };
+                if (dbClub) return { ...dbClub, siret, stadium_address } as import("../../types").Club;
 
                 try {
                     const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
                     const r = await fetch(`${SIRET_API_URL}?q=${siret}&page=1&per_page=1`);
                     if (r.ok) {
-                        const d: any = await r.json();
+                        const d = await r.json() as import("../../types").SiretApiResponse;
                         if (d.results && d.results.length > 0) {
                             const rData = d.results[0];
                             const newId = crypto.randomUUID();
@@ -258,19 +144,19 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                             const city = rData.siege?.libelle_commune || '';
                             const zip = rData.siege?.code_postal || '';
                             const address = rData.siege?.adresse || '';
-                            const lat = rData.siege?.latitude ? parseFloat(rData.siege.latitude) : null;
-                            const lng = rData.siege?.longitude ? parseFloat(rData.siege.longitude) : null;
+                            const lat = rData.siege?.latitude ? parseFloat(rData.siege.latitude) : 0;
+                            const lng = rData.siege?.longitude ? parseFloat(rData.siege.longitude) : 0;
 
                             await env.DB.prepare(
                                 'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())'
                             ).bind(newId, siret, name, city, address, zip, lat, lng).run();
 
-                            return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address };
+                            return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address } as import("../../types").Club;
                         }
                     }
                 } catch (e) { }
 
-                return { id: siret, siret, name: siret, stadium_address };
+                return { id: crypto.randomUUID(), siret, name: siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address } as import("../../types").Club;
             }));
         }
 
@@ -282,40 +168,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     }, Permission.READ_API);
 
     /**
-     * @openapi
-     * /api/users/me:
-     *   put:
-     *     tags:
-     *       - User Management
-     *     summary: Update the current user's profile
-     *     description: >
-     *       Updates mutable fields of the current user's profile (e.g., location, stadium address).
-     *       Administrative fields like subscription and club association are protected and cannot be modified here.
-     *     security:
-     *       - bearerAuth: []
-     *     requestBody:
-     *       description: Fields to update in the user's profile.
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             $ref: '#/components/schemas/User'
-     *     responses:
-     *       200:
-     *         description: Successful update. Returns the updated user record.
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 success: { type: boolean }
-     *                 user: { $ref: '#/components/schemas/User' }
-     *       401:
-     *         description: Unauthorized - Access denied.
-     *       404:
-     *         description: Not Found - User record not found.
-     *       500:
-     *         description: Internal Server Error - Database update failed.
+     * PUT /api/users/me
      */
     router.put('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
@@ -341,43 +194,13 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         try {
             const updated = await userService.updateUser(user.id, body);
             return Response.json({ success: true, user: updated }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.WRITE_API);
 
     /**
-     * @openapi
-     * /api/users/link-club:
-     *   post:
-     *     tags:
-     *       - User Management
-     *     summary: Link the current user to a football club via SIRET
-     *     description: >
-     *       Links the current user's profile to a club identified by a 14-digit SIRET number.
-     *       It fetches official club information (name, address, coordinates) from an external French government API.
-     *       If the club does not exist locally, it is created.
-     *       **Note:** This action is irreversible for the user.
-     *     security:
-     *       - bearerAuth: []
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             required: [siret]
-     *             properties:
-     *               siret: { type: string, description: "9-digit SIREN or 14-digit SIRET number." }
-     *     responses:
-     *       200:
-     *         description: Successfully linked. Returns the updated user and club details.
-     *       400:
-     *         description: Bad Request - Missing SIRET or user already linked.
-     *       404:
-     *         description: Not Found - No business found for the provided SIRET.
-     *       502:
-     *         description: Bad Gateway - Failed to retrieve data from the SIRET API.
+     * POST /api/users/link-club
      */
     router.post('/api/users/link-club', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
@@ -404,7 +227,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                 return Response.json({ success: false, error: 'Erreur lors de la recherche de l\'entreprise.' }, { status: 502, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             }
 
-            const apiData: any = await apiRes.json();
+            const apiData = await apiRes.json() as import("../../types").SiretApiResponse;
             if (!apiData.results || apiData.results.length === 0) {
                 return Response.json({ success: false, error: 'Aucune entreprise trouvée pour ce SIRET.' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             }
@@ -414,7 +237,6 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
             const clubName = entreprise.nom_complet || entreprise.nom_raison_sociale || 'Club inconnu';
 
-            // SECURITY: SIRET Filtering — Admin/Super-Admin bypass NAF/APE check
             let isAdminUser = user.email === SUPER_ADMIN_EMAIL;
             if (!isAdminUser) {
                 try {
@@ -467,29 +289,14 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                     club: { id: clubId, siret: body.siret, name: clubName, city: clubCity, address: clubAddress, zip: clubZip, latitude: lat, longitude: lon }
                 }
             }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Link Club Error:', e);
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.READ_API);
 
     /**
-     * @openapi
-     * /api/users/unlink-club:
-     *   post:
-     *     tags:
-     *       - Administrative Actions
-     *     summary: Unlink a user from their club (Admin only)
-     *     description: >
-     *       Administrative endpoint to reset a user's club association.
-     *       Currently restricted to a specific administrator email for testing and support purposes.
-     *     security:
-     *       - bearerAuth: []
-     *     responses:
-     *       200:
-     *         description: Successfully unlinked.
-     *       403:
-     *         description: Forbidden - Lacks administrative privileges.
+     * POST /api/users/unlink-club
      */
     router.post('/api/users/unlink-club', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
@@ -507,33 +314,13 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
 
             return Response.json({ success: true, message: 'Club détaché avec succès.' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.ADMIN_AUTH0);
 
     /**
-     * @openapi
-     * /api/users/me:
-     *   delete:
-     *     tags:
-     *       - User Management
-     *     summary: Delete the current user's account
-     *     description: >
-     *       Permanently deletes the current user's record from the database.
-     *       Associated matches and tournament data created by this user will be deleted via cascade.
-     *       Authentication is required.
-     *     security:
-     *       - bearerAuth: []
-     *     responses:
-     *       200:
-     *         description: Account successfully deleted.
-     *       401:
-     *         description: Unauthorized.
-     *       404:
-     *         description: User not found.
-     *       500:
-     *         description: Internal error during deletion.
+     * DELETE /api/users/me
      */
     router.delete('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
@@ -545,15 +332,22 @@ export const setupUserRoutes = (router: Router, env: Env) => {
 
         try {
             await userService.deleteUser(user.id);
+
+            // RGPD audit: log account deletion
+            try {
+                await env.DB.prepare(
+                    'INSERT INTO rgpd_audit_log (id, user_id, action, details) VALUES (?, ?, ?, ?)'
+                ).bind(crypto.randomUUID(), user.id, 'delete', 'Account self-deletion').run();
+            } catch { /* audit log should not block deletion */ }
+
             return Response.json({ success: true, message: 'Account deleted' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.READ_API);
 
     /**
      * GET /api/users/me/calendar-link
-     * Returns the webcal sync URL for the user.
      */
     router.get('/api/users/me/calendar-link', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
@@ -571,23 +365,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
     }, Permission.READ_API);
 
     /**
-     * @openapi
-     * /api/me/export:
-     *   get:
-     *     tags:
-     *       - User Management
-     *     summary: Export user data as PDF
-     *     description: Generates a PDF containing the user's profile, match history, and statistics.
-     *     security:
-     *       - bearerAuth: []
-     *     responses:
-     *       200:
-     *         description: PDF file containing user data.
-     *         content:
-     *           application/pdf:
-     *             schema:
-     *               type: string
-     *               format: binary
+     * GET /api/me/export
      */
     router.get('/api/me/export', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
@@ -598,58 +376,58 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
 
         try {
-            const data: any = await userService.exportUserData(user.id);
+            const data = await userService.exportUserData(user.id);
+            const exportData = data as Record<string, unknown>;
             
-            // Dynamic import for pdf-lib (Lazy Loading) - Using bundled ESM to fix resolution issues
             const { PDFDocument, rgb, StandardFonts } = await import('pdf-lib/dist/pdf-lib.esm.js');
             
-            // Create a new PDF document
             const pdfDoc = await PDFDocument.create();
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
             
-            let page = pdfDoc.addPage([595.28, 841.89]); // A4
+            let page = pdfDoc.addPage([595.28, 841.89]);
             const { width, height } = page.getSize();
             let y = height - 50;
 
-            // Header
             page.drawText('KduFoot - Export de Données (RGPD)', { x: 50, y, size: 20, font: fontBold, color: rgb(0, 0, 0.5) });
             y -= 30;
             page.drawText(`Date d'export : ${new Date().toLocaleString('fr-FR')}`, { x: 50, y, size: 10, font });
             y -= 40;
 
-            // Section: Profil
+            const profile = (exportData.profile || {}) as Record<string, unknown>;
             page.drawText('1. PROFIL UTILISATEUR', { x: 50, y, size: 14, font: fontBold });
             y -= 25;
-            page.drawText(`Nom : ${data.profile.lastname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Nom : ${profile.lastname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
             y -= 15;
-            page.drawText(`Prénom : ${data.profile.firstname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Prénom : ${profile.firstname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
             y -= 15;
-            page.drawText(`Email : ${data.profile.email}`, { x: 70, y, size: 11, font });
+            page.drawText(`Email : ${profile.email}`, { x: 70, y, size: 11, font });
             y -= 15;
-            page.drawText(`Licence : ${data.profile.license_id || 'Non spécifiée'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Licence : ${profile.license_id || 'Non spécifiée'}`, { x: 70, y, size: 11, font });
             y -= 15;
-            page.drawText(`Club : ${data.profile.siret || 'Aucun club lié'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Club : ${profile.siret || 'Aucun club lié'}`, { x: 70, y, size: 11, font });
             y -= 40;
 
-            // Section: Statistiques
+            const matches = (exportData.matches || []) as any[];
+            const match_applications = (exportData.match_applications || []) as any[];
+            const training_sessions = (exportData.training_sessions || []) as any[];
+            const created_exercises = (exportData.created_exercises || []) as any[];
+
             page.drawText('2. RÉSUMÉ D\'ACTIVITÉ', { x: 50, y, size: 14, font: fontBold });
             y -= 25;
-            page.drawText(`Matchs créés : ${data.matches.length}`, { x: 70, y, size: 11, font });
+            page.drawText(`Matchs créés : ${matches.length}`, { x: 70, y, size: 11, font });
             y -= 15;
-            page.drawText(`Participations : ${data.match_applications.length}`, { x: 70, y, size: 11, font });
+            page.drawText(`Participations : ${match_applications.length}`, { x: 70, y, size: 11, font });
             y -= 15;
-            page.drawText(`Séances d'entraînement : ${data.training_sessions.length}`, { x: 70, y, size: 11, font });
+            page.drawText(`Séances d'entraînement : ${training_sessions.length}`, { x: 70, y, size: 11, font });
             y -= 15;
-            page.drawText(`Exercices créés : ${data.created_exercises.length}`, { x: 70, y, size: 11, font });
+            page.drawText(`Exercices créés : ${created_exercises.length}`, { x: 70, y, size: 11, font });
             y -= 40;
 
-            // Section: Matchs (Table-like)
-            if (data.matches.length > 0) {
+            if (matches.length > 0) {
                 page.drawText('3. HISTORIQUE DES MATCHS CRÉÉS', { x: 50, y, size: 14, font: fontBold });
                 y -= 25;
                 
-                // Header table
                 page.drawText('Date', { x: 70, y, size: 10, font: fontBold });
                 page.drawText('Type', { x: 170, y, size: 10, font: fontBold });
                 page.drawText('Lieu', { x: 270, y, size: 10, font: fontBold });
@@ -657,7 +435,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                 page.drawLine({ start: { x: 70, y }, end: { x: 520, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
                 y -= 15;
 
-                for (const match of data.matches.slice(0, 15)) { // Limit to avoid page overflow for now
+                for (const match of matches.slice(0, 15)) {
                     if (y < 50) {
                          page = pdfDoc.addPage([595.28, 841.89]);
                          y = height - 50;
@@ -672,6 +450,13 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             }
 
             const pdfBytes = await pdfDoc.save();
+
+            // RGPD audit: log data export
+            try {
+                await env.DB.prepare(
+                    'INSERT INTO rgpd_audit_log (id, user_id, action, details) VALUES (?, ?, ?, ?)'
+                ).bind(crypto.randomUUID(), user.id, 'export', 'PDF export').run();
+            } catch { /* audit log should not block export */ }
             
             return new Response(pdfBytes, {
                 status: 200,
@@ -682,7 +467,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
                     "Content-Length": pdfBytes.length.toString()
                 }
             });
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Export PDF Error:', e);
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }

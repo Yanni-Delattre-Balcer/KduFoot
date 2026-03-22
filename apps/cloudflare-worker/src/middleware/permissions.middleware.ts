@@ -2,6 +2,7 @@
 import { checkPermissions } from '../auth0';
 import { Permission, PermissionCheck } from '../types/permissions';
 import type { Env } from '../types/env';
+import type { Auth0JwtPayload } from '../types';
 
 /**
  * This middleware checks if a request is authorized.
@@ -76,7 +77,7 @@ async function checkQuota(
     env: Env,
     permission: Permission,
     token: string,
-    payload: any
+    payload: Auth0JwtPayload
 ): Promise<PermissionCheck> {
     const quotaConfig: Record<string, { limit: number; period: string }> = {
         [Permission.VIDEOS_ANALYZE]: { limit: 0, period: 'daily' },
@@ -157,6 +158,6 @@ function getNextPeriodReset(period: string): string {
     }
 }
 
-function extractUserIdFromPayload(payload: any): string {
-    return payload.sub;
+function extractUserIdFromPayload(payload: Auth0JwtPayload): string {
+    return payload.sub || '';
 }

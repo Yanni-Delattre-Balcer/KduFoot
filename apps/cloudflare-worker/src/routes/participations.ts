@@ -73,7 +73,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
                 ctx.waitUntil(broadcastDataChanged(env));
             }
             return Response.json({ success }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CONTACT);
@@ -101,7 +101,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
                 ctx.waitUntil(broadcastDataChanged(env));
             }
             return Response.json({ success }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CREATE);

@@ -37,7 +37,7 @@ export interface NotificationPayload {
     targetClubId?: string; // E.g., for "NEW_MATCH_NEARBY"
     message: string;
     actionUrl?: string;
-    data?: any;
+    data?: Record<string, unknown>;
 }
 
 
@@ -81,7 +81,15 @@ export async function broadcastNotification(env: Env, payload: NotificationPaylo
     }
 }
 
-async function sendWebPush(env: Env, subscription: any, payload: any) {
+export interface PushSubscription {
+    endpoint: string;
+    keys: {
+        p256dh: string;
+        auth: string;
+    };
+}
+
+async function sendWebPush(env: Env, subscription: PushSubscription, payload: Record<string, unknown>) {
     if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) {
         console.warn("VAPID keys missing, skipping push");
         return;

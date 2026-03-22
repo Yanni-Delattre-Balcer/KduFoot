@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@heroui/button';
+
 import { motion } from 'framer-motion';
 
 interface EmptyStateProps {

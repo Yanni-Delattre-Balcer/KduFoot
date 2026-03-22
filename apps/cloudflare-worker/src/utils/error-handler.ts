@@ -1,30 +1,41 @@
 
-
 /**
- * Technical Perfection: Global Error Handler
+ * Global Error Handler
  * Ensures consistent API responses and proper status codes.
- * Shields internal server details from the client in production.
+ * SECURITY: Never reveals internal error details to the client.
  */
 export class ErrorHandler {
+    /** Safe, generic error messages keyed by HTTP status code */
+    private static readonly SAFE_MESSAGES: Record<number, string> = {
+        400: "Requête invalide.",
+        401: "Non autorisé.",
+        403: "Accès refusé.",
+        404: "Ressource introuvable.",
+        409: "Conflit – cette action ne peut pas être effectuée.",
+        422: "Données invalides.",
+        429: "Trop de requêtes. Veuillez réessayer plus tard.",
+        500: "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
+    };
+
     static handle(e: unknown, corsHeaders: Record<string, string>) {
         let status = 500;
-        let message = 'Internal Server Error';
+        let internalMessage = 'Unknown error';
 
         if (e instanceof Error) {
-            message = e.message;
-            if ('status' in e && typeof (e as any).status === 'number') {
-                status = (e as any).status;
+            internalMessage = e.message;
+            if ('status' in e && typeof (e as Record<string, unknown>).status === 'number') {
+                status = (e as Record<string, unknown>).status as number;
             }
-        } else if (typeof e === 'object' && e !== null && 'status' in e && typeof (e as any).status === 'number') {
-           status = (e as any).status;
+        } else if (typeof e === 'object' && e !== null && 'status' in e && typeof (e as Record<string, unknown>).status === 'number') {
+           status = (e as Record<string, unknown>).status as number;
         }
 
-        console.error(`[API Error] ${status} - ${message}`);
+        // Log the REAL error for debugging — never sent to client
+        console.error(`[API Error] ${status} - ${internalMessage}`);
 
-        // Security: Don't reveal internal DB/System errors in production
-        const userFriendlyMessage = (status === 500 || message.includes('D1_ERROR') || message.includes('SQLITE'))
-            ? "Une erreur interne s'est produite. Veuillez réessayer plus tard." 
-            : message;
+        // SECURITY: Always return a generic, safe message to the client
+        const userFriendlyMessage = ErrorHandler.SAFE_MESSAGES[status]
+            ?? ErrorHandler.SAFE_MESSAGES[500];
 
         return Response.json(
             { 
@@ -37,7 +48,6 @@ export class ErrorHandler {
                 headers: { 
                     ...corsHeaders, 
                     "Content-Type": "application/json",
-                    "X-Error-Code": status.toString()
                 } 
             }
         );

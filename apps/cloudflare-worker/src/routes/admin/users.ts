@@ -1,94 +1,19 @@
+import { Router, AuthenticatedRequest } from '../router';
+import { Env } from '../../types/env';
+import { ExecutionContext } from "@cloudflare/workers-types";
+import { UserService } from '../../services/user.service';
+import { Permission } from '../../types/permissions';
+import { broadcastDataChanged, broadcastNotification } from '../../utils/broadcast';
+import { checkAdmin, SUPER_ADMIN_EMAIL, SUPREME_MASTER_ID } from './utils';
 
-import { Router, AuthenticatedRequest } from './router';
-import { Env } from '../types/env';
-import { UserService } from '../services/user.service';
-import { MatchService } from '../services/match.service';
-import { checkPermissions } from '../auth0';
-import { Permission } from '../types/permissions';
-import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast';
-
-const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
-const SUPREME_MASTER_ID = '6f62d717-2136-49d7-8c51-fee07eaeebce';
-
-export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
+export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
     const userService = new UserService(env.DB);
-    const matchService = new MatchService(env.DB);
-
-    /**
-     * Resolves the calling user's email from the JWT sub claim by looking up in D1.
-     */
-    const getCallerEmail = async (request: AuthenticatedRequest): Promise<string | null> => {
-        try {
-            const payload = request.user || {} as any;
-            if (payload.email) return payload.email as string;
-
-            const sub = payload.sub;
-            if (!sub) return null;
-            const dbUser = await env.DB.prepare('SELECT email FROM users WHERE auth0_sub = ?').bind(sub).first<{ email: string }>();
-            return dbUser?.email || null;
-        } catch {
-            return null;
-        }
-    };
-
-    /**
-     * Helper: extract D1 user ID from Auth0 sub claim in the JWT
-     */
-    const getCallerD1Id = async (request: AuthenticatedRequest): Promise<string | null> => {
-        try {
-            const payload = request.user || {};
-            const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
-            return dbUser?.id || null;
-        } catch {
-            return null;
-        }
-    };
-
-    const checkAdmin = async (request: AuthenticatedRequest): Promise<boolean> => {
-        const [email, d1Id] = await Promise.all([
-            getCallerEmail(request),
-            getCallerD1Id(request)
-        ]);
-        
-        if (email === SUPER_ADMIN_EMAIL || d1Id === SUPREME_MASTER_ID) {
-            return true;
-        }
-
-        try {
-            const authHeader = request.headers.get('Authorization');
-            if (!authHeader) return false;
-            const token = authHeader.substring(7);
-            const { access } = await checkPermissions(token, [Permission.ADMIN_AUTH0], env);
-            return access;
-        } catch {
-            return false;
-        }
-    };
-
-    /**
-     * DELETE /api/admin/matches/<id>
-     */
-    router.delete('/api/admin/matches/<id>', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) {
-            return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
-        }
-
-        const params = request.params;
-
-        try {
-            await env.DB.prepare('DELETE FROM matches WHERE id = ?').bind(params.id).run();
-            await broadcastDataChanged(env);
-            return Response.json({ success: true, message: 'Match deleted by admin' }, { headers: router.corsHeaders });
-        } catch (e: any) {
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
-        }
-    }, Permission.WRITE_API);
 
     /**
      * DELETE /api/admin/users/<id>
      */
     router.delete('/api/admin/users/<id>', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+        if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
         const params = request.params;
         let id = decodeURIComponent(params.id);
@@ -109,7 +34,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             await userService.deleteUser(d1Id);
             await broadcastDataChanged(env);
             return Response.json({ success: true, message: 'User deleted from D1' }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.WRITE_API);
@@ -118,7 +43,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
      * GET /api/admin/users/metadata
      */
     router.get('/api/admin/users/metadata', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) {
+        if (!await checkAdmin(request, env)) {
             return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
         }
 
@@ -132,26 +57,41 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
             const results = await env.DB.prepare(`
                 SELECT 
+                    u.id,
                     u.auth0_sub, 
+                    u.email,
+                    u.firstname,
+                    u.lastname,
+                    u.club_id,
                     u.is_blocked, 
                     u.block_reason, 
                     u.siret,
+                    u.created_at,
+                    u.updated_at,
                     c.name as club_name
                 FROM users u
                 LEFT JOIN clubs c ON u.club_id = c.id
+                ORDER BY u.created_at DESC
                 LIMIT ? OFFSET ?
-            `).bind(limit, offset).all<{ auth0_sub: string; is_blocked: number; block_reason: string | null; siret: string | null; club_name: string | null }>();
+            `).bind(limit, offset).all<any>();
 
             const metadata = results.results?.map(u => ({
+                id: u.id,
                 auth0_sub: u.auth0_sub,
+                email: u.email,
+                name: u.firstname && u.lastname ? `${u.firstname} ${u.lastname}` : 'Utilisateur',
+                club_id: u.club_id,
+                club_name: u.club_name,
                 is_blocked: !!u.is_blocked,
                 block_reason: u.block_reason,
                 siret: u.siret,
-                club_name: u.club_name
+                created_at: u.created_at,
+                last_login: u.updated_at,
+                role: u.email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'user'
             })) || [];
 
             return Response.json({ success: true, metadata, pagination: { total, limit, offset } }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.ADMIN_AUTH0);
@@ -160,7 +100,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
      * PATCH /api/admin/users/<id>/block
      */
     router.patch('/api/admin/users/<id>/block', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) {
+        if (!await checkAdmin(request, env)) {
             return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
         }
 
@@ -193,6 +133,10 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
                 await env.DB.prepare('UPDATE users SET block_count = block_count + 1 WHERE id = ?').bind(d1Id).run();
             }
 
+            if (env.KV_CACHE) {
+                await env.KV_CACHE.delete(`blocked:${(targetUser as any).auth0_sub}`);
+            }
+
             ctx.waitUntil(broadcastDataChanged(env));
             ctx.waitUntil(broadcastNotification(env, {
                 type: 'NOTIFICATION',
@@ -204,7 +148,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
                 data: { reason: body.block_reason }
             }));
             return Response.json({ success: true, message: `User ${body.is_blocked ? 'blocked' : 'unblocked'}` }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.WRITE_API);
@@ -213,7 +157,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
      * PATCH /api/admin/users/<id>
      */
     router.patch('/api/admin/users/<id>', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+        if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
         const params = request.params;
         let id = decodeURIComponent(params.id);
@@ -224,15 +168,15 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
         if (!targetUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
-        const body: any = await request.json();
+        const body = await request.json() as Record<string, unknown>;
         const d1Id = (targetUser as any).id as string;
 
         try {
             const updated = await userService.updateUser(d1Id, body);
             await broadcastDataChanged(env);
             return Response.json({ success: true, user: updated }, { headers: router.corsHeaders });
-        } catch (e: any) {
-            if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        } catch (e: unknown) {
+            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.WRITE_API);
@@ -241,7 +185,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
      * POST /api/admin/users/<id>/additional-sirets
      */
     router.post('/api/admin/users/<id>/additional-sirets', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+        if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
         const params = request.params;
         let id = decodeURIComponent(params.id);
@@ -268,7 +212,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
         let clubName = 'Entreprise / Club';
         if (!body.force) {
-            const { ClubService } = await import('../services/club.service');
+            const { ClubService } = await import('../../services/club.service');
             const clubService = new ClubService(env);
             const validation = await clubService.validateSiret(body.siret);
             if (!validation.isValid) {
@@ -277,7 +221,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             clubName = validation.clubName || clubName;
         } else {
             try {
-                const { ClubService } = await import('../services/club.service');
+                const { ClubService } = await import('../../services/club.service');
                 const clubService = new ClubService(env);
                 const validation = await clubService.validateSiret(body.siret);
                 if (validation.clubName) clubName = validation.clubName;
@@ -304,7 +248,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             await broadcastDataChanged(env);
         }
 
-        const clubService = new (await import('../services/club.service')).ClubService(env);
+        const clubService = new (await import('../../services/club.service')).ClubService(env);
         const additionalWithNames = await Promise.all(sirets.map(async (s) => {
             const validation = await clubService.validateSiret(s);
             return { siret: s, name: validation.clubName || 'Inconnu' };
@@ -321,7 +265,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
      * POST /api/admin/users/<id>/primary-siret
      */
     router.post('/api/admin/users/<id>/primary-siret', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+        if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
         const params = request.params;
         let id = decodeURIComponent(params.id);
@@ -346,8 +290,8 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             return Response.json({ success: false, error: 'SIRET (14 chiffres) ou SIREN (9 chiffres) invalide' }, { status: 400, headers: router.corsHeaders });
         }
 
-        const { ClubService } = await import('../services/club.service');
-        const { validateClubSiret } = await import('../utils/siret.validator');
+        const { ClubService } = await import('../../services/club.service');
+        const { validateClubSiret } = await import('../../utils/siret.validator');
         const clubService = new ClubService(env);
 
         let clubName = 'Entreprise / Club';
@@ -361,7 +305,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         try {
             const apiRes = await fetch(`${SIRET_API_URL}?q=${body.siret}&page=1&per_page=1`);
             if (apiRes.ok) {
-                const apiData: any = await apiRes.json();
+                const apiData = await apiRes.json() as import("../../types").SiretApiResponse;
                 if (apiData.results && apiData.results.length > 0) {
                     const ent = apiData.results[0];
                     if (!body.force) {
@@ -379,7 +323,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
                     return Response.json({ success: false, error: "Entreprise introuvable" }, { status: 404, headers: router.corsHeaders });
                 }
             }
-        } catch (e: any) {
+        } catch (e: unknown) {
             if (!body.force) return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: router.corsHeaders });
         }
 
@@ -406,7 +350,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
      * DELETE /api/admin/users/<id>/primary-siret
      */
     router.delete('/api/admin/users/<id>/primary-siret', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+        if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
         const params = request.params;
         let id = decodeURIComponent(params.id);
@@ -428,7 +372,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
      * DELETE /api/admin/users/<id>/additional-sirets/<siret>
      */
     router.delete('/api/admin/users/<id>/additional-sirets/<siret>', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+        if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
         const params = request.params as any;
         let id = decodeURIComponent(params.id);
@@ -461,7 +405,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             try {
                 const r = await fetch(`${SIRET_API_URL}?q=${s}&page=1&per_page=1`);
                 if (r.ok) {
-                    const d: any = await r.json();
+                    const d = await r.json() as import("../../types").SiretApiResponse;
                     return { siret: s, name: d.results?.[0]?.nom_complet || s };
                 }
             } catch (e) { }
@@ -475,7 +419,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
      * GET /api/admin/users/<id>/sirets
      */
     router.get('/api/admin/users/<id>/sirets', async (request: AuthenticatedRequest, env: Env) => {
-        if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
+        if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
         const params = request.params;
         let id = decodeURIComponent(params.id);
@@ -498,7 +442,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
         const user = (targetUser as any);
         let siretsStr = user.additional_sirets;
-        let additional_sirets_raw: any[] = [];
+        let additional_sirets_raw: unknown[] = [];
         if (typeof siretsStr === 'string') {
             try {
                 let parsed = JSON.parse(siretsStr);
@@ -509,7 +453,7 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             additional_sirets_raw = siretsStr;
         }
 
-        const clubService = new (await import('../services/club.service')).ClubService(env);
+        const clubService = new (await import('../../services/club.service')).ClubService(env);
 
         let primary_name = null;
         if (user.siret) {
@@ -517,9 +461,10 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             primary_name = validation.clubName || user.siret;
         }
 
-        const additionalWithNames = await Promise.all(additional_sirets_raw.map(async (s) => {
-            const currentSiret = typeof s === 'string' ? s : s.siret;
-            const currentStadium = typeof s === 'object' ? s.stadium_address : null;
+        const additionalWithNames = await Promise.all(additional_sirets_raw.map(async (s: unknown) => {
+            const sObj = s as { siret?: string; stadium_address?: string };
+            const currentSiret = typeof s === 'string' ? s : (sObj.siret || '');
+            const currentStadium = typeof s === 'object' && s !== null ? sObj.stadium_address : null;
             const validation = await clubService.validateSiret(currentSiret);
             return {
                 siret: currentSiret,

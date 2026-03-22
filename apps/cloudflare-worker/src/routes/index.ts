@@ -28,14 +28,14 @@ import { decodeJwt } from "jose";
 // Local imports for routing and environment definitions
 import { getManagementToken, addPermissionsToUser } from "../auth0";
 import { Router } from "./router";
-import { setupUserRoutes } from "./users";
+import { setupUserRoutes } from "./users/routes";
 import { setupClubRoutes } from "./clubs";
 import { setupExerciseRoutes } from "./exercises";
 import { setupSessionRoutes } from "./sessions";
 import { setupMatchRoutes } from "./matches";
 import { setupTournamentRoutes } from "./tournaments";
 import { setupParticipationRoutes } from "./participations";
-import { setupAdminRoutes } from "./admin";
+import { setupAdminRoutes } from "./admin/routes";
 import { setupCalendarRoutes } from "./calendar";
 import { Env } from "../types/env";
 
@@ -173,142 +173,7 @@ import { Env } from "../types/env";
  * It takes a router instance and the environment configuration.
  */
 export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
-	/**
-	 * @openapi
-	 * /api/__auth0/token:
-	 *   post:
-	 *     tags:
-	 *       - Auth0 Administration
-	 *     summary: Obtain an Auth0 Management API token
-	 *     description: >
-	 *       Requests an Auth0 Management API token via the client_credentials flow.
-	 *       This token is used by the backend to perform administrative tasks (like assigning permissions).
-	 *       The token is cached in Cloudflare KV to respect Auth0 rate limits and improve performance.
-	 *       Access is restricted to users with the 'auth0:admin:api' permission.
-	 *     security:
-	 *       - bearerAuth: []
-	 *     responses:
-	 *       200:
-	 *         description: Successfully retrieved the Management API token.
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               $ref: '#/components/schemas/Auth0TokenResponse'
-	 *       401:
-	 *         description: Unauthorized - The provided JWT is invalid or lacks the required administrative scope.
-	 *       500:
-	 *         description: Internal Server Error - An error occurred while communicating with Auth0 or the KV store.
-	 */
-	router.post(
-		"/api/__auth0/token",
-		async () => {
-			try {
-				const token = await getManagementToken(env);
-				const now = Math.floor(Date.now() / 1000);
 
-				return new Response(
-					JSON.stringify({
-						access_token: token,
-						token_type: "Bearer",
-						expires_in: 3600, // Default to 1h, though we could decode it for accuracy
-						from_cache: true,   // Simplified: we assume it might be from cache
-					}),
-					{
-						status: 200,
-						headers: { ...router.corsHeaders, "Content-Type": "application/json" },
-					},
-				);
-			} catch (error) {
-				return new Response(
-					JSON.stringify({ success: false, error: 'Internal server error' }),
-					{
-						status: 500,
-						headers: { ...router.corsHeaders, "Content-Type": "application/json" },
-					},
-				);
-			}
-		},
-		env.ADMIN_AUTH0_PERMISSION,
-	);
-
-	/**
-	 * @openapi
-	 * /api/__auth0/autopermissions:
-	 *   post:
-	 *     tags:
-	 *       - Auth0 Administration
-	 *     summary: Automatically assign default permissions to the current user
-	 *     description: >
-	 *       Checks the current user's permissions against a predefined list (AUTH0_AUTOMATIC_PERMISSIONS).
-	 *       If any permissions are missing, they are automatically granted via the Auth0 Management API.
-	 *       This is typically called by the client application after a successful login to ensure the user has a baseline set of capabilities.
-	 *       Requires a valid JWT.
-	 *     security:
-	 *       - bearerAuth: []
-	 *     responses:
-	 *       200:
-	 *         description: Successfully processed. Returns details about added permissions or a message if none were needed.
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 success: { type: boolean }
-	 *                 added: { type: array, items: { type: string }, description: "List of permissions newly granted." }
-	 *                 message: { type: string, description: "Informational message if no permissions were added." }
-	 *       500:
-	 *         description: Internal Server Error - Failed to grant permissions due to an API or configuration error.
-	 */
-	router.post(
-		"/api/__auth0/autopermissions",
-		async (request, env, ctx) => {
-			try {
-				const autoPermsStr = env.AUTH0_AUTOMATIC_PERMISSIONS || "";
-				if (!autoPermsStr) {
-					return new Response(JSON.stringify({ success: true, message: "No automatic permissions configured" }), {
-						status: 200,
-						headers: { ...router.corsHeaders, "Content-Type": "application/json" },
-					});
-				}
-
-				const autoPerms = autoPermsStr.split(",").map(p => p.trim()).filter(p => p !== "");
-				const currentPerms = router.userPermissions || [];
-				const missingPerms = autoPerms.filter(p => !currentPerms.includes(p));
-
-				if (missingPerms.length === 0) {
-					return new Response(JSON.stringify({ success: true, message: "User already has all automatic permissions" }), {
-						status: 200,
-						headers: { ...router.corsHeaders, "Content-Type": "application/json" },
-					});
-				}
-
-				const userId = router.jwtPayload.sub;
-				if (!userId) {
-					throw new Error("User ID not found in token");
-				}
-
-				await addPermissionsToUser(userId, missingPerms, env);
-
-				return new Response(JSON.stringify({ success: true, added: missingPerms }), {
-					status: 200,
-					headers: { ...router.corsHeaders, "Content-Type": "application/json" },
-				});
-			} catch (error) {
-				return new Response(
-					JSON.stringify({ success: false, error: 'Internal server error' }),
-					{
-						status: 500,
-						headers: { ...router.corsHeaders, "Content-Type": "application/json" },
-					},
-				);
-			}
-		},
-		/**
-		 * Empty string indicator: This route requires a valid JWT (authentication)
-		 * but does not require any specific scope/permission to access.
-		 */
-		"",
-	);
 
 	/**
 	 * @openapi
@@ -319,7 +184,7 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 	 *     summary: WebSocket Connection Hub
 	 *     description: Upgrade to a WebSocket connection. Managed by the WEBSOCKET_HUB Durable Object.
 	 */
-	router.get("/api/ws", async (request: any): Promise<any> => {
+	router.get("/api/ws", async (request: Request): Promise<Response> => {
 		const token = new URL(request.url).searchParams.get("token") || request.headers.get("Authorization")?.split(" ")[1];
 		
 		const { checkPermissions } = await import("../auth0");
@@ -435,7 +300,7 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 				status: 200,
 				headers: { ...router.corsHeaders, "Content-Type": "application/json" },
 			});
-		} catch (e: any) {
+		} catch (e: unknown) {
 			return new Response(JSON.stringify({ success: false, error: 'Internal server error' }), {
 				status: 500,
 				headers: { ...router.corsHeaders, "Content-Type": "application/json" },

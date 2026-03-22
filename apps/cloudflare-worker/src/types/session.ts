@@ -31,7 +31,7 @@ export interface CreateSessionDto {
     category?: string;
     level?: string;
     total_duration?: number;
-    constraints?: any;
+    constraints?: Record<string, unknown>;
     status?: 'draft' | 'scheduled' | 'completed';
     scheduled_date?: string;
     exercises?: {
@@ -39,7 +39,7 @@ export interface CreateSessionDto {
         order_index: number;
         duration: number;
         players: number;
-        adapted_data?: any;
+        adapted_data?: Record<string, unknown>;
     }[];
 }
 

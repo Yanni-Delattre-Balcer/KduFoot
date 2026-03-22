@@ -56,18 +56,22 @@ export class ClubService {
             throw new Error(`API Error: ${response.statusText}`);
         }
 
-        const data: any = await response.json();
+        const data = await response.json() as import("../types").SiretApiResponse;
 
-        return data.results.map((r: any) => ({
-            id: r.siren,
-            name: r.nom_complet,
-            city: r.siege.libelle_commune,
-            zipcode: r.siege.code_postal,
-            address: r.siege.adresse,
-            location: r.siege.latitude && r.siege.longitude
-                ? { lat: parseFloat(r.siege.latitude), lng: parseFloat(r.siege.longitude) }
-                : undefined
-        }));
+        return data.results.map((r) => {
+            const rAny = r as any;
+            return {
+                id: crypto.randomUUID(),
+                siret: rAny.siren || '',
+                name: r.nom_complet || '',
+                city: r.siege?.libelle_commune || '',
+                zipcode: r.siege?.code_postal || '',
+                address: r.siege?.adresse || '',
+                location: r.siege?.latitude && r.siege?.longitude 
+                    ? { lat: parseFloat(r.siege.latitude), lng: parseFloat(r.siege.longitude) } 
+                    : undefined
+            } as Club;
+        });
     }
 
     async getClubByCity(city: string): Promise<Club[]> {
@@ -100,7 +104,7 @@ export class ClubService {
             const response = await fetch(`${this.env.SIRET_API_URL}?${params}`);
             if (!response.ok) return { isValid: false, error: "Impossible de contacter l'API SIRET." };
 
-            const data: any = await response.json();
+            const data = await response.json() as import("../types").SiretApiResponse;
             if (!data.results || data.results.length === 0) {
                 return { isValid: false, error: "SIRET non trouvé." };
             }

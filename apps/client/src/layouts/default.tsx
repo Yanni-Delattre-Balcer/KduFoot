@@ -68,11 +68,18 @@ export default function DefaultLayout({
 
   return (
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
+      {/* Accessibility: Skip-link for keyboard navigation */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-bold"
+      >
+        Aller au contenu principal
+      </a>
       <Navbar />
       <ConnectivityStatus />
       {/* Spacer pour compenser la navbar fixed, avec prise en compte de la Safe Area iOS */}
       <div className="h-16 lg:h-28 shrink-0" />
-      <main className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}>
+      <main id="main-content" className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}>
         {children}
       </main>
       <footer className="relative w-full border-t border-default-100 bg-background/80 backdrop-blur-md mt-auto">

@@ -1,9 +1,10 @@
 import { DurableObject } from "cloudflare:workers";
+import type { Env } from "../types/env";
 
-export class WebSocketHub extends DurableObject {
+export class WebSocketHub extends DurableObject<Env> {
     private sessions: Set<WebSocket>;
 
-    constructor(ctx: DurableObjectState, env: any) {
+    constructor(ctx: DurableObjectState, env: Env) {
         super(ctx, env);
         this.sessions = new Set();
     }

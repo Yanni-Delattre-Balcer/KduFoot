@@ -30,11 +30,42 @@ export { WebSocketHub } from "./durable_objects/WebSocketHub";
 // NOTE: We now use a small Router class to organize routes and permission checks.
 
 export default {
-	async fetch(request: Request, env: any, ctx: ExecutionContext): Promise<Response> {
-		const router = new Router(env);
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		const url = new URL(request.url);
+		const start = Date.now();
+		let reqCount = 0;
 
-		setupRoutes(router, env as import("./types/env").Env, ctx);
+		const envWithDb = env as import("./types/env").Env;
+		if (envWithDb.DB) {
+			const originalPrepare = envWithDb.DB.prepare.bind(envWithDb.DB);
+			const originalBatch = envWithDb.DB.batch.bind(envWithDb.DB);
+			envWithDb.DB.prepare = (query: string) => {
+				reqCount++;
+				return originalPrepare(query);
+			};
+			envWithDb.DB.batch = <T = unknown>(statements: D1PreparedStatement[]) => {
+				reqCount += 1;
+				return originalBatch(statements);
+			};
+		}
 
-		return await router.handleRequest(request, env, ctx);
+		const router = new Router(envWithDb);
+
+		setupRoutes(router, envWithDb, ctx);
+
+		const response = await router.handleRequest(request, envWithDb, ctx);
+		
+		const duration = Date.now() - start;
+		console.log(JSON.stringify({
+			level: reqCount >= 10 ? 'WARN' : 'INFO',
+			method: request.method,
+			path: url.pathname,
+			status: response.status,
+			durationMs: duration,
+			d1RequestCount: reqCount,
+			message: `Processed ${request.method} ${url.pathname} in ${duration}ms with ${reqCount} D1 queries.`
+		}));
+		
+		return response;
 	},
-} satisfies ExportedHandler<any>;
+} satisfies ExportedHandler<Env>;

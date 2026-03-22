@@ -46,24 +46,12 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
             filters.ownerId = dbUser.id;
         }
 
-        const cacheKey = `matches:search:${url.search}`;
-        if (env.KV_CACHE && !filters.ownerId) {
-            const cached = await env.KV_CACHE.get(cacheKey, 'json');
-            if (cached) return Response.json({ success: true, ...(cached as any), _source: 'KV' }, { 
-                headers: { 
-                    ...router.corsHeaders,
-                    "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300"
-                } 
-            });
-        }
-
         const result = await searchService.search(filters, env.GOOGLE_MAPS_API_KEY);
-        if (env.KV_CACHE && !filters.ownerId) await env.KV_CACHE.put(cacheKey, JSON.stringify(result), { expirationTtl: 60 });
 
         return Response.json({ success: true, ...result }, { 
             headers: { 
                 ...router.corsHeaders,
-                "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300"
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
             } 
         });
     }, Permission.READ_API);
@@ -73,29 +61,13 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
      */
     router.get('/api/matches/<id>', async (request: AuthenticatedRequest, env: Env) => {
         const { id } = request.params;
-        const cacheKey = `match:${id}`;
-        
-        if (env.KV_CACHE) {
-            const cached = await env.KV_CACHE.get(cacheKey, 'json');
-            if (cached) return Response.json({ success: true, match: cached, _source: 'KV' }, { 
-                headers: { 
-                    ...router.corsHeaders,
-                    "Cache-Control": "public, s-maxage=60, stale-while-revalidate=3600"
-                } 
-            });
-        }
-
         const match = await matchService.getById(id);
         if (!match) return Response.json({ success: false, error: 'Not found' }, { status: 404, headers: router.corsHeaders });
-
-        if (env.KV_CACHE) {
-            await env.KV_CACHE.put(cacheKey, JSON.stringify(match), { expirationTtl: 300 });
-        }
 
         return Response.json({ success: true, match }, { 
             headers: { 
                 ...router.corsHeaders,
-                "Cache-Control": "public, s-maxage=60, stale-while-revalidate=3600"
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
             } 
         });
     }, Permission.READ_API);
@@ -138,7 +110,7 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
                     const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
                     const apiRes = await fetch(`${SIRET_API_URL}?q=${clubId}&page=1&per_page=1`);
                     if (apiRes.ok) {
-                        const apiData: any = await apiRes.json();
+                        const apiData = await apiRes.json() as import("../types").SiretApiResponse;
                         if (apiData.results && apiData.results.length > 0) {
                             const ent = apiData.results[0];
                             const siege = ent.siege || {};
@@ -161,7 +133,7 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
             const match = await matchService.create(dbUser.id, validation.data as CreateMatchDto);
             ctx.waitUntil(broadcastDataChanged(env));
             return Response.json({ success: true, match }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CREATE);
@@ -197,7 +169,7 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
                 }));
             }
             return Response.json({ success: true, match }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CREATE);
@@ -230,7 +202,7 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
                 }
             }
             return Response.json({ success }, { headers: router.corsHeaders });
-        } catch (e: any) {
+        } catch (e: unknown) {
             return Response.json({ success: false, error: "Internal server error" }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.MATCHES_CREATE);

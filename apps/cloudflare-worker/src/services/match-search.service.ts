@@ -156,7 +156,7 @@ export class MatchSearchService {
                 if (!res.ok) continue;
                 const data = await res.json() as any;
                 if (data.rows?.[0]?.elements) {
-                    data.rows[0].elements.forEach((el: any, j: number) => {
+                    data.rows[0].elements.forEach((el: { status: string; distance?: { value: number } }, j: number) => {
                         if (el.status === 'OK' && el.distance) {
                             distanceMap.set(i + j, el.distance.value);
                         }

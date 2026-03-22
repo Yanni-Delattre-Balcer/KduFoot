@@ -12,7 +12,7 @@ export interface Env {
     THUMBNAILS_BUCKET: R2Bucket;
     KV_CACHE: KVNamespace; // Fast global Key-Value storage
     WEBSOCKET_HUB: DurableObjectNamespace; // WebSockets tracking & broadcasting
-    RATE_LIMITER: any; // Limits the number of requests to prevent abuse
+    RATE_LIMITER: { limit: (options: { key: string }) => Promise<{ success: boolean }> }; // Limits the number of requests to prevent abuse
 
     // Environment variables
     AUTH0_DOMAIN: string;

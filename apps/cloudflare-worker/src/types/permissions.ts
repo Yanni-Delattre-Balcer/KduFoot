@@ -52,7 +52,7 @@ export interface PermissionCheck {
     reason?: string;
     statusCode?: number;
     quota?: QuotaInfo;
-    payload?: any;
+    payload?: Record<string, unknown>;
 }
 
 export interface QuotaInfo {
