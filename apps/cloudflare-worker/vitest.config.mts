@@ -7,6 +7,8 @@ export default defineWorkersConfig({
 				wrangler: { configPath: './wrangler.jsonc' },
 			},
 		},
+		setupFiles: ["./test/setup.ts"],
+		passWithNoTests: false,
 		coverage: {
 			reporter: ['text', 'json', 'html'],
 			thresholds: {

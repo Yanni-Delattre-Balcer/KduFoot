@@ -31,34 +31,24 @@ vi.mock("../src/auth0", () => {
     return { checkPermissions: fn };
 });
 
+import { mockEnv } from "./setup";
 import { checkPermissions } from "../src/auth0";
 
 const makeRequest = (method = "GET", url = "https://example.test/", headers: Record<string, string> = {}) => {
     return new Request(url, { method, headers });
 };
 
-const makeEnv = (overrides: Partial<Env> = {}): Env => ({
+const makeEnv = (overrides: Partial<any> = {}): any => ({
+    ...mockEnv,
     CORS_ORIGIN: "*",
     READ_PERMISSION: "read:api",
     WRITE_PERMISSION: "write:api",
     ADMIN_PERMISSION: "admin:api",
     API_BASE_URL: "http://localhost:8787/api",
-    AUTH0_DOMAIN: "example.auth0.com",
-    AUTH0_AUDIENCE: "audience",
-    AUTH0_CLIENT_ID: "",
-    AUTH0_CLIENT_SECRET: "",
-    AUTH0_SCOPE: "",
-    AUTH0_SUB: "",
-    BACKUP_PERMISSION: "",
-    CRYPTOKEN: "",
-    AUTHENTICATION_PROVIDER_TYPE: "auth0",
-    DEX_JWKS_ENDPOINT: "",
-    AUTH0_TOKEN: "",
-    RATE_LIMITER: {
-        limit: async () => ({ success: true }),
-    } as any,
     ...overrides,
 });
+
+const ctx = { waitUntil: vi.fn(), passThroughOnException: vi.fn() } as any;
 
 beforeEach(() => {
     ((checkPermissions as unknown) as Mock).mockReset();
@@ -67,27 +57,27 @@ beforeEach(() => {
 describe("Router basic behavior", () => {
     test("OPTIONS returns 204", async () => {
         const router = new Router(makeEnv());
-        const res = await router.handleRequest(makeRequest("OPTIONS", "https://example.test/"), makeEnv());
+        const res = await router.handleRequest(makeRequest("OPTIONS", "https://example.test/"), makeEnv(), ctx);
         expect(res.status).toBe(204);
     });
 
     test("Unknown path returns 404", async () => {
         const router = new Router(makeEnv());
-        const res = await router.handleRequest(makeRequest("GET", "https://example.test/unknown"), makeEnv());
+        const res = await router.handleRequest(makeRequest("GET", "https://example.test/unknown"), makeEnv(), ctx);
         expect(res.status).toBe(404);
     });
 
     test("Rate limiter can return 429", async () => {
         const env = makeEnv({ RATE_LIMITER: { limit: async () => ({ success: false }) } as any });
         const router = new Router(env);
-        const res = await router.handleRequest(makeRequest("GET", "https://example.test/any"), env);
+        const res = await router.handleRequest(makeRequest("GET", "https://example.test/any"), env, ctx);
         expect(res.status).toBe(429);
     });
 
     test("Protected route without Authorization header returns 401", async () => {
         const router = new Router(makeEnv());
         router.get("/private", async () => new Response(JSON.stringify({ success: true })), makeEnv().READ_PERMISSION);
-        const res = await router.handleRequest(makeRequest("GET", "https://example.test/private"), makeEnv());
+        const res = await router.handleRequest(makeRequest("GET", "https://example.test/private"), makeEnv(), ctx);
         expect(res.status).toBe(401);
     });
 
@@ -103,7 +93,7 @@ describe("Router basic behavior", () => {
         );
 
         const req = makeRequest("GET", "https://example.test/private", { Authorization: "Bearer faketoken" });
-        const res = await router.handleRequest(req, env);
+        const res = await router.handleRequest(req, env, ctx);
         const body = await res.json() as any;
         expect(res.status).toBe(200);
         expect(body.ok).toBe(true);
@@ -122,7 +112,7 @@ describe("Router basic behavior", () => {
         );
 
         const req = makeRequest("GET", "https://example.test/api/get/alice");
-        const res = await router.handleRequest(req, env);
+        const res = await router.handleRequest(req, env, ctx);
         const body = await res.json() as any;
         expect(res.status).toBe(200);
         expect(body.ok).toBe(true);
@@ -138,7 +128,7 @@ describe("Router basic behavior", () => {
         );
 
         const req = makeRequest("GET", "https://example.test/files/a/b/c.txt");
-        const res = await router.handleRequest(req, env);
+        const res = await router.handleRequest(req, env, ctx);
         const body = await res.json() as any;
         expect(res.status).toBe(200);
         expect(body.ok).toBe(true);
@@ -159,7 +149,7 @@ describe("Router basic behavior", () => {
         );
 
         const req = makeRequest("GET", "https://example.test/private2", { Authorization: "Bearer faketoken2" });
-        const res = await router.handleRequest(req, env);
+        const res = await router.handleRequest(req, env, ctx);
         const body = await res.json() as any;
         expect(res.status).toBe(200);
         expect(body.ok).toBe(true);

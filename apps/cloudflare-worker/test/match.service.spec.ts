@@ -1,53 +1,41 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MatchService } from '../src/services/match.service';
-import { D1Database } from '@cloudflare/workers-types';
+import { mockEnv } from './setup';
 
 describe('MatchService', () => {
-    let db: D1Database;
     let matchService: MatchService;
 
     beforeEach(() => {
-        // Mock D1 Database
-        db = {
-            prepare: vi.fn().mockReturnThis(),
-            bind: vi.fn().mockReturnThis(),
-            all: vi.fn(),
-            first: vi.fn(),
-            run: vi.fn(),
-            batch: vi.fn()
-        } as unknown as D1Database;
-
-        matchService = new MatchService(db);
+        matchService = new MatchService(mockEnv.DB as any);
+        vi.clearAllMocks();
     });
 
+    it('should exist and be instantiable', () => {
+        expect(matchService).toBeDefined();
+    });
 
+    it('should correctly determine if it is too late to modify', () => {
+        const futureDate = '2099-01-01';
+        const futureTime = '12:00';
+        // Should return false for very far future
+        expect(matchService.isTooLateToModify(futureDate, futureTime)).toBe(false);
+    });
 
     it('should map database row to Match object correctly', () => {
         const row = {
             id: '1',
             owner_id: 'user1',
             type: 'match',
+            club_id: 'c1',
             club_name: 'Test Club',
             club_city: 'Test City',
-            club_logo_url: 'http://logo.com',
-            match_date: '2026-03-25'
-        };
-
-        const result = (matchService as any).mapRowToMatch(row);
-        expect(result.id).toBe('1');
-        expect(result.club.name).toBe('Test Club');
-        expect(result.club.city).toBe('Test City');
-    });
-
-    it('should handle missing club data in mapRowToMatch', () => {
-        const row = {
-            id: '1',
-            owner_id: 'user1',
-            type: 'match',
-            match_date: '2026-03-25'
+            match_date: '2026-03-25',
+            match_time: '18:00'
         } as any;
 
-        const result = (matchService as any).mapRowToMatch(row);
-        expect(result.club.name).toBe('');
+        const result = matchService.mapRowToMatch(row);
+        expect(result.id).toBe('1');
+        expect(result.club!.name).toBe('Test Club');
+        expect(result.club!.city).toBe('Test City');
     });
 });

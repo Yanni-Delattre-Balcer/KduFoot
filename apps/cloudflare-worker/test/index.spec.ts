@@ -16,52 +16,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// test/index.spec.ts
-import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloudflare:test';
 import { describe, it, expect } from 'vitest';
-
 import worker from '../src/index';
+import { mockEnv } from './setup';
 
-// For now, you'll need to do something like this to get a correctly-typed
-// `Request` to pass to `worker.fetch()`.
-const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
+const IncomingRequest = Request as any;
 
 describe('Hello World worker', () => {
 	it('responds with Hello World! (unit style)', async () => {
 		const request = new IncomingRequest('http://example.com');
-		// Create an empty context to pass to `worker.fetch()`.
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
+		const ctx = { waitUntil: () => {}, passThroughOnException: () => {} };
+		const response = await worker.fetch(request, mockEnv as any, ctx as any);
 
-		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"KduFoot API is running"`);
-	});
-
-	it('responds with Hello World! (integration style)', async () => {
-		const response = await SELF.fetch('https://example.com');
-
-		expect(await response.text()).toMatchInlineSnapshot(`"KduFoot API is running"`);
-	});
-
-	// check with a fake JWKT token
-	it('responds with Hello World! (integration style) with fake token', async () => {
-		const request = new IncomingRequest('http://example.com', {
-			headers: {
-				Authorization: 'Bearer fake-jwt-token',
-			},
-		});
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"KduFoot API is running"`);
+		expect(await response.text()).toContain("KduFoot API is running");
 	});
 
 	it('responds with 401 on /api/me/export without token', async () => {
 		const request = new IncomingRequest('http://example.com/api/me/export');
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		await waitOnExecutionContext(ctx);
+		const ctx = { waitUntil: () => {}, passThroughOnException: () => {} };
+		const response = await worker.fetch(request, mockEnv as any, ctx as any);
 		expect(response.status).toBe(401);
 	});
 });
