@@ -12,7 +12,7 @@
     "build": "echo 'Cloudflare Worker does not require build step'",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
-    "lint": "eslint ./src/**/*.{ts,tsx} --fix",
+    "lint": "eslint ./src/**/*.{ts,tsx} --fix --max-warnings=200",
     "cf-typegen": "wrangler types",
     "d1:create": "wrangler d1 migrations apply kdufoot-db --local",
     "d1:create:remote": "wrangler d1 migrations apply kdufoot-db --remote",

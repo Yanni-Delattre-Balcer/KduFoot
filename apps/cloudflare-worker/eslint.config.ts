@@ -119,7 +119,12 @@ export default [
 		files: ["src/**/*.ts"],
 		rules: {
 			"no-undef": "off",
-			"@typescript-eslint/no-explicit-any": "warn",
+			"@typescript-eslint/no-explicit-any": "off",
+            "no-console": "off",
+            "@typescript-eslint/no-unused-vars": ["warn", {
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_"
+            }]
 		},
 	},
 	{

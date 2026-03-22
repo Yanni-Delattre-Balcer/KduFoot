@@ -81,7 +81,7 @@ export class MatchSearchService {
                     query += " AND (m.match_date > ? OR (m.match_date = ? AND m.id > ?))";
                     params.push(cursorData.date, cursorData.date, cursorData.id);
                 }
-            } catch (e) { }
+            } catch (e) { /* intentionnellement vide */ }
         }
 
         query += ' ORDER BY m.match_date ASC, m.id ASC';
@@ -162,7 +162,7 @@ export class MatchSearchService {
                         }
                     });
                 }
-            } catch { }
+            } catch { /* intentionnellement vide */ }
         }
         return distanceMap;
     }

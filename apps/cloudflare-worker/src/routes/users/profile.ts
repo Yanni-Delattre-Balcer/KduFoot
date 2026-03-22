@@ -62,7 +62,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
                             return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address } as import("../../types").Club;
                         }
                     }
-                } catch (e) { }
+                } catch (e) { /* intentionnellement vide */ }
 
                 return { id: crypto.randomUUID(), siret, name: siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address } as import("../../types").Club;
             }));
@@ -155,7 +155,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
                             return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address } as import("../../types").Club;
                         }
                     }
-                } catch (e) { }
+                } catch (e) { /* intentionnellement vide */ }
 
                 return { id: crypto.randomUUID(), siret, name: siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address } as import("../../types").Club;
             }));

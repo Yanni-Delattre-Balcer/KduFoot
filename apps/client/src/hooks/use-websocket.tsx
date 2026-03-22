@@ -172,7 +172,7 @@ export function useWebSocketSync(
               case "MATCH_UPDATE":
               case "MATCH_MODIFIED":
                 {
-                  const isOrganizer = payload.data?.owner_id === userId;
+                  const isOrganizer = payload.data?.owner_sub === userId;
 
                   if (isOrganizer) {
                     // Silent for organizer, the form submit API already handles the success toast!
@@ -296,8 +296,8 @@ export function useWebSocketSync(
               case "REQUEST_RECEIVED":
               case "NEW_APPLICANT":
                 {
-                  const isOrganizer = payload.data?.owner_id === userId;
-                  const isApplicant = payload.data?.user_id === userId;
+                  const isOrganizer = payload.data?.owner_sub === userId;
+                  const isApplicant = payload.data?.user_sub === userId;
 
                   if (isOrganizer) {
                     color = "primary";
@@ -377,8 +377,8 @@ export function useWebSocketSync(
               case "REQUEST_ACCEPTED":
               case "ENROLLMENT_ACCEPTED":
                 {
-                  const isOrganizer = payload.data?.owner_id === userId;
-                  const isApplicant = payload.data?.user_id === userId;
+                  const isOrganizer = payload.data?.owner_sub === userId;
+                  const isApplicant = payload.data?.user_sub === userId;
 
                   // Trigger global mutation for all participants
                   mutate(
@@ -476,8 +476,8 @@ export function useWebSocketSync(
                 return;
               case "ENROLLMENT_REFUSED":
                 {
-                  const isOrganizer = payload.data?.owner_id === userId;
-                  const isApplicant = payload.data?.user_id === userId;
+                  const isOrganizer = payload.data?.owner_sub === userId;
+                  const isApplicant = payload.data?.user_sub === userId;
 
                   if (isOrganizer) {
                     return; // Organizer gets UI response instantly from button click

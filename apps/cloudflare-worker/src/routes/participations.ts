@@ -68,7 +68,16 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
                         notificationType: 'NEW_APPLICANT',
                         message: `Nouvelle demande de ${applicantClub?.name || 'un club'} pour le ${match.match_date}`,
                         targetUserId: owner.auth0_sub,
-                        data: { match_id: params.id, match_type: match.type, match_date: match.match_date, owner_id: match.owner_id, user_id: dbUser.id, applicant_club_name: applicantClub?.name }
+                        data: { 
+                            match_id: params.id, 
+                            match_type: match.type, 
+                            match_date: match.match_date, 
+                            owner_id: match.owner_id, 
+                            owner_sub: owner.auth0_sub,
+                            user_id: dbUser.id, 
+                            user_sub: request.user?.sub,
+                            applicant_club_name: applicantClub?.name 
+                        }
                     }));
                 }
                 ctx.waitUntil(broadcastDataChanged(env));
@@ -91,12 +100,22 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
                 const match = await matchService.getById(params.matchId);
                 const applicant = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(params.userId).first<{ auth0_sub: string }>();
                 if (applicant && match) {
+                    const owner = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(match.owner_id).first<{ auth0_sub: string }>();
                     ctx.waitUntil(broadcastNotification(env, {
                         type: 'NOTIFICATION',
                         notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
                         message: body.status === 'accepted' ? `Demande acceptée pour le ${match.match_date}` : `Demande refusée pour le ${match.match_date}`,
                         targetUserId: applicant.auth0_sub,
-                        data: { match_id: params.matchId, match_type: match.type, match_date: match.match_date, owner_id: match.owner_id, user_id: params.userId, host_club_name: match.club?.name }
+                        data: { 
+                            match_id: params.matchId, 
+                            match_type: match.type, 
+                            match_date: match.match_date, 
+                            owner_id: match.owner_id, 
+                            owner_sub: owner?.auth0_sub,
+                            user_id: params.userId, 
+                            user_sub: applicant.auth0_sub,
+                            host_club_name: match.club?.name 
+                        }
                     }));
                 }
                 ctx.waitUntil(broadcastDataChanged(env));

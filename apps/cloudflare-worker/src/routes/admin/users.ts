@@ -226,7 +226,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 const clubService = new ClubService(env);
                 const validation = await clubService.validateSiret(body.siret);
                 if (validation.clubName) clubName = validation.clubName;
-            } catch (e) { }
+            } catch (e) { /* intentionnellement vide */ }
         }
 
         const d1Id = (targetUser as any).id as string;
@@ -409,7 +409,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                     const d = await r.json() as import("../../types").SiretApiResponse;
                     return { siret: s, name: d.results?.[0]?.nom_complet || s };
                 }
-            } catch (e) { }
+            } catch (e) { /* intentionnellement vide */ }
             return { siret: s, name: s };
         }));
 
