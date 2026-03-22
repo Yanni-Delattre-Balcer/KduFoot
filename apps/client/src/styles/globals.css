@@ -80,9 +80,10 @@
   padding-top: env(safe-area-inset-top, 20px) !important;
 }
 
-/* Fix Hero UI Toast container blocking clicks */
+/* Fix Hero UI Toast container blocking clicks and ensure visibility */
 [role="region"] {
   pointer-events: none !important;
+  z-index: 9999 !important;
 }
 
 [role="status"], [role="alert"] {

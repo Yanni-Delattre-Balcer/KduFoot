@@ -360,6 +360,7 @@ export default function DashboardPage() {
       format: r.match_format || r.format,
       category: r.match_category || r.category,
       level: r.match_level || r.level,
+      pitch_type: r.match_pitch_type || r.pitch_type,
     }));
 
   const acceptedParticipations = (myParticipations || [])
@@ -388,6 +389,7 @@ export default function DashboardPage() {
       format: p.match_format || p.format,
       category: p.match_category || p.category,
       level: p.match_level || p.level,
+      pitch_type: p.match_pitch_type || p.pitch_type,
     }));
 
   const allConfirmedMatches = [
