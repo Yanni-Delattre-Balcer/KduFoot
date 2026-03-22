@@ -17,6 +17,7 @@ import { useFavorites } from "@/hooks/use-favorites";
 import DefaultLayout from "@/layouts/default";
 import DataWall from "@/components/data-wall";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { EmptyState } from "@/components/common/empty-state";
 
 export default function FavoritesPage() {
   const { t, i18n } = useTranslation();
@@ -89,7 +90,7 @@ export default function FavoritesPage() {
                 {t("nav.favorites")}
               </h1>
             </div>
-            <p className="text-default-500 text-lg max-w-md mx-auto text-center">
+            <p className="text-default-300 text-lg max-w-md mx-auto text-center">
               {view === "exercises"
                 ? t("favorites.description_exercises")
                 : t("favorites.description_matches")}
@@ -257,43 +258,12 @@ export default function FavoritesPage() {
                     ))}
                   </div>
                 ) : (
-                  <Card className="border border-cyan-500/20 bg-[#251820]">
-                    <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
-                      <div className="p-4 rounded-full bg-cyan-500/10 text-cyan-500">
-                        <svg
-                          className="w-8 h-8"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold text-cyan-900/90 dark:text-cyan-100">
-                          {t("favorites.empty_exercises")}
-                        </p>
-                        <p className="text-md text-cyan-900/70 dark:text-cyan-200/70 mt-1">
-                          {t("favorites.empty_exercises_desc")}
-                        </p>
-                      </div>
-                      <Button
-                        as={Link}
-                        className="mt-2 text-cyan-700 bg-cyan-100 dark:bg-cyan-500/20 dark:text-cyan-300 font-bold shadow-sm"
-                        color="primary"
-                        to="/exercises"
-                        variant="flat"
-                      >
-                        {t("favorites.discover_exercises")}
-                      </Button>
-                    </CardBody>
-                  </Card>
+                  <EmptyState
+                    actionLabel={t("favorites.discover_exercises")}
+                    description={t("favorites.empty_exercises_desc")}
+                    title={t("favorites.empty_exercises")}
+                    onAction={() => window.location.href = "/exercises"}
+                  />
                 )}
               </>
             )}
@@ -385,43 +355,12 @@ export default function FavoritesPage() {
                     ))}
                   </div>
                 ) : (
-                  <Card className="border border-violet-500/20 bg-[#252018]">
-                    <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
-                      <div className="p-4 rounded-full bg-violet-500/10 text-violet-500">
-                        <svg
-                          className="w-8 h-8"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m11.372-5.362c.962-.203 1.934-.377 2.916-.52M19.5 4.5c.125.163.233.332.322.508M19.5 4.5v.243a12.98 12.98 0 0 1-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold text-violet-900/90 dark:text-violet-100">
-                          {t("favorites.empty_matches")}
-                        </p>
-                        <p className="text-md text-violet-900/70 dark:text-violet-200/70 mt-1">
-                          {t("favorites.empty_matches_desc")}
-                        </p>
-                      </div>
-                      <Button
-                        as={Link}
-                        className="mt-2 bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 font-bold shadow-sm"
-                        color="secondary"
-                        to="/matches"
-                        variant="flat"
-                      >
-                        {t("favorites.find_matches")}
-                      </Button>
-                    </CardBody>
-                  </Card>
+                  <EmptyState
+                    actionLabel={t("favorites.find_matches")}
+                    description={t("favorites.empty_matches_desc")}
+                    title={t("favorites.empty_matches")}
+                    onAction={() => window.location.href = "/matches"}
+                  />
                 )}
               </>
             )}
@@ -513,52 +452,12 @@ export default function FavoritesPage() {
                     ))}
                   </div>
                 ) : (
-                  <Card className="border border-purple-500/20 bg-[#252318]">
-                    <CardBody className="py-16 flex flex-col items-center gap-4 text-center">
-                      <div className="p-4 rounded-full bg-purple-500/10 text-purple-500">
-                        <svg
-                          className="w-8 h-8"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold text-purple-900/90 dark:text-purple-100">
-                          {t(
-                            "favorites.empty_tournaments",
-                            "Aucun tournoi favori",
-                          )}
-                        </p>
-                        <p className="text-md text-purple-900/70 dark:text-purple-200/70 mt-1">
-                          {t(
-                            "favorites.empty_tournaments_desc",
-                            "Ajoutez des tournois à vos favoris pour les retrouver ici.",
-                          )}
-                        </p>
-                      </div>
-                      <Button
-                        as={Link}
-                        className="mt-2 bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 font-bold shadow-sm"
-                        color="secondary"
-                        to="/matches"
-                        variant="flat"
-                      >
-                        {t(
-                          "favorites.find_tournaments",
-                          "Trouver des tournois",
-                        )}
-                      </Button>
-                    </CardBody>
-                  </Card>
+                  <EmptyState
+                    actionLabel={t("favorites.find_tournaments", "Trouver des tournois")}
+                    description={t("favorites.empty_tournaments_desc", "Ajoutez des tournois à vos favoris pour les retrouver ici.")}
+                    title={t("favorites.empty_tournaments", "Aucun tournoi favori")}
+                    onAction={() => window.location.href = "/matches?type=tournament"}
+                  />
                 )}
               </>
             )}

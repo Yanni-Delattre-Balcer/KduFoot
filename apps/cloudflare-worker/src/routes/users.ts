@@ -8,7 +8,7 @@ import { checkPermission } from '../middleware/permissions.middleware';
 import { checkPermissions } from '../auth0';
 import { validateClubSiret } from '../utils/siret.validator';
 import { broadcastDataChanged } from '../utils/broadcast';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { AuthenticatedRequest } from './router';
 
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
@@ -62,11 +62,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *       500:
      *         description: Internal Server Error - Failed to update the database.
      */
-    router.post('/api/users/sync', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
+    router.post('/api/users/sync', async (request: Request, env: Env) => {
 
         const body: any = await request.json();
 
@@ -89,7 +85,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             console.error('User Sync Error:', e);
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.READ_API);
 
     /**
      * @openapi
@@ -118,16 +114,8 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *       401:
      *         description: Unauthorized - Invalid or missing JWT.
      */
-    router.get('/api/users/me', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const sub = payload.sub;
+    router.get('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -177,7 +165,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
 
         return Response.json({ success: true, user: { ...user, club, additional_clubs } }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-    });
+    }, Permission.READ_API);
 
     /**
      * @openapi
@@ -197,14 +185,8 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *       404:
      *         description: User not found.
      */
-    router.get('/api/me/context', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const sub = payload.sub;
+    router.get('/api/me/context', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
 
         // 1. Prepare all queries for batch execution
         const userQuery = env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(sub);
@@ -297,7 +279,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             user: { ...user, club, additional_clubs },
             notifications
         }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-    });
+    }, Permission.READ_API);
 
     /**
      * @openapi
@@ -335,16 +317,8 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *       500:
      *         description: Internal Server Error - Database update failed.
      */
-    router.put('/api/users/me', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const sub = payload.sub;
+    router.put('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -370,7 +344,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.WRITE_API);
 
     /**
      * @openapi
@@ -405,16 +379,9 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *       502:
      *         description: Bad Gateway - Failed to retrieve data from the SIRET API.
      */
-    router.post('/api/users/link-club', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const sub = payload.sub;
+    router.post('/api/users/link-club', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
+        const token = request.headers.get('Authorization')?.substring(7) || '';
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -504,7 +471,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             console.error('Link Club Error:', e);
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.READ_API);
 
     /**
      * @openapi
@@ -524,14 +491,8 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *       403:
      *         description: Forbidden - Lacks administrative privileges.
      */
-    router.post('/api/users/unlink-club', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.ADMIN_AUTH0);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const sub = payload.sub;
+    router.post('/api/users/unlink-club', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -549,7 +510,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.ADMIN_AUTH0);
 
     /**
      * @openapi
@@ -574,16 +535,8 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *       500:
      *         description: Internal error during deletion.
      */
-    router.delete('/api/users/me', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const sub = payload.sub;
+    router.delete('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -596,15 +549,14 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.READ_API);
 
     /**
      * GET /api/users/me/calendar-link
      * Returns the webcal sync URL for the user.
      */
-    router.get('/api/users/me/calendar-link', async (request, env) => {
-        const payload = (request as any).user;
-        const sub = payload.sub;
+    router.get('/api/users/me/calendar-link', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -637,14 +589,8 @@ export const setupUserRoutes = (router: Router, env: Env) => {
      *               type: string
      *               format: binary
      */
-    router.get('/api/me/export', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const sub = payload.sub;
+    router.get('/api/me/export', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -652,7 +598,10 @@ export const setupUserRoutes = (router: Router, env: Env) => {
         }
 
         try {
-            const data = await userService.exportUserData(user.id);
+            const data: any = await userService.exportUserData(user.id);
+            
+            // Dynamic import for pdf-lib (Lazy Loading) - Using bundled ESM to fix resolution issues
+            const { PDFDocument, rgb, StandardFonts } = await import('pdf-lib/dist/pdf-lib.esm.js');
             
             // Create a new PDF document
             const pdfDoc = await PDFDocument.create();
@@ -735,7 +684,7 @@ export const setupUserRoutes = (router: Router, env: Env) => {
             });
         } catch (e: any) {
             console.error('Export PDF Error:', e);
-            return Response.json({ success: false, error: 'Internal server error during PDF generation' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.READ_API);
 };

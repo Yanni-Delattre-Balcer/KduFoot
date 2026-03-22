@@ -27,7 +27,9 @@
     "bug_report": "Report a bug",
     "feature_request": "Suggest a feature",
     "other": "Other",
-    "delete_failed_with_type": "Failed to delete {{matchType}}. Please try again."
+    "delete_failed_with_type": "Failed to delete {{matchType}}. Please try again.",
+    "action_failed": "Action failed. Please try again.",
+    "withdraw_failed": "Withdrawal failed. Please try again."
   },
   "user_banned_signal": "User ban report",
   "cookie-consent-title": "Cookies management",

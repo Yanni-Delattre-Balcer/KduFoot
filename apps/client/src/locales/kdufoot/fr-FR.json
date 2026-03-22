@@ -27,7 +27,9 @@
     "bug_report": "Signaler un bug",
     "feature_request": "Suggérer une fonctionnalité",
     "other": "Autre",
-    "delete_failed_with_type": "Impossible de supprimer {{matchType}}. Veuillez réessayer."
+    "delete_failed_with_type": "Impossible de supprimer {{matchType}}. Veuillez réessayer.",
+    "action_failed": "L'action a échoué. Veuillez réessayer.",
+    "withdraw_failed": "Le désistement a échoué. Veuillez réessayer."
   },
   "user_banned_signal": "Signalement d'utilisateur banni",
   "cookie-consent-title": "Gestion des cookies",

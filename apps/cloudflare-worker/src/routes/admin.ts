@@ -1,11 +1,10 @@
 
-import { Router } from './router';
+import { Router, AuthenticatedRequest } from './router';
 import { Env } from '../types/env';
 import { UserService } from '../services/user.service';
 import { MatchService } from '../services/match.service';
 import { checkPermissions } from '../auth0';
 import { Permission } from '../types/permissions';
-import { checkPermission } from '../middleware/permissions.middleware';
 import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast';
 
 const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
@@ -17,19 +16,12 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
     /**
      * Resolves the calling user's email from the JWT sub claim by looking up in D1.
-     * Auth0 access tokens don't always include the email claim directly.
      */
-    const getCallerEmail = async (request: Request): Promise<string | null> => {
+    const getCallerEmail = async (request: AuthenticatedRequest): Promise<string | null> => {
         try {
-            const authHeader = request.headers.get('Authorization');
-            if (!authHeader) return null;
-            const token = authHeader.substring(7);
-            const payload = (request as any).user || {};
+            const payload = request.user || {} as any;
+            if (payload.email) return payload.email as string;
 
-            // Try direct email claim first (may exist in some configurations)
-            if (payload.email) return payload.email;
-
-            // Fallback: look up email from D1 using the sub claim
             const sub = payload.sub;
             if (!sub) return null;
             const dbUser = await env.DB.prepare('SELECT email FROM users WHERE auth0_sub = ?').bind(sub).first<{ email: string }>();
@@ -39,7 +31,20 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         }
     };
 
-    const checkAdmin = async (request: Request): Promise<boolean> => {
+    /**
+     * Helper: extract D1 user ID from Auth0 sub claim in the JWT
+     */
+    const getCallerD1Id = async (request: AuthenticatedRequest): Promise<string | null> => {
+        try {
+            const payload = request.user || {};
+            const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+            return dbUser?.id || null;
+        } catch {
+            return null;
+        }
+    };
+
+    const checkAdmin = async (request: AuthenticatedRequest): Promise<boolean> => {
         const [email, d1Id] = await Promise.all([
             getCallerEmail(request),
             getCallerD1Id(request)
@@ -49,7 +54,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             return true;
         }
 
-        // Allow any user with the Auth0 Admin API permission
         try {
             const authHeader = request.headers.get('Authorization');
             if (!authHeader) return false;
@@ -62,35 +66,14 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
     };
 
     /**
-     * Helper: extract D1 user ID from Auth0 sub claim in the JWT
-     */
-    const getCallerD1Id = async (request: Request): Promise<string | null> => {
-        try {
-            const authHeader = request.headers.get('Authorization')!;
-            const token = authHeader.substring(7);
-            const payload = (request as any).user || {};
-            const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
-            return dbUser?.id || null;
-        } catch {
-            return null;
-        }
-    };
-
-    /**
      * DELETE /api/admin/matches/<id>
-     * Admin only route to delete a match advertisement.
      */
-    router.delete('/api/admin/matches/<id>', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: router.corsHeaders });
-        }
-
+    router.delete('/api/admin/matches/<id>', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) {
             return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
         }
 
-        const params = (request as any).params as { id: string };
+        const params = request.params;
 
         try {
             await env.DB.prepare('DELETE FROM matches WHERE id = ?').bind(params.id).run();
@@ -99,18 +82,15 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
-    });
+    }, Permission.WRITE_API);
 
     /**
      * DELETE /api/admin/users/<id>
-     * Admin only route to delete a user's account from D1 and trigger real-time sync.
      */
-    router.delete('/api/admin/users/<id>', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+    router.delete('/api/admin/users/<id>', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
-        const params = (request as any).params as { id: string };
+        const params = request.params;
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
@@ -132,19 +112,12 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
-    });
+    }, Permission.WRITE_API);
 
     /**
      * GET /api/admin/users/metadata
-     * Returns an array of objects { auth0_sub, is_blocked, block_reason, club_name, siret } 
-     * for all users registered in D1.
      */
-    router.get('/api/admin/users/metadata', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.ADMIN_AUTH0);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: router.corsHeaders });
-        }
-
+    router.get('/api/admin/users/metadata', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) {
             return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
         }
@@ -181,33 +154,21 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
-    });
+    }, Permission.ADMIN_AUTH0);
 
     /**
      * PATCH /api/admin/users/<id>/block
-     * Admin only route to block/unblock a user.
-     * Accepts { is_blocked: boolean, block_reason?: string }
-     * The <id> is the D1 user ID (UUID).
-     * Blocks include cascade deletion of the user's matches.
-     * Super-admin email is protected and cannot be blocked.
      */
-    router.patch('/api/admin/users/<id>/block', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 401, headers: router.corsHeaders });
-        }
-
+    router.patch('/api/admin/users/<id>/block', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) {
             return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
         }
 
-        const params = (request as any).params as { id: string };
+        const params = request.params;
         let id = decodeURIComponent(params.id);
 
-        // Resolve user: the ID might be a D1 UUID or an Auth0 sub (e.g. auth0|xxx)
         let targetUser;
         if (id.includes('|')) {
-            // Auth0 sub format: look up by auth0_sub
             targetUser = await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first();
         } else {
             targetUser = await userService.getUserById(id);
@@ -217,7 +178,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
-        // Use the D1 id for all subsequent operations
         const d1Id = (targetUser as any).id as string;
 
         if (d1Id === SUPREME_MASTER_ID || (targetUser as any).email === SUPER_ADMIN_EMAIL) {
@@ -229,7 +189,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         try {
             await userService.setBlockedStatus(d1Id, body.is_blocked, body.block_reason);
 
-            // Increment block_count if being blocked
             if (body.is_blocked) {
                 await env.DB.prepare('UPDATE users SET block_count = block_count + 1 WHERE id = ?').bind(d1Id).run();
             }
@@ -248,19 +207,15 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
-    });
+    }, Permission.WRITE_API);
 
     /**
      * PATCH /api/admin/users/<id>
-     * Full profile update reserved for Admins.
-     * Can update stadium_address, counters, etc.
      */
-    router.patch('/api/admin/users/<id>', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+    router.patch('/api/admin/users/<id>', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
-        const params = (request as any).params as { id: string };
+        const params = request.params;
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
@@ -278,19 +233,17 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             return Response.json({ success: true, user: updated }, { headers: router.corsHeaders });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
-    });
+    }, Permission.WRITE_API);
 
     /**
      * POST /api/admin/users/<id>/additional-sirets
      */
-    router.post('/api/admin/users/<id>/additional-sirets', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+    router.post('/api/admin/users/<id>/additional-sirets', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
-        const params = (request as any).params as { id: string };
+        const params = request.params;
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
@@ -299,7 +252,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
         if (!targetUser) {
             if (id.includes('|')) {
-                // Potential new user from Auth0, create stub
                 const newId = crypto.randomUUID();
                 await env.DB.prepare('INSERT INTO users (id, auth0_sub, created_at, updated_at) VALUES (?, ?, unixepoch(), unixepoch())')
                     .bind(newId, id).run();
@@ -316,7 +268,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
         let clubName = 'Entreprise / Club';
         if (!body.force) {
-            // Validate via Gouv API
             const { ClubService } = await import('../services/club.service');
             const clubService = new ClubService(env);
             const validation = await clubService.validateSiret(body.siret);
@@ -325,7 +276,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             }
             clubName = validation.clubName || clubName;
         } else {
-            // Even if forced, try to get the name for better UI but don't fail
             try {
                 const { ClubService } = await import('../services/club.service');
                 const clubService = new ClubService(env);
@@ -346,15 +296,14 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         } else if (Array.isArray(siretsStr)) {
             sirets = siretsStr;
         }
+
         if (!sirets.includes(body.siret)) {
             sirets.push(body.siret);
-            // Increment siret_change_count
             await env.DB.prepare('UPDATE users SET additional_sirets = ?, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?')
                 .bind(JSON.stringify(sirets), d1Id).run();
             await broadcastDataChanged(env);
         }
 
-        // Return updated list with names for immediate UI update
         const clubService = new (await import('../services/club.service')).ClubService(env);
         const additionalWithNames = await Promise.all(sirets.map(async (s) => {
             const validation = await clubService.validateSiret(s);
@@ -363,21 +312,18 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
         return Response.json({
             success: true,
-            additional_sirets: additionalWithNames, // Standardized key
+            additional_sirets: additionalWithNames,
             club_name: clubName
         }, { headers: router.corsHeaders });
-    });
+    }, Permission.WRITE_API);
 
     /**
      * POST /api/admin/users/<id>/primary-siret
-     * Set (and potentially force) primary SIRET for a user
      */
-    router.post('/api/admin/users/<id>/primary-siret', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+    router.post('/api/admin/users/<id>/primary-siret', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
-        const params = (request as any).params as { id: string };
+        const params = request.params;
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
@@ -386,7 +332,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
 
         if (!targetUser) {
             if (id.includes('|')) {
-                // Potential new user from Auth0, create stub
                 const newId = crypto.randomUUID();
                 await env.DB.prepare('INSERT INTO users (id, auth0_sub, created_at, updated_at) VALUES (?, ?, unixepoch(), unixepoch())')
                     .bind(newId, id).run();
@@ -401,9 +346,8 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             return Response.json({ success: false, error: 'SIRET (14 chiffres) ou SIREN (9 chiffres) invalide' }, { status: 400, headers: router.corsHeaders });
         }
 
-        // Validate via Gouv API
         const { ClubService } = await import('../services/club.service');
-        const { validateClubSiret } = await import('../utils/siret.validator'); // Fixed path
+        const { validateClubSiret } = await import('../utils/siret.validator');
         const clubService = new ClubService(env);
 
         let clubName = 'Entreprise / Club';
@@ -439,7 +383,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             if (!body.force) return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: router.corsHeaders });
         }
 
-        // Create or get club ID
         const existingClub = await env.DB.prepare('SELECT id FROM clubs WHERE siret = ?').bind(body.siret).first();
         let clubId: string;
         if (existingClub) {
@@ -457,17 +400,15 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         await broadcastDataChanged(env);
 
         return Response.json({ success: true, club_name: clubName }, { headers: router.corsHeaders });
-    });
+    }, Permission.WRITE_API);
 
     /**
      * DELETE /api/admin/users/<id>/primary-siret
      */
-    router.delete('/api/admin/users/<id>/primary-siret', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+    router.delete('/api/admin/users/<id>/primary-siret', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
-        const params = (request as any).params as { id: string };
+        const params = request.params;
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
@@ -481,17 +422,15 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         await broadcastDataChanged(env);
 
         return Response.json({ success: true }, { headers: router.corsHeaders });
-    });
+    }, Permission.WRITE_API);
 
     /**
      * DELETE /api/admin/users/<id>/additional-sirets/<siret>
      */
-    router.delete('/api/admin/users/<id>/additional-sirets/<siret>', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.WRITE_API);
-        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+    router.delete('/api/admin/users/<id>/additional-sirets/<siret>', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
-        const params = (request as any).params as { id: string, siret: string };
+        const params = request.params as any;
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
@@ -517,7 +456,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         await env.DB.prepare('UPDATE users SET additional_sirets = ?, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?').bind(JSON.stringify(sirets), d1Id).run();
         await broadcastDataChanged(env);
 
-        // Return updated list with names for consistent UI
         const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
         const additionalWithNames = await Promise.all(sirets.map(async (s) => {
             try {
@@ -531,17 +469,15 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
         }));
 
         return Response.json({ success: true, additional_sirets: additionalWithNames }, { headers: router.corsHeaders });
-    });
+    }, Permission.WRITE_API);
 
     /**
      * GET /api/admin/users/<id>/sirets
      */
-    router.get('/api/admin/users/<id>/sirets', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) return Response.json({ success: false, error: permissionCheck.reason }, { status: 401, headers: router.corsHeaders });
+    router.get('/api/admin/users/<id>/sirets', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
-        const params = (request as any).params as { id: string };
+        const params = request.params;
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
@@ -573,7 +509,6 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             additional_sirets_raw = siretsStr;
         }
 
-        // Fetch names for all SIRETs
         const clubService = new (await import('../services/club.service')).ClubService(env);
 
         let primary_name = null;
@@ -602,5 +537,5 @@ export const setupAdminRoutes = (router: Router, env: Env, ctx: ExecutionContext
             block_count: user.block_count || 0,
             siret_change_count: user.siret_change_count || 0
         }, { headers: router.corsHeaders });
-    });
+    }, Permission.READ_API);
 };

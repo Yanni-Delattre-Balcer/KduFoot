@@ -28,20 +28,21 @@ export class UserService {
         return this.parseUser(result);
     }
 
-    public parseUser(user: any): User | null {
+    public parseUser(user: User | null): User | null {
         if (!user) return null;
-        if (typeof user.additional_sirets === 'string') {
+        const u = { ...user };
+        if (typeof u.additional_sirets === 'string') {
             try {
-                let parsed = JSON.parse(user.additional_sirets);
+                let parsed = JSON.parse(u.additional_sirets);
                 if (typeof parsed === 'string') parsed = JSON.parse(parsed); // Auto-heal double-stringified corruption
-                user.additional_sirets = Array.isArray(parsed) ? parsed : [];
+                u.additional_sirets = Array.isArray(parsed) ? parsed : [];
             } catch (e) {
-                user.additional_sirets = [];
+                u.additional_sirets = [];
             }
-        } else if (!Array.isArray(user.additional_sirets)) {
-            user.additional_sirets = [];
+        } else if (!Array.isArray(u.additional_sirets)) {
+            u.additional_sirets = [];
         }
-        return user as User;
+        return u as User;
     }
 
     async createOrUpdateUser(dto: CreateUserDto): Promise<User> {
@@ -79,7 +80,7 @@ export class UserService {
             'siret_change_count'
         ] as const;
 
-        const keys = Object.keys(dto).filter(k => allowedKeys.includes(k as any)) as (keyof UpdateUserDto)[];
+        const keys = Object.keys(dto).filter(k => allowedKeys.includes(k as typeof allowedKeys[number])) as (keyof UpdateUserDto)[];
         if (keys.length === 0) return this.getUserById(id);
 
         const setClause = keys.map((key) => `${key} = ?`).join(', ');
@@ -161,7 +162,7 @@ export class UserService {
             .run();
     }
 
-    async exportUserData(userId: string): Promise<any> {
+    async exportUserData(userId: string): Promise<Record<string, unknown>> {
         // Prepare queries for all user-related data
         const profileQuery = this.db.prepare('SELECT * FROM users WHERE id = ?').bind(userId);
         const matchesQuery = this.db.prepare('SELECT * FROM matches WHERE owner_id = ?').bind(userId);
@@ -178,7 +179,7 @@ export class UserService {
         ]);
 
         return {
-            profile: this.parseUser(results[0].results[0]),
+            profile: this.parseUser(results[0].results[0] as unknown as User),
             matches: results[1].results,
             match_applications: results[2].results,
             training_sessions: results[3].results,

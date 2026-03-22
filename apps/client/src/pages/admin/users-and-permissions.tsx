@@ -779,7 +779,7 @@ export default function UsersAndPermissionsPage() {
         },
       }));
     } catch (err: any) {
-      addToast({ title: "Erreur", description: err.message, color: "danger" });
+      addToast({ title: t("error.title"), description: err.message, color: "danger" });
     }
   };
 
@@ -839,7 +839,7 @@ export default function UsersAndPermissionsPage() {
 
       if (data.success) {
         addToast({
-          title: "Succès",
+          title: t("success"),
           description: "Profil administrateur mis à jour sur D1.",
           color: "success",
         });
@@ -847,14 +847,14 @@ export default function UsersAndPermissionsPage() {
         if (mgmtToken) setTimeout(() => loadUsers(mgmtToken, true), 1000);
       } else {
         addToast({
-          title: "Erreur",
+          title: t("error.title"),
           description: data.error || "Échec de la mise à jour.",
           color: "danger",
         });
       }
     } catch (err: any) {
       addToast({
-        title: "Erreur",
+        title: t("error.title"),
         description: err.message || "Erreur réseau.",
         color: "danger",
       });
@@ -890,20 +890,20 @@ export default function UsersAndPermissionsPage() {
         setNewSiret("");
         setForceSiret(false);
         addToast({
-          title: "Succès",
+          title: t("success"),
           description: `SIRET ${forceSiret ? "(forcé) " : ""}ajouté.`,
           color: "success",
         });
       } else {
         addToast({
-          title: "Erreur",
+          title: t("error.title"),
           description: data.error || "Échec de l'ajout.",
           color: "danger",
         });
       }
     } catch {
       addToast({
-        title: "Erreur",
+        title: t("error.title"),
         description: "Erreur réseau.",
         color: "danger",
       });
@@ -930,20 +930,20 @@ export default function UsersAndPermissionsPage() {
           prev ? { ...prev, additional_sirets: data.additional_sirets } : null,
         );
         addToast({
-          title: "Succès",
+          title: t("success"),
           description: "SIRET détaché.",
           color: "success",
         });
       } else {
         addToast({
-          title: "Erreur",
+          title: t("error.title"),
           description: data.error || "Échec de la suppression.",
           color: "danger",
         });
       }
     } catch {
       addToast({
-        title: "Erreur",
+        title: t("error.title"),
         description: "Erreur réseau.",
         color: "danger",
       });
@@ -1011,7 +1011,7 @@ export default function UsersAndPermissionsPage() {
       }));
     } catch (err: any) {
       addToast({
-        title: "Erreur",
+        title: t("error.title"),
         description: err.message,
         variant: "solid",
         color: "danger",
@@ -1074,7 +1074,7 @@ export default function UsersAndPermissionsPage() {
       const msg = (err as Error).message ?? "";
 
       addToast({
-        title: t("error"),
+        title: t("error.title"),
         description: msg.includes("not found")
           ? t("adminUsersPage.toasts.noResourceServer")
           : t("adminUsersPage.toasts.syncError"),

@@ -619,171 +619,13 @@
         "tags": [
           "Matches"
         ],
-        "summary": "Search and filter football matches",
-        "description": "Retrieves a list of matches with advanced filtering capabilities including category, level, venue type, and geographical proximity. Geographical search uses 'radius_km' along with 'user_lat' and 'user_lng'. Requires a valid JWT.\n",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "category",
-            "in": "query",
-            "description": "Filter by age or gender category.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "level",
-            "in": "query",
-            "description": "Filter by competitive level.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "description": "Match format (e.g., 5v5, 11v11).",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "description": "Current status of the match.",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "radius_km",
-            "in": "query",
-            "description": "Search radius in kilometers.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "user_lat",
-            "in": "query",
-            "description": "Reference latitude for proximity search.",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "user_lng",
-            "in": "query",
-            "description": "Reference longitude for proximity search.",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated match list."
-          },
-          "403": {
-            "description": "Forbidden."
-          }
-        }
+        "summary": "Search matches"
       },
       "post": {
         "tags": [
           "Matches"
         ],
-        "summary": "Create a new match offer",
-        "description": "Registers a new match in the system. The creating user is assigned as the owner. Requires 'matches:create' permission.\n",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "date",
-                  "category",
-                  "level",
-                  "format"
-                ],
-                "properties": {
-                  "date": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "category": {
-                    "type": "string"
-                  },
-                  "level": {
-                    "type": "string"
-                  },
-                  "format": {
-                    "type": "string"
-                  },
-                  "venue": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Match successfully created."
-          },
-          "403": {
-            "description": "Forbidden."
-          }
-        }
-      }
-    },
-    "/api/matches/requests": {
-      "get": {
-        "tags": [
-          "Match Participation"
-        ],
-        "summary": "List incoming match requests for the organizer",
-        "description": "Retrieves all participation requests for matches owned by the current user.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of incoming requests."
-          }
-        }
-      }
-    },
-    "/api/matches/participations": {
-      "get": {
-        "tags": [
-          "Match Participation"
-        ],
-        "summary": "List outgoing match participation applications",
-        "description": "Displays all matches the current user has applied to join.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of outgoing applications."
-          }
-        }
+        "summary": "Create match"
       }
     },
     "/api/matches/{id}": {
@@ -791,431 +633,19 @@
         "tags": [
           "Matches"
         ],
-        "summary": "Retrieve detailed match information by ID",
-        "description": "Fetches full match criteria, location, and owner details for a given match identifier.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "description": "Unique UUID of the match.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Match details."
-          },
-          "404": {
-            "description": "Not Found."
-          }
-        }
+        "summary": "Get match by ID"
       },
       "put": {
         "tags": [
           "Matches"
         ],
-        "summary": "Update an existing match offer",
-        "description": "Updates match details. Only the match owner can perform this action.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Match successfully updated."
-          },
-          "403": {
-            "description": "Forbidden - Not the owner."
-          }
-        }
+        "summary": "Update match"
       },
       "delete": {
         "tags": [
           "Matches"
         ],
-        "summary": "Delete a match offer",
-        "description": "Permanently removes a match. Only the owner can delete it.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Match successfully deleted."
-          },
-          "404": {
-            "description": "Not Found."
-          }
-        }
-      }
-    },
-    "/api/matches/{id}/close-registrations": {
-      "put": {
-        "tags": [
-          "Matches"
-        ],
-        "summary": "Manually close tournament registrations",
-        "description": "Updates tournament status to 'found'. Only the owner can perform this.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Tournament registrations closed successfully."
-          },
-          "403": {
-            "description": "Forbidden - Not the owner."
-          }
-        }
-      }
-    },
-    "/api/matches/{id}/contact": {
-      "post": {
-        "tags": [
-          "Match Participation"
-        ],
-        "summary": "Apply to participate in a match",
-        "description": "Sends a request to the match owner to participate (or accept the offer). Requires 'matches:contact' permission.\n",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Application sent."
-          }
-        }
-      }
-    },
-    "/api/matches/{matchId}/requests/{userId}": {
-      "patch": {
-        "tags": [
-          "Match Participation"
-        ],
-        "summary": "Update status of a participation request",
-        "description": "Allows the match owner to accept or refuse an incoming request from a specific user.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "matchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "status"
-                ],
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "accepted",
-                      "refused"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Request status updated."
-          },
-          "403": {
-            "description": "Forbidden - Lacks ownership."
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Match Participation"
-        ],
-        "summary": "Cancel or remove a participation request",
-        "description": "Allows the requester or the match owner to remove a contact request.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "matchId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Request removed."
-          },
-          "403": {
-            "description": "Forbidden - Lacks authority."
-          }
-        }
-      }
-    },
-    "/api/matches/{id}/notifications/read": {
-      "patch": {
-        "tags": [
-          "Match Participation"
-        ],
-        "summary": "Mark match notifications as read",
-        "description": "Resets the notification state for a specific match and user.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Notification marked as read."
-          }
-        }
-      }
-    },
-    "/api/matches/{id}/pairings": {
-      "get": {
-        "tags": [
-          "Tournament"
-        ],
-        "summary": "Get tournament pairings",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of pairings."
-          }
-        }
-      }
-    },
-    "/api/matches/pairings/{pairingId}": {
-      "patch": {
-        "tags": [
-          "Tournament"
-        ],
-        "summary": "Update pairing time",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "pairingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "scheduled_time"
-                ],
-                "properties": {
-                  "scheduled_time": {
-                    "type": "string",
-                    "format": "time"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Pairing updated."
-          }
-        }
-      }
-    },
-    "/api/matches/{id}/pairings/generate": {
-      "post": {
-        "tags": [
-          "Tournament"
-        ],
-        "summary": "Generate tournament pairings",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Pairings generated."
-          }
-        }
+        "summary": "Delete match"
       }
     },
     "/api/sessions": {
@@ -1747,6 +1177,33 @@
           },
           "403": {
             "description": "Forbidden - Lacks administrative privileges."
+          }
+        }
+      }
+    },
+    "/api/me/export": {
+      "get": {
+        "tags": [
+          "User Management"
+        ],
+        "summary": "Export user data as PDF",
+        "description": "Generates a PDF containing the user's profile, match history, and statistics.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF file containing user data.",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
           }
         }
       }

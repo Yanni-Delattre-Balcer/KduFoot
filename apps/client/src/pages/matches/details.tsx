@@ -236,7 +236,7 @@ export default function MatchDetailsPage() {
       setKnownData(nextKnown);
 
       addToast({
-        title: t("base.success", "Succès"),
+        title: t("success"),
         description: t("details.status.confirmed_accepted"),
         color: "success",
       });
@@ -245,7 +245,7 @@ export default function MatchDetailsPage() {
     } catch (e) {
       console.error(e);
       addToast({
-        title: "Erreur",
+        title: t("error.title"),
         description: "Impossible de valider les modifications",
         color: "danger",
       });
@@ -297,7 +297,7 @@ export default function MatchDetailsPage() {
     } catch (error) {
       console.error("Failed to delete match", error);
       addToast({
-        title: t("base.error.title", "Erreur"),
+        title: t("error.title"),
         description: t(
           "error.delete_failed_with_type",
           match.type === "tournament" ? "Erreur lors de la suppression du tournoi" : "Erreur lors de la suppression du match",
@@ -321,7 +321,7 @@ export default function MatchDetailsPage() {
     } catch (error: any) {
       console.error("Failed to cancel request", error);
       addToast({
-        title: "Erreur",
+        title: t("error.title"),
         description: error.message || "Erreur lors de l'annulation",
         color: "danger",
       });
@@ -355,7 +355,7 @@ export default function MatchDetailsPage() {
     } catch (error: any) {
       console.error("Admin delete failed", error);
       addToast({
-        title: "Erreur",
+        title: t("error.title"),
         description: error.message || "Erreur lors de la suppression admin",
         color: "danger",
       });
@@ -371,7 +371,7 @@ export default function MatchDetailsPage() {
       await blockUser(match.owner_id, true, blockReason);
 
       addToast({
-        title: "Succès",
+        title: t("success"),
         description: "Utilisateur bloqué avec succès",
         variant: "flat",
         color: "success",
@@ -379,7 +379,7 @@ export default function MatchDetailsPage() {
     } catch (error: any) {
       console.error("Blocking failed", error);
       addToast({
-        title: "Erreur",
+        title: t("error.title"),
         description: error.message || "Erreur lors du blocage",
         variant: "flat",
         color: "danger",
@@ -1071,7 +1071,7 @@ export default function MatchDetailsPage() {
                                         t("match.contact_tracking_message"),
                                     });
                                     addToast({
-                                      title: t("base.success", "Succès"),
+                                      title: t("success"),
                                       description: t(
                                         "matchForm.alerts.contact_success",
                                         { date: match.match_date },
@@ -1082,7 +1082,7 @@ export default function MatchDetailsPage() {
                                     });
                                   } catch (e: any) {
                                     addToast({
-                                      title: t("base.error.title", "Erreur"),
+                                      title: t("error.title"),
                                       description:
                                         e.message || "Erreur lors de l'envoi",
                                       variant: "flat",
@@ -1285,6 +1285,7 @@ export default function MatchDetailsPage() {
                       color="danger"
                       isLoading={isCancelling}
                       onPress={handleCancelRequest}
+                      autoFocus
                     >
                       {t("details.modal.withdraw_confirm")}
                     </Button>
@@ -1326,6 +1327,7 @@ export default function MatchDetailsPage() {
                       color="danger"
                       isLoading={isDeleting}
                       onPress={handleDelete}
+                      autoFocus
                     >
                       {t("details.modal.delete_confirm")}
                     </Button>
@@ -1365,6 +1367,7 @@ export default function MatchDetailsPage() {
                       color="danger"
                       isLoading={isAdminDeleting}
                       onPress={handleAdminDelete}
+                      autoFocus
                     >
                       {t("details.modal.admin_delete_confirm")}
                     </Button>
@@ -1417,6 +1420,7 @@ export default function MatchDetailsPage() {
                         await handleBlockUser();
                         onClose();
                       }}
+                      autoFocus
                     >
                       {t("details.modal.block_confirm")}
                     </Button>

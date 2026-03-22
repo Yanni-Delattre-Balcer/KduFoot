@@ -10,7 +10,11 @@ export function useMatchRequests() {
     const token = await getAccessTokenSilently();
     const res = await matchService.getRequests(token);
 
-    if (!res.success) throw new Error(res.error || "Failed to fetch requests");
+    if (!res.success) {
+      const error = new Error(res.error || "Failed to fetch requests") as any;
+      error.status = res.status || 500;
+      throw error;
+    }
 
     return res.requests;
   };

@@ -225,8 +225,8 @@ export default function DashboardPage() {
     } catch (error: any) {
       console.error("Action error:", error);
       addToast({
-        title: t("base.error.title", "Erreur"),
-        description: error.message || t("base.error.action_failed", "Erreur lors de l'action"),
+        title: t("error.title"),
+        description: error.message || t("error.action_failed"),
         color: "danger",
       });
     } finally {
@@ -253,8 +253,8 @@ export default function DashboardPage() {
     } catch (error: any) {
       console.error("Action error:", error);
       addToast({
-        title: t("base.error.title", "Erreur"),
-        description: error.message || t("base.error.action_failed", "Erreur lors du désistement"),
+        title: t("error.title"),
+        description: error.message || t("error.withdraw_failed"),
         color: "danger",
       });
     } finally {

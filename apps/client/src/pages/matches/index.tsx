@@ -41,6 +41,8 @@ import { useFavorites } from "@/hooks/use-favorites";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { useAuth } from "@/authentication";
 import { MatchListSkeleton } from "@/components/skeletons/match-skeleton";
+import { EmptyState } from "@/components/common/empty-state";
+import { ErrorView } from "@/components/common/error-views";
 
 export default function MatchesPage() {
   const { t, i18n } = useTranslation();
@@ -260,7 +262,7 @@ export default function MatchesPage() {
         );
       } catch (err: any) {
         addToast({
-          title: "Erreur",
+        title: t("error.title"),
           description: err.message,
           variant: "solid",
           color: "danger",
@@ -443,7 +445,7 @@ export default function MatchesPage() {
                 {uiConfig.title}
               </h1>
             </div>
-            <p className="text-default-500 text-sm md:text-lg max-w-lg">
+            <p className="text-default-300 text-sm md:text-lg max-w-lg">
               {view === "find" ? uiConfig.desc_find : uiConfig.desc_create}
             </p>
 
@@ -1059,6 +1061,7 @@ export default function MatchesPage() {
                           return (
                             <button
                               key={day}
+                              aria-label={t("calendar.day", { date: new Date(dateKey).toLocaleDateString() })}
                               className={`
                                                                 h-16 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all text-sm relative border border-white/5
                                                                 ${isSelected ? "bg-violet-500/30 border-2 border-violet-500 shadow-lg shadow-violet-500/20" : ""}
@@ -1106,23 +1109,11 @@ export default function MatchesPage() {
                 {displayMode === "list" && (
                   <div className="flex flex-col gap-4">
                     {isError && (
-                      <div className="flex items-center gap-3 p-4 rounded-xl bg-danger/10 border border-danger/20 text-danger">
-                        <svg
-                          className="w-5 h-5 shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        {t("error.loading_matches")}
-                      </div>
+                      <ErrorView 
+                        status={isError.status || 500} 
+                        message={isError.message} 
+                        onRetry={() => globalMutate((key: any) => typeof key === "string" && key.includes("/api/matches"))}
+                      />
                     )}
 
                     {!isLoading && filteredMatches.length > 0 && (
@@ -1435,49 +1426,12 @@ export default function MatchesPage() {
 
 
                     {!isLoading && filteredMatches.length === 0 && !isError && (
-                      <Card className="border border-violet-800/50 bg-[#232120] overflow-hidden">
-                        <div className="absolute inset-0 bg-linear-to-br from-violet-500/5 to-transparent pointer-events-none" />
-                        <CardBody className="relative py-16 flex flex-col items-center gap-4 text-center">
-                          <div className="p-4 rounded-full bg-violet-800/20">
-                            <svg
-                              className="w-12 h-12 text-violet-400"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={1}
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-lg font-semibold text-violet-900/80 dark:text-violet-100">
-                              {type === "tournament"
-                                ? t("matchesPage.empty_title_tournament")
-                                : t("matchesPage.empty_title")}
-                            </p>
-                            <p className="text-sm text-violet-800/60 dark:text-violet-200/60 mt-1">
-                              {type === "tournament"
-                                ? t("matchesPage.empty_desc_tournament")
-                                : t("matchesPage.empty_desc")}
-                            </p>
-                          </div>
-                          <Button
-                            className="mt-2 font-semibold bg-violet-900/20 text-violet-200 dark:bg-violet-500/20 dark:text-violet-300"
-                            color="secondary"
-                            variant="flat"
-                            onPress={() => setView("create")}
-                          >
-                            {type === "tournament"
-                              ? t("match.create_tournament")
-                              : t("match.create")}
-                          </Button>
-                        </CardBody>
-                      </Card>
+                      <EmptyState
+                        actionLabel={type === "tournament" ? t("match.create_tournament") : t("match.create")}
+                        description={type === "tournament" ? t("matchesPage.empty_desc_tournament") : t("matchesPage.empty_desc")}
+                        title={type === "tournament" ? t("matchesPage.empty_title_tournament") : t("matchesPage.empty_title")}
+                        onAction={() => setView("create")}
+                      />
                     )}
                   </div>
                 )}

@@ -27,7 +27,17 @@ export const sessionService = {
       body: JSON.stringify(data),
     });
 
-    if (!response.ok) throw new Error(await response.text());
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      try {
+        const errorJson = JSON.parse(errorText);
+
+        throw new Error(errorJson.error || errorJson.message || errorText);
+      } catch {
+        throw new Error(errorText);
+      }
+    }
 
     return response.json();
   },
@@ -45,7 +55,17 @@ export const sessionService = {
       },
     );
 
-    if (!response.ok) throw new Error(await response.text());
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      try {
+        const errorJson = JSON.parse(errorText);
+
+        throw new Error(errorJson.error || errorJson.message || errorText);
+      } catch {
+        throw new Error(errorText);
+      }
+    }
 
     return response.json();
   },
@@ -59,7 +79,17 @@ export const sessionService = {
       },
     );
 
-    if (!response.ok) throw new Error(await response.text());
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      try {
+        const errorJson = JSON.parse(errorText);
+
+        throw new Error(errorJson.error || errorJson.message || errorText);
+      } catch {
+        throw new Error(errorText);
+      }
+    }
 
     return response.json();
   },

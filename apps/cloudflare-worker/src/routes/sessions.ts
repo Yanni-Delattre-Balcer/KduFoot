@@ -49,21 +49,10 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      *       403:
      *         description: Forbidden - Invalid token or insufficient permissions.
      */
-    router.get('/api/sessions', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API); // Minimal read permission? Or specific SESSIONS_READ?
-        // Permissions enum doesn't have SESSIONS_READ explicitly, maybe use generic READ_API or add it?
-        // Using READ_API for list for now, or SESSIONS_CREATE if it implies managing them.
-        // Let's stick to READ_API for basic access, and maybe ensure it's their own data via userId filter.
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
+    router.get('/api/sessions', async (request, env) => {
 
         // Default to seeing own sessions
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
@@ -84,7 +73,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
 
         const result = await sessionService.search(filters);
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-    });
+    }, Permission.READ_API);
 
     /**
      * @openapi
@@ -112,30 +101,37 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      *       404:
      *         description: Not Found - Session ID invalid.
      */
-    router.get('/api/sessions/<id>', async (request: Request) => {
-        const params = (request as any).params as { id: string };
-        const permissionCheck = await checkPermission(request, env, Permission.READ_API);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
+    router.get('/api/sessions/<id>', async (request, env) => {
+        const { id } = request.params;
+
+        const cacheKey = `session:${id}`;
+        if (env.KV_CACHE) {
+            const cached = await env.KV_CACHE.get(cacheKey);
+            if (cached) {
+                const sessionData = JSON.parse(cached);
+                // Security check even for cache
+                const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+                if (dbUser && sessionData.session.user_id !== dbUser.id) {
+                    return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                }
+                return Response.json({ success: true, ...sessionData, cached: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            }
         }
 
-        const result = await sessionService.getById(params.id);
+        const result = await sessionService.getById(id);
         if (!result) {
             return Response.json({ success: false, error: 'Session not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         // Security check: is it my session?
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
 
         if (dbUser && result.session.user_id !== dbUser.id) {
             return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
         return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-    });
+    }, Permission.READ_API);
 
     /**
      * @openapi
@@ -166,16 +162,8 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      *       403:
      *         description: Forbidden - Insufficient rights.
      */
-    router.post('/api/sessions', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.SESSIONS_CREATE);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+    router.post('/api/sessions', async (request, env) => {
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
@@ -189,7 +177,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.SESSIONS_CREATE);
 
     /**
      * @openapi
@@ -225,21 +213,9 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      *       403:
      *         description: Forbidden - Lacks permissions or ownership.
      */
-    router.put('/api/sessions/<id>', async (request: Request) => {
-        const params = (request as any).params as { id: string };
-        // Update might use same permission or generic write? 
-        // Types/Permissions has SESSIONS_CREATE, SESSIONS_ADAPT. 
-        // Let's use SESSIONS_CREATE as general "manage sessions" or WRITE_API.
-        // Strictly speaking, updating is "managing".
-        const permissionCheck = await checkPermission(request, env, Permission.SESSIONS_CREATE);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+    router.put('/api/sessions/<id>', async (request, env) => {
+        const { id } = request.params;
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
         }
@@ -247,17 +223,17 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         const dto = await request.json() as UpdateSessionDto;
 
         try {
-            const success = await sessionService.update(params.id, dbUser.id, dto);
+            const success = await sessionService.update(id, dbUser.id, dto);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
 
+            if (env.KV_CACHE) await env.KV_CACHE.delete(`session:${id}`);
             await broadcastDataChanged(env);
-            // Return updated (would need fetch, but for efficiency just success)
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.SESSIONS_CREATE);
 
     /**
      * @openapi
@@ -281,23 +257,15 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      *       403:
      *         description: Forbidden - Unauthorized.
      */
-    router.delete('/api/sessions/<id>', async (request: Request) => {
-        const params = (request as any).params as { id: string };
-        const permissionCheck = await checkPermission(request, env, Permission.SESSIONS_CREATE); // Assuming delete is part of management
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+    router.delete('/api/sessions/<id>', async (request, env) => {
+        const { id } = request.params;
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
         }
 
         try {
-            const success = await sessionService.delete(params.id, dbUser.id);
+            const success = await sessionService.delete(id, dbUser.id);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             await broadcastDataChanged(env);
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
@@ -305,5 +273,5 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.SESSIONS_CREATE);
 };

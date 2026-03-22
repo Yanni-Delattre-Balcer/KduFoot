@@ -15,6 +15,8 @@ import { useUser } from "../../hooks/use-user";
 import { useWelcomeGateway } from "../../contexts/welcome-gateway-context";
 import DataWall from "../../components/data-wall";
 import { ExerciseListSkeleton } from "../../components/skeletons/exercise-skeleton";
+import { ErrorView } from "../../components/common/error-views";
+import { useSWRConfig } from "swr";
 
 export default function ExercisesPage() {
   const { t } = useTranslation();
@@ -24,6 +26,7 @@ export default function ExercisesPage() {
     selectedExercises.some((e) => e.id === id);
 
   const { exercises, isError, isLoading } = useExercises({});
+  const { mutate } = useSWRConfig();
   const { isLocked } = useUser();
   const { isVisitor, openGateway } = useWelcomeGateway();
 
@@ -87,7 +90,7 @@ export default function ExercisesPage() {
                 {t("video.analyzeTitle")}
               </h1>
             </div>
-            <p className="text-default-500 text-center max-w-lg font-bold tracking-widest text-xs opacity-70">
+            <p className="text-default-300 text-center max-w-lg font-bold tracking-widest text-xs">
               {t("video.analyzeSubtitle")}
             </p>
             <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -236,12 +239,11 @@ export default function ExercisesPage() {
             )}
 
             {isError && (
-              <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">
-                {t(
-                  "error.loading_exercises",
-                  "Erreur lors du chargement des exercices",
-                )}
-              </div>
+              <ErrorView 
+                status={isError.status || 500} 
+                message={isError.message} 
+                onRetry={() => mutate((key: any) => typeof key === "string" && key.includes("/api/exercises"))}
+              />
             )}
 
             {exercises.length === 0 && !isError && (

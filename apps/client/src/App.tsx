@@ -16,7 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import React, { Suspense, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { SiteLoading } from "./components/site-loading";
 import {
@@ -26,38 +27,53 @@ import {
   useUser,
   BlockedPage,
 } from "./authentication";
-import { PageNotFound } from "./pages/404";
 import { UnifiedOnboarding } from "./components/unified-onboarding";
 
 import { ErrorBoundary } from "./components/error-boundary";
-import { OfflineStatus } from "./components/offline-status";
-import IndexPage from "@/pages/index";
-import ApiPage from "@/pages/api";
-import AboutPage from "@/pages/about";
-import ThankYouPage from "@/pages/thank-you";
-import ExercisesPage from "@/pages/exercises";
-import ExerciseDetailsPage from "@/pages/exercises/details";
-import ExerciseEditPage from "@/pages/exercises/edit";
-import SessionPlannerPage from "@/pages/sessions/planner";
-import SessionDetailsPage from "@/pages/sessions/details";
-import SessionEditPage from "@/pages/sessions/edit";
-import MatchDetailsPage from "@/pages/matches/details";
-import MatchEditPage from "@/pages/matches/edit";
-import MatchesPage from "@/pages/matches";
-import DashboardPage from "@/pages/dashboard/index";
-import FavoritesPage from "@/pages/favorites";
-import TrainingPage from "@/pages/training";
-import { TrainingProvider } from "@/contexts/training-context";
-import { showVideoAnalysis } from "@/config/site";
-
+import ScrollToTop from "./components/scroll-to-top";
+const IndexPage = React.lazy(() => import("@/pages/index"));
+const ApiPage = React.lazy(() => import("@/pages/api"));
+const AboutPage = React.lazy(() => import("@/pages/about"));
+const ThankYouPage = React.lazy(() => import("@/pages/thank-you"));
+const GDPRPage = React.lazy(() => import("@/pages/gdpr"));
+const ExercisesPage = React.lazy(() => import("@/pages/exercises"));
+const ExerciseDetailsPage = React.lazy(() => import("@/pages/exercises/details"));
+const ExerciseEditPage = React.lazy(() => import("@/pages/exercises/edit"));
+const SessionPlannerPage = React.lazy(() => import("@/pages/sessions/planner"));
+const SessionDetailsPage = React.lazy(() => import("@/pages/sessions/details"));
+const SessionEditPage = React.lazy(() => import("@/pages/sessions/edit"));
+const MatchDetailsPage = React.lazy(() => import("@/pages/matches/details"));
+const MatchEditPage = React.lazy(() => import("@/pages/matches/edit"));
+const MatchesPage = React.lazy(() => import("@/pages/matches"));
+const DashboardPage = React.lazy(() => import("@/pages/dashboard/index"));
+const FavoritesPage = React.lazy(() => import("@/pages/favorites"));
+const TrainingPage = React.lazy(() => import("@/pages/training"));
 const PricingPage = React.lazy(() => import("@/pages/pricing/index"));
 const BlogPage = React.lazy(() => import("@/pages/blog"));
 const UsersAndPermissionsPage = React.lazy(() => import("@/pages/admin/users-and-permissions"));
 const AccountPageLazy = React.lazy(() => import("@/pages/account"));
+const PageNotFound = React.lazy(() => import("./pages/404").then(m => ({ default: m.PageNotFound })));
+const OfflineStatus = React.lazy(() => import("./components/offline-status").then(m => ({ default: m.OfflineStatus })));
+
+import { TrainingProvider } from "@/contexts/training-context";
+import { showVideoAnalysis } from "@/config/site";
+
+
+const PageWrapper = ({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    exit={{ opacity: 0, scale: 0.98, y: -10 }}
+    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+  >
+    {children}
+  </motion.div>
+);
 
 function App() {
   const { isBlocked, isLoading: userLoading, user, blockReason } = useUser();
   const { isLoading: authLoading, isAuthenticated } = useAuth();
+  const location = useLocation();
 
   // Mobile Redirection Logic (SEO & Auth0 fix)
   useEffect(() => {
@@ -96,85 +112,89 @@ function App() {
       <Suspense fallback={<SiteLoading />}>
         <TrainingProvider>
           <OfflineStatus />
+          <ScrollToTop />
           <UserSync />
           <UnifiedOnboarding />
-          <Routes>
-            <Route element={<IndexPage />} path="/" />
-            <Route
-              element={<AuthenticationGuard component={ApiPage} />}
-              path="/api"
-            />
-            <Route
-              element={<AuthenticationGuard component={PricingPage} />}
-              path="/pricing"
-            />
-            <Route
-              element={<AuthenticationGuard component={BlogPage} />}
-              path="/blog"
-            />
-            <Route element={<AboutPage />} path="/about" />
-            <Route element={<ThankYouPage />} path="/remerciements" />
-            <Route element={<PageNotFound />} path="*" />
-            {showVideoAnalysis && (
-              <>
-                <Route element={<ExercisesPage />} path="/exercises" />
-                <Route element={<TrainingPage />} path="/training" />
-              </>
-            )}
-            <Route element={<FavoritesPage />} path="/favorites" />
-            {showVideoAnalysis && (
-              <>
-                <Route
-                  element={<AuthenticationGuard component={ExerciseEditPage} />}
-                  path="/exercises/new"
-                />
-                <Route
-                  element={<AuthenticationGuard component={ExerciseEditPage} />}
-                  path="/exercises/:id/edit"
-                />
-                <Route
-                  element={
-                    <AuthenticationGuard component={ExerciseDetailsPage} />
-                  }
-                  path="/exercises/:id"
-                />
-              </>
-            )}
-            <Route element={<SessionPlannerPage />} path="/sessions" />
-            <Route
-              element={<AuthenticationGuard component={SessionEditPage} />}
-              path="/sessions/new"
-            />
-            <Route
-              element={<AuthenticationGuard component={SessionEditPage} />}
-              path="/sessions/:id/edit"
-            />
-            <Route
-              element={<AuthenticationGuard component={SessionDetailsPage} />}
-              path="/sessions/:id"
-            />
-            <Route element={<DashboardPage />} path="/dashboard" />
-            <Route element={<MatchesPage />} path="/matches" />
-            <Route
-              element={<AuthenticationGuard component={MatchEditPage} />}
-              path="/matches/new"
-            />
-            <Route
-              element={<AuthenticationGuard component={MatchEditPage} />}
-              path="/matches/:id/edit"
-            />
-            <Route element={<MatchDetailsPage />} path="/matches/:id" />
-            <Route
-              element={<AuthenticationGuard component={AccountPageLazy} />}
-              path="/account"
-            />
-            <Route
-              element={
-                <AuthenticationGuard component={UsersAndPermissionsPage} />
-              }
-              path="/admin/users"
-            />
-          </Routes>
+          <AnimatePresence mode="wait">
+            <Routes key={location.pathname} location={location}>
+              <Route element={<PageWrapper><IndexPage /></PageWrapper>} path="/" />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={ApiPage} /></PageWrapper>}
+                path="/api"
+              />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={PricingPage} /></PageWrapper>}
+                path="/pricing"
+              />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={BlogPage} /></PageWrapper>}
+                path="/blog"
+              />
+              <Route element={<PageWrapper><AboutPage /></PageWrapper>} path="/about" />
+              <Route element={<PageWrapper><ThankYouPage /></PageWrapper>} path="/remerciements" />
+              <Route element={<PageWrapper><GDPRPage /></PageWrapper>} path="/gdpr" />
+              <Route element={<PageWrapper><PageNotFound /></PageWrapper>} path="*" />
+              {showVideoAnalysis && (
+                <>
+                  <Route element={<PageWrapper><ExercisesPage /></PageWrapper>} path="/exercises" />
+                  <Route element={<PageWrapper><TrainingPage /></PageWrapper>} path="/training" />
+                </>
+              )}
+              <Route element={<PageWrapper><FavoritesPage /></PageWrapper>} path="/favorites" />
+              {showVideoAnalysis && (
+                <>
+                  <Route
+                    element={<PageWrapper><AuthenticationGuard component={ExerciseEditPage} /></PageWrapper>}
+                    path="/exercises/new"
+                  />
+                  <Route
+                    element={<PageWrapper><AuthenticationGuard component={ExerciseEditPage} /></PageWrapper>}
+                    path="/exercises/:id/edit"
+                  />
+                  <Route
+                    element={
+                      <PageWrapper><AuthenticationGuard component={ExerciseDetailsPage} /></PageWrapper>
+                    }
+                    path="/exercises/:id"
+                  />
+                </>
+              )}
+              <Route element={<PageWrapper><SessionPlannerPage /></PageWrapper>} path="/sessions" />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={SessionEditPage} /></PageWrapper>}
+                path="/sessions/new"
+              />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={SessionEditPage} /></PageWrapper>}
+                path="/sessions/:id/edit"
+              />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={SessionDetailsPage} /></PageWrapper>}
+                path="/sessions/:id"
+              />
+              <Route element={<PageWrapper><DashboardPage /></PageWrapper>} path="/dashboard" />
+              <Route element={<PageWrapper><MatchesPage /></PageWrapper>} path="/matches" />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={MatchEditPage} /></PageWrapper>}
+                path="/matches/new"
+              />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={MatchEditPage} /></PageWrapper>}
+                path="/matches/:id/edit"
+              />
+              <Route element={<PageWrapper><MatchDetailsPage /></PageWrapper>} path="/matches/:id" />
+              <Route
+                element={<PageWrapper><AuthenticationGuard component={AccountPageLazy} /></PageWrapper>}
+                path="/account"
+              />
+              <Route
+                element={
+                  <PageWrapper><AuthenticationGuard component={UsersAndPermissionsPage} /></PageWrapper>
+                }
+                path="/admin/users"
+              />
+            </Routes>
+          </AnimatePresence>
         </TrainingProvider>
       </Suspense>
     </ErrorBoundary>

@@ -36,7 +36,12 @@ export function useMatches(filters?: MatchFilters) {
       headers,
     });
 
-    if (!response.ok) throw new Error("Failed to fetch matches");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error || "Failed to fetch matches") as any;
+      error.status = response.status;
+      throw error;
+    }
 
     return response.json();
   };
@@ -204,7 +209,12 @@ export function useMatch(id: string | null) {
       headers,
     });
 
-    if (!response.ok) throw new Error("Failed to fetch match");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error || "Failed to fetch match") as any;
+      error.status = response.status;
+      throw error;
+    }
 
     return response.json();
   };
@@ -315,7 +325,12 @@ export function useIncomingRequests() {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!response.ok) throw new Error("Failed to fetch requests");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error || "Failed to fetch requests") as any;
+      error.status = response.status;
+      throw error;
+    }
 
     return response.json();
   };
@@ -345,7 +360,12 @@ export function useMyParticipations() {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!response.ok) throw new Error("Failed to fetch participations");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error || "Failed to fetch participations") as any;
+      error.status = response.status;
+      throw error;
+    }
 
     return response.json();
   };

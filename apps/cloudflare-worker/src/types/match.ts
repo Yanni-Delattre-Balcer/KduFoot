@@ -64,6 +64,16 @@ export interface Match {
     pairings?: TournamentPairing[];
 }
 
+export interface MatchRow extends Omit<Match, 'club' | 'contacts' | 'pairings'> {
+    club_name?: string;
+    club_city?: string;
+    club_zip?: string;
+    club_logo_url?: string;
+    club_address?: string;
+    club_latitude?: number;
+    club_longitude?: number;
+}
+
 export interface CreateMatchDto {
     club_id: string;
     type: 'match' | 'tournament';
@@ -128,4 +138,50 @@ export interface MatchFilters {
 
 export interface ContactMatchDto {
     message: string;
+}
+
+export interface ParticipationRequest extends MatchContact {
+    match_id: string;
+    match_type: 'match' | 'tournament';
+    category: string;
+    level?: string;
+    match_date: string;
+    match_time: string;
+    venue: 'Domicile' | 'Extérieur';
+    match_max_teams?: number;
+    accepted_count: number;
+    
+    // Requester info (GUEST)
+    requester_user_id?: string;
+    requester_firstname?: string;
+    requester_lastname?: string;
+    requester_category?: string;
+    requester_level?: string;
+    requester_pitch_type?: string;
+    requester_phone?: string;
+    requester_email?: string;
+    requester_stadium_address?: string;
+    requester_club_name?: string;
+    requester_club_logo?: string;
+    requester_city?: string;
+    requester_club_address?: string;
+    
+    // Host info (HOST)
+    host_club_name?: string;
+    host_club_logo?: string;
+    host_city?: string;
+    host_firstname?: string;
+    host_lastname?: string;
+    host_category?: string;
+    host_level?: string;
+    host_stadium_address?: string;
+    host_email?: string;
+    host_phone?: string;
+
+    request_status: 'pending' | 'accepted' | 'refused' | 'withdrawn';
+    match_status?: 'active' | 'found' | 'expired';
+    location_city?: string;
+    location_address?: string;
+    location_zip?: string;
+    match_pitch_type?: string;
 }

@@ -8,8 +8,10 @@ import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useSWRConfig } from "swr";
 
 import FootballClock from "../../components/football-clock";
+import { ErrorView } from "@/components/common/error-views";
 
 import { matchService } from "@/services/matches";
 import { useMatches, useMyParticipations } from "@/hooks/use-matches";
@@ -25,6 +27,7 @@ import { MatchListSkeleton } from "@/components/skeletons/match-skeleton";
 export default function SessionPlannerPage() {
   const { t, i18n } = useTranslation();
   const { getAccessTokenSilently } = useAuth0();
+  const { mutate: globalMutate } = useSWRConfig();
   const { user } = useUser();
   const [view, setView] = useState<"exercises" | "matches" | "tournaments">(
     showVideoAnalysis ? "exercises" : "matches",
@@ -288,9 +291,11 @@ export default function SessionPlannerPage() {
                 )}
 
                 {isErrorSessions && (
-                  <div className="text-danger p-4 rounded-xl bg-danger/10 border border-danger/20">
-                    {t("error.loading_sessions")}
-                  </div>
+                  <ErrorView 
+                    status={isErrorSessions.status || 500} 
+                    message={isErrorSessions.message} 
+                    onRetry={() => globalMutate((key: any) => typeof key === "string" && key.includes("/api/sessions"))}
+                  />
                 )}
 
                 {sessions.length === 0 && !isErrorSessions && (

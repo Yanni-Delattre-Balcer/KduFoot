@@ -52,6 +52,7 @@ export default function TournamentForm({
     category: Category.SENIORS,
     level: Level.DEPARTEMENTAL_1,
     format: "11v11" as any,
+    type: "tournament" as const,
     venue: "Domicile" as any,
     max_teams: "16",
     registration_fee: "0",
@@ -107,6 +108,7 @@ export default function TournamentForm({
         location_city: initialData.location_city || "",
         pitch_type: initialData.pitch_type || "Herbe",
         jersey_color: initialData.jersey_color || "",
+        type: "tournament" as const,
       });
     } else if (user) {
       setFormData((prev) => ({
@@ -130,6 +132,7 @@ export default function TournamentForm({
         level: (user.level as Level) || prev.level,
         pitch_type: (user.pitch_type as PitchType) || prev.pitch_type,
         jersey_color: user.home_jersey_color || prev.jersey_color || "",
+        type: "tournament" as const,
       }));
     }
   }, [user, initialData]);
@@ -285,7 +288,7 @@ export default function TournamentForm({
       if (onSuccess) onSuccess();
     } catch (error: any) {
       addToast({
-        title: t("error"),
+        title: t("error.title"),
         description: error.message || t("error.save_failed"),
         color: "danger",
       });

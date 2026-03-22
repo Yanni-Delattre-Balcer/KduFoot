@@ -27,9 +27,12 @@ import { JWTPayload } from "jose";
 
 import { checkPermissions } from "../auth0";
 import { Env } from "../types/env";
+import { ErrorHandler } from "../utils/error-handler";
+
+export type AuthenticatedRequest = Request & { params: Record<string, string>; user?: JWTPayload };
 
 type RouteHandler = (
-	request: Request & { params: Record<string, string>; user?: any },
+	request: AuthenticatedRequest,
 	env: Env,
 	ctx: ExecutionContext,
 ) => Promise<Response>;
@@ -108,64 +111,41 @@ export class Router {
 		});
 	}
 
-	/**
-	 * Compile a route path supporting Rocket-style parameters:
-	 * - <name> -> :name
-	 * - <name..> -> :name* (catch-all)
-	 *
-	 * Returns an object with an optional URLPattern or null if not necessary.
-	 */
 	private compileRoute(path: string): { compiled?: URLPattern | null } {
-		// Quick detection: only compile if the route contains '<' and '>'
 		if (!path.includes("<") || !path.includes(">")) return { compiled: null };
 
-		// Convert `<name..>` to `:name*` and `<name>` to `:name`
-		// Keep it simple (strings only) per choice
 		const converted = path
 			.replace(/<([a-zA-Z0-9_]+)\.\.>/g, ":$1*")
 			.replace(/<([a-zA-Z0-9_]+)>/g, ":$1");
 
 		try {
 			const pattern = new URLPattern({ pathname: converted });
-
 			return { compiled: pattern };
 		} catch (e) {
-			// If URLPattern is not available or pattern invalid, fallback to null
-			// (caller will use the legacy matchPath)
-			// eslint-disable-next-line no-console
 			console.warn("Failed to compile route pattern:", converted, e);
-
 			return { compiled: null };
 		}
 	}
 
 	private addSecurityHeaders(response: Response): Response {
-		// Do not add security headers to WebSocket upgrade responses (101 Switching Protocols)
-		// as it would break the connection.
 		if (response.status === 101) return response;
 
 		const newHeaders = new Headers(response.headers);
+		if (!newHeaders.has("Cache-Control")) {
+			newHeaders.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+		}
 		newHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 		newHeaders.set("X-Frame-Options", "DENY");
 		newHeaders.set("X-Content-Type-Options", "nosniff");
 		newHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
 		newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+		newHeaders.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.auth0.com https://*.googleusercontent.com; connect-src 'self' https://*.auth0.com https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; upgrade-insecure-requests;");
 		
 		return new Response(response.body, { 
 			status: response.status,
 			statusText: response.statusText,
 			headers: newHeaders 
 		});
-	}
-
-	async handleUnauthorizedRequest(): Promise<Response> {
-		return this.addSecurityHeaders(new Response(
-			JSON.stringify({ success: false, error: "Unauthorized" }),
-			{
-				status: 403,
-				headers: { "Content-Type": "application/json" },
-			},
-		));
 	}
 
 	async handleRequest(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -182,16 +162,31 @@ export class Router {
 		const url = new URL(request.url);
 		const { pathname } = url;
 
-		// Rate limiting (uses binding RATE_LIMITER if present)
 		try {
 			const ip = request.headers.get("CF-Connecting-IP") || "unknown";
 			const userId = this.jwtPayload.sub || "anonymous";
 			const endpoint = pathname;
 			const rateLimitKey = `${ip}:${userId}:${endpoint}`;
 
+			const isSensitiveParams = pathname.startsWith("/api/contact") || pathname.startsWith("/api/register") || pathname.startsWith("/api/auth");
+			if (isSensitiveParams && env.KV_CACHE) {
+				const strictKey = `strict_rl:${ip}:${pathname}`;
+				const currentStr = await env.KV_CACHE.get(strictKey);
+				const current = currentStr ? parseInt(currentStr, 10) : 0;
+				if (current >= 5) {
+					return this.addSecurityHeaders(new Response(
+						JSON.stringify({ error: `429 Too Many Requests - Strict rate limit exceeded for ${pathname}` }),
+						{ 
+							status: 429,
+							headers: { ...this.corsHeaders, "Retry-After": "300" }
+						}
+					));
+				}
+				await env.KV_CACHE.put(strictKey, (current + 1).toString(), { expirationTtl: 300 });
+			}
+
 			if (env.RATE_LIMITER) {
 				const { success } = await env.RATE_LIMITER.limit({ key: rateLimitKey });
-
 				if (!success) {
 					return this.addSecurityHeaders(new Response(
 						JSON.stringify(`429 Failure – rate limit exceeded for ${pathname}`),
@@ -209,9 +204,7 @@ export class Router {
 				}
 			}
 		} catch (e) {
-			// eslint-disable-next-line no-console
 			console.error("Rate limiter error:", e);
-			// ignore rate limiter errors and continue
 		}
 
 		for (const route of this.routes) {
@@ -219,14 +212,11 @@ export class Router {
 
 			let match: Record<string, string> | null = null;
 
-			// If we have a compiled URLPattern, use it (supports Rocket-style <name> syntax)
 			if (route.compiled) {
 				try {
 					const urlObj = new URL(request.url);
 					const res = route.compiled.exec(urlObj);
-
 					if (res && res.pathname && res.pathname.groups) {
-						// Convert groups (may include undefined entries) to strings
 						for (const [k, v] of Object.entries(res.pathname.groups)) {
 							if (v !== undefined) {
 								(match || (match = {}))[k] = v;
@@ -234,13 +224,10 @@ export class Router {
 						}
 					}
 				} catch (e) {
-					// eslint-disable-next-line no-console
 					console.warn("Error matching URLPattern for route:", route.path, e);
-					// ignore URLPattern errors and fallback to legacy matching
 				}
 			}
 
-			// Fallback to legacy matching if no match from URLPattern
 			if (!match) {
 				match = this.matchPath(route.path, pathname);
 			}
@@ -249,31 +236,12 @@ export class Router {
 
 			if (route.permission !== undefined) {
 				if (!request.headers.has("Authorization")) {
-					return this.addSecurityHeaders(new Response(
-						JSON.stringify({
-							success: false,
-							error: "Authentication required",
-						}),
-						{
-							status: 401,
-							headers: { ...this.corsHeaders },
-						},
-					));
+					return ErrorHandler.unauthorized(this.corsHeaders);
 				}
 
 				const token = request.headers.get("Authorization")?.split(" ")[1];
-
 				if (!token) {
-					return this.addSecurityHeaders(new Response(
-						JSON.stringify({
-							success: false,
-							error: "Invalid authorization header",
-						}),
-						{
-							status: 401,
-							headers: { ...this.corsHeaders },
-						},
-					));
+					return ErrorHandler.unauthorized(this.corsHeaders);
 				}
 
 				const { access, payload, permissions } = await checkPermissions(
@@ -286,21 +254,11 @@ export class Router {
 				this.jwtPayload = payload;
 
 				if (!access) {
-					return this.addSecurityHeaders(new Response(
-						JSON.stringify({
-							success: false,
-							error: "Insufficient permissions",
-						}),
-						{
-							status: 403,
-							headers: { ...this.corsHeaders },
-						},
-					));
+					return ErrorHandler.forbidden(this.corsHeaders);
 				}
 
-				(request as any).user = payload;
+				(request as Request & { user?: JWTPayload }).user = payload;
 
-				// GLOBAL GUARD: Check if user is blocked in the D1 database
 				const userId = payload.sub;
 				if (userId) {
 					try {
@@ -320,46 +278,36 @@ export class Router {
 							));
 						}
 					} catch (e) {
-						// eslint-disable-next-line no-console
 						console.error("Failed to check block status:", e);
-						// Continue if DB check fails to avoid total lockout on DB transient issues
 					}
 				}
 			}
 
-			(request as any).params = match;
+			(request as Request & { params: Record<string, string> }).params = match;
 
-				try {
-					const response = await route.handler(
-						request as Request & { params: Record<string, string>; user?: any },
-						env,
-						ctx,
-					);
-					return this.addSecurityHeaders(response);
-				} catch (error: any) {
-					// eslint-disable-next-line no-console
-					console.error("Route handler error:", error);
-
-					return this.addSecurityHeaders(new Response(
-						JSON.stringify({
-							success: false,
-							error: "Internal server error"
-						}),
-						{
-							status: 500,
-							headers: { ...this.corsHeaders },
-						},
-					));
-				}
+			try {
+				const response = await route.handler(
+					request as Request & { params: Record<string, string>; user?: JWTPayload },
+					env,
+					ctx,
+				);
+				return this.addSecurityHeaders(response);
+			} catch (error: any) {
+				return ErrorHandler.handle(error, this.corsHeaders);
 			}
+		}
 
-			return this.addSecurityHeaders(new Response(
-				JSON.stringify({ success: false, error: "Not found" }),
-				{
-					status: 404,
-					headers: { ...this.corsHeaders },
-				},
-			));
+		return Response.json(
+			{ success: false, error: "Route non trouvée" },
+			{ 
+				status: 404, 
+				headers: { 
+					...this.corsHeaders,
+					"Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'; sandbox",
+					"X-Content-Type-Options": "nosniff"
+				} 
+			},
+		);
 	}
 
 	private matchPath(
@@ -381,7 +329,6 @@ export class Router {
 
 			if (routePart.startsWith(":")) {
 				const paramName = routePart.slice(1);
-
 				params[paramName] = pathPart;
 				continue;
 			}

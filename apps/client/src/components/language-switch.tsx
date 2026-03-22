@@ -167,7 +167,7 @@ export const LanguageSwitch: FC<LanguageSwitchProps> = ({
               return (
                 <DropdownItem
                   key={languageIdentifier.code}
-                  aria-label={`${t("language")}: ${languageIdentifier}`}
+                  aria-label={`${t("language")}: ${languageIdentifier.nativeName}`}
                   aria-selected={isSelected}
                 >
                   <button

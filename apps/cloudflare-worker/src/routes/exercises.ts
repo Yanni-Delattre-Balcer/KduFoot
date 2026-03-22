@@ -60,15 +60,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
  *       403:
  *         description: Forbidden - Insufficient permissions.
  */
-    router.get('/api/exercises', async (request: Request) => {
-        /**
-         * Before processing the request, we check if the user has the required permission.
-         * Permissions are often called "Scopes" in OAuth2/Auth0.
-         */
-        const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_READ);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        }
+    router.get('/api/exercises', async (request, env) => {
 
         const url = new URL(request.url);
         const filters = {
@@ -82,8 +74,14 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         };
 
         const result = await exerciseService.search(filters);
-        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-    });
+        return Response.json({ success: true, ...result }, { 
+            headers: { 
+                ...router.corsHeaders, 
+                "Content-Type": "application/json",
+                "Cache-Control": "public, s-maxage=60, stale-while-revalidate=600"
+            } 
+        });
+    }, Permission.EXERCISES_READ);
 
     /**
  * @openapi
@@ -118,20 +116,34 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
  *       403:
  *         description: Forbidden - Access denied.
  */
-    router.get('/api/exercises/<id>', async (request: Request) => {
-        const params = (request as any).params as { id: string };
-        const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_READ);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
+    router.get('/api/exercises/<id>', async (request, env) => {
+        const { id } = request.params;
+
+        const cacheKey = `exercise:${id}`;
+        if (env.KV_CACHE) {
+            const cached = await env.KV_CACHE.get(cacheKey);
+            if (cached) {
+                return Response.json({ success: true, exercise: JSON.parse(cached), cached: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            }
         }
 
-        const exercise = await exerciseService.getById(params.id);
+        const exercise = await exerciseService.getById(id);
         if (!exercise) {
             return Response.json({ success: false, error: 'Exercise not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
 
-        return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-    });
+        if (env.KV_CACHE) {
+            await env.KV_CACHE.put(cacheKey, JSON.stringify(exercise), { expirationTtl: 3600 });
+        }
+
+        return Response.json({ success: true, exercise }, { 
+            headers: { 
+                ...router.corsHeaders, 
+                "Content-Type": "application/json",
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400"
+            } 
+        });
+    }, Permission.EXERCISES_READ);
 
     /**
  * @openapi
@@ -169,22 +181,8 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
  *       500:
  *         description: Internal Server Error - Failed to save the record.
  */
-    router.post('/api/exercises', async (request: Request) => {
-        const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_CREATE);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7); // Remove "Bearer " prefix
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-
-        /**
-         * Auth0 provides a 'sub' (subject) which is a unique string for the user.
-         * However, our database (D1) uses its own internal UUIDs for relational integrity.
-         * We must look up our internal ID using the Auth0 'sub'.
-         */
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+    router.post('/api/exercises', async (request, env) => {
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
@@ -197,7 +195,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         } catch (e: any) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.EXERCISES_CREATE);
 
     /**
      * @openapi
@@ -234,17 +232,9 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
      *       500:
      *         description: Internal Server Error - Update failed.
      */
-    router.put('/api/exercises/<id>', async (request: Request) => {
-        const params = (request as any).params as { id: string };
-        const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_UPDATE);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+    router.put('/api/exercises/<id>', async (request, env) => {
+        const { id } = request.params;
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
         }
@@ -252,14 +242,14 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         const dto = await request.json() as UpdateExerciseDto;
 
         try {
-            const exercise = await exerciseService.update(params.id, dbUser.id, dto);
+            const exercise = await exerciseService.update(id, dbUser.id, dto);
             if (!exercise) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.EXERCISES_UPDATE);
 
     /**
      * @openapi
@@ -287,28 +277,20 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
      *       404:
      *         description: Not Found - Exercise identifier invalid.
      */
-    router.delete('/api/exercises/<id>', async (request: Request) => {
-        const params = (request as any).params as { id: string };
-        const permissionCheck = await checkPermission(request, env, Permission.EXERCISES_DELETE);
-        if (!permissionCheck.hasPermission) {
-            return Response.json({ success: false, error: permissionCheck.reason }, { status: permissionCheck.statusCode || 403 });
-        }
-
-        const authHeader = request.headers.get('Authorization')!;
-        const token = authHeader.substring(7);
-        const payload = typeof permissionCheck !== 'undefined' ? permissionCheck.payload : (request as any).user;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(payload.sub).first<{ id: string }>();
+    router.delete('/api/exercises/<id>', async (request, env) => {
+        const { id } = request.params;
+        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
         }
 
         try {
-            const success = await exerciseService.delete(params.id, dbUser.id);
+            const success = await exerciseService.delete(id, dbUser.id);
             if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: any) {
             if (e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
-    });
+    }, Permission.EXERCISES_DELETE);
 };

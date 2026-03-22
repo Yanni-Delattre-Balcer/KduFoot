@@ -27,7 +27,12 @@ export function useSessions(filters?: SessionFilters) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!response.ok) throw new Error("Failed to fetch sessions");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error || "Failed to fetch sessions") as any;
+      error.status = response.status;
+      throw error;
+    }
 
     return response.json();
   };
@@ -108,7 +113,12 @@ export function useSession(id: string | null) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!response.ok) throw new Error("Failed to fetch session");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error || "Failed to fetch session") as any;
+      error.status = response.status;
+      throw error;
+    }
 
     return response.json();
   };

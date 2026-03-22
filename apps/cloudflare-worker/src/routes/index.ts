@@ -33,6 +33,8 @@ import { setupClubRoutes } from "./clubs";
 import { setupExerciseRoutes } from "./exercises";
 import { setupSessionRoutes } from "./sessions";
 import { setupMatchRoutes } from "./matches";
+import { setupTournamentRoutes } from "./tournaments";
+import { setupParticipationRoutes } from "./participations";
 import { setupAdminRoutes } from "./admin";
 import { setupCalendarRoutes } from "./calendar";
 import { Env } from "../types/env";
@@ -344,7 +346,9 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 	setupClubRoutes(router, env);
 	setupExerciseRoutes(router, env);
 	setupSessionRoutes(router, env);
+	setupParticipationRoutes(router, env, ctx); // Strategic placement before dynamic /api/matches/<id>
 	setupMatchRoutes(router, env, ctx);
+	setupTournamentRoutes(router, env, ctx);
 	setupAdminRoutes(router, env, ctx);
 	setupCalendarRoutes(router, env);
 	// Preserve the original root response for backwards compatibility

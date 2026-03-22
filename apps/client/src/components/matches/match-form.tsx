@@ -52,6 +52,7 @@ export default function MatchForm({
     category: Category.SENIORS,
     level: Level.DEPARTEMENTAL_1,
     format: "11v11",
+    type: "match" as const,
     venue: "Domicile",
     match_date: new Date(
       new Date().getTime() - new Date().getTimezoneOffset() * 60000,
@@ -100,6 +101,7 @@ export default function MatchForm({
         location_zip: initialData.location_zip || "",
         pitch_type: initialData.pitch_type,
         jersey_color: initialData.jersey_color || "",
+        type: "match" as const,
       });
     } else if (user) {
       setFormData((prev) => ({
@@ -128,6 +130,7 @@ export default function MatchForm({
             : prev.venue === "Extérieur"
               ? user.away_jersey_color || ""
               : "",
+        type: "match" as const,
       }));
     }
   }, [initialData, user]);
@@ -272,6 +275,7 @@ export default function MatchForm({
     try {
       const payload = {
         ...formData,
+        type: "match" as const,
         notes: `Genre: ${gender}\n${formData.notes || ""}`.trim(),
       };
 
@@ -294,7 +298,7 @@ export default function MatchForm({
       if (onSuccess) onSuccess();
     } catch (error: any) {
       addToast({
-        title: t("error"),
+        title: t("error.title"),
         description: error.message || t("error.save_failed"),
         color: "danger",
       });

@@ -77,9 +77,10 @@ export const CookieConsent: React.FC = () => {
         },
       }}
       placement="bottom"
+      aria-labelledby="cookie-consent-title"
     >
       <ModalContent>
-        <ModalHeader className="text-lg font-semibold text-default-900">
+        <ModalHeader id="cookie-consent-title" className="text-lg font-semibold text-default-900">
           {t("cookie-consent-title")}
         </ModalHeader>
         <ModalBody className="text-small font-normal text-default-700">

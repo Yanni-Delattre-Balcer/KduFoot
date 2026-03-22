@@ -133,7 +133,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <h2 className="text-2xl font-black text-white tracking-tighter italic leading-tight">
+                  <h2 id="pwa-modal-title" className="text-2xl font-black text-white tracking-tighter italic leading-tight">
                     Installer KduFoot sur votre iPhone
                   </h2>
                   <p className="text-[10px] text-primary font-black tracking-[0.2em]">
@@ -259,7 +259,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
           {showPCHint && (
             <Card className="bg-zinc-900 border-2 border-white/10 w-full p-8 space-y-6 shadow-2xl">
               <div className="flex flex-col items-center text-center gap-4">
-                <h2 className="text-xl font-black text-white italic">
+                <h2 id="pwa-modal-title" className="text-xl font-black text-white italic">
                   Installation manuelle
                 </h2>
                 <p className="text-sm text-zinc-400">

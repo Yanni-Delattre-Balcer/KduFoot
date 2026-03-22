@@ -41,7 +41,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
         color: "success",
       });
     } catch {
-      addToast({ title: "Erreur", description: "Impossible de copier le lien.", color: "danger" });
+      addToast({ title: t("error.title"), description: "Impossible de copier le lien.", color: "danger" });
     }
   };
 

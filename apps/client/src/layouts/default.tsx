@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
 import { jwtVerify, JWTPayload } from "jose";
 import { Mail, Handshake } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
@@ -108,7 +109,10 @@ export default function DefaultLayout({
             </div>
           </div>
 
-          <div className="pt-4 pb-12 sm:pb-0 border-t border-default-100 w-full text-center">
+          <div className="pt-4 pb-12 sm:pb-0 border-t border-default-100 w-full flex flex-col items-center gap-2 text-center">
+            <Link to="/gdpr" className="text-xs text-default-500 hover:text-primary transition-colors underline-offset-4 hover:underline">
+              Politique de Confidentialité & RGPD
+            </Link>
             <p className="text-xs sm:text-sm text-default-400 tracking-widest font-bold opacity-50">
               © 2026 KduFoot
             </p>

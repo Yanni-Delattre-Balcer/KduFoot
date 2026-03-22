@@ -1,32 +1,23 @@
 import { Router } from './router';
 import { Env } from '../types/env';
-import { MatchService } from '../services/match.service';
+import { MatchSearchService } from '../services/match-search.service';
+import { ParticipationService } from '../services/participation.service';
 import { UserService } from '../services/user.service';
+import { ParticipationRequest } from '../types/match';
 
 export const setupCalendarRoutes = (router: Router, env: Env) => {
     /**
      * @openapi
      * /api/calendar/<token>.ics:
      *   get:
-     *     tags:
-     *       - Calendar
+     *     tags: [Calendar]
      *     summary: Fetch iCalendar feed for a user
-     *     parameters:
-     *       - name: token
-     *         in: path
-     *         required: true
-     *         schema:
-     *           type: string
-     *     responses:
-     *       200:
-     *         description: iCalendar file
-     *       404:
-     *         description: Invalid token
      */
     router.get('/api/calendar/<token>.ics', async (request, env) => {
-        const { token } = request.params;
+        const { token } = (request.params as { token: string });
         const userService = new UserService(env.DB);
-        const matchService = new MatchService(env.DB);
+        const searchService = new MatchSearchService(env.DB);
+        const participationService = new ParticipationService(env.DB);
 
         const user = await userService.getUserByCalendarToken(token);
         if (!user) {
@@ -36,21 +27,19 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
         // Log the sync activity
         await userService.updateLastCalendarSyncAt(user.id);
 
-
         // Fetch matches (organized or as accepted participant)
-        // Note: For organized matches, we use search.
         const [incoming, participations, owned] = await Promise.all([
-            matchService.getIncomingRequests(user.id),
-            matchService.getMyParticipations(user.id),
-            matchService.search({ ownerId: user.id })
+            participationService.getIncomingRequests(user.id),
+            participationService.getMyParticipations(user.id),
+            searchService.search({ ownerId: user.id })
         ]);
 
         // Match items to include in calendar
         const matchMap = new Map<string, any>();
 
         // 1. Confirmed matches / teams where I am the HOST
-        incoming.forEach(r => {
-            if (r.status === 'accepted' || r.request_status === 'accepted') {
+        incoming.forEach((r: ParticipationRequest) => {
+            if (r.status === 'accepted') {
                 matchMap.set(r.match_id, {
                     ...r,
                     opponentName: r.requester_club_name
@@ -59,9 +48,9 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
         });
 
         // 2. Confirmed matches / teams where I am the GUEST
-        participations.forEach(p => {
-            if (p.status === 'accepted' || p.request_status === 'accepted') {
-                matchMap.set(p.match_id || p.id, {
+        participations.forEach((p: ParticipationRequest) => {
+            if (p.status === 'accepted') {
+                matchMap.set(p.match_id, {
                     ...p,
                     opponentName: p.host_club_name
                 });
@@ -71,7 +60,6 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
         // 3. Tournaments I ORGANIZED (always visible)
         owned.data.forEach(m => {
             if (m.type === 'tournament') {
-                // Don't overwrite if already set via participation logic (though unlikely to be host and guest)
                 if (!matchMap.has(m.id)) {
                     matchMap.set(m.id, m);
                 }
@@ -83,14 +71,9 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             if (isCancelled) return false;
 
             const type = m.match_type || m.type || 'match';
-            
-            // For tournaments, we show them as soon as they are created
             if (type === 'tournament') return true;
 
-            // For matches, we only show them if they are confirmed
-            // At this point, everything in the map for 'match' type should be confirmed
-            // because of the filters above, but let's be safe.
-            const status = m.match_status || m.status || m.request_status;
+            const status = m.match_status || m.status;
             return status === 'found' || status === 'accepted';
         });
 
@@ -115,7 +98,6 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             const level = item.level || item.match_level || '';
             const venue = item.venue || 'N/A';
 
-            // --- Location & Deduplication ---
             let baseAddress = venue === 'Domicile'
                 ? (item.stadium_address || item.location_address || '')
                 : (item.location_address || item.stadium_address || '');
@@ -127,9 +109,6 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 location += (location ? ', ' : '') + city;
             }
 
-            // --- Titre ---
-            // Tournoi → "Kdufoot : [nom du tournoi]"
-            // Match  → "Kdufoot : Match contre [nom du club adverse]"
             let summary = '';
             if (typeRaw === 'tournament') {
                 const tournamentName = item.tournament_name || item.match_title || item.name || 'Tournoi';
@@ -139,16 +118,11 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 summary = `Kdufoot : Match contre ${opponentName}`;
             }
 
-            // --- Lien GPS Google Maps ---
             const encodedAddress = encodeURIComponent(location || 'France');
             const gpsLink = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
-
-            // --- Lien Kdufoot ---
             const kduFootUrl = 'https://kdufoot.com';
             const matchDetailUrl = `${kduFootUrl}/matches/${item.id || item.match_id}`;
 
-            // --- Description enrichie (Plain text & HTML) ---
-            // Plain text description: avoid raw URLs where possible, but provide the GPS link separately for compatibility
             const descLines = [
                 `Type : ${typeLabel}`,
                 `Catégorie : ${category || 'N/A'}`,
@@ -157,7 +131,6 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 `Position : ${venue}`,
             ];
             
-            // Only add GPS link if location doesn't seem to contain an address (basic check)
             if (!location || location.trim() === 'N/A' || location.trim() === '') {
                 descLines.push(`Lien GPS : ${gpsLink}`);
             }
@@ -178,18 +151,15 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 '</body></html>'
             ].join('');
 
-            // --- Dates ---
             const dateParts = date.split('-');
             const timeParts = time.split(':');
             const dtStart = `${dateParts.join('')}T${timeParts.join('')}00`;
 
             let dtEnd = '';
             if (typeRaw === 'tournament' && item.match_end_time) {
-                // Tournois : utiliser l'heure de fin réelle
                 const endTimeParts = item.match_end_time.split(':');
                 dtEnd = `${dateParts.join('')}T${endTimeParts.join('')}00`;
             } else {
-                // Matchs : durée fixe de 2 heures
                 const startHour = parseInt(timeParts[0]);
                 const startMin = parseInt(timeParts[1]);
                 const endDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]), startHour + 2, startMin);
@@ -203,7 +173,6 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
                 dtEnd = `${endYear}${endMonth}${endDay}T${endH}${endM}00`;
             }
 
-            // UID stable = pas de doublons même si on re-synchronise
             const uid = `match-${item.id || item.match_id}@kdufoot.com`;
 
             ics.push(

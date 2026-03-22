@@ -54,7 +54,7 @@ export interface TournamentPairing {
   updated_at: string;
 }
 
-export type Format = "11v11" | "8v8" | "5v5" | "Futsal";
+export type Format = "11v11" | "8v8" | "7v7" | "5v5" | "Futsal";
 export type Venue = "Domicile" | "Extérieur";
 export type PitchType =
   | "Herbe"

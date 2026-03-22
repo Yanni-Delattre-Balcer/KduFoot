@@ -198,12 +198,27 @@ export default defineConfig(({ mode }) => {
               }
             },
             {
+              // Cache exercises for offline training
+              urlPattern: /\/api\/exercises*/i,
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'exercises-api-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
               // Never cache Auth0 domain requests
               urlPattern: /^https:\/\/.*\.auth0\.com\/.*/i,
               handler: 'NetworkOnly',
             },
             {
-              // Never cache API requests
+              // Never cache other API requests
               urlPattern: /^.*\/api\/.*/i,
               handler: 'NetworkOnly',
             }

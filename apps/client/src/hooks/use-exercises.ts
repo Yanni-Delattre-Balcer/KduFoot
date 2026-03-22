@@ -32,7 +32,12 @@ export function useExercises(filters?: ExerciseFilters) {
       headers,
     });
 
-    if (!response.ok) throw new Error("Failed to fetch exercises");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error || "Failed to fetch exercises") as any;
+      error.status = response.status;
+      throw error;
+    }
 
     return response.json();
   };
@@ -115,7 +120,12 @@ export function useExercise(id: string | null) {
       headers,
     });
 
-    if (!response.ok) throw new Error("Failed to fetch exercise");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const error = new Error(errorData.error || "Failed to fetch exercise") as any;
+      error.status = response.status;
+      throw error;
+    }
 
     return response.json();
   };
