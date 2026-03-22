@@ -161,7 +161,7 @@ export function useWebSocketSync(
                     isBanned: true,
                     reason: payload.data?.reason || payload.message,
                   });
-                break;
+                return;
               case "USER_UNBANNED":
                 color = "success";
                 title = "Compte Débloqué";

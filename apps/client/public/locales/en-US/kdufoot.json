@@ -153,7 +153,9 @@
       "cancel_duel": "Cancel duel",
       "edit_ad": "Edit announcement",
       "close_tournament": "Close tournament",
-      "cancel_request": "🗑️ Cancel my request"
+      "cancel_request": "🗑️ Cancel my request",
+      "delete_ad": "Delete Ad",
+      "block_user": "Block User"
     },
     "status": {
       "masked": "MASKED CLUB",

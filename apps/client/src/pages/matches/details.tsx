@@ -42,7 +42,7 @@ const InfoItem = ({
   icon: string;
   label: string;
   value: string;
-  color: "primary" | "secondary" | "success" | "warning" | "danger" | "default";
+  color: "primary" | "secondary" | "success" | "warning" | "danger" | "default" | "info" | "violet" | "orange" | "cyan";
   highlight?: boolean;
   showPulse?: boolean;
 }) => {
@@ -60,6 +60,10 @@ const InfoItem = ({
       ? `bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] ${showPulse ? "animate-pulse" : ""}`
       : "bg-amber-500/10 text-amber-400 border-amber-500/20",
     danger: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    info: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+    violet: "bg-violet-500/10 text-violet-400 border-violet-500/20",
+    orange: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    cyan: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
     default: highlight
       ? `bg-rose-500/20 text-rose-400 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] ${showPulse ? "animate-pulse" : ""}`
       : "bg-zinc-500/20 text-zinc-400 border-zinc-500/30",
@@ -148,6 +152,19 @@ export default function MatchDetailsPage() {
   // Red Alert Detection Logic
   const { participations, markAsRead } = useMyParticipations();
   const participation = participations?.find((p) => p.match_id === id);
+  const isOwner = user?.id === match?.owner_id;
+  const isModified = !isOwner && participation?.notification_state === 1;
+
+  // Parse Gender and clean notes early for highlights and UI
+  const genderMatch = match?.notes?.match(/Genre: (.*)(\n|$)/);
+  let gender = genderMatch ? genderMatch[1].trim() : "Mixte";
+  if (gender.startsWith("enums.gender.")) {
+    gender = gender.replace("enums.gender.", "");
+  }
+  if (!gender || gender.trim() === "" || gender === "Non spécifié")
+    gender = "Mixte";
+
+  const cleanNotes = match?.notes?.replace(/Genre: .*(\n|$)/, "").trim();
 
   const [knownData, setKnownData] = useState<Record<string, any>>(() => {
     try {
@@ -167,8 +184,7 @@ export default function MatchDetailsPage() {
   };
 
   const matchKnownData = knownData[id || ""];
-  const isOwner = user?.id === match?.owner_id;
-  const isModified = !isOwner && participation?.notification_state === 1;
+
 
   const highlights = {
     date:
@@ -196,6 +212,8 @@ export default function MatchDetailsPage() {
       isDifferent(match?.category, matchKnownData.category),
     level:
       isModified && !!matchKnownData && isDifferent(match?.level, matchKnownData.level),
+    gender:
+      isModified && !!matchKnownData && isDifferent(gender, matchKnownData.gender),
   };
 
   const [showPulse, setShowPulse] = useState(true);
@@ -389,19 +407,6 @@ export default function MatchDetailsPage() {
     }
   };
 
-  // Parse Gender from notes if present
-  const genderMatch = match.notes?.match(/Genre: (.*)(\n|$)/);
-  // Default to 'Mixte' if not specified or explicitly 'Non spécifié'
-  let gender = genderMatch ? genderMatch[1].trim() : "Mixte";
-
-  // Remove technical prefix if present (e.g. from legacy data or misformatted inputs)
-  if (gender.startsWith("enums.gender.")) {
-    gender = gender.replace("enums.gender.", "");
-  }
-  // Final fallback/normalization
-  if (!gender || gender.trim() === "" || gender === "Non spécifié")
-    gender = "Mixte";
-  const cleanNotes = match.notes?.replace(/Genre: .*(\n|$)/, "").trim();
 
   return (
     <DefaultLayout>
@@ -692,7 +697,7 @@ export default function MatchDetailsPage() {
                 <InfoItem
                   color="success"
                   highlight={highlights.pitch}
-                  icon="🏟️"
+                  icon="🌱"
                   label={t("details.labels.pitch")}
                   showPulse={showPulse}
                   value={
@@ -710,36 +715,42 @@ export default function MatchDetailsPage() {
                   value={t(`enums.format.${match.format}`, match.format)}
                 />
                 <InfoItem
-                  color="primary"
+                  color="orange"
                   highlight={highlights.date}
                   icon="📅"
                   label={t("details.labels.date")}
                   showPulse={showPulse}
                   value={new Date(match.match_date).toLocaleDateString(
                     i18n.language,
-                    { day: "numeric", month: "long" },
+                    {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                    },
                   )}
                 />
                 <InfoItem
-                  color="primary"
+                  color="info"
                   highlight={highlights.time}
-                  icon="🕒"
+                  icon="⏰"
                   label={t("details.labels.time")}
                   showPulse={showPulse}
                   value={`${formatTime(match.match_time)}${match.match_end_time ? ` - ${formatTime(match.match_end_time)}` : ""}`}
                 />
                 <InfoItem
-                  color="secondary"
+                  color="violet"
                   highlight={highlights.venue}
-                  icon={match.venue === "Domicile" ? "🏠" : "🚗"}
+                  icon="📍"
                   label={t("details.labels.venue")}
                   showPulse={showPulse}
                   value={t(`enums.venue.${match.venue}`)}
                 />
                 <InfoItem
-                  color="default"
-                  icon="⚤"
+                  color="cyan"
+                  highlight={highlights.gender}
+                  icon="🚻"
                   label={t("details.labels.gender")}
+                  showPulse={showPulse}
                   value={t(`enums.gender.${gender}`)}
                 />
               </div>

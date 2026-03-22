@@ -164,7 +164,9 @@
       "cancel_duel": "Annuler le duel",
       "edit_ad": "Modifier l'annonce",
       "close_tournament": "Fermer le tournoi",
-      "cancel_request": "🗑️ Annuler ma demande"
+      "cancel_request": "🗑️ Annuler ma demande",
+      "delete_ad": "Supprimer l'annonce",
+      "block_user": "Bloquer l'utilisateur"
     },
     "status": {
       "masked": "CLUB MASQUÉ",
