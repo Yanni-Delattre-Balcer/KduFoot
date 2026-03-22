@@ -10,7 +10,7 @@
     "preview:env": "shx cp ../../.env .dev.vars && wrangler dev --port 8787",
     "start": "wrangler dev",
     "build": "echo 'Cloudflare Worker does not require build step'",
-    "test": "vitest",
+    "test": "vitest run",
     "type-check": "tsc --noEmit",
     "lint": "eslint ./src/**/*.{ts,tsx} --fix",
     "cf-typegen": "wrangler types",

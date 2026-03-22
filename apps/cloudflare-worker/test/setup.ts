@@ -1,5 +1,20 @@
 import { vi } from "vitest";
 
+// Mock Cloudflare Workers specific modules
+vi.mock("cloudflare:workers", () => ({
+    DurableObject: class {
+        constructor(public state: any, public env: any) {}
+    }
+}));
+
+// Mock global Cloudflare constants/classes if needed
+if (typeof (globalThis as any).WebSocketPair === 'undefined') {
+    (globalThis as any).WebSocketPair = class {
+        0 = {} as any;
+        1 = {} as any;
+    };
+}
+
 // Common mock implementation for D1 Database
 const mockD1PreparedStatement = {
     bind: vi.fn().mockReturnThis(),
