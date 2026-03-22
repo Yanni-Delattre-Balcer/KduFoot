@@ -761,20 +761,32 @@ export default function TournamentForm({
             <Input
               isRequired
               classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
+              errorMessage={errors.email}
+              isInvalid={!!errors.email}
               label={t("tournamentForm.labels.contact_email")}
               size="sm"
               type="email"
               value={formData.email}
               variant="faded"
+              onBlur={() => {
+                if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email))
+                  setErrors((p) => ({ ...p, email: t("account.errors.email_invalid") }));
+              }}
               onValueChange={(v) => handleChange("email", v)}
             />
             <Input
               isRequired
               classNames={{ inputWrapper: "bg-[#160d21] border-[#2a1b3d]" }}
+              errorMessage={errors.phone}
+              isInvalid={!!errors.phone}
               label={t("matchForm.labels.phone")}
               size="sm"
               value={formData.phone}
               variant="faded"
+              onBlur={() => {
+                if (!formData.phone || formData.phone.replace(/\D/g, "").length < 11)
+                  setErrors((p) => ({ ...p, phone: t("account.errors.phone_required") }));
+              }}
               onValueChange={(v) => handleChange("phone", v)}
             />
           </div>

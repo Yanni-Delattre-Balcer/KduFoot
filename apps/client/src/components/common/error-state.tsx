@@ -17,10 +17,10 @@ export const ErrorState = ({
 	showHome = true,
 }: ErrorStateProps) => {
 	return (
-		<div className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
+		<div role="alert" className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
 			<Card className="max-w-md w-full border-danger bg-danger-50 dark:bg-danger-100/10">
 				<CardBody className="flex flex-col items-center gap-4 py-8">
-					<div className="p-3 bg-danger/10 rounded-full text-danger">
+					<div aria-hidden="true" className="p-3 bg-danger/10 rounded-full text-danger">
 						<AlertTriangle size={32} />
 					</div>
 					<div className="space-y-2">

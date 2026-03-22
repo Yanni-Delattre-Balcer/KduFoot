@@ -48,7 +48,7 @@ export const IdentitySection = ({
           <span className="text-default-500">Email</span>
           <span className="font-medium">{email}</span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
             isRequired
             aria-label={t("account.fields.firstname")}
@@ -97,6 +97,10 @@ export const IdentitySection = ({
           size="sm"
           value={phone}
           variant="bordered"
+          onBlur={() => {
+            if (!phone || phone.replace(/\D/g, "").length < 11)
+              setErrors((prev) => ({ ...prev, phone: t("account.errors.phone_required") }));
+          }}
           onValueChange={(v) => {
             handlePhoneChange(v);
             if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
