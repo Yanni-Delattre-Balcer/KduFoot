@@ -126,12 +126,12 @@ export class ExerciseService {
 
         if (filters.cursor) {
             try {
-                const cursorData = JSON.parse(atob(filters.cursor));
+                const cursorData = JSON.parse(globalThis.atob(filters.cursor));
                 if (cursorData.created_at && cursorData.id) {
                     query += " AND (created_at < ? OR (created_at = ? AND id < ?))";
                     params.push(cursorData.created_at, cursorData.created_at, cursorData.id);
                 }
-            } catch (e) { }
+            } catch (e) { /* erreur ignorée intentionnellement */ }
         }
 
         query += ' ORDER BY created_at DESC, id DESC';

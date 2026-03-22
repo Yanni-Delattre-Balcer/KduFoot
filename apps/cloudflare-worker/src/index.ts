@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import type { ExecutionContext } from "@cloudflare/workers-types";
 import { Router } from "./routes/router";
 import { setupRoutes } from "./routes";
 import { Env } from "./types/env";
@@ -56,10 +57,11 @@ export default {
 		const response = await router.handleRequest(request, envWithDb, ctx);
 		
 		const duration = Date.now() - start;
+		// eslint-disable-next-line no-console
 		console.log(JSON.stringify({
-			level: reqCount >= 10 ? 'WARN' : 'INFO',
+			timestamp: new Date().toISOString(),
 			method: request.method,
-			path: url.pathname,
+			url: request.url,
 			status: response.status,
 			durationMs: duration,
 			d1RequestCount: reqCount,

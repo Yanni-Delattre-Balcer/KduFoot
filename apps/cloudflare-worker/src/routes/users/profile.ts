@@ -1,3 +1,4 @@
+/// <reference types="@cloudflare/workers-types" />
 import { Router, AuthenticatedRequest } from '../router';
 import { Env } from '../../types/env';
 import { UserService } from '../../services/user.service';

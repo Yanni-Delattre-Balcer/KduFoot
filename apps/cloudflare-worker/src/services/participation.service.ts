@@ -38,7 +38,7 @@ export class ParticipationService {
                    c_req.city as requester_city, c_req.address as requester_club_address,
                    mc.status as request_status,
                    COALESCE(mc.notification_state, 0) as notification_state,
-                   m.pitch_type as host_pitch_type
+                   m.pitch_type as match_pitch_type
             FROM match_contacts mc
             JOIN matches m ON mc.match_id = m.id
             JOIN users u_req ON mc.user_id = u_req.id

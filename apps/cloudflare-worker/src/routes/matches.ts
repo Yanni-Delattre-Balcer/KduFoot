@@ -1,4 +1,4 @@
-
+import type { ExecutionContext } from "@cloudflare/workers-types";
 import { Router, AuthenticatedRequest } from './router';
 import { Env } from '../types/env';
 import { MatchService } from '../services/match.service';

@@ -1,3 +1,4 @@
+import type { ExecutionContext } from "@cloudflare/workers-types";
 import { Router } from './router';
 import { Env } from '../types/env';
 import { ParticipationService } from '../services/participation.service';
@@ -67,7 +68,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
                         notificationType: 'NEW_APPLICANT',
                         message: `Nouvelle demande de ${applicantClub?.name || 'un club'} pour le ${match.match_date}`,
                         targetUserId: owner.auth0_sub,
-                        data: { match_id: params.id, match_type: match.type, match_date: match.match_date }
+                        data: { match_id: params.id, match_type: match.type, match_date: match.match_date, owner_id: match.owner_id, user_id: dbUser.id, applicant_club_name: applicantClub?.name }
                     }));
                 }
                 ctx.waitUntil(broadcastDataChanged(env));
@@ -95,7 +96,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
                         notificationType: body.status === 'accepted' ? 'ENROLLMENT_ACCEPTED' : 'ENROLLMENT_REFUSED',
                         message: body.status === 'accepted' ? `Demande acceptée pour le ${match.match_date}` : `Demande refusée pour le ${match.match_date}`,
                         targetUserId: applicant.auth0_sub,
-                        data: { match_id: params.matchId, match_type: match.type, match_date: match.match_date }
+                        data: { match_id: params.matchId, match_type: match.type, match_date: match.match_date, owner_id: match.owner_id, user_id: params.userId, host_club_name: match.club?.name }
                     }));
                 }
                 ctx.waitUntil(broadcastDataChanged(env));

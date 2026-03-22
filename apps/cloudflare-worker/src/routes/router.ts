@@ -1,3 +1,4 @@
+/// <reference types="@cloudflare/workers-types" />
 /**
  * MIT License
  *
@@ -22,6 +23,8 @@
  * SOFTWARE.
  */
 
+/// <reference types="@cloudflare/workers-types" />
+import type { ExecutionContext } from "@cloudflare/workers-types";
 /* global URLPattern */
 import { JWTPayload } from "jose";
 
@@ -145,7 +148,7 @@ export class Router {
 		return new Response(response.body, { 
 			status: response.status,
 			statusText: response.statusText,
-			headers: newHeaders 
+			headers: new Headers(newHeaders)
 		});
 	}
 

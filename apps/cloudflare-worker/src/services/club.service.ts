@@ -1,4 +1,5 @@
-
+/// <reference types="@cloudflare/workers-types" />
+import { D1Database } from '@cloudflare/workers-types';
 import { Env } from '../types/env';
 
 export interface Club {
@@ -38,7 +39,7 @@ export class ClubService {
 
             return results;
         } catch (error) {
-            console.error('Error fetching clubs:', error);
+            console.warn('Club search failed', error);
             return [];
         }
     }

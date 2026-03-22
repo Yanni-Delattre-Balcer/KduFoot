@@ -197,12 +197,12 @@ export class SessionService {
 
         if (filters.cursor) {
             try {
-                const cursorData = JSON.parse(atob(filters.cursor));
+                const cursorData = JSON.parse(globalThis.atob(filters.cursor));
                 if (cursorData.scheduled_date && cursorData.id) {
                     query += " AND (scheduled_date > ? OR (scheduled_date = ? AND id > ?))";
                     params.push(cursorData.scheduled_date, cursorData.scheduled_date, cursorData.id);
                 }
-            } catch (e) { }
+            } catch (e) { /* erreur ignorée intentionnellement */ }
         }
 
         query += ' ORDER BY scheduled_date ASC, id ASC';
@@ -223,7 +223,7 @@ export class SessionService {
         let nextCursor: string | null = null;
         if (hasMore && results.length > 0) {
             const lastItem = results[results.length - 1];
-            nextCursor = btoa(JSON.stringify({ scheduled_date: lastItem.scheduled_date, id: lastItem.id }));
+            nextCursor = globalThis.btoa(JSON.stringify({ scheduled_date: lastItem.scheduled_date, id: lastItem.id }));
         }
 
         return { data: results, nextCursor, hasMore };

@@ -1,3 +1,4 @@
+/// <reference types="@cloudflare/workers-types" />
 import { DurableObject } from "cloudflare:workers";
 import type { Env } from "../types/env";
 

@@ -13,6 +13,7 @@ export function decodeJwtPayload(token: string): Record<string, unknown> | null 
         );
         return JSON.parse(jsonPayload) as Record<string, unknown>;
     } catch (e) {
+        /* erreur ignorée intentionnellement */
         return null;
     }
 }

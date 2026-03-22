@@ -31,6 +31,7 @@ export class ErrorHandler {
         }
 
         // Log the REAL error for debugging — never sent to client
+        // eslint-disable-next-line no-console
         console.error(`[API Error] ${status} - ${internalMessage}`);
 
         // SECURITY: Always return a generic, safe message to the client

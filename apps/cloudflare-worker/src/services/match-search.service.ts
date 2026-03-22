@@ -76,7 +76,7 @@ export class MatchSearchService {
 
         if (!wantDistance && filters.cursor) {
             try {
-                const cursorData = JSON.parse(atob(filters.cursor));
+                const cursorData = JSON.parse(globalThis.atob(filters.cursor));
                 if (cursorData.date && cursorData.id) {
                     query += " AND (m.match_date > ? OR (m.match_date = ? AND m.id > ?))";
                     params.push(cursorData.date, cursorData.date, cursorData.id);

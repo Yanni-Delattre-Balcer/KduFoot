@@ -30,6 +30,7 @@ export const setupSyncRoutes = (router: Router, env: Env) => {
             const user = await userService.createOrUpdateUser(dto);
             return Response.json({ success: true, user }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         } catch (e: unknown) {
+            // eslint-disable-next-line no-console
             console.error('User Sync Error:', e);
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }

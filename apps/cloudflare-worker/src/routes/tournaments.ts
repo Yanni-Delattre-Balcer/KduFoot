@@ -1,3 +1,4 @@
+import type { ExecutionContext } from "@cloudflare/workers-types";
 import { Router } from './router';
 import { Env } from '../types/env';
 import { TournamentService } from '../services/tournament.service';

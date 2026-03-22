@@ -116,6 +116,13 @@ export default [
 		},
 	},
 	{
+		files: ["src/**/*.ts"],
+		rules: {
+			"no-undef": "off",
+			"@typescript-eslint/no-explicit-any": "warn",
+		},
+	},
+	{
 		ignores: [
 			".now/*",
 			"*.css",

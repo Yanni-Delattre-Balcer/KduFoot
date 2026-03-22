@@ -121,16 +121,17 @@ async function sendWebPush(env: Env, subscription: PushSubscription, payload: Re
 
         if (!response.ok) {
             const error = await response.text();
+            // eslint-disable-next-line no-console
             console.error(`Push subscription error at ${endpoint.host}: ${response.status} ${error}`);
             if (response.status === 410 || response.status === 404) {
-                console.log(`Unregistering invalid subscription for ${subscription.endpoint}`);
-                // Optional: clear the subscription in DB here if we had the user ID
+                console.warn(`Unregistering invalid subscription for ${subscription.endpoint}`);
             }
         } else {
+            // eslint-disable-next-line no-console
             console.log(`Push sent successfully to ${endpoint.host}`);
         }
     } catch (e) {
+        // eslint-disable-next-line no-console
         console.error("Error sending Web Push:", e);
     }
 }
-
