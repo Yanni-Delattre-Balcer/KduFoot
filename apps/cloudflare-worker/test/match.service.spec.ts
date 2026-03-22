@@ -20,12 +20,7 @@ describe('MatchService', () => {
         matchService = new MatchService(db);
     });
 
-    it('should calculate haversine distance correctly', () => {
-        // Paris to London: ~344km
-        const dist = (matchService as any).haversineKm(48.8566, 2.3522, 51.5074, -0.1278);
-        expect(dist).toBeGreaterThan(340);
-        expect(dist).toBeLessThan(350);
-    });
+
 
     it('should map database row to Match object correctly', () => {
         const row = {

@@ -34,7 +34,7 @@ describe('UserService', () => {
 
             const service = new UserService(db);
             const result = await service.getUserById('123');
-            expect(result).toEqual(mockUser);
+            expect(result).toEqual({ ...mockUser, additional_sirets: [] });
         });
     });
 
