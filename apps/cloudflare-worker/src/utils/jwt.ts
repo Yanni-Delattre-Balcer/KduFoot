@@ -12,7 +12,7 @@ export function decodeJwtPayload(token: string): Record<string, unknown> | null 
                 .join('')
         );
         return JSON.parse(jsonPayload) as Record<string, unknown>;
-    } catch (e) {
+    } catch (_e) {
         /* erreur ignorée intentionnellement */
         return null;
     }

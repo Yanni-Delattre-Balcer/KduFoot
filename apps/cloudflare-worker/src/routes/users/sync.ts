@@ -10,7 +10,7 @@ export const setupSyncRoutes = (router: Router, env: Env) => {
     /**
      * POST /api/users/sync
      */
-    router.post('/api/users/sync', async (request: Request, env: Env) => {
+    router.post('/api/users/sync', async (request: Request, _env: Env) => {
 
         const body = await request.json() as Record<string, unknown>;
 

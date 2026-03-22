@@ -36,7 +36,7 @@ export class UserService {
                 let parsed = JSON.parse(u.additional_sirets);
                 if (typeof parsed === 'string') parsed = JSON.parse(parsed); // Auto-heal double-stringified corruption
                 u.additional_sirets = Array.isArray(parsed) ? parsed : [];
-            } catch (e) {
+            } catch (_e) {
                 u.additional_sirets = [];
             }
         } else if (!Array.isArray(u.additional_sirets)) {

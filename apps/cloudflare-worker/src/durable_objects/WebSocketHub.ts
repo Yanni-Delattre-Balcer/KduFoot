@@ -55,7 +55,7 @@ export class WebSocketHub extends DurableObject<Env> {
         for (const session of this.sessions) {
             try {
                 session.send(message);
-            } catch (error) {
+            } catch (_error) {
                 // If a connection is broken, quietly remove it
                 this.sessions.delete(session);
             }

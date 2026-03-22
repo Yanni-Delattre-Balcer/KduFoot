@@ -202,7 +202,7 @@ export class SessionService {
                     query += " AND (scheduled_date > ? OR (scheduled_date = ? AND id > ?))";
                     params.push(cursorData.scheduled_date, cursorData.scheduled_date, cursorData.id);
                 }
-            } catch (e) { /* erreur ignorée intentionnellement */ }
+            } catch (_e) { /* erreur ignorée intentionnellement */ }
         }
 
         query += ' ORDER BY scheduled_date ASC, id ASC';

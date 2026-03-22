@@ -131,7 +131,7 @@ export class ExerciseService {
                     query += " AND (created_at < ? OR (created_at = ? AND id < ?))";
                     params.push(cursorData.created_at, cursorData.created_at, cursorData.id);
                 }
-            } catch (e) { /* erreur ignorée intentionnellement */ }
+            } catch (_e) { /* erreur ignorée intentionnellement */ }
         }
 
         query += ' ORDER BY created_at DESC, id DESC';

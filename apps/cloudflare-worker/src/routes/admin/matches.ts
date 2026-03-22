@@ -20,7 +20,7 @@ export const setupAdminMatchRoutes = (router: Router, env: Env, ctx: ExecutionCo
             await env.DB.prepare('DELETE FROM matches WHERE id = ?').bind(params.id).run();
             await broadcastDataChanged(env);
             return Response.json({ success: true, message: 'Match deleted by admin' }, { headers: router.corsHeaders });
-        } catch (e: unknown) {
+        } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.WRITE_API);

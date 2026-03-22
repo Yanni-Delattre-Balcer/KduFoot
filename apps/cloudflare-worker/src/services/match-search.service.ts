@@ -81,7 +81,7 @@ export class MatchSearchService {
                     query += " AND (m.match_date > ? OR (m.match_date = ? AND m.id > ?))";
                     params.push(cursorData.date, cursorData.date, cursorData.id);
                 }
-            } catch (e) { /* intentionnellement vide */ }
+            } catch (_e) { /* intentionnellement vide */ }
         }
 
         query += ' ORDER BY m.match_date ASC, m.id ASC';

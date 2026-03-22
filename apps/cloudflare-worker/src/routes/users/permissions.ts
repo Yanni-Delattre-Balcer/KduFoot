@@ -23,7 +23,7 @@ export const setupPermissionsRoutes = (router: Router, env: Env) => {
                         headers: { ...router.corsHeaders, "Content-Type": "application/json" },
                     },
                 );
-            } catch (error) {
+            } catch (_error) {
                 return new Response(
                     JSON.stringify({ success: false, error: 'Internal server error' }),
                     {
@@ -41,7 +41,7 @@ export const setupPermissionsRoutes = (router: Router, env: Env) => {
      */
     router.post(
         "/api/__auth0/autopermissions",
-        async (request, env, ctx) => {
+        async (_request, env, _ctx) => {
             try {
                 const autoPermsStr = env.AUTH0_AUTOMATIC_PERMISSIONS || "";
                 if (!autoPermsStr) {
@@ -73,7 +73,7 @@ export const setupPermissionsRoutes = (router: Router, env: Env) => {
                     status: 200,
                     headers: { ...router.corsHeaders, "Content-Type": "application/json" },
                 });
-            } catch (error) {
+            } catch (_error) {
                 return new Response(
                     JSON.stringify({ success: false, error: 'Internal server error' }),
                     {

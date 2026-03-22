@@ -35,7 +35,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
             await userService.deleteUser(d1Id);
             await broadcastDataChanged(env);
             return Response.json({ success: true, message: 'User deleted from D1' }, { headers: router.corsHeaders });
-        } catch (e: unknown) {
+        } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.WRITE_API);
@@ -92,7 +92,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
             })) || [];
 
             return Response.json({ success: true, metadata, pagination: { total, limit, offset } }, { headers: router.corsHeaders });
-        } catch (e: unknown) {
+        } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.ADMIN_AUTH0);
@@ -149,7 +149,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 data: { reason: body.block_reason }
             }));
             return Response.json({ success: true, message: `User ${body.is_blocked ? 'blocked' : 'unblocked'}` }, { headers: router.corsHeaders });
-        } catch (e: unknown) {
+        } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.WRITE_API);
@@ -324,7 +324,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                     return Response.json({ success: false, error: "Entreprise introuvable" }, { status: 404, headers: router.corsHeaders });
                 }
             }
-        } catch (e: unknown) {
+        } catch (_e: unknown) {
             if (!body.force) return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: router.corsHeaders });
         }
 

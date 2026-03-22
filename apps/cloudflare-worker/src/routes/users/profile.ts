@@ -62,7 +62,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
                             return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address } as import("../../types").Club;
                         }
                     }
-                } catch (e) { /* intentionnellement vide */ }
+                } catch (_e) { /* intentionnellement vide */ }
 
                 return { id: crypto.randomUUID(), siret, name: siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address } as import("../../types").Club;
             }));
@@ -155,7 +155,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
                             return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address } as import("../../types").Club;
                         }
                     }
-                } catch (e) { /* intentionnellement vide */ }
+                } catch (_e) { /* intentionnellement vide */ }
 
                 return { id: crypto.randomUUID(), siret, name: siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address } as import("../../types").Club;
             }));
@@ -195,7 +195,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
         try {
             const updated = await userService.updateUser(user.id, body);
             return Response.json({ success: true, user: updated }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: unknown) {
+        } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.WRITE_API);
@@ -315,7 +315,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             await broadcastDataChanged(env);
 
             return Response.json({ success: true, message: 'Club détaché avec succès.' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: unknown) {
+        } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.ADMIN_AUTH0);
@@ -342,7 +342,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             } catch { /* audit log should not block deletion */ }
 
             return Response.json({ success: true, message: 'Account deleted' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-        } catch (e: unknown) {
+        } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.READ_API);

@@ -60,7 +60,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
  *       403:
  *         description: Forbidden - Insufficient permissions.
  */
-    router.get('/api/exercises', async (request, env) => {
+    router.get('/api/exercises', async (request, _env) => {
 
         const url = new URL(request.url);
         const filters = {

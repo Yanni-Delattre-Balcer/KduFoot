@@ -59,7 +59,7 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
     /**
      * GET /api/matches/<id>
      */
-    router.get('/api/matches/<id>', async (request: AuthenticatedRequest, env: Env) => {
+    router.get('/api/matches/<id>', async (request: AuthenticatedRequest, _env: Env) => {
         const { id } = request.params;
         const match = await matchService.getById(id);
         if (!match) return Response.json({ success: false, error: 'Not found' }, { status: 404, headers: router.corsHeaders });
