@@ -397,7 +397,11 @@
     "contact_tracking_message": "A porté de l'intérêt en envoyant une demande",
     "status": {
       "pending": "En attente"
-    }
+    },
+    "cancel_error": "Erreur lors de l'annulation",
+    "admin_delete_error": "Erreur lors de la suppression admin",
+    "block_success": "Utilisateur bloqué avec succès",
+    "block_error": "Erreur lors du blocage"
   },
   "session": {
     "create": "Nouvelle séance",
@@ -762,7 +766,8 @@
     },
     "confirm_delete": "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?",
     "delete_success": "Compte supprimé avec succès",
-    "delete_error": "Erreur lors de la suppression du compte"
+    "delete_error": "Erreur lors de la suppression du compte",
+    "profile_info": "Informations du Profil"
   },
   "tournamentForm": {
     "title": "Informations sur le tournoi",
@@ -1150,5 +1155,57 @@
     "buttons": {
       "details": "DÉTAILS"
     }
+  },
+  "pwa": {
+    "install_title": "Installer Kdufoot",
+    "install_desc": "Installez l'application mobile pour une expérience fluide et des notifications sportives en temps réel.",
+    "install": "Installer",
+    "later": "Plus tard",
+    "already_have_it": "Je l'ai déjà",
+    "ios_guide_subtitle": "Guide d'installation",
+    "ios_step1": "Ouvrez le site sur",
+    "ios_step2_pre": "Cliquez sur l'icône",
+    "ios_step2_bold": "Partager",
+    "ios_step2_suf": "(le carré avec la flèche vers le haut) en bas au centre.",
+    "ios_step3_pre": "Faites défiler le menu pour trouver le bouton",
+    "ios_step3_bold": "\"En savoir plus\"",
+    "ios_step3_suf": ".",
+    "ios_step4_pre": "Cliquez sur la ligne",
+    "ios_step4_bold": "\"Sur l'écran d'accueil\"",
+    "ios_step4_suf": "(généralement la 5ème option).",
+    "ios_step5_pre": "Appuyez sur",
+    "ios_step5_bold": "\"Ajouter\"",
+    "ios_step5_suf": "en haut à droite.",
+    "ios_success": "Votre application Kdufoot est maintenant installée sur votre écran d'accueil, prête à l'emploi !",
+    "understood": "C'est compris !",
+    "already_installed": "JE L'AI DÉJÀ INSTALLÉE",
+    "pc_title": "Comment l'installer ?",
+    "pc_blocked": "L'installation automatique est bloquée par votre navigateur actuel.",
+    "pc_instruction_pre": "Pour installer Kdufoot, cliquez sur l'icône",
+    "pc_instruction_bold": "Installer l'application",
+    "pc_instruction_mid": "(qui ressemble souvent à un écran d'ordinateur ou à un plus ➕) située",
+    "pc_instruction_loc": "à tout moment à droite de votre barre d'adresse en haut de la fenêtre.",
+    "pc_android_pre": "Sur Android Chrome, cherchez",
+    "pc_android_bold": "\"Ajouter à l'écran d'accueil\"",
+    "pc_android_suf": "dans le menu du navigateur (les 3 petits points verticaux).",
+    "got_it": "J'ai compris",
+    "modal_ios_title": "Installer KduFoot sur votre iPhone",
+    "modal_ios_subtitle": "Guide d'installation Safari",
+    "modal_ios_step1_pre": "Ouvrez le site sur",
+    "modal_ios_step1_suf": "et cliquez sur les trois petits points ⋯ ou l'icône de partage en bas de votre écran.",
+    "modal_ios_step2_pre": "Dans le menu qui s'ouvre, appuyez sur",
+    "modal_ios_step2_bold": "Partager",
+    "modal_ios_step3_pre": "Faites défiler les options vers le bas et cliquez sur",
+    "modal_ios_step3_bold": "En voir plus",
+    "modal_ios_step4_pre": "Cherchez et cliquez sur",
+    "modal_ios_step4_bold": "Sur l'écran d'accueil",
+    "modal_ios_step5_pre": "Enfin, appuyez sur",
+    "modal_ios_step5_bold": "Ajouter",
+    "modal_ios_step5_suf": "en haut à droite.",
+    "modal_ios_success": "✨ L'application est maintenant installée sur votre téléphone comme une app classique !",
+    "modal_pc_title": "Installation manuelle",
+    "modal_pc_desc_pre": "Cliquez sur l'icône",
+    "modal_pc_desc_bold": "Installer",
+    "modal_pc_desc_suf": "dans votre barre d'adresse ou dans le menu de votre navigateur."
   }
 }

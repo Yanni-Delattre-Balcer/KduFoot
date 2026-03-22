@@ -63,7 +63,7 @@ export default function AccountPage() {
                 </svg>
               </div>
               <h2 className="text-xl font-bold text-white">
-                Informations du Profil
+                {t("account.profile_info")}
               </h2>
             </div>
           </CardHeader>

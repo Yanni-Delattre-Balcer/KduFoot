@@ -94,13 +94,6 @@ async function checkQuota(
 
     let current = parseInt(await env.KV_CACHE.get(kvKey) || '0');
 
-    // TEMPORARY: Reset quota if reached in local development
-    const isLocal = env.API_BASE_URL?.includes('localhost') || env.API_BASE_URL?.includes('127.0.0.1');
-    if (isLocal && current >= config.limit) {
-        current = 0;
-        await env.KV_CACHE.put(kvKey, '0');
-    }
-
     if (current >= config.limit) {
         return {
             hasPermission: false,

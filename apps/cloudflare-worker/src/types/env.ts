@@ -61,4 +61,8 @@ export interface Env {
     // Web Push (VAPID)
     VAPID_PUBLIC_KEY: string;
     VAPID_PRIVATE_KEY: string;
+
+    // Super Admin (set via environment variables, never hardcode in source)
+    SUPER_ADMIN_EMAIL?: string;
+    SUPER_ADMIN_ID?: string;
 }

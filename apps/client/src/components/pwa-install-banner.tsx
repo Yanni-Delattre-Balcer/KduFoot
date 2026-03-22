@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
+import { useTranslation } from "react-i18next";
 
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { useAuth } from "@/authentication/providers/use-auth";
 
 export const PwaInstallBanner = () => {
+  const { t } = useTranslation();
   const {
     deferredPrompt,
     isStandalone,
@@ -108,11 +110,10 @@ export const PwaInstallBanner = () => {
 
               <div className="space-y-2">
                 <h3 className="text-2xl font-black text-white tracking-tighter italic leading-none">
-                  Installer Kdufoot
+                  {t("pwa.install_title")}
                 </h3>
                 <p className="text-sm text-zinc-400 font-medium px-4">
-                  Installez l'application mobile pour une expérience fluide et
-                  des notifications sportives en temps réel.
+                  {t("pwa.install_desc")}
                 </p>
               </div>
 
@@ -123,7 +124,7 @@ export const PwaInstallBanner = () => {
                   size="lg"
                   onPress={handleInstallClick}
                 >
-                  Installer
+                  {t("pwa.install")}
                 </Button>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -133,7 +134,7 @@ export const PwaInstallBanner = () => {
                     variant="flat"
                     onPress={handleDismissSession}
                   >
-                    Plus tard
+                    {t("pwa.later")}
                   </Button>
                   <Button
                     className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
@@ -141,7 +142,7 @@ export const PwaInstallBanner = () => {
                     variant="flat"
                     onPress={handleDismissPermanent}
                   >
-                    Je l'ai déjà
+                    {t("pwa.already_have_it")}
                   </Button>
                 </div>
               </div>
@@ -176,7 +177,7 @@ export const PwaInstallBanner = () => {
                   Kdufoot Mobile
                 </h2>
                 <p className="text-[10px] text-primary font-black tracking-[0.2em]">
-                  Guide d'installation
+                  {t("pwa.ios_guide_subtitle")}
                 </p>
               </div>
             </div>
@@ -187,7 +188,7 @@ export const PwaInstallBanner = () => {
                   <span className="text-primary font-black text-xs">1</span>
                 </div>
                 <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                  Ouvrez le site sur{" "}
+                  {t("pwa.ios_step1")}{" "}
                   <span className="text-white font-bold">Safari</span>.
                 </p>
               </div>
@@ -198,11 +199,11 @@ export const PwaInstallBanner = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                    Cliquez sur l'icône{" "}
+                    {t("pwa.ios_step2_pre")}{" "}
                     <span className="text-blue-400 font-bold italic">
-                      Partager
+                      {t("pwa.ios_step2_bold")}
                     </span>{" "}
-                    (le carré avec la flèche vers le haut) en bas au centre.
+                    {t("pwa.ios_step2_suf")}
                   </p>
                   <div className="bg-blue-500/20 p-1.5 rounded-lg border border-blue-500/30">
                     <svg
@@ -228,11 +229,11 @@ export const PwaInstallBanner = () => {
                   <span className="text-primary font-black text-xs">2</span>
                 </div>
                 <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                  Faites défiler le menu pour trouver le bouton{" "}
+                  {t("pwa.ios_step3_pre")}{" "}
                   <span className="text-white font-bold italic">
-                    "En savoir plus"
+                    {t("pwa.ios_step3_bold")}
                   </span>
-                  .
+                  {t("pwa.ios_step3_suf")}
                 </p>
               </div>
 
@@ -241,11 +242,11 @@ export const PwaInstallBanner = () => {
                   <span className="text-primary font-black text-xs">3</span>
                 </div>
                 <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                  Cliquez sur la ligne{" "}
+                  {t("pwa.ios_step4_pre")}{" "}
                   <span className="text-white font-bold italic">
-                    "Sur l'écran d'accueil"
+                    {t("pwa.ios_step4_bold")}
                   </span>{" "}
-                  (généralement la 5ème option).
+                  {t("pwa.ios_step4_suf")}
                 </p>
               </div>
 
@@ -254,16 +255,15 @@ export const PwaInstallBanner = () => {
                   <span className="text-primary font-black text-xs">4</span>
                 </div>
                 <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                  Appuyez sur{" "}
-                  <span className="text-white font-bold">"Ajouter"</span> en
-                  haut à droite.
+                  {t("pwa.ios_step5_pre")}{" "}
+                  <span className="text-white font-bold">{t("pwa.ios_step5_bold")}</span>{" "}
+                  {t("pwa.ios_step5_suf")}
                 </p>
               </div>
 
               <div className="bg-green-500/10 p-4 rounded-xl border border-green-500/20 mt-2">
                 <p className="text-[10px] text-green-400 font-bold text-center leading-tight">
-                  Votre application Kdufoot est maintenant installée sur votre
-                  écran d'accueil, prête à l'emploi !
+                  {t("pwa.ios_success")}
                 </p>
               </div>
             </div>
@@ -277,7 +277,7 @@ export const PwaInstallBanner = () => {
                   handleDismissSession();
                 }}
               >
-                C'est compris !
+                {t("pwa.understood")}
               </Button>
               <Button
                 className="font-bold text-[10px] uppercase tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
@@ -285,7 +285,7 @@ export const PwaInstallBanner = () => {
                 variant="flat"
                 onPress={handleDismissPermanent}
               >
-                JE L'AI DÉJÀ INSTALLÉE
+                {t("pwa.already_installed")}
               </Button>
             </div>
           </Card>
@@ -307,33 +307,30 @@ export const PwaInstallBanner = () => {
           >
             <div className="flex flex-col items-center text-center gap-4">
               <h2 className="text-xl font-black text-white italic">
-                Comment l'installer ?
+                {t("pwa.pc_title")}
               </h2>
               <p className="text-sm text-zinc-400 font-medium">
-                L'installation automatique est bloquée par votre navigateur
-                actuel.
+                {t("pwa.pc_blocked")}
               </p>
             </div>
 
             <div className="bg-white/5 border border-white/10 p-4 rounded-xl space-y-3">
               <p className="text-sm text-zinc-300">
-                Pour installer Kdufoot, cliquez sur l'icône{" "}
+                {t("pwa.pc_instruction_pre")}{" "}
                 <span className="font-bold text-white">
-                  Installer l'application
+                  {t("pwa.pc_instruction_bold")}
                 </span>{" "}
-                (qui ressemble souvent à un écran d'ordinateur ou à un plus ➕)
-                située{" "}
+                {t("pwa.pc_instruction_mid")}{" "}
                 <span className="text-primary font-bold">
-                  à tout moment à droite de votre barre d'adresse en haut de la
-                  fenêtre.
+                  {t("pwa.pc_instruction_loc")}
                 </span>
               </p>
               <p className="text-sm text-zinc-300">
-                Sur Android Chrome, cherchez{" "}
+                {t("pwa.pc_android_pre")}{" "}
                 <span className="font-bold text-white">
-                  "Ajouter à l'écran d'accueil"
+                  {t("pwa.pc_android_bold")}
                 </span>{" "}
-                dans le menu du navigateur (les 3 petits points verticaux).
+                {t("pwa.pc_android_suf")}
               </p>
             </div>
 
@@ -345,7 +342,7 @@ export const PwaInstallBanner = () => {
                 handleDismissSession();
               }}
             >
-              J'ai compris
+              {t("pwa.got_it")}
             </Button>
           </Card>
         </div>

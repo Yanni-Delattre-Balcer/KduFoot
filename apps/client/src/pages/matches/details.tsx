@@ -340,7 +340,7 @@ export default function MatchDetailsPage() {
       console.error("Failed to cancel request", error);
       addToast({
         title: t("error.title"),
-        description: error.message || "Erreur lors de l'annulation",
+        description: error.message || t("match.cancel_error"),
         color: "danger",
       });
     } finally {
@@ -374,7 +374,7 @@ export default function MatchDetailsPage() {
       console.error("Admin delete failed", error);
       addToast({
         title: t("error.title"),
-        description: error.message || "Erreur lors de la suppression admin",
+        description: error.message || t("match.admin_delete_error"),
         color: "danger",
       });
     } finally {
@@ -390,7 +390,7 @@ export default function MatchDetailsPage() {
 
       addToast({
         title: t("success"),
-        description: "Utilisateur bloqué avec succès",
+        description: t("match.block_success"),
         variant: "flat",
         color: "success",
       });
@@ -398,7 +398,7 @@ export default function MatchDetailsPage() {
       console.error("Blocking failed", error);
       addToast({
         title: t("error.title"),
-        description: error.message || "Erreur lors du blocage",
+        description: error.message || t("match.block_error"),
         variant: "flat",
         color: "danger",
       });

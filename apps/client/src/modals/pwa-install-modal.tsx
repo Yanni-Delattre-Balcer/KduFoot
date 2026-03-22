@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Modal, ModalContent, ModalBody } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Card } from "@heroui/card";
+import { useTranslation } from "react-i18next";
 
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
@@ -11,6 +12,7 @@ interface PwaInstallModalProps {
 }
 
 export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
+  const { t } = useTranslation();
   const { deferredPrompt, isStandalone, isIOS, installPWA, dismissPrompt } =
     usePWAInstall();
   const [showIOSHint, setShowIOSHint] = useState(false);
@@ -80,11 +82,10 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
 
                 <div className="space-y-2">
                   <h3 id="pwa-modal-title" className="text-2xl font-black text-white tracking-tighter italic leading-none">
-                    Installer Kdufoot
+                    {t("pwa.install_title")}
                   </h3>
                   <p className="text-sm text-zinc-400 font-medium px-4">
-                    Installez l'application mobile pour une expérience fluide et
-                    des notifications sportives en temps réel.
+                    {t("pwa.install_desc")}
                   </p>
                 </div>
 
@@ -95,7 +96,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                     size="lg"
                     onPress={handleInstallClick}
                   >
-                    Installer
+                    {t("pwa.install")}
                   </Button>
 
                   <div className="grid grid-cols-2 gap-2">
@@ -105,7 +106,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                       variant="flat"
                       onPress={handleDismissSession}
                     >
-                      Plus tard
+                      {t("pwa.later")}
                     </Button>
                     <Button
                       className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400 hover:text-white"
@@ -113,7 +114,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                       variant="flat"
                       onPress={handleDismissPermanent}
                     >
-                      Je l'ai déjà
+                      {t("pwa.already_have_it")}
                     </Button>
                   </div>
                 </div>
@@ -134,10 +135,10 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                 </div>
                 <div className="space-y-1">
                   <h2 id="pwa-modal-title" className="text-2xl font-black text-white tracking-tighter italic leading-tight">
-                    Installer KduFoot sur votre iPhone
+                    {t("pwa.modal_ios_title")}
                   </h2>
                   <p className="text-[10px] text-primary font-black tracking-[0.2em]">
-                    Guide d'installation Safari
+                    {t("pwa.modal_ios_subtitle")}
                   </p>
                 </div>
               </div>
@@ -150,11 +151,10 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                      Ouvrez le site sur{" "}
+                      {t("pwa.modal_ios_step1_pre")}{" "}
                       <span className="text-blue-400 font-bold italic">Safari</span>{" "}
-                      et cliquez sur les trois petits points{" "}
                       <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500/20 rounded-lg border border-blue-500/30 text-blue-400 font-bold text-[10px]">⋯</span>{" "}
-                      ou l'icône de partage en bas de votre écran.
+                      {t("pwa.modal_ios_step1_suf")}
                     </p>
                   </div>
                 </div>
@@ -166,8 +166,8 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                      Dans le menu qui s'ouvre, appuyez sur{" "}
-                      <span className="text-white font-bold italic">Partager</span>
+                      {t("pwa.modal_ios_step2_pre")}{" "}
+                      <span className="text-white font-bold italic">{t("pwa.modal_ios_step2_bold")}</span>
                     </p>
                     <div className="bg-blue-500/20 p-1 rounded-lg border border-blue-500/30">
                       <svg
@@ -194,8 +194,8 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                     <span className="text-primary font-black text-xs">3</span>
                   </div>
                   <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                    Faites défiler les options vers le bas et cliquez sur{" "}
-                    <span className="text-white font-bold italic">En voir plus</span>{" "}
+                    {t("pwa.modal_ios_step3_pre")}{" "}
+                    <span className="text-white font-bold italic">{t("pwa.modal_ios_step3_bold")}</span>{" "}
                     <span className="inline-flex items-center justify-center w-5 h-5 bg-zinc-700/50 rounded border border-white/10 text-zinc-300 font-bold text-[10px]">⌄</span>
                   </p>
                 </div>
@@ -206,8 +206,8 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                     <span className="text-primary font-black text-xs">4</span>
                   </div>
                   <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                    Cherchez et cliquez sur{" "}
-                    <span className="text-white font-bold italic">Sur l'écran d'accueil</span>{" "}
+                    {t("pwa.modal_ios_step4_pre")}{" "}
+                    <span className="text-white font-bold italic">{t("pwa.modal_ios_step4_bold")}</span>{" "}
                     <span className="inline-flex items-center justify-center w-5 h-5 bg-emerald-500/20 rounded border border-emerald-500/30 text-emerald-400 font-bold text-sm">⊕</span>
                   </p>
                 </div>
@@ -218,16 +218,16 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                     <span className="text-primary font-black text-xs">5</span>
                   </div>
                   <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                    Enfin, appuyez sur{" "}
-                    <span className="text-blue-400 font-bold italic">Ajouter</span>{" "}
-                    en haut à droite.
+                    {t("pwa.modal_ios_step5_pre")}{" "}
+                    <span className="text-blue-400 font-bold italic">{t("pwa.modal_ios_step5_bold")}</span>{" "}
+                    {t("pwa.modal_ios_step5_suf")}
                   </p>
                 </div>
 
                 {/* Résultat */}
                 <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 mt-2">
                   <p className="text-xs text-emerald-400 font-bold text-center leading-relaxed">
-                    ✨ L'application est maintenant installée sur votre téléphone comme une app classique !
+                    {t("pwa.modal_ios_success")}
                   </p>
                 </div>
               </div>
@@ -241,7 +241,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                     handleDismissSession();
                   }}
                 >
-                  C'est compris !
+                  {t("pwa.understood")}
                 </Button>
                 <Button
                   className="font-bold text-[10px] tracking-tighter bg-zinc-800 text-zinc-400"
@@ -249,7 +249,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   variant="flat"
                   onPress={handleDismissPermanent}
                 >
-                  JE L'AI DÉJÀ INSTALLÉE
+                  {t("pwa.already_installed")}
                 </Button>
               </div>
             </Card>
@@ -260,12 +260,12 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
             <Card className="bg-zinc-900 border-2 border-white/10 w-full p-8 space-y-6 shadow-2xl">
               <div className="flex flex-col items-center text-center gap-4">
                 <h2 id="pwa-modal-title" className="text-xl font-black text-white italic">
-                  Installation manuelle
+                  {t("pwa.modal_pc_title")}
                 </h2>
                 <p className="text-sm text-zinc-400">
-                  Cliquez sur l'icône{" "}
-                  <span className="text-primary font-bold">Installer</span> dans
-                  votre barre d'adresse ou dans le menu de votre navigateur.
+                  {t("pwa.modal_pc_desc_pre")}{" "}
+                  <span className="text-primary font-bold">{t("pwa.modal_pc_desc_bold")}</span>{" "}
+                  {t("pwa.modal_pc_desc_suf")}
                 </p>
               </div>
               <Button
@@ -276,7 +276,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   handleDismissSession();
                 }}
               >
-                J'ai compris
+                {t("pwa.got_it")}
               </Button>
             </Card>
           )}

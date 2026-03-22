@@ -3,8 +3,6 @@ import { Env } from '../../types/env';
 import { checkPermissions } from '../../auth0';
 import { Permission } from '../../types/permissions';
 
-export const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
-export const SUPREME_MASTER_ID = '6f62d717-2136-49d7-8c51-fee07eaeebce';
 
 export const getCallerEmail = async (request: AuthenticatedRequest, env: Env): Promise<string | null> => {
     try {
@@ -36,7 +34,7 @@ export const checkAdmin = async (request: AuthenticatedRequest, env: Env): Promi
         getCallerD1Id(request, env)
     ]);
     
-    if (email === SUPER_ADMIN_EMAIL || d1Id === SUPREME_MASTER_ID) {
+    if ((env.SUPER_ADMIN_EMAIL && email === env.SUPER_ADMIN_EMAIL) || (env.SUPER_ADMIN_ID && d1Id === env.SUPER_ADMIN_ID)) {
         return true;
     }
 

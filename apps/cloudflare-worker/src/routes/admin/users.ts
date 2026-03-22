@@ -5,7 +5,7 @@ import { ExecutionContext } from "@cloudflare/workers-types";
 import { UserService } from '../../services/user.service';
 import { Permission } from '../../types/permissions';
 import { broadcastDataChanged, broadcastNotification } from '../../utils/broadcast';
-import { checkAdmin, SUPER_ADMIN_EMAIL, SUPREME_MASTER_ID } from './utils';
+import { checkAdmin } from './utils';
 
 export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
     const userService = new UserService(env.DB);
@@ -27,7 +27,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
 
         const d1Id = (targetUser as any).id as string;
 
-        if (d1Id === SUPREME_MASTER_ID || (targetUser as any).email === SUPER_ADMIN_EMAIL) {
+        if ((env.SUPER_ADMIN_ID && d1Id === env.SUPER_ADMIN_ID) || (env.SUPER_ADMIN_EMAIL && (targetUser as any).email === env.SUPER_ADMIN_EMAIL)) {
             return Response.json({ success: false, error: 'Impossible de supprimer le Maître Suprême ou le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
         }
 
@@ -88,7 +88,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 siret: u.siret,
                 created_at: u.created_at,
                 last_login: u.updated_at,
-                role: u.email === SUPER_ADMIN_EMAIL ? 'super_admin' : 'user'
+                role: (env.SUPER_ADMIN_EMAIL && u.email === env.SUPER_ADMIN_EMAIL) ? 'super_admin' : 'user'
             })) || [];
 
             return Response.json({ success: true, metadata, pagination: { total, limit, offset } }, { headers: router.corsHeaders });
@@ -121,7 +121,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
 
         const d1Id = (targetUser as any).id as string;
 
-        if (d1Id === SUPREME_MASTER_ID || (targetUser as any).email === SUPER_ADMIN_EMAIL) {
+        if ((env.SUPER_ADMIN_ID && d1Id === env.SUPER_ADMIN_ID) || (env.SUPER_ADMIN_EMAIL && (targetUser as any).email === env.SUPER_ADMIN_EMAIL)) {
             return Response.json({ success: false, error: 'Impossible de bloquer le Maître Suprême ou le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
         }
 

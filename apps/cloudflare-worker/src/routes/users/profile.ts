@@ -8,7 +8,6 @@ import { checkPermissions } from '../../auth0';
 import { validateClubSiret } from '../../utils/siret.validator';
 import { broadcastDataChanged } from '../../utils/broadcast';
 
-const SUPER_ADMIN_EMAIL = 'yannidelattrebalcer.artois@gmail.com';
 
 export const setupProfileRoutes = (router: Router, env: Env) => {
     const userService = new UserService(env.DB);
@@ -238,7 +237,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
             const clubName = entreprise.nom_complet || entreprise.nom_raison_sociale || 'Club inconnu';
 
-            let isAdminUser = user.email === SUPER_ADMIN_EMAIL;
+            let isAdminUser = !!(env.SUPER_ADMIN_EMAIL && user.email === env.SUPER_ADMIN_EMAIL);
             if (!isAdminUser) {
                 try {
                     const { access } = await checkPermissions(token, [Permission.ADMIN_AUTH0], env);
