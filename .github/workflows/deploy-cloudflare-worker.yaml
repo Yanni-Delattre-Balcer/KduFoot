@@ -69,7 +69,7 @@ jobs:
         working-directory: apps/cloudflare-worker
 
       - name: Lint (Worker)
-        run: npm run lint -- --max-warnings=0 || true
+        run: npm run lint
         working-directory: apps/cloudflare-worker
 
       - name: Create .env file

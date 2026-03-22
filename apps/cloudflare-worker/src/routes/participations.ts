@@ -131,6 +131,44 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
         const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
+        const match = await env.DB.prepare('SELECT m.*, u.auth0_sub as owner_sub, c.name as host_club_name FROM matches m JOIN users u ON m.owner_id = u.id JOIN clubs c ON m.club_id = c.id WHERE m.id = ?').bind(params.matchId).first<any>();
+        const targetUser = await env.DB.prepare('SELECT u.*, c.name as club_name FROM users u LEFT JOIN clubs c ON u.club_id = c.id WHERE u.id = ?').bind(params.userId).first<any>();
+        
+        if (match && targetUser) {
+            const isWithdrawal = dbUser.id === params.userId;
+            const isCancellation = dbUser.id === match.owner_id;
+
+            if (isWithdrawal) {
+                ctx.waitUntil(broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: 'TEAM_WITHDRAWAL',
+                    message: `Désistement de ${targetUser.club_name || 'un club'} pour le ${match.match_date}`,
+                    targetUserId: match.owner_sub,
+                    data: { 
+                        match_id: params.matchId, 
+                        match_date: match.match_date, 
+                        match_type: match.type,
+                        applicant_club_name: targetUser.club_name,
+                        owner_sub: match.owner_sub
+                    }
+                }));
+            } else if (isCancellation) {
+                ctx.waitUntil(broadcastNotification(env, {
+                    type: 'NOTIFICATION',
+                    notificationType: 'REQUEST_CANCELLED',
+                    message: `Demande annulée par ${match.host_club_name || 'le club hôte'} pour le ${match.match_date}`,
+                    targetUserId: targetUser.auth0_sub,
+                    data: { 
+                        match_id: params.matchId, 
+                        match_date: match.match_date, 
+                        match_type: match.type,
+                        host_club_name: match.host_club_name,
+                        user_sub: targetUser.auth0_sub
+                    }
+                }));
+            }
+        }
+
         const success = await participationService.deleteContact(params.matchId, params.userId, dbUser.id);
         ctx.waitUntil(broadcastDataChanged(env));
         return Response.json({ success }, { headers: router.corsHeaders });
