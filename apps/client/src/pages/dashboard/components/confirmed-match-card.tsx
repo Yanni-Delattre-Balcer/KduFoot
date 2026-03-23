@@ -285,10 +285,10 @@ export const ConfirmedMatchCard = ({
                   )}
                 </Button>
               )}
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     as={Link}
-                    className="flex-1 font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10"
+                    className="flex-1 min-w-[100px] font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10"
                     size="md"
                     to={`/matches/${match.match_id}`}
                     variant="flat"
@@ -297,14 +297,14 @@ export const ConfirmedMatchCard = ({
                   </Button>
                   {isParticipant && onWithdraw && (
                     <Button
-                      className="flex-1 font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10"
+                      className="flex-1 min-w-[120px] font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10 whitespace-normal leading-tight text-center"
                       color="danger"
                       isLoading={isWithdrawing}
-                      size="sm"
+                      size="md"
                       variant="light"
                       onPress={onWithdraw}
                     >
-                    {t("match.withdraw_match")}
+                      {t("match.withdraw_match")}
                     </Button>
                   )}
                 </div>

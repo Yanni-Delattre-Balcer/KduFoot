@@ -84,7 +84,26 @@ export const setupCalendarRoutes = (router: Router, env: Env) => {
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
             'X-WR-CALNAME:KduFoot - Mes Matchs/Tournois',
-            'X-WR-TIMEZONE:Europe/Paris'
+            'X-WR-TIMEZONE:Europe/Paris',
+            // VTIMEZONE required by RFC 5545 when using TZID — without it Google Calendar
+            // on Android silently drops all events
+            'BEGIN:VTIMEZONE',
+            'TZID:Europe/Paris',
+            'BEGIN:STANDARD',
+            'DTSTART:19701025T030000',
+            'RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10',
+            'TZNAME:CET',
+            'TZOFFSETFROM:+0200',
+            'TZOFFSETTO:+0100',
+            'END:STANDARD',
+            'BEGIN:DAYLIGHT',
+            'DTSTART:19700329T020000',
+            'RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3',
+            'TZNAME:CEST',
+            'TZOFFSETFROM:+0100',
+            'TZOFFSETTO:+0200',
+            'END:DAYLIGHT',
+            'END:VTIMEZONE',
         ];
 
         for (const item of items) {
