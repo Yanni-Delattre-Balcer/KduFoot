@@ -2,7 +2,6 @@ import type { ExecutionContext } from "@cloudflare/workers-types";
 import { Router } from './router';
 import { Env } from '../types/env';
 import { TournamentService } from '../services/tournament.service';
-import { checkPermission } from '../middleware/permissions.middleware';
 import { Permission } from '../types/permissions';
 import { broadcastDataChanged } from '../utils/broadcast';
 import { UpdateScoreSchema } from '../utils/validation';

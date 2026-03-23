@@ -4,7 +4,6 @@ import { Env } from '../types/env';
 import { ExerciseService } from '../services/exercise.service';
 import { CreateExerciseDto, UpdateExerciseDto } from '../types/exercise';
 import { Permission } from '../types/permissions';
-import { checkPermission } from '../middleware/permissions.middleware';
 
 export const setupExerciseRoutes = (router: Router, env: Env) => {
     const exerciseService = new ExerciseService(env.DB);

@@ -33,6 +33,22 @@ import { Env } from "../types/env";
 import { BlockedUserRow } from "../types";
 import { ErrorHandler } from "../utils/error-handler";
 
+// ── In-memory caches (persist across requests within the same Worker isolate) ──
+
+// Strict rate limiting: Map<key, { count, expiresAt }>
+const strictRateLimitCache = new Map<string, { count: number; expiresAt: number }>();
+
+// Block status cache: Map<auth0_sub, { isBlocked, blockReason, expiresAt }>
+const blockStatusCache = new Map<string, { isBlocked: boolean; blockReason: string | null; expiresAt: number }>();
+
+const BLOCK_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const STRICT_RL_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+
+/** Call this after blocking/unblocking a user so the next request re-checks D1. */
+export function invalidateBlockCache(auth0Sub: string): void {
+	blockStatusCache.delete(auth0Sub);
+}
+
 export type AuthenticatedRequest = Request & { params: Record<string, string>; user?: JWTPayload };
 
 type RouteHandler = (
@@ -173,20 +189,24 @@ export class Router {
 			const rateLimitKey = `${ip}:${userId}:${endpoint}`;
 
 			const isSensitiveParams = pathname.startsWith("/api/contact") || pathname.startsWith("/api/register") || pathname.startsWith("/api/auth");
-			if (isSensitiveParams && env.KV_CACHE) {
+			if (isSensitiveParams) {
 				const strictKey = `strict_rl:${ip}:${pathname}`;
-				const currentStr = await env.KV_CACHE.get(strictKey);
-				const current = currentStr ? parseInt(currentStr, 10) : 0;
-				if (current >= 5) {
-					return this.addSecurityHeaders(new Response(
-						JSON.stringify({ error: `429 Too Many Requests - Strict rate limit exceeded for ${pathname}` }),
-						{ 
-							status: 429,
-							headers: { ...this.corsHeaders, "Retry-After": "300" }
-						}
-					));
+				const now = Date.now();
+				const entry = strictRateLimitCache.get(strictKey);
+				if (entry && entry.expiresAt > now) {
+					if (entry.count >= 5) {
+						return this.addSecurityHeaders(new Response(
+							JSON.stringify({ error: `429 Too Many Requests - Strict rate limit exceeded for ${pathname}` }),
+							{
+								status: 429,
+								headers: { ...this.corsHeaders, "Retry-After": "300" }
+							}
+						));
+					}
+					entry.count++;
+				} else {
+					strictRateLimitCache.set(strictKey, { count: 1, expiresAt: now + STRICT_RL_WINDOW_MS });
 				}
-				await env.KV_CACHE.put(strictKey, (current + 1).toString(), { expirationTtl: 300 });
 			}
 
 			if (env.RATE_LIMITER) {
@@ -266,13 +286,27 @@ export class Router {
 				const userId = payload.sub;
 				if (userId) {
 					try {
-						const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(userId).first<BlockedUserRow>();
-						if (dbUser && dbUser.is_blocked) {
+						const now = Date.now();
+						let blocked = false;
+						let blockReason: string | null = null;
+
+						const cached = blockStatusCache.get(userId);
+						if (cached && cached.expiresAt > now) {
+							blocked = cached.isBlocked;
+							blockReason = cached.blockReason;
+						} else {
+							const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(userId).first<BlockedUserRow>();
+							blocked = !!(dbUser && dbUser.is_blocked);
+							blockReason = (dbUser as any)?.block_reason ?? null;
+							blockStatusCache.set(userId, { isBlocked: blocked, blockReason, expiresAt: now + BLOCK_CACHE_TTL_MS });
+						}
+
+						if (blocked) {
 							return this.addSecurityHeaders(new Response(
 								JSON.stringify({
 									success: false,
-									error: "Votre compte a été suspendu pour le motif suivant : " + ((dbUser as any).block_reason || "Aucun motif spécifié"),
-									reason: (dbUser as any).block_reason || "Aucun motif spécifié",
+									error: "Votre compte a été suspendu pour le motif suivant : " + (blockReason || "Aucun motif spécifié"),
+									reason: blockReason || "Aucun motif spécifié",
 									is_blocked: true
 								}),
 								{

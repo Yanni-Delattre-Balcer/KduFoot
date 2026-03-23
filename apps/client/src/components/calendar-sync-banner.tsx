@@ -209,24 +209,14 @@ export const CalendarSyncBanner: React.FC = () => {
           </Button>
           
           {isAndroid && (
-             <div className="flex gap-2">
-               <Button
-                 className="flex-1 font-bold text-[10px] h-8 bg-white/5 text-white/40"
-                 variant="flat"
-                 size="sm"
-                 onPress={() => handleCalendarSync("default")}
-               >
-                 App Directe
-               </Button>
-               <Button
-                 className="flex-1 font-bold text-[10px] h-8 bg-white/5 text-white/40"
-                 variant="flat"
-                 size="sm"
-                 onPress={() => handleCalendarSync("copy")}
-               >
-                 {t("onboarding.calendar.copy_link")}
-               </Button>
-             </div>
+             <Button
+               className="w-full font-bold text-[10px] h-8 bg-white/5 text-white/40"
+               variant="flat"
+               size="sm"
+               onPress={() => handleCalendarSync("default")}
+             >
+               App Directe
+             </Button>
           )}
         </div>
       </CardBody>

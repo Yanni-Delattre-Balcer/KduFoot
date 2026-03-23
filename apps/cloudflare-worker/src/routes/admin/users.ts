@@ -1,5 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
-import { Router, AuthenticatedRequest } from '../router';
+import { Router, AuthenticatedRequest, invalidateBlockCache } from '../router';
 import { Env } from '../../types/env';
 import { ExecutionContext } from "@cloudflare/workers-types";
 import { UserService } from '../../services/user.service';
@@ -134,6 +134,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 await env.DB.prepare('UPDATE users SET block_count = block_count + 1 WHERE id = ?').bind(d1Id).run();
             }
 
+            invalidateBlockCache((targetUser as any).auth0_sub);
             if (env.KV_CACHE) {
                 await env.KV_CACHE.delete(`blocked:${(targetUser as any).auth0_sub}`);
             }

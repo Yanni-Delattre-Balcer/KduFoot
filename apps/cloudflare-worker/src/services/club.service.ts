@@ -76,18 +76,8 @@ export class ClubService {
     }
 
     async getClubByCity(city: string): Promise<Club[]> {
-        const cacheKey = `clubs:city:${city.toLowerCase()}`;
-
-        const cached = await this.env.KV_CACHE.get<Club[]>(cacheKey, 'json');
-        if (cached) return cached;
-
-        const results = await this.searchClubs(city);
-
-        await this.env.KV_CACHE.put(cacheKey, JSON.stringify(results), {
-            expirationTtl: ClubService.CACHE_TTL
-        });
-
-        return results;
+        // searchClubs already handles its own KV caching, no need to double-cache here
+        return this.searchClubs(city);
     }
 
     async validateSiret(siret: string): Promise<{ isValid: boolean; clubName?: string; error?: string }> {

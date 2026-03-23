@@ -4,7 +4,6 @@ import { Env } from '../types/env';
 import { SessionService } from '../services/session.service';
 import { CreateSessionDto, UpdateSessionDto } from '../types/session';
 import { Permission } from '../types/permissions';
-import { checkPermission } from '../middleware/permissions.middleware';
 import { broadcastDataChanged } from '../utils/broadcast';
 
 export const setupSessionRoutes = (router: Router, env: Env) => {

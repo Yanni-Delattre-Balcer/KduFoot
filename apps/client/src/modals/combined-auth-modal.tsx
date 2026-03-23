@@ -7,7 +7,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Calendar, ChevronRight, Copy } from "lucide-react";
+import { Calendar, ChevronRight } from "lucide-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { addToast } from "@heroui/toast";
 import { useTranslation } from "react-i18next";
@@ -26,24 +26,8 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
   const { getAccessTokenSilently } = useAuth0();
   const { t } = useTranslation();
   const [isSyncing, setIsSyncing] = useState(false);
-  const [hasSyncedOnce, setHasSyncedOnce] = useState(false);
-  const [calendarUrl, setCalendarUrl] = useState<string | null>(null);
 
   const isAndroid = /android/i.test(navigator.userAgent);
-
-  const handleCopyLink = async () => {
-    if (!calendarUrl) return;
-    try {
-      await navigator.clipboard.writeText(calendarUrl);
-      addToast({
-        title: t("onboarding.calendar.copy_success", "Lien copié !"),
-        description: t("onboarding.calendar.copy_success_desc", "Collez-le dans votre application calendrier pour vous abonner."),
-        color: "success",
-      });
-    } catch {
-      addToast({ title: t("error.title"), description: "Impossible de copier le lien.", color: "danger" });
-    }
-  };
 
   const handleCalendarSync = async () => {
     setIsSyncing(true);
@@ -58,10 +42,6 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
 
       if (data && (data as any).url) {
         const rawUrl = (data as any).url;
-
-        // Save the raw URL for the "copy" fallback
-        setCalendarUrl(rawUrl);
-        setHasSyncedOnce(true);
 
         if (isAndroid) {
           // Android: Use Google Calendar subscription URL which triggers the app chooser
@@ -167,22 +147,6 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
             >
               {t("onboarding.calendar.dismiss", "Je l'ai déjà fait")}
             </Button>
-
-            {hasSyncedOnce && (
-              <>
-                <Button
-                  className="w-full font-bold text-sm tracking-tight rounded-xl h-12 border-2 border-purple-500/20 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-all"
-                  startContent={<Copy size={16} />}
-                  variant="flat"
-                  onPress={handleCopyLink}
-                >
-                  {t("onboarding.calendar.copy_link", "📋 Copier le lien du calendrier")}
-                </Button>
-                <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
-                  {t("onboarding.calendar.help_text", "Si le calendrier ne s'est pas ouvert automatiquement, copiez le lien et collez-le dans votre application calendrier.")}
-                </p>
-              </>
-            )}
 
             {/* Bouton "Pas maintenant" : fermeture pour la session actuelle */}
             <Button
