@@ -30,24 +30,34 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         let additional_clubs: import("../../types").Club[] = [];
         if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
-            additional_clubs = await Promise.all(user.additional_sirets.map(async (item: unknown) => {
+            // Extract siret info from items
+            const siretItems = user.additional_sirets.map((item: unknown) => {
                 const itemObj = item as { siret?: string; stadium_address?: string };
-                // Keep strictly typed logic here using fallback
-                const siret = typeof item === 'string' ? item : (itemObj.siret || '');
-                const stadium_address = typeof item === 'object' && item !== null ? itemObj.stadium_address : undefined;
+                return {
+                    siret: typeof item === 'string' ? item : (itemObj.siret || ''),
+                    stadium_address: typeof item === 'object' && item !== null ? itemObj.stadium_address : undefined
+                };
+            });
 
-                const dbClub = await env.DB.prepare('SELECT id, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(siret).first<{ id: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number }>();
-                if (dbClub) return { ...dbClub, siret, stadium_address } as import("../../types").Club;
+            // Batch DB lookup: one query per siret using D1 batch
+            const batchQueries = siretItems.map(s =>
+                env.DB.prepare('SELECT id, siret, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(s.siret)
+            );
+            const batchResults = await env.DB.batch(batchQueries);
+
+            additional_clubs = await Promise.all(siretItems.map(async (item, idx) => {
+                const dbClub = batchResults[idx].results[0] as { id: string, siret: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number } | undefined;
+                if (dbClub) return { ...dbClub, siret: item.siret, stadium_address: item.stadium_address } as import("../../types").Club;
 
                 try {
                     const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
-                    const r = await fetch(`${SIRET_API_URL}?q=${siret}&page=1&per_page=1`);
+                    const r = await fetch(`${SIRET_API_URL}?q=${item.siret}&page=1&per_page=1`);
                     if (r.ok) {
                         const d = await r.json() as import("../../types").SiretApiResponse;
                         if (d.results && d.results.length > 0) {
                             const rData = d.results[0];
                             const newId = crypto.randomUUID();
-                            const name = rData.nom_complet || siret;
+                            const name = rData.nom_complet || item.siret;
                             const city = rData.siege?.libelle_commune || '';
                             const zip = rData.siege?.code_postal || '';
                             const address = rData.siege?.adresse || '';
@@ -56,14 +66,14 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
                             await env.DB.prepare(
                                 'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())'
-                            ).bind(newId, siret, name, city, address, zip, lat, lng).run();
+                            ).bind(newId, item.siret, name, city, address, zip, lat, lng).run();
 
-                            return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address } as import("../../types").Club;
+                            return { id: newId, siret: item.siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address: item.stadium_address } as import("../../types").Club;
                         }
                     }
-                } catch (_e) { /* intentionnellement vide */ }
+                } catch (_e) { console.warn('[Profile] SIRET API lookup failed for', item.siret, _e); }
 
-                return { id: crypto.randomUUID(), siret, name: siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address } as import("../../types").Club;
+                return { id: crypto.randomUUID(), siret: item.siret, name: item.siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address: item.stadium_address } as import("../../types").Club;
             }));
         }
 
@@ -121,26 +131,35 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
         }
         notifications.total = notifications.incoming_requests + notifications.updates;
 
-        // Handle additional clubs separately
+        // Handle additional clubs separately — batched DB lookup
         let additional_clubs: import("../../types").Club[] = [];
         if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
-            additional_clubs = await Promise.all(user.additional_sirets.map(async (item: unknown) => {
+            const siretItems = user.additional_sirets.map((item: unknown) => {
                 const itemObj = item as { siret?: string; stadium_address?: string };
-                const siret = typeof item === 'string' ? item : (itemObj.siret || '');
-                const stadium_address = typeof item === 'object' && item !== null ? itemObj.stadium_address : undefined;
+                return {
+                    siret: typeof item === 'string' ? item : (itemObj.siret || ''),
+                    stadium_address: typeof item === 'object' && item !== null ? itemObj.stadium_address : undefined
+                };
+            });
 
-                const dbClub = await env.DB.prepare('SELECT id, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(siret).first<{ id: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number }>();
-                if (dbClub) return { ...dbClub, siret, stadium_address } as import("../../types").Club;
+            const batchQueries = siretItems.map(s =>
+                env.DB.prepare('SELECT id, siret, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(s.siret)
+            );
+            const batchResults = await env.DB.batch(batchQueries);
+
+            additional_clubs = await Promise.all(siretItems.map(async (item, idx) => {
+                const dbClub = batchResults[idx].results[0] as { id: string, siret: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number } | undefined;
+                if (dbClub) return { ...dbClub, siret: item.siret, stadium_address: item.stadium_address } as import("../../types").Club;
 
                 try {
                     const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
-                    const r = await fetch(`${SIRET_API_URL}?q=${siret}&page=1&per_page=1`);
+                    const r = await fetch(`${SIRET_API_URL}?q=${item.siret}&page=1&per_page=1`);
                     if (r.ok) {
                         const d = await r.json() as import("../../types").SiretApiResponse;
                         if (d.results && d.results.length > 0) {
                             const rData = d.results[0];
                             const newId = crypto.randomUUID();
-                            const name = rData.nom_complet || siret;
+                            const name = rData.nom_complet || item.siret;
                             const city = rData.siege?.libelle_commune || '';
                             const zip = rData.siege?.code_postal || '';
                             const address = rData.siege?.adresse || '';
@@ -149,14 +168,14 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
                             await env.DB.prepare(
                                 'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())'
-                            ).bind(newId, siret, name, city, address, zip, lat, lng).run();
+                            ).bind(newId, item.siret, name, city, address, zip, lat, lng).run();
 
-                            return { id: newId, siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address } as import("../../types").Club;
+                            return { id: newId, siret: item.siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address: item.stadium_address } as import("../../types").Club;
                         }
                     }
-                } catch (_e) { /* intentionnellement vide */ }
+                } catch (_e) { console.warn('[Context] SIRET API lookup failed for', item.siret, _e); }
 
-                return { id: crypto.randomUUID(), siret, name: siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address } as import("../../types").Club;
+                return { id: crypto.randomUUID(), siret: item.siret, name: item.siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address: item.stadium_address } as import("../../types").Club;
             }));
         }
 
@@ -332,6 +351,29 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         try {
             await userService.deleteUser(user.id);
+
+            // RGPD: Delete Auth0 account
+            if (env.AUTH0_DOMAIN && env.AUTH0_MANAGEMENT_API_CLIENT_ID && env.AUTH0_MANAGEMENT_API_CLIENT_SECRET) {
+                try {
+                    const tokenRes = await fetch(`https://${env.AUTH0_DOMAIN}/oauth/token`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            grant_type: 'client_credentials',
+                            client_id: env.AUTH0_MANAGEMENT_API_CLIENT_ID,
+                            client_secret: env.AUTH0_MANAGEMENT_API_CLIENT_SECRET,
+                            audience: `https://${env.AUTH0_DOMAIN}/api/v2/`
+                        })
+                    });
+                    if (tokenRes.ok) {
+                        const { access_token } = await tokenRes.json() as { access_token: string };
+                        await fetch(`https://${env.AUTH0_DOMAIN}/api/v2/users/${encodeURIComponent(sub)}`, {
+                            method: 'DELETE',
+                            headers: { Authorization: `Bearer ${access_token}` }
+                        });
+                    }
+                } catch { /* Auth0 deletion should not block D1 deletion */ }
+            }
 
             // RGPD audit: log account deletion
             try {

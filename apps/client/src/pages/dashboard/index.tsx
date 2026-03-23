@@ -6,6 +6,7 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
+import { DashboardListSkeleton } from "../../components/skeletons/dashboard-skeleton";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -576,9 +577,7 @@ export default function DashboardPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {isLoadingIncoming ? (
-                    <div className="col-span-full flex justify-center py-12">
-                      <Spinner aria-label={t("loading")} color="warning" />
-                    </div>
+                    <DashboardListSkeleton count={4} />
                   ) : filteredRequests.length > 0 ? (
                     filteredRequests.map((request, idx) => (
                       <Card
@@ -883,9 +882,7 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-4 pt-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {isLoadingIncoming || isLoadingParticipations ? (
-                    <div className="col-span-full flex justify-center py-12">
-                      <Spinner aria-label={t("loading")} color="success" />
-                    </div>
+                    <DashboardListSkeleton count={4} />
                   ) : allConfirmedMatches.length > 0 ? (
                     allConfirmedMatches.map((cm, idx) => (
                       <ConfirmedMatchCard
@@ -961,9 +958,7 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-4 pt-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {isLoadingParticipations ? (
-                    <div className="col-span-full flex justify-center py-12">
-                      <Spinner aria-label={t("loading")} color="secondary" />
-                    </div>
+                    <DashboardListSkeleton count={3} />
                   ) : allConfirmedTournaments.length > 0 ? (
                     allConfirmedTournaments.map((part) => (
                       <ConfirmedTournamentCard

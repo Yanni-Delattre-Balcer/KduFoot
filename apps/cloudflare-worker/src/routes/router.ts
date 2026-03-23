@@ -188,13 +188,14 @@ export class Router {
 			const endpoint = pathname;
 			const rateLimitKey = `${ip}:${userId}:${endpoint}`;
 
-			const isSensitiveParams = pathname.startsWith("/api/contact") || pathname.startsWith("/api/register") || pathname.startsWith("/api/auth");
+			const isSensitiveParams = pathname.startsWith("/api/contact") || pathname.startsWith("/api/register") || pathname.startsWith("/api/auth") || pathname.startsWith("/api/clubs/") || pathname.startsWith("/api/calendar/");
 			if (isSensitiveParams) {
 				const strictKey = `strict_rl:${ip}:${pathname}`;
 				const now = Date.now();
+				const maxRequests = pathname.startsWith("/api/clubs/") ? 30 : 5;
 				const entry = strictRateLimitCache.get(strictKey);
 				if (entry && entry.expiresAt > now) {
-					if (entry.count >= 5) {
+					if (entry.count >= maxRequests) {
 						return this.addSecurityHeaders(new Response(
 							JSON.stringify({ error: `429 Too Many Requests - Strict rate limit exceeded for ${pathname}` }),
 							{

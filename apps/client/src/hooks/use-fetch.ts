@@ -26,11 +26,30 @@ export function useFetch() {
           },
         );
 
+        if (response.status === 401) {
+          try {
+            const freshToken = await getAccessTokenSilently({ cacheMode: "off" });
+            const retryResponse = await fetch(
+              `${import.meta.env.API_BASE_URL}${endpoint}`,
+              {
+                ...options,
+                headers: {
+                  ...headers,
+                  Authorization: `Bearer ${freshToken}`,
+                },
+              },
+            );
+            if (retryResponse.ok) return retryResponse.json();
+          } catch {
+            // Refresh failed — fall through to error
+          }
+        }
+
         if (!response.ok) {
           const error = await response.json().catch(() => ({}));
 
           throw new Error(
-            error.message || `Request failed with status ${response.status}`,
+            (error as any).message || `Request failed with status ${response.status}`,
           );
         }
 

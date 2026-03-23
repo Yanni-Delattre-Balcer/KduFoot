@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { useState } from "react";
-import { Spinner } from "@heroui/spinner";
+import { MatchSkeleton } from "../../components/skeletons/match-skeleton";
+import { ExerciseSkeleton } from "../../components/skeletons/exercise-skeleton";
 import { Link } from "react-router-dom";
 import { Chip } from "@heroui/chip";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -196,8 +197,8 @@ export default function FavoritesPage() {
             {view === "exercises" && (
               <>
                 {loadingEx ? (
-                  <div className="flex justify-center py-10">
-                    <Spinner aria-label={t("loading")} color="success" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[1, 2, 3, 4].map(i => <ExerciseSkeleton key={i} />)}
                   </div>
                 ) : favExercises.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -271,8 +272,8 @@ export default function FavoritesPage() {
             {view === "matches" && (
               <>
                 {loadingMatches ? (
-                  <div className="flex justify-center py-10">
-                    <Spinner aria-label={t("loading")} color="secondary" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3].map(i => <MatchSkeleton key={i} />)}
                   </div>
                 ) : favMatches.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -368,8 +369,8 @@ export default function FavoritesPage() {
             {view === "tournaments" && (
               <>
                 {loadingMatches ? (
-                  <div className="flex justify-center py-10">
-                    <Spinner aria-label={t("loading")} color="secondary" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3].map(i => <MatchSkeleton key={i} />)}
                   </div>
                 ) : favTournaments.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -51,32 +51,63 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
         const url = new URL(request.url);
         const limit = parseInt(url.searchParams.get('limit') || '50');
         const offset = parseInt(url.searchParams.get('offset') || '0');
+        const cursor = url.searchParams.get('cursor') || undefined;
 
         try {
             const countRes = await env.DB.prepare('SELECT count(*) as total FROM users').first<{ total: number }>();
             const total = countRes?.total || 0;
 
-            const results = await env.DB.prepare(`
-                SELECT 
+            let query = `
+                SELECT
                     u.id,
-                    u.auth0_sub, 
+                    u.auth0_sub,
                     u.email,
                     u.firstname,
                     u.lastname,
                     u.club_id,
-                    u.is_blocked, 
-                    u.block_reason, 
+                    u.is_blocked,
+                    u.block_reason,
                     u.siret,
                     u.created_at,
                     u.updated_at,
                     c.name as club_name
                 FROM users u
-                LEFT JOIN clubs c ON u.club_id = c.id
-                ORDER BY u.created_at DESC
-                LIMIT ? OFFSET ?
-            `).bind(limit, offset).all<any>();
+                LEFT JOIN clubs c ON u.club_id = c.id`;
+            const params: unknown[] = [];
 
-            const metadata = results.results?.map(u => ({
+            if (cursor) {
+                try {
+                    const cursorData = JSON.parse(globalThis.atob(cursor));
+                    if (cursorData.created_at && cursorData.id) {
+                        query += ' WHERE (u.created_at < ? OR (u.created_at = ? AND u.id > ?))';
+                        params.push(cursorData.created_at, cursorData.created_at, cursorData.id);
+                    }
+                } catch { /* invalid cursor, ignore */ }
+            }
+
+            query += ' ORDER BY u.created_at DESC, u.id ASC LIMIT ?';
+            params.push(limit + 1);
+
+            if (!cursor) {
+                query += ' OFFSET ?';
+                params.push(offset);
+            }
+
+            const results = await env.DB.prepare(query).bind(...params).all<any>();
+
+            let hasMore = false;
+            if (results.results && results.results.length > limit) {
+                hasMore = true;
+                results.results.pop();
+            }
+
+            let nextCursor: string | null = null;
+            if (hasMore && results.results && results.results.length > 0) {
+                const lastItem = results.results[results.results.length - 1];
+                nextCursor = globalThis.btoa(JSON.stringify({ created_at: lastItem.created_at, id: lastItem.id }));
+            }
+
+            const metadata = results.results?.map((u: any) => ({
                 id: u.id,
                 auth0_sub: u.auth0_sub,
                 email: u.email,
@@ -91,7 +122,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 role: (env.SUPER_ADMIN_EMAIL && u.email === env.SUPER_ADMIN_EMAIL) ? 'super_admin' : 'user'
             })) || [];
 
-            return Response.json({ success: true, metadata, pagination: { total, limit, offset } }, { headers: router.corsHeaders });
+            return Response.json({ success: true, metadata, pagination: { total, limit, offset, nextCursor, hasMore } }, { headers: router.corsHeaders });
         } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
@@ -227,7 +258,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 const clubService = new ClubService(env);
                 const validation = await clubService.validateSiret(body.siret);
                 if (validation.clubName) clubName = validation.clubName;
-            } catch (e) { /* intentionnellement vide */ }
+            } catch (e) { console.warn('[Admin] Operation failed:', e); }
         }
 
         const d1Id = (targetUser as any).id as string;
@@ -410,7 +441,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                     const d = await r.json() as import("../../types").SiretApiResponse;
                     return { siret: s, name: d.results?.[0]?.nom_complet || s };
                 }
-            } catch (e) { /* intentionnellement vide */ }
+            } catch (e) { console.warn('[Admin] Operation failed:', e); }
             return { siret: s, name: s };
         }));
 
