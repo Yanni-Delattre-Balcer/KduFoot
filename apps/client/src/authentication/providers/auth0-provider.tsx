@@ -87,7 +87,6 @@ export const useAuth0Provider = (): AuthProvider => {
 
         return token;
       } catch (error: any) {
-        // eslint-disable-next-line no-console
         console.error("Error getting access token:", error);
 
         // If the error indicates we need to re-authenticate (e.g. missing refresh token, login required)
@@ -175,7 +174,6 @@ export const useAuth0Provider = (): AuthProvider => {
 
         return result;
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Error checking permission:", error);
 
         return false;
@@ -191,13 +189,14 @@ export const useAuth0Provider = (): AuthProvider => {
     if (response.status === 429) {
       addToast({
         title: "Forte affluence",
-        description: "Nos serveurs sont très sollicités. Veuillez patienter un instant.",
+        description:
+          "Nos serveurs sont très sollicités. Veuillez patienter un instant.",
         variant: "flat",
         color: "warning",
         timeout: 5000,
       });
     }
-    
+
     if (response.status === 403) {
       const text = await response
         .clone()
@@ -219,7 +218,7 @@ export const useAuth0Provider = (): AuthProvider => {
 
           window.dispatchEvent(event);
         }
-      } catch (e) {
+      } catch {
         // Not JSON or other error
       }
     }
@@ -256,7 +255,7 @@ export const useAuth0Provider = (): AuthProvider => {
               ) {
                 errorJson = JSON.parse(errorText);
               }
-            } catch (e) {
+            } catch {
               /* ignore parse error */
             }
 
@@ -285,13 +284,13 @@ export const useAuth0Provider = (): AuthProvider => {
 
         try {
           const data = await promise;
+
           return data;
         } finally {
           // remove from cache so next call is a fresh fetch
           requestCacheRef.current.delete(cacheKey);
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Error fetching JSON:", error);
         throw error;
       }
@@ -326,7 +325,7 @@ export const useAuth0Provider = (): AuthProvider => {
             ) {
               errorJson = JSON.parse(errorText);
             }
-          } catch (e) {
+          } catch {
             /* ignore */
           }
           throw new Error(
@@ -342,7 +341,6 @@ export const useAuth0Provider = (): AuthProvider => {
 
         return await apiResponse.json();
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Error posting JSON:", error);
         throw error;
       }
@@ -377,7 +375,7 @@ export const useAuth0Provider = (): AuthProvider => {
             ) {
               errorJson = JSON.parse(errorText);
             }
-          } catch (e) {
+          } catch {
             /* ignore */
           }
           throw new Error(
@@ -393,7 +391,6 @@ export const useAuth0Provider = (): AuthProvider => {
 
         return await apiResponse.json();
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Error patching JSON:", error);
         throw error;
       }
@@ -427,7 +424,7 @@ export const useAuth0Provider = (): AuthProvider => {
             ) {
               errorJson = JSON.parse(errorText);
             }
-          } catch (e) {
+          } catch {
             /* ignore */
           }
           throw new Error(
@@ -443,7 +440,6 @@ export const useAuth0Provider = (): AuthProvider => {
 
         return await apiResponse.json();
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Error deleting JSON:", error);
         throw error;
       }
@@ -478,7 +474,7 @@ export const useAuth0Provider = (): AuthProvider => {
             ) {
               errorJson = JSON.parse(errorText);
             }
-          } catch (e) {
+          } catch {
             /* ignore */
           }
           throw new Error(
@@ -494,7 +490,6 @@ export const useAuth0Provider = (): AuthProvider => {
 
         return await apiResponse.json();
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Error putting JSON:", error);
         throw error;
       }

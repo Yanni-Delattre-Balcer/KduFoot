@@ -199,7 +199,7 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 		if (!access) {
 			return new Response(JSON.stringify({ success: false, error: "Insufficient permissions" }), {
 				status: 403,
-				headers: { ...router.corsHeaders, "Content-Type": "application/json" }
+				headers: router.corsHeaders
 			});
 		}
 
@@ -212,7 +212,7 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 	setupUserRoutes(router, env);
 	setupClubRoutes(router, env);
 	setupExerciseRoutes(router, env);
-	setupSessionRoutes(router, env);
+	setupSessionRoutes(router, env, ctx);
 	setupParticipationRoutes(router, env, ctx); // Strategic placement before dynamic /api/matches/<id>
 	setupMatchRoutes(router, env, ctx);
 	setupTournamentRoutes(router, env, ctx);
@@ -269,7 +269,7 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 	router.get("/health", async () => {
 		return new Response(JSON.stringify({ success: true, status: "ok" }), {
 			status: 200,
-			headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+			headers: router.corsHeaders,
 		});
 	});
 
@@ -300,12 +300,12 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 				env_id: env.CLOUDFLARE_DATABASE_ID // This might be undefined unless injected
 			}), {
 				status: 200,
-				headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+				headers: router.corsHeaders,
 			});
 		} catch (e: unknown) {
 			return new Response(JSON.stringify({ success: false, error: 'Internal server error' }), {
 				status: 500,
-				headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+				headers: router.corsHeaders,
 			});
 		}
 	}, env.ADMIN_AUTH0_PERMISSION);
@@ -403,7 +403,7 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 
 			return new Response(JSON.stringify({ success: true, user }), {
 				status: 200,
-				headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+				headers: router.corsHeaders,
 			});
 		},
 		env.READ_PERMISSION,

@@ -3,6 +3,7 @@ import { Router, AuthenticatedRequest, invalidateBlockCache } from '../router';
 import { Env } from '../../types/env';
 import { ExecutionContext } from "@cloudflare/workers-types";
 import { UserService } from '../../services/user.service';
+import { User } from '../../types/user';
 import { Permission } from '../../types/permissions';
 import { broadcastDataChanged, broadcastNotification } from '../../utils/broadcast';
 import { checkAdmin } from './utils';
@@ -11,7 +12,26 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
     const userService = new UserService(env.DB);
 
     /**
-     * DELETE /api/admin/users/<id>
+     * @openapi
+     * /api/admin/users/{id}:
+     *   delete:
+     *     tags: [Admin]
+     *     summary: Delete a user by ID or Auth0 sub
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         description: D1 UUID or Auth0 sub (pipe-encoded)
+     *         schema: { type: string }
+     *     responses:
+     *       200:
+     *         description: User deleted
+     *       403:
+     *         description: Forbidden (admin only, or attempt to delete super-admin)
+     *       404:
+     *         description: User not found
      */
     router.delete('/api/admin/users/<id>', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
@@ -20,14 +40,14 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
-            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first<User>()
             : await userService.getUserById(id);
 
         if (!targetUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
-        const d1Id = (targetUser as any).id as string;
+        const d1Id = targetUser.id as string;
 
-        if ((env.SUPER_ADMIN_ID && d1Id === env.SUPER_ADMIN_ID) || (env.SUPER_ADMIN_EMAIL && (targetUser as any).email === env.SUPER_ADMIN_EMAIL)) {
+        if ((env.SUPER_ADMIN_ID && d1Id === env.SUPER_ADMIN_ID) || (env.SUPER_ADMIN_EMAIL && targetUser.email === env.SUPER_ADMIN_EMAIL)) {
             return Response.json({ success: false, error: 'Impossible de supprimer le Maître Suprême ou le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
         }
 
@@ -41,7 +61,25 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
     }, Permission.WRITE_API);
 
     /**
-     * GET /api/admin/users/metadata
+     * @openapi
+     * /api/admin/users/metadata:
+     *   get:
+     *     tags: [Admin]
+     *     summary: List all users with pagination
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: limit
+     *         in: query
+     *         schema: { type: integer, default: 50 }
+     *       - name: cursor
+     *         in: query
+     *         schema: { type: string }
+     *     responses:
+     *       200:
+     *         description: Paginated list of users
+     *       403:
+     *         description: Forbidden
      */
     router.get('/api/admin/users/metadata', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request, env)) {
@@ -93,7 +131,14 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 params.push(offset);
             }
 
-            const results = await env.DB.prepare(query).bind(...params).all<any>();
+            interface UserMetadataRow {
+                id: string; auth0_sub: string; email: string;
+                firstname: string; lastname: string; club_id: string | null;
+                is_blocked: boolean; block_reason: string | null; siret: string | null;
+                created_at: number; updated_at: number; club_name: string | null;
+            }
+
+            const results = await env.DB.prepare(query).bind(...params).all<UserMetadataRow>();
 
             let hasMore = false;
             if (results.results && results.results.length > limit) {
@@ -107,7 +152,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 nextCursor = globalThis.btoa(JSON.stringify({ created_at: lastItem.created_at, id: lastItem.id }));
             }
 
-            const metadata = results.results?.map((u: any) => ({
+            const metadata = results.results?.map((u) => ({
                 id: u.id,
                 auth0_sub: u.auth0_sub,
                 email: u.email,
@@ -141,7 +186,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
 
         let targetUser;
         if (id.includes('|')) {
-            targetUser = await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first();
+            targetUser = await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first<User>();
         } else {
             targetUser = await userService.getUserById(id);
         }
@@ -150,9 +195,9 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
-        const d1Id = (targetUser as any).id as string;
+        const d1Id = targetUser.id as string;
 
-        if ((env.SUPER_ADMIN_ID && d1Id === env.SUPER_ADMIN_ID) || (env.SUPER_ADMIN_EMAIL && (targetUser as any).email === env.SUPER_ADMIN_EMAIL)) {
+        if ((env.SUPER_ADMIN_ID && d1Id === env.SUPER_ADMIN_ID) || (env.SUPER_ADMIN_EMAIL && targetUser.email === env.SUPER_ADMIN_EMAIL)) {
             return Response.json({ success: false, error: 'Impossible de bloquer le Maître Suprême ou le Super-Administrateur.' }, { status: 403, headers: router.corsHeaders });
         }
 
@@ -165,16 +210,13 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 await env.DB.prepare('UPDATE users SET block_count = block_count + 1 WHERE id = ?').bind(d1Id).run();
             }
 
-            invalidateBlockCache((targetUser as any).auth0_sub);
-            if (env.KV_CACHE) {
-                await env.KV_CACHE.delete(`blocked:${(targetUser as any).auth0_sub}`);
-            }
+            await invalidateBlockCache(targetUser.auth0_sub, env);
 
             ctx.waitUntil(broadcastDataChanged(env));
             ctx.waitUntil(broadcastNotification(env, {
                 type: 'NOTIFICATION',
                 notificationType: body.is_blocked ? 'USER_BANNED' : 'USER_UNBANNED',
-                targetUserId: (targetUser as any).auth0_sub,
+                targetUserId: targetUser.auth0_sub,
                 message: body.is_blocked
                     ? (body.block_reason || 'Aucun motif spécifié')
                     : 'Votre compte a été débloqué.',
@@ -196,20 +238,20 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
-            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first<User>()
             : await userService.getUserById(id);
 
         if (!targetUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         const body = await request.json() as Record<string, unknown>;
-        const d1Id = (targetUser as any).id as string;
+        const d1Id = targetUser.id as string;
 
         try {
             const updated = await userService.updateUser(d1Id, body);
             await broadcastDataChanged(env);
             return Response.json({ success: true, user: updated }, { headers: router.corsHeaders });
         } catch (e: unknown) {
-            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: router.corsHeaders });
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.WRITE_API);
@@ -224,7 +266,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
-            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first<User>()
             : await userService.getUserById(id);
 
         if (!targetUser) {
@@ -232,11 +274,12 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 const newId = crypto.randomUUID();
                 await env.DB.prepare('INSERT INTO users (id, auth0_sub, created_at, updated_at) VALUES (?, ?, unixepoch(), unixepoch())')
                     .bind(newId, id).run();
-                targetUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(newId).first();
+                targetUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(newId).first<User>();
             } else {
                 return Response.json({ success: false, error: 'User not found in D1' }, { status: 404, headers: router.corsHeaders });
             }
         }
+        if (!targetUser) return Response.json({ success: false, error: 'User creation failed' }, { status: 500, headers: router.corsHeaders });
 
         const body: { siret: string; force?: boolean } = await request.json();
         if (!body.siret || (body.siret.length !== 14 && body.siret.length !== 9)) {
@@ -261,17 +304,17 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
             } catch (e) { console.warn('[Admin] Operation failed:', e); }
         }
 
-        const d1Id = (targetUser as any).id as string;
-        let siretsStr = (targetUser as any).additional_sirets;
+        const d1Id = targetUser.id;
+        const siretsRaw = targetUser.additional_sirets;
         let sirets: string[] = [];
-        if (typeof siretsStr === 'string') {
+        if (typeof siretsRaw === 'string') {
             try {
-                let parsed = JSON.parse(siretsStr);
+                let parsed = JSON.parse(siretsRaw);
                 if (typeof parsed === 'string') parsed = JSON.parse(parsed);
-                if (Array.isArray(parsed)) sirets = parsed;
-            } catch (e) { sirets = []; }
-        } else if (Array.isArray(siretsStr)) {
-            sirets = siretsStr;
+                if (Array.isArray(parsed)) sirets = parsed.map(String);
+            } catch (_e) { sirets = []; }
+        } else if (Array.isArray(siretsRaw)) {
+            sirets = siretsRaw.map(s => typeof s === 'string' ? s : (s as { siret: string }).siret);
         }
 
         if (!sirets.includes(body.siret)) {
@@ -304,7 +347,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
-            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first<User>()
             : await userService.getUserById(id);
 
         if (!targetUser) {
@@ -312,11 +355,12 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
                 const newId = crypto.randomUUID();
                 await env.DB.prepare('INSERT INTO users (id, auth0_sub, created_at, updated_at) VALUES (?, ?, unixepoch(), unixepoch())')
                     .bind(newId, id).run();
-                targetUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(newId).first();
+                targetUser = await env.DB.prepare('SELECT * FROM users WHERE id = ?').bind(newId).first<User>();
             } else {
                 return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
             }
         }
+        if (!targetUser) return Response.json({ success: false, error: 'User creation failed' }, { status: 500, headers: router.corsHeaders });
 
         const body: { siret: string; force?: boolean } = await request.json();
         if (!body.siret || (body.siret.length !== 14 && body.siret.length !== 9)) {
@@ -360,17 +404,17 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
             if (!body.force) return Response.json({ success: false, error: 'Internal server error' }, { status: 400, headers: router.corsHeaders });
         }
 
-        const existingClub = await env.DB.prepare('SELECT id FROM clubs WHERE siret = ?').bind(body.siret).first();
+        const existingClub = await env.DB.prepare('SELECT id FROM clubs WHERE siret = ?').bind(body.siret).first<{ id: string }>();
         let clubId: string;
         if (existingClub) {
-            clubId = (existingClub as any).id;
+            clubId = existingClub.id;
         } else {
             clubId = crypto.randomUUID();
             await env.DB.prepare('INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
                 .bind(clubId, body.siret, clubName, clubCity, clubAddress, clubZip, lat, lon).run();
         }
 
-        const d1Id = (targetUser as any).id as string;
+        const d1Id = targetUser.id as string;
         await env.DB.prepare('UPDATE users SET siret = ?, club_id = ?, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?')
             .bind(body.siret, clubId, d1Id).run();
 
@@ -389,12 +433,12 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
-            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first<User>()
             : await userService.getUserById(id);
 
         if (!targetUser) return Response.json({ success: false, error: 'User not found in D1' }, { status: 404, headers: router.corsHeaders });
 
-        const d1Id = (targetUser as any).id as string;
+        const d1Id = targetUser.id as string;
         await env.DB.prepare('UPDATE users SET siret = NULL, club_id = NULL, siret_change_count = siret_change_count + 1, updated_at = unixepoch() WHERE id = ?').bind(d1Id).run();
         await broadcastDataChanged(env);
 
@@ -407,26 +451,26 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
     router.delete('/api/admin/users/<id>/additional-sirets/<siret>', async (request: AuthenticatedRequest, env: Env) => {
         if (!await checkAdmin(request, env)) return Response.json({ success: false, error: 'Forbidden: Admin only' }, { status: 403, headers: router.corsHeaders });
 
-        const params = request.params as any;
+        const params = request.params;
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
-            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first<User>()
             : await userService.getUserById(id);
 
         if (!targetUser) return Response.json({ success: false, error: 'User not found in D1' }, { status: 404, headers: router.corsHeaders });
 
-        const d1Id = (targetUser as any).id as string;
-        let siretsStr = (targetUser as any).additional_sirets;
+        const d1Id = targetUser.id;
+        const siretsData = targetUser.additional_sirets;
         let sirets: string[] = [];
-        if (typeof siretsStr === 'string') {
+        if (typeof siretsData === 'string') {
             try {
-                let parsed = JSON.parse(siretsStr);
+                let parsed = JSON.parse(siretsData);
                 if (typeof parsed === 'string') parsed = JSON.parse(parsed);
-                if (Array.isArray(parsed)) sirets = parsed;
-            } catch (e) { sirets = []; }
-        } else if (Array.isArray(siretsStr)) {
-            sirets = siretsStr;
+                if (Array.isArray(parsed)) sirets = parsed.map(String);
+            } catch (_e) { sirets = []; }
+        } else if (Array.isArray(siretsData)) {
+            sirets = siretsData.map(s => typeof s === 'string' ? s : (s as { siret: string }).siret);
         }
         sirets = sirets.filter(s => s !== params.siret);
 
@@ -458,7 +502,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
         let id = decodeURIComponent(params.id);
 
         let targetUser = id.includes('|')
-            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first()
+            ? await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(id).first<User>()
             : await userService.getUserById(id);
 
         if (!targetUser) {
@@ -473,7 +517,7 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
             }, { headers: router.corsHeaders });
         }
 
-        const user = (targetUser as any);
+        const user = targetUser;
         let siretsStr = user.additional_sirets;
         let additional_sirets_raw: unknown[] = [];
         if (typeof siretsStr === 'string') {

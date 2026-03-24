@@ -4,7 +4,8 @@ import { Env } from '../types/env';
 import { TournamentService } from '../services/tournament.service';
 import { Permission } from '../types/permissions';
 import { broadcastDataChanged } from '../utils/broadcast';
-import { UpdateScoreSchema } from '../utils/validation';
+import { UpdateScoreSchema, requireValidUUID } from '../utils/validation';
+import { getDbUser } from '../utils/db-helpers';
 
 export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
     const tournamentService = new TournamentService(env.DB);
@@ -19,7 +20,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
     router.get('/api/tournaments/<id>/pairings', async (request) => {
         const params = request.params as { id: string };
         const pairings = await tournamentService.getPairings(params.id);
-        return Response.json({ success: true, pairings }, { headers: router.corsHeaders });
+        return Response.json({ success: true, pairings }, { headers: { ...router.corsHeaders, 'Cache-Control': 'public, s-maxage=60' } });
     });
 
     /**
@@ -31,7 +32,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
      */
     router.post('/api/tournaments/<id>/pairings/generate', async (request, env, ctx) => {
         const params = request.params as { id: string };
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         try {
@@ -53,7 +54,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
     router.patch('/api/tournaments/pairings/<pairingId>/time', async (request, env, ctx) => {
         const params = request.params as { pairingId: string };
         const body = await request.json() as { scheduled_time: string };
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         try {
@@ -74,7 +75,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
      */
     router.put('/api/matches/<id>/close-registrations', async (request, env, ctx) => {
         const params = request.params as { id: string };
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         try {
@@ -98,7 +99,7 @@ export const setupTournamentRoutes = (router: Router, env: Env, ctx: ExecutionCo
         const validation = UpdateScoreSchema.safeParse(await request.json());
         if (!validation.success) return Response.json({ success: false, error: 'Invalid data' }, { status: 400, headers: router.corsHeaders });
 
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         try {

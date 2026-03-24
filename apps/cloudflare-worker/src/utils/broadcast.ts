@@ -1,6 +1,11 @@
 import { Env } from "../types/env";
 import { SignJWT, importPKCS8 } from "jose";
 
+/**
+ * Notifies all connected WebSocket clients that shared data has changed.
+ * Sends a "DATA_CHANGED" signal to the global WebSocketHub Durable Object.
+ * Safe to call even if no clients are connected — silently no-ops on error.
+ */
 export async function broadcastDataChanged(env: Env) {
     if (!env.WEBSOCKET_HUB) return;
     try {

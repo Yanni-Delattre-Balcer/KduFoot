@@ -32,10 +32,8 @@ import { WelcomeGatewayProvider } from "./contexts/welcome-gateway-context.tsx";
 
 // Request persistent storage to prevent browsers from clearing PWA data
 if (navigator.storage && navigator.storage.persist) {
-  navigator.storage.persist().then((persistent) => {
-    if (persistent) {
-    } else {
-    }
+  navigator.storage.persist().catch(() => {
+    /* best-effort */
   });
 }
 

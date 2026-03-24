@@ -268,7 +268,7 @@ export const ConfirmedMatchCard = ({
                   </span>
                 </div>
 
-                <div className="text-xl font-black text-default-300 italic">
+                <div className="text-xl font-black text-default-400 italic">
                   VS
                 </div>
 

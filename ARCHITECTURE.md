@@ -5,20 +5,37 @@ Plateforme de matchs et tournois de football amateur.
 ## Tech Stack
 
 ### Frontend (Client)
-- **Framework**: React 18 with Vite.
+- **Framework**: React 19 with Vite 7.
 - **UI Library**: HeroUI (NextUI) for high-end components.
-- **Styling**: TailwindCSS & Framer Motion for premium animations.
+- **Styling**: TailwindCSS 4 & Framer Motion for premium animations.
 - **Authentication**: Auth0 (OIDC/JWT) for secure user sessions.
 - **Data Fetching**: SWR for reactive data fetching and caching.
 - **Internationalization**: i18next for multi-language support (FR/EN).
+- **PWA**: Vite PWA + Workbox for offline support and installability.
 
 ### Backend (Cloudflare Worker)
-- **Runtime**: Cloudflare Workers (Edge Computing).
+- **Runtime**: Cloudflare Workers (Edge Computing, V8 isolates).
 - **Database**: Cloudflare D1 (SQLite at the edge).
 - **Caching**: Cloudflare KV for high-performance metadata and details caching.
-- **Rate Limiting**: Cloudflare Rate Limiter for DoS protection.
+- **Rate Limiting**: Cloudflare Rate Limiter + in-memory strict RL for DoS protection.
 - **Real-time**: Durable Objects + WebSocket (WebSocketHub).
-- **Architecture**: Custom Router with middleware-based permission checking.
+- **Architecture**: Custom Router with request-scoped context and middleware-based permission checking.
+
+---
+
+## Contextes Bornés (Bounded Contexts)
+
+Le domaine est découpé en 5 contextes métier distincts :
+
+| Contexte | Services | Entités Clés | Responsabilité |
+|---|---|---|---|
+| **Identité** | `UserService`, Auth0 | `User`, `Club` | Auth, profil, RGPD, permissions |
+| **Compétition** | `MatchService`, `MatchSearchService`, `ParticipationService` | `Match`, `Participation` | Création matchs, recherche géo, inscriptions |
+| **Tournois** | `TournamentService` | `Tournament`, `Pairing` | Brackets, pairings, gestion tournois |
+| **Entraînement** | `ExerciseService`, `SessionService` | `Exercise`, `Session` | Exercices, plans d'entraînement |
+| **Infrastructure** | `ClubService`, `CalendarService` | `Club`, `CalendarToken` | SIRET, iCalendar, WebSocket hub |
+
+Chaque contexte possède ses propres types dans `src/types/` et ses routes dans `src/routes/`.
 
 ---
 
@@ -26,15 +43,16 @@ Plateforme de matchs et tournois de football amateur.
 
 ```
 Client (React) → Auth0 (JWT) → Cloudflare Worker → Router
-  ├─ Permission Check (Auth0 + DB block status)
-  ├─ Rate Limiting (Cloudflare RL + KV strict)
+  ├─ Rate Limiting (Cloudflare RL + strict in-memory)
+  ├─ Permission Check (Auth0 JWT verify + DB block status)
+  ├─ request.user ← JWT payload (sub, permissions)
   ├─ Route Handler
-  │   ├─ Service Layer (business logic)
+  │   ├─ Service Layer (business logic, no HTTP concerns)
   │   │   ├─ D1 Database (SQL queries)
   │   │   ├─ KV Cache (read-through)
   │   │   └─ External APIs (Google Maps, SIRET)
-  │   └─ ErrorHandler (safe error responses)
-  └─ Security Headers (HSTS, CSP, X-Frame-Options)
+  │   └─ ErrorHandler (safe error responses, no leaks)
+  └─ Security Headers (HSTS, CSP, X-Frame-Options, Permissions-Policy)
 ```
 
 ---
@@ -54,6 +72,18 @@ Client (React) → Auth0 (JWT) → Cloudflare Worker → Router
 
 ---
 
+## Architecture Decision Records (ADRs)
+
+Les décisions architecturales majeures sont documentées dans `docs/adr/` :
+
+| ADR | Titre | Statut |
+|---|---|---|
+| [ADR-001](docs/adr/001-cloudflare-edge-architecture.md) | Cloudflare Workers comme runtime backend | Accepté |
+| [ADR-002](docs/adr/002-auth0-authentication.md) | Auth0 pour l'authentification et l'autorisation | Accepté |
+| [ADR-003](docs/adr/003-d1-sqlite-database.md) | Cloudflare D1 (SQLite) comme base de données | Accepté |
+
+---
+
 ## Comment ajouter une nouvelle route
 
 1. **Créer le service** dans `src/services/mon-service.service.ts`
@@ -61,27 +91,31 @@ Client (React) → Auth0 (JWT) → Cloudflare Worker → Router
 3. **Importer dans `routes/index.ts`** et appeler la fonction setup
 4. **Définir les permissions** dans `types/permissions.ts` si nécessaire
 5. **Enregistrer la route** avec `router.get('/api/...', handler, 'permission:scope')`
+   - L'utilisateur authentifié est disponible via `request.user` (JWTPayload)
+   - Les permissions sont disponibles via `request.permissions`
 6. **Ajouter des tests** dans `services/__tests__/`
 
 ---
 
 ## Variables d'environnement
 
-| Variable | Rôle | Obligatoire |
-|---|---|---|
-| `AUTH0_DOMAIN` | Domaine Auth0 (ex: `kdufoot.eu.auth0.com`) | ✅ |
-| `AUTH0_CLIENT_ID` | Client ID Auth0 | ✅ |
-| `AUTH0_CLIENT_SECRET` | Client Secret Auth0 | ✅ |
-| `AUTH0_AUDIENCE` | Audience API Auth0 | ✅ |
-| `AUTH0_SCOPE` | Scopes OAuth2 | ✅ |
-| `API_BASE_URL` | URL de l'API Worker | ✅ |
-| `CORS_ORIGIN` | Origines CORS autorisées | ✅ |
-| `GOOGLE_API_KEY` | Clé API Google Maps | ✅ |
-| `SIRET_API_URL` | URL de l'API SIRET (INSEE) | ✅ |
-| `READ_PERMISSION` | Permission de lecture | ✅ |
-| `WRITE_PERMISSION` | Permission d'écriture | ✅ |
-| `ADMIN_PERMISSION` | Permission admin | ✅ |
-| `VITE_API_URL` | URL API pour le frontend | ✅ |
+Voir `.env.example` à la racine pour la liste complète. Variables obligatoires :
+
+| Variable | Rôle |
+|---|---|
+| `AUTH0_DOMAIN` | Domaine Auth0 (ex: `kdufoot.eu.auth0.com`) |
+| `AUTH0_CLIENT_ID` | Client ID Auth0 |
+| `AUTH0_CLIENT_SECRET` | Client Secret Auth0 |
+| `AUTH0_AUDIENCE` | Audience API Auth0 |
+| `AUTH0_SCOPE` | Scopes OAuth2 |
+| `API_BASE_URL` | URL de l'API Worker |
+| `CORS_ORIGIN` | Origines CORS autorisées |
+| `GOOGLE_API_KEY` | Clé API Google Maps |
+| `SIRET_API_URL` | URL de l'API SIRET (INSEE) |
+| `READ_PERMISSION` | Permission de lecture |
+| `WRITE_PERMISSION` | Permission d'écriture |
+| `ADMIN_PERMISSION` | Permission admin |
+| `VITE_API_URL` | URL API pour le frontend |
 
 ---
 
@@ -92,11 +126,11 @@ Client (React) → Auth0 (JWT) → Cloudflare Worker → Router
 
 ## Monitoring & Seuils Critiques
 - **Requêtes D1 par exécution** : Maximum recommandé < 10 requêtes par appel HTTP. Utiliser `Promise.all` ou `DB.batch()` pour les lectures multiples. Logs structurés JSON alertent si dépassement.
-- **Rate Limits** : Global Cloudflare RL + strict KV (5 req/5min) sur routes sensibles.
+- **Rate Limits** : Global Cloudflare RL + strict in-memory (5 req/5min) sur routes sensibles.
 
 ---
 
-## 📈 Stratégie de Scaling
+## Stratégie de Scaling
 
 | Seuil | Action | Coût estimé |
 |---|---|---|
@@ -120,11 +154,11 @@ Client (React) → Auth0 (JWT) → Cloudflare Worker → Router
 npm run dev:env          # Lancer Worker + Client en mode dev
 npm run type-check       # Vérification TypeScript (tsc --noEmit)
 npm test                 # Tests Vitest
-npm test -- --coverage   # Tests avec couverture
+npm test -- --coverage   # Tests avec couverture (seuils : 70% lignes/fonctions)
 npm run lint             # ESLint
 npx wrangler deploy      # Déploiement production
 ```
 
 ## Test Coverage Thresholds
 - **Minimum global** : 70% lines, 70% functions (configuré dans `vitest.config.mts`).
-
+- **Rapport** : `text` (console) + `json` (CI) + `html` (navigation).

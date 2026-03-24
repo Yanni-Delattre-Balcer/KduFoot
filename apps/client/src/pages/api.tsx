@@ -22,7 +22,8 @@ import { Snippet } from "@heroui/snippet";
 
 import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
-import { useAuth, useSecuredApi } from "@/authentication";
+import { useAuth } from "@/authentication";
+import { useSecuredApi } from "@/authentication/auth-components";
 
 export default function ApiPage() {
   const { t } = useTranslation();

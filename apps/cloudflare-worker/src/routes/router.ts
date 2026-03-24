@@ -33,23 +33,30 @@ import { Env } from "../types/env";
 import { BlockedUserRow } from "../types";
 import { ErrorHandler } from "../utils/error-handler";
 
-// ── In-memory caches (persist across requests within the same Worker isolate) ──
+// ── KV cache TTLs (seconds) ──────────────────────────────────────────────────
+const BLOCK_CACHE_TTL_S = 5 * 60;   // 5 minutes
+const STRICT_RL_WINDOW_S = 5 * 60;  // 5 minutes
 
-// Strict rate limiting: Map<key, { count, expiresAt }>
-const strictRateLimitCache = new Map<string, { count: number; expiresAt: number }>();
-
-// Block status cache: Map<auth0_sub, { isBlocked, blockReason, expiresAt }>
-const blockStatusCache = new Map<string, { isBlocked: boolean; blockReason: string | null; expiresAt: number }>();
-
-const BLOCK_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const STRICT_RL_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
-
-/** Call this after blocking/unblocking a user so the next request re-checks D1. */
-export function invalidateBlockCache(auth0Sub: string): void {
-	blockStatusCache.delete(auth0Sub);
+/**
+ * Delete the distributed block-status cache entry for a user.
+ * Call this after blocking/unblocking so the next request re-checks D1.
+ */
+export async function invalidateBlockCache(auth0Sub: string, env: Env): Promise<void> {
+	try {
+		if (env.KV_CACHE) {
+			await env.KV_CACHE.delete(`blocked:${auth0Sub}`);
+		}
+	} catch (e) {
+		console.error('Failed to invalidate block cache in KV:', e);
+	}
 }
 
-export type AuthenticatedRequest = Request & { params: Record<string, string>; user?: JWTPayload };
+export type AuthenticatedRequest = Request & {
+	params: Record<string, string>;
+	user?: JWTPayload;
+	/** Permissions extracted from the JWT, available in every authenticated route handler. */
+	permissions: string[];
+};
 
 type RouteHandler = (
 	request: AuthenticatedRequest,
@@ -189,25 +196,23 @@ export class Router {
 			const rateLimitKey = `${ip}:${userId}:${endpoint}`;
 
 			const isSensitiveParams = pathname.startsWith("/api/contact") || pathname.startsWith("/api/register") || pathname.startsWith("/api/auth") || pathname.startsWith("/api/clubs/") || pathname.startsWith("/api/calendar/");
-			if (isSensitiveParams) {
-				const strictKey = `strict_rl:${ip}:${pathname}`;
-				const now = Date.now();
+			if (isSensitiveParams && env.KV_CACHE) {
+				const pathParts = pathname.split('/').filter(Boolean);
+				const endpointGroup = pathParts.slice(0, 2).join(':');
+				const strictKey = `rl:strict:${ip}:${endpointGroup}`;
 				const maxRequests = pathname.startsWith("/api/clubs/") ? 30 : 5;
-				const entry = strictRateLimitCache.get(strictKey);
-				if (entry && entry.expiresAt > now) {
-					if (entry.count >= maxRequests) {
-						return this.addSecurityHeaders(new Response(
-							JSON.stringify({ error: `429 Too Many Requests - Strict rate limit exceeded for ${pathname}` }),
-							{
-								status: 429,
-								headers: { ...this.corsHeaders, "Retry-After": "300" }
-							}
-						));
-					}
-					entry.count++;
-				} else {
-					strictRateLimitCache.set(strictKey, { count: 1, expiresAt: now + STRICT_RL_WINDOW_MS });
+				const entry = await env.KV_CACHE.get<{ count: number }>(strictKey, 'json');
+				if (entry && entry.count >= maxRequests) {
+					return this.addSecurityHeaders(new Response(
+						JSON.stringify({ error: `429 Too Many Requests - Strict rate limit exceeded for ${pathname}` }),
+						{
+							status: 429,
+							headers: { ...this.corsHeaders, "Retry-After": "300" }
+						}
+					));
 				}
+				const newCount = (entry?.count || 0) + 1;
+				ctx.waitUntil(env.KV_CACHE.put(strictKey, JSON.stringify({ count: newCount }), { expirationTtl: STRICT_RL_WINDOW_S }));
 			}
 
 			if (env.RATE_LIMITER) {
@@ -282,24 +287,31 @@ export class Router {
 					return ErrorHandler.forbidden(this.corsHeaders);
 				}
 
-				(request as Request & { user?: JWTPayload }).user = payload;
+				(request as AuthenticatedRequest).user = payload;
+				(request as AuthenticatedRequest).permissions = permissions;
 
 				const userId = payload.sub;
 				if (userId) {
 					try {
-						const now = Date.now();
 						let blocked = false;
 						let blockReason: string | null = null;
 
-						const cached = blockStatusCache.get(userId);
-						if (cached && cached.expiresAt > now) {
-							blocked = cached.isBlocked;
-							blockReason = cached.blockReason;
+						if (env.KV_CACHE) {
+							const kvBlockKey = `blocked:${userId}`;
+							const cachedBlock = await env.KV_CACHE.get<{ isBlocked: boolean; blockReason: string | null }>(kvBlockKey, 'json');
+							if (cachedBlock !== null) {
+								blocked = cachedBlock.isBlocked;
+								blockReason = cachedBlock.blockReason;
+							} else {
+								const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(userId).first<BlockedUserRow>();
+								blocked = !!(dbUser && dbUser.is_blocked);
+								blockReason = dbUser?.block_reason ?? null;
+								ctx.waitUntil(env.KV_CACHE.put(kvBlockKey, JSON.stringify({ isBlocked: blocked, blockReason }), { expirationTtl: BLOCK_CACHE_TTL_S }));
+							}
 						} else {
 							const dbUser = await env.DB.prepare('SELECT is_blocked, block_reason FROM users WHERE auth0_sub = ?').bind(userId).first<BlockedUserRow>();
 							blocked = !!(dbUser && dbUser.is_blocked);
-							blockReason = (dbUser as any)?.block_reason ?? null;
-							blockStatusCache.set(userId, { isBlocked: blocked, blockReason, expiresAt: now + BLOCK_CACHE_TTL_MS });
+							blockReason = dbUser?.block_reason ?? null;
 						}
 
 						if (blocked) {
@@ -322,11 +334,11 @@ export class Router {
 				}
 			}
 
-			(request as Request & { params: Record<string, string> }).params = match;
+			(request as AuthenticatedRequest).params = match;
 
 			try {
 				const response = await route.handler(
-					request as Request & { params: Record<string, string>; user?: JWTPayload },
+					request as AuthenticatedRequest,
 					env,
 					ctx,
 				);

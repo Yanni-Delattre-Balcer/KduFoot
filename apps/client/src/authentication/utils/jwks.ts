@@ -49,7 +49,6 @@ export async function getLocalJwkSet(domain: string) {
           }
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.warn(
           "Failed to load JWKS from sessionStorage, fetching anew",
           e,
@@ -66,7 +65,6 @@ export async function getLocalJwkSet(domain: string) {
           JSON.stringify({ jwks, uat: Date.now() }),
         );
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.warn("Failed to save JWKS to sessionStorage", e);
       }
 

@@ -198,9 +198,17 @@ export function useWebSocketSync(
                     description: (
                       <div
                         className="cursor-pointer w-full h-full"
+                        role="button"
+                        tabIndex={0}
                         onClick={() =>
                           navigate(`/matches/${payload.data?.match_id}`)
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            navigate(`/matches/${payload.data?.match_id}`);
+                          }
+                        }}
                       >
                         {t("dashboard.notifications.modification_message", {
                           date: payload.data?.match_date
@@ -277,7 +285,15 @@ export function useWebSocketSync(
                   description: (
                     <div
                       className="cursor-pointer h-full w-full"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => navigate("/dashboard")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          navigate("/dashboard");
+                        }
+                      }}
                     >
                       {description}
                     </div>
@@ -347,11 +363,21 @@ export function useWebSocketSync(
                       description: (
                         <div
                           className="cursor-pointer w-full h-full"
+                          role="button"
+                          tabIndex={0}
                           onClick={() =>
                             navigate(
                               `/dashboard?tab=requests&highlight=${payload.data?.match_id}`,
                             )
                           }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              navigate(
+                                `/dashboard?tab=requests&highlight=${payload.data?.match_id}`,
+                              );
+                            }
+                          }}
                         >
                           {description}
                         </div>
@@ -459,6 +485,8 @@ export function useWebSocketSync(
                     description: (
                       <div
                         className="cursor-pointer w-full h-full"
+                        role="button"
+                        tabIndex={0}
                         onClick={() => {
                           const tab =
                             payload.data?.match_type === "tournament"
@@ -468,6 +496,19 @@ export function useWebSocketSync(
                           navigate(
                             `/dashboard?tab=${tab}&highlight=${payload.data?.match_id}`,
                           );
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            const tab =
+                              payload.data?.match_type === "tournament"
+                                ? "participations"
+                                : "confirmed_matches";
+
+                            navigate(
+                              `/dashboard?tab=${tab}&highlight=${payload.data?.match_id}`,
+                            );
+                          }
                         }}
                       >
                         {description}

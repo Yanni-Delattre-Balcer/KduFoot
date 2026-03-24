@@ -18,10 +18,7 @@ import { useTranslation } from "react-i18next";
 
 import { SiteLoading } from "../components/site-loading";
 
-import {
-  useAuth,
-  withAuthentication,
-} from "./providers/use-auth";
+import { useAuth, withAuthentication } from "./providers/use-auth";
 import { useUser } from "./providers/user-provider";
 import { AccountModal } from "./account-modal";
 
@@ -31,9 +28,11 @@ const mgmtCache: Record<string, { data: any; timestamp: number }> = {};
 
 const getFromCache = (key: string) => {
   const cached = mgmtCache[key];
+
   if (cached && Date.now() - cached.timestamp < AUTH0_CACHE_TTL) {
     return cached.data;
   }
+
   return null;
 };
 
@@ -54,10 +53,15 @@ export const clearUserListCache = () => {
   deleteFromCache("users_list");
 };
 
-export const updateUserInCache = (userId: string, updateFn: (user: any) => any) => {
+export const updateUserInCache = (
+  userId: string,
+  updateFn: (user: any) => any,
+) => {
   const cached = getFromCache("users_list");
+
   if (cached && Array.isArray(cached)) {
     const updated = cached.map((u) => (u.user_id === userId ? updateFn(u) : u));
+
     setToCache("users_list", updated);
   }
 };
@@ -412,7 +416,6 @@ export const AuthenticationGuardWithPermission: FC<{
           setIsLoading(false);
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Permission check failed:", error);
         if (isMounted) {
           setPermitted(false);
@@ -480,6 +483,7 @@ export const useSecuredApi = () => {
   const listAuth0Users = async (mgmtToken: string): Promise<Auth0User[]> => {
     const cacheKey = "users_list";
     const cached = getFromCache(cacheKey);
+
     if (cached) return cached;
 
     const resp = await fetch(
@@ -505,7 +509,9 @@ export const useSecuredApi = () => {
     }
 
     const data = await resp.json();
+
     setToCache(cacheKey, data);
+
     return data;
   };
 
@@ -670,16 +676,19 @@ export const useSecuredApi = () => {
     metadata: any,
   ): Promise<void> => {
     const encodedId = encodeURIComponent(userId);
-    const resp = await fetch(`https://${auth0Domain}/api/v2/users/${encodedId}`, {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${mgmtToken}`,
-        "Content-Type": "application/json",
+    const resp = await fetch(
+      `https://${auth0Domain}/api/v2/users/${encodedId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${mgmtToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          app_metadata: metadata,
+        }),
       },
-      body: JSON.stringify({
-        app_metadata: metadata,
-      }),
-    });
+    );
 
     if (!resp.ok) throw new Error(await resp.text());
   };
@@ -784,6 +793,7 @@ export const useSecuredApi = () => {
   const getResourceServers = async (mgmtToken: string): Promise<any[]> => {
     const cacheKey = "resource_servers";
     const cached = getFromCache(cacheKey);
+
     if (cached) return cached;
 
     const resp = await fetch(`https://${auth0Domain}/api/v2/resource-servers`, {
@@ -796,7 +806,9 @@ export const useSecuredApi = () => {
     if (!resp.ok) throw new Error(await resp.text());
 
     const data = await resp.json();
+
     setToCache(cacheKey, data);
+
     return data;
   };
 
@@ -841,6 +853,7 @@ export const useSecuredApi = () => {
   ): Promise<{ value: string; description: string }[]> => {
     const cacheKey = `resource_server_scopes_${id}`;
     const cached = getFromCache(cacheKey);
+
     if (cached) return cached;
 
     const encodedId = encodeURIComponent(id);
@@ -859,6 +872,7 @@ export const useSecuredApi = () => {
     const scopes = data.scopes ?? [];
 
     setToCache(cacheKey, scopes);
+
     return scopes;
   };
 
@@ -948,76 +962,76 @@ export const useSecuredApi = () => {
     return checkResourceServerScopes(mgmtToken, server.id, targetScopes);
   };
 
-    /**
-     * Fetches metadata for all D1 users (blocked status, club names, etc.)
-     */
-    const getD1UserMetadata = async (
-      skipCache: boolean = false,
-    ): Promise<
-      {
-        id: string;
-        auth0_sub: string;
-        email: string;
-        name: string;
-        club_id: string | null;
-        is_blocked: boolean;
-        block_reason: string | null;
-        siret: string | null;
-        club_name: string | null;
-        created_at: string;
-        last_login: string | null;
-        role: string;
-      }[]
-    > => {
-      const apiBase =
-        typeof import.meta !== "undefined" &&
-        (import.meta as any).env?.API_BASE_URL
-          ? (import.meta as any).env.API_BASE_URL
-          : "";
+  /**
+   * Fetches metadata for all D1 users (blocked status, club names, etc.)
+   */
+  const getD1UserMetadata = async (
+    skipCache: boolean = false,
+  ): Promise<
+    {
+      id: string;
+      auth0_sub: string;
+      email: string;
+      name: string;
+      club_id: string | null;
+      is_blocked: boolean;
+      block_reason: string | null;
+      siret: string | null;
+      club_name: string | null;
+      created_at: string;
+      last_login: string | null;
+      role: string;
+    }[]
+  > => {
+    const apiBase =
+      typeof import.meta !== "undefined" &&
+      (import.meta as any).env?.API_BASE_URL
+        ? (import.meta as any).env.API_BASE_URL
+        : "";
 
-      try {
-        const url = skipCache
-          ? `${apiBase}/api/admin/users/metadata?t=${Date.now()}`
-          : `${apiBase}/api/admin/users/metadata`;
-        const data = await getJson(url);
+    try {
+      const url = skipCache
+        ? `${apiBase}/api/admin/users/metadata?t=${Date.now()}`
+        : `${apiBase}/api/admin/users/metadata`;
+      const data = await getJson(url);
 
-        if (data && data.success && Array.isArray(data.metadata)) {
-          return data.metadata;
-        }
-
-        return [];
-      } catch {
-        return [];
+      if (data && data.success && Array.isArray(data.metadata)) {
+        return data.metadata;
       }
-    };
 
-    return {
-      getJson,
-      postJson,
-      deleteJson,
-      hasPermission,
-      putJson,
-      // Auth0 Management API
-      getAuth0ManagementToken,
-      listAuth0Users,
-      getUserPermissions,
-      addPermissionToUser,
-      addPermissionsToUser,
-      removePermissionFromUser,
-      removePermissionsFromUser,
-      deleteAuth0User,
-      getResourceServers,
-      updateResourceServerScopes,
-      getResourceServerScopes,
-      getResourcesServerScopesWithAudience,
-      updateResourceServerScopesWithAudience,
-      getD1BlockedUsers,
-      getD1UserMetadata,
-      checkResourceServerScopes,
-      checkResourceServerScopesWithAudience,
-      updateUserAppMetadata,
-    };
+      return [];
+    } catch {
+      return [];
+    }
   };
+
+  return {
+    getJson,
+    postJson,
+    deleteJson,
+    hasPermission,
+    putJson,
+    // Auth0 Management API
+    getAuth0ManagementToken,
+    listAuth0Users,
+    getUserPermissions,
+    addPermissionToUser,
+    addPermissionsToUser,
+    removePermissionFromUser,
+    removePermissionsFromUser,
+    deleteAuth0User,
+    getResourceServers,
+    updateResourceServerScopes,
+    getResourceServerScopes,
+    getResourcesServerScopesWithAudience,
+    updateResourceServerScopesWithAudience,
+    getD1BlockedUsers,
+    getD1UserMetadata,
+    checkResourceServerScopes,
+    checkResourceServerScopesWithAudience,
+    updateUserAppMetadata,
+  };
+};
 
 /**
  * Composant de bannissement (Nuclear Guard)
@@ -1213,7 +1227,6 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({
           mutate(() => true, undefined, { revalidate: true });
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Auto-provisioning failed:", error);
       } finally {
         setIsProvisioning(false);

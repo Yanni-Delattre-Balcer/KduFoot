@@ -34,7 +34,7 @@ export const IdentitySection = ({
   setStadiumAddress,
   errors,
   setErrors,
-  email
+  email,
 }: IdentitySectionProps) => {
   const { t } = useTranslation();
 
@@ -63,7 +63,8 @@ export const IdentitySection = ({
             variant="bordered"
             onValueChange={(v) => {
               setFirstname(v);
-              if (errors.firstname) setErrors((prev) => ({ ...prev, firstname: "" }));
+              if (errors.firstname)
+                setErrors((prev) => ({ ...prev, firstname: "" }));
             }}
           />
           <Input
@@ -80,7 +81,8 @@ export const IdentitySection = ({
             variant="bordered"
             onValueChange={(v) => {
               setLastname(v);
-              if (errors.lastname) setErrors((prev) => ({ ...prev, lastname: "" }));
+              if (errors.lastname)
+                setErrors((prev) => ({ ...prev, lastname: "" }));
             }}
           />
         </div>
@@ -99,7 +101,10 @@ export const IdentitySection = ({
           variant="bordered"
           onBlur={() => {
             if (!phone || phone.replace(/\D/g, "").length < 11)
-              setErrors((prev) => ({ ...prev, phone: t("account.errors.phone_required") }));
+              setErrors((prev) => ({
+                ...prev,
+                phone: t("account.errors.phone_required"),
+              }));
           }}
           onValueChange={(v) => {
             handlePhoneChange(v);
@@ -120,7 +125,8 @@ export const IdentitySection = ({
           variant="bordered"
           onValueChange={(v) => {
             setLicenseId(v);
-            if (errors.licenseId) setErrors((prev) => ({ ...prev, licenseId: "" }));
+            if (errors.licenseId)
+              setErrors((prev) => ({ ...prev, licenseId: "" }));
           }}
         />
         <Input
@@ -157,7 +163,8 @@ export const IdentitySection = ({
           variant="bordered"
           onValueChange={(v) => {
             setStadiumAddress(v);
-            if (errors.stadiumAddress) setErrors((prev) => ({ ...prev, stadiumAddress: "" }));
+            if (errors.stadiumAddress)
+              setErrors((prev) => ({ ...prev, stadiumAddress: "" }));
           }}
         />
       </div>

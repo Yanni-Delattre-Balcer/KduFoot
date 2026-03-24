@@ -1,7 +1,9 @@
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { useTranslation } from "react-i18next";
+
 import { JerseyColorDots } from "../jersey-color-dots";
+
 import { Category } from "@/types/exercise.types";
 import { Level } from "@/types/match.types";
 
@@ -33,7 +35,7 @@ export const SportsProfileSection = ({
   awayJerseyColor,
   setAwayJerseyColor,
   errors,
-  setErrors
+  setErrors,
 }: SportsProfileSectionProps) => {
   const { t } = useTranslation();
 
@@ -56,7 +58,8 @@ export const SportsProfileSection = ({
           variant="bordered"
           onChange={(e) => {
             setCategory(e.target.value);
-            if (errors.category) setErrors((prev) => ({ ...prev, category: "" }));
+            if (errors.category)
+              setErrors((prev) => ({ ...prev, category: "" }));
           }}
         >
           {CATEGORIES.map((cat) => (
@@ -90,37 +93,45 @@ export const SportsProfileSection = ({
         <Input
           isRequired
           aria-label={t("account.fields.home_jersey")}
-          errorMessage={errors.homeJerseyColor}
           endContent={<JerseyColorDots colors={homeJerseyColor} size="md" />}
+          errorMessage={errors.homeJerseyColor}
           id={`${baseId}_home_jersey`}
           isInvalid={!!errors.homeJerseyColor}
           label={t("account.fields.home_jersey", "Couleur maillot Domicile")}
           name="acc_home_jersey"
-          placeholder={t("account.fields.home_jersey_placeholder", "Ex: Rouge et Blanc")}
+          placeholder={t(
+            "account.fields.home_jersey_placeholder",
+            "Ex: Rouge et Blanc",
+          )}
           size="sm"
           value={homeJerseyColor}
           variant="bordered"
           onValueChange={(v) => {
             setHomeJerseyColor(v);
-            if (errors.homeJerseyColor) setErrors((prev) => ({ ...prev, homeJerseyColor: "" }));
+            if (errors.homeJerseyColor)
+              setErrors((prev) => ({ ...prev, homeJerseyColor: "" }));
           }}
         />
         <Input
           isRequired
           aria-label={t("account.fields.away_jersey")}
-          errorMessage={errors.awayJerseyColor}
           endContent={<JerseyColorDots colors={awayJerseyColor} size="md" />}
+          errorMessage={errors.awayJerseyColor}
           id={`${baseId}_away_jersey`}
           isInvalid={!!errors.awayJerseyColor}
           label={t("account.fields.away_jersey", "Couleur maillot Extérieur")}
           name="acc_away_jersey"
-          placeholder={t("account.fields.away_jersey_placeholder", "Ex: Bleu et Noir")}
+          placeholder={t(
+            "account.fields.away_jersey_placeholder",
+            "Ex: Bleu et Noir",
+          )}
           size="sm"
           value={awayJerseyColor}
           variant="bordered"
           onValueChange={(v) => {
             setAwayJerseyColor(v);
-            if (errors.awayJerseyColor) setErrors((prev) => ({ ...prev, awayJerseyColor: "" }));
+            if (errors.awayJerseyColor)
+              setErrors((prev) => ({ ...prev, awayJerseyColor: "" }));
           }}
         />
       </div>

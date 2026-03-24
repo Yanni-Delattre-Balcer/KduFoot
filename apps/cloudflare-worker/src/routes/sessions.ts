@@ -1,12 +1,14 @@
-
+import type { ExecutionContext } from "@cloudflare/workers-types";
 import { Router } from './router';
 import { Env } from '../types/env';
 import { SessionService } from '../services/session.service';
 import { CreateSessionDto, UpdateSessionDto } from '../types/session';
 import { Permission } from '../types/permissions';
 import { broadcastDataChanged } from '../utils/broadcast';
+import { getDbUser } from '../utils/db-helpers';
+import { requireValidUUID } from '../utils/validation';
 
-export const setupSessionRoutes = (router: Router, env: Env) => {
+export const setupSessionRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
     const sessionService = new SessionService(env.DB);
 
     /**
@@ -51,9 +53,9 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
     router.get('/api/sessions', async (request, env) => {
 
         // Default to seeing own sessions
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) {
-            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: router.corsHeaders });
         }
 
         const url = new URL(request.url);
@@ -71,7 +73,7 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
         };
 
         const result = await sessionService.search(filters);
-        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Cache-Control": "private, max-age=60" } });
     }, Permission.READ_API);
 
     /**
@@ -102,6 +104,8 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      */
     router.get('/api/sessions/<id>', async (request, env) => {
         const { id } = request.params;
+        const uuidError = requireValidUUID(id, router.corsHeaders);
+        if (uuidError) return uuidError;
 
         const cacheKey = `session:${id}`;
         if (env.KV_CACHE) {
@@ -109,27 +113,27 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
             if (cached) {
                 const sessionData = JSON.parse(cached);
                 // Security check even for cache
-                const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+                const dbUser = await getDbUser(env.DB, request.user?.sub);
                 if (dbUser && sessionData.session.user_id !== dbUser.id) {
-                    return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                    return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: router.corsHeaders });
                 }
-                return Response.json({ success: true, ...sessionData, cached: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                return Response.json({ success: true, ...sessionData, cached: true }, { headers: { ...router.corsHeaders, "Cache-Control": "private, max-age=300" } });
             }
         }
 
         const result = await sessionService.getById(id);
         if (!result) {
-            return Response.json({ success: false, error: 'Session not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Session not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         // Security check: is it my session?
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
 
         if (dbUser && result.session.user_id !== dbUser.id) {
-            return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: router.corsHeaders });
         }
 
-        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        return Response.json({ success: true, ...result }, { headers: { ...router.corsHeaders, "Cache-Control": "private, max-age=300" } });
     }, Permission.READ_API);
 
     /**
@@ -162,19 +166,19 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      *         description: Forbidden - Insufficient rights.
      */
     router.post('/api/sessions', async (request, env) => {
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) {
-            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: router.corsHeaders });
         }
 
         const dto = await request.json() as CreateSessionDto;
 
         try {
             const session = await sessionService.create(dbUser.id, dto);
-            await broadcastDataChanged(env);
-            return Response.json({ success: true, session }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            ctx.waitUntil(broadcastDataChanged(env));
+            return Response.json({ success: true, session }, { headers: router.corsHeaders });
         } catch (e: unknown) {
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.SESSIONS_CREATE);
 
@@ -214,7 +218,9 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      */
     router.put('/api/sessions/<id>', async (request, env) => {
         const { id } = request.params;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const uuidError = requireValidUUID(id, router.corsHeaders);
+        if (uuidError) return uuidError;
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
         }
@@ -223,14 +229,14 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
 
         try {
             const success = await sessionService.update(id, dbUser.id, dto);
-            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: router.corsHeaders });
 
             if (env.KV_CACHE) await env.KV_CACHE.delete(`session:${id}`);
-            await broadcastDataChanged(env);
-            return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            ctx.waitUntil(broadcastDataChanged(env));
+            return Response.json({ success: true }, { headers: router.corsHeaders });
         } catch (e: unknown) {
-            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: router.corsHeaders });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.SESSIONS_CREATE);
 
@@ -258,19 +264,21 @@ export const setupSessionRoutes = (router: Router, env: Env) => {
      */
     router.delete('/api/sessions/<id>', async (request, env) => {
         const { id } = request.params;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const uuidError = requireValidUUID(id, router.corsHeaders);
+        if (uuidError) return uuidError;
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
         }
 
         try {
             const success = await sessionService.delete(id, dbUser.id);
-            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            await broadcastDataChanged(env);
-            return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: router.corsHeaders });
+            ctx.waitUntil(broadcastDataChanged(env));
+            return Response.json({ success: true }, { headers: router.corsHeaders });
         } catch (e: unknown) {
-            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: router.corsHeaders });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.SESSIONS_CREATE);
 };

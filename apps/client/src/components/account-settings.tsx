@@ -26,9 +26,17 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const from = searchParams.get("from") || (location.state as { from?: string })?.from;
+  const from =
+    searchParams.get("from") || (location.state as { from?: string })?.from;
   const { user: authUser, getAccessToken, logout } = useAuth();
-  const { user: dbUser, updateUser, linkClub, unlinkClub, refetch, resetCalendarSync } = useUser();
+  const {
+    user: dbUser,
+    updateUser,
+    linkClub,
+    unlinkClub,
+    refetch,
+    resetCalendarSync,
+  } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [licenseId, setLicenseId] = useState("");
@@ -93,15 +101,15 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     return formatted;
   };
 
-
-
   // Sync properties from dbUser when it loads
   useEffect(() => {
     if (dbUser && !isInitialized) {
       // Check for local storage data as fallback for missing/incomplete fields
       let localData: any = {};
+
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
+
         if (saved) localData = JSON.parse(saved);
       } catch (e) {
         console.warn("Failed to parse local profile data", e);
@@ -112,11 +120,17 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       setLicenseId(localData.licenseId || dbUser.license_id || "");
       setLevel(localData.level || dbUser.level || "");
       setCategory(localData.category || dbUser.category || "");
-      setHomeJerseyColor(localData.homeJerseyColor || dbUser.home_jersey_color || "");
-      setAwayJerseyColor(localData.awayJerseyColor || dbUser.away_jersey_color || "");
+      setHomeJerseyColor(
+        localData.homeJerseyColor || dbUser.home_jersey_color || "",
+      );
+      setAwayJerseyColor(
+        localData.awayJerseyColor || dbUser.away_jersey_color || "",
+      );
       setPhone(formatPhoneNumber(localData.phone || dbUser.phone || ""));
       setSiret(formatSiret(localData.siret || dbUser.siret || ""));
-      setStadiumAddress(localData.stadiumAddress || dbUser.stadium_address || "");
+      setStadiumAddress(
+        localData.stadiumAddress || dbUser.stadium_address || "",
+      );
 
       // Initialize additional stadium addresses
       const addAddr: Record<string, string> = {};
@@ -174,8 +188,10 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+
       reader.onload = (e) => {
         const img = new window.Image();
+
         img.onload = () => {
           const canvas = document.createElement("canvas");
           let width = img.width;
@@ -200,10 +216,12 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext("2d");
+
           ctx?.drawImage(img, 0, 0, width, height);
-          
+
           // Compress to JPEG with 0.7 quality
           const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+
           resolve(dataUrl);
         };
         img.onerror = reject;
@@ -222,12 +240,13 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     try {
       // Compress and resize image
       const compressedDataUrl = await compressImage(file);
-      setPreviewUrl(compressedDataUrl);
 
+      setPreviewUrl(compressedDataUrl);
     } catch (error) {
       console.error("Image processing error:", error);
       // Fallback: use legacy FileReader if compression fails
       const reader = new FileReader();
+
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
       };
@@ -373,12 +392,15 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       setIsDeleting(true);
       try {
         const token = await getAccessToken();
-        const res = await fetch(`${import.meta.env.API_BASE_URL}/api/me/delete`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const res = await fetch(
+          `${import.meta.env.API_BASE_URL}/api/me/delete`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         if (!res.ok) throw new Error(t("account.delete_error"));
         addToast({
@@ -406,15 +428,18 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
       if (!res.ok) throw new Error("Erreur lors de l'export");
       const blob = await res.blob();
-      const url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+      const url = URL.createObjectURL(
+        new Blob([blob], { type: "application/pdf" }),
+      );
       const a = document.createElement("a");
+
       a.href = url;
-      a.download = `mes-donnees-kdufoot_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.download = `mes-donnees-kdufoot_${new Date().toISOString().split("T")[0]}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       addToast({
         title: "Export réussi",
         color: "success",
@@ -518,7 +543,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
           aria-label={t("account.avatar.change")}
           className="relative group cursor-pointer z-10"
           role="button"
+          tabIndex={0}
           onClick={handleAvatarClick}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleAvatarClick();
+            }
+          }}
         >
           <Image
             alt={authUser.name}
@@ -527,20 +559,20 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
           />
           <div className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 shadow-lg border-2 border-white z-20">
             <svg
-                aria-hidden="true"
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={3}
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 4.5v15m7.5-7.5h-15"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              aria-hidden="true"
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={3}
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 4.5v15m7.5-7.5h-15"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
           <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-15">
             <span className="text-white text-xs font-bold">
@@ -567,38 +599,38 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                 : t("account.subscription.free_account")}
             </Chip>
           </div>
-               <div className="w-full space-y-8">
-          <IdentitySection
-            baseId={baseId}
-            email={authUser.email || ""}
-            errors={errors}
-            firstname={firstname}
-            handlePhoneChange={handlePhoneChange}
-            hqAddress={dbUser?.club?.address || ""}
-            lastname={lastname}
-            licenseId={licenseId}
-            phone={phone}
-            setErrors={setErrors}
-            setFirstname={setFirstname}
-            setLastname={setLastname}
-            setLicenseId={setLicenseId}
-            setStadiumAddress={setStadiumAddress}
-            stadiumAddress={stadiumAddress}
-          />
-
-          <SportsProfileSection
-            awayJerseyColor={awayJerseyColor}
-            baseId={baseId}
-            category={category}
-            errors={errors}
-            homeJerseyColor={homeJerseyColor}
-            level={level}
-            setAwayJerseyColor={setAwayJerseyColor}
-            setCategory={setCategory}
-            setErrors={setErrors}
-            setHomeJerseyColor={setHomeJerseyColor}
-            setLevel={setLevel}
-          />    </div>
+          <div className="w-full space-y-8">
+            <IdentitySection
+              baseId={baseId}
+              email={authUser.email || ""}
+              errors={errors}
+              firstname={firstname}
+              handlePhoneChange={handlePhoneChange}
+              hqAddress={dbUser?.club?.address || ""}
+              lastname={lastname}
+              licenseId={licenseId}
+              phone={phone}
+              setErrors={setErrors}
+              setFirstname={setFirstname}
+              setLastname={setLastname}
+              setLicenseId={setLicenseId}
+              setStadiumAddress={setStadiumAddress}
+              stadiumAddress={stadiumAddress}
+            />
+            <SportsProfileSection
+              awayJerseyColor={awayJerseyColor}
+              baseId={baseId}
+              category={category}
+              errors={errors}
+              homeJerseyColor={homeJerseyColor}
+              level={level}
+              setAwayJerseyColor={setAwayJerseyColor}
+              setCategory={setCategory}
+              setErrors={setErrors}
+              setHomeJerseyColor={setHomeJerseyColor}
+              setLevel={setLevel}
+            />{" "}
+          </div>
 
           <div className="space-y-3">
             <p className="text-sm font-bold text-default-400 ml-1 mt-2">
@@ -627,8 +659,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                   )}
                   {!dbUser?.club_id && (
                     <p className="text-xs text-default-500 leading-relaxed order-1 mt-1">
-                      💼{" "}
-                      {t("matchForm.link_club.enterprise_help")}
+                      💼 {t("matchForm.link_club.enterprise_help")}
                     </p>
                   )}
                   <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start order-2">
@@ -657,7 +688,10 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                           if (cleaned.length <= 14) {
                             setSiret(v);
                             if (errors.siret)
-                              setErrors((prev: Record<string, string>) => ({ ...prev, siret: "" }));
+                              setErrors((prev: Record<string, string>) => ({
+                                ...prev,
+                                siret: "",
+                              }));
                           }
                         }}
                       />
@@ -692,7 +726,11 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                                   color: "success",
                                 });
                               } catch (e: unknown) {
-                                addToast({ title: e instanceof Error ? e.message : String(e), color: "danger" });
+                                addToast({
+                                  title:
+                                    e instanceof Error ? e.message : String(e),
+                                  color: "danger",
+                                });
                               } finally {
                                 setIsSaving(false);
                               }
@@ -739,61 +777,73 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                       <p className="text-[10px] font-bold text-default-400 tracking-widest mb-1">
                         {t("account.fields.other_clubs")}
                       </p>
-                      {dbUser.additional_clubs.map((s: { name?: string; city?: string; zip?: string; siret: string }, idx: number) => (
-                        <div
-                          key={idx}
-                          className="bg-white/5 p-4 rounded-xl border border-white/10 flex flex-col gap-3"
-                        >
-                          <div className="flex justify-between items-start gap-2 w-full overflow-hidden">
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-xs font-black text-white truncate">
-                                {s.name || t("account.fields.nameless_club")}
-                              </span>
-                              <div className="flex gap-2 text-[10px] text-default-500 font-bold mt-0.5">
-                                <span>{s.city}</span>
-                                <span>•</span>
-                                <span>{getDept(s.zip)}</span>
+                      {dbUser.additional_clubs.map(
+                        (
+                          s: {
+                            name?: string;
+                            city?: string;
+                            zip?: string;
+                            siret: string;
+                          },
+                          idx: number,
+                        ) => (
+                          <div
+                            key={idx}
+                            className="bg-white/5 p-4 rounded-xl border border-white/10 flex flex-col gap-3"
+                          >
+                            <div className="flex justify-between items-start gap-2 w-full overflow-hidden">
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-black text-white truncate">
+                                  {s.name || t("account.fields.nameless_club")}
+                                </span>
+                                <div className="flex gap-2 text-[10px] text-default-500 font-bold mt-0.5">
+                                  <span>{s.city}</span>
+                                  <span>•</span>
+                                  <span>{getDept(s.zip)}</span>
+                                </div>
                               </div>
+                              <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 py-0.5 rounded shrink-0 border border-white/5">
+                                {formatSiret(s.siret)}
+                              </span>
                             </div>
-                            <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 py-0.5 rounded shrink-0 border border-white/5">
-                              {formatSiret(s.siret)}
-                            </span>
-                          </div>
 
-                          <div className="space-y-1.5">
-                            <Input
-                              aria-label={t(
-                                "account.fields.stadium_address_for",
-                                { club: s.name },
-                              )}
-                              autoComplete="street-address"
-                              classNames={{
-                                label:
-                                  "text-[10px] font-bold text-primary-400 tracking-tight",
-                                input: "text-xs",
-                                inputWrapper: "h-9 min-h-9",
-                              }}
-                              id={`${baseId}_stadium_address_${s.siret}`}
-                              label={t("account.fields.stadium_address_for", {
-                                club: s.name,
-                              })}
-                              name={`acc_stadium_address_${s.siret}`}
-                              placeholder={t(
-                                "account.fields.stadium_placeholder",
-                              )}
-                              size="sm"
-                              value={additionalStadiumAddresses[s.siret] || ""}
-                              variant="bordered"
-                              onValueChange={(v) => {
-                                setAdditionalStadiumAddresses((prev) => ({
-                                  ...prev,
-                                  [s.siret]: v,
-                                }));
-                              }}
-                            />
+                            <div className="space-y-1.5">
+                              <Input
+                                aria-label={t(
+                                  "account.fields.stadium_address_for",
+                                  { club: s.name },
+                                )}
+                                autoComplete="street-address"
+                                classNames={{
+                                  label:
+                                    "text-[10px] font-bold text-primary-400 tracking-tight",
+                                  input: "text-xs",
+                                  inputWrapper: "h-9 min-h-9",
+                                }}
+                                id={`${baseId}_stadium_address_${s.siret}`}
+                                label={t("account.fields.stadium_address_for", {
+                                  club: s.name,
+                                })}
+                                name={`acc_stadium_address_${s.siret}`}
+                                placeholder={t(
+                                  "account.fields.stadium_placeholder",
+                                )}
+                                size="sm"
+                                value={
+                                  additionalStadiumAddresses[s.siret] || ""
+                                }
+                                variant="bordered"
+                                onValueChange={(v) => {
+                                  setAdditionalStadiumAddresses((prev) => ({
+                                    ...prev,
+                                    [s.siret]: v,
+                                  }));
+                                }}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   )}
 
@@ -842,17 +892,23 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div className="flex-1 flex items-center gap-3">
-                  <div 
-                    className={`w-3 h-3 rounded-full shrink-0 ${dbUser?.has_synced_calendar ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-zinc-600'}`} 
+                  <div
+                    className={`w-3 h-3 rounded-full shrink-0 ${dbUser?.has_synced_calendar ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-zinc-600"}`}
                   />
                   <div>
                     <p className="text-sm font-bold text-white">
-                      {dbUser?.has_synced_calendar 
+                      {dbUser?.has_synced_calendar
                         ? t("account.sync.active", "Calendrier Synchronisé ✅")
-                        : t("account.sync.disabled", "Calendrier non connecté ❌")}
+                        : t(
+                            "account.sync.disabled",
+                            "Calendrier non connecté ❌",
+                          )}
                     </p>
                     <p className="text-[10px] text-zinc-500 mt-0.5 font-bold tracking-tight">
-                      {t("onboarding.calendar.native", "Calendrier natif Apple / Google / Outlook")}
+                      {t(
+                        "onboarding.calendar.native",
+                        "Calendrier natif Apple / Google / Outlook",
+                      )}
                     </p>
                   </div>
                 </div>
@@ -863,7 +919,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                   variant={dbUser?.has_synced_calendar ? "bordered" : "flat"}
                   onPress={handleResetCalendar}
                 >
-                  {dbUser?.has_synced_calendar 
+                  {dbUser?.has_synced_calendar
                     ? t("account.buttons.reset_calendar", "Désactiver")
                     : t("account.buttons.sync_now", "Se synchroniser")}
                 </Button>
@@ -894,7 +950,10 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
               variant="flat"
               onPress={handleExportData}
             >
-              {t("account.buttons.export_data_pdf", "Télécharger mes données (PDF)")}
+              {t(
+                "account.buttons.export_data_pdf",
+                "Télécharger mes données (PDF)",
+              )}
             </Button>
 
             <Button

@@ -48,6 +48,7 @@ export const CookieConsent: React.FC = () => {
 
   return (
     <Modal
+      aria-labelledby="cookie-consent-title"
       backdrop="blur"
       isDismissable={false}
       isKeyboardDismissDisabled={true}
@@ -77,10 +78,12 @@ export const CookieConsent: React.FC = () => {
         },
       }}
       placement="bottom"
-      aria-labelledby="cookie-consent-title"
     >
       <ModalContent>
-        <ModalHeader id="cookie-consent-title" className="text-lg font-semibold text-default-900">
+        <ModalHeader
+          className="text-lg font-semibold text-default-900"
+          id="cookie-consent-title"
+        >
           {t("cookie-consent-title")}
         </ModalHeader>
         <ModalBody className="text-small font-normal text-default-700">

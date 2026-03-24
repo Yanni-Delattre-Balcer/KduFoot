@@ -9,12 +9,14 @@ export const UserSync = () => {
   useEffect(() => {
     if (isAuthenticated && user && user.sub && syncedRef.current !== user.sub) {
       const currentSub = user.sub;
+
       syncedRef.current = currentSub;
 
       postJson(`${import.meta.env.API_BASE_URL}/api/users/sync`, user)
         .then(async (res: any) => {
           if (res.success) {
             const { mutate } = await import("swr");
+
             await mutate("/api/me/context");
           } else {
             console.error("User sync returned error:", res.error);

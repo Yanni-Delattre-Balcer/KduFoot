@@ -22,7 +22,7 @@ export function useMatches(filters?: MatchFilters) {
 
     try {
       token = await getAccessTokenSilently();
-    } catch (e) {
+    } catch {
       // Unauthenticated
     }
 
@@ -206,7 +206,7 @@ export function useMatch(id: string | null) {
 
     try {
       token = await getAccessTokenSilently();
-    } catch (e) {
+    } catch {
       // Unauthenticated
     }
 

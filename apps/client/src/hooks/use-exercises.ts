@@ -20,7 +20,7 @@ export function useExercises(filters?: ExerciseFilters) {
 
     try {
       token = await getAccessTokenSilently();
-    } catch (e) {
+    } catch {
       // Unauthenticated
     }
 
@@ -117,7 +117,7 @@ export function useExercise(id: string | null) {
 
     try {
       token = await getAccessTokenSilently();
-    } catch (e) {
+    } catch {
       // Unauthenticated
     }
 

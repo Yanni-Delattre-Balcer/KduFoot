@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { CopyButton } from "@/components/copy-button";
-import { AuthenticationGuardWithPermission } from "@/authentication";
+import { AuthenticationGuardWithPermission } from "@/authentication/auth-components";
 
 interface UserTechnicalInfoModalProps {
   isOpen: boolean;
@@ -164,10 +164,18 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                               color="primary"
                               role="button"
                               size="sm"
+                              tabIndex={0}
                               variant="solid"
                               onClick={() => {
                                 navigate("/admin/users");
                                 onClose();
+                              }}
+                              onKeyDown={(e: React.KeyboardEvent) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  navigate("/admin/users");
+                                  onClose();
+                                }
                               }}
                             >
                               {perm} (Admin Panel)

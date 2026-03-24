@@ -145,8 +145,8 @@ export default function ExerciseDetailsPage() {
             </CardHeader>
             <CardBody className="flex items-center justify-center bg-white p-4">
               <div
-                dangerouslySetInnerHTML={{ 
-                  __html: sanitizeSvg(exercise.svg_schema) 
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeSvg(exercise.svg_schema),
                 }}
                 className="w-full max-w-2xl"
               />

@@ -537,6 +537,97 @@
         }
       }
     },
+    "/api/matches": {
+      "get": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Search matches and tournaments with optional filters",
+        "description": "Returns a cursor-paginated list of active matches/tournaments. Supports geo-radius filtering via Google Maps Distance Matrix (radius_km + user_lat/user_lng). When ownerId=me, returns only the authenticated user's own matches.\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "radius_km",
+            "in": "query",
+            "description": "Filter by driving distance (requires user_lat + user_lng)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Opaque pagination cursor from previous response",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of matches with optional distance_km field"
+          }
+        }
+      }
+    },
+    "/api/matches/{id}": {
+      "get": {
+        "tags": [
+          "Matches"
+        ],
+        "summary": "Get a single match or tournament by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Match details including club info and accepted participants"
+          },
+          "404": {
+            "description": "Match not found"
+          }
+        }
+      }
+    },
     "/api/sessions": {
       "get": {
         "tags": [

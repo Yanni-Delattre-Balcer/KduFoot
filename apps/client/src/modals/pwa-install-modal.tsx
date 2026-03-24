@@ -52,6 +52,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
   return (
     <Modal
       hideCloseButton
+      aria-labelledby="pwa-modal-title"
       backdrop="blur"
       classNames={{
         base: "bg-transparent shadow-none border-none",
@@ -61,7 +62,6 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
       size="md"
-      aria-labelledby="pwa-modal-title"
       onClose={() => onClose("dismissed")}
     >
       <ModalContent>
@@ -81,7 +81,10 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                 </div>
 
                 <div className="space-y-2">
-                  <h3 id="pwa-modal-title" className="text-2xl font-black text-white tracking-tighter italic leading-none">
+                  <h3
+                    className="text-2xl font-black text-white tracking-tighter italic leading-none"
+                    id="pwa-modal-title"
+                  >
                     {t("pwa.install_title")}
                   </h3>
                   <p className="text-sm text-zinc-400 font-medium px-4">
@@ -134,7 +137,10 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   />
                 </div>
                 <div className="space-y-1">
-                  <h2 id="pwa-modal-title" className="text-2xl font-black text-white tracking-tighter italic leading-tight">
+                  <h2
+                    className="text-2xl font-black text-white tracking-tighter italic leading-tight"
+                    id="pwa-modal-title"
+                  >
                     {t("pwa.modal_ios_title")}
                   </h2>
                   <p className="text-[10px] text-primary font-black tracking-[0.2em]">
@@ -152,8 +158,12 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   <div className="flex-1">
                     <p className="text-xs text-zinc-300 font-medium leading-relaxed">
                       {t("pwa.modal_ios_step1_pre")}{" "}
-                      <span className="text-blue-400 font-bold italic">Safari</span>{" "}
-                      <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500/20 rounded-lg border border-blue-500/30 text-blue-400 font-bold text-[10px]">⋯</span>{" "}
+                      <span className="text-blue-400 font-bold italic">
+                        Safari
+                      </span>{" "}
+                      <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500/20 rounded-lg border border-blue-500/30 text-blue-400 font-bold text-[10px]">
+                        ⋯
+                      </span>{" "}
                       {t("pwa.modal_ios_step1_suf")}
                     </p>
                   </div>
@@ -167,7 +177,9 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   <div className="flex items-center gap-2">
                     <p className="text-xs text-zinc-300 font-medium leading-relaxed">
                       {t("pwa.modal_ios_step2_pre")}{" "}
-                      <span className="text-white font-bold italic">{t("pwa.modal_ios_step2_bold")}</span>
+                      <span className="text-white font-bold italic">
+                        {t("pwa.modal_ios_step2_bold")}
+                      </span>
                     </p>
                     <div className="bg-blue-500/20 p-1 rounded-lg border border-blue-500/30">
                       <svg
@@ -195,8 +207,12 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   </div>
                   <p className="text-xs text-zinc-300 font-medium leading-relaxed">
                     {t("pwa.modal_ios_step3_pre")}{" "}
-                    <span className="text-white font-bold italic">{t("pwa.modal_ios_step3_bold")}</span>{" "}
-                    <span className="inline-flex items-center justify-center w-5 h-5 bg-zinc-700/50 rounded border border-white/10 text-zinc-300 font-bold text-[10px]">⌄</span>
+                    <span className="text-white font-bold italic">
+                      {t("pwa.modal_ios_step3_bold")}
+                    </span>{" "}
+                    <span className="inline-flex items-center justify-center w-5 h-5 bg-zinc-700/50 rounded border border-white/10 text-zinc-300 font-bold text-[10px]">
+                      ⌄
+                    </span>
                   </p>
                 </div>
 
@@ -207,8 +223,12 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   </div>
                   <p className="text-xs text-zinc-300 font-medium leading-relaxed">
                     {t("pwa.modal_ios_step4_pre")}{" "}
-                    <span className="text-white font-bold italic">{t("pwa.modal_ios_step4_bold")}</span>{" "}
-                    <span className="inline-flex items-center justify-center w-5 h-5 bg-emerald-500/20 rounded border border-emerald-500/30 text-emerald-400 font-bold text-sm">⊕</span>
+                    <span className="text-white font-bold italic">
+                      {t("pwa.modal_ios_step4_bold")}
+                    </span>{" "}
+                    <span className="inline-flex items-center justify-center w-5 h-5 bg-emerald-500/20 rounded border border-emerald-500/30 text-emerald-400 font-bold text-sm">
+                      ⊕
+                    </span>
                   </p>
                 </div>
 
@@ -219,7 +239,9 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
                   </div>
                   <p className="text-xs text-zinc-300 font-medium leading-relaxed">
                     {t("pwa.modal_ios_step5_pre")}{" "}
-                    <span className="text-blue-400 font-bold italic">{t("pwa.modal_ios_step5_bold")}</span>{" "}
+                    <span className="text-blue-400 font-bold italic">
+                      {t("pwa.modal_ios_step5_bold")}
+                    </span>{" "}
                     {t("pwa.modal_ios_step5_suf")}
                   </p>
                 </div>
@@ -259,12 +281,17 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
           {showPCHint && (
             <Card className="bg-zinc-900 border-2 border-white/10 w-full p-8 space-y-6 shadow-2xl">
               <div className="flex flex-col items-center text-center gap-4">
-                <h2 id="pwa-modal-title" className="text-xl font-black text-white italic">
+                <h2
+                  className="text-xl font-black text-white italic"
+                  id="pwa-modal-title"
+                >
                   {t("pwa.modal_pc_title")}
                 </h2>
                 <p className="text-sm text-zinc-400">
                   {t("pwa.modal_pc_desc_pre")}{" "}
-                  <span className="text-primary font-bold">{t("pwa.modal_pc_desc_bold")}</span>{" "}
+                  <span className="text-primary font-bold">
+                    {t("pwa.modal_pc_desc_bold")}
+                  </span>{" "}
                   {t("pwa.modal_pc_desc_suf")}
                 </p>
               </div>

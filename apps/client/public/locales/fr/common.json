@@ -154,5 +154,34 @@
     "certifiedCoach": "Coach Certifié"
   },
   "delete": "Supprimer",
-  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur"
+  "error-updating-user": "Erreur lors de la mise à jour de l'utilisateur",
+  "error_boundary": {
+    "title": "Oups ! Une erreur est survenue",
+    "message": "L'application a rencontré un problème inattendu. Ne vous inquiétez pas, vos données sont en sécurité.",
+    "refresh": "Rafraîchir la page",
+    "go_home": "Retour à l'accueil"
+  },
+  "error_state": {
+    "title": "Une erreur est survenue",
+    "message": "Nous n'avons pas pu charger cette page. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "go_home": "Retour à l'accueil"
+  },
+  "gateway": {
+    "welcome": "Bienvenue sur KduFoot",
+    "login_prompt": "Veuillez vous connecter ou créer un compte pour accéder à la plateforme.",
+    "last_step": "Un dernier effort...",
+    "complete_profile": "Pour débloquer l'accès aux données du site (matchs, tournois...), veuillez compléter votre profil Coach.",
+    "login": "Se connecter",
+    "register": "Créer un compte",
+    "or": "ou",
+    "google": "Continuer avec Google",
+    "guest": "Continuer sans compte",
+    "fill_profile": "Remplir mon profil Coach",
+    "visit": "Visiter le site"
+  },
+  "club_search": {
+    "label": "Club",
+    "placeholder": "Rechercher un club..."
+  }
 }

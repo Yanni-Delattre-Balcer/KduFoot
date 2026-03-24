@@ -31,10 +31,8 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
 
   const handleCalendarSync = async () => {
     setIsSyncing(true);
-    console.log("[Calendar] Starting manual synchronization...");
 
     try {
-      console.log("[Calendar] Fetching sync link...");
       const data = await api.get(
         "/api/users/me/calendar-link",
         getAccessTokenSilently,
@@ -48,19 +46,11 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           const httpsUrl = rawUrl.replace(/^webcal:\/\//, "https://");
           const googleCalUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(httpsUrl)}`;
 
-          console.log(
-            "[Calendar] Android detected, opening Google Calendar intent:",
-            googleCalUrl,
-          );
           window.open(googleCalUrl, "_blank");
         } else {
           // iOS / Desktop: webcal:// works natively
           const webcalUrl = rawUrl.replace(/^https?:\/\//, "webcal://");
 
-          console.log(
-            "[Calendar] iOS/Desktop, opening webcal link:",
-            webcalUrl,
-          );
           window.location.href = webcalUrl;
         }
       }

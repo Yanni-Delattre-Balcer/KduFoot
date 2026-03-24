@@ -17,7 +17,11 @@ export class MatchSearchService {
             c.name as club_name, c.city as club_city, c.zip as club_zip, c.logo_url as club_logo_url,
             c.address as club_address, c.latitude as club_latitude, c.longitude as club_longitude
         `;
-        const fromClause = 'matches m LEFT JOIN clubs c ON m.club_id = c.id';
+        // Conditionally add the aggregated accepted_count join to avoid a correlated subquery per row
+        const needsTournamentJoin = !filters.ownerId && filters.type !== 'match';
+        const fromClause = needsTournamentJoin
+            ? "matches m LEFT JOIN clubs c ON m.club_id = c.id LEFT JOIN (SELECT match_id, COUNT(*) as accepted_count FROM match_contacts WHERE status = 'accepted' GROUP BY match_id) mc_counts ON mc_counts.match_id = m.id"
+            : 'matches m LEFT JOIN clubs c ON m.club_id = c.id';
 
         let query = `SELECT ${selectClause} FROM ${fromClause} WHERE m.deleted_at IS NULL`;
         const params: (string | number)[] = [];
@@ -62,11 +66,15 @@ export class MatchSearchService {
             query += " AND (m.match_date > DATE('now') OR (m.match_date = DATE('now') AND m.match_time >= TIME('now')))";
         }
 
-        if (!filters.ownerId && filters.type !== 'match') {
-            query += ` AND (m.type != 'tournament' OR m.status = 'active' OR (m.type = 'tournament' AND m.status = 'active' AND m.max_teams IS NOT NULL AND (SELECT COUNT(*) FROM match_contacts mc2 WHERE mc2.match_id = m.id AND mc2.status = 'accepted') < m.max_teams))`;
+        if (needsTournamentJoin) {
+            query += ` AND (m.type != 'tournament' OR m.status = 'active' OR (m.type = 'tournament' AND m.status = 'active' AND m.max_teams IS NOT NULL AND COALESCE(mc_counts.accepted_count, 0) < m.max_teams))`;
         }
 
         if (wantDistance) {
+            // Pre-filter with a bounding box before calling the Google Maps API.
+            // We over-expand by 1.4x to account for road vs straight-line distance difference
+            // (roads are typically 20-40% longer than straight-line "crow-flies" distance).
+            // 1° latitude ≈ 111 km; 1° longitude ≈ 111 km × cos(lat) due to Earth's spherical shape.
             const expandedRadius = filters.radius_km! * 1.4;
             const latDelta = expandedRadius / 111.0;
             const lngDelta = expandedRadius / (111.0 * Math.cos(filters.user_lat! * Math.PI / 180));
@@ -86,6 +94,9 @@ export class MatchSearchService {
 
         query += ' ORDER BY m.match_date ASC, m.id ASC';
         const limit = filters.limit || 50;
+        // For distance mode: fetch up to 200 candidates from the bounding-box pre-filter,
+        // then the Google Maps API refines them to exact road distances.
+        // For cursor mode: fetch limit+1 to detect whether a next page exists.
         const fetchLimit = wantDistance ? 200 : limit + 1;
         query += ' LIMIT ?';
         params.push(fetchLimit);
@@ -94,6 +105,8 @@ export class MatchSearchService {
         let mappedResults = results.map(row => this.baseMatchService.mapRowToMatch(row));
 
         if (!wantDistance) {
+            // Keyset (seek) pagination: if we got limit+1 results, a next page exists.
+            // The cursor encodes {date, id} of the last item so the next query can resume.
             let hasMore = mappedResults.length > limit;
             if (hasMore) mappedResults.pop();
             let nextCursor: string | null = null;
@@ -146,24 +159,28 @@ export class MatchSearchService {
         if (!destinations.length || !validApiKey) return distanceMap;
 
         const batchSize = 25;
+        const batchPromises: Promise<void>[] = [];
         for (let i = 0; i < destinations.length; i += batchSize) {
+            const batchIndex = i;
             const batch = destinations.slice(i, i + batchSize);
             const destStr = batch.map(d => `${d.lat},${d.lng}`).join('|');
             const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${originLat},${originLng}&destinations=${encodeURIComponent(destStr)}&key=${apiKey}&units=metric&mode=driving`;
 
-            try {
-                const res = await fetch(url);
-                if (!res.ok) continue;
-                const data = await res.json() as any;
-                if (data.rows?.[0]?.elements) {
-                    data.rows[0].elements.forEach((el: { status: string; distance?: { value: number } }, j: number) => {
-                        if (el.status === 'OK' && el.distance) {
-                            distanceMap.set(i + j, el.distance.value);
-                        }
-                    });
-                }
-            } catch { /* intentionnellement vide */ }
+            batchPromises.push(
+                fetch(url).then(async res => {
+                    if (!res.ok) return;
+                    const data = await res.json() as any;
+                    if (data.rows?.[0]?.elements) {
+                        data.rows[0].elements.forEach((el: { status: string; distance?: { value: number } }, j: number) => {
+                            if (el.status === 'OK' && el.distance) {
+                                distanceMap.set(batchIndex + j, el.distance.value);
+                            }
+                        });
+                    }
+                }).catch(() => { /* intentionnellement vide */ })
+            );
         }
+        await Promise.all(batchPromises);
         return distanceMap;
     }
 }

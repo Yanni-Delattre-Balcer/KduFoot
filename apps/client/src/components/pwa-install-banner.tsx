@@ -93,7 +93,15 @@ export const PwaInstallBanner = () => {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-appearance-in sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[420px]">
           <div
             className="absolute inset-0 sm:hidden"
+            role="button"
+            tabIndex={0}
             onClick={handleDismissSession}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleDismissSession();
+              }
+            }}
           />
           <Card className="bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-0 overflow-hidden relative w-full">
             <div className="h-1.5 w-full bg-gradient-to-r from-primary via-primary/50 to-primary" />
@@ -155,9 +163,18 @@ export const PwaInstallBanner = () => {
       {showIOSHint && (
         <div
           className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in overflow-y-auto overscroll-contain"
+          role="button"
+          tabIndex={0}
           onClick={() => {
             setShowIOSHint(false);
             handleDismissSession();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setShowIOSHint(false);
+              handleDismissSession();
+            }
           }}
         >
           <Card
@@ -256,7 +273,9 @@ export const PwaInstallBanner = () => {
                 </div>
                 <p className="text-xs text-zinc-300 font-medium leading-relaxed">
                   {t("pwa.ios_step5_pre")}{" "}
-                  <span className="text-white font-bold">{t("pwa.ios_step5_bold")}</span>{" "}
+                  <span className="text-white font-bold">
+                    {t("pwa.ios_step5_bold")}
+                  </span>{" "}
                   {t("pwa.ios_step5_suf")}
                 </p>
               </div>
@@ -296,9 +315,18 @@ export const PwaInstallBanner = () => {
       {showPCHint && (
         <div
           className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in"
+          role="button"
+          tabIndex={0}
           onClick={() => {
             setShowPCHint(false);
             handleDismissSession();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setShowPCHint(false);
+              handleDismissSession();
+            }
           }}
         >
           <Card

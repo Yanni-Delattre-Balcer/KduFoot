@@ -7,14 +7,9 @@ import { CombinedAuthModal } from "@/modals/combined-auth-modal";
 
 export const UnifiedOnboarding = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const {
-    isLoading: userLoading,
-    needsCalendarReSync,
-    updateUser,
-  } = useUser();
+  const { isLoading: userLoading, needsCalendarReSync, updateUser } = useUser();
 
   const {
-
     isStandalone,
     isPermanentlyDismissed,
     isSessionDismissed,
@@ -25,14 +20,14 @@ export const UnifiedOnboarding = () => {
   const [pwaStepEvaluated, setPwaStepEvaluated] = useState(false);
   const [localAuthSuppressed, setLocalAuthSuppressed] = useState(
     sessionStorage.getItem("kdufoot-calendar-suppressed") === "true" ||
-    localStorage.getItem("kdufoot-calendar-never-ask") === "true",
+      localStorage.getItem("kdufoot-calendar-never-ask") === "true",
   );
 
   useEffect(() => {
     const handleStatusChange = () => {
       setLocalAuthSuppressed(
         sessionStorage.getItem("kdufoot-calendar-suppressed") === "true" ||
-        localStorage.getItem("kdufoot-calendar-never-ask") === "true"
+          localStorage.getItem("kdufoot-calendar-never-ask") === "true",
       );
     };
 
@@ -59,20 +54,11 @@ export const UnifiedOnboarding = () => {
     // --- EVALUATION ---
     const needsPWA =
       isWeb && !isSessionDismissed && !isPermanentlyDismissed && canInstall;
-    const needsAuth = needsCalendarReSync && !localAuthSuppressed && isAuthenticated;
+    const needsAuth =
+      needsCalendarReSync && !localAuthSuppressed && isAuthenticated;
 
     // --- STATE MACHINE ---
     // Log only when major states change or when evaluating after loads
-    if (needsPWA || needsAuth || activeStep !== null) {
-      console.log("[Onboarding] Evaluating step...", {
-        activeStep,
-        needsPWA,
-        needsAuth,
-        pwaStepEvaluated,
-        canInstall,
-      });
-    }
-
     // Step 1: PWA (only if needed and not yet evaluated)
     if (needsPWA && !pwaStepEvaluated) {
       if (activeStep !== "pwa") setActiveStep("pwa");
@@ -82,7 +68,6 @@ export const UnifiedOnboarding = () => {
       const pwaResolved = isStandalone || !needsPWA || pwaStepEvaluated;
 
       if (pwaResolved && activeStep !== "auth") {
-        console.log("[Onboarding] Showing Auth/Calendar modal");
         setActiveStep("auth");
       }
     }
@@ -107,13 +92,11 @@ export const UnifiedOnboarding = () => {
     localAuthSuppressed,
   ]);
 
-  const handlePwaClose = (action: "installed" | "dismissed") => {
-    console.log("[Onboarding] PWA Close Action:", action);
+  const handlePwaClose = (_action: "installed" | "dismissed") => {
     setPwaStepEvaluated(true);
   };
 
   const handleAuthClose = async (reason?: "permanent" | "never") => {
-    console.log("[Onboarding] Auth Close. Reason:", reason);
     if (reason === "permanent") {
       // Persistent dismissal in database (legacy)
       try {

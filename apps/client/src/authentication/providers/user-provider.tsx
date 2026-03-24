@@ -182,13 +182,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const needsCalendarReSync = useMemo(() => {
     if (!user) return false;
-    
+
     // Si pas encore synchronisé, on demande tout le temps
     return !user.has_synced_calendar;
   }, [user]);
 
   const isAdmin = user?.email === "yannidelattrebalcer.artois@gmail.com";
-
 
   const linkClub = async (siret: string) => {
     const resData = await postJson(
@@ -280,7 +279,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       logout,
       isAccountModalOpen,
     ],
-
   );
 
   if (isLoading && isAuthenticated && !isBlocked && !user) {

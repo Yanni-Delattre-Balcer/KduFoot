@@ -12,6 +12,7 @@ export function useMatchRequests() {
 
     if (!res.success) {
       const error = new Error(res.error || "Failed to fetch requests") as any;
+
       error.status = res.status || 500;
       throw error;
     }

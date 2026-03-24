@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "@heroui/image";
 import { Chip } from "@heroui/chip";
+import { useSWRConfig } from "swr";
 
 import { useExercises } from "../../hooks/use-exercises";
 import DefaultLayout from "../../layouts/default";
@@ -16,7 +17,6 @@ import { useWelcomeGateway } from "../../contexts/welcome-gateway-context";
 import DataWall from "../../components/data-wall";
 import { ExerciseListSkeleton } from "../../components/skeletons/exercise-skeleton";
 import { ErrorView } from "../../components/common/error-views";
-import { useSWRConfig } from "swr";
 
 export default function ExercisesPage() {
   const { t } = useTranslation();
@@ -90,7 +90,7 @@ export default function ExercisesPage() {
                 {t("video.analyzeTitle")}
               </h1>
             </div>
-            <p className="text-default-300 text-center max-w-lg font-bold tracking-widest text-xs">
+            <p className="text-default-400 text-center max-w-lg font-bold tracking-widest text-xs">
               {t("video.analyzeSubtitle")}
             </p>
             <div className="w-full max-w-4xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -234,15 +234,18 @@ export default function ExercisesPage() {
               </Chip>
             </div>
 
-            {isLoading && exercises.length === 0 && (
-              <ExerciseListSkeleton />
-            )}
+            {isLoading && exercises.length === 0 && <ExerciseListSkeleton />}
 
             {isError && (
-              <ErrorView 
-                status={isError.status || 500} 
-                message={isError.message} 
-                onRetry={() => mutate((key: any) => typeof key === "string" && key.includes("/api/exercises"))}
+              <ErrorView
+                message={isError.message}
+                status={isError.status || 500}
+                onRetry={() =>
+                  mutate(
+                    (key: any) =>
+                      typeof key === "string" && key.includes("/api/exercises"),
+                  )
+                }
               />
             )}
 
@@ -307,7 +310,7 @@ export default function ExercisesPage() {
                               strokeLinejoin="round"
                             />
                           </svg>
-                          <span className="text-default-300 text-xs">
+                          <span className="text-default-400 text-xs">
                             {t("exercises.noImage")}
                           </span>
                         </div>

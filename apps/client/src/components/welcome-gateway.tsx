@@ -9,11 +9,13 @@ import {
 import { Button } from "@heroui/button";
 import { Image } from "@heroui/image";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { useAuth, useUser } from "@/authentication";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 
 export const WelcomeGateway: React.FC = () => {
+  const { t } = useTranslation();
   const { login, isAuthenticated, isLoading } = useAuth();
   const { profileComplete, isLoading: isUserLoading } = useUser();
   const navigate = useNavigate();
@@ -72,17 +74,16 @@ export const WelcomeGateway: React.FC = () => {
               {!isAuthenticated ? (
                 <>
                   <h1 className="text-2xl lg:text-3xl font-black text-foreground tracking-tight leading-tight mt-2">
-                    Bienvenue sur KduFoot
+                    {t("gateway.welcome")}
                   </h1>
                   <p className="text-default-500 text-base max-w-md font-medium">
-                    Veuillez vous connecter ou créer un compte pour accéder à la
-                    plateforme.
+                    {t("gateway.login_prompt")}
                   </p>
                 </>
               ) : (
                 <>
                   <h1 className="text-2xl lg:text-3xl font-black bg-[linear-gradient(to_right,#ef4444,#f97316,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899)] bg-clip-text text-transparent leading-tight mt-2 italic">
-                    Un dernier effort...
+                    {t("gateway.last_step")}
                   </h1>
 
                   {blockingMessage && (
@@ -108,8 +109,7 @@ export const WelcomeGateway: React.FC = () => {
                   )}
 
                   <p className="text-default-500 text-base max-w-md font-medium">
-                    Pour débloquer l'accès aux données du site (matchs,
-                    tournois...), veuillez compléter votre profil Coach.
+                    {t("gateway.complete_profile")}
                   </p>
                 </>
               )}
@@ -122,7 +122,7 @@ export const WelcomeGateway: React.FC = () => {
                     size="lg"
                     onPress={() => login()}
                   >
-                    Se connecter
+                    {t("gateway.login")}
                   </Button>
 
                   <Button
@@ -133,13 +133,13 @@ export const WelcomeGateway: React.FC = () => {
                       login({ authorizationParams: { screen_hint: "signup" } })
                     }
                   >
-                    Créer un compte
+                    {t("gateway.register")}
                   </Button>
 
                   <div className="flex items-center gap-3 w-full my-1">
                     <div className="h-px bg-default-200 flex-1" />
                     <span className="text-xs sm:text-sm font-bold text-default-400">
-                      ou
+                      {t("gateway.or")}
                     </span>
                     <div className="h-px bg-default-200 flex-1" />
                   </div>
@@ -173,7 +173,7 @@ export const WelcomeGateway: React.FC = () => {
                       })
                     }
                   >
-                    Continuer avec Google
+                    {t("gateway.google")}
                   </Button>
 
                   <Button
@@ -181,7 +181,7 @@ export const WelcomeGateway: React.FC = () => {
                     variant="light"
                     onPress={closeGateway}
                   >
-                    Continuer sans compte
+                    {t("gateway.guest")}
                   </Button>
                 </div>
               ) : (
@@ -190,7 +190,7 @@ export const WelcomeGateway: React.FC = () => {
                     className="bg-danger text-white font-black tracking-tighter w-full rounded-2xl h-14 text-lg shadow-lg shadow-danger/20"
                     onPress={handleRegister}
                   >
-                    Remplir mon profil Coach
+                    {t("gateway.fill_profile")}
                   </Button>
 
                   <Button
@@ -198,7 +198,7 @@ export const WelcomeGateway: React.FC = () => {
                     variant="light"
                     onPress={setVisitorMode}
                   >
-                    Visiter le site
+                    {t("gateway.visit")}
                   </Button>
                 </div>
               )}

@@ -28,7 +28,6 @@ import {
   BlockedPage,
 } from "./authentication";
 import { UnifiedOnboarding } from "./components/unified-onboarding";
-
 import { ErrorBoundary } from "./components/error-boundary";
 import ScrollToTop from "./components/scroll-to-top";
 const IndexPage = React.lazy(() => import("@/pages/index"));
@@ -37,7 +36,9 @@ const AboutPage = React.lazy(() => import("@/pages/about"));
 const ThankYouPage = React.lazy(() => import("@/pages/thank-you"));
 const GDPRPage = React.lazy(() => import("@/pages/gdpr"));
 const ExercisesPage = React.lazy(() => import("@/pages/exercises"));
-const ExerciseDetailsPage = React.lazy(() => import("@/pages/exercises/details"));
+const ExerciseDetailsPage = React.lazy(
+  () => import("@/pages/exercises/details"),
+);
 const ExerciseEditPage = React.lazy(() => import("@/pages/exercises/edit"));
 const SessionPlannerPage = React.lazy(() => import("@/pages/sessions/planner"));
 const SessionDetailsPage = React.lazy(() => import("@/pages/sessions/details"));
@@ -50,14 +51,21 @@ const FavoritesPage = React.lazy(() => import("@/pages/favorites"));
 const TrainingPage = React.lazy(() => import("@/pages/training"));
 const PricingPage = React.lazy(() => import("@/pages/pricing/index"));
 const BlogPage = React.lazy(() => import("@/pages/blog"));
-const UsersAndPermissionsPage = React.lazy(() => import("@/pages/admin/users-and-permissions"));
+const UsersAndPermissionsPage = React.lazy(
+  () => import("@/pages/admin/users-and-permissions"),
+);
 const AccountPageLazy = React.lazy(() => import("@/pages/account"));
-const PageNotFound = React.lazy(() => import("./pages/404").then(m => ({ default: m.PageNotFound })));
-const OfflineStatus = React.lazy(() => import("./components/offline-status").then(m => ({ default: m.OfflineStatus })));
+const PageNotFound = React.lazy(() =>
+  import("./pages/404").then((m) => ({ default: m.PageNotFound })),
+);
+const OfflineStatus = React.lazy(() =>
+  import("./components/offline-status").then((m) => ({
+    default: m.OfflineStatus,
+  })),
+);
 
 import { TrainingProvider } from "@/contexts/training-context";
 import { showVideoAnalysis } from "@/config/site";
-
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => (
   <motion.div
@@ -117,79 +125,211 @@ function App() {
           <UnifiedOnboarding />
           <AnimatePresence mode="wait">
             <Routes key={location.pathname} location={location}>
-              <Route element={<PageWrapper><IndexPage /></PageWrapper>} path="/" />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={ApiPage} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <IndexPage />
+                  </PageWrapper>
+                }
+                path="/"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={ApiPage} />
+                  </PageWrapper>
+                }
                 path="/api"
               />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={PricingPage} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={PricingPage} />
+                  </PageWrapper>
+                }
                 path="/pricing"
               />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={BlogPage} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={BlogPage} />
+                  </PageWrapper>
+                }
                 path="/blog"
               />
-              <Route element={<PageWrapper><AboutPage /></PageWrapper>} path="/about" />
-              <Route element={<PageWrapper><ThankYouPage /></PageWrapper>} path="/remerciements" />
-              <Route element={<PageWrapper><GDPRPage /></PageWrapper>} path="/gdpr" />
-              <Route element={<PageWrapper><PageNotFound /></PageWrapper>} path="*" />
-              {showVideoAnalysis && (
-                <>
-                  <Route element={<PageWrapper><ExercisesPage /></PageWrapper>} path="/exercises" />
-                  <Route element={<PageWrapper><TrainingPage /></PageWrapper>} path="/training" />
-                </>
-              )}
-              <Route element={<PageWrapper><FavoritesPage /></PageWrapper>} path="/favorites" />
+              <Route
+                element={
+                  <PageWrapper>
+                    <AboutPage />
+                  </PageWrapper>
+                }
+                path="/about"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <ThankYouPage />
+                  </PageWrapper>
+                }
+                path="/remerciements"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <GDPRPage />
+                  </PageWrapper>
+                }
+                path="/gdpr"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <PageNotFound />
+                  </PageWrapper>
+                }
+                path="*"
+              />
               {showVideoAnalysis && (
                 <>
                   <Route
-                    element={<PageWrapper><AuthenticationGuard component={ExerciseEditPage} /></PageWrapper>}
+                    element={
+                      <PageWrapper>
+                        <ExercisesPage />
+                      </PageWrapper>
+                    }
+                    path="/exercises"
+                  />
+                  <Route
+                    element={
+                      <PageWrapper>
+                        <TrainingPage />
+                      </PageWrapper>
+                    }
+                    path="/training"
+                  />
+                </>
+              )}
+              <Route
+                element={
+                  <PageWrapper>
+                    <FavoritesPage />
+                  </PageWrapper>
+                }
+                path="/favorites"
+              />
+              {showVideoAnalysis && (
+                <>
+                  <Route
+                    element={
+                      <PageWrapper>
+                        <AuthenticationGuard component={ExerciseEditPage} />
+                      </PageWrapper>
+                    }
                     path="/exercises/new"
                   />
                   <Route
-                    element={<PageWrapper><AuthenticationGuard component={ExerciseEditPage} /></PageWrapper>}
+                    element={
+                      <PageWrapper>
+                        <AuthenticationGuard component={ExerciseEditPage} />
+                      </PageWrapper>
+                    }
                     path="/exercises/:id/edit"
                   />
                   <Route
                     element={
-                      <PageWrapper><AuthenticationGuard component={ExerciseDetailsPage} /></PageWrapper>
+                      <PageWrapper>
+                        <AuthenticationGuard component={ExerciseDetailsPage} />
+                      </PageWrapper>
                     }
                     path="/exercises/:id"
                   />
                 </>
               )}
-              <Route element={<PageWrapper><SessionPlannerPage /></PageWrapper>} path="/sessions" />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={SessionEditPage} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <SessionPlannerPage />
+                  </PageWrapper>
+                }
+                path="/sessions"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={SessionEditPage} />
+                  </PageWrapper>
+                }
                 path="/sessions/new"
               />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={SessionEditPage} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={SessionEditPage} />
+                  </PageWrapper>
+                }
                 path="/sessions/:id/edit"
               />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={SessionDetailsPage} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={SessionDetailsPage} />
+                  </PageWrapper>
+                }
                 path="/sessions/:id"
               />
-              <Route element={<PageWrapper><DashboardPage /></PageWrapper>} path="/dashboard" />
-              <Route element={<PageWrapper><MatchesPage /></PageWrapper>} path="/matches" />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={MatchEditPage} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <DashboardPage />
+                  </PageWrapper>
+                }
+                path="/dashboard"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <MatchesPage />
+                  </PageWrapper>
+                }
+                path="/matches"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={MatchEditPage} />
+                  </PageWrapper>
+                }
                 path="/matches/new"
               />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={MatchEditPage} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={MatchEditPage} />
+                  </PageWrapper>
+                }
                 path="/matches/:id/edit"
               />
-              <Route element={<PageWrapper><MatchDetailsPage /></PageWrapper>} path="/matches/:id" />
               <Route
-                element={<PageWrapper><AuthenticationGuard component={AccountPageLazy} /></PageWrapper>}
+                element={
+                  <PageWrapper>
+                    <MatchDetailsPage />
+                  </PageWrapper>
+                }
+                path="/matches/:id"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <AuthenticationGuard component={AccountPageLazy} />
+                  </PageWrapper>
+                }
                 path="/account"
               />
               <Route
                 element={
-                  <PageWrapper><AuthenticationGuard component={UsersAndPermissionsPage} /></PageWrapper>
+                  <PageWrapper>
+                    <AuthenticationGuard component={UsersAndPermissionsPage} />
+                  </PageWrapper>
                 }
                 path="/admin/users"
               />

@@ -58,7 +58,7 @@ export default function TrainingPage() {
               </h1>
             </div>
             {selectedExercises.length > 0 && (
-              <p className="text-default-300 text-lg max-w-lg">
+              <p className="text-default-400 text-lg max-w-lg">
                 {t("training.hero_stats", {
                   count: selectedExercises.length,
                   duration: selectedExercises.length * 15,
@@ -66,7 +66,7 @@ export default function TrainingPage() {
               </p>
             )}
             {selectedExercises.length === 0 && (
-              <p className="text-default-300 text-lg max-w-lg">
+              <p className="text-default-400 text-lg max-w-lg">
                 {t("training.hero_create")}
               </p>
             )}

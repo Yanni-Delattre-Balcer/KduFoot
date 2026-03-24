@@ -84,7 +84,6 @@ export const CalendarSyncBanner: React.FC = () => {
     type: "default" | "google" | "copy" = "default",
   ) => {
     setIsSyncing(true);
-    console.log(`[Calendar] Starting synchronization (${type}) from banner...`);
 
     try {
       const data = await api.get(

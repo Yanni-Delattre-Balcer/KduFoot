@@ -20,7 +20,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found in D1. Call sync first.' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found in D1. Call sync first.' }, { status: 404, headers: router.corsHeaders });
         }
 
         let club = null;
@@ -77,7 +77,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             }));
         }
 
-        return Response.json({ success: true, user: { ...user, club, additional_clubs } }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        return Response.json({ success: true, user: { ...user, club, additional_clubs } }, { headers: { ...router.corsHeaders, "Cache-Control": "private, max-age=30" } });
     }, Permission.READ_API);
 
     /**
@@ -91,7 +91,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
         
         const [userRes] = await Promise.all([userQuery.first<any>()]);
         if (!userRes) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
         const user = userService.parseUser(userRes)!;
 
@@ -183,7 +183,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             success: true,
             user: { ...user, club, additional_clubs },
             notifications
-        }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }, { headers: { ...router.corsHeaders, "Cache-Control": "private, max-age=30" } });
     }, Permission.READ_API);
 
     /**
@@ -194,7 +194,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         const body: UpdateUserDto = await request.json();
@@ -212,9 +212,9 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         try {
             const updated = await userService.updateUser(user.id, body);
-            return Response.json({ success: true, user: updated }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: true, user: updated }, { headers: router.corsHeaders });
         } catch (_e: unknown) {
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.WRITE_API);
 
@@ -227,28 +227,28 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         if (user.club_id) {
-            return Response.json({ success: false, error: 'Votre compte est déjà lié à un club. Cette action est irréversible.' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Votre compte est déjà lié à un club. Cette action est irréversible.' }, { status: 400, headers: router.corsHeaders });
         }
 
         const body: { siret: string } = await request.json();
         if (!body.siret || (body.siret.length !== 9 && body.siret.length !== 14)) {
-            return Response.json({ success: false, error: 'Numéro invalide. Il doit contenir 9 (SIREN) ou 14 (SIRET) chiffres.' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Numéro invalide. Il doit contenir 9 (SIREN) ou 14 (SIRET) chiffres.' }, { status: 400, headers: router.corsHeaders });
         }
 
         try {
             const apiUrl = `${env.SIRET_API_URL}?q=${body.siret}&page=1&per_page=1`;
             const apiRes = await fetch(apiUrl);
             if (!apiRes.ok) {
-                return Response.json({ success: false, error: 'Erreur lors de la recherche de l\'entreprise.' }, { status: 502, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                return Response.json({ success: false, error: 'Erreur lors de la recherche de l\'entreprise.' }, { status: 502, headers: router.corsHeaders });
             }
 
             const apiData = await apiRes.json() as import("../../types").SiretApiResponse;
             if (!apiData.results || apiData.results.length === 0) {
-                return Response.json({ success: false, error: 'Aucune entreprise trouvée pour ce SIRET.' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                return Response.json({ success: false, error: 'Aucune entreprise trouvée pour ce SIRET.' }, { status: 404, headers: router.corsHeaders });
             }
 
             const entreprise = apiData.results[0];
@@ -267,7 +267,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             if (!isAdminUser) {
                 const validation = validateClubSiret(entreprise.activite_principale, clubName);
                 if (!validation.isValid) {
-                    return Response.json({ success: false, error: validation.reason }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                    return Response.json({ success: false, error: validation.reason }, { status: 403, headers: router.corsHeaders });
                 }
             }
 
@@ -307,10 +307,10 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
                     ...updatedUser,
                     club: { id: clubId, siret: body.siret, name: clubName, city: clubCity, address: clubAddress, zip: clubZip, latitude: lat, longitude: lon }
                 }
-            }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            }, { headers: router.corsHeaders });
         } catch (e: unknown) {
             console.error('Link Club Error:', e);
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.READ_API);
 
@@ -322,7 +322,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         try {
@@ -332,9 +332,9 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
             await broadcastDataChanged(env);
 
-            return Response.json({ success: true, message: 'Club détaché avec succès.' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: true, message: 'Club détaché avec succès.' }, { headers: router.corsHeaders });
         } catch (_e: unknown) {
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.ADMIN_AUTH0);
 
@@ -346,7 +346,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         try {
@@ -382,9 +382,9 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
                 ).bind(crypto.randomUUID(), user.id, 'delete', 'Account self-deletion').run();
             } catch { /* audit log should not block deletion */ }
 
-            return Response.json({ success: true, message: 'Account deleted' }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: true, message: 'Account deleted' }, { headers: router.corsHeaders });
         } catch (_e: unknown) {
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.READ_API);
 
@@ -396,7 +396,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         const token = await userService.getOrCreateCalendarToken(user.id);
@@ -411,11 +411,11 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
                 await userService.regenerateCalendarToken(user.id);
                 const newToken = await userService.getOrCreateCalendarToken(user.id);
                 const webcalUrl2 = `webcal://${url.host}/api/calendar/${newToken}.ics`;
-                return Response.json({ success: true, url: webcalUrl2 }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                return Response.json({ success: true, url: webcalUrl2 }, { headers: router.corsHeaders });
             }
         }
 
-        return Response.json({ success: true, url: webcalUrl }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        return Response.json({ success: true, url: webcalUrl }, { headers: router.corsHeaders });
     }, Permission.READ_API);
 
     /**
@@ -426,7 +426,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         try {
@@ -523,7 +523,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             });
         } catch (e: unknown) {
             console.error('Export PDF Error:', e);
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.READ_API);
 
@@ -535,7 +535,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         try {
@@ -559,7 +559,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             });
         } catch (e: unknown) {
             console.error('Export JSON Error:', e);
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.READ_API);
 };

@@ -44,13 +44,14 @@ export function Provider({ children }: { children: React.ReactNode }) {
             import("@heroui/toast").then(({ addToast }) => {
               addToast({
                 title: "Forte affluence",
-                description: "Le serveur est saturé. La page sera actualisée automatiquement quand ce sera passé.",
+                description:
+                  "Le serveur est saturé. La page sera actualisée automatiquement quand ce sera passé.",
                 color: "warning",
                 timeout: 5000,
               });
             });
           }
-        }
+        },
       }}
     >
       <HeroUIProvider navigate={navigate} useHref={useHref}>
@@ -61,7 +62,8 @@ export function Provider({ children }: { children: React.ReactNode }) {
             classNames: {
               base: "mt-[80px] sm:mt-0 w-auto max-w-lg min-w-fit",
               title: "line-clamp-none whitespace-normal text-sm font-bold",
-              description: "line-clamp-none whitespace-normal text-xs font-medium",
+              description:
+                "line-clamp-none whitespace-normal text-xs font-medium",
             },
           }}
         />

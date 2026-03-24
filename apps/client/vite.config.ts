@@ -233,22 +233,24 @@ export default defineConfig(({ mode }) => {
     build: {
       assetsInlineLimit: 1024,
       sourcemap: true,
+      chunkSizeWarningLimit: 1200,
       rollupOptions: {
         output: {
           assetFileNames: `assets/${packageJson.name}-[name]-[hash][extname]`,
           entryFileNames: `js/${packageJson.name}-[hash].js`,
           chunkFileNames: `js/${packageJson.name}-[hash].js`,
           manualChunks: {
-            react: [
+            vendor: [
               "react",
               "react-dom",
               "react-router-dom",
               "react-i18next",
               "i18next",
               "i18next-http-backend",
+              "framer-motion",
+              ...extractPerVendorDependencies(packageJson, "@heroui"),
             ],
-            heroui: extractPerVendorDependencies(packageJson, "@heroui"),
-            auth0: extractPerVendorDependencies(packageJson, "@auth0"),
+            swr: ["swr"],
           },
         },
       },

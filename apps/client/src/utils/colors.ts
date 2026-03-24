@@ -54,7 +54,6 @@ export const parseJerseyColors = (
   // Split by common separators: "et", "and", "/", ",", and spaces
   const parts = normalized.split(/\s+et\s+|\s+and\s+|\s*\/\s*|\s*,\s*|\s+/);
 
-
   const colors: string[] = [];
 
   parts.forEach((part) => {

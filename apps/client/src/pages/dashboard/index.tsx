@@ -6,7 +6,6 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
-import { DashboardListSkeleton } from "../../components/skeletons/dashboard-skeleton";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -20,6 +19,7 @@ import {
   useDisclosure,
 } from "@heroui/modal";
 
+import { DashboardListSkeleton } from "../../components/skeletons/dashboard-skeleton";
 import { matchService } from "../../services/matches";
 import FootballClock from "../../components/football-clock";
 
@@ -774,7 +774,7 @@ export default function DashboardPage() {
                               {request.message &&
                                 request.message !==
                                   "Demande de participation envoyée via KduFoot" && (
-                                  <p className="text-sm text-default-300 italic mt-2 line-clamp-2 border-t border-white/5 pt-2">
+                                  <p className="text-sm text-default-400 italic mt-2 line-clamp-2 border-t border-white/5 pt-2">
                                     "{request.message}"
                                   </p>
                                 )}

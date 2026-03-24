@@ -4,6 +4,8 @@ import { Env } from '../types/env';
 import { ExerciseService } from '../services/exercise.service';
 import { CreateExerciseDto, UpdateExerciseDto } from '../types/exercise';
 import { Permission } from '../types/permissions';
+import { getDbUser } from '../utils/db-helpers';
+import { requireValidUUID } from '../utils/validation';
 
 export const setupExerciseRoutes = (router: Router, env: Env) => {
     const exerciseService = new ExerciseService(env.DB);
@@ -117,18 +119,20 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
  */
     router.get('/api/exercises/<id>', async (request, env) => {
         const { id } = request.params;
+        const uuidError = requireValidUUID(id, router.corsHeaders);
+        if (uuidError) return uuidError;
 
         const cacheKey = `exercise:${id}`;
         if (env.KV_CACHE) {
             const cached = await env.KV_CACHE.get(cacheKey);
             if (cached) {
-                return Response.json({ success: true, exercise: JSON.parse(cached), cached: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+                return Response.json({ success: true, exercise: JSON.parse(cached), cached: true }, { headers: router.corsHeaders });
             }
         }
 
         const exercise = await exerciseService.getById(id);
         if (!exercise) {
-            return Response.json({ success: false, error: 'Exercise not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Exercise not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         if (env.KV_CACHE) {
@@ -181,18 +185,18 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
  *         description: Internal Server Error - Failed to save the record.
  */
     router.post('/api/exercises', async (request, env) => {
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) {
-            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'User profile not created' }, { status: 400, headers: router.corsHeaders });
         }
 
         const dto = await request.json() as CreateExerciseDto;
 
         try {
             const exercise = await exerciseService.create(dbUser.id, dto);
-            return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: true, exercise }, { headers: router.corsHeaders });
         } catch (e: unknown) {
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.EXERCISES_CREATE);
 
@@ -233,7 +237,9 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
      */
     router.put('/api/exercises/<id>', async (request, env) => {
         const { id } = request.params;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const uuidError = requireValidUUID(id, router.corsHeaders);
+        if (uuidError) return uuidError;
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
         }
@@ -242,11 +248,11 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
 
         try {
             const exercise = await exerciseService.update(id, dbUser.id, dto);
-            if (!exercise) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: true, exercise }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (!exercise) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: router.corsHeaders });
+            return Response.json({ success: true, exercise }, { headers: router.corsHeaders });
         } catch (e: unknown) {
-            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: router.corsHeaders });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.EXERCISES_UPDATE);
 
@@ -278,18 +284,20 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
      */
     router.delete('/api/exercises/<id>', async (request, env) => {
         const { id } = request.params;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const uuidError = requireValidUUID(id, router.corsHeaders);
+        if (uuidError) return uuidError;
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) {
             return Response.json({ success: false, error: 'User profile not created' }, { status: 400 });
         }
 
         try {
             const success = await exerciseService.delete(id, dbUser.id);
-            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: true }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (!success) return Response.json({ success: false, error: 'Not found or unauthorized' }, { status: 404, headers: router.corsHeaders });
+            return Response.json({ success: true }, { headers: router.corsHeaders });
         } catch (e: unknown) {
-            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            if (e instanceof Error && e.message === 'Unauthorized') return Response.json({ success: false, error: 'Unauthorized' }, { status: 403, headers: router.corsHeaders });
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.EXERCISES_DELETE);
 };

@@ -13,23 +13,30 @@
  */
 
 import type {
-    Auth0ManagementTokenResponse,
-    Auth0User,
-    Auth0Permission,
+  Auth0ManagementTokenResponse,
+  Auth0User,
+  Auth0Permission,
 } from "@/types/auth0.types";
+
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/button";
 import { Checkbox } from "@heroui/checkbox";
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
 } from "@heroui/table";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/modal";
 import { Chip } from "@heroui/chip";
 import { Card } from "@heroui/card";
 import { addToast } from "@heroui/toast";
@@ -37,7 +44,10 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Input } from "@heroui/input";
 
 import DefaultLayout from "@/layouts/default";
-import { useSecuredApi, updateUserInCache } from "@/authentication";
+import {
+  useSecuredApi,
+  updateUserInCache,
+} from "@/authentication/auth-components";
 import { useUser } from "@/hooks/use-user";
 import { Permission } from "@/types/permissions";
 
@@ -195,6 +205,7 @@ export default function UsersAndPermissionsPage() {
         audience,
         targetScopes,
       );
+
       setIsUpToDate(upToDate);
     } catch (err) {
       console.error("Error checking sync status:", err);
@@ -205,8 +216,8 @@ export default function UsersAndPermissionsPage() {
   const loadUsers = async (token: string, silent: boolean = false) => {
     // Throttle calls: maximum one call every 2 seconds
     const now = Date.now();
+
     if (now - lastLoadUsersCall.current < 2000) {
-      console.log("[Admin] loadUsers throttled (call too frequent)");
       return;
     }
     lastLoadUsersCall.current = now;
@@ -229,7 +240,9 @@ export default function UsersAndPermissionsPage() {
 
       // Use D1 userMetadata as the primary source of truth, merging Auth0 data if available
       const mergedUsers = userMetadata.map((metadata) => {
-        const user = (u ?? []).find((a) => a.user_id === metadata.auth0_sub) || {
+        const user = (u ?? []).find(
+          (a) => a.user_id === metadata.auth0_sub,
+        ) || {
           user_id: metadata.auth0_sub,
           email: metadata.email,
           name: metadata.name,
@@ -238,29 +251,41 @@ export default function UsersAndPermissionsPage() {
           email_verified: true,
           logins_count: 0,
           created_at: metadata.created_at || new Date().toISOString(),
-          updated_at: metadata.last_login || metadata.created_at || new Date().toISOString(),
-          last_login: metadata.last_login || metadata.created_at || new Date().toISOString(),
-          app_metadata: { permissions: [] }
+          updated_at:
+            metadata.last_login ||
+            metadata.created_at ||
+            new Date().toISOString(),
+          last_login:
+            metadata.last_login ||
+            metadata.created_at ||
+            new Date().toISOString(),
+          app_metadata: { permissions: [] },
         };
 
         const isBlockedInD1 = metadata?.is_blocked === true;
         const currentPerms = user.app_metadata?.permissions || [];
         const hasBlockedPerm = currentPerms.includes(Permission.ROLE_BLOCKED);
-        const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL || user.user_id === SUPREME_MASTER_ID;
+        const isSuperAdmin =
+          user.email === SUPER_ADMIN_EMAIL ||
+          user.user_id === SUPREME_MASTER_ID;
         let updatedPerms = currentPerms;
 
         if (isSuperAdmin) {
-          updatedPerms = Object.values(Permission).filter(p => p !== Permission.ROLE_BLOCKED);
+          updatedPerms = Object.values(Permission).filter(
+            (p) => p !== Permission.ROLE_BLOCKED,
+          );
         } else if (isBlockedInD1 && !hasBlockedPerm) {
           updatedPerms = [...currentPerms, Permission.ROLE_BLOCKED];
         } else if (!isBlockedInD1 && hasBlockedPerm) {
-          updatedPerms = currentPerms.filter((p) => p !== Permission.ROLE_BLOCKED);
+          updatedPerms = currentPerms.filter(
+            (p) => p !== Permission.ROLE_BLOCKED,
+          );
         }
 
         return {
           ...user,
           blocked: isSuperAdmin ? false : isBlockedInD1,
-          block_reason: isSuperAdmin ? null : (metadata?.block_reason || null),
+          block_reason: isSuperAdmin ? null : metadata?.block_reason || null,
           club_name: metadata?.club_name || null,
           app_metadata: {
             ...user.app_metadata,
@@ -345,6 +370,7 @@ export default function UsersAndPermissionsPage() {
         Object.values(Permission).forEach((p) => {
           if (p === Permission.ROLE_BLOCKED) return;
           const key = (p as string).replace(/:/g, "_");
+
           permState[key] = true;
         });
       } else {
@@ -407,6 +433,7 @@ export default function UsersAndPermissionsPage() {
         variant: "solid",
         color: "danger",
       });
+
       return;
     }
 
@@ -562,6 +589,7 @@ export default function UsersAndPermissionsPage() {
         .filter(([key, active]) => active && key !== "role_blocked")
         .map(([key]) => {
           const p = KDUFOOT_PERMISSIONS.find((k) => k.key === key);
+
           return p ? p.value : null;
         })
         .filter(Boolean) as string[];
@@ -626,7 +654,10 @@ export default function UsersAndPermissionsPage() {
 
       updateUserInCache(userId, (u: any) => {
         const prevPerms = u.app_metadata?.permissions || [];
-        let updatedPerms = prevPerms.filter((p: string) => !toRemove.includes(p));
+        let updatedPerms = prevPerms.filter(
+          (p: string) => !toRemove.includes(p),
+        );
+
         toAdd.forEach((newP) => {
           if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
         });
@@ -636,11 +667,18 @@ export default function UsersAndPermissionsPage() {
 
         if (handleBlockLogic) {
           newBlockedState = targetBlockState;
-          newBlockReason = targetBlockState ? "Suspension administrative" : null;
-          if (targetBlockState && !updatedPerms.includes(Permission.ROLE_BLOCKED)) {
+          newBlockReason = targetBlockState
+            ? "Suspension administrative"
+            : null;
+          if (
+            targetBlockState &&
+            !updatedPerms.includes(Permission.ROLE_BLOCKED)
+          ) {
             updatedPerms.push(Permission.ROLE_BLOCKED);
           } else if (!targetBlockState) {
-            updatedPerms = updatedPerms.filter((p: string) => p !== Permission.ROLE_BLOCKED);
+            updatedPerms = updatedPerms.filter(
+              (p: string) => p !== Permission.ROLE_BLOCKED,
+            );
           }
         }
 
@@ -679,6 +717,7 @@ export default function UsersAndPermissionsPage() {
         description: t("adminUsersPage.toasts.cannotDeleteSelf"),
         variant: "solid",
       });
+
       return;
     }
     // Super-admin protection
@@ -691,6 +730,7 @@ export default function UsersAndPermissionsPage() {
         variant: "solid",
         color: "danger",
       });
+
       return;
     }
     // Suppression directe sans confirm (ou gérer via un état si nécessaire, mais ici on suit "No Alert")
@@ -705,6 +745,7 @@ export default function UsersAndPermissionsPage() {
           },
         },
       );
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
 
@@ -742,6 +783,7 @@ export default function UsersAndPermissionsPage() {
         variant: "solid",
         color: "danger",
       });
+
       return;
     }
 
@@ -792,7 +834,11 @@ export default function UsersAndPermissionsPage() {
         },
       }));
     } catch (err: any) {
-      addToast({ title: t("error.title"), description: err.message, color: "danger" });
+      addToast({
+        title: t("error.title"),
+        description: err.message,
+        color: "danger",
+      });
     }
   };
 
@@ -992,6 +1038,7 @@ export default function UsersAndPermissionsPage() {
 
       // 2. Restaurer les permissions de base Auth0 (Abonné Free)
       let freePerms: Permission[] = [];
+
       if (mgmtToken) {
         freePerms = [
           Permission.READ_API,
@@ -1019,7 +1066,9 @@ export default function UsersAndPermissionsPage() {
         block_reason: null,
         app_metadata: {
           ...u.app_metadata,
-          permissions: Array.from(new Set([...(u.app_metadata?.permissions || []), ...freePerms])),
+          permissions: Array.from(
+            new Set([...(u.app_metadata?.permissions || []), ...freePerms]),
+          ),
         },
       }));
     } catch (err: any) {
@@ -1149,20 +1198,20 @@ export default function UsersAndPermissionsPage() {
           {isUpToDate === true ? (
             <Chip
               color="success"
-              variant="flat"
               size="sm"
               startContent={<span className="ml-1">✓</span>}
+              variant="flat"
             >
               {t("adminUsersPage.auth0UpToDate")}
             </Chip>
           ) : (
             <Button
               color="secondary"
-              variant="flat"
-              size="sm"
-              onPress={syncAuth0Permissions}
-              isLoading={isSyncing}
               isDisabled={!mgmtToken || isUpToDate === null}
+              isLoading={isSyncing}
+              size="sm"
+              variant="flat"
+              onPress={syncAuth0Permissions}
             >
               {t("adminUsersPage.btnSyncAuth0")}
             </Button>
@@ -1173,17 +1222,17 @@ export default function UsersAndPermissionsPage() {
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-sm font-bold text-default-500">Filtrer :</span>
           <Button
+            color={roleFilter === "all" ? "primary" : "default"}
             size="sm"
             variant={roleFilter === "all" ? "solid" : "flat"}
-            color={roleFilter === "all" ? "primary" : "default"}
             onPress={() => setRoleFilter("all")}
           >
             Tous ({users.length})
           </Button>
           <Button
+            color={roleFilter === "subscribers" ? "success" : "default"}
             size="sm"
             variant={roleFilter === "subscribers" ? "solid" : "flat"}
-            color={roleFilter === "subscribers" ? "success" : "default"}
             onPress={() => setRoleFilter("subscribers")}
           >
             Abonnés (
@@ -1200,19 +1249,19 @@ export default function UsersAndPermissionsPage() {
             )
           </Button>
           <Button
-            color={roleFilter === 'admins' ? 'warning' : 'default'}
-                        size="sm"
-                        variant={roleFilter === 'admins' ? 'solid' : 'flat'}
-                        onPress={() => setRoleFilter('admins')}
+            color={roleFilter === "admins" ? "warning" : "default"}
+            size="sm"
+            variant={roleFilter === "admins" ? "solid" : "flat"}
+            onPress={() => setRoleFilter("admins")}
           >
             Admins ({users.filter((u) => getIsAdmin(u)).length})
           </Button>
           <Button
+            className={roleFilter === "blocked" ? "font-black" : ""}
+            color={roleFilter === "blocked" ? "danger" : "default"}
             size="sm"
             variant={roleFilter === "blocked" ? "solid" : "flat"}
-            color={roleFilter === "blocked" ? "danger" : "default"}
             onPress={() => setRoleFilter("blocked")}
-            className={roleFilter === "blocked" ? "font-black" : ""}
           >
             🚫 Bloqués (
             {
@@ -1240,7 +1289,8 @@ export default function UsersAndPermissionsPage() {
                     Permission.ROLE_BLOCKED,
                   ) || u.blocked;
                 const isSupremeMaster = u.user_id === SUPREME_MASTER_ID;
-                const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL || isSupremeMaster;
+                const isSuperAdmin =
+                  u.email === SUPER_ADMIN_EMAIL || isSupremeMaster;
 
                 return (
                   <Card
@@ -1252,10 +1302,10 @@ export default function UsersAndPermissionsPage() {
                       <div className="flex items-center gap-3">
                         {u.picture && (
                           <img
-                            src={u.picture}
                             alt={u.name}
-                            referrerPolicy="no-referrer"
                             className={`w-12 h-12 rounded-full border-2 border-white/5 shrink-0 ${isUserBlocked ? "opacity-40 grayscale" : ""}`}
+                            referrerPolicy="no-referrer"
+                            src={u.picture}
                           />
                         )}
                         <div className="min-w-0 flex-1">
@@ -1274,11 +1324,11 @@ export default function UsersAndPermissionsPage() {
                       <div className="flex flex-wrap items-center gap-2 mt-1">
                         {isSuperAdmin && (
                           <Chip
-                            size="sm"
-                            color="success"
-                            variant="solid"
                             className="h-5 text-[10px] sm:text-xs font-bold px-2"
+                            color="success"
+                            size="sm"
                             title={t("adminUsersPage.statusCreator")}
+                            variant="solid"
                           >
                             <span className="hidden sm:inline">
                               Créateur du site
@@ -1288,41 +1338,41 @@ export default function UsersAndPermissionsPage() {
                         )}
                         {!isSuperAdmin && getIsAdmin(u) && (
                           <Chip
-                            size="sm"
-                            color="primary"
-                            variant="solid"
                             className="h-5 text-[10px] sm:text-xs font-bold px-2"
+                            color="primary"
+                            size="sm"
+                            variant="solid"
                           >
                             Admin
                           </Chip>
                         )}
                         {isUserBlocked && (
                           <Chip
-                            size="sm"
-                            color="danger"
-                            variant="solid"
                             className="h-5 text-[10px] font-black"
+                            color="danger"
+                            size="sm"
+                            variant="solid"
                           >
                             🚫 Banni
                           </Chip>
                         )}
                         {u.club_name && !isSuperAdmin && (
                           <Chip
-                            size="sm"
-                            color="success"
-                            variant="flat"
                             className="h-5 text-[10px] font-bold max-w-full truncate"
+                            color="success"
+                            size="sm"
                             title={u.club_name}
+                            variant="flat"
                           >
                             🏠 {u.club_name}
                           </Chip>
                         )}
                         {!isUserBlocked && !isSuperAdmin && (
                           <Chip
-                            size="sm"
-                            color="success"
-                            variant="flat"
                             className="h-5 text-[10px] font-bold"
+                            color="success"
+                            size="sm"
+                            variant="flat"
                           >
                             Actif
                           </Chip>
@@ -1332,11 +1382,14 @@ export default function UsersAndPermissionsPage() {
 
                     <Button
                       className="font-black w-full h-12 tracking-widest text-sm shadow-primary/20"
-                                            color="primary"
-                                            isDisabled={!mgmtToken || (isSuperAdmin && u.user_id !== currentUserId)}
-                                            size="lg"
-                                            variant="shadow"
-                                            onPress={() => openUserEditing(u.user_id)}
+                      color="primary"
+                      isDisabled={
+                        !mgmtToken ||
+                        (isSuperAdmin && u.user_id !== currentUserId)
+                      }
+                      size="lg"
+                      variant="shadow"
+                      onPress={() => openUserEditing(u.user_id)}
                     >
                       Voir le Profil
                     </Button>
@@ -1375,7 +1428,8 @@ export default function UsersAndPermissionsPage() {
                     u.app_metadata?.permissions?.includes(
                       Permission.ROLE_BLOCKED,
                     ) || u.blocked;
-                  const isSuperAdmin = u.email === SUPER_ADMIN_EMAIL || isSupremeMaster;
+                  const isSuperAdmin =
+                    u.email === SUPER_ADMIN_EMAIL || isSupremeMaster;
 
                   return (
                     <TableRow
@@ -1390,10 +1444,10 @@ export default function UsersAndPermissionsPage() {
                         <div className="flex items-center gap-2">
                           {u.picture && (
                             <img
-                              src={u.picture}
                               alt={u.name}
-                              referrerPolicy="no-referrer"
                               className={`w-8 h-8 rounded-full ${isUserBlocked ? "opacity-40 grayscale" : ""}`}
+                              referrerPolicy="no-referrer"
+                              src={u.picture}
                             />
                           )}
                           <div>
@@ -1423,11 +1477,11 @@ export default function UsersAndPermissionsPage() {
                       <TableCell>
                         {u.club_name && !isSupremeMaster ? (
                           <Chip
-                            size="sm"
-                            color="success"
-                            variant="flat"
                             className="h-5 text-[10px] sm:text-xs font-bold max-w-[100px] lg:max-w-[200px] truncate"
+                            color="success"
+                            size="sm"
                             title={u.club_name}
+                            variant="flat"
                           >
                             🏠 {u.club_name}
                           </Chip>
@@ -1441,32 +1495,34 @@ export default function UsersAndPermissionsPage() {
                         <div className="flex flex-wrap gap-1">
                           {isSuperAdmin && (
                             <Chip
-                              size="sm"
-                              color="success"
-                              variant="solid"
                               className="h-5 text-xs font-bold px-2"
+                              color="success"
+                              size="sm"
                               title={t("adminUsersPage.statusCreator")}
+                              variant="solid"
                             >
-                              <span className="hidden lg:inline">Créateur du site</span>
+                              <span className="hidden lg:inline">
+                                Créateur du site
+                              </span>
                               <span className="inline lg:hidden">Créateur</span>
                             </Chip>
                           )}
                           {!isSuperAdmin && getIsAdmin(u) && (
                             <Chip
-                              size="sm"
-                              color="primary"
-                              variant="solid"
                               className="h-5 text-xs sm:text-sm font-bold"
+                              color="primary"
+                              size="sm"
+                              variant="solid"
                             >
                               {t("adminUsersPage.statusAdmin")}
                             </Chip>
                           )}
                           {isUserBlocked && (
                             <Chip
-                              size="sm"
-                              color="danger"
-                              variant="solid"
                               className="h-5 text-xs sm:text-sm font-black animate-pulse"
+                              color="danger"
+                              size="sm"
+                              variant="solid"
                             >
                               {t("adminUsersPage.statusBanned")}
                             </Chip>
@@ -1475,10 +1531,10 @@ export default function UsersAndPermissionsPage() {
                             "coach:certified",
                           ) && (
                             <Chip
-                              size="sm"
-                              color="success"
-                              variant="solid"
                               className="h-5 text-xs sm:text-sm font-bold italic"
+                              color="success"
+                              size="sm"
+                              variant="solid"
                             >
                               {t("adminUsersPage.statusCertified")}
                             </Chip>
@@ -1488,7 +1544,6 @@ export default function UsersAndPermissionsPage() {
                       <TableCell>
                         {u.app_metadata?.subscription ? (
                           <Chip
-                            size="sm"
                             color={
                               u.app_metadata.subscription === "Ultime"
                                 ? "warning"
@@ -1496,12 +1551,13 @@ export default function UsersAndPermissionsPage() {
                                   ? "primary"
                                   : "default"
                             }
+                            size="sm"
                             variant="flat"
                           >
                             {u.app_metadata.subscription}
                           </Chip>
                         ) : (
-                          <Chip size="sm" color="default" variant="flat">
+                          <Chip color="default" size="sm" variant="flat">
                             Free
                           </Chip>
                         )}
@@ -1512,15 +1568,17 @@ export default function UsersAndPermissionsPage() {
                       <TableCell>
                         <div className="flex justify-center w-full">
                           <Button
-                            size="sm"
-                            variant="solid"
+                            className="font-bold px-6"
                             color="primary"
-                            onPress={() => openUserEditing(u.user_id)}
                             isDisabled={
                               !mgmtToken ||
-                              (isSuperAdmin && u.user_id !== currentUserId && currentUserId !== SUPREME_MASTER_ID)
+                              (isSuperAdmin &&
+                                u.user_id !== currentUserId &&
+                                currentUserId !== SUPREME_MASTER_ID)
                             }
-                            className="font-bold px-6"
+                            size="sm"
+                            variant="solid"
+                            onPress={() => openUserEditing(u.user_id)}
                           >
                             {t("adminUsersPage.btnViewProfile")}
                           </Button>
@@ -1536,7 +1594,14 @@ export default function UsersAndPermissionsPage() {
 
         {/* Panneau d'édition du profil (Modal) */}
         <Modal
+          classNames={{
+            base: "bg-zinc-900 border border-white/10 m-0 sm:m-auto w-full h-[100dvh] sm:h-auto max-w-none sm:max-w-4xl rounded-none sm:rounded-3xl overflow-hidden",
+            wrapper: "p-0 sm:p-4",
+            body: "overflow-x-hidden",
+          }}
           isOpen={!!selectedUserId}
+          scrollBehavior="inside"
+          size="4xl"
           onClose={() => {
             if (selectedUserId) {
               setEditing((prev) => ({ ...prev, [selectedUserId]: {} }));
@@ -1545,13 +1610,6 @@ export default function UsersAndPermissionsPage() {
             setSiretData(null);
             setNewSiret("");
             setForceSiret(false);
-          }}
-          size="4xl"
-          scrollBehavior="inside"
-          classNames={{
-            base: "bg-zinc-900 border border-white/10 m-0 sm:m-auto w-full h-[100dvh] sm:h-auto max-w-none sm:max-w-4xl rounded-none sm:rounded-3xl overflow-hidden",
-            wrapper: "p-0 sm:p-4",
-            body: "overflow-x-hidden",
           }}
         >
           <ModalContent>
@@ -1568,15 +1626,16 @@ export default function UsersAndPermissionsPage() {
                       <span className="text-primary text-2xl ml-1 truncate max-w-[200px] sm:max-w-none">
                         {targetUser?.name ?? selectedUserId}
                       </span>
-                      {(targetUser?.email === SUPER_ADMIN_EMAIL || targetUser?.user_id === SUPREME_MASTER_ID) && (
+                      {(targetUser?.email === SUPER_ADMIN_EMAIL ||
+                        targetUser?.user_id === SUPREME_MASTER_ID) && (
                         <Chip
-                          size="sm"
-                          color="warning"
-                          variant="solid"
                           className="ml-2 h-5 text-xs font-bold"
+                          color="warning"
+                          size="sm"
+                          variant="solid"
                         >
-                          {targetUser?.user_id === SUPREME_MASTER_ID 
-                            ? t("adminUsersPage.statusCreator") 
+                          {targetUser?.user_id === SUPREME_MASTER_ID
+                            ? t("adminUsersPage.statusCreator")
                             : t("adminUsersPage.modalProtected")}
                         </Chip>
                       )}
@@ -1618,13 +1677,13 @@ export default function UsersAndPermissionsPage() {
                               {t("adminUsersPage.siretSectionTitle")}
                             </h3>
                             <Button
+                              isDisabled={!selectedUserId}
+                              isLoading={siretLoading}
                               size="sm"
                               variant="flat"
                               onPress={() =>
                                 selectedUserId && loadSirets(selectedUserId)
                               }
-                              isLoading={siretLoading}
-                              isDisabled={!selectedUserId}
                             >
                               {t("adminUsersPage.btnRefresh")}
                             </Button>
@@ -1652,10 +1711,10 @@ export default function UsersAndPermissionsPage() {
                                     </p>
                                   </div>
                                   <Button
-                                    size="sm"
-                                    color="danger"
-                                    variant="flat"
                                     className="font-bold shrink-0"
+                                    color="danger"
+                                    size="sm"
+                                    variant="flat"
                                     onPress={async () => {
                                       setSiretLoading(true);
                                       try {
@@ -1670,6 +1729,7 @@ export default function UsersAndPermissionsPage() {
                                             },
                                           },
                                         );
+
                                         if (res.ok) {
                                           addToast({
                                             title: t(
@@ -1719,10 +1779,12 @@ export default function UsersAndPermissionsPage() {
                                         </div>
                                         <Button
                                           className="shrink-0 scale-90 origin-right"
-                                                                                color="danger"
-                                                                                size="sm"
-                                                                                variant="flat"
-                                                                                onPress={() => handleRemoveSiret(item.siret)}
+                                          color="danger"
+                                          size="sm"
+                                          variant="flat"
+                                          onPress={() =>
+                                            handleRemoveSiret(item.siret)
+                                          }
                                         >
                                           {t("adminUsersPage.btnDetach")}
                                         </Button>
@@ -1743,30 +1805,19 @@ export default function UsersAndPermissionsPage() {
                                     {t("adminUsersPage.addSiretTitle")}
                                   </p>
                                   <Checkbox
-                                    size="sm"
-                                    isSelected={forceSiret}
-                                    onValueChange={setForceSiret}
                                     classNames={{
                                       label:
                                         "text-xs font-bold text-warning-500",
                                     }}
+                                    isSelected={forceSiret}
+                                    size="sm"
+                                    onValueChange={setForceSiret}
                                   >
                                     {t("adminUsersPage.forceSiret")}
                                   </Checkbox>
                                 </div>
                                 <div className="flex gap-2 items-end">
                                   <Input
-                                    label={t("adminUsersPage.primaryClub")}
-                                    placeholder={t(
-                                      "adminUsersPage.siretPlaceholder",
-                                    )}
-                                    size="sm"
-                                    variant="bordered"
-                                    value={newSiret}
-                                    onValueChange={(v) =>
-                                      setNewSiret(formatSiret(v))
-                                    }
-                                    maxLength={18}
                                     errorMessage={
                                       newSiret &&
                                       newSiret.replace(/\s/g, "").length !==
@@ -1781,12 +1832,22 @@ export default function UsersAndPermissionsPage() {
                                         14 &&
                                       newSiret.replace(/\s/g, "").length !== 9
                                     }
+                                    label={t("adminUsersPage.primaryClub")}
+                                    maxLength={18}
+                                    placeholder={t(
+                                      "adminUsersPage.siretPlaceholder",
+                                    )}
+                                    size="sm"
+                                    value={newSiret}
+                                    variant="bordered"
+                                    onValueChange={(v) =>
+                                      setNewSiret(formatSiret(v))
+                                    }
                                   />
                                   <div className="flex flex-col gap-2">
                                     <Button
+                                      className="font-bold min-w-[120px]"
                                       color="primary"
-                                      size="sm"
-                                      onPress={handleAddSiret}
                                       isDisabled={
                                         (newSiret.replace(/\s/g, "").length !==
                                           14 &&
@@ -1795,12 +1856,22 @@ export default function UsersAndPermissionsPage() {
                                         siretLoading
                                       }
                                       isLoading={siretLoading}
-                                      className="font-bold min-w-[120px]"
+                                      size="sm"
+                                      onPress={handleAddSiret}
                                     >
                                       {t("adminUsersPage.btnAddAdditional")}
                                     </Button>
                                     <Button
+                                      className="font-bold min-w-[120px]"
                                       color="warning"
+                                      isDisabled={
+                                        (newSiret.replace(/\s/g, "").length !==
+                                          14 &&
+                                          newSiret.replace(/\s/g, "").length !==
+                                            9) ||
+                                        siretLoading
+                                      }
+                                      isLoading={siretLoading}
                                       size="sm"
                                       variant="shadow"
                                       onPress={async () => {
@@ -1808,6 +1879,7 @@ export default function UsersAndPermissionsPage() {
                                         const cleanSiret = newSiret
                                           .replace(/\s/g, "")
                                           .trim();
+
                                         setSiretLoading(true);
                                         try {
                                           const token =
@@ -1827,6 +1899,7 @@ export default function UsersAndPermissionsPage() {
                                               }),
                                             },
                                           );
+
                                           if (res.ok) {
                                             addToast({
                                               title: t(
@@ -1839,6 +1912,7 @@ export default function UsersAndPermissionsPage() {
                                             loadSirets(selectedUserId);
                                           } else {
                                             const d = await res.json();
+
                                             addToast({
                                               title: t("error.title"),
                                               description:
@@ -1853,15 +1927,6 @@ export default function UsersAndPermissionsPage() {
                                           setSiretLoading(false);
                                         }
                                       }}
-                                      isDisabled={
-                                        (newSiret.replace(/\s/g, "").length !==
-                                          14 &&
-                                          newSiret.replace(/\s/g, "").length !==
-                                            9) ||
-                                        siretLoading
-                                      }
-                                      isLoading={siretLoading}
-                                      className="font-bold min-w-[120px]"
                                     >
                                       {t("adminUsersPage.btnAddPrimary")}
                                     </Button>
@@ -1887,31 +1952,35 @@ export default function UsersAndPermissionsPage() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-2">
                               <Input
-                                description={t("adminUsersPage.stadiumAddressDesc")}
-                                                                label={t("adminUsersPage.stadiumAddressLabel")}
-                                                                placeholder={t("adminUsersPage.stadiumAddressPlaceholder")}
-                                                                size="sm"
-                                                                value={adminStadiumAddress}
-                                                                variant="bordered"
-                                                                onValueChange={setAdminStadiumAddress}
+                                description={t(
+                                  "adminUsersPage.stadiumAddressDesc",
+                                )}
+                                label={t("adminUsersPage.stadiumAddressLabel")}
+                                placeholder={t(
+                                  "adminUsersPage.stadiumAddressPlaceholder",
+                                )}
+                                size="sm"
+                                value={adminStadiumAddress}
+                                variant="bordered"
+                                onValueChange={setAdminStadiumAddress}
                               />
                             </div>
                             <Input
-                              type="number"
                               label={t("adminUsersPage.blockCountLabel")}
                               size="sm"
-                              variant="bordered"
+                              type="number"
                               value={adminBlockCount?.toString()}
+                              variant="bordered"
                               onValueChange={(v) =>
                                 setAdminBlockCount(Number(v))
                               }
                             />
                             <Input
-                              type="number"
                               label={t("adminUsersPage.siretChangeCountLabel")}
                               size="sm"
-                              variant="bordered"
+                              type="number"
                               value={adminSiretChangeCount?.toString()}
+                              variant="bordered"
                               onValueChange={(v) =>
                                 setAdminSiretChangeCount(Number(v))
                               }
@@ -1919,12 +1988,12 @@ export default function UsersAndPermissionsPage() {
                           </div>
 
                           <Button
-                            color="primary"
-                            variant="shadow"
-                            size="sm"
                             className="font-black tracking-widest h-10 mt-1 shadow-primary/20"
-                            onPress={handleUpdateUserProfile}
+                            color="primary"
                             isLoading={isSavingProfile}
+                            size="sm"
+                            variant="shadow"
+                            onPress={handleUpdateUserProfile}
                           >
                             {t("adminUsersPage.btnSaveD1")}
                           </Button>
@@ -1956,10 +2025,10 @@ export default function UsersAndPermissionsPage() {
                                 <div className="flex flex-col sm:flex-row gap-3">
                                   {isTargetBlocked ? (
                                     <Button
+                                      className="font-bold tracking-tight flex-1"
+                                      color="primary"
                                       size="md"
                                       variant="solid"
-                                      color="primary"
-                                      className="font-bold tracking-tight flex-1"
                                       onPress={() =>
                                         handleUnblockUser(
                                           selectedUserId as string,
@@ -1970,10 +2039,10 @@ export default function UsersAndPermissionsPage() {
                                     </Button>
                                   ) : (
                                     <Button
+                                      className="font-bold flex-1"
+                                      color="danger"
                                       size="md"
                                       variant="solid"
-                                      color="danger"
-                                      className="font-bold flex-1"
                                       onPress={() =>
                                         handleBlockUser(
                                           selectedUserId as string,
@@ -1985,14 +2054,14 @@ export default function UsersAndPermissionsPage() {
                                     </Button>
                                   )}
                                   <Button
+                                    className="flex-1"
+                                    color="danger"
+                                    isDisabled={!mgmtToken}
                                     size="md"
                                     variant="flat"
-                                    color="danger"
-                                    className="flex-1"
                                     onPress={() =>
                                       deleteUser(selectedUserId as string)
                                     }
-                                    isDisabled={!mgmtToken}
                                   >
                                     {t("adminUsersPage.btnDeleteAccount")}
                                   </Button>
@@ -2014,42 +2083,42 @@ export default function UsersAndPermissionsPage() {
                               {t("adminUsersPage.quickAssignLabel")}
                             </span>
                             <Button
+                              color="default"
                               size="sm"
                               variant="flat"
-                              color="default"
                               onPress={() => applyRole("free")}
                             >
                               {t("adminUsersPage.roleFree")}
                             </Button>
                             <Button
+                              color="warning"
                               size="sm"
                               variant="flat"
-                              color="warning"
                               onPress={() => applyRole("premium")}
                             >
                               {t("adminUsersPage.rolePremium")}
                             </Button>
                             <Button
+                              color="secondary"
                               size="sm"
                               variant="flat"
-                              color="secondary"
                               onPress={() => applyRole("admin")}
                             >
                               {t("adminUsersPage.roleAdmin")}
                             </Button>
                             <Button
+                              color="danger"
                               size="sm"
                               variant="flat"
-                              color="danger"
                               onPress={() => applyRole("superadmin")}
                             >
                               {t("adminUsersPage.roleSuperAdmin")}
                             </Button>
                             <Button
+                              className="font-black"
+                              color="danger"
                               size="sm"
                               variant="solid"
-                              color="danger"
-                              className="font-black"
                               onPress={() => applyRole("blocked")}
                             >
                               {t("adminUsersPage.roleBlocked")}
@@ -2066,6 +2135,7 @@ export default function UsersAndPermissionsPage() {
                                   perms: typeof KDUFOOT_PERMISSIONS;
                                 }
                               > = {};
+
                               for (const perm of KDUFOOT_PERMISSIONS) {
                                 if (!groups[perm.group]) {
                                   groups[perm.group] = {
@@ -2083,10 +2153,10 @@ export default function UsersAndPermissionsPage() {
                                     className={`rounded-lg p-3 ${groupKey === "role" ? "bg-red-950/30 border border-red-600/30" : "bg-zinc-900 border border-white/10"}`}
                                   >
                                     <Chip
-                                      size="sm"
-                                      color={groupColor(groupKey)}
-                                      variant="flat"
                                       className="mb-2"
+                                      color={groupColor(groupKey)}
+                                      size="sm"
+                                      variant="flat"
                                     >
                                       {group.label}
                                     </Chip>
@@ -2113,18 +2183,6 @@ export default function UsersAndPermissionsPage() {
                                             className="flex flex-col gap-2"
                                           >
                                             <Checkbox
-                                              isSelected={
-                                                editing[selectedUserId ?? ""]?.[
-                                                  perm.key
-                                                ] ?? false
-                                              }
-                                              onValueChange={() =>
-                                                togglePermission(
-                                                  selectedUserId as string,
-                                                  perm.key,
-                                                )
-                                              }
-                                              size="sm"
                                               color={
                                                 perm.key === "role_blocked"
                                                   ? "danger"
@@ -2143,9 +2201,21 @@ export default function UsersAndPermissionsPage() {
                                                   selectedUserId !==
                                                     currentUserId)
                                               }
+                                              isSelected={
+                                                editing[selectedUserId ?? ""]?.[
+                                                  perm.key
+                                                ] ?? false
+                                              }
+                                              size="sm"
+                                              onValueChange={() =>
+                                                togglePermission(
+                                                  selectedUserId as string,
+                                                  perm.key,
+                                                )
+                                              }
                                             >
                                               <span
-                                                className={`text-xs ${perm.key === "role_blocked" ? "font-black text-red-500" : isDirty ? "text-red-500 font-bold animate-pulse" : "text-default-300"}`}
+                                                className={`text-xs ${perm.key === "role_blocked" ? "font-black text-red-500" : isDirty ? "text-red-500 font-bold animate-pulse" : "text-default-400"}`}
                                               >
                                                 {perm.key === "role_blocked"
                                                   ? "🚫 "
@@ -2170,9 +2240,9 @@ export default function UsersAndPermissionsPage() {
                   </ModalBody>
                   <ModalFooter className="border-t border-white/5 flex flex-col sm:flex-row gap-3">
                     <Button
-                      variant="flat"
-                      size="lg"
                       className="font-semibold text-default-600 bg-white/5 w-full sm:w-auto order-2 sm:order-1"
+                      size="lg"
+                      variant="flat"
                       onPress={() => {
                         if (selectedUserId) {
                           setEditing((prev) => ({
@@ -2189,16 +2259,16 @@ export default function UsersAndPermissionsPage() {
                       {t("adminUsersPage.modalBtnCloseProfile")}
                     </Button>
                     <Button
-                      color="primary"
-                      size="lg"
                       className="font-bold shadow-lg shadow-primary-500/30 w-full sm:w-auto order-1 sm:order-2"
-                      onPress={() => savePermissions(selectedUserId as string)}
-                      isLoading={savingUserId === selectedUserId}
+                      color="primary"
                       isDisabled={
                         modalLoading ||
                         Object.keys(editing[selectedUserId ?? ""] ?? {})
                           .length === 0
                       }
+                      isLoading={savingUserId === selectedUserId}
+                      size="lg"
+                      onPress={() => savePermissions(selectedUserId as string)}
                     >
                       {t("adminUsersPage.modalBtnSaveModifications")}
                     </Button>
@@ -2212,10 +2282,10 @@ export default function UsersAndPermissionsPage() {
         {/* Ban Reason Modal */}
         <Modal
           backdrop="blur"
-                    className="bg-zinc-950 border border-white/10"
-                    isOpen={isBanModalOpen}
-                    size="md"
-                    onOpenChange={setIsBanModalOpen}
+          className="bg-zinc-950 border border-white/10"
+          isOpen={isBanModalOpen}
+          size="md"
+          onOpenChange={setIsBanModalOpen}
         >
           <ModalContent>
             {(onClose) => (
@@ -2229,13 +2299,13 @@ export default function UsersAndPermissionsPage() {
                     <strong>{banTarget?.email}</strong> ?
                   </p>
                   <Input
+                    autoFocus
+                    className="mb-4"
                     label="Motif du blocage"
                     placeholder="Ex: Suspension administrative, violation des règles..."
                     value={banReason}
-                    onValueChange={setBanReason}
                     variant="bordered"
-                    className="mb-4"
-                    autoFocus
+                    onValueChange={setBanReason}
                   />
                   <div className="bg-red-950/20 border border-red-500/20 p-3 rounded-xl">
                     <p className="text-red-300 text-xs">
@@ -2246,15 +2316,15 @@ export default function UsersAndPermissionsPage() {
                 </ModalBody>
                 <ModalFooter>
                   <Button
+                    className="font-bold"
                     variant="light"
                     onPress={onClose}
-                    className="font-bold"
                   >
                     Annuler
                   </Button>
                   <Button
-                    color="danger"
                     className="font-bold shadow-lg shadow-red-500/20"
+                    color="danger"
                     onPress={async () => {
                       if (banTarget) {
                         await confirmBlock(banTarget.id, banReason);

@@ -23,10 +23,10 @@ export const OfflineStatus = () => {
     <AnimatePresence>
       {!isOnline && (
         <motion.div
-          initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
           className="fixed top-0 left-0 right-0 z-[9999] flex justify-center p-2"
+          exit={{ opacity: 0, y: -50 }}
+          initial={{ opacity: 0, y: -50 }}
         >
           <div className="bg-danger/90 backdrop-blur-md text-white px-4 py-2 rounded-full shadow-2xl flex items-center gap-3 border border-white/20">
             <svg

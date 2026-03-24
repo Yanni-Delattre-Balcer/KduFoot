@@ -5,31 +5,58 @@ import { ParticipationService } from '../services/participation.service';
 import { MatchService } from '../services/match.service';
 import { Permission } from '../types/permissions';
 import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast';
-import { ContactMatchSchema } from '../utils/validation';
+import { ContactMatchSchema, requireValidUUID } from '../utils/validation';
 import { ContactMatchDto } from '../types/match';
+import { getDbUser } from '../utils/db-helpers';
 
 export const setupParticipationRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
     const participationService = new ParticipationService(env.DB);
     const matchService = new MatchService(env.DB);
 
+    /**
+     * @openapi
+     * /api/matches/requests:
+     *   get:
+     *     tags: [Participations]
+     *     summary: List incoming participation requests for the current user's matches
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: List of incoming requests (pending/accepted/refused) with requester info
+     */
     router.get('/api/matches/requests', async (request, env) => {
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         const requests = await participationService.getIncomingRequests(dbUser.id);
-        return Response.json({ success: true, requests }, { headers: router.corsHeaders });
+        return Response.json({ success: true, requests }, { headers: { ...router.corsHeaders, 'Cache-Control': 'private, max-age=30' } });
     }, Permission.MATCHES_CREATE);
 
+    /**
+     * @openapi
+     * /api/matches/participations:
+     *   get:
+     *     tags: [Participations]
+     *     summary: List matches the current user has applied to participate in
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: List of participation requests made by the current user, with host match info
+     */
     router.get('/api/matches/participations', async (request, env) => {
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         const participations = await participationService.getMyParticipations(dbUser.id);
-        return Response.json({ success: true, participations }, { headers: router.corsHeaders });
+        return Response.json({ success: true, participations }, { headers: { ...router.corsHeaders, 'Cache-Control': 'private, max-age=30' } });
     }, Permission.MATCHES_CONTACT);
 
     router.post('/api/matches/<id>/contact', async (request, env, ctx) => {
         const params = request.params as { id: string };
+        const uuidError = requireValidUUID(params.id, router.corsHeaders);
+        if (uuidError) return uuidError;
         const body = await request.json();
         const validation = ContactMatchSchema.safeParse(body);
         if (!validation.success) {
@@ -37,7 +64,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
             return Response.json({ success: false, error: `Données invalides : ${errorMsg}` }, { status: 400, headers: router.corsHeaders });
         }
     
-        const dbUser = await env.DB.prepare('SELECT id, firstname, lastname, phone, license_id, category, level, stadium_address, home_jersey_color, away_jersey_color, location, club_id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<any>();
+        const dbUser = await env.DB.prepare('SELECT id, firstname, lastname, phone, license_id, category, level, stadium_address, home_jersey_color, away_jersey_color, location, club_id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string; firstname: string; lastname: string; phone: string; license_id: string; category: string; level: string; stadium_address: string; home_jersey_color: string; away_jersey_color: string; location: string; club_id: string }>();
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         // Profile complete check
@@ -58,9 +85,11 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
         try {
             const success = await participationService.contact(params.id, dbUser.id, validation.data as ContactMatchDto);
             if (success) {
-                const match = await matchService.getById(params.id);
-                const applicantClub = await env.DB.prepare('SELECT c.name FROM clubs c JOIN users u ON u.club_id = c.id WHERE u.id = ?').bind(dbUser.id).first<{ name: string }>();
-                const owner = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(match?.owner_id).first<{ auth0_sub: string }>();
+                const [match, applicantClub] = await Promise.all([
+                    matchService.getById(params.id),
+                    env.DB.prepare('SELECT c.name FROM clubs c JOIN users u ON u.club_id = c.id WHERE u.id = ?').bind(dbUser.id).first<{ name: string }>()
+                ]);
+                const owner = match ? await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(match.owner_id).first<{ auth0_sub: string }>() : null;
 
                 if (owner && match) {
                     ctx.waitUntil(broadcastNotification(env, {
@@ -91,14 +120,16 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
     router.patch('/api/matches/<matchId>/requests/<userId>', async (request, env, ctx) => {
         const params = request.params as { matchId: string, userId: string };
         const body = await request.json() as { status: 'accepted' | 'refused' };
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         try {
             const success = await participationService.updateRequestStatus(params.matchId, params.userId, dbUser.id, body.status);
             if (success) {
-                const match = await matchService.getById(params.matchId);
-                const applicant = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(params.userId).first<{ auth0_sub: string }>();
+                const [match, applicant] = await Promise.all([
+                    matchService.getById(params.matchId),
+                    env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(params.userId).first<{ auth0_sub: string }>()
+                ]);
                 if (applicant && match) {
                     const owner = await env.DB.prepare('SELECT auth0_sub FROM users WHERE id = ?').bind(match.owner_id).first<{ auth0_sub: string }>();
                     ctx.waitUntil(broadcastNotification(env, {
@@ -128,7 +159,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
 
     router.delete('/api/matches/<matchId>/requests/<userId>', async (request, env, ctx) => {
         const params = request.params as { matchId: string, userId: string };
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         const match = await env.DB.prepare('SELECT m.*, u.auth0_sub as owner_sub, c.name as host_club_name FROM matches m JOIN users u ON m.owner_id = u.id JOIN clubs c ON m.club_id = c.id WHERE m.id = ?').bind(params.matchId).first<any>();
@@ -176,7 +207,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
 
     router.patch('/api/matches/<id>/notifications/read', async (request, env) => {
         const params = request.params as { id: string };
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         await participationService.markNotificationsAsRead(params.id, dbUser.id);
@@ -184,10 +215,10 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
     }, Permission.READ_API);
 
     router.get('/api/me/notifications/counts', async (request, env) => {
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         const counts = await participationService.getNotificationCounts(dbUser.id);
-        return Response.json({ success: true, ...counts }, { headers: router.corsHeaders });
+        return Response.json({ success: true, ...counts }, { headers: { ...router.corsHeaders, 'Cache-Control': 'no-store' } });
     }, Permission.READ_API);
 };

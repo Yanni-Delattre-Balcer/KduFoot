@@ -3,8 +3,6 @@
  * @license AGPL-3.0-or-later
  */
 
-/* eslint-disable no-console */
-
 import { UserManager, User, WebStorageStateStore, Log } from "oidc-client-ts";
 import { useEffect, useState } from "react";
 import { JWTPayload, jwtVerify, createRemoteJWKSet } from "jose";

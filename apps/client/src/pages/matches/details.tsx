@@ -17,7 +17,6 @@ import {
 import { addToast } from "@heroui/toast";
 import { Textarea } from "@heroui/input";
 
-
 import DataWall from "@/components/data-wall";
 import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { useAuth, useUser } from "@/authentication";
@@ -42,7 +41,17 @@ const InfoItem = ({
   icon: string;
   label: string;
   value: string;
-  color: "primary" | "secondary" | "success" | "warning" | "danger" | "default" | "info" | "violet" | "orange" | "cyan";
+  color:
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "default"
+    | "info"
+    | "violet"
+    | "orange"
+    | "cyan";
   highlight?: boolean;
   showPulse?: boolean;
 }) => {
@@ -156,7 +165,6 @@ export default function MatchDetailsPage() {
   } = useDisclosure();
   const [blockReason, setBlockReason] = useState("Suspension administrative");
 
-
   // Red Alert Detection Logic
   const { participations, markAsRead } = useMyParticipations();
   const participation = participations?.find((p) => p.match_id === id);
@@ -166,6 +174,7 @@ export default function MatchDetailsPage() {
   // Parse Gender and clean notes early for highlights and UI
   const genderMatch = match?.notes?.match(/Genre: (.*)(\n|$)/);
   let gender = genderMatch ? genderMatch[1].trim() : "Mixte";
+
   if (gender.startsWith("enums.gender.")) {
     gender = gender.replace("enums.gender.", "");
   }
@@ -186,13 +195,17 @@ export default function MatchDetailsPage() {
 
   const isDifferent = (val1: any, val2: any) => {
     if (!val1 || !val2) return false;
-    const s1 = String(val1 || "").trim().toLowerCase();
-    const s2 = String(val2 || "").trim().toLowerCase();
+    const s1 = String(val1 || "")
+      .trim()
+      .toLowerCase();
+    const s2 = String(val2 || "")
+      .trim()
+      .toLowerCase();
+
     return s1 !== s2;
   };
 
   const matchKnownData = knownData[id || ""];
-
 
   const highlights = {
     date:
@@ -207,21 +220,29 @@ export default function MatchDetailsPage() {
         matchKnownData.time?.slice(0, 5),
       ),
     venue:
-      isModified && !!matchKnownData && isDifferent(match?.venue, matchKnownData.venue),
+      isModified &&
+      !!matchKnownData &&
+      isDifferent(match?.venue, matchKnownData.venue),
     pitch:
       isModified &&
       !!matchKnownData &&
       isDifferent(match?.pitch_type, matchKnownData.pitch),
     format:
-      isModified && !!matchKnownData && isDifferent(match?.format, matchKnownData.format),
+      isModified &&
+      !!matchKnownData &&
+      isDifferent(match?.format, matchKnownData.format),
     category:
       isModified &&
       !!matchKnownData &&
       isDifferent(match?.category, matchKnownData.category),
     level:
-      isModified && !!matchKnownData && isDifferent(match?.level, matchKnownData.level),
+      isModified &&
+      !!matchKnownData &&
+      isDifferent(match?.level, matchKnownData.level),
     gender:
-      isModified && !!matchKnownData && isDifferent(gender, matchKnownData.gender),
+      isModified &&
+      !!matchKnownData &&
+      isDifferent(gender, matchKnownData.gender),
   };
 
   const [showPulse, setShowPulse] = useState(true);
@@ -229,12 +250,9 @@ export default function MatchDetailsPage() {
   // Stop pulse after 5 seconds
   useEffect(() => {
     const timer = setTimeout(() => setShowPulse(false), 5000);
+
     return () => clearTimeout(timer);
   }, []);
-
-
-
-
 
   const [isMarkingRead, setIsMarkingRead] = useState(false);
 
@@ -258,7 +276,10 @@ export default function MatchDetailsPage() {
         },
       };
 
-      localStorage.setItem("kdufoot_known_match_data", JSON.stringify(nextKnown));
+      localStorage.setItem(
+        "kdufoot_known_match_data",
+        JSON.stringify(nextKnown),
+      );
       setKnownData(nextKnown);
 
       addToast({
@@ -305,17 +326,22 @@ export default function MatchDetailsPage() {
     );
   }
 
-
-
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       await deleteMatch();
       addToast({
-        title: t("dashboard.toasts.delete_success", "Votre {{matchType}} a été supprimé avec succès", {
-          matchType: t("enums.type." + match.type).toLowerCase()
-        }),
-        description: t("dashboard.toasts.delete_success_desc", "L'annonce a été retirée avec succès."),
+        title: t(
+          "dashboard.toasts.delete_success",
+          "Votre {{matchType}} a été supprimé avec succès",
+          {
+            matchType: t("enums.type." + match.type).toLowerCase(),
+          },
+        ),
+        description: t(
+          "dashboard.toasts.delete_success_desc",
+          "L'annonce a été retirée avec succès.",
+        ),
         color: "success",
       });
       onDeleteOpenChange(); // Close modal on success
@@ -326,10 +352,12 @@ export default function MatchDetailsPage() {
         title: t("error.title"),
         description: t(
           "error.delete_failed_with_type",
-          match.type === "tournament" ? "Erreur lors de la suppression du tournoi" : "Erreur lors de la suppression du match",
+          match.type === "tournament"
+            ? "Erreur lors de la suppression du tournoi"
+            : "Erreur lors de la suppression du match",
           {
-            matchType: t("enums.type." + match.type).toLowerCase()
-          }
+            matchType: t("enums.type." + match.type).toLowerCase(),
+          },
         ),
         color: "danger",
       });
@@ -414,7 +442,6 @@ export default function MatchDetailsPage() {
       setIsBlocking(false);
     }
   };
-
 
   return (
     <DefaultLayout>
@@ -508,8 +535,6 @@ export default function MatchDetailsPage() {
                     className="font-black tracking-tighter flex-1 h-20 text-lg shadow-xl"
                     color="default"
                     size="lg"
-                    variant="solid"
-                    onPress={onAdminDeleteOpen}
                     startContent={
                       <svg
                         className="w-8 h-8 mr-2"
@@ -526,6 +551,8 @@ export default function MatchDetailsPage() {
                         />
                       </svg>
                     }
+                    variant="solid"
+                    onPress={onAdminDeleteOpen}
                   >
                     {t("details.buttons.delete_ad")}
                   </Button>
@@ -534,8 +561,6 @@ export default function MatchDetailsPage() {
                     color="danger"
                     isLoading={isBlocking}
                     size="lg"
-                    variant="solid"
-                    onPress={onBlockOpen}
                     startContent={
                       <svg
                         className="w-8 h-8 mr-2"
@@ -550,10 +575,11 @@ export default function MatchDetailsPage() {
                         />
                       </svg>
                     }
+                    variant="solid"
+                    onPress={onBlockOpen}
                   >
                     {t("details.buttons.block_user")}
                   </Button>
-
                 </div>
               </div>
             )}
@@ -770,10 +796,16 @@ export default function MatchDetailsPage() {
                     <span className="text-2xl animate-bounce">⚠️</span>
                     <div>
                       <p className="text-sm font-black text-danger tracking-tight">
-                        {t("details.modification_alert_title", "Des modifications ont été apportées")}
+                        {t(
+                          "details.modification_alert_title",
+                          "Des modifications ont été apportées",
+                        )}
                       </p>
                       <p className="text-[10px] text-danger/70 font-medium">
-                        {t("details.modification_alert_desc", "Les champs en rouge ont été modifiés par l'organisateur.")}
+                        {t(
+                          "details.modification_alert_desc",
+                          "Les champs en rouge ont été modifiés par l'organisateur.",
+                        )}
                       </p>
                     </div>
                   </div>
@@ -785,7 +817,10 @@ export default function MatchDetailsPage() {
                     variant="solid"
                     onPress={handleMarkAsRead}
                   >
-                    {t("dashboard.controls.view_changes", "J'AI VU LES MODIFICATIONS")}
+                    {t(
+                      "dashboard.controls.view_changes",
+                      "J'AI VU LES MODIFICATIONS",
+                    )}
                   </Button>
                 </div>
               )}
@@ -836,7 +871,7 @@ export default function MatchDetailsPage() {
                     <span className="text-2xl">📝</span>{" "}
                     {t("matchForm.labels.notes", "Notes & Instructions")}
                   </h3>
-                  <div className="text-default-300 font-medium leading-relaxed italic text-lg opacity-80 border-l-2 border-amber-500/30 pl-6">
+                  <div className="text-default-400 font-medium leading-relaxed italic text-lg opacity-80 border-l-2 border-amber-500/30 pl-6">
                     {cleanNotes}
                   </div>
                 </div>
@@ -864,12 +899,18 @@ export default function MatchDetailsPage() {
                             onPress={onCancelAcceptedOpen}
                           >
                             {match.type === "tournament"
-                              ? t("details.buttons.cancel_tournament", "Annuler le tournoi")
-                              : t("details.buttons.cancel_duel", "Annuler le duel")}
+                              ? t(
+                                  "details.buttons.cancel_tournament",
+                                  "Annuler le tournoi",
+                                )
+                              : t(
+                                  "details.buttons.cancel_duel",
+                                  "Annuler le duel",
+                                )}
                           </Button>
                         </div>
                       ) : (
-                        <p className="text-default-400 text-sm font-bold tracking-wide opacity-60">
+                        <p className="text-default-500 text-sm font-bold tracking-wide">
                           {t("details.labels.organizer_management")}
                         </p>
                       )}
@@ -905,7 +946,10 @@ export default function MatchDetailsPage() {
                               {t("details.status.modified", "MATCH MODIFIÉ")}
                             </p>
                             <p className="text-rose-300 text-[10px] font-bold opacity-80 text-center">
-                              {t("details.status.modified_desc", "Certains détails ont changé")}
+                              {t(
+                                "details.status.modified_desc",
+                                "Certains détails ont changé",
+                              )}
                             </p>
                           </div>
                           <Button
@@ -914,7 +958,10 @@ export default function MatchDetailsPage() {
                             variant="solid"
                             onPress={handleMarkAsRead}
                           >
-                            {t("details.buttons.view_changes", "J'ai vu les changements")}
+                            {t(
+                              "details.buttons.view_changes",
+                              "J'ai vu les changements",
+                            )}
                           </Button>
                         </div>
                       )}
@@ -982,7 +1029,7 @@ export default function MatchDetailsPage() {
                         // STATE: Pending or no contact → show initial request block
                         return (
                           <>
-                            <p className="text-default-300 text-sm text-center">
+                            <p className="text-default-400 text-sm text-center">
                               {t("details.labels.participate_prompt")}
                             </p>
 
@@ -1086,8 +1133,9 @@ export default function MatchDetailsPage() {
                                   }
                                   try {
                                     await contactMatch({
-                                      message:
-                                        t("match.contact_tracking_message"),
+                                      message: t(
+                                        "match.contact_tracking_message",
+                                      ),
                                     });
                                     addToast({
                                       title: t("success"),
@@ -1157,9 +1205,9 @@ export default function MatchDetailsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {match.contacts && match.contacts.length > 0 ? (
                     match.contacts.map((contact, index) => {
-                        const isActionable =
-                          user?.id === match.owner_id &&
-                          contact.message === t("match.contact_tracking_message");
+                      const isActionable =
+                        user?.id === match.owner_id &&
+                        contact.message === t("match.contact_tracking_message");
                       const statusConfig = {
                         accepted: {
                           border: "border-emerald-500/50",
@@ -1252,7 +1300,10 @@ export default function MatchDetailsPage() {
                                   navigate("/dashboard?tab=requests")
                                 }
                               >
-                                {t("details.buttons.view_request", "Voir la demande")}
+                                {t(
+                                  "details.buttons.view_request",
+                                  "Voir la demande",
+                                )}
                               </Button>
                             )}
                           </CardBody>
@@ -1300,11 +1351,11 @@ export default function MatchDetailsPage() {
                       {t("cancel")}
                     </Button>
                     <Button
+                      autoFocus
                       className="font-black tracking-tighter shadow-lg shadow-danger/20"
                       color="danger"
                       isLoading={isCancelling}
                       onPress={handleCancelRequest}
-                      autoFocus
                     >
                       {t("details.modal.withdraw_confirm")}
                     </Button>
@@ -1329,8 +1380,18 @@ export default function MatchDetailsPage() {
                   <ModalBody className="p-4 pt-2 sm:p-6 sm:pt-2">
                     <p className="text-default-400 font-medium">
                       {match.type === "tournament"
-                        ? t("match.confirm_delete_tournament", "Es-tu sûr de vouloir supprimer ce tournoi ?")
-                        : t("match.confirm_delete_match", "Es-tu sûr de vouloir supprimer ce match ?")} {t("details.modal.irreversible", "Cette action est irréversible.")}
+                        ? t(
+                            "match.confirm_delete_tournament",
+                            "Es-tu sûr de vouloir supprimer ce tournoi ?",
+                          )
+                        : t(
+                            "match.confirm_delete_match",
+                            "Es-tu sûr de vouloir supprimer ce match ?",
+                          )}{" "}
+                      {t(
+                        "details.modal.irreversible",
+                        "Cette action est irréversible.",
+                      )}
                     </p>
                   </ModalBody>
                   <ModalFooter>
@@ -1342,11 +1403,11 @@ export default function MatchDetailsPage() {
                       {t("cancel")}
                     </Button>
                     <Button
+                      autoFocus
                       className="font-black tracking-tighter shadow-lg shadow-danger/20"
                       color="danger"
                       isLoading={isDeleting}
                       onPress={handleDelete}
-                      autoFocus
                     >
                       {t("details.modal.delete_confirm")}
                     </Button>
@@ -1370,7 +1431,10 @@ export default function MatchDetailsPage() {
                   </ModalHeader>
                   <ModalBody>
                     <p className="text-default-400 font-medium italic">
-                      {t("details.modal.admin_delete_desc", "⚠️ Attention : En tant qu'administrateur, vous allez supprimer cette annonce. L'action est définitive.")}
+                      {t(
+                        "details.modal.admin_delete_desc",
+                        "⚠️ Attention : En tant qu'administrateur, vous allez supprimer cette annonce. L'action est définitive.",
+                      )}
                     </p>
                   </ModalBody>
                   <ModalFooter>
@@ -1382,11 +1446,11 @@ export default function MatchDetailsPage() {
                       {t("cancel")}
                     </Button>
                     <Button
+                      autoFocus
                       className="font-black tracking-tighter shadow-lg shadow-danger/20"
                       color="danger"
                       isLoading={isAdminDeleting}
                       onPress={handleAdminDelete}
-                      autoFocus
                     >
                       {t("details.modal.admin_delete_confirm")}
                     </Button>
@@ -1416,7 +1480,10 @@ export default function MatchDetailsPage() {
                       isRequired
                       className="mt-2"
                       label={t("details.modal.block_reason_label")}
-                      placeholder={t("details.modal.block_reason_placeholder", "Saisissez la raison du blocage (ex: Comportement inapproprié, multiples désistements...)")}
+                      placeholder={t(
+                        "details.modal.block_reason_placeholder",
+                        "Saisissez la raison du blocage (ex: Comportement inapproprié, multiples désistements...)",
+                      )}
                       value={blockReason}
                       variant="bordered"
                       onValueChange={setBlockReason}
@@ -1432,6 +1499,7 @@ export default function MatchDetailsPage() {
                       {t("cancel")}
                     </Button>
                     <Button
+                      autoFocus
                       className="font-black tracking-tighter shadow-lg shadow-danger/20"
                       color="danger"
                       isLoading={isBlocking}
@@ -1439,7 +1507,6 @@ export default function MatchDetailsPage() {
                         await handleBlockUser();
                         onClose();
                       }}
-                      autoFocus
                     >
                       {t("details.modal.block_confirm")}
                     </Button>
@@ -1482,21 +1549,27 @@ export default function MatchDetailsPage() {
                           await closeRegistrations();
                           addToast({
                             title: t("success"),
-                            description: t("details.modal.closed_success", "Inscriptions closes"),
+                            description: t(
+                              "details.modal.closed_success",
+                              "Inscriptions closes",
+                            ),
                             color: "success",
                           });
                           onClose();
-                        } catch (e) {
+                        } catch {
                           addToast({
                             title: t("error.title"),
-                            description: t("error.action_impossible", "Action impossible"),
+                            description: t(
+                              "error.action_impossible",
+                              "Action impossible",
+                            ),
                             color: "danger",
                           });
                         }
                       }}
-                      >
-                        {t("details.buttons.close")}
-                      </Button>
+                    >
+                      {t("details.buttons.close")}
+                    </Button>
                   </ModalFooter>
                 </>
               )}

@@ -136,15 +136,17 @@ export class ExerciseService {
 
         query += ' ORDER BY created_at DESC, id DESC';
 
-        if (filters.limit) {
+        const MAX_LIMIT = 200;
+        const limit = filters.limit ? Math.min(filters.limit, MAX_LIMIT) : undefined;
+        if (limit) {
             query += ' LIMIT ?';
-            params.push(filters.limit + 1);
+            params.push(limit + 1);
         }
 
         const { results } = await this.db.prepare(query).bind(...params).all<Exercise>();
 
         let hasMore = false;
-        if (filters.limit && results.length > filters.limit) {
+        if (limit && results.length > limit) {
             hasMore = true;
             results.pop();
         }

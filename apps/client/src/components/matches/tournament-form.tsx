@@ -213,20 +213,30 @@ export default function TournamentForm({
       newErrors.match_date = "La date est obligatoire.";
     } else {
       const now = new Date();
-      const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .split("T")[0];
       const selectedDate = formData.match_date;
 
       if (selectedDate < todayStr) {
-        newErrors.match_date = t("matchForm.alerts.date_past_error", "Date passée : Le tournoi ne peut pas être dans le passé.");
+        newErrors.match_date = t(
+          "matchForm.alerts.date_past_error",
+          "Date passée : Le tournoi ne peut pas être dans le passé.",
+        );
       } else if (selectedDate === todayStr) {
         // Restriction de 2h uniquement pour AUJOURD'HUI
         if (formData.match_time) {
           const [hours, minutes] = formData.match_time.split(":").map(Number);
-          const matchDateTime = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
+          const matchDateTime = new Date(
+            `${selectedDate}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`,
+          );
           const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
           if (matchDateTime < minTime) {
-            newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un tournoi aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.");
+            newErrors.match_time = t(
+              "matchForm.alerts.delay_short_error",
+              "Délai trop court : Un tournoi aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.",
+            );
           }
         }
       }
@@ -252,9 +262,13 @@ export default function TournamentForm({
     if (!validate()) {
       addToast({
         title: t("matchForm.alerts.validation_failed", "Formulaire incomplet"),
-        description: t("account.errors.form_incomplete_desc", "Veuillez remplir tous les champs obligatoires en rouge."),
+        description: t(
+          "account.errors.form_incomplete_desc",
+          "Veuillez remplir tous les champs obligatoires en rouge.",
+        ),
         color: "danger",
       });
+
       return;
     }
     if (!user?.club_id) return;
@@ -463,7 +477,15 @@ export default function TournamentForm({
             <div className="flex flex-col gap-3">
               <div
                 className="relative cursor-pointer"
+                role="button"
+                tabIndex={0}
                 onClick={() => showLockedInfo("address")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    showLockedInfo("address");
+                  }
+                }}
               >
                 <Input
                   isDisabled
@@ -472,7 +494,9 @@ export default function TournamentForm({
                     <div className="flex items-center h-full">
                       <div className="bg-emerald-500 text-[#0f0717] text-[10px] sm:text-[11px] font-black px-2 py-1 rounded-full flex items-center gap-1 leading-none shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                         <span>🏟️</span>
-                        <span className="mb-[1px]">{t("matchForm.labels.stadium")}</span>
+                        <span className="mb-[1px]">
+                          {t("matchForm.labels.stadium")}
+                        </span>
                       </div>
                     </div>
                   }
@@ -485,7 +509,15 @@ export default function TournamentForm({
               <div className="grid grid-cols-2 gap-3">
                 <div
                   className="cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => showLockedInfo("zip")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      showLockedInfo("zip");
+                    }
+                  }}
                 >
                   <Input
                     isDisabled
@@ -500,7 +532,15 @@ export default function TournamentForm({
                 </div>
                 <div
                   className="cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => showLockedInfo("city")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      showLockedInfo("city");
+                    }
+                  }}
                 >
                   <Input
                     isDisabled
@@ -603,8 +643,12 @@ export default function TournamentForm({
                 variant="faded"
                 onChange={(e) => setGender(e.target.value)}
               >
-                <SelectItem key="Masculin">{t("enums.gender.Masculin")}</SelectItem>
-                <SelectItem key="Féminin">{t("enums.gender.Féminin")}</SelectItem>
+                <SelectItem key="Masculin">
+                  {t("enums.gender.Masculin")}
+                </SelectItem>
+                <SelectItem key="Féminin">
+                  {t("enums.gender.Féminin")}
+                </SelectItem>
                 <SelectItem key="Mixte">{t("enums.gender.Mixte")}</SelectItem>
               </Select>
               <Select
@@ -671,7 +715,15 @@ export default function TournamentForm({
 
             <div
               className="bg-[#160d21]/50 border border-[#2a1b3d] rounded-2xl p-4 flex items-center justify-between group cursor-pointer"
+              role="button"
+              tabIndex={0}
               onClick={() => showLockedInfo("jersey")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  showLockedInfo("jersey");
+                }
+              }}
             >
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-black text-purple-400 tracking-widest pl-1">
@@ -679,7 +731,8 @@ export default function TournamentForm({
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="text-white font-bold pl-1">
-                    {formData.jersey_color || t("tournamentForm.labels.unspecified")}
+                    {formData.jersey_color ||
+                      t("tournamentForm.labels.unspecified")}
                   </span>
                   {formData.jersey_color && (
                     <JerseyColorDots colors={formData.jersey_color} size="md" />
@@ -688,64 +741,69 @@ export default function TournamentForm({
               </div>
               <div className="flex items-center gap-2 bg-purple-500/10 text-purple-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-purple-500/20 group-hover:bg-purple-500/20 transition-all">
                 <span>🔒</span>
-                <span className="mb-[1px]">{t("matchForm.labels.edit_in_account")}</span>
+                <span className="mb-[1px]">
+                  {t("matchForm.labels.edit_in_account")}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Progress Bar Container */}
-      <div className="flex flex-col gap-2 pt-2">
-        <div className="flex justify-between items-center bg-zinc-800/50 p-3 rounded-xl border border-white/5">
-          <p className="text-[10px] font-black tracking-[0.2em] text-default-400 uppercase">
-            {t("tournamentForm.labels.progress_announcement")}
-          </p>
-          <p className="text-xs font-black text-primary animate-pulse">
-            {(() => {
-              const fields = [
-                formData.name,
-                formData.max_teams,
-                formData.registration_fee, // Changed from price to registration_fee
-                formData.match_date, // Changed from date to match_date
-                formData.match_time, // Changed from time to match_time
-                formData.email, // Changed from contact_email to email
-              ];
-              const filled = fields.filter(
-                (f) =>
-                  f !== undefined &&
-                  f !== null &&
-                  f.toString().trim().length > 0,
-              ).length;
-              return Math.round((filled / fields.length) * 100);
-            })()}
-            %
-          </p>
-        </div>
-        <Progress
-          aria-label="Progression"
-          className="h-2"
-          classNames={{
-            indicator: "bg-gradient-to-r from-purple-600 to-purple-400 rounded-full", // Corrected classNames
-            base: "bg-purple-900/20 rounded-full overflow-hidden", // Added base classNames
-          }}
-          value={(() => {
-            const fields = [
-              formData.name,
-              formData.max_teams,
-              formData.registration_fee, // Changed from price to registration_fee
-              formData.match_date, // Changed from date to match_date
-              formData.match_time, // Changed from time to match_time
-              formData.email, // Changed from contact_email to email
-            ];
-            const filled = fields.filter(
-              (f) =>
-                f !== undefined &&
-                f !== null &&
-                f.toString().trim().length > 0,
-            ).length;
-            return Math.round((filled / fields.length) * 100);
-          })()}
-        />
-      </div>
+          <div className="flex flex-col gap-2 pt-2">
+            <div className="flex justify-between items-center bg-zinc-800/50 p-3 rounded-xl border border-white/5">
+              <p className="text-[10px] font-black tracking-[0.2em] text-default-400 uppercase">
+                {t("tournamentForm.labels.progress_announcement")}
+              </p>
+              <p className="text-xs font-black text-primary animate-pulse">
+                {(() => {
+                  const fields = [
+                    formData.name,
+                    formData.max_teams,
+                    formData.registration_fee, // Changed from price to registration_fee
+                    formData.match_date, // Changed from date to match_date
+                    formData.match_time, // Changed from time to match_time
+                    formData.email, // Changed from contact_email to email
+                  ];
+                  const filled = fields.filter(
+                    (f) =>
+                      f !== undefined &&
+                      f !== null &&
+                      f.toString().trim().length > 0,
+                  ).length;
+
+                  return Math.round((filled / fields.length) * 100);
+                })()}
+                %
+              </p>
+            </div>
+            <Progress
+              aria-label="Progression"
+              className="h-2"
+              classNames={{
+                indicator:
+                  "bg-gradient-to-r from-purple-600 to-purple-400 rounded-full", // Corrected classNames
+                base: "bg-purple-900/20 rounded-full overflow-hidden", // Added base classNames
+              }}
+              value={(() => {
+                const fields = [
+                  formData.name,
+                  formData.max_teams,
+                  formData.registration_fee, // Changed from price to registration_fee
+                  formData.match_date, // Changed from date to match_date
+                  formData.match_time, // Changed from time to match_time
+                  formData.email, // Changed from contact_email to email
+                ];
+                const filled = fields.filter(
+                  (f) =>
+                    f !== undefined &&
+                    f !== null &&
+                    f.toString().trim().length > 0,
+                ).length;
+
+                return Math.round((filled / fields.length) * 100);
+              })()}
+            />
+          </div>
         </CardBody>
       </Card>
 
@@ -770,7 +828,10 @@ export default function TournamentForm({
               variant="faded"
               onBlur={() => {
                 if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email))
-                  setErrors((p) => ({ ...p, email: t("account.errors.email_invalid") }));
+                  setErrors((p) => ({
+                    ...p,
+                    email: t("account.errors.email_invalid"),
+                  }));
               }}
               onValueChange={(v) => handleChange("email", v)}
             />
@@ -784,8 +845,14 @@ export default function TournamentForm({
               value={formData.phone}
               variant="faded"
               onBlur={() => {
-                if (!formData.phone || formData.phone.replace(/\D/g, "").length < 11)
-                  setErrors((p) => ({ ...p, phone: t("account.errors.phone_required") }));
+                if (
+                  !formData.phone ||
+                  formData.phone.replace(/\D/g, "").length < 11
+                )
+                  setErrors((p) => ({
+                    ...p,
+                    phone: t("account.errors.phone_required"),
+                  }));
               }}
               onValueChange={(v) => handleChange("phone", v)}
             />
@@ -800,23 +867,25 @@ export default function TournamentForm({
             onValueChange={(v) => handleChange("notes", v)}
           />
 
-            <div className="flex justify-end gap-3 mt-4">
-              <Button
-                className="font-bold text-zinc-500"
-                variant="light"
-                onPress={() => (onCancel ? onCancel() : navigate("/tournaments"))}
-              >
-                {t("matchForm.buttons.cancel")}
-              </Button>
-              <Button
-                className="bg-purple-600 font-black tracking-tighter px-12 rounded-xl shadow-lg shadow-purple-500/20"
-                color="primary"
-                isLoading={isSaving}
-                type="submit"
-              >
-                {initialData ? t("tournamentForm.labels.update", "Mettre à jour le tournoi") : t("tournamentForm.labels.publish", "Publier le tournoi")}
-              </Button>
-            </div>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button
+              className="font-bold text-zinc-500"
+              variant="light"
+              onPress={() => (onCancel ? onCancel() : navigate("/tournaments"))}
+            >
+              {t("matchForm.buttons.cancel")}
+            </Button>
+            <Button
+              className="bg-purple-600 font-black tracking-tighter px-12 rounded-xl shadow-lg shadow-purple-500/20"
+              color="primary"
+              isLoading={isSaving}
+              type="submit"
+            >
+              {initialData
+                ? t("tournamentForm.labels.update", "Mettre à jour le tournoi")
+                : t("tournamentForm.labels.publish", "Publier le tournoi")}
+            </Button>
+          </div>
         </CardBody>
       </Card>
     </form>

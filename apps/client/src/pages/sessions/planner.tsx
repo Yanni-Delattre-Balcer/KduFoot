@@ -11,8 +11,8 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useSWRConfig } from "swr";
 
 import FootballClock from "../../components/football-clock";
-import { ErrorView } from "@/components/common/error-views";
 
+import { ErrorView } from "@/components/common/error-views";
 import { matchService } from "@/services/matches";
 import { useMatches, useMyParticipations } from "@/hooks/use-matches";
 import { useSessions } from "@/hooks/use-sessions";
@@ -32,7 +32,11 @@ export default function SessionPlannerPage() {
   const [view, setView] = useState<"exercises" | "matches" | "tournaments">(
     showVideoAnalysis ? "exercises" : "matches",
   );
-  const { sessions, isError: isErrorSessions, isLoading: isLoadingSessions } = useSessions();
+  const {
+    sessions,
+    isError: isErrorSessions,
+    isLoading: isLoadingSessions,
+  } = useSessions();
   const {
     matches,
     isLoading: isLoadingMatches,
@@ -291,10 +295,16 @@ export default function SessionPlannerPage() {
                 )}
 
                 {isErrorSessions && (
-                  <ErrorView 
-                    status={isErrorSessions.status || 500} 
-                    message={isErrorSessions.message} 
-                    onRetry={() => globalMutate((key: any) => typeof key === "string" && key.includes("/api/sessions"))}
+                  <ErrorView
+                    message={isErrorSessions.message}
+                    status={isErrorSessions.status || 500}
+                    onRetry={() =>
+                      globalMutate(
+                        (key: any) =>
+                          typeof key === "string" &&
+                          key.includes("/api/sessions"),
+                      )
+                    }
                   />
                 )}
 
@@ -558,7 +568,7 @@ export default function SessionPlannerPage() {
                                                 ),
                                                 color: "success",
                                               });
-                                            } catch (e) {
+                                            } catch {
                                               addToast({
                                                 title: t("error.title"),
                                                 color: "danger",
@@ -710,7 +720,7 @@ export default function SessionPlannerPage() {
                                                   ),
                                                   color: "success",
                                                 });
-                                              } catch (e: any) {
+                                              } catch {
                                                 addToast({
                                                   title: t("error.title"),
                                                   color: "danger",
@@ -753,7 +763,7 @@ export default function SessionPlannerPage() {
                                                   ),
                                                   color: "warning",
                                                 });
-                                              } catch (e: any) {
+                                              } catch {
                                                 addToast({
                                                   title: t("error.title"),
                                                   color: "danger",
@@ -776,7 +786,9 @@ export default function SessionPlannerPage() {
                                         to={`/matches/${request.match_id}`}
                                         variant="flat"
                                       >
-                                        {t("dashboard.controls.view").toUpperCase()}
+                                        {t(
+                                          "dashboard.controls.view",
+                                        ).toUpperCase()}
                                       </Button>
                                     </CardBody>
                                   </Card>

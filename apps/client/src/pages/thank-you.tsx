@@ -75,7 +75,7 @@ export default function ThankYouPage() {
                 <p className="text-lg font-bold">
                   <Trans t={t}>thank-you.philippe.name</Trans>
                 </p>
-                <span className="text-default-300">|</span>
+                <span className="text-default-400">|</span>
                 <p className="text-lg font-bold">
                   <Trans t={t}>thank-you.franck.name</Trans>
                 </p>

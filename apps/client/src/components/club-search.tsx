@@ -1,6 +1,7 @@
 import { Autocomplete, AutocompleteItem } from "@heroui/autocomplete";
 import { useAsyncList } from "@react-stately/data";
 import { Key } from "@react-types/shared";
+import { useTranslation } from "react-i18next";
 
 import { Club } from "@/types/match.types";
 import { clubService } from "@/services/clubs";
@@ -14,11 +15,12 @@ interface ClubSearchProps {
 
 export default function ClubSearch({
   onSelect,
-  label = "Club",
-  placeholder = "Rechercher un club...",
+  label,
+  placeholder,
   initialInputValue = "",
 }: ClubSearchProps) {
-  // Use useAsyncList for handling async search
+  const { t } = useTranslation();
+
   let list = useAsyncList<Club>({
     async load({ filterText }) {
       const query = filterText;
@@ -32,7 +34,7 @@ export default function ClubSearch({
         const items = await clubService.search(query);
 
         return { items };
-      } catch (e) {
+      } catch {
         return { items: [] };
       }
     },
@@ -44,8 +46,8 @@ export default function ClubSearch({
       inputValue={list.filterText}
       isLoading={list.isLoading}
       items={list.items}
-      label={label}
-      placeholder={placeholder}
+      label={label || t("club_search.label")}
+      placeholder={placeholder || t("club_search.placeholder")}
       variant="bordered"
       onInputChange={list.setFilterText}
       onSelectionChange={(key: Key | null) => {

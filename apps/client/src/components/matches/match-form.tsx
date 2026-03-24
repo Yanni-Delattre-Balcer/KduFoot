@@ -226,20 +226,30 @@ export default function MatchForm({
       newErrors.match_date = t("matchForm.alerts.date_required");
     } else {
       const now = new Date();
-      const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .split("T")[0];
       const selectedDate = formData.match_date;
 
       if (selectedDate < todayStr) {
-        newErrors.match_date = t("matchForm.alerts.date_past_error", "Date passée : Le match ne peut pas être dans le passé.");
+        newErrors.match_date = t(
+          "matchForm.alerts.date_past_error",
+          "Date passée : Le match ne peut pas être dans le passé.",
+        );
       } else if (selectedDate === todayStr) {
         // Restriction de 2h uniquement pour AUJOURD'HUI
         if (formData.match_time) {
           const [hours, minutes] = formData.match_time.split(":").map(Number);
-          const matchDateTime = new Date(`${selectedDate}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
+          const matchDateTime = new Date(
+            `${selectedDate}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`,
+          );
           const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
           if (matchDateTime < minTime) {
-            newErrors.match_time = t("matchForm.alerts.delay_short_error", "Délai trop court : Un match aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.");
+            newErrors.match_time = t(
+              "matchForm.alerts.delay_short_error",
+              "Délai trop court : Un match aujourd'hui doit être créé au moins 2 heures avant le coup d'envoi.",
+            );
           }
         }
       }
@@ -264,9 +274,13 @@ export default function MatchForm({
     if (!validate()) {
       addToast({
         title: t("matchForm.alerts.validation_failed", "Formulaire incomplet"),
-        description: t("account.errors.form_incomplete_desc", "Veuillez remplir tous les champs obligatoires en rouge."),
+        description: t(
+          "account.errors.form_incomplete_desc",
+          "Veuillez remplir tous les champs obligatoires en rouge.",
+        ),
         color: "danger",
       });
+
       return;
     }
     if (!user?.club_id) return;
@@ -402,7 +416,15 @@ export default function MatchForm({
             <div className="flex flex-col gap-3">
               <div
                 className="relative cursor-pointer"
+                role="button"
+                tabIndex={0}
                 onClick={() => showLockedInfo("address")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    showLockedInfo("address");
+                  }
+                }}
               >
                 <Input
                   isDisabled
@@ -411,7 +433,9 @@ export default function MatchForm({
                     <div className="flex items-center h-full">
                       <div className="bg-emerald-500 text-[#0f0717] text-[10px] sm:text-[11px] font-black px-2 py-1 rounded-full flex items-center gap-1 leading-none shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                         <span>🏟️</span>
-                        <span className="mb-[1px]">{t("matchForm.labels.stadium")}</span>
+                        <span className="mb-[1px]">
+                          {t("matchForm.labels.stadium")}
+                        </span>
                       </div>
                     </div>
                   }
@@ -424,7 +448,15 @@ export default function MatchForm({
               <div className="grid grid-cols-2 gap-3">
                 <div
                   className="cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => showLockedInfo("zip")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      showLockedInfo("zip");
+                    }
+                  }}
                 >
                   <Input
                     isDisabled
@@ -439,7 +471,15 @@ export default function MatchForm({
                 </div>
                 <div
                   className="cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => showLockedInfo("city")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      showLockedInfo("city");
+                    }
+                  }}
                 >
                   <Input
                     isDisabled
@@ -508,8 +548,12 @@ export default function MatchForm({
                 variant="faded"
                 onChange={(e) => setGender(e.target.value)}
               >
-                <SelectItem key="Masculin">{t("enums.gender.Masculin")}</SelectItem>
-                <SelectItem key="Féminin">{t("enums.gender.Féminin")}</SelectItem>
+                <SelectItem key="Masculin">
+                  {t("enums.gender.Masculin")}
+                </SelectItem>
+                <SelectItem key="Féminin">
+                  {t("enums.gender.Féminin")}
+                </SelectItem>
                 <SelectItem key="Mixte">{t("enums.gender.Mixte")}</SelectItem>
               </Select>
             </div>
@@ -556,7 +600,9 @@ export default function MatchForm({
                 variant="faded"
                 onChange={(e) => handleChange("venue", e.target.value)}
               >
-                <SelectItem key="Domicile">{t("enums.venue.Domicile")}</SelectItem>
+                <SelectItem key="Domicile">
+                  {t("enums.venue.Domicile")}
+                </SelectItem>
                 <SelectItem key="Extérieur">
                   {t("enums.venue.Extérieur")}
                 </SelectItem>
@@ -578,7 +624,15 @@ export default function MatchForm({
 
             <div
               className="bg-[#160d21]/50 border border-[#2a1b3d] rounded-2xl p-4 flex items-center justify-between group cursor-pointer"
+              role="button"
+              tabIndex={0}
               onClick={() => showLockedInfo("jersey")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  showLockedInfo("jersey");
+                }
+              }}
             >
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-black text-violet-400 tracking-widest pl-1">
@@ -595,7 +649,12 @@ export default function MatchForm({
               </div>
               <div className="flex items-center gap-2 bg-violet-500/10 text-violet-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-violet-500/20 group-hover:bg-violet-500/20 transition-all">
                 <span>🔒</span>
-                <span className="mb-[1px]">{t("matchForm.labels.edit_in_account", "Modifier dans mon compte")}</span>
+                <span className="mb-[1px]">
+                  {t(
+                    "matchForm.labels.edit_in_account",
+                    "Modifier dans mon compte",
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -642,7 +701,10 @@ export default function MatchForm({
               variant="faded"
               onBlur={() => {
                 if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email))
-                  setErrors((p) => ({ ...p, email: t("account.errors.email_invalid") }));
+                  setErrors((p) => ({
+                    ...p,
+                    email: t("account.errors.email_invalid"),
+                  }));
               }}
               onValueChange={(v) => handleChange("email", v)}
             />
@@ -656,8 +718,14 @@ export default function MatchForm({
               value={formData.phone}
               variant="faded"
               onBlur={() => {
-                if (!formData.phone || formData.phone.replace(/\D/g, "").length < 11)
-                  setErrors((p) => ({ ...p, phone: t("account.errors.phone_required") }));
+                if (
+                  !formData.phone ||
+                  formData.phone.replace(/\D/g, "").length < 11
+                )
+                  setErrors((p) => ({
+                    ...p,
+                    phone: t("account.errors.phone_required"),
+                  }));
               }}
               onValueChange={(v) => handleChange("phone", v)}
             />
@@ -687,7 +755,9 @@ export default function MatchForm({
               isLoading={isSaving}
               type="submit"
             >
-              {initialData ? t("matchForm.buttons.update") : t("matchForm.buttons.create")}
+              {initialData
+                ? t("matchForm.buttons.update")
+                : t("matchForm.buttons.create")}
             </Button>
           </div>
         </CardBody>

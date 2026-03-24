@@ -1,5 +1,20 @@
 import { z } from 'zod';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Validates that a route param is a well-formed UUID (v4). */
+export function isValidUUID(id: string | undefined): id is string {
+    return !!id && UUID_REGEX.test(id);
+}
+
+/** Returns a 400 guard helper for UUID params. */
+export function requireValidUUID(id: string | undefined, corsHeaders: Record<string, string>): Response | null {
+    if (!isValidUUID(id)) {
+        return Response.json({ success: false, error: 'Invalid ID format' }, { status: 400, headers: corsHeaders });
+    }
+    return null;
+}
+
 /**
  * Schema for match/tournament creation
  */

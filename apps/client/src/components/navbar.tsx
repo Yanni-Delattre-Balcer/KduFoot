@@ -37,7 +37,10 @@ import { Chip } from "@heroui/chip";
 import { I18nIcon, LanguageSwitch } from "./language-switch";
 import { LinkUniversal } from "./link-universal";
 
-import { LoginLogoutButton, LoginLogoutLink } from "@/authentication";
+import {
+  LoginLogoutButton,
+  LoginLogoutLink,
+} from "@/authentication/auth-components";
 import { siteConfig } from "@/config/site";
 import { availableLanguages } from "@/i18n";
 import { useIncomingRequests, useMyParticipations } from "@/hooks/use-matches";

@@ -7,7 +7,8 @@ import { ClubService } from '../services/club.service';
 import { CreateMatchDto, UpdateMatchDto, MatchFilters } from '../types/match';
 import { Permission } from '../types/permissions';
 import { broadcastDataChanged, broadcastNotification } from '../utils/broadcast';
-import { CreateMatchSchema, UpdateMatchSchema } from '../utils/validation';
+import { CreateMatchSchema, UpdateMatchSchema, requireValidUUID } from '../utils/validation';
+import { getDbUser } from '../utils/db-helpers';
 
 export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext) => {
     const matchService = new MatchService(env.DB);
@@ -15,8 +16,38 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
     const clubService = new ClubService(env);
 
     /**
-     * GET /api/matches
-     * Search matches with filters
+     * @openapi
+     * /api/matches:
+     *   get:
+     *     tags: [Matches]
+     *     summary: Search matches and tournaments with optional filters
+     *     description: >
+     *       Returns a cursor-paginated list of active matches/tournaments. Supports geo-radius
+     *       filtering via Google Maps Distance Matrix (radius_km + user_lat/user_lng). When
+     *       ownerId=me, returns only the authenticated user's own matches.
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: category
+     *         in: query
+     *         schema: { type: string }
+     *       - name: level
+     *         in: query
+     *         schema: { type: string }
+     *       - name: radius_km
+     *         in: query
+     *         description: Filter by driving distance (requires user_lat + user_lng)
+     *         schema: { type: number }
+     *       - name: cursor
+     *         in: query
+     *         description: Opaque pagination cursor from previous response
+     *         schema: { type: string }
+     *       - name: limit
+     *         in: query
+     *         schema: { type: integer, default: 50 }
+     *     responses:
+     *       200:
+     *         description: Paginated list of matches with optional distance_km field
      */
     router.get('/api/matches', async (request: AuthenticatedRequest, env: Env) => {
         const url = new URL(request.url);
@@ -41,7 +72,7 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
         };
 
         if (filters.ownerId === 'me') {
-            const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+            const dbUser = await getDbUser(env.DB, request.user?.sub);
             if (!dbUser) return Response.json({ success: false, error: 'Auth required for me' }, { status: 401, headers: router.corsHeaders });
             filters.ownerId = dbUser.id;
         }
@@ -57,10 +88,28 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
     }, Permission.READ_API);
 
     /**
-     * GET /api/matches/<id>
+     * @openapi
+     * /api/matches/{id}:
+     *   get:
+     *     tags: [Matches]
+     *     summary: Get a single match or tournament by ID
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: id
+     *         in: path
+     *         required: true
+     *         schema: { type: string, format: uuid }
+     *     responses:
+     *       200:
+     *         description: Match details including club info and accepted participants
+     *       404:
+     *         description: Match not found
      */
     router.get('/api/matches/<id>', async (request: AuthenticatedRequest, _env: Env) => {
         const { id } = request.params;
+        const uuidError = requireValidUUID(id, router.corsHeaders);
+        if (uuidError) return uuidError;
         const match = await matchService.getById(id);
         if (!match) return Response.json({ success: false, error: 'Not found' }, { status: 404, headers: router.corsHeaders });
 
@@ -143,7 +192,9 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
      */
     router.put('/api/matches/<id>', async (request: AuthenticatedRequest, env: Env, ctx: ExecutionContext) => {
         const params = request.params;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const uuidError = requireValidUUID(params.id, router.corsHeaders);
+        if (uuidError) return uuidError;
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         const body = await request.json();
@@ -179,7 +230,9 @@ export const setupMatchRoutes = (router: Router, env: Env, ctx: ExecutionContext
      */
     router.delete('/api/matches/<id>', async (request: AuthenticatedRequest, env: Env, ctx: ExecutionContext) => {
         const params = request.params;
-        const dbUser = await env.DB.prepare('SELECT id FROM users WHERE auth0_sub = ?').bind(request.user?.sub).first<{ id: string }>();
+        const uuidError = requireValidUUID(params.id, router.corsHeaders);
+        if (uuidError) return uuidError;
+        const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         try {

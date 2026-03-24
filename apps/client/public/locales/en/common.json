@@ -116,5 +116,34 @@
     "certifiedCoach": "Certified Coach"
   },
   "delete": "Delete",
-  "error-updating-user": "Error updating user"
+  "error-updating-user": "Error updating user",
+  "error_boundary": {
+    "title": "Oops! Something went wrong",
+    "message": "The application encountered an unexpected problem. Don't worry, your data is safe.",
+    "refresh": "Refresh the page",
+    "go_home": "Back to home"
+  },
+  "error_state": {
+    "title": "An error occurred",
+    "message": "We couldn't load this page. Please try again.",
+    "retry": "Retry",
+    "go_home": "Back to home"
+  },
+  "gateway": {
+    "welcome": "Welcome to KduFoot",
+    "login_prompt": "Please log in or create an account to access the platform.",
+    "last_step": "One last step...",
+    "complete_profile": "To unlock access to site data (matches, tournaments...), please complete your Coach profile.",
+    "login": "Log in",
+    "register": "Create an account",
+    "or": "or",
+    "google": "Continue with Google",
+    "guest": "Continue without account",
+    "fill_profile": "Complete my Coach profile",
+    "visit": "Visit the site"
+  },
+  "club_search": {
+    "label": "Club",
+    "placeholder": "Search for a club..."
+  }
 }

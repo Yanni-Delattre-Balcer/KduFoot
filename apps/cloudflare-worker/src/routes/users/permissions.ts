@@ -20,7 +20,7 @@ export const setupPermissionsRoutes = (router: Router, env: Env) => {
                     }),
                     {
                         status: 200,
-                        headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+                        headers: router.corsHeaders,
                     },
                 );
             } catch (_error) {
@@ -28,7 +28,7 @@ export const setupPermissionsRoutes = (router: Router, env: Env) => {
                     JSON.stringify({ success: false, error: 'Internal server error' }),
                     {
                         status: 500,
-                        headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+                        headers: router.corsHeaders,
                     },
                 );
             }
@@ -47,7 +47,7 @@ export const setupPermissionsRoutes = (router: Router, env: Env) => {
                 if (!autoPermsStr) {
                     return new Response(JSON.stringify({ success: true, message: "No automatic permissions configured" }), {
                         status: 200,
-                        headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+                        headers: router.corsHeaders,
                     });
                 }
 
@@ -58,7 +58,7 @@ export const setupPermissionsRoutes = (router: Router, env: Env) => {
                 if (missingPerms.length === 0) {
                     return new Response(JSON.stringify({ success: true, message: "User already has all automatic permissions" }), {
                         status: 200,
-                        headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+                        headers: router.corsHeaders,
                     });
                 }
 
@@ -71,14 +71,14 @@ export const setupPermissionsRoutes = (router: Router, env: Env) => {
 
                 return new Response(JSON.stringify({ success: true, added: missingPerms }), {
                     status: 200,
-                    headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+                    headers: router.corsHeaders,
                 });
             } catch (_error) {
                 return new Response(
                     JSON.stringify({ success: false, error: 'Internal server error' }),
                     {
                         status: 500,
-                        headers: { ...router.corsHeaders, "Content-Type": "application/json" },
+                        headers: router.corsHeaders,
                     },
                 );
             }

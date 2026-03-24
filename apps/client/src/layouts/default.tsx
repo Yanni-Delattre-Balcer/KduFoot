@@ -57,7 +57,6 @@ export default function DefaultLayout({
           setTokenPayload(payload);
         })
         .catch((err) => {
-          // eslint-disable-next-line no-console
           console.error("Failed to get or verify access token", err);
         });
     } else {
@@ -70,8 +69,8 @@ export default function DefaultLayout({
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
       {/* Accessibility: Skip-link for keyboard navigation */}
       <a
-        href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-bold"
+        href="#main-content"
       >
         Aller au contenu principal
       </a>
@@ -79,7 +78,10 @@ export default function DefaultLayout({
       <ConnectivityStatus />
       {/* Spacer pour compenser la navbar fixed, avec prise en compte de la Safe Area iOS */}
       <div className="h-16 lg:h-28 shrink-0" />
-      <main id="main-content" className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}>
+      <main
+        className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}
+        id="main-content"
+      >
         {children}
       </main>
       <footer className="relative w-full border-t border-default-100 bg-background/80 backdrop-blur-md mt-auto">
@@ -95,7 +97,7 @@ export default function DefaultLayout({
                 >
                   {t("support.technical_issue")}
                 </Button>
-                <p className="text-[10px] sm:text-xs text-center text-default-400 font-medium italic opacity-70 px-2 lg:px-0">
+                <p className="text-[10px] sm:text-xs text-center text-default-500 font-medium italic px-2 lg:px-0">
                   {t("support.technical_issue_desc")}
                 </p>
               </div>
@@ -109,7 +111,7 @@ export default function DefaultLayout({
                 >
                   {t("support.other_inquiry")}
                 </Button>
-                <p className="text-[10px] sm:text-xs text-center text-default-400 font-medium italic opacity-70 px-2 lg:px-0">
+                <p className="text-[10px] sm:text-xs text-center text-default-500 font-medium italic px-2 lg:px-0">
                   {t("support.other_inquiry_desc")}
                 </p>
               </div>
@@ -117,10 +119,13 @@ export default function DefaultLayout({
           </div>
 
           <div className="pt-4 pb-12 sm:pb-0 border-t border-default-100 w-full flex flex-col items-center gap-2 text-center">
-            <Link to="/gdpr" className="text-xs text-default-500 hover:text-primary transition-colors underline-offset-4 hover:underline">
+            <Link
+              className="text-xs text-default-500 hover:text-primary transition-colors underline-offset-4 hover:underline"
+              to="/gdpr"
+            >
               Politique de Confidentialité & RGPD
             </Link>
-            <p className="text-xs sm:text-sm text-default-400 tracking-widest font-bold opacity-50">
+            <p className="text-xs sm:text-sm text-default-500 tracking-widest font-bold">
               © 2026 KduFoot
             </p>
           </div>

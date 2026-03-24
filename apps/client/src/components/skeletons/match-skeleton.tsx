@@ -9,7 +9,7 @@ export const MatchSkeleton = () => {
         <Skeleton className="w-24 h-6 rounded-xl bg-default-200/50" />
         <Skeleton className="w-16 h-6 rounded-xl bg-default-200/50" />
       </div>
-      
+
       <div className="flex gap-4 items-center relative z-10">
         <Skeleton className="w-14 h-14 rounded-2xl bg-default-300/30" />
         <div className="flex-1 space-y-2">

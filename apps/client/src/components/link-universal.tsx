@@ -94,12 +94,12 @@ export const LinkUniversal = forwardRef<HTMLAnchorElement, LinkUniversalProps>(
           anchorIcon={anchorIcon}
           className={className}
           disableAnimation={disableAnimation}
+          href={href}
           isDisabled={isDisabled}
           isExternal={isExternal}
           showAnchorIcon={showAnchorIcon}
-          size={size as any}
           underline={underline as any}
-          href={href}
+          size={size as any}
           // @ts-ignore
           color={color as any}
           {...props}

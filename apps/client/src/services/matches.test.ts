@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { matchService } from "./matches";
+
 import { Category } from "../types/exercise.types";
+
+import { matchService } from "./matches";
 
 describe("matchService", () => {
   describe("getAll", () => {

@@ -28,10 +28,20 @@ import { Env } from "./types/env";
 
 export { WebSocketHub } from "./durable_objects/WebSocketHub";
 
+/** Fail fast if critical env vars are missing — caught at first request, not at deploy. */
+function validateEnv(env: Env): void {
+    const required: (keyof Env)[] = ['AUTH0_DOMAIN', 'CORS_ORIGIN', 'AUTH0_AUDIENCE'];
+    const missing = required.filter(key => !env[key]);
+    if (missing.length > 0) {
+        throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
+}
+
 // NOTE: We now use a small Router class to organize routes and permission checks.
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		validateEnv(env);
 		const url = new URL(request.url);
 		const start = Date.now();
 		let reqCount = 0;

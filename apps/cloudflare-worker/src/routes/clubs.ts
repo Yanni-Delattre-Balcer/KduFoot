@@ -45,12 +45,12 @@ export const setupClubRoutes = (router: Router, env: Env) => {
         const query = url.searchParams.get('q');
 
         if (!query || query.length < 3) {
-            return Response.json({ success: false, error: 'Query too short' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'Query too short' }, { status: 400, headers: router.corsHeaders });
         }
 
         const clubs = await clubService.searchClubs(query);
         const cacheHeaders = { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400" };
-        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, ...cacheHeaders, "Content-Type": "application/json" } });
+        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, ...cacheHeaders } });
     });
 
     /**
@@ -91,11 +91,11 @@ export const setupClubRoutes = (router: Router, env: Env) => {
         const city = url.searchParams.get('city');
 
         if (!city) {
-            return Response.json({ success: false, error: 'City required' }, { status: 400, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            return Response.json({ success: false, error: 'City required' }, { status: 400, headers: router.corsHeaders });
         }
 
         const clubs = await clubService.getClubByCity(city);
         const cacheHeaders = { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400" };
-        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, ...cacheHeaders, "Content-Type": "application/json" } });
+        return Response.json({ success: true, clubs }, { headers: { ...router.corsHeaders, ...cacheHeaders } });
     });
 };

@@ -32,7 +32,11 @@ const PITCH_TYPES: PitchType[] = [
   "Stabilisé",
   "Toutes surfaces",
 ];
-const VENUES: (Venue | "Peu importe")[] = ["Peu importe", "Domicile", "Extérieur"];
+const VENUES: (Venue | "Peu importe")[] = [
+  "Peu importe",
+  "Domicile",
+  "Extérieur",
+];
 
 import MatchForm from "@/components/matches/match-form";
 import TournamentForm from "@/components/matches/tournament-form";
@@ -46,7 +50,8 @@ import { ErrorView } from "@/components/common/error-views";
 
 export default function MatchesPage() {
   const { t, i18n } = useTranslation();
-  const {} = useWelcomeGateway();
+
+  useWelcomeGateway();
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState<"find" | "create">(
     (searchParams.get("view") as "find" | "create") || "find",
@@ -162,7 +167,7 @@ export default function MatchesPage() {
         );
 
         return saved ? JSON.parse(saved) : {};
-      } catch (e) {
+      } catch {
         return {};
       }
     },
@@ -223,7 +228,10 @@ export default function MatchesPage() {
     async (matchId: string) => {
       if (
         !confirm(
-          t("match.confirm_delete_admin", "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés."),
+          t(
+            "match.confirm_delete_admin",
+            "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.",
+          ),
         )
       )
         return;
@@ -240,12 +248,16 @@ export default function MatchesPage() {
         );
 
         if (!res.ok) throw new Error("Erreur lors de la suppression");
-        const deletedMatch = matches.find(m => m.id === matchId);
+        const deletedMatch = matches.find((m) => m.id === matchId);
+
         addToast({
           title: t("match.delete_success_admin", "{{matchType}} supprimé", {
-            matchType: t("enums.type." + (deletedMatch?.type || "match"))
+            matchType: t("enums.type." + (deletedMatch?.type || "match")),
           }),
-          description: t("match.delete_success_desc_admin", "Les participants ont été notifiés de l'annulation."),
+          description: t(
+            "match.delete_success_desc_admin",
+            "Les participants ont été notifiés de l'annulation.",
+          ),
           classNames: {
             description: "line-clamp-none whitespace-normal block",
             title: "line-clamp-none whitespace-normal block",
@@ -262,7 +274,7 @@ export default function MatchesPage() {
         );
       } catch (err: any) {
         addToast({
-        title: t("error.title"),
+          title: t("error.title"),
           description: err.message,
           variant: "solid",
           color: "danger",
@@ -445,7 +457,7 @@ export default function MatchesPage() {
                 {uiConfig.title}
               </h1>
             </div>
-            <p className="text-default-300 text-sm md:text-lg max-w-lg">
+            <p className="text-default-400 text-sm md:text-lg max-w-lg">
               {view === "find" ? uiConfig.desc_find : uiConfig.desc_create}
             </p>
 
@@ -562,7 +574,12 @@ export default function MatchesPage() {
           id="results-container"
         >
           {view === "create" ? (
-            <DataWall message={t("match.create_warning", "Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.).")}>
+            <DataWall
+              message={t(
+                "match.create_warning",
+                "Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.).",
+              )}
+            >
               {type === "match" ? (
                 <MatchForm onSuccess={handleCreateSuccess} />
               ) : (
@@ -570,7 +587,12 @@ export default function MatchesPage() {
               )}
             </DataWall>
           ) : (
-            <DataWall message={t("match.search_warning", "L'accès aux recherches détaillées est réservé aux profils complets.")}>
+            <DataWall
+              message={t(
+                "match.search_warning",
+                "L'accès aux recherches détaillées est réservé aux profils complets.",
+              )}
+            >
               <div className="flex flex-col gap-5">
                 {/* Filter Section - Coordinated container */}
                 <Card
@@ -1061,7 +1083,9 @@ export default function MatchesPage() {
                           return (
                             <button
                               key={day}
-                              aria-label={t("calendar.day", { date: new Date(dateKey).toLocaleDateString() })}
+                              aria-label={t("calendar.day", {
+                                date: new Date(dateKey).toLocaleDateString(),
+                              })}
                               className={`
                                                                 h-16 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all text-sm relative border border-white/5
                                                                 ${isSelected ? "bg-violet-500/30 border-2 border-violet-500 shadow-lg shadow-violet-500/20" : ""}
@@ -1109,10 +1133,16 @@ export default function MatchesPage() {
                 {displayMode === "list" && (
                   <div className="flex flex-col gap-4">
                     {isError && (
-                      <ErrorView 
-                        status={isError.status || 500} 
-                        message={isError.message} 
-                        onRetry={() => globalMutate((key: any) => typeof key === "string" && key.includes("/api/matches"))}
+                      <ErrorView
+                        message={isError.message}
+                        status={isError.status || 500}
+                        onRetry={() =>
+                          globalMutate(
+                            (key: any) =>
+                              typeof key === "string" &&
+                              key.includes("/api/matches"),
+                          )
+                        }
                       />
                     )}
 
@@ -1423,13 +1453,23 @@ export default function MatchesPage() {
                       })}
                     </div>
 
-
-
                     {!isLoading && filteredMatches.length === 0 && !isError && (
                       <EmptyState
-                        actionLabel={type === "tournament" ? t("match.create_tournament") : t("match.create")}
-                        description={type === "tournament" ? t("matchesPage.empty_desc_tournament") : t("matchesPage.empty_desc")}
-                        title={type === "tournament" ? t("matchesPage.empty_title_tournament") : t("matchesPage.empty_title")}
+                        actionLabel={
+                          type === "tournament"
+                            ? t("match.create_tournament")
+                            : t("match.create")
+                        }
+                        description={
+                          type === "tournament"
+                            ? t("matchesPage.empty_desc_tournament")
+                            : t("matchesPage.empty_desc")
+                        }
+                        title={
+                          type === "tournament"
+                            ? t("matchesPage.empty_title_tournament")
+                            : t("matchesPage.empty_title")
+                        }
                         onAction={() => setView("create")}
                       />
                     )}
