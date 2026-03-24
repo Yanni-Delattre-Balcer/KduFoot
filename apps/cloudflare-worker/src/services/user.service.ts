@@ -139,6 +139,11 @@ export class UserService {
         return newToken;
     }
 
+    async regenerateCalendarToken(userId: string): Promise<void> {
+        const newToken = crypto.randomUUID();
+        await this.db.prepare('UPDATE users SET calendar_token = ?, updated_at = unixepoch() WHERE id = ?').bind(newToken, userId).run();
+    }
+
     async getUserByCalendarToken(token: string): Promise<User | null> {
         const result = await this.db
             .prepare('SELECT * FROM users WHERE calendar_token = ?')
@@ -169,13 +174,15 @@ export class UserService {
         const participationsQuery = this.db.prepare('SELECT * FROM match_contacts WHERE user_id = ?').bind(userId);
         const sessionsQuery = this.db.prepare('SELECT * FROM training_sessions WHERE user_id = ?').bind(userId);
         const exercisesQuery = this.db.prepare('SELECT * FROM exercises WHERE user_id = ?').bind(userId);
+        const auditQuery = this.db.prepare('SELECT * FROM rgpd_audit_log WHERE user_id = ? ORDER BY rowid DESC LIMIT 50').bind(userId);
 
         const results = await this.db.batch([
             profileQuery,
             matchesQuery,
             participationsQuery,
             sessionsQuery,
-            exercisesQuery
+            exercisesQuery,
+            auditQuery
         ]);
 
         return {
@@ -184,8 +191,8 @@ export class UserService {
             match_applications: results[2].results,
             training_sessions: results[3].results,
             created_exercises: results[4].results,
+            audit_log: results[5].results,
             exported_at: Math.floor(Date.now() / 1000)
         };
     }
 }
-

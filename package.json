@@ -25,16 +25,25 @@
     "build:worker": "turbo run build --filter=@kdufoot/api",
     "build:client:env": "turbo run build:env --filter=@kdufoot/client",
     "build:worker:env": "turbo run build:env --filter=@kdufoot/api",
-    "deploy:worker": "turbo run deploy --filter=@kdufoot/api"
+    "deploy:worker": "turbo run deploy --filter=@kdufoot/api",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "apps/client/src/**/*.{ts,tsx}": [
+      "eslint --no-error-on-unmatched-pattern --fix --rule {\"import/order\":\"off\",\"no-undef\":\"off\"}"
+    ]
   },
   "devDependencies": {
-    "@heroui/theme": "^2.4.26",
     "@heroui/system": "^2.4.26",
+    "@heroui/theme": "^2.4.26",
     "@tailwindcss/postcss": "^4.2.0",
     "@tailwindcss/vite": "^4.2.0",
+    "@testing-library/dom": "^10.4.1",
     "@types/node": "^24.10.11",
     "dotenv-cli": "^11.0.0",
     "framer-motion": "12.33.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "shx": "^0.4.0",

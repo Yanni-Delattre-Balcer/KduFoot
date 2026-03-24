@@ -107,7 +107,7 @@ export const DataWall: React.FC<DataWallProps> = ({
             {t("data_wall.main_title")}
           </h2>
 
-          <p className="text-white/40 text-xs sm:text-sm font-medium mb-6 sm:mb-8 text-center">
+          <p className="text-white/60 text-xs sm:text-sm font-medium mb-6 sm:mb-8 text-center">
             {t("data_wall.subtitle")}
           </p>
 
@@ -133,7 +133,7 @@ export const DataWall: React.FC<DataWallProps> = ({
 
             <div className="flex items-center gap-3 w-full my-1">
               <div className="h-px bg-white/20 flex-1" />
-              <span className="text-xs sm:text-sm font-bold text-white/30 tracking-widest">
+              <span className="text-xs sm:text-sm font-bold text-white/60 tracking-widest">
                 {t("data_wall.or")}
               </span>
               <div className="h-px bg-white/20 flex-1" />
@@ -172,7 +172,7 @@ export const DataWall: React.FC<DataWallProps> = ({
           </div>
 
           <Button
-            className="mt-4 sm:mt-6 font-bold h-8 text-white/30 hover:text-white/60 transition-all uppercase tracking-widest text-xs sm:text-sm"
+            className="mt-4 sm:mt-6 font-bold h-8 text-white/60 hover:text-white/60 transition-all uppercase tracking-widest text-xs sm:text-sm"
             variant="light"
             onPress={() => {
               setVisitorMode();
@@ -217,7 +217,7 @@ export const DataWall: React.FC<DataWallProps> = ({
             {customMessage || t("data_wall.complete_profile")}
           </h2>
 
-          <p className="text-white/40 text-[10px] sm:text-xs font-medium leading-relaxed">
+          <p className="text-white/60 text-[10px] sm:text-xs font-medium leading-relaxed">
             {t("data_wall.complete_profile_desc")}
           </p>
 

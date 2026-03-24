@@ -38,7 +38,10 @@ export function useMatches(filters?: MatchFilters) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(errorData.error || "Failed to fetch matches") as any;
+      const error = new Error(
+        errorData.error || "Failed to fetch matches",
+      ) as any;
+
       error.status = response.status;
       throw error;
     }
@@ -59,6 +62,7 @@ export function useMatches(filters?: MatchFilters) {
   const { data, error, isLoading, mutate } = useSWR(
     isAuthenticated ? key : null,
     fetcher,
+    { keepPreviousData: true },
   );
 
   const createMatch = useCallback(
@@ -70,9 +74,11 @@ export function useMatches(filters?: MatchFilters) {
 
       mutate(
         (currentData: any) => {
-          if (!currentData || (!currentData.data && !currentData.matches)) return currentData;
+          if (!currentData || (!currentData.data && !currentData.matches))
+            return currentData;
 
           const currentList = currentData.data || currentData.matches || [];
+
           return {
             ...currentData,
             data: [newMatch, ...currentList],
@@ -112,9 +118,11 @@ export function useMatches(filters?: MatchFilters) {
       // Optimistic UI: Remove match from the current cache instantly
       mutate(
         (currentData: any) => {
-          if (!currentData || (!currentData.data && !currentData.matches)) return currentData;
+          if (!currentData || (!currentData.data && !currentData.matches))
+            return currentData;
 
           const currentList = currentData.data || currentData.matches || [];
+
           return {
             ...currentData,
             data: currentList.filter((m: Match) => m.id !== id),
@@ -152,9 +160,11 @@ export function useMatches(filters?: MatchFilters) {
 
       await matchService.closeRegistrations(id, token);
       mutate((currentData: any) => {
-        if (!currentData || (!currentData.data && !currentData.matches)) return currentData;
+        if (!currentData || (!currentData.data && !currentData.matches))
+          return currentData;
 
         const currentList = currentData.data || currentData.matches || [];
+
         return {
           ...currentData,
           data: currentList.map((m: Match) =>
@@ -172,7 +182,8 @@ export function useMatches(filters?: MatchFilters) {
   );
 
   return {
-    matches: (data?.data as Match[]) ?? (data?.matches as Match[]) ?? EMPTY_ARRAY,
+    matches:
+      (data?.data as Match[]) ?? (data?.matches as Match[]) ?? EMPTY_ARRAY,
     nextCursor: (data?.nextCursor as string | null) ?? null,
     hasMore: (data?.hasMore as boolean) ?? false,
     total: (data?.total as number) ?? 0,
@@ -211,7 +222,10 @@ export function useMatch(id: string | null) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(errorData.error || "Failed to fetch match") as any;
+      const error = new Error(
+        errorData.error || "Failed to fetch match",
+      ) as any;
+
       error.status = response.status;
       throw error;
     }
@@ -327,7 +341,10 @@ export function useIncomingRequests() {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(errorData.error || "Failed to fetch requests") as any;
+      const error = new Error(
+        errorData.error || "Failed to fetch requests",
+      ) as any;
+
       error.status = response.status;
       throw error;
     }
@@ -338,6 +355,7 @@ export function useIncomingRequests() {
   const { data, error, isLoading, mutate } = useSWR(
     isAuthenticated ? "/api/matches/requests" : null,
     fetcher,
+    { keepPreviousData: true },
   );
 
   return {
@@ -362,7 +380,10 @@ export function useMyParticipations() {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(errorData.error || "Failed to fetch participations") as any;
+      const error = new Error(
+        errorData.error || "Failed to fetch participations",
+      ) as any;
+
       error.status = response.status;
       throw error;
     }
@@ -373,6 +394,7 @@ export function useMyParticipations() {
   const { data, error, isLoading, mutate } = useSWR(
     isAuthenticated ? "/api/matches/participations" : null,
     fetcher,
+    { keepPreviousData: true },
   );
 
   const markAsRead = useCallback(

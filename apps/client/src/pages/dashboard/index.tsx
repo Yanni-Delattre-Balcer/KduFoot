@@ -100,6 +100,7 @@ export default function DashboardPage() {
     participations: myParticipations,
     isLoading: isLoadingParticipations,
     markAsRead: markAsReadHook,
+    mutate: mutateParticipations,
   } = useMyParticipations();
 
   // States
@@ -215,7 +216,9 @@ export default function DashboardPage() {
           status === "accepted"
             ? t("dashboard.notifications.acceptance_player", {
                 date: matchDate,
-                matchType: t("enums.type." + (request.match_type || "match")).toLowerCase(),
+                matchType: t(
+                  "enums.type." + (request.match_type || "match"),
+                ).toLowerCase(),
               })
             : t("dashboard.notifications.refusal_organizer", {
                 team: clubName,
@@ -242,6 +245,18 @@ export default function DashboardPage() {
     try {
       const token = await getAccessTokenSilently();
 
+      // Optimistic: immediately remove from participations
+      mutateParticipations((data: any) => {
+        if (!data?.participations) return data;
+
+        return {
+          ...data,
+          participations: data.participations.filter(
+            (p: any) => !(p.match_id === matchId && p.user_id === userId),
+          ),
+        };
+      }, false);
+
       await matchService.cancelRequest(matchId, userId, token);
       addToast({
         title: t("success"),
@@ -249,7 +264,7 @@ export default function DashboardPage() {
         color: "success",
       });
       mutateRequests();
-      // Also mutate participations as the list should update
+      mutateParticipations(); // Also refresh participations list
       window.dispatchEvent(new CustomEvent("kdufoot_matches_updated"));
     } catch (error: any) {
       console.error("Action error:", error);
@@ -572,7 +587,7 @@ export default function DashboardPage() {
                 </div>
               }
             >
-              <div className="flex flex-col gap-4 pt-2">
+              <div aria-live="polite" className="flex flex-col gap-4 pt-2">
                 {renderSubFilters(requestsSubFilter, setRequestsSubFilter)}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -701,7 +716,6 @@ export default function DashboardPage() {
                                     request.location_city ||
                                     t("common:unknown_city", "Ville inconnue")}
                                 </span>
-
                               </div>
                               <div className="flex items-center gap-1 text-[9px] text-default-400">
                                 <span className="text-default-600">🏅</span>
@@ -740,8 +754,11 @@ export default function DashboardPage() {
                                     })}
                                   </span>
                                   <span className="text-sm font-black text-white mt-0.5">
-                                    {formatDate(request.match_date, i18n.language)} à{" "}
-                                    {formatTime(request.match_time)}
+                                    {formatDate(
+                                      request.match_date,
+                                      i18n.language,
+                                    )}{" "}
+                                    à {formatTime(request.match_time)}
                                   </span>
                                 </div>
                                 {request.location_city && (
@@ -764,42 +781,42 @@ export default function DashboardPage() {
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-4 relative z-20">
-                                <Button
-                                  className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-emerald-500/20 w-full sm:w-auto text-lg"
-                                  color="success"
-                                  isLoading={
-                                    actionLoading[
-                                      `${request.match_id}-${request.requester_user_id}-accepted`
-                                    ]
-                                  }
-                                  size="lg"
-                                  startContent={
-                                    <span className="text-xl">✅</span>
-                                  }
-                                  onPress={() =>
-                                    handleRequestAction(request, "accepted")
-                                  }
-                                >
-                                  {t("dashboard.controls.accept", "Accepter")}
-                                </Button>
-                                <Button
-                                  className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-rose-500/20 w-full sm:w-auto text-lg"
-                                  color="danger"
-                                  isLoading={
-                                    actionLoading[
-                                      `${request.match_id}-${request.requester_user_id}-refused`
-                                    ]
-                                  }
-                                  size="lg"
-                                  startContent={
-                                    <span className="text-xl">❌</span>
-                                  }
-                                  onPress={() =>
-                                    handleRequestAction(request, "refused")
-                                  }
-                                >
-                                  {t("dashboard.controls.refuse", "Refuser")}
-                                </Button>
+                              <Button
+                                className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-emerald-500/20 w-full sm:w-auto text-lg"
+                                color="success"
+                                isLoading={
+                                  actionLoading[
+                                    `${request.match_id}-${request.requester_user_id}-accepted`
+                                  ]
+                                }
+                                size="lg"
+                                startContent={
+                                  <span className="text-xl">✅</span>
+                                }
+                                onPress={() =>
+                                  handleRequestAction(request, "accepted")
+                                }
+                              >
+                                {t("dashboard.controls.accept", "Accepter")}
+                              </Button>
+                              <Button
+                                className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-rose-500/20 w-full sm:w-auto text-lg"
+                                color="danger"
+                                isLoading={
+                                  actionLoading[
+                                    `${request.match_id}-${request.requester_user_id}-refused`
+                                  ]
+                                }
+                                size="lg"
+                                startContent={
+                                  <span className="text-xl">❌</span>
+                                }
+                                onPress={() =>
+                                  handleRequestAction(request, "refused")
+                                }
+                              >
+                                {t("dashboard.controls.refuse", "Refuser")}
+                              </Button>
                             </div>
                             <Button
                               className="w-full font-bold text-xs h-10 border-transparent text-secondary/70 hover:text-secondary"
@@ -879,7 +896,7 @@ export default function DashboardPage() {
                 </div>
               }
             >
-              <div className="flex flex-col gap-4 pt-2">
+              <div aria-live="polite" className="flex flex-col gap-4 pt-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {isLoadingIncoming || isLoadingParticipations ? (
                     <DashboardListSkeleton count={4} />
@@ -895,11 +912,11 @@ export default function DashboardPage() {
                         }
                         knownData={knownData[cm.match_id]}
                         match={cm}
+                        userId={user?.id}
                         onMarkAsRead={markAsRead}
                         onWithdraw={() =>
                           handleWithdraw(cm.match_id, user?.id || "")
                         }
-                        userId={user?.id}
                       />
                     ))
                   ) : (
@@ -955,7 +972,7 @@ export default function DashboardPage() {
                 </div>
               }
             >
-              <div className="flex flex-col gap-4 pt-2">
+              <div aria-live="polite" className="flex flex-col gap-4 pt-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                   {isLoadingParticipations ? (
                     <DashboardListSkeleton count={3} />
@@ -978,11 +995,11 @@ export default function DashboardPage() {
                         }
                         knownData={knownData}
                         participation={part}
+                        userId={user?.id}
                         onMarkAsRead={markAsRead}
                         onWithdraw={() =>
                           handleWithdraw(part.match_id, user?.id || "")
                         }
-                        userId={user?.id}
                       />
                     ))
                   ) : (

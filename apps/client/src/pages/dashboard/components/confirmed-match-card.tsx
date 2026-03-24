@@ -50,17 +50,31 @@ export const ConfirmedMatchCard = ({
   const previousState = knownData;
   const isDifferent = (val1: any, val2: any) => {
     if (!val1 || !val2) return false;
-    return String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase();
+
+    return (
+      String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase()
+    );
   };
 
   const isOwner = match.owner_id === userId || match.is_organizer;
-  const showSurgical = !isOwner && isParticipant && isModification && previousState;
+  const showSurgical =
+    !isOwner && isParticipant && isModification && previousState;
 
-  const isDateChanged = showSurgical && isDifferent(previousState?.date, match.match_date);
-  const isTimeChanged = showSurgical && isDifferent(previousState?.time, match.match_time);
-  const isVenueChanged = showSurgical && isDifferent(previousState?.venue, match.venue);
-  const isFormatChanged = showSurgical && isDifferent(previousState?.format, match.match_format || match.format);
-  const isPitchChanged = showSurgical && isDifferent(previousState?.pitch, match.match_pitch_type || match.pitch_type);
+  const isDateChanged =
+    showSurgical && isDifferent(previousState?.date, match.match_date);
+  const isTimeChanged =
+    showSurgical && isDifferent(previousState?.time, match.match_time);
+  const isVenueChanged =
+    showSurgical && isDifferent(previousState?.venue, match.venue);
+  const isFormatChanged =
+    showSurgical &&
+    isDifferent(previousState?.format, match.match_format || match.format);
+  const isPitchChanged =
+    showSurgical &&
+    isDifferent(
+      previousState?.pitch,
+      match.match_pitch_type || match.pitch_type,
+    );
 
   // Role-based overall styling
   const borderClass =
@@ -84,7 +98,11 @@ export const ConfirmedMatchCard = ({
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
                   {opponentClubLogo ? (
-                    <Image className="object-contain" src={opponentClubLogo} />
+                    <Image
+                      className="object-contain"
+                      loading="lazy"
+                      src={opponentClubLogo}
+                    />
                   ) : (
                     <span className="text-white font-black text-2xl">
                       {opponentClubName?.charAt(0)}
@@ -183,7 +201,13 @@ export const ConfirmedMatchCard = ({
                   size="sm"
                   variant="dot"
                 >
-                  {(t("enums.format." + (match.format || match.match_format || "11v11"), match.format || match.match_format || "11v11") as string)}
+                  {
+                    t(
+                      "enums.format." +
+                        (match.format || match.match_format || "11v11"),
+                      match.format || match.match_format || "11v11",
+                    ) as string
+                  }
                 </Chip>
               </div>
               <div
@@ -265,7 +289,6 @@ export const ConfirmedMatchCard = ({
                   <span className="text-[9px] font-bold text-default-400 break-words text-center">
                     {opponentClubName}
                   </span>
-
                 </div>
               </div>
             </div>
@@ -285,29 +308,29 @@ export const ConfirmedMatchCard = ({
                   )}
                 </Button>
               )}
-                <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  as={Link}
+                  className="flex-1 min-w-[100px] font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10"
+                  size="md"
+                  to={`/matches/${match.match_id}`}
+                  variant="flat"
+                >
+                  {t("dashboard.controls.view")}
+                </Button>
+                {isParticipant && onWithdraw && (
                   <Button
-                    as={Link}
-                    className="flex-1 min-w-[100px] font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10"
+                    className="flex-1 min-w-[120px] font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10 whitespace-normal leading-tight text-center"
+                    color="danger"
+                    isLoading={isWithdrawing}
                     size="md"
-                    to={`/matches/${match.match_id}`}
-                    variant="flat"
+                    variant="light"
+                    onPress={onWithdraw}
                   >
-                    {t("dashboard.controls.view")}
+                    {t("match.withdraw_match")}
                   </Button>
-                  {isParticipant && onWithdraw && (
-                    <Button
-                      className="flex-1 min-w-[120px] font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10 whitespace-normal leading-tight text-center"
-                      color="danger"
-                      isLoading={isWithdrawing}
-                      size="md"
-                      variant="light"
-                      onPress={onWithdraw}
-                    >
-                      {t("match.withdraw_match")}
-                    </Button>
-                  )}
-                </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

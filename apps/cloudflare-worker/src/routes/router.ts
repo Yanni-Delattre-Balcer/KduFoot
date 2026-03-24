@@ -158,7 +158,7 @@ export class Router {
 		newHeaders.set("X-Frame-Options", "DENY");
 		newHeaders.set("X-Content-Type-Options", "nosniff");
 		newHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
-		newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+		newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), bluetooth=(), usb=(), payment=(), interest-cohort=()");
 		newHeaders.set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://*.auth0.com https://*.googleusercontent.com; connect-src 'self' https://*.auth0.com https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; upgrade-insecure-requests;");
 		
 		return new Response(response.body, { 

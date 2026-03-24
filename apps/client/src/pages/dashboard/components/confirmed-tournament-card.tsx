@@ -40,14 +40,27 @@ export const ConfirmedTournamentCard = ({
 
   const isDifferent = (val1: any, val2: any) => {
     if (!val1 || !val2) return false;
-    return String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase();
+
+    return (
+      String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase()
+    );
   };
 
   const showSurgical = part.notification_state === 1 && previousState;
-  const isDateChanged = showSurgical && isDifferent(previousState?.date, part.match_date);
-  const isNewTimeChanged = isTimeChanged || (showSurgical && isDifferent(previousState?.time, part.match_time));
-  const isFormatChanged = showSurgical && isDifferent(previousState?.format, part.match_format || part.format);
-  const isPitchChanged = showSurgical && isDifferent(previousState?.pitch, part.match_pitch_type || part.opponent_pitch_type || part.pitch_type);
+  const isDateChanged =
+    showSurgical && isDifferent(previousState?.date, part.match_date);
+  const isNewTimeChanged =
+    isTimeChanged ||
+    (showSurgical && isDifferent(previousState?.time, part.match_time));
+  const isFormatChanged =
+    showSurgical &&
+    isDifferent(previousState?.format, part.match_format || part.format);
+  const isPitchChanged =
+    showSurgical &&
+    isDifferent(
+      previousState?.pitch,
+      part.match_pitch_type || part.opponent_pitch_type || part.pitch_type,
+    );
 
   // Mock/Real teams logos (limit to 3)
   const teams = part.accepted_teams || [];
@@ -93,7 +106,11 @@ export const ConfirmedTournamentCard = ({
                     {part.name || part.host_club_name}
                   </h3>
                   <p className="text-[10px] sm:text-xs font-bold text-default-400 mt-1 uppercase tracking-wider">
-                    {part.accepted_count || 0} {t("dashboard.tournament.registered_teams", "équipes inscrites")}
+                    {part.accepted_count || 0}{" "}
+                    {t(
+                      "dashboard.tournament.registered_teams",
+                      "équipes inscrites",
+                    )}
                   </p>
                   <div className="flex flex-wrap items-center gap-3 mt-2">
                     <Chip
@@ -181,7 +198,13 @@ export const ConfirmedTournamentCard = ({
                   size="sm"
                   variant="dot"
                 >
-                  {(t("enums.format." + (part.match_format || part.format || "5v5"), part.match_format || part.format || "5v5") as string)}
+                  {
+                    t(
+                      "enums.format." +
+                        (part.match_format || part.format || "5v5"),
+                      part.match_format || part.format || "5v5",
+                    ) as string
+                  }
                 </Chip>
               </div>
               <div
@@ -263,7 +286,7 @@ export const ConfirmedTournamentCard = ({
                     className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]"
                   >
                     {team.logo_url ? (
-                      <Image src={team.logo_url} />
+                      <Image loading="lazy" src={team.logo_url} />
                     ) : (
                       <span className="text-xs sm:text-sm font-black">
                         {team.name?.charAt(0)}

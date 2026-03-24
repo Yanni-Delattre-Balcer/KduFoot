@@ -80,7 +80,9 @@ export const CalendarSyncBanner: React.FC = () => {
     checkVisibility();
   }, [user?.calendar_token, isStep1Active]);
 
-  const handleCalendarSync = async (type: "default" | "google" | "copy" = "default") => {
+  const handleCalendarSync = async (
+    type: "default" | "google" | "copy" = "default",
+  ) => {
     setIsSyncing(true);
     console.log(`[Calendar] Starting synchronization (${type}) from banner...`);
 
@@ -95,18 +97,22 @@ export const CalendarSyncBanner: React.FC = () => {
 
         if (type === "google") {
           const googleUrl = `https://www.google.com/calendar/render?cid=${encodeURIComponent(url.replace(/^webcal:\/\//, "https://"))}`;
+
           window.open(googleUrl, "_blank");
         } else if (type === "copy") {
-          await navigator.clipboard.writeText(url.replace(/^webcal:\/\//, "https://"));
+          await navigator.clipboard.writeText(
+            url.replace(/^webcal:\/\//, "https://"),
+          );
           addToast({
             title: t("onboarding.calendar.link_copied"),
             color: "success",
           });
         } else {
           const finalUrl = url.replace(/^https?:\/\//, "webcal://");
+
           window.location.href = finalUrl;
           addToast({
-            title: isAndroid 
+            title: isAndroid
               ? t("onboarding.calendar.instructions_android")
               : t("onboarding.calendar.toast_success"),
             color: "success",
@@ -159,14 +165,14 @@ export const CalendarSyncBanner: React.FC = () => {
               <h3 className="font-bold text-white tracking-tight">
                 {t("onboarding.calendar.title")}
               </h3>
-              <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mt-0.5">
+              <p className="text-[10px] text-white/60 uppercase font-bold tracking-widest mt-0.5">
                 {t("onboarding.calendar.new_feature", "Nouveauté")}
               </p>
             </div>
           </div>
           <Button
             isIconOnly
-            className="text-white/40 hover:text-white/80 -mr-2 -mt-2"
+            className="text-white/60 hover:text-white/80 -mr-2 -mt-2"
             size="sm"
             variant="light"
             onPress={handleDismiss}
@@ -176,7 +182,7 @@ export const CalendarSyncBanner: React.FC = () => {
         </div>
 
         <p className="text-sm text-white/70 leading-relaxed">
-          {isAndroid 
+          {isAndroid
             ? t("onboarding.calendar.instructions_android")
             : t("onboarding.calendar.description")}
         </p>
@@ -187,12 +193,16 @@ export const CalendarSyncBanner: React.FC = () => {
               className="flex-[2] font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
               color="secondary"
               isLoading={isSyncing}
-              onPress={() => handleCalendarSync(isAndroid ? "google" : "default")}
+              onPress={() =>
+                handleCalendarSync(isAndroid ? "google" : "default")
+              }
             >
-              {isAndroid ? t("onboarding.calendar.add_google") : t("onboarding.calendar.button")}
+              {isAndroid
+                ? t("onboarding.calendar.add_google")
+                : t("onboarding.calendar.button")}
             </Button>
             <Button
-              className="flex-1 font-bold text-xs h-12 border-white/10 text-white/40 hover:text-white/60"
+              className="flex-1 font-bold text-xs h-12 border-white/10 text-white/60 hover:text-white/60"
               variant="bordered"
               onPress={handleNever}
             >
@@ -207,16 +217,16 @@ export const CalendarSyncBanner: React.FC = () => {
           >
             {t("onboarding.calendar.later")}
           </Button>
-          
+
           {isAndroid && (
-             <Button
-               className="w-full font-bold text-[10px] h-8 bg-white/5 text-white/40"
-               variant="flat"
-               size="sm"
-               onPress={() => handleCalendarSync("default")}
-             >
-               App Directe
-             </Button>
+            <Button
+              className="w-full font-bold text-[10px] h-8 bg-white/5 text-white/60"
+              size="sm"
+              variant="flat"
+              onPress={() => handleCalendarSync("default")}
+            >
+              App Directe
+            </Button>
           )}
         </div>
       </CardBody>

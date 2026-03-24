@@ -102,6 +102,7 @@ export default [
           "newlines-between": "always",
         },
       ],
+      "@typescript-eslint/no-explicit-any": "warn",
       "react/self-closing-comp": "warn",
       "react/jsx-sort-props": [
         "warn",

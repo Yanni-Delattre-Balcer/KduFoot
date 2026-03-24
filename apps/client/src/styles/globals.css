@@ -73,6 +73,12 @@
     padding-right: env(safe-area-inset-right, 0px);
     font-display: swap;
   }
+
+  /* Keyboard focus ring for accessibility */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--heroui-primary));
+    outline-offset: 2px;
+  }
 }
 
 /* Utility classes for safe area — Tailwind can't parse env() in arbitrary values */

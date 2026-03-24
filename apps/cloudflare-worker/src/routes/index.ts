@@ -185,7 +185,9 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 	 *     description: Upgrade to a WebSocket connection. Managed by the WEBSOCKET_HUB Durable Object.
 	 */
 	router.get("/api/ws", async (request: Request): Promise<Response> => {
-		const token = new URL(request.url).searchParams.get("token") || request.headers.get("Authorization")?.split(" ")[1];
+		const protocols = request.headers.get("Sec-WebSocket-Protocol") || "";
+		const protocolToken = protocols.split(",").map(p => p.trim()).find(p => p.startsWith("bearer-"))?.slice(7);
+		const token = protocolToken || new URL(request.url).searchParams.get("token") || request.headers.get("Authorization")?.split(" ")[1];
 		
 		const { checkPermissions } = await import("../auth0");
 		const { access } = await checkPermissions(

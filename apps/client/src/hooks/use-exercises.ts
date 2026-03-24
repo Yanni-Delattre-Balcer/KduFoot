@@ -17,6 +17,7 @@ export function useExercises(filters?: ExerciseFilters) {
 
   const fetcher = async (url: string) => {
     let token: string | null = null;
+
     try {
       token = await getAccessTokenSilently();
     } catch (e) {
@@ -24,6 +25,7 @@ export function useExercises(filters?: ExerciseFilters) {
     }
 
     const headers: Record<string, string> = {};
+
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
@@ -34,7 +36,10 @@ export function useExercises(filters?: ExerciseFilters) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(errorData.error || "Failed to fetch exercises") as any;
+      const error = new Error(
+        errorData.error || "Failed to fetch exercises",
+      ) as any;
+
       error.status = response.status;
       throw error;
     }
@@ -55,6 +60,7 @@ export function useExercises(filters?: ExerciseFilters) {
   const { data, error, isLoading, mutate } = useSWR(
     isAuthenticated ? key : null,
     fetcher,
+    { keepPreviousData: true },
   );
 
   const createExercise = useCallback(
@@ -88,7 +94,10 @@ export function useExercises(filters?: ExerciseFilters) {
   );
 
   return {
-    exercises: (data?.data as Exercise[]) ?? (data?.exercises as Exercise[]) ?? EMPTY_ARRAY,
+    exercises:
+      (data?.data as Exercise[]) ??
+      (data?.exercises as Exercise[]) ??
+      EMPTY_ARRAY,
     nextCursor: (data?.nextCursor as string | null) ?? null,
     hasMore: (data?.hasMore as boolean) ?? false,
     total: (data?.total as number) ?? 0,
@@ -105,6 +114,7 @@ export function useExercise(id: string | null) {
 
   const fetcher = async (url: string) => {
     let token: string | null = null;
+
     try {
       token = await getAccessTokenSilently();
     } catch (e) {
@@ -112,6 +122,7 @@ export function useExercise(id: string | null) {
     }
 
     const headers: Record<string, string> = {};
+
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
@@ -122,7 +133,10 @@ export function useExercise(id: string | null) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(errorData.error || "Failed to fetch exercise") as any;
+      const error = new Error(
+        errorData.error || "Failed to fetch exercise",
+      ) as any;
+
       error.status = response.status;
       throw error;
     }

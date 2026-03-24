@@ -29,7 +29,10 @@ export function useSessions(filters?: SessionFilters) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(errorData.error || "Failed to fetch sessions") as any;
+      const error = new Error(
+        errorData.error || "Failed to fetch sessions",
+      ) as any;
+
       error.status = response.status;
       throw error;
     }
@@ -47,7 +50,9 @@ export function useSessions(filters?: SessionFilters) {
 
   const key = `/api/sessions?${query.toString()}`;
 
-  const { data, error, isLoading, mutate } = useSWR(key, fetcher);
+  const { data, error, isLoading, mutate } = useSWR(key, fetcher, {
+    keepPreviousData: true,
+  });
   const { mutate: globalMutate } = useSWRConfig();
 
   /**
@@ -92,7 +97,10 @@ export function useSessions(filters?: SessionFilters) {
   );
 
   return {
-    sessions: (data?.data as TrainingSession[]) ?? (data?.sessions as TrainingSession[]) ?? [],
+    sessions:
+      (data?.data as TrainingSession[]) ??
+      (data?.sessions as TrainingSession[]) ??
+      [],
     nextCursor: (data?.nextCursor as string | null) ?? null,
     hasMore: (data?.hasMore as boolean) ?? false,
     total: (data?.total as number) ?? 0,
@@ -115,7 +123,10 @@ export function useSession(id: string | null) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(errorData.error || "Failed to fetch session") as any;
+      const error = new Error(
+        errorData.error || "Failed to fetch session",
+      ) as any;
+
       error.status = response.status;
       throw error;
     }

@@ -72,6 +72,14 @@ jobs:
         run: npm run lint
         working-directory: apps/cloudflare-worker
 
+      - name: Type Check (Client)
+        run: npm run type-check
+        working-directory: apps/client
+
+      - name: Run Tests (Client)
+        run: npm test
+        working-directory: apps/client
+
       - name: Create .env file
         run: |
           echo "DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}" > .env

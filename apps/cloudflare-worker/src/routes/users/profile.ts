@@ -403,6 +403,18 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
         const url = new URL(request.url);
         const webcalUrl = `webcal://${url.host}/api/calendar/${token}.ics`;
 
+        // Rotate calendar token if older than 90 days
+        if (user.last_calendar_sync_at) {
+            const lastSync = new Date(user.last_calendar_sync_at * 1000);
+            const daysSinceSync = (Date.now() - lastSync.getTime()) / (1000 * 60 * 60 * 24);
+            if (daysSinceSync > 90) {
+                await userService.regenerateCalendarToken(user.id);
+                const newToken = await userService.getOrCreateCalendarToken(user.id);
+                const webcalUrl2 = `webcal://${url.host}/api/calendar/${newToken}.ics`;
+                return Response.json({ success: true, url: webcalUrl2 }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+            }
+        }
+
         return Response.json({ success: true, url: webcalUrl }, { headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
     }, Permission.READ_API);
 
@@ -511,6 +523,42 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             });
         } catch (e: unknown) {
             console.error('Export PDF Error:', e);
+            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+    }, Permission.READ_API);
+
+    /**
+     * GET /api/me/export/json — RGPD portability: JSON export
+     */
+    router.get('/api/me/export/json', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
+
+        const user = await userService.getUserByAuth0Sub(sub);
+        if (!user) {
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
+        }
+
+        try {
+            const data = await userService.exportUserData(user.id);
+
+            // RGPD audit: log data export
+            try {
+                await env.DB.prepare(
+                    'INSERT INTO rgpd_audit_log (id, user_id, action, details) VALUES (?, ?, ?, ?)'
+                ).bind(crypto.randomUUID(), user.id, 'export', 'JSON export (portability)').run();
+            } catch { /* audit log should not block export */ }
+
+            const jsonStr = JSON.stringify(data, null, 2);
+            return new Response(jsonStr, {
+                status: 200,
+                headers: {
+                    ...router.corsHeaders,
+                    "Content-Type": "application/json; charset=utf-8",
+                    "Content-Disposition": 'attachment; filename="mes-donnees-kdufoot.json"',
+                }
+            });
+        } catch (e: unknown) {
+            console.error('Export JSON Error:', e);
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: { ...router.corsHeaders, "Content-Type": "application/json" } });
         }
     }, Permission.READ_API);

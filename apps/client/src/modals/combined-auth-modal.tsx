@@ -48,20 +48,29 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           const httpsUrl = rawUrl.replace(/^webcal:\/\//, "https://");
           const googleCalUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(httpsUrl)}`;
 
-          console.log("[Calendar] Android detected, opening Google Calendar intent:", googleCalUrl);
+          console.log(
+            "[Calendar] Android detected, opening Google Calendar intent:",
+            googleCalUrl,
+          );
           window.open(googleCalUrl, "_blank");
         } else {
           // iOS / Desktop: webcal:// works natively
           const webcalUrl = rawUrl.replace(/^https?:\/\//, "webcal://");
 
-          console.log("[Calendar] iOS/Desktop, opening webcal link:", webcalUrl);
+          console.log(
+            "[Calendar] iOS/Desktop, opening webcal link:",
+            webcalUrl,
+          );
           window.location.href = webcalUrl;
         }
       }
     } catch (error) {
       console.error("[Calendar] Failed to fetch calendar link:", error);
       addToast({
-        title: t("onboarding.calendar.toast_error", "Échec de la synchronisation"),
+        title: t(
+          "onboarding.calendar.toast_error",
+          "Échec de la synchronisation",
+        ),
         color: "danger",
       });
     } finally {
@@ -81,6 +90,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
 
   return (
     <Modal
+      aria-labelledby="auth-modal-title"
       backdrop="blur"
       classNames={{
         base: "bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden",
@@ -93,7 +103,6 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
       size="md"
-      aria-labelledby="auth-modal-title"
       onClose={() => {}} // Empêcher la fermeture par défaut
     >
       <ModalContent>
@@ -104,11 +113,17 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           </div>
         </ModalHeader>
         <ModalBody className="text-center px-6 sm:px-10">
-          <h1 id="auth-modal-title" className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight leading-tight">
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight leading-tight"
+            id="auth-modal-title"
+          >
             {t("onboarding.calendar.title", "Synchronisez votre calendrier")}
           </h1>
           <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed max-w-[280px] sm:max-w-none mx-auto opacity-80">
-            {t("onboarding.calendar.description", "Ne manquez aucun match ! Synchronisez vos rencontres avec l'application calendrier de votre téléphone.")}
+            {t(
+              "onboarding.calendar.description",
+              "Ne manquez aucun match ! Synchronisez vos rencontres avec l'application calendrier de votre téléphone.",
+            )}
           </p>
 
           <div className="flex justify-center w-full mt-6">
@@ -119,7 +134,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
                   className="text-purple-400 group-hover:scale-110 transition-transform duration-500"
                   size={32}
                 />
-                <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-1">
+                <span className="text-[10px] text-white/60 font-bold uppercase tracking-[0.2em] mt-1">
                   {t("onboarding.calendar.native", "Calendrier natif")}
                 </span>
               </div>
@@ -160,7 +175,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
 
             {/* Bouton "Ne plus me demander" : fermeture définitive pour cet appareil */}
             <Button
-              className="text-zinc-500/50 hover:text-zinc-400 font-medium text-[9px] tracking-widest leading-none mt-1"
+              className="text-zinc-400 hover:text-zinc-400 font-medium text-[9px] tracking-widest leading-none mt-1"
               size="sm"
               variant="light"
               onPress={handleNeverAskAgain}

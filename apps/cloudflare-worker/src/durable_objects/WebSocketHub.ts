@@ -44,9 +44,12 @@ export class WebSocketHub extends DurableObject<Env> {
             this.sessions.delete(server);
         });
 
+        const requestedProtocol = request.headers.get("Sec-WebSocket-Protocol");
+        const acceptProtocol = requestedProtocol?.split(",").map(p => p.trim()).find(p => p.startsWith("bearer-"));
         return new Response(null, {
             status: 101,
             webSocket: client,
+            ...(acceptProtocol ? { headers: { "Sec-WebSocket-Protocol": acceptProtocol } } : {})
         });
     }
 

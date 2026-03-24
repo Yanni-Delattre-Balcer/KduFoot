@@ -32,4 +32,40 @@ describe('UserService', () => {
         await service.deleteUser('user-1');
         expect(mockEnv.DB.prepare).toHaveBeenCalled();
     });
+
+    describe('parseUser', () => {
+        it('should return null for null input', () => {
+            expect(service.parseUser(null)).toBeNull();
+        });
+
+        it('should parse stringified additional_sirets', () => {
+            const user = { id: '1', additional_sirets: '["12345","67890"]' } as any;
+            const result = service.parseUser(user);
+            expect(result?.additional_sirets).toEqual(['12345', '67890']);
+        });
+
+        it('should heal double-stringified additional_sirets', () => {
+            const user = { id: '1', additional_sirets: '"[\\"12345\\"]"' } as any;
+            const result = service.parseUser(user);
+            expect(result?.additional_sirets).toEqual(['12345']);
+        });
+
+        it('should default to empty array for corrupted JSON', () => {
+            const user = { id: '1', additional_sirets: 'not-json' } as any;
+            const result = service.parseUser(user);
+            expect(result?.additional_sirets).toEqual([]);
+        });
+
+        it('should keep existing array as-is', () => {
+            const user = { id: '1', additional_sirets: ['a', 'b'] } as any;
+            const result = service.parseUser(user);
+            expect(result?.additional_sirets).toEqual(['a', 'b']);
+        });
+
+        it('should default non-array non-string to empty array', () => {
+            const user = { id: '1', additional_sirets: 42 } as any;
+            const result = service.parseUser(user);
+            expect(result?.additional_sirets).toEqual([]);
+        });
+    });
 });

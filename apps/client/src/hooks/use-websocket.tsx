@@ -81,11 +81,7 @@ export function useWebSocketSync(
         window.location.origin;
       let wsUrl = apiUrl.replace(/^http/, "ws").replace(/\/+$/, "") + "/api/ws";
 
-      if (token) {
-        wsUrl += `?token=${encodeURIComponent(token)}`;
-      }
-
-      const ws = new WebSocket(wsUrl);
+      const ws = new WebSocket(wsUrl, token ? [`bearer-${token}`] : []);
 
       wsRef.current = ws;
 
@@ -161,6 +157,7 @@ export function useWebSocketSync(
                     isBanned: true,
                     reason: payload.data?.reason || payload.message,
                   });
+
                 return;
               case "USER_UNBANNED":
                 color = "success";
@@ -212,7 +209,8 @@ export function useWebSocketSync(
                               ).toLocaleDateString("fr-FR")
                             : "date inconnue",
                           matchType: t(
-                            "enums.type." + (payload.data?.match_type || "match"),
+                            "enums.type." +
+                              (payload.data?.match_type || "match"),
                           ).toLowerCase(),
                         })}
                       </div>
@@ -222,6 +220,7 @@ export function useWebSocketSync(
                     timeout: 5000,
                   });
                 }
+
                 return;
               case "MATCH_CANCELLED":
                 // Message ciblés envoyés uniquement aux joueurs par le backend
@@ -254,6 +253,12 @@ export function useWebSocketSync(
                   (d: any) => d,
                   { revalidate: true },
                 );
+                mutate("/api/matches/participations", (d: any) => d, {
+                  revalidate: true,
+                });
+                mutate("/api/matches/requests", (d: any) => d, {
+                  revalidate: true,
+                });
                 // Increment badge unread counter
                 {
                   const uk = `kdufoot_unread_count_${userId || "guest"}`;
@@ -335,7 +340,7 @@ export function useWebSocketSync(
                     window.dispatchEvent(
                       new CustomEvent("kdufoot_matches_updated"),
                     );
-                    
+
                     closeAll();
                     addToast({
                       title,
@@ -473,6 +478,7 @@ export function useWebSocketSync(
                     timeout: 5000,
                   });
                 }
+
                 return;
               case "ENROLLMENT_REFUSED":
                 {
@@ -537,6 +543,7 @@ export function useWebSocketSync(
                     timeout: 5000,
                   });
                 }
+
                 return;
               case "TEAM_WITHDRAWAL":
                 color = "danger";
@@ -558,6 +565,12 @@ export function useWebSocketSync(
                   (d: any) => d,
                   { revalidate: true },
                 );
+                mutate("/api/matches/participations", (d: any) => d, {
+                  revalidate: true,
+                });
+                mutate("/api/matches/requests", (d: any) => d, {
+                  revalidate: true,
+                });
                 // Increment badge unread counter
                 {
                   const uk = `kdufoot_unread_count_${userId || "guest"}`;
@@ -607,6 +620,12 @@ export function useWebSocketSync(
                   (d: any) => d,
                   { revalidate: true },
                 );
+                mutate("/api/matches/participations", (d: any) => d, {
+                  revalidate: true,
+                });
+                mutate("/api/matches/requests", (d: any) => d, {
+                  revalidate: true,
+                });
                 {
                   const uk = `kdufoot_unread_count_${userId || "guest"}`;
 
@@ -718,4 +737,3 @@ export function useWebSocketSync(
 
   return { status };
 }
-

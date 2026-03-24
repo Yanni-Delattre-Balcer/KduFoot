@@ -61,7 +61,11 @@ export const OrganizedTournamentCard = ({
                     {match.name || match.club?.name}
                   </h3>
                   <p className="text-[10px] sm:text-xs font-bold text-default-400 mt-1 uppercase tracking-wider">
-                    {match.accepted_count || 0} {t("dashboard.tournament.registered_teams", "équipes inscrites")}
+                    {match.accepted_count || 0}{" "}
+                    {t(
+                      "dashboard.tournament.registered_teams",
+                      "équipes inscrites",
+                    )}
                   </p>
                   <div className="flex flex-wrap items-center gap-3 mt-2">
                     <Chip
@@ -189,7 +193,7 @@ export const OrganizedTournamentCard = ({
                     className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]"
                   >
                     {contact.club_logo ? (
-                      <Image src={contact.club_logo} />
+                      <Image loading="lazy" src={contact.club_logo} />
                     ) : (
                       <span className="text-xs sm:text-sm font-black">
                         {contact.club_name?.charAt(0)}
