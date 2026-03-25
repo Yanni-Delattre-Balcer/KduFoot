@@ -255,6 +255,17 @@ export const MatchCard = React.memo(function MatchCard({
             {t("matchesPage.view_changes")}
           </Button>
         )}
+        <Button
+          as={Link}
+          className="w-full font-black tracking-widest uppercase text-xs"
+          color="primary"
+          size="sm"
+          to={`/matches/${match.id}`}
+          variant="flat"
+        >
+          {t("details")}
+        </Button>
+
         {isAdmin && onDelete && (
           <Button
             className="w-full font-bold text-xs h-10 border-red-500/20 hover:bg-red-500/10"
@@ -263,7 +274,8 @@ export const MatchCard = React.memo(function MatchCard({
             variant="light"
             onPress={() => onDelete(match.id)}
           >
-            {t("account.details.admin.delete_ad")}
+            {t("match.confirm_delete_admin")?.split("\n")[0] ||
+              "Supprimer l'annonce"}
           </Button>
         )}
       </CardFooter>
