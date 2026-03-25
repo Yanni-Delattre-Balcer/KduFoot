@@ -421,18 +421,148 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     setIsExporting(true);
     try {
       const token = await getAccessToken();
-      const res = await fetch(`${import.meta.env.API_BASE_URL}/api/me/export`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${import.meta.env.API_BASE_URL}/api/me/export/json`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!res.ok)
         throw new Error(t("account.export_error", "Erreur lors de l'export"));
-      const blob = await res.blob();
-      const url = URL.createObjectURL(
-        new Blob([blob], { type: "application/pdf" }),
-      );
+
+      const exportData = await res.json();
+
+      // Generate PDF client-side (pdf-lib works reliably in browsers)
+      const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
+      const pdfDoc = await PDFDocument.create();
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const pageWidth = 595.28;
+      const pageHeight = 841.89;
+
+      let page = pdfDoc.addPage([pageWidth, pageHeight]);
+      let y = pageHeight - 50;
+
+      const addPage = () => {
+        page = pdfDoc.addPage([pageWidth, pageHeight]);
+        y = pageHeight - 50;
+      };
+
+      page.drawText("KduFoot - Export de Données (RGPD)", {
+        x: 50,
+        y,
+        size: 20,
+        font: fontBold,
+        color: rgb(0, 0, 0.5),
+      });
+      y -= 30;
+      page.drawText(`Date d'export : ${new Date().toLocaleString("fr-FR")}`, {
+        x: 50,
+        y,
+        size: 10,
+        font,
+      });
+      y -= 40;
+
+      const profile = exportData.profile || {};
+
+      page.drawText("1. PROFIL UTILISATEUR", {
+        x: 50,
+        y,
+        size: 14,
+        font: fontBold,
+      });
+      y -= 25;
+      const profileLines = [
+        `Nom : ${profile.lastname || "Non spécifié"}`,
+        `Prénom : ${profile.firstname || "Non spécifié"}`,
+        `Email : ${profile.email || "N/A"}`,
+        `Licence : ${profile.license_id || "Non spécifiée"}`,
+        `Club : ${profile.siret || "Aucun club lié"}`,
+      ];
+
+      for (const line of profileLines) {
+        page.drawText(line, { x: 70, y, size: 11, font });
+        y -= 15;
+      }
+      y -= 25;
+
+      const matches = exportData.matches || [];
+      const applications = exportData.match_applications || [];
+      const sessions = exportData.training_sessions || [];
+      const exercises = exportData.created_exercises || [];
+
+      page.drawText("2. RÉSUMÉ D'ACTIVITÉ", {
+        x: 50,
+        y,
+        size: 14,
+        font: fontBold,
+      });
+      y -= 25;
+      const summaryLines = [
+        `Matchs créés : ${matches.length}`,
+        `Participations : ${applications.length}`,
+        `Séances d'entraînement : ${sessions.length}`,
+        `Exercices créés : ${exercises.length}`,
+      ];
+
+      for (const line of summaryLines) {
+        page.drawText(line, { x: 70, y, size: 11, font });
+        y -= 15;
+      }
+      y -= 25;
+
+      if (matches.length > 0) {
+        page.drawText("3. HISTORIQUE DES MATCHS CRÉÉS", {
+          x: 50,
+          y,
+          size: 14,
+          font: fontBold,
+        });
+        y -= 25;
+        page.drawText("Date", { x: 70, y, size: 10, font: fontBold });
+        page.drawText("Type", { x: 170, y, size: 10, font: fontBold });
+        page.drawText("Lieu", { x: 270, y, size: 10, font: fontBold });
+        y -= 15;
+        page.drawLine({
+          start: { x: 70, y },
+          end: { x: 520, y },
+          thickness: 1,
+          color: rgb(0.8, 0.8, 0.8),
+        });
+        y -= 15;
+
+        for (const m of matches.slice(0, 15)) {
+          if (y < 50) addPage();
+          const d = m.match_date
+            ? new Date(m.match_date).toLocaleDateString("fr-FR")
+            : "N/A";
+          const loc = m.address
+            ? m.address.length > 30
+              ? m.address.substring(0, 27) + "..."
+              : m.address
+            : "N/A";
+
+          page.drawText(d, { x: 70, y, size: 9, font });
+          page.drawText(m.match_type || "Amical", {
+            x: 170,
+            y,
+            size: 9,
+            font,
+          });
+          page.drawText(loc, { x: 270, y, size: 9, font });
+          y -= 15;
+        }
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([new Uint8Array(pdfBytes)], {
+        type: "application/pdf",
+      });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
 
       a.href = url;
@@ -446,8 +576,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         title: t("account.export_success", "Export réussi"),
         color: "success",
       });
-    } catch (e: any) {
-      addToast({ title: e.message, color: "danger" });
+    } catch (e: unknown) {
+      addToast({
+        title:
+          e instanceof Error
+            ? e.message
+            : t("account.export_error", "Erreur lors de l'export"),
+        color: "danger",
+      });
     } finally {
       setIsExporting(false);
     }
