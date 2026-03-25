@@ -316,12 +316,13 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
               <div className="flex flex-wrap gap-2">
                 <Button
                   as={Link}
-                  className="flex-1 min-w-[100px] font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10 transition-colors"
-                  size="md"
+                  className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+                  color="default"
+                  size="sm"
                   to={`/matches/${match.match_id}`}
                   variant="flat"
                 >
-                  {t("dashboard.controls.view")}
+                  {t("details.title")}
                 </Button>
                 {isParticipant && onWithdraw && (
                   <Button

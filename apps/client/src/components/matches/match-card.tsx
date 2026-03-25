@@ -71,9 +71,9 @@ export const MatchCard = React.memo(function MatchCard({
       )}
 
       <Link className="flex-1 flex flex-col" to={`/matches/${match.id}`}>
-        <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
+        <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-2 relative">
           {isOwner && (
-            <div className="absolute top-2 left-2 flex items-center gap-1 bg-linear-to-r from-violet-600 to-amber-700 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-lg z-10 transition-transform group-hover:scale-105">
+            <div className="flex items-center gap-1 bg-linear-to-r from-violet-600 to-amber-700 text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full shadow-lg z-10 transition-transform group-hover:scale-105 mb-1">
               <svg
                 className="w-3 h-3"
                 fill="currentColor"
@@ -255,29 +255,31 @@ export const MatchCard = React.memo(function MatchCard({
             {t("matchesPage.view_changes")}
           </Button>
         )}
-        <Button
-          as={Link}
-          className="w-full font-black tracking-widest uppercase text-xs"
-          color="primary"
-          size="sm"
-          to={`/matches/${match.id}`}
-          variant="flat"
-        >
-          {t("details")}
-        </Button>
-
-        {isAdmin && onDelete && (
+        <div className="flex flex-row gap-2 w-full mt-2">
           <Button
-            className="w-full font-bold text-xs h-10 border-red-500/20 hover:bg-red-500/10"
-            color="danger"
+            as={Link}
+            className="flex-1 font-black tracking-widest uppercase text-xs"
+            color="primary"
             size="sm"
-            variant="light"
-            onPress={() => onDelete(match.id)}
+            to={`/matches/${match.id}`}
+            variant="flat"
           >
-            {t("match.confirm_delete_admin")?.split("\n")[0] ||
-              "Supprimer l'annonce"}
+            {t("details.title")}
           </Button>
-        )}
+
+          {isAdmin && onDelete && (
+            <Button
+              className="flex-1 font-bold text-xs h-10 border-red-500/20 hover:bg-red-500/10"
+              color="danger"
+              size="sm"
+              variant="light"
+              onPress={() => onDelete(match.id)}
+            >
+              {t("match.confirm_delete_admin")?.split("\n")[0] ||
+                "Supprimer l'annonce"}
+            </Button>
+          )}
+        </div>
       </CardFooter>
     </Card>
   );

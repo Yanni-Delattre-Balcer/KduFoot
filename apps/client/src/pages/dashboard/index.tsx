@@ -27,15 +27,9 @@ import FootballClock from "../../components/football-clock";
 import { ConfirmedTournamentCard } from "./components/confirmed-tournament-card";
 import { ConfirmedMatchCard } from "./components/confirmed-match-card";
 import { DashboardRequestCard } from "./components/dashboard-request-card";
-import { OrganizedTournamentCard } from "./components/organized-tournament-card";
-import { MyOrganizationsMemo } from "./components/my-organizations-memo";
 
 import { useUser } from "@/hooks/use-user";
-import {
-  useIncomingRequests,
-  useMyParticipations,
-  useMatches,
-} from "@/hooks/use-matches";
+import { useIncomingRequests, useMyParticipations } from "@/hooks/use-matches";
 import DataWall from "@/components/data-wall";
 import { JerseyColorDots } from "@/components/jersey-color-dots";
 import DefaultLayout from "@/layouts/default";
@@ -116,15 +110,6 @@ export default function DashboardPage() {
     markAsRead: markAsReadHook,
     mutate: mutateParticipations,
   } = useMyParticipations();
-
-  // 4. Mes Créations (Organisateur - Direct)
-  const {
-    matches: myMatches,
-    isLoading: isLoadingMyMatches,
-    mutate: mutateMyMatches,
-    deleteMatch: deleteMatchHook,
-    closeRegistrations: closeRegistrationsHook,
-  } = useMatches({ ownerId: user?.id });
 
   // States
   const [requestsSubFilter, setRequestsSubFilter] = useState<
@@ -331,59 +316,6 @@ export default function DashboardPage() {
       });
     } finally {
       setActionLoading((prev) => ({ ...prev, [key]: false }));
-    }
-  };
-
-  const handleDeleteMatch = async (id: string, date: string, time: string) => {
-    if (!window.confirm(t("dashboard.alerts.confirm_delete", { date, time })))
-      return;
-
-    try {
-      await deleteMatchHook(id);
-      addToast({
-        title: t("success"),
-        description: t("dashboard.notifications.match_deleted"),
-        color: "success",
-      });
-      mutateMyMatches();
-      globalMutate(
-        (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
-        { revalidate: true },
-      );
-    } catch (error: unknown) {
-      const err = error as Error;
-
-      addToast({
-        title: t("error.title"),
-        description: err.message || t("error.delete_failed"),
-        color: "danger",
-      });
-    }
-  };
-
-  const handleCloseRegistrations = async (id: string) => {
-    try {
-      await closeRegistrationsHook(id);
-      addToast({
-        title: t("success"),
-        description: t("dashboard.notifications.registrations_closed"),
-        color: "success",
-      });
-      mutateMyMatches();
-      globalMutate(
-        (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
-        { revalidate: true },
-      );
-    } catch (error: unknown) {
-      const err = error as Error;
-
-      addToast({
-        title: t("error.title"),
-        description: err.message || t("error.action_failed"),
-        color: "danger",
-      });
     }
   };
 
@@ -652,12 +584,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <MyOrganizationsMemo
-          events={myMatches}
-          formatDate={(d) => formatDate(d, i18n.language)}
-          isLoading={isLoadingMyMatches}
-        />
-
         <DataWall>
           <Tabs
             aria-label="Dashboard Options"
@@ -920,69 +846,6 @@ export default function DashboardPage() {
                         variant="flat"
                       >
                         {t("dashboard.labels.search_tournament")}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Tab>
-
-            <Tab
-              key="my_creations"
-              title={
-                <div className="flex items-center space-x-2">
-                  <span>
-                    {t("dashboard.tabs.my_creations", "Mes Créations")}
-                  </span>
-                  {myMatches.length > 0 && (
-                    <Chip
-                      className="h-5 min-w-5 px-1 font-black"
-                      color="secondary"
-                      size="sm"
-                      variant="solid"
-                    >
-                      {myMatches.length}
-                    </Chip>
-                  )}
-                </div>
-              }
-            >
-              <div aria-live="polite" className="flex flex-col gap-4 pt-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {isLoadingMyMatches ? (
-                    <DashboardListSkeleton count={3} />
-                  ) : myMatches.length > 0 ? (
-                    myMatches.map((m) => (
-                      <OrganizedTournamentCard
-                        key={m.id}
-                        formatDate={(d) => formatDate(d, i18n.language)}
-                        formatTime={formatTime}
-                        isSaving={actionLoading[m.id]}
-                        isTooLate={false}
-                        match={m}
-                        onCloseRegistrations={handleCloseRegistrations}
-                        onDelete={handleDeleteMatch}
-                      />
-                    ))
-                  ) : (
-                    <div className="col-span-full py-8 text-center space-y-4">
-                      <p className="text-default-400 font-medium">
-                        {t(
-                          "dashboard.empty.no_my_creations",
-                          "Vous n'avez créé aucun événement.",
-                        )}
-                      </p>
-                      <Button
-                        as={Link}
-                        className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto"
-                        color="secondary"
-                        to="/matches"
-                        variant="flat"
-                      >
-                        {t(
-                          "dashboard.labels.create_match",
-                          "Créer un événement",
-                        )}
                       </Button>
                     </div>
                   )}

@@ -359,7 +359,7 @@ export const ConfirmedTournamentCard = React.memo(
                     to={`/matches/${part.match_id}`}
                     variant="flat"
                   >
-                    {t("dashboard.controls.view")}
+                    {t("details.title")}
                   </Button>
                   <Button
                     as="a"

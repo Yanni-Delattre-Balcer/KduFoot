@@ -228,6 +228,16 @@ export const DashboardRequestCard = React.memo(function DashboardRequestCard({
             </Button>
           </div>
           <Button
+            as={Link}
+            className="w-full font-black tracking-widest uppercase text-xs h-10 border border-white/5 bg-white/5 hover:bg-white/10"
+            color="default"
+            size="sm"
+            to={`/matches/${request.match_id}`}
+            variant="flat"
+          >
+            {t("details.title")}
+          </Button>
+          <Button
             className="w-full font-bold text-xs h-10 border-transparent text-secondary/70 hover:text-secondary"
             color="secondary"
             size="sm"

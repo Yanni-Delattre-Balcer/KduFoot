@@ -78,7 +78,12 @@ export function useMatches(filters?: MatchFilters) {
   const { data, error, isLoading, mutate } = useSWR<MatchesResponse>(
     isAuthenticated ? key : null,
     fetcher,
-    { keepPreviousData: true },
+    {
+      keepPreviousData: true,
+      dedupingInterval: 0,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+    },
   );
 
   const createMatch = useCallback(
@@ -287,6 +292,11 @@ export function useMatch(id: string | null) {
   const { data, error, isLoading, mutate } = useSWR<{ match: Match }>(
     isAuthenticated && id ? `/api/matches/${id}` : null,
     fetcher,
+    {
+      dedupingInterval: 0,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+    },
   );
 
   const updateMatch = useCallback(
@@ -446,7 +456,12 @@ export function useIncomingRequests() {
   const { data, error, isLoading, mutate } = useSWR(
     isAuthenticated ? "/api/matches/requests" : null,
     fetcher,
-    { keepPreviousData: true },
+    {
+      keepPreviousData: true,
+      dedupingInterval: 0,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+    },
   );
 
   return {
@@ -489,7 +504,12 @@ export function useMyParticipations() {
   const { data, error, isLoading, mutate } = useSWR(
     isAuthenticated ? "/api/matches/participations" : null,
     fetcher,
-    { keepPreviousData: true },
+    {
+      keepPreviousData: true,
+      dedupingInterval: 0,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+    },
   );
 
   const markAsRead = useCallback(
