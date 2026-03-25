@@ -296,8 +296,13 @@ export function useMatch(id: string | null) {
 
       await matchService.update(id, dto, token);
       mutate();
+      globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (currentData: unknown) => currentData,
+        { revalidate: true },
+      );
     },
-    [id, getAccessTokenSilently, mutate],
+    [id, getAccessTokenSilently, mutate, globalMutate],
   );
 
   const deleteMatch = useCallback(async () => {
@@ -321,8 +326,13 @@ export function useMatch(id: string | null) {
 
       await matchService.contact(id, dto, token);
       mutate(); // Re-fetch to see the new contact in the list
+      globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (currentData: unknown) => currentData,
+        { revalidate: true },
+      );
     },
-    [id, getAccessTokenSilently, mutate],
+    [id, getAccessTokenSilently, mutate, globalMutate],
   );
 
   const cancelMatchContact = useCallback(
@@ -332,8 +342,13 @@ export function useMatch(id: string | null) {
 
       await matchService.cancelRequest(id, userId, token);
       mutate();
+      globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (currentData: unknown) => currentData,
+        { revalidate: true },
+      );
     },
-    [id, getAccessTokenSilently, mutate],
+    [id, getAccessTokenSilently, mutate, globalMutate],
   );
 
   const adminDeleteMatch = useCallback(async () => {
@@ -366,8 +381,13 @@ export function useMatch(id: string | null) {
 
       await matchService.updateRequestStatus(id, userId, status, token);
       mutate();
+      globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (currentData: unknown) => currentData,
+        { revalidate: true },
+      );
     },
-    [id, getAccessTokenSilently, mutate],
+    [id, getAccessTokenSilently, mutate, globalMutate],
   );
 
   const closeRegistrations = useCallback(async () => {
@@ -376,7 +396,12 @@ export function useMatch(id: string | null) {
 
     await matchService.closeRegistrations(id, token);
     mutate();
-  }, [id, getAccessTokenSilently, mutate]);
+    globalMutate(
+      (key) => typeof key === "string" && key.startsWith("/api/"),
+      (currentData: unknown) => currentData,
+      { revalidate: true },
+    );
+  }, [id, getAccessTokenSilently, mutate, globalMutate]);
 
   return {
     match: data?.match as Match,

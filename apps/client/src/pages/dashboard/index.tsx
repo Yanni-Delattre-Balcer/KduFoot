@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSWRConfig } from "swr";
 import { useTranslation } from "react-i18next";
 import { LayoutDashboard } from "lucide-react";
 import { Card } from "@heroui/card";
@@ -94,6 +95,7 @@ const formatTimestampTime = (ts: number, locale: string = "fr-FR") => {
 
 export default function DashboardPage() {
   const { t, i18n } = useTranslation("kdufoot");
+  const { mutate: globalMutate } = useSWRConfig();
   const {
     isOpen: isProfileOpen,
     onOpen: onProfileOpen,
@@ -251,6 +253,11 @@ export default function DashboardPage() {
         color: status === "accepted" ? "success" : "warning",
       });
       mutateRequests();
+      globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (currentData: unknown) => currentData,
+        { revalidate: true },
+      );
     } catch (error: unknown) {
       const err = error as Error;
 
@@ -293,11 +300,16 @@ export default function DashboardPage() {
       await matchService.cancelRequest(matchId, userId, token);
       addToast({
         title: t("success"),
-        description: "Désistement enregistré avec succès",
+        description: t("dashboard.notifications.withdraw_success"),
         color: "success",
       });
       mutateRequests();
       mutateParticipations(); // Also refresh participations list
+      globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (currentData: unknown) => currentData,
+        { revalidate: true },
+      );
       window.dispatchEvent(new CustomEvent("kdufoot_matches_updated"));
     } catch (error: unknown) {
       const err = error as Error;
@@ -325,6 +337,11 @@ export default function DashboardPage() {
         color: "success",
       });
       mutateMyMatches();
+      globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (currentData: unknown) => currentData,
+        { revalidate: true },
+      );
     } catch (error: unknown) {
       const err = error as Error;
 
@@ -345,6 +362,11 @@ export default function DashboardPage() {
         color: "success",
       });
       mutateMyMatches();
+      globalMutate(
+        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (currentData: unknown) => currentData,
+        { revalidate: true },
+      );
     } catch (error: unknown) {
       const err = error as Error;
 

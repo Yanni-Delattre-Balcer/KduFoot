@@ -163,7 +163,9 @@ export default function MatchDetailsPage() {
     onOpen: onCancelAcceptedOpen,
     onOpenChange: onCancelAcceptedOpenChange,
   } = useDisclosure();
-  const [blockReason, setBlockReason] = useState("Suspension administrative");
+  const [blockReason, setBlockReason] = useState(
+    t("details.admin.block_reason_default", "Suspension administrative"),
+  );
 
   // Red Alert Detection Logic
   const { participations, markAsRead } = useMyParticipations();
@@ -302,7 +304,10 @@ export default function MatchDetailsPage() {
       console.error(e);
       addToast({
         title: t("error.title"),
-        description: "Impossible de valider les modifications",
+        description: t(
+          "error.mark_as_read_failed",
+          "Impossible de valider les modifications",
+        ),
         color: "danger",
       });
     } finally {
@@ -1054,7 +1059,10 @@ export default function MatchDetailsPage() {
                                 onPress={() => {
                                   if (isMasked) {
                                     openGateway(
-                                      "Veuillez compléter votre profil pour effectuer cette action",
+                                      t(
+                                        "error.profile_incomplete_action",
+                                        "Veuillez compléter votre profil pour effectuer cette action",
+                                      ),
                                     );
 
                                     return;
@@ -1071,7 +1079,10 @@ export default function MatchDetailsPage() {
                                 onPress={() => {
                                   if (isMasked) {
                                     openGateway(
-                                      "Veuillez compléter votre profil pour effectuer cette action",
+                                      t(
+                                        "error.profile_incomplete_action",
+                                        "Veuillez compléter votre profil pour effectuer cette action",
+                                      ),
                                     );
 
                                     return;
@@ -1121,23 +1132,34 @@ export default function MatchDetailsPage() {
                                 onPress={async () => {
                                   if (isMasked) {
                                     openGateway(
-                                      "Veuillez compléter votre profil pour effectuer cette action",
+                                      t(
+                                        "error.profile_incomplete_action",
+                                        "Veuillez compléter votre profil pour effectuer cette action",
+                                      ),
                                     );
 
                                     return;
                                   }
                                   if (!user) {
                                     openGateway(
-                                      "Veuillez vous connecter pour envoyer une demande.",
+                                      t(
+                                        "error.login_required",
+                                        "Veuillez vous connecter pour envoyer une demande.",
+                                      ),
                                     );
 
                                     return;
                                   }
                                   if (!user.club_id) {
                                     addToast({
-                                      title: "Profil incomplet",
-                                      description:
+                                      title: t(
+                                        "profile_incomplete",
+                                        "Profil incomplet",
+                                      ),
+                                      description: t(
+                                        "match.club_link_required",
                                         "Veuillez lier votre club pour envoyer une demande.",
+                                      ),
                                       color: "warning",
                                       timeout: 5000,
                                     });

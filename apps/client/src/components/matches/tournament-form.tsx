@@ -216,14 +216,31 @@ export default function TournamentForm({
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name) newErrors.name = "Le nom du tournoi est obligatoire.";
+    if (!formData.name)
+      newErrors.name = t(
+        "tournamentForm.alerts.name_required",
+        "Le nom du tournoi est obligatoire.",
+      );
     if (!formData.category)
-      newErrors.category = "La catégorie est obligatoire.";
-    if (!formData.level) newErrors.level = "Le niveau est obligatoire.";
+      newErrors.category = t(
+        "account.errors.category_required",
+        "La catégorie est obligatoire.",
+      );
+    if (!formData.level)
+      newErrors.level = t(
+        "account.errors.level_required",
+        "Le niveau est obligatoire.",
+      );
     if (!formData.max_teams)
-      newErrors.max_teams = "Le nombre d'équipes est obligatoire.";
+      newErrors.max_teams = t(
+        "tournamentForm.alerts.max_teams_required",
+        "Le nombre d'équipes est obligatoire.",
+      );
     if (!formData.match_date) {
-      newErrors.match_date = "La date est obligatoire.";
+      newErrors.match_date = t(
+        "matchForm.alerts.date_required",
+        "La date est obligatoire.",
+      );
     } else {
       const now = new Date();
       const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
@@ -255,15 +272,30 @@ export default function TournamentForm({
       }
     }
     if (!formData.match_time)
-      newErrors.match_time = "L'heure de début est obligatoire.";
+      newErrors.match_time = t(
+        "matchForm.alerts.time_required",
+        "L'heure de début est obligatoire.",
+      );
     if (!formData.match_end_time)
-      newErrors.match_end_time = "L'heure de fin est obligatoire.";
+      newErrors.match_end_time = t(
+        "tournamentForm.alerts.end_time_required",
+        "L'heure de fin est obligatoire.",
+      );
     if (!formData.pitch_type)
-      newErrors.pitch_type = "Le type de terrain est obligatoire.";
+      newErrors.pitch_type = t(
+        "account.errors.pitch_required",
+        "Le type de terrain est obligatoire.",
+      );
     if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email))
-      newErrors.email = "Un email valide est obligatoire.";
+      newErrors.email = t(
+        "account.errors.email_invalid",
+        "Un email valide est obligatoire.",
+      );
     if (!formData.phone || formData.phone.replace(/\D/g, "").length < 11)
-      newErrors.phone = "Le téléphone est obligatoire.";
+      newErrors.phone = t(
+        "account.errors.phone_required",
+        "Le téléphone est obligatoire.",
+      );
 
     setErrors(newErrors);
 

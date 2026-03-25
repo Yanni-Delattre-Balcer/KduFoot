@@ -91,7 +91,7 @@ export const ConfirmedTournamentCard = React.memo(
 
     return (
       <Card
-        className={`overflow-hidden border transition-all duration-300 col-span-full ${borderClass} group`}
+        className={`w-full overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full ${borderClass} group`}
         id={`card-${part.match_id}`}
       >
         <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50" />
