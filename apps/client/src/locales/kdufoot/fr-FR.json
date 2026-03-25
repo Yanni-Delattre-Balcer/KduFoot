@@ -714,8 +714,10 @@
       "save_changes": "Enregistrer les modifications",
       "save_and_continue": "Enregistrer et continuer",
       "export_data": "Exporter mes données (JSON)",
+      "export_data_pdf": "Télécharger mes données (PDF)",
       "delete_account": "Supprimer mon compte",
-      "reset_calendar": "Réinitialiser ma synchronisation calendrier",
+      "reset_calendar": "Désactiver",
+      "sync_now": "Se synchroniser",
       "validate_club": "VALIDER MON CLUB",
       "contact_support": "📩 CONTACTER LE SUPPORT"
     },
@@ -728,7 +730,11 @@
     },
     "confirm_delete": "⚠️ ATTENTION : Cette action est irréversible.\n\nVotre compte ainsi que TOUS vos matchs et tournois seront définitivement supprimés.\n\nVoulez-vous vraiment continuer ?",
     "delete_success": "Compte supprimé avec succès",
-    "delete_error": "Erreur lors de la suppression du compte"
+    "delete_error": "Erreur lors de la suppression du compte",
+    "export_error": "Erreur lors de l'export",
+    "export_success": "Export réussi",
+    "admin_unlink_confirm": "Détacher le club ? (Admin uniquement)",
+    "admin_unlink_success": "Club détaché"
   },
   "tournamentForm": {
     "title": "Informations sur le tournoi",

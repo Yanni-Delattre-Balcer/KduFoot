@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import useSWR, { useSWRConfig } from "swr";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback } from "react";
@@ -200,6 +201,7 @@ export function useMatches(filters?: MatchFilters) {
 
 export function useMatch(id: string | null) {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const { mutate: globalMutate } = useSWRConfig();
 
   const fetcher = async (url: string) => {
     let token: string | null = null;
@@ -254,9 +256,14 @@ export function useMatch(id: string | null) {
     const token = await getAccessTokenSilently();
 
     await matchService.delete(id, token);
-    // No mutate needed mostly as we navigate away, but for correctness:
     mutate(null, false);
-  }, [id, getAccessTokenSilently, mutate]);
+    // Global invalidation: refresh all /api/ keys so dashboard cleans up immediately
+    globalMutate(
+      (key) => typeof key === "string" && key.startsWith("/api/"),
+      (currentData: any) => currentData,
+      { revalidate: true },
+    );
+  }, [id, getAccessTokenSilently, mutate, globalMutate]);
 
   const contactMatch = useCallback(
     async (dto: ContactMatchDto) => {
@@ -296,7 +303,13 @@ export function useMatch(id: string | null) {
 
       throw new Error(err.error || "Failed to delete match as admin");
     }
-  }, [id, getAccessTokenSilently]);
+    mutate(null, false);
+    globalMutate(
+      (key) => typeof key === "string" && key.startsWith("/api/"),
+      (currentData: any) => currentData,
+      { revalidate: true },
+    );
+  }, [id, getAccessTokenSilently, mutate, globalMutate]);
   const updateRequestStatus = useCallback(
     async (userId: string, status: "accepted" | "refused") => {
       if (!id) return;

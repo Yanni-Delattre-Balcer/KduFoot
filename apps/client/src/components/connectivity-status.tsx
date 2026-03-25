@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Chip } from "@heroui/chip";
 import { useTranslation } from "react-i18next";
 

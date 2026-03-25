@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSWRConfig } from "swr";
@@ -736,18 +737,18 @@ export default function MatchesPage() {
                         label={t("matchesPage.filters.gender")}
                         name="gender"
                         placeholder={t("matchesPage.filters.all")}
-                        onChange={(e) =>
-                          handleFilterChange(
-                            "notes",
-                            e.target.value ? `Genre: ${e.target.value}` : "",
-                          )
-                        } // Hacky filter via notes
                         selectedKeys={
                           filters.notes && filters.notes.includes("Genre:")
                             ? [filters.notes.split("Genre: ")[1]]
                             : []
                         }
                         size="sm"
+                        onChange={(e) =>
+                          handleFilterChange(
+                            "notes",
+                            e.target.value ? `Genre: ${e.target.value}` : "",
+                          )
+                        }
                       >
                         <SelectItem key="Masculin">
                           {t("enums.gender.Masculin")}

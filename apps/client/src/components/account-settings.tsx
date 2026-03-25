@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@heroui/button";
 import { addToast } from "@heroui/toast";
 import { Image } from "@heroui/image";
@@ -426,7 +427,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         },
       });
 
-      if (!res.ok) throw new Error("Erreur lors de l'export");
+      if (!res.ok)
+        throw new Error(t("account.export_error", "Erreur lors de l'export"));
       const blob = await res.blob();
       const url = URL.createObjectURL(
         new Blob([blob], { type: "application/pdf" }),
@@ -441,7 +443,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       URL.revokeObjectURL(url);
 
       addToast({
-        title: "Export réussi",
+        title: t("account.export_success", "Export réussi"),
         color: "success",
       });
     } catch (e: any) {
@@ -716,13 +718,21 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
                           variant="flat"
                           onPress={async () => {
                             if (
-                              confirm("Détacher le club ? (Admin uniquement)")
+                              confirm(
+                                t(
+                                  "account.admin_unlink_confirm",
+                                  "Détacher le club ? (Admin uniquement)",
+                                ),
+                              )
                             ) {
                               setIsSaving(true);
                               try {
                                 await unlinkClub();
                                 addToast({
-                                  title: "Club détaché",
+                                  title: t(
+                                    "account.admin_unlink_success",
+                                    "Club détaché",
+                                  ),
                                   color: "success",
                                 });
                               } catch (e: unknown) {

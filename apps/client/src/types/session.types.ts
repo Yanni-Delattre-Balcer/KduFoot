@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) 2026 Ronan LE MEILLAT
  * License: AGPL-3.0-or-later

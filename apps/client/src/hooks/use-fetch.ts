@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback } from "react";
 

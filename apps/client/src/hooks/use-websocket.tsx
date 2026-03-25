@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import { useSWRConfig } from "swr";
 import { addToast, closeAll } from "@heroui/toast";
@@ -574,7 +575,13 @@ export function useWebSocketSync(
                     description: (
                       <div
                         className="cursor-pointer w-full h-full"
+                        role="button"
+                        tabIndex={0}
                         onClick={() => navigate("/dashboard")}
+                        onKeyDown={(e: React.KeyboardEvent) => {
+                          if (e.key === "Enter" || e.key === " ")
+                            navigate("/dashboard");
+                        }}
                       >
                         {description}
                       </div>
@@ -630,7 +637,13 @@ export function useWebSocketSync(
                   description: (
                     <div
                       className="cursor-pointer w-full h-full"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => navigate("/dashboard?tab=requests")}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === "Enter" || e.key === " ")
+                          navigate("/dashboard?tab=requests");
+                      }}
                     >
                       {description}
                     </div>
@@ -684,7 +697,13 @@ export function useWebSocketSync(
                   description: (
                     <div
                       className="cursor-pointer w-full h-full"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => navigate("/dashboard")}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === "Enter" || e.key === " ")
+                          navigate("/dashboard");
+                      }}
                     >
                       {description}
                     </div>
@@ -702,7 +721,13 @@ export function useWebSocketSync(
               description: (
                 <div
                   className="cursor-pointer w-full h-full"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => navigate("/dashboard")}
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === "Enter" || e.key === " ")
+                      navigate("/dashboard");
+                  }}
                 >
                   {description}
                 </div>

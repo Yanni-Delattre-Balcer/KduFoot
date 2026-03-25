@@ -7,6 +7,7 @@ import { Permission } from '../../types/permissions';
 import { checkPermissions } from '../../auth0';
 import { validateClubSiret } from '../../utils/siret.validator';
 import { broadcastDataChanged } from '../../utils/broadcast';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 
 export const setupProfileRoutes = (router: Router, env: Env) => {
@@ -432,8 +433,6 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
         try {
             const data = await userService.exportUserData(user.id);
             const exportData = data as Record<string, unknown>;
-            
-            const { PDFDocument, rgb, StandardFonts } = await import('pdf-lib/dist/pdf-lib.esm.js');
             
             const pdfDoc = await PDFDocument.create();
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);

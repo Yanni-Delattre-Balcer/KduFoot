@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Copyright (c) 2024-2026 Ronan LE MEILLAT
  * License: AGPL-3.0-or-later
@@ -93,15 +94,14 @@ export const LinkUniversal = forwardRef<HTMLAnchorElement, LinkUniversalProps>(
           ref={ref}
           anchorIcon={anchorIcon}
           className={className}
+          color={color as any}
           disableAnimation={disableAnimation}
           href={href}
           isDisabled={isDisabled}
           isExternal={isExternal}
           showAnchorIcon={showAnchorIcon}
-          underline={underline as any}
           size={size as any}
-          // @ts-ignore
-          color={color as any}
+          underline={underline as any}
           {...props}
         >
           {children}

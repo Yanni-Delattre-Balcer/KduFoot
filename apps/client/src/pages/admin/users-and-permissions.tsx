@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @copyright Copyright (c) 2024-2026 Ronan LE MEILLAT (base) / KduFoot adaptation
  * @license AGPL-3.0-or-later
@@ -609,12 +610,9 @@ export default function UsersAndPermissionsPage() {
       setUsers((prev) =>
         prev.map((u) => {
           if (u.user_id !== userId) return u;
-          const prevPerms = u.app_metadata?.permissions || [];
-          let updatedPerms = prevPerms.filter((p) => !toRemove.includes(p));
-
-          toAdd.forEach((newP) => {
-            if (!updatedPerms.includes(newP)) updatedPerms.push(newP);
-          });
+          // Use the complete finalPerms set instead of delta approach
+          // This ensures Free/Premium permissions are always accurately reflected
+          let updatedPerms = [...finalPerms];
 
           // Handle optimistic UI for block state
           let newBlockedState = u.blocked;
