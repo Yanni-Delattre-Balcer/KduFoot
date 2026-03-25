@@ -1,23 +1,25 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import React from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Chip } from "@heroui/chip";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+import { Match } from "@/types/match.types";
+
 interface MyOrganizationsMemoProps {
-  events: any[];
+  events: Match[];
   isLoading?: boolean;
   formatDate: (date: string) => string;
 }
 
-export const MyOrganizationsMemo = ({
+export const MyOrganizationsMemo = React.memo(function MyOrganizationsMemo({
   events,
   isLoading,
   formatDate,
-}: MyOrganizationsMemoProps) => {
+}: MyOrganizationsMemoProps) {
   const { t } = useTranslation();
 
-  const getStatusLabel = (event: any) => {
+  const getStatusLabel = (event: Match) => {
     const eventDate = new Date(
       `${event.match_date}T${event.match_time || "00:00"}:00`,
     );
@@ -30,7 +32,10 @@ export const MyOrganizationsMemo = ({
       };
     }
 
-    if (event.accepted_count >= (event.max_teams || 2)) {
+    if (
+      event.accepted_count !== undefined &&
+      event.accepted_count >= (event.max_teams || 2)
+    ) {
       return {
         label: t("dashboard.status.full", "Complet"),
         color: "warning" as const,
@@ -167,4 +172,4 @@ export const MyOrganizationsMemo = ({
       </CardBody>
     </Card>
   );
-};
+});

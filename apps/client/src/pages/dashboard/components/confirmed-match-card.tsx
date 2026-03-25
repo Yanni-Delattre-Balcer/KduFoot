@@ -1,16 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import React from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Image } from "@heroui/image";
+import { Image as HeroImage } from "@heroui/image";
 import { Progress } from "@heroui/progress";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { JerseyColorDots } from "@/components/jersey-color-dots";
+import { DashboardMatch } from "@/types/match.types";
 
 interface ConfirmedMatchCardProps {
-  match: any;
+  match: DashboardMatch;
   highlighted?: boolean;
   knownData?: {
     date?: string;
@@ -27,7 +28,7 @@ interface ConfirmedMatchCardProps {
   userId?: string;
 }
 
-export const ConfirmedMatchCard = ({
+export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
   match,
   highlighted,
   knownData,
@@ -37,7 +38,7 @@ export const ConfirmedMatchCard = ({
   formatDate,
   formatTime,
   userId,
-}: ConfirmedMatchCardProps) => {
+}: ConfirmedMatchCardProps) {
   const { t } = useTranslation("kdufoot");
 
   const isUserHome = match.isUserHome;
@@ -49,7 +50,7 @@ export const ConfirmedMatchCard = ({
 
   // Surgical Highlights calculation rely on knownData
   const previousState = knownData;
-  const isDifferent = (val1: any, val2: any) => {
+  const isDifferent = (val1: unknown, val2: unknown) => {
     if (!val1 || !val2) return false;
 
     return (
@@ -99,7 +100,7 @@ export const ConfirmedMatchCard = ({
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
                   {opponentClubLogo ? (
-                    <Image
+                    <HeroImage
                       className="object-contain"
                       loading="lazy"
                       src={opponentClubLogo}
@@ -277,7 +278,7 @@ export const ConfirmedMatchCard = ({
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-12 h-12 rounded-full border-2 border-success-500/30 bg-success-500/10 flex items-center justify-center overflow-hidden">
                     {opponentClubLogo ? (
-                      <Image
+                      <HeroImage
                         className="w-full h-full object-contain"
                         src={opponentClubLogo}
                       />
@@ -338,4 +339,4 @@ export const ConfirmedMatchCard = ({
       </CardBody>
     </Card>
   );
-};
+});

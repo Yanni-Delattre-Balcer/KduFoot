@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@heroui/button";
 import { addToast } from "@heroui/toast";
-import { Image } from "@heroui/image";
+import { Image as HeroImage } from "@heroui/image";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import React, { useState, useRef, useEffect, useId } from "react";
@@ -28,7 +27,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const from =
-    searchParams.get("from") || (location.state as { from?: string })?.from;
+    searchParams.get("from") ||
+    (location.state as { from?: string } | null)?.from;
   const { user: authUser, getAccessToken, logout } = useAuth();
   const {
     user: dbUser,
@@ -106,7 +106,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   useEffect(() => {
     if (dbUser && !isInitialized) {
       // Check for local storage data as fallback for missing/incomplete fields
-      let localData: any = {};
+      let localData: Partial<Record<string, string>> = {};
 
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -373,12 +373,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       if (from) {
         navigate(from);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Update profile error:", error);
+      const message = error instanceof Error ? error.message : "";
+
       addToast({
         title: t("error.title"),
         description:
-          error.message ||
+          message ||
           t("accountModal.alerts.update_error", "Erreur de mise à jour"),
         variant: "flat",
         color: "danger",
@@ -409,8 +411,10 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
           color: "success",
         });
         logout({ logoutParams: { returnTo: window.location.origin } });
-      } catch (e: any) {
-        addToast({ title: e.message, color: "danger" });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+
+        addToast({ title: message, color: "danger" });
       } finally {
         setIsDeleting(false);
       }
@@ -602,10 +606,12 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         description: t("account.sync.reset_success"),
         color: "success",
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+
       addToast({
         title: t("account.sync.reset_error"),
-        description: e.message,
+        description: message,
         color: "danger",
       });
     } finally {
@@ -632,7 +638,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       await linkClub(cleanSiret);
       // Clear local storage if we linked a club (this is part of the crucial onboarding data)
       localStorage.removeItem(STORAGE_KEY);
-      await getAccessToken({ cacheMode: "off" } as any);
+      await getAccessToken({ cacheMode: "off" });
       await refetch();
       await mutate("/api/me/context");
       addToast({
@@ -644,10 +650,12 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         variant: "flat",
         color: "success",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+
       addToast({
         title: t("error.title"),
-        description: error.message,
+        description: message,
         variant: "flat",
         color: "danger",
       });
@@ -690,7 +698,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             }
           }}
         >
-          <Image
+          <HeroImage
             alt={authUser.name}
             className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
             src={previewUrl || dbUser?.picture || authUser.picture}

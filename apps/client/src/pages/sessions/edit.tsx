@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Spinner } from "@heroui/spinner";
@@ -9,10 +8,13 @@ import { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Chip } from "@heroui/chip";
 
-import { CreateSessionDto } from "@/types/session.types";
-import { Category, Level } from "@/types/exercise.types";
+import {
+  CreateSessionDto,
+  SessionExercise,
+  UpdateSessionDto,
+} from "@/types/session.types";
+import { Category, Level, Exercise } from "@/types/exercise.types";
 import ExerciseSelector from "@/components/exercise-selector";
-import { SessionExercise } from "@/types/session.types";
 import { useSession, useSessions } from "@/hooks/use-sessions";
 import DefaultLayout from "@/layouts/default";
 
@@ -61,8 +63,7 @@ export default function SessionEditPage() {
     }
   }, [session, isEditing]);
 
-  const handleAddExercises = (newExercises: any[]) => {
-    // Using any[] temporarily, should be Exercise[]
+  const handleAddExercises = (newExercises: Exercise[]) => {
     setSessionExercises((prev) => {
       const currentCount = prev.length;
       const newSessionExercises = newExercises.map(
@@ -72,7 +73,7 @@ export default function SessionEditPage() {
             exercise: ex,
             order_index: currentCount + index,
             duration: parseInt(ex.duration) || 10,
-            players: parseInt(ex.nb_joueurs) || 12, // Default to sensible value or parse ex.nb_joueurs if it's string number
+            players: parseInt(ex.nb_joueurs) || 12,
           }) as SessionExercise,
       );
 
@@ -96,7 +97,10 @@ export default function SessionEditPage() {
     });
   };
 
-  const handleChange = (field: keyof CreateSessionDto, value: any) => {
+  const handleChange = (
+    field: keyof CreateSessionDto | keyof UpdateSessionDto,
+    value: string | number | Category | Level | undefined,
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -116,9 +120,9 @@ export default function SessionEditPage() {
       };
 
       if (isEditing && id) {
-        await updateSession(id, payload as any);
+        await updateSession(id, payload as UpdateSessionDto);
       } else {
-        await createSession(payload as any);
+        await createSession(payload as CreateSessionDto);
       }
       navigate("/sessions");
     } catch (error) {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useMemo } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,6 +7,15 @@ interface BeforeInstallPromptEvent extends Event {
     platform: string;
   }>;
   prompt(): Promise<void>;
+}
+
+declare global {
+  interface Window {
+    deferredPWAInstallPrompt?: BeforeInstallPromptEvent;
+  }
+  interface Navigator {
+    standalone?: boolean;
+  }
 }
 
 export function usePWAInstall() {
@@ -35,7 +43,7 @@ export function usePWAInstall() {
       // Find if already installed
       const isStandaloneMatch =
         window.matchMedia("(display-mode: standalone)").matches ||
-        (window.navigator as any).standalone ||
+        window.navigator.standalone ||
         document.referrer.includes("android-app://");
 
       setIsStandalone(isStandaloneMatch);
@@ -51,17 +59,19 @@ export function usePWAInstall() {
 
     setIsIOS(ios);
 
-    if ((window as any).deferredPWAInstallPrompt) {
-      setDeferredPrompt((window as any).deferredPWAInstallPrompt);
+    if (window.deferredPWAInstallPrompt) {
+      setDeferredPrompt(window.deferredPWAInstallPrompt);
     }
 
     const handler = (e: Event) => {
+      const promptEvent = e as BeforeInstallPromptEvent;
+
       // Avoid redundant updates if we already have the same prompt
-      if ((window as any).deferredPWAInstallPrompt === e) return;
+      if (window.deferredPWAInstallPrompt === promptEvent) return;
 
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      (window as any).deferredPWAInstallPrompt = e;
+      setDeferredPrompt(promptEvent);
+      window.deferredPWAInstallPrompt = promptEvent;
     };
 
     window.addEventListener("beforeinstallprompt", handler);

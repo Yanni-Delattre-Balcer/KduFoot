@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
@@ -28,7 +27,7 @@ export const CalendarSyncBanner: React.FC = () => {
         sessionStorage.getItem("kdufoot-pwa-session-dismiss") === "true";
       const standalone =
         window.matchMedia("(display-mode: standalone)").matches ||
-        (window.navigator as any).standalone;
+        window.navigator.standalone;
 
       if (sess || standalone) {
         setIsStep1Active(false);
@@ -87,13 +86,13 @@ export const CalendarSyncBanner: React.FC = () => {
     setIsSyncing(true);
 
     try {
-      const data = await api.get(
+      const data = await api.get<{ url: string }>(
         "/api/users/me/calendar-link",
         getAccessTokenSilently,
       );
 
-      if (data && (data as any).url) {
-        const url = (data as any).url;
+      if (data && data.url) {
+        const url = data.url;
 
         if (type === "google") {
           const googleUrl = `https://www.google.com/calendar/render?cid=${encodeURIComponent(url.replace(/^webcal:\/\//, "https://"))}`;

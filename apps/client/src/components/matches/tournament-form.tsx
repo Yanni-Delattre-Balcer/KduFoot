@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -16,13 +15,20 @@ import { Progress } from "@heroui/progress";
 import { addToast } from "@heroui/toast";
 
 import { Category } from "@/types/exercise.types";
-import { Level, PitchType } from "@/types/match.types";
+import {
+  Level,
+  PitchType,
+  Match,
+  Format,
+  Venue,
+  CreateMatchDto,
+} from "@/types/match.types";
 import { useUser } from "@/hooks/use-user";
 import { useMatches } from "@/hooks/use-matches";
 import { JerseyColorDots } from "@/components/jersey-color-dots";
 
 interface TournamentFormProps {
-  initialData?: any;
+  initialData?: Match;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -52,9 +58,9 @@ export default function TournamentForm({
     name: "",
     category: Category.SENIORS,
     level: Level.DEPARTEMENTAL_1,
-    format: "11v11" as any,
+    format: "11v11" as Format,
     type: "tournament" as const,
-    venue: "Domicile" as any,
+    venue: "Domicile" as Venue,
     max_teams: "16",
     registration_fee: "0",
     match_date: new Date(
@@ -92,7 +98,7 @@ export default function TournamentForm({
       setFormData({
         name: initialData.name || "",
         category: initialData.category,
-        level: initialData.level,
+        level: initialData.level || Level.DEPARTEMENTAL_1,
         format: initialData.format,
         venue: initialData.venue,
         max_teams: initialData.max_teams?.toString() || "16",
@@ -183,7 +189,10 @@ export default function TournamentForm({
     return formatted;
   };
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (
+    field: string,
+    value: string | number | Format | Venue | Category | Level | PitchType,
+  ) => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
@@ -195,7 +204,10 @@ export default function TournamentForm({
       setErrors((prev) => ({ ...prev, match_date: "" }));
     }
     if (field === "phone") {
-      setFormData((prev) => ({ ...prev, [field]: formatPhoneNumber(value) }));
+      setFormData((prev) => ({
+        ...prev,
+        [field]: formatPhoneNumber(String(value)),
+      }));
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
@@ -285,14 +297,14 @@ export default function TournamentForm({
       };
 
       if (initialData?.id) {
-        await updateMatch(initialData.id, payload as any);
+        await updateMatch(initialData.id, payload as CreateMatchDto);
         addToast({
           title: t("success"),
           description: t("dashboard.alerts.success_discrete"),
           color: "success",
         });
       } else {
-        await createMatch(payload as any);
+        await createMatch(payload as CreateMatchDto);
         addToast({
           title: t("success"),
           description: t("tournamentForm.alerts.create_success"),
@@ -301,10 +313,13 @@ export default function TournamentForm({
       }
 
       if (onSuccess) onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : t("error.save_failed");
+
       addToast({
         title: t("error.title"),
-        description: error.message || t("error.save_failed"),
+        description: message,
         color: "danger",
       });
     } finally {
@@ -334,25 +349,26 @@ export default function TournamentForm({
     }
   };
 
-  const availableClubs = user
-    ? [
-        {
-          id: user.club?.id || "primary",
-          name: user.club?.name || "Club Principal",
-          description: "Club Principal",
-        },
-        ...(user.additional_sirets || []).map((item: any) => {
-          const s = typeof item === "string" ? item : item.siret;
-          const clubInfo = user.additional_clubs?.find((c) => c.siret === s);
+  const availableClubs: { id: string; name: string; description: string }[] =
+    user
+      ? [
+          {
+            id: user.club?.id || "primary",
+            name: user.club?.name || "Club Principal",
+            description: "Club Principal",
+          },
+          ...(user.additional_sirets || []).map((item) => {
+            const s = typeof item === "string" ? item : item.siret;
+            const clubInfo = user.additional_clubs?.find((c) => c.siret === s);
 
-          return {
-            id: clubInfo?.id || s,
-            name: clubInfo?.name || s,
-            description: "Club Secondaire",
-          };
-        }),
-      ]
-    : [];
+            return {
+              id: clubInfo?.id || s,
+              name: clubInfo?.name || s,
+              description: "Club Secondaire",
+            };
+          }),
+        ]
+      : [];
 
   return (
     <form
@@ -447,7 +463,11 @@ export default function TournamentForm({
                           handleChange("club_id", key as string)
                         }
                       >
-                        {(item: any) => (
+                        {(item: {
+                          id: string;
+                          name: string;
+                          description: string;
+                        }) => (
                           <DropdownItem
                             key={item.id}
                             className="text-emerald-900"

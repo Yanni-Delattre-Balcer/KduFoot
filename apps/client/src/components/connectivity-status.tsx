@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Chip } from "@heroui/chip";
 import { useTranslation } from "react-i18next";
 
 import { useUser } from "@/authentication";
 
 export const ConnectivityStatus = () => {
-  const { isOnline, syncStatus, isAuthenticated } = useUser() as any;
+  const { isOnline, syncStatus, isAuthenticated } = useUser();
   const { t } = useTranslation();
 
   // On n'affiche rien si tout va bien

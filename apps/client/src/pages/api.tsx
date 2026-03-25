@@ -29,7 +29,7 @@ export default function ApiPage() {
   const { t } = useTranslation();
   const { getJson } = useSecuredApi();
   const { user, isAuthenticated } = useAuth();
-  const [apiResponse, setApiResponse] = useState("");
+  const [apiResponse, setApiResponse] = useState<unknown>(null);
 
   useEffect(() => {
     const fetchData = async () => {

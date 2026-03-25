@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -6,7 +5,7 @@ import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Image } from "@heroui/image";
+import { Image as HeroImage } from "@heroui/image";
 import {
   Modal,
   ModalContent,
@@ -184,24 +183,33 @@ export default function MatchDetailsPage() {
 
   const cleanNotes = match?.notes?.replace(/Genre: .*(\n|$)/, "").trim();
 
-  const [knownData, setKnownData] = useState<Record<string, any>>(() => {
-    try {
-      const saved = localStorage.getItem("kdufoot_known_match_data");
+  interface KnownMatchData {
+    date?: string;
+    time?: string;
+    venue?: string;
+    pitch?: string;
+    format?: string;
+    category?: string;
+    level?: string;
+    gender?: string;
+  }
 
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+  const [knownData, setKnownData] = useState<Record<string, KnownMatchData>>(
+    () => {
+      try {
+        const saved = localStorage.getItem("kdufoot_known_match_data");
 
-  const isDifferent = (val1: any, val2: any) => {
+        return saved ? JSON.parse(saved) : {};
+      } catch {
+        return {};
+      }
+    },
+  );
+
+  const isDifferent = (val1: unknown, val2: unknown) => {
     if (!val1 || !val2) return false;
-    const s1 = String(val1 || "")
-      .trim()
-      .toLowerCase();
-    const s2 = String(val2 || "")
-      .trim()
-      .toLowerCase();
+    const s1 = String(val1).trim().toLowerCase();
+    const s2 = String(val2).trim().toLowerCase();
 
     return s1 !== s2;
   };
@@ -349,17 +357,15 @@ export default function MatchDetailsPage() {
       navigate("/matches");
     } catch (error) {
       console.error("Failed to delete match", error);
+      const message = error instanceof Error ? error.message : "";
+
       addToast({
         title: t("error.title"),
-        description: t(
-          "error.delete_failed_with_type",
-          match.type === "tournament"
-            ? "Erreur lors de la suppression du tournoi"
-            : "Erreur lors de la suppression du match",
-          {
-            matchType: t("enums.type." + match.type).toLowerCase(),
-          },
-        ),
+        description:
+          message ||
+          t("error.delete_failed_with_type", {
+            matchType: t("enums.type." + (match.type || "match")).toLowerCase(),
+          }),
         color: "danger",
       });
     } finally {
@@ -373,11 +379,13 @@ export default function MatchDetailsPage() {
     try {
       await cancelMatchContact(user.id);
       onCancelOpenChange();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to cancel request", error);
+      const message = error instanceof Error ? error.message : "";
+
       addToast({
         title: t("error.title"),
-        description: error.message || t("match.cancel_error"),
+        description: message || t("match.cancel_error"),
         color: "danger",
       });
     } finally {
@@ -407,11 +415,13 @@ export default function MatchDetailsPage() {
         timeout: 5000,
       });
       navigate("/matches");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Admin delete failed", error);
+      const message = error instanceof Error ? error.message : "";
+
       addToast({
         title: t("error.title"),
-        description: error.message || t("match.admin_delete_error"),
+        description: message || t("match.admin_delete_error"),
         color: "danger",
       });
     } finally {
@@ -431,11 +441,13 @@ export default function MatchDetailsPage() {
         variant: "flat",
         color: "success",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Blocking failed", error);
+      const message = error instanceof Error ? error.message : "";
+
       addToast({
         title: t("error.title"),
-        description: error.message || t("match.block_error"),
+        description: message || t("match.block_error"),
         variant: "flat",
         color: "danger",
       });
@@ -599,7 +611,7 @@ export default function MatchDetailsPage() {
                       <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-xl group-hover:bg-primary/30 transition-all" />
                       {match.club?.logo_url ? (
                         <div className="relative w-32 h-32 bg-[#232120] rounded-3xl p-4 border border-white/5 flex items-center justify-center shadow-2xl">
-                          <Image
+                          <HeroImage
                             alt={match.club.name}
                             className="object-contain"
                             height={100}
@@ -1148,11 +1160,12 @@ export default function MatchDetailsPage() {
                                       color: "success",
                                       timeout: 5000,
                                     });
-                                  } catch (e: any) {
+                                  } catch (e: unknown) {
                                     addToast({
                                       title: t("error.title"),
                                       description:
-                                        e.message || "Erreur lors de l'envoi",
+                                        (e as Error).message ||
+                                        t("error.generic"),
                                       variant: "flat",
                                       color: "danger",
                                       timeout: 5000,
@@ -1249,7 +1262,7 @@ export default function MatchDetailsPage() {
                                 className={`w-14 h-14 rounded-2xl bg-[#000] border border-white/10 flex items-center justify-center text-2xl shadow-inner relative`}
                               >
                                 {contact.club_logo ? (
-                                  <Image
+                                  <HeroImage
                                     className="w-10 h-10 object-contain"
                                     src={contact.club_logo}
                                   />

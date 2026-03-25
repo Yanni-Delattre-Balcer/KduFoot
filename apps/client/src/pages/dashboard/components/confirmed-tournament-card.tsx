@@ -1,18 +1,28 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import React from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Image } from "@heroui/image";
+import { Image as HeroImage } from "@heroui/image";
 import { Progress } from "@heroui/progress";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { JerseyColorDots } from "@/components/jersey-color-dots";
+import { DashboardMatch } from "@/types/match.types";
 
 interface ConfirmedTournamentCardProps {
-  participation: any;
+  participation: DashboardMatch;
   highlighted?: boolean;
-  knownData?: any;
+  knownData?: Record<
+    string,
+    {
+      date?: string;
+      time?: string;
+      venue?: string;
+      format?: string;
+      pitch?: string;
+    }
+  >;
   isTimeChanged?: boolean;
   onMarkAsRead: (matchId: string) => void;
   formatDate: (date: string) => string;
@@ -22,362 +32,372 @@ interface ConfirmedTournamentCardProps {
   userId?: string;
 }
 
-export const ConfirmedTournamentCard = ({
-  participation: part,
-  highlighted,
-  knownData,
-  isTimeChanged,
-  onMarkAsRead,
-  formatDate,
-  formatTime,
-  onWithdraw,
-  isWithdrawing,
-  userId,
-}: ConfirmedTournamentCardProps) => {
-  const { t } = useTranslation("kdufoot");
+export const ConfirmedTournamentCard = React.memo(
+  function ConfirmedTournamentCard({
+    participation: part,
+    highlighted,
+    knownData,
+    isTimeChanged,
+    onMarkAsRead,
+    formatDate,
+    formatTime,
+    onWithdraw,
+    isWithdrawing,
+    userId,
+  }: ConfirmedTournamentCardProps) {
+    const { t } = useTranslation("kdufoot");
 
-  // Use knownData for surgical highlights
-  const previousState = knownData ? knownData[part.match_id] : null;
+    // Use knownData for surgical highlights
+    const previousState = knownData ? knownData[part.match_id] : null;
 
-  const isDifferent = (val1: any, val2: any) => {
-    if (!val1 || !val2) return false;
+    const isDifferent = (val1: unknown, val2: unknown) => {
+      if (!val1 || !val2) return false;
+
+      return (
+        String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase()
+      );
+    };
+
+    const showSurgical = part.notification_state === 1 && previousState;
+    const isDateChanged =
+      showSurgical && isDifferent(previousState?.date, part.match_date);
+    const isNewTimeChanged =
+      isTimeChanged ||
+      (showSurgical && isDifferent(previousState?.time, part.match_time));
+    const isFormatChanged =
+      showSurgical &&
+      isDifferent(previousState?.format, part.match_format || part.format);
+    const isPitchChanged =
+      showSurgical &&
+      isDifferent(
+        previousState?.pitch,
+        part.match_pitch_type || part.opponent_pitch_type || part.pitch_type,
+      );
+
+    // Mock/Real teams logos (limit to 3)
+    const teams = part.accepted_teams || [];
+    const displayTeams = teams.slice(0, 3);
+    const remainingTeamsCount = Math.max(0, part.accepted_count - 3);
+
+    const isModification = part.notification_state === 1;
+    // Role-based overall styling
+    const borderClass = isModification
+      ? highlighted
+        ? "border-danger ring-4 ring-danger/30 shadow-danger/20"
+        : "border-danger/50 bg-zinc-900/90 shadow-danger/10"
+      : "border-violet-500/40 bg-zinc-900/90 shadow-xl hover:shadow-violet-500/20";
+
+    const isOwner = userId === part.owner_id;
 
     return (
-      String(val1).trim().toLowerCase() !== String(val2).trim().toLowerCase()
-    );
-  };
-
-  const showSurgical = part.notification_state === 1 && previousState;
-  const isDateChanged =
-    showSurgical && isDifferent(previousState?.date, part.match_date);
-  const isNewTimeChanged =
-    isTimeChanged ||
-    (showSurgical && isDifferent(previousState?.time, part.match_time));
-  const isFormatChanged =
-    showSurgical &&
-    isDifferent(previousState?.format, part.match_format || part.format);
-  const isPitchChanged =
-    showSurgical &&
-    isDifferent(
-      previousState?.pitch,
-      part.match_pitch_type || part.opponent_pitch_type || part.pitch_type,
-    );
-
-  // Mock/Real teams logos (limit to 3)
-  const teams = part.accepted_teams || [];
-  const displayTeams = teams.slice(0, 3);
-  const remainingTeamsCount = Math.max(0, part.accepted_count - 3);
-
-  const isModification = part.notification_state === 1;
-  // Role-based overall styling
-  const borderClass = isModification
-    ? highlighted
-      ? "border-danger ring-4 ring-danger/30 shadow-danger/20"
-      : "border-danger/50 bg-zinc-900/90 shadow-danger/10"
-    : "border-violet-500/40 bg-zinc-900/90 shadow-xl hover:shadow-violet-500/20";
-
-  const isOwner = userId === part.owner_id;
-
-  return (
-    <Card
-      className={`overflow-hidden border transition-all duration-300 col-span-full ${borderClass} group`}
-      id={`card-${part.match_id}`}
-    >
-      <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50" />
-      <CardBody className="p-0">
-        <div className="flex flex-col 2xl:flex-row">
-          {/* Left Section: Info & Progress */}
-          <div className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
-                  {part.host_club_logo ? (
-                    <Image
-                      className="object-contain"
-                      src={part.host_club_logo}
-                    />
-                  ) : (
-                    <span className="text-white font-black text-2xl">
-                      {(part.host_club_name || part.name || "T").charAt(0)}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
-                    {part.name || part.host_club_name}
-                  </h3>
-                  <p className="text-[10px] sm:text-xs font-bold text-default-400 mt-1 uppercase tracking-wider">
-                    {part.accepted_count || 0}{" "}
-                    {t(
-                      "dashboard.tournament.registered_teams",
-                      "équipes inscrites",
-                    )}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3 mt-2">
-                    <Chip
-                      className="font-black text-[10px] sm:text-xs tracking-wider h-auto py-0.5 whitespace-normal"
-                      color="secondary"
-                      size="sm"
-                      variant="flat"
-                    >
-                      🏆 {t("enums.type.tournament")}
-                    </Chip>
-                    <Chip
-                      className="h-5 text-[9px] font-black shrink-0"
-                      color="warning"
-                      size="sm"
-                      variant="flat"
-                    >
-                      ✈️ {t("dashboard.away_label")}
-                    </Chip>
-                    {(part.host_home_jersey_color ||
-                      part.host_away_jersey_color) && (
-                      <div className="flex gap-2 items-center bg-white/5 px-2 py-0.5 rounded-lg border border-white/10 group-hover:border-violet-500/30 transition-colors">
-                        {part.host_home_jersey_color && (
-                          <JerseyColorDots
-                            colors={part.host_home_jersey_color}
-                            size="sm"
-                          />
-                        )}
-                        {part.host_away_jersey_color && (
-                          <JerseyColorDots
-                            colors={part.host_away_jersey_color}
-                            size="sm"
-                          />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end lg:w-48 shrink-0 flex-col gap-2">
-                <Chip
-                  className="font-black text-xs sm:text-sm py-3 shadow-lg shadow-emerald-500/20 w-full"
-                  color="success"
-                  size="sm"
-                  variant="solid"
-                >
-                  {t("dashboard.status.accepted")}
-                </Chip>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div
-                className={`rounded-xl p-3 border transition-colors ${isDateChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
-              >
-                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("matchForm.labels.date", "Date")}
-                </p>
-                <p
-                  className={`text-sm font-bold ${isDateChanged || highlighted ? "text-danger" : "text-white"}`}
-                >
-                  {formatDate(part.match_date)}
-                </p>
-              </div>
-              <div
-                className={`rounded-xl p-3 border transition-colors ${highlighted || isNewTimeChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : "bg-white/5 border-white/5"}`}
-              >
-                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("matchForm.labels.time", "Heure")}
-                </p>
-                <p
-                  className={`text-sm font-bold ${highlighted || isNewTimeChanged ? "text-danger" : "text-white"}`}
-                >
-                  {formatTime(part.match_time)}
-                </p>
-              </div>
-              <div
-                className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
-              >
-                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("matchForm.labels.format", "Format")}
-                </p>
-                <Chip
-                  className="font-black text-xs border-none p-0"
-                  color={isFormatChanged || highlighted ? "danger" : "primary"}
-                  size="sm"
-                  variant="dot"
-                >
-                  {
-                    t(
-                      "enums.format." +
-                        (part.match_format || part.format || "5v5"),
-                      part.match_format || part.format || "5v5",
-                    ) as string
-                  }
-                </Chip>
-              </div>
-              <div
-                className={`rounded-xl p-3 border transition-colors ${highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
-              >
-                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("tournamentForm.labels.fee", "Frais")}
-                </p>
-                <p
-                  className={`text-sm font-bold ${highlighted ? "text-danger" : "text-green-400"}`}
-                >
-                  {part.entry_fee
-                    ? `${part.entry_fee}€`
-                    : t("matchForm.labels.free", "Gratuit")}
-                </p>
-              </div>
-              <div
-                className={`rounded-xl p-3 border transition-colors col-span-2 sm:col-span-1 ${isPitchChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
-              >
-                <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
-                  {t("matchForm.labels.pitch_type", "Terrain")}
-                </p>
-                <p
-                  className={`text-sm font-bold ${isPitchChanged || highlighted ? "text-danger" : "text-white"}`}
-                >
-                  {part.match_pitch_type ||
-                  part.opponent_pitch_type ||
-                  part.pitch_type
-                    ? t(
-                        `enums.pitch.${part.match_pitch_type || part.opponent_pitch_type || part.pitch_type}`,
-                      )
-                    : "—"}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between items-end">
-                <p className="text-sm font-black text-violet-400 tracking-widest">
-                  {t("dashboard.tournament.filling", "Remplissage du tournoi")}
-                </p>
-                <p className="text-xs font-bold text-white">
-                  {(part.accepted_count || 0) + 1} / {part.max_teams || "∞"}
-                </p>
-              </div>
-              <Progress
-                aria-label={t(
-                  "dashboard.tournament.filling",
-                  "Remplissage du tournoi",
-                )}
-                className="max-w-md"
-                classNames={{
-                  indicator: "bg-linear-to-r from-violet-500 to-indigo-500",
-                }}
-                color="secondary"
-                size="md"
-                value={
-                  part.max_teams
-                    ? (((part.accepted_count || 0) + 1) / part.max_teams) * 100
-                    : 100
-                }
-              />
-            </div>
-          </div>
-
-          {/* Right Section: Teams & Actions */}
-          <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
-            <div className="mb-6">
-              <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-3">
-                {t(
-                  "dashboard.tournament.registered_teams",
-                  "Équipes inscrites",
-                )}
-              </p>
-              <div className="flex items-center -space-x-3">
-                {displayTeams.map((team: any, i: number) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]"
-                  >
-                    {team.logo_url ? (
-                      <Image loading="lazy" src={team.logo_url} />
+      <Card
+        className={`overflow-hidden border transition-all duration-300 col-span-full ${borderClass} group`}
+        id={`card-${part.match_id}`}
+      >
+        <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50" />
+        <CardBody className="p-0">
+          <div className="flex flex-col 2xl:flex-row">
+            {/* Left Section: Info & Progress */}
+            <div className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
+                    {part.host_club_logo ? (
+                      <HeroImage
+                        className="object-contain"
+                        src={part.host_club_logo}
+                      />
                     ) : (
-                      <span className="text-xs sm:text-sm font-black">
-                        {team.name?.charAt(0)}
+                      <span className="text-white font-black text-2xl">
+                        {(part.host_club_name || part.name || "T").charAt(0)}
                       </span>
                     )}
                   </div>
-                ))}
-                {remainingTeamsCount > 0 && (
-                  <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-violet-500 flex items-center justify-center z-[1]">
-                    <span className="text-xs sm:text-sm font-black text-white">
-                      +{remainingTeamsCount}
-                    </span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
+                      {part.name || part.host_club_name}
+                    </h3>
+                    <p className="text-[10px] sm:text-xs font-bold text-default-400 mt-1 uppercase tracking-wider">
+                      {part.accepted_count || 0}{" "}
+                      {t(
+                        "dashboard.tournament.registered_teams",
+                        "équipes inscrites",
+                      )}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 mt-2">
+                      <Chip
+                        className="font-black text-[10px] sm:text-xs tracking-wider h-auto py-0.5 whitespace-normal"
+                        color="secondary"
+                        size="sm"
+                        variant="flat"
+                      >
+                        🏆 {t("enums.type.tournament")}
+                      </Chip>
+                      <Chip
+                        className="h-5 text-[9px] font-black shrink-0"
+                        color="warning"
+                        size="sm"
+                        variant="flat"
+                      >
+                        ✈️ {t("dashboard.away_label")}
+                      </Chip>
+                      {(part.host_home_jersey_color ||
+                        part.host_away_jersey_color) && (
+                        <div className="flex gap-2 items-center bg-white/5 px-2 py-0.5 rounded-lg border border-white/10 group-hover:border-violet-500/30 transition-colors">
+                          {part.host_home_jersey_color && (
+                            <JerseyColorDots
+                              colors={part.host_home_jersey_color}
+                              size="sm"
+                            />
+                          )}
+                          {part.host_away_jersey_color && (
+                            <JerseyColorDots
+                              colors={part.host_away_jersey_color}
+                              size="sm"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-                {part.accepted_count === 0 && (
-                  <p className="text-sm text-default-400 italic">
+                </div>
+                <div className="flex justify-end lg:w-48 shrink-0 flex-col gap-2">
+                  <Chip
+                    className="font-black text-xs sm:text-sm py-3 shadow-lg shadow-emerald-500/20 w-full"
+                    color="success"
+                    size="sm"
+                    variant="solid"
+                  >
+                    {t("dashboard.status.accepted")}
+                  </Chip>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div
+                  className={`rounded-xl p-3 border transition-colors ${isDateChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
+                >
+                  <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
+                    {t("matchForm.labels.date", "Date")}
+                  </p>
+                  <p
+                    className={`text-sm font-bold ${isDateChanged || highlighted ? "text-danger" : "text-white"}`}
+                  >
+                    {formatDate(part.match_date)}
+                  </p>
+                </div>
+                <div
+                  className={`rounded-xl p-3 border transition-colors ${highlighted || isNewTimeChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : "bg-white/5 border-white/5"}`}
+                >
+                  <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
+                    {t("matchForm.labels.time", "Heure")}
+                  </p>
+                  <p
+                    className={`text-sm font-bold ${highlighted || isNewTimeChanged ? "text-danger" : "text-white"}`}
+                  >
+                    {formatTime(part.match_time)}
+                  </p>
+                </div>
+                <div
+                  className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
+                >
+                  <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
+                    {t("matchForm.labels.format", "Format")}
+                  </p>
+                  <Chip
+                    className="font-black text-xs border-none p-0"
+                    color={
+                      isFormatChanged || highlighted ? "danger" : "primary"
+                    }
+                    size="sm"
+                    variant="dot"
+                  >
+                    {
+                      t(
+                        "enums.format." +
+                          (part.match_format || part.format || "5v5"),
+                        part.match_format || part.format || "5v5",
+                      ) as string
+                    }
+                  </Chip>
+                </div>
+                <div
+                  className={`rounded-xl p-3 border transition-colors ${highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
+                >
+                  <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
+                    {t("tournamentForm.labels.fee", "Frais")}
+                  </p>
+                  <p
+                    className={`text-sm font-bold ${highlighted ? "text-danger" : "text-green-400"}`}
+                  >
+                    {part.entry_fee
+                      ? `${part.entry_fee}€`
+                      : t("matchForm.labels.free", "Gratuit")}
+                  </p>
+                </div>
+                <div
+                  className={`rounded-xl p-3 border transition-colors col-span-2 sm:col-span-1 ${isPitchChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
+                >
+                  <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
+                    {t("matchForm.labels.pitch_type", "Terrain")}
+                  </p>
+                  <p
+                    className={`text-sm font-bold ${isPitchChanged || highlighted ? "text-danger" : "text-white"}`}
+                  >
+                    {part.match_pitch_type ||
+                    part.opponent_pitch_type ||
+                    part.pitch_type
+                      ? t(
+                          `enums.pitch.${part.match_pitch_type || part.opponent_pitch_type || part.pitch_type}`,
+                        )
+                      : "—"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-end">
+                  <p className="text-sm font-black text-violet-400 tracking-widest">
                     {t(
-                      "dashboard.tournament.waiting_teams",
-                      "En attente d'équipes...",
+                      "dashboard.tournament.filling",
+                      "Remplissage du tournoi",
                     )}
                   </p>
-                )}
+                  <p className="text-xs font-bold text-white">
+                    {(part.accepted_count || 0) + 1} / {part.max_teams || "∞"}
+                  </p>
+                </div>
+                <Progress
+                  aria-label={t(
+                    "dashboard.tournament.filling",
+                    "Remplissage du tournoi",
+                  )}
+                  className="max-w-md"
+                  classNames={{
+                    indicator: "bg-linear-to-r from-violet-500 to-indigo-500",
+                  }}
+                  color="secondary"
+                  size="md"
+                  value={
+                    part.max_teams
+                      ? (((part.accepted_count || 0) + 1) / part.max_teams) *
+                        100
+                      : 100
+                  }
+                />
               </div>
             </div>
 
-            <div className="space-y-3">
-              {isModification && (
-                <Button
-                  className="font-black text-[11px] w-full animate-pulse shadow-lg shadow-danger/20 h-11"
-                  color="danger"
-                  size="sm"
-                  variant="solid"
-                  onPress={() => onMarkAsRead(part.match_id)}
-                >
+            {/* Right Section: Teams & Actions */}
+            <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
+              <div className="mb-6">
+                <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-3">
                   {t(
-                    "dashboard.controls.view_changes",
-                    "J'ai vu les changements",
+                    "dashboard.tournament.registered_teams",
+                    "Équipes inscrites",
                   )}
-                </Button>
-              )}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  as={Link}
-                  className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 bg-white/5"
-                  color="default"
-                  size="sm"
-                  to={`/matches/${part.match_id}`}
-                  variant="flat"
-                >
-                  {t("dashboard.controls.view")}
-                </Button>
-                <Button
-                  as="a"
-                  className="flex-1 min-w-[120px] font-black text-[10px] h-12 active:scale-95 shadow-sm"
-                  color="primary"
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${part.opponent_stadium_address || part.location_address || part.host_stadium_address}, ${part.opponent_city || part.location_city || part.host_city}`)}`}
-                  rel="noopener noreferrer"
-                  size="sm"
-                  target="_blank"
-                  variant="flat"
-                >
-                  {t("dashboard.controls.itinerary")}
-                </Button>
-                <Button
-                  as="a"
-                  className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 shadow-md shadow-violet-500/20"
-                  color="secondary"
-                  href={`tel:${part.host_phone || part.opponent_phone}`}
-                  size="sm"
-                  variant="solid"
-                >
-                  {t("dashboard.controls.contact")}
-                </Button>
-                {onWithdraw && !isOwner && (
+                </p>
+                <div className="flex items-center -space-x-3">
+                  {displayTeams.map(
+                    (team: { logo_url?: string; name?: string }, i: number) => (
+                      <div
+                        key={i}
+                        className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]"
+                      >
+                        {team.logo_url ? (
+                          <HeroImage loading="lazy" src={team.logo_url} />
+                        ) : (
+                          <span className="text-xs sm:text-sm font-black">
+                            {team.name?.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                    ),
+                  )}
+                  {remainingTeamsCount > 0 && (
+                    <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-violet-500 flex items-center justify-center z-[1]">
+                      <span className="text-xs sm:text-sm font-black text-white">
+                        +{remainingTeamsCount}
+                      </span>
+                    </div>
+                  )}
+                  {part.accepted_count === 0 && (
+                    <p className="text-sm text-default-400 italic">
+                      {t(
+                        "dashboard.tournament.waiting_teams",
+                        "En attente d'équipes...",
+                      )}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {isModification && (
                   <Button
-                    className="flex-1 min-w-[120px] font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10"
+                    className="font-black text-[11px] w-full animate-pulse shadow-lg shadow-danger/20 h-11"
                     color="danger"
-                    isLoading={isWithdrawing}
                     size="sm"
-                    variant="light"
-                    onPress={onWithdraw}
+                    variant="solid"
+                    onPress={() => onMarkAsRead(part.match_id)}
                   >
-                    {t("match.withdraw_tournament")}
+                    {t(
+                      "dashboard.controls.view_changes",
+                      "J'ai vu les changements",
+                    )}
                   </Button>
                 )}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    as={Link}
+                    className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 bg-white/5"
+                    color="default"
+                    size="sm"
+                    to={`/matches/${part.match_id}`}
+                    variant="flat"
+                  >
+                    {t("dashboard.controls.view")}
+                  </Button>
+                  <Button
+                    as="a"
+                    className="flex-1 min-w-[120px] font-black text-[10px] h-12 active:scale-95 shadow-sm"
+                    color="primary"
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${part.opponent_stadium_address || part.location_address || part.host_stadium_address}, ${part.opponent_city || part.location_city || part.host_city}`)}`}
+                    rel="noopener noreferrer"
+                    size="sm"
+                    target="_blank"
+                    variant="flat"
+                  >
+                    {t("dashboard.controls.itinerary")}
+                  </Button>
+                  <Button
+                    as="a"
+                    className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 shadow-md shadow-violet-500/20"
+                    color="secondary"
+                    href={`tel:${part.host_phone || part.opponent_phone}`}
+                    size="sm"
+                    variant="solid"
+                  >
+                    {t("dashboard.controls.contact")}
+                  </Button>
+                  {onWithdraw && !isOwner && (
+                    <Button
+                      className="flex-1 min-w-[120px] font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10"
+                      color="danger"
+                      isLoading={isWithdrawing}
+                      size="sm"
+                      variant="light"
+                      onPress={onWithdraw}
+                    >
+                      {t("match.withdraw_tournament")}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </CardBody>
-    </Card>
-  );
-};
+        </CardBody>
+      </Card>
+    );
+  },
+);

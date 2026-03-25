@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Spinner } from "@heroui/spinner";
@@ -50,7 +49,7 @@ export default function ExerciseEditPage() {
         synopsis: exercise.synopsis,
         themes: Array.isArray(exercise.themes)
           ? exercise.themes
-          : [exercise.themes as any],
+          : [exercise.themes as unknown as Theme],
         category: exercise.category,
         level: exercise.level,
         nb_joueurs: exercise.nb_joueurs,
@@ -64,7 +63,10 @@ export default function ExerciseEditPage() {
     }
   }, [exercise, isEditing]);
 
-  const handleChange = (field: keyof CreateExerciseDto, value: any) => {
+  const handleChange = (
+    field: keyof CreateExerciseDto,
+    value: CreateExerciseDto[keyof CreateExerciseDto],
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -73,9 +75,9 @@ export default function ExerciseEditPage() {
     setIsSaving(true);
     try {
       if (isEditing && id) {
-        await updateExercise(id, formData as any); // Type assertion for now due to partial
+        await updateExercise(id, formData);
       } else {
-        await createExercise(formData as any);
+        await createExercise(formData as CreateExerciseDto);
       }
       navigate("/exercises");
     } catch (error) {
@@ -153,7 +155,7 @@ export default function ExerciseEditPage() {
                 selectedKeys={new Set(formData.themes || [])}
                 selectionMode="multiple"
                 onSelectionChange={(keys) =>
-                  handleChange("themes", Array.from(keys))
+                  handleChange("themes", Array.from(keys) as Theme[])
                 }
               >
                 {Object.values(Theme).map((thm) => (

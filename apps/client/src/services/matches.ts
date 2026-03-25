@@ -1,4 +1,7 @@
 import {
+  Match,
+  MatchRequest,
+  MatchParticipation,
   CreateMatchDto,
   UpdateMatchDto,
   MatchFilters,
@@ -18,7 +21,7 @@ export const matchService = {
     return `${BASE_URL}?${query.toString()}`;
   },
 
-  create: async (data: CreateMatchDto, token: string) => {
+  create: async (data: CreateMatchDto, token: string): Promise<Match> => {
     const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}`, {
       method: "POST",
       headers: {
@@ -43,7 +46,11 @@ export const matchService = {
     return response.json();
   },
 
-  update: async (id: string, data: UpdateMatchDto, token: string) => {
+  update: async (
+    id: string,
+    data: UpdateMatchDto,
+    token: string,
+  ): Promise<Match> => {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}${BASE_URL}/${id}`,
       {
@@ -123,7 +130,7 @@ export const matchService = {
     return response.json();
   },
 
-  getRequests: async (token: string) => {
+  getRequests: async (token: string): Promise<{ requests: MatchRequest[] }> => {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}${BASE_URL}/requests`,
       {
@@ -147,7 +154,9 @@ export const matchService = {
     return response.json();
   },
 
-  getParticipations: async (token: string) => {
+  getParticipations: async (
+    token: string,
+  ): Promise<{ participations: MatchParticipation[] }> => {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}${BASE_URL}/participations`,
       {

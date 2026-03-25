@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import useSWR, { useSWRConfig } from "swr";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback } from "react";
@@ -6,10 +5,15 @@ import { useCallback } from "react";
 import { sessionService } from "../services/sessions";
 import {
   TrainingSession,
+  SessionExercise,
   CreateSessionDto,
   UpdateSessionDto,
   SessionFilters,
 } from "../types/session.types";
+
+interface FetchError extends Error {
+  status?: number;
+}
 
 export function useSessions(filters?: SessionFilters) {
   const { getAccessTokenSilently } = useAuth0();
@@ -21,7 +25,15 @@ export function useSessions(filters?: SessionFilters) {
    *
    * The fetcher function is responsible for the actual network request.
    */
-  const fetcher = async (url: string) => {
+  const fetcher = async (
+    url: string,
+  ): Promise<{
+    data?: TrainingSession[];
+    sessions?: TrainingSession[];
+    total?: number;
+    nextCursor?: string | null;
+    hasMore?: boolean;
+  }> => {
     // We get a fresh security token from Auth0 to prove the user is logged in
     const token = await getAccessTokenSilently();
     const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
@@ -29,10 +41,12 @@ export function useSessions(filters?: SessionFilters) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
       const error = new Error(
         errorData.error || "Failed to fetch sessions",
-      ) as any;
+      ) as FetchError;
 
       error.status = response.status;
       throw error;
@@ -70,7 +84,7 @@ export function useSessions(filters?: SessionFilters) {
       // Global invalidation just in case
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: any) => currentData,
+        (currentData: unknown) => currentData,
         { revalidate: true },
       );
     },
@@ -98,15 +112,12 @@ export function useSessions(filters?: SessionFilters) {
   );
 
   return {
-    sessions:
-      (data?.data as TrainingSession[]) ??
-      (data?.sessions as TrainingSession[]) ??
-      [],
-    nextCursor: (data?.nextCursor as string | null) ?? null,
-    hasMore: (data?.hasMore as boolean) ?? false,
-    total: (data?.total as number) ?? 0,
+    sessions: data?.data ?? data?.sessions ?? [],
+    nextCursor: data?.nextCursor ?? null,
+    hasMore: data?.hasMore ?? false,
+    total: data?.total ?? 0,
     isLoading,
-    isError: error,
+    isError: error as FetchError | undefined,
     createSession,
     updateSession,
     deleteSession,
@@ -116,17 +127,21 @@ export function useSessions(filters?: SessionFilters) {
 export function useSession(id: string | null) {
   const { getAccessTokenSilently } = useAuth0();
 
-  const fetcher = async (url: string) => {
+  const fetcher = async (
+    url: string,
+  ): Promise<{ session: TrainingSession; exercises: SessionExercise[] }> => {
     const token = await getAccessTokenSilently();
     const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
       const error = new Error(
         errorData.error || "Failed to fetch session",
-      ) as any;
+      ) as FetchError;
 
       error.status = response.status;
       throw error;
@@ -142,8 +157,8 @@ export function useSession(id: string | null) {
 
   return {
     session: data?.session as TrainingSession,
-    exercises: data?.exercises as any[], // Using any[] for now or SessionExercise[]
+    exercises: data?.exercises ?? [],
     isLoading,
-    isError: error,
+    isError: error as FetchError | undefined,
   };
 }

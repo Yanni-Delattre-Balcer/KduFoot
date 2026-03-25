@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import {
   Modal,
@@ -34,13 +33,13 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
     setIsSyncing(true);
 
     try {
-      const data = await api.get(
+      const data = await api.get<{ url: string }>(
         "/api/users/me/calendar-link",
         getAccessTokenSilently,
       );
 
-      if (data && (data as any).url) {
-        const rawUrl = (data as any).url;
+      if (data && data.url) {
+        const rawUrl = data.url;
 
         if (isAndroid) {
           // Android: Use Google Calendar subscription URL which triggers the app chooser

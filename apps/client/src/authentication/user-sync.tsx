@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef } from "react";
 
 import { useAuth } from "./providers/use-auth";
@@ -13,8 +12,11 @@ export const UserSync = () => {
 
       syncedRef.current = currentSub;
 
-      postJson(`${import.meta.env.API_BASE_URL}/api/users/sync`, user)
-        .then(async (res: any) => {
+      postJson<{ success: boolean; error?: string }>(
+        `${import.meta.env.API_BASE_URL}/api/users/sync`,
+        user,
+      )
+        .then(async (res) => {
           if (res.success) {
             const { mutate } = await import("swr");
 
@@ -24,7 +26,7 @@ export const UserSync = () => {
             // Don't reset immediately to avoid infinite loop on persistent errors
           }
         })
-        .catch((err: any) => {
+        .catch((err: unknown) => {
           console.error("User sync failed", err);
           // If we fail, we don't want to loop. We'll let the next mount or user change deal with it.
           // Or we could implement a backoff. For now, just logging is safer.

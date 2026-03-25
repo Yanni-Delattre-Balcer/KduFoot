@@ -1,0 +1,15 @@
+npm warn config ignoring workspace config at C:\Users\yanni\Desktop\Development\projet_philippe\apps\client/.npmrc
+
+> @kdufoot/client@0.0.0 type-check
+> tsc --noEmit
+
+src/authentication/providers/auth0-provider.tsx(47,11): error TS2698: Spread types may only be created from object types.
+src/components/session-card.tsx(8,10): error TS2305: Module '"@/types/session.types"' has no exported member 'Session'.
+src/pages/api.tsx(42,26): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SetStateAction<string>'.
+npm error Lifecycle script `type-check` failed with error:
+npm error code 2
+npm error path C:\Users\yanni\Desktop\Development\projet_philippe\apps\client
+npm error workspace @kdufoot/client@0.0.0
+npm error location C:\Users\yanni\Desktop\Development\projet_philippe\apps\client
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c tsc --noEmit

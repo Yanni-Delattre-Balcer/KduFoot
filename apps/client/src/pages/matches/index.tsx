@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSWRConfig } from "swr";
 import { addToast } from "@heroui/toast";
-import { Card, CardBody, CardHeader, CardFooter } from "@heroui/card";
+import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Chip } from "@heroui/chip";
 import { Select, SelectItem } from "@heroui/select";
 import { Input } from "@heroui/input";
@@ -21,7 +20,10 @@ import {
   Venue,
   MatchFilters,
   Level,
+  Match,
 } from "../../types/match.types";
+
+import { MatchCard } from "@/components/matches/match-card";
 
 const CATEGORIES = Object.values(Category);
 const LEVELS = Object.values(Level);
@@ -145,12 +147,12 @@ export default function MatchesPage() {
 
   // Build filters with user coordinates when radius is active
   const effectiveFilters = useMemo(() => {
-    const f = { ...filters, type };
+    const f: MatchFilters = { ...filters, type };
 
     if (radiusKm > 0 && user?.club?.latitude && user?.club?.longitude) {
-      (f as any).radius_km = radiusKm;
-      (f as any).user_lat = user.club.latitude;
-      (f as any).user_lng = user.club.longitude;
+      f.radius_km = radiusKm;
+      f.user_lat = user.club.latitude;
+      f.user_lng = user.club.longitude;
     }
 
     return f;
@@ -160,7 +162,7 @@ export default function MatchesPage() {
   const { mutate: globalMutate } = useSWRConfig();
 
   // ─── Surgical Highlight Logic ──────────────────────────────────────────
-  const [acceptedMatches, setAcceptedMatches] = useState<Record<string, any>>(
+  const [acceptedMatches, setAcceptedMatches] = useState<Record<string, Match>>(
     () => {
       try {
         const saved = localStorage.getItem(
@@ -175,7 +177,7 @@ export default function MatchesPage() {
   );
 
   const handleAcceptChanges = useCallback(
-    (match: any) => {
+    (match: Match) => {
       setAcceptedMatches((prev) => {
         const next = { ...prev, [match.id]: { ...match } };
 
@@ -193,14 +195,14 @@ export default function MatchesPage() {
   );
 
   const getDiff = useCallback(
-    (currentMatch: any) => {
+    (currentMatch: Match) => {
       const accepted = acceptedMatches[currentMatch.id];
 
       if (!accepted) return {};
 
       const diff: Record<string, boolean> = {};
       // Liste des champs critiques à surveiller pour le surlignage rouge
-      const fieldsToCompare = [
+      const fieldsToCompare: (keyof Match)[] = [
         "match_date",
         "match_time",
         "venue",
@@ -239,7 +241,7 @@ export default function MatchesPage() {
       try {
         const token = await getAccessToken({
           authorizationParams: { audience: import.meta.env.AUTH0_AUDIENCE },
-        } as any);
+        });
         const res = await fetch(
           `${import.meta.env.API_BASE_URL}/api/admin/matches/${matchId}`,
           {
@@ -273,10 +275,12 @@ export default function MatchesPage() {
           undefined,
           { revalidate: true },
         );
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+
         addToast({
           title: t("error.title"),
-          description: err.message,
+          description: message,
           variant: "solid",
           color: "danger",
           timeout: 5000,
@@ -1139,7 +1143,7 @@ export default function MatchesPage() {
                         status={isError.status || 500}
                         onRetry={() =>
                           globalMutate(
-                            (key: any) =>
+                            (key: unknown) =>
                               typeof key === "string" &&
                               key.includes("/api/matches"),
                           )
@@ -1172,284 +1176,20 @@ export default function MatchesPage() {
                         const hasChanges = Object.keys(diff).length > 0;
 
                         return (
-                          <Card
+                          <MatchCard
                             key={match.id}
-                            className={`group hover:shadow-lg transition-all border ${hasChanges ? "border-red-500/50 shadow-red-500/10" : "border-violet-800/50"} hover:border-violet-500/40 bg-[#232120] ${user?.id === match.owner_id ? "ring-2 ring-violet-500 shadow-violet-500/20" : ""}`}
-                          >
-                            <CardHeader className="pb-2 pt-4 px-4 flex-col items-start gap-1 relative">
-                              {user?.id === match.owner_id && (
-                                <div className="absolute top-2 right-2 flex items-center gap-1 bg-linear-to-r from-violet-600 to-amber-700 text-white text-xs sm:text-sm font-bold px-2 py-0.5 rounded-full shadow-lg">
-                                  <svg
-                                    className="w-3 h-3"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      clipRule="evenodd"
-                                      d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-                                      fillRule="evenodd"
-                                    />
-                                  </svg>
-                                  {t("matchesPage.my_creation")}
-                                </div>
-                              )}
-                              <div className="flex flex-col w-full">
-                                <h4
-                                  className={`font-bold text-xl ${diff.name ? "text-red-500" : "text-default-900"} group-hover:text-violet-200 transition-colors tracking-tight break-words whitespace-normal w-full`}
-                                >
-                                  {isMasked
-                                    ? t("matchesPage.masked_club")
-                                    : match.club?.name ||
-                                      t("matchesPage.unknown_club")}
-                                </h4>
-                                {match.type === "tournament" && match.name && (
-                                  <h5
-                                    className={`font-bold text-sm ${diff.name ? "text-red-400" : "text-fuchsia-400"} group-hover:text-fuchsia-300 transition-colors break-words whitespace-normal w-full pb-1`}
-                                  >
-                                    {match.name}
-                                  </h5>
-                                )}
-                                <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                  <Chip
-                                    className="h-4 text-[9px] font-bold"
-                                    color="default"
-                                    size="sm"
-                                    variant="flat"
-                                  >
-                                    {match.type === "tournament" ? "🏆" : "⚽"}{" "}
-                                    {t(`enums.type.${match.type}`)}
-                                  </Chip>
-                                  {match.type === "tournament" &&
-                                    match.registration_fee !== undefined &&
-                                    match.registration_fee !== null && (
-                                      <Chip
-                                        className="h-4 text-[9px] font-bold"
-                                        color={
-                                          diff.registration_fee
-                                            ? "danger"
-                                            : "success"
-                                        }
-                                        size="sm"
-                                        variant="flat"
-                                      >
-                                        {match.registration_fee > 0
-                                          ? `${match.registration_fee} €`
-                                          : t("matchForm.labels.free")}
-                                      </Chip>
-                                    )}
-                                  <Chip
-                                    className="h-4 text-[9px] font-black"
-                                    color={
-                                      diff.category || diff.level
-                                        ? "danger"
-                                        : "warning"
-                                    }
-                                    size="sm"
-                                    variant="flat"
-                                  >
-                                    {t(`enums.category.${match.category}`)}{" "}
-                                    {match.level
-                                      ? `• ${t(`enums.level.${match.level}`)}`
-                                      : ""}
-                                  </Chip>
-                                  <Chip
-                                    className="h-4 text-[9px] font-black"
-                                    color={
-                                      diff.pitch_type ? "danger" : "primary"
-                                    }
-                                    size="sm"
-                                    variant="flat"
-                                  >
-                                    🏟️ {t(`enums.pitch.${match.pitch_type}`)}
-                                  </Chip>
-                                  <Chip
-                                    className="h-4 text-[9px] font-black"
-                                    color={diff.venue ? "danger" : "secondary"}
-                                    size="sm"
-                                    variant="flat"
-                                  >
-                                    {match.venue === "Domicile"
-                                      ? t("badges.venue.home")
-                                      : t("badges.venue.away")}
-                                  </Chip>
-                                </div>
-                                <p
-                                  className={`text-small ${diff.location_city ? "text-red-500 font-bold" : "text-default-500"} font-medium`}
-                                >
-                                  {isMasked
-                                    ? t("matchesPage.masked_city")
-                                    : `${match.location_city || match.club?.city} (${match.location_zip || match.club?.zip})`}
-                                </p>
-                              </div>
-                            </CardHeader>
-                            <CardBody className="py-2 px-4 gap-3">
-                              {/* Date & Time Row - Simplified */}
-                              <div
-                                className={`flex flex-wrap items-center gap-2 sm:gap-4 text-sm ${diff.match_date || diff.match_time ? "text-red-500 bg-red-500/10 border border-red-500/20" : "text-default-600 bg-default-50"} p-2 rounded-lg justify-center transition-colors`}
-                              >
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  <svg
-                                    className={`w-4 h-4 ${diff.match_date ? "text-red-500" : "text-violet-200"}`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth={1.5}
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                  <span
-                                    className={`font-semibold capitalize text-xs sm:text-sm ${diff.match_date ? "animate-pulse" : ""}`}
-                                  >
-                                    {new Date(
-                                      match.match_date,
-                                    ).toLocaleDateString(i18n.language, {
-                                      weekday: "short",
-                                      day: "numeric",
-                                      month: "short",
-                                    })}
-                                  </span>
-                                </div>
-                                <div
-                                  className={`hidden sm:block w-px h-4 ${diff.match_date || diff.match_time ? "bg-red-500/30" : "bg-default-300"}`}
-                                />
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  <svg
-                                    className={`w-4 h-4 ${diff.match_time ? "text-red-500" : "text-violet-200"}`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth={1.5}
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                  <span
-                                    className={`font-semibold text-xs sm:text-sm ${diff.match_time ? "animate-pulse" : ""}`}
-                                  >
-                                    {match.match_time}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {match.distance_km != null && (
-                                <div className="flex justify-center">
-                                  <Chip
-                                    className="h-5 text-xs sm:text-sm"
-                                    color="primary"
-                                    size="sm"
-                                    variant="flat"
-                                  >
-                                    {match.distance_approximate ? "~" : ""}
-                                    {match.distance_km} km
-                                  </Chip>
-                                </div>
-                              )}
-                            </CardBody>
-                            <CardFooter className="px-4 pb-4 flex flex-col gap-2">
-                              {hasChanges && (
-                                <Button
-                                  className="w-full font-black bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 shadow-lg shadow-red-500/10 animate-pulse"
-                                  color="danger"
-                                  size="sm"
-                                  variant="flat"
-                                  onPress={() => handleAcceptChanges(match)}
-                                >
-                                  {t("details.buttons.accept_changes")}
-                                </Button>
-                              )}
-                              <div className="flex gap-2 w-full items-center">
-                                {/* Favorite Star */}
-                                <Button
-                                  isIconOnly
-                                  aria-label={
-                                    isFavorite(
-                                      match.id,
-                                      match.type === "tournament"
-                                        ? "tournament"
-                                        : "match",
-                                    )
-                                      ? "Retirer des favoris"
-                                      : "Ajouter aux favoris"
-                                  }
-                                  className="shrink-0"
-                                  size="sm"
-                                  variant="light"
-                                  onPress={() =>
-                                    toggleFavorite(
-                                      match.id,
-                                      match.type === "tournament"
-                                        ? "tournament"
-                                        : "match",
-                                    )
-                                  }
-                                >
-                                  <svg
-                                    className="w-5 h-5 transition-colors"
-                                    fill={
-                                      isFavorite(
-                                        match.id,
-                                        match.type === "tournament"
-                                          ? "tournament"
-                                          : "match",
-                                      )
-                                        ? "#fbbf24"
-                                        : "none"
-                                    }
-                                    stroke={
-                                      isFavorite(
-                                        match.id,
-                                        match.type === "tournament"
-                                          ? "tournament"
-                                          : "match",
-                                      )
-                                        ? "#fbbf24"
-                                        : "currentColor"
-                                    }
-                                    strokeWidth={1.5}
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.563.563 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.385a.563.563 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-                                </Button>
-                                <Button
-                                  as={Link}
-                                  className="font-bold flex-1 bg-linear-to-r from-violet-500 to-violet-700 text-white shadow-md shadow-violet-500/20"
-                                  color="secondary"
-                                  size="sm"
-                                  to={`/matches/${match.id}`}
-                                  variant="solid"
-                                >
-                                  {t("cards.buttons.details")}
-                                </Button>
-                                {isAdmin && (
-                                  <Button
-                                    className="font-black tracking-tight shadow-md shadow-red-500/20"
-                                    color="danger"
-                                    size="sm"
-                                    variant="solid"
-                                    onPress={() => adminDeleteMatch(match.id)}
-                                  >
-                                    {t("details.buttons.delete")}
-                                  </Button>
-                                )}
-                              </div>
-                            </CardFooter>
-                          </Card>
+                            diff={diff}
+                            hasChanges={hasChanges}
+                            i18n={i18n}
+                            isAdmin={isAdmin}
+                            isFavorite={isFavorite}
+                            isMasked={isMasked}
+                            match={match}
+                            user={user || undefined}
+                            onAcceptChanges={handleAcceptChanges}
+                            onDelete={adminDeleteMatch}
+                            onToggleFavorite={toggleFavorite}
+                          />
                         );
                       })}
                     </div>

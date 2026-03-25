@@ -1,22 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import useSWR from "swr";
 import { useAuth0 } from "@auth0/auth0-react";
 
 import { matchService } from "@/services/matches";
+import { MatchRequest } from "@/types/match.types";
+
+interface FetchError extends Error {
+  status?: number;
+}
 
 export function useMatchRequests() {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-  const fetcher = async () => {
+  const fetcher = async (): Promise<MatchRequest[]> => {
     const token = await getAccessTokenSilently();
     const res = await matchService.getRequests(token);
-
-    if (!res.success) {
-      const error = new Error(res.error || "Failed to fetch requests") as any;
-
-      error.status = res.status || 500;
-      throw error;
-    }
 
     return res.requests;
   };
@@ -38,7 +35,7 @@ export function useMatchRequests() {
   return {
     requests,
     isLoading,
-    isError: error,
+    isError: error as FetchError | undefined,
     mutate,
   };
 }

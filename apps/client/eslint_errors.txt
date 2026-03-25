@@ -1,0 +1,17 @@
+npm warn config ignoring workspace config at C:\Users\yanni\Desktop\Development\projet_philippe\apps\client/.npmrc
+
+> @kdufoot/client@0.0.0 lint
+> eslint ./src/**/**/*.{ts,tsx} --fix
+
+
+C:\Users\yanni\Desktop\Development\projet_philippe\apps\client\src\components\matches\tournament-form.tsx
+  360:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\yanni\Desktop\Development\projet_philippe\apps\client\src\pages\matches\index.tsx
+  26:1  warning  There should be no empty line within import group  import/order
+
+C:\Users\yanni\Desktop\Development\projet_philippe\apps\client\src\pages\sessions\planner.tsx
+  26:1  warning  There should be no empty line within import group  import/order
+
+Ô£û 3 problems (0 errors, 3 warnings)
+

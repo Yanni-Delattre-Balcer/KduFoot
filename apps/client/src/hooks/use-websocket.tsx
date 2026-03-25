@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import { useSWRConfig } from "swr";
 import { addToast, closeAll } from "@heroui/toast";
@@ -104,7 +103,7 @@ export function useWebSocketSync(
         if (event.data === "DATA_CHANGED" || event.data === "MATCH_ACCEPTED") {
           mutate(
             (key) => typeof key === "string" && key.startsWith("/api/"),
-            (d: any) => d,
+            (d: unknown) => d,
             { revalidate: true },
           );
           window.dispatchEvent(new CustomEvent("kdufoot_matches_updated"));
@@ -119,10 +118,10 @@ export function useWebSocketSync(
             // ALWAYS mutate before any filtering to ensure badge/data refresh
             mutate(
               (key) => typeof key === "string" && key.startsWith("/api/"),
-              (d: any) => d,
+              (d: unknown) => d,
               { revalidate: true },
             );
-            mutate("/api/me/context", (d: any) => d, { revalidate: true });
+            mutate("/api/me/context", (d: unknown) => d, { revalidate: true });
 
             // Early return if not intended for current user (targeted notification)
             const isTargetedToMe =
@@ -152,7 +151,9 @@ export function useWebSocketSync(
               case "USER_BANNED":
                 color = "danger";
                 title = "Compte Bloqué";
-                mutate("/api/me/context", (d: any) => d, { revalidate: true });
+                mutate("/api/me/context", (d: unknown) => d, {
+                  revalidate: true,
+                });
                 if (onBanStatusChangeRef.current)
                   onBanStatusChangeRef.current({
                     isBanned: true,
@@ -163,7 +164,9 @@ export function useWebSocketSync(
               case "USER_UNBANNED":
                 color = "success";
                 title = "Compte Débloqué";
-                mutate("/api/me/context", (d: any) => d, { revalidate: true });
+                mutate("/api/me/context", (d: unknown) => d, {
+                  revalidate: true,
+                });
                 if (onBanStatusChangeRef.current)
                   onBanStatusChangeRef.current({ isBanned: false });
                 break;
@@ -253,19 +256,19 @@ export function useWebSocketSync(
                 mutate(
                   (key) =>
                     typeof key === "string" && key.startsWith("/api/matches"),
-                  (d: any) => d,
+                  (d: unknown) => d,
                   { revalidate: true },
                 );
                 mutate(
                   (key) =>
                     typeof key === "string" && key.startsWith("/api/dashboard"),
-                  (d: any) => d,
+                  (d: unknown) => d,
                   { revalidate: true },
                 );
-                mutate("/api/matches/participations", (d: any) => d, {
+                mutate("/api/matches/participations", (d: unknown) => d, {
                   revalidate: true,
                 });
-                mutate("/api/matches/requests", (d: any) => d, {
+                mutate("/api/matches/requests", (d: unknown) => d, {
                   revalidate: true,
                 });
                 // Increment badge unread counter
@@ -311,7 +314,7 @@ export function useWebSocketSync(
                 mutate(
                   (key) =>
                     typeof key === "string" && key.includes("/api/tournaments"),
-                  (d: any) => d,
+                  (d: unknown) => d,
                   { revalidate: true },
                 );
                 break;
@@ -342,7 +345,7 @@ export function useWebSocketSync(
                       (key) =>
                         typeof key === "string" &&
                         key.startsWith("/api/dashboard"),
-                      (d: any) => d,
+                      (d: unknown) => d,
                       { revalidate: true },
                     );
                     // Increment badge unread counter
@@ -397,7 +400,7 @@ export function useWebSocketSync(
                       (key) =>
                         typeof key === "string" &&
                         key.startsWith("/api/dashboard"),
-                      (d: any) => d,
+                      (d: unknown) => d,
                       { revalidate: true },
                     );
                   } else {
@@ -416,14 +419,14 @@ export function useWebSocketSync(
                   mutate(
                     (key) =>
                       typeof key === "string" && key.startsWith("/api/matches"),
-                    (d: any) => d,
+                    (d: unknown) => d,
                     { revalidate: true },
                   );
                   mutate(
                     (key) =>
                       typeof key === "string" &&
                       key.startsWith("/api/dashboard"),
-                    (d: any) => d,
+                    (d: unknown) => d,
                     { revalidate: true },
                   );
 
@@ -433,7 +436,7 @@ export function useWebSocketSync(
                       (key) =>
                         typeof key === "string" &&
                         key.startsWith("/api/matches/requests"),
-                      (d: any) => d,
+                      (d: unknown) => d,
                       { revalidate: true },
                     );
                     window.dispatchEvent(
@@ -461,7 +464,7 @@ export function useWebSocketSync(
                       (key) =>
                         typeof key === "string" &&
                         key.startsWith("/api/matches/participations"),
-                      (d: any) => d,
+                      (d: unknown) => d,
                       { revalidate: true },
                     );
                   } else {
@@ -550,7 +553,7 @@ export function useWebSocketSync(
                       (key) =>
                         typeof key === "string" &&
                         key.startsWith("/api/dashboard"),
-                      (d: any) => d,
+                      (d: unknown) => d,
                       { revalidate: true },
                     );
                   } else {
@@ -610,13 +613,13 @@ export function useWebSocketSync(
                 mutate(
                   (key) =>
                     typeof key === "string" && key.includes("/api/dashboard"),
-                  (d: any) => d,
+                  (d: unknown) => d,
                   { revalidate: true },
                 );
-                mutate("/api/matches/participations", (d: any) => d, {
+                mutate("/api/matches/participations", (d: unknown) => d, {
                   revalidate: true,
                 });
-                mutate("/api/matches/requests", (d: any) => d, {
+                mutate("/api/matches/requests", (d: unknown) => d, {
                   revalidate: true,
                 });
                 // Increment badge unread counter
@@ -671,13 +674,13 @@ export function useWebSocketSync(
                 mutate(
                   (key) =>
                     typeof key === "string" && key.startsWith("/api/dashboard"),
-                  (d: any) => d,
+                  (d: unknown) => d,
                   { revalidate: true },
                 );
-                mutate("/api/matches/participations", (d: any) => d, {
+                mutate("/api/matches/participations", (d: unknown) => d, {
                   revalidate: true,
                 });
-                mutate("/api/matches/requests", (d: any) => d, {
+                mutate("/api/matches/requests", (d: unknown) => d, {
                   revalidate: true,
                 });
                 {

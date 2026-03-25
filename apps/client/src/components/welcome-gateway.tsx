@@ -7,7 +7,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
-import { Image } from "@heroui/image";
+import { Image as HeroImage } from "@heroui/image";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -63,7 +63,7 @@ export const WelcomeGateway: React.FC = () => {
         {() => (
           <>
             <ModalHeader className="flex justify-center">
-              <Image
+              <HeroImage
                 alt="Kdufoot Logo"
                 className="drop-shadow-sm"
                 src="/logo.png"

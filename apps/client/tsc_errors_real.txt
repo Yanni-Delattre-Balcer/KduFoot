@@ -1,0 +1,5 @@
+npm warn config ignoring workspace config at C:\Users\yanni\Desktop\Development\projet_philippe\apps\client/.npmrc
+
+> @kdufoot/client@0.0.0 type-check
+> tsc --noEmit
+

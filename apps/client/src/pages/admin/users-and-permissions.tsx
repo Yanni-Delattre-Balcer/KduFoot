@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @copyright Copyright (c) 2024-2026 Ronan LE MEILLAT (base) / KduFoot adaptation
  * @license AGPL-3.0-or-later
@@ -21,6 +20,7 @@ import type {
 
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { Button } from "@heroui/button";
 import { Checkbox } from "@heroui/checkbox";
 import {
@@ -56,7 +56,7 @@ const SUPER_ADMIN_EMAIL = "yannidelattrebalcer.artois@gmail.com";
 const SUPREME_MASTER_ID = "6f62d717-2136-49d7-8c51-fee07eaeebce";
 
 // ─── Permissions KduFoot à gérer dans l'interface (Généré dynamiquement) ─────
-const getKdufootPermissions = (t: any) => {
+const getKdufootPermissions = (t: TFunction) => {
   return Object.values(Permission).map((val) => {
     const value = val as string;
     const key = value.replace(/:/g, "_");
@@ -296,7 +296,7 @@ export default function UsersAndPermissionsPage() {
       });
 
       setUsers(mergedUsers);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Erreur chargement utilisateurs:", err);
       addToast({
         title: t("error.title"),
@@ -332,7 +332,7 @@ export default function UsersAndPermissionsPage() {
           setLoadingUsers(false);
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error("Erreur token Management:", err);
         addToast({
           title: t("error.title"),
@@ -523,7 +523,7 @@ export default function UsersAndPermissionsPage() {
         mgmtToken,
         userId,
       );
-      const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? "";
+      const audience = import.meta.env.AUTH0_AUDIENCE ?? "";
       const currentNames = currentPerms
         .filter((p) => {
           const rs = p.resource_server_identifier ?? "";
@@ -650,7 +650,7 @@ export default function UsersAndPermissionsPage() {
       setEditing((prev) => ({ ...prev, [userId]: {} }));
       setSelectedUserId(null);
 
-      updateUserInCache(userId, (u: any) => {
+      updateUserInCache(userId, (u: Auth0User) => {
         const prevPerms = u.app_metadata?.permissions || [];
         let updatedPerms = prevPerms.filter(
           (p: string) => !toRemove.includes(p),
@@ -694,7 +694,7 @@ export default function UsersAndPermissionsPage() {
       if (mgmtToken && handleBlockLogic) {
         setTimeout(() => loadUsers(mgmtToken, true), 500);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       addToast({
         title: t("error.title"),
@@ -822,7 +822,7 @@ export default function UsersAndPermissionsPage() {
       // Action de bannissement réelle (inclut mutate(CONTEXT_KEY))
       await blockUser(d1UserId, true, finalReason);
 
-      updateUserInCache(d1UserId, (u: any) => ({
+      updateUserInCache(d1UserId, (u: Auth0User) => ({
         ...u,
         blocked: true,
         block_reason: finalReason,
@@ -831,10 +831,10 @@ export default function UsersAndPermissionsPage() {
           permissions: [Permission.ROLE_BLOCKED],
         },
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
       addToast({
         title: t("error.title"),
-        description: err.message,
+        description: err instanceof Error ? err.message : String(err),
         color: "danger",
       });
     }
@@ -909,10 +909,10 @@ export default function UsersAndPermissionsPage() {
           color: "danger",
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       addToast({
         title: t("error.title"),
-        description: err.message || "Erreur réseau.",
+        description: err instanceof Error ? err.message : t("error-network"),
         color: "danger",
       });
     } finally {
@@ -1058,7 +1058,7 @@ export default function UsersAndPermissionsPage() {
         color: "success",
       });
 
-      updateUserInCache(d1UserId, (u: any) => ({
+      updateUserInCache(d1UserId, (u: Auth0User) => ({
         ...u,
         blocked: false,
         block_reason: null,
@@ -1069,10 +1069,10 @@ export default function UsersAndPermissionsPage() {
           ),
         },
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
       addToast({
         title: t("error.title"),
-        description: err.message,
+        description: err instanceof Error ? err.message : String(err),
         variant: "solid",
         color: "danger",
       });
@@ -1648,7 +1648,7 @@ export default function UsersAndPermissionsPage() {
                             {t("adminUsersPage.statBans")}
                           </p>
                           <p className="text-2xl font-black text-red-500">
-                            {(siretData as any).block_count || 0}
+                            {siretData.block_count || 0}
                           </p>
                         </div>
                         <div className="flex-1 p-3 rounded-xl bg-zinc-800/50 border border-white/5 text-center">
@@ -1656,7 +1656,7 @@ export default function UsersAndPermissionsPage() {
                             {t("adminUsersPage.statSiretChanges")}
                           </p>
                           <p className="text-2xl font-black text-primary">
-                            {(siretData as any).siret_change_count || 0}
+                            {siretData.siret_change_count || 0}
                           </p>
                         </div>
                       </div>
@@ -1762,7 +1762,7 @@ export default function UsersAndPermissionsPage() {
                                 {siretData.additional_sirets &&
                                 siretData.additional_sirets.length > 0 ? (
                                   siretData.additional_sirets.map(
-                                    (item: any) => (
+                                    (item: { siret: string; name: string }) => (
                                       <div
                                         key={item.siret}
                                         className="flex items-center justify-between bg-zinc-900/50 border border-zinc-800 p-2 rounded-lg"

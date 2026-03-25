@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import useSWR from "swr";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback } from "react";
@@ -11,7 +10,7 @@ import {
   ExerciseFilters,
 } from "../types/exercise.types";
 
-const EMPTY_ARRAY: any[] = [];
+const EMPTY_ARRAY: Exercise[] = [];
 
 export function useExercises(filters?: ExerciseFilters) {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
@@ -37,11 +36,11 @@ export function useExercises(filters?: ExerciseFilters) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(
-        errorData.error || "Failed to fetch exercises",
-      ) as any;
+      const error = Object.assign(
+        new Error(errorData.error || "Failed to fetch exercises"),
+        { status: response.status },
+      );
 
-      error.status = response.status;
       throw error;
     }
 
@@ -134,11 +133,11 @@ export function useExercise(id: string | null) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const error = new Error(
-        errorData.error || "Failed to fetch exercise",
-      ) as any;
+      const error = Object.assign(
+        new Error(errorData.error || "Failed to fetch exercise"),
+        { status: response.status },
+      );
 
-      error.status = response.status;
       throw error;
     }
 

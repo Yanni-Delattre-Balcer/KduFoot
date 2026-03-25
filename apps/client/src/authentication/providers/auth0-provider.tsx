@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @copyright Copyright (c) 2024-2026 Ronan LE MEILLAT
  * @license AGPL-3.0-or-later
@@ -42,13 +41,15 @@ export const useAuth0Provider = (): AuthProvider => {
 
   const login = useCallback(
     async (options?: LoginOptions): Promise<void> => {
-      return loginWithRedirect({
+      const auth0Options: RedirectLoginOptions = {
         ...options,
         authorizationParams: {
-          ...options?.authorizationParams,
+          ...(options?.authorizationParams || {}),
           redirect_uri: window.location.origin,
         },
-      } as RedirectLoginOptions);
+      };
+
+      return loginWithRedirect(auth0Options);
     },
     [loginWithRedirect],
   );
@@ -58,7 +59,7 @@ export const useAuth0Provider = (): AuthProvider => {
       const auth0Options: Auth0LogoutOptions = {
         ...options,
         logoutParams: {
-          ...options?.logoutParams,
+          ...(options?.logoutParams || {}),
           returnTo: window.location.origin,
         },
       };
@@ -87,12 +88,13 @@ export const useAuth0Provider = (): AuthProvider => {
         });
 
         return token;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error getting access token:", error);
 
         // If the error indicates we need to re-authenticate (e.g. missing refresh token, login required)
         // we force a redirect to login.
-        const errorMessage = error?.message?.toLowerCase() || "";
+        const errorMessage =
+          error instanceof Error ? error.message.toLowerCase() : "";
 
         if (
           errorMessage.includes("login_required") ||
@@ -184,7 +186,7 @@ export const useAuth0Provider = (): AuthProvider => {
   );
 
   // Simple in-memory request cache to dedupe identical requests while active
-  const requestCacheRef = useRef<Map<string, Promise<any>>>(new Map());
+  const requestCacheRef = useRef<Map<string, Promise<unknown>>>(new Map());
 
   const handleGlobalError = useCallback(async (response: Response) => {
     if (response.status === 429) {
@@ -226,14 +228,14 @@ export const useAuth0Provider = (): AuthProvider => {
   }, []);
 
   const getJson = useCallback(
-    async (url: string): Promise<any> => {
+    async <T = unknown,>(url: string): Promise<T> => {
       try {
         const accessToken = await getAccessToken();
 
         const cacheKey = `${accessToken}:${url}`;
 
         if (requestCacheRef.current.has(cacheKey)) {
-          return await requestCacheRef.current.get(cacheKey)!;
+          return (await requestCacheRef.current.get(cacheKey)) as T;
         }
 
         const promise = (async () => {
@@ -246,7 +248,7 @@ export const useAuth0Provider = (): AuthProvider => {
           if (!apiResponse.ok) {
             await handleGlobalError(apiResponse);
             const errorText = await apiResponse.text().catch(() => "");
-            let errorJson: any = {};
+            let errorJson: { error?: string } = {};
 
             try {
               if (
@@ -265,8 +267,11 @@ export const useAuth0Provider = (): AuthProvider => {
             );
 
             if (apiResponse.status === 403) {
-              (error as any).status = 403;
-              (error as any).isBlocked = true;
+              (error as Error & { status: number; isBlocked: boolean }).status =
+                403;
+              (
+                error as Error & { status: number; isBlocked: boolean }
+              ).isBlocked = true;
             }
             throw error;
           }
@@ -286,7 +291,7 @@ export const useAuth0Provider = (): AuthProvider => {
         try {
           const data = await promise;
 
-          return data;
+          return data as T;
         } finally {
           // remove from cache so next call is a fresh fetch
           requestCacheRef.current.delete(cacheKey);
@@ -296,11 +301,11 @@ export const useAuth0Provider = (): AuthProvider => {
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessToken, handleGlobalError],
   );
 
   const postJson = useCallback(
-    async (url: string, data: any): Promise<any> => {
+    async <T = unknown,>(url: string, data: unknown): Promise<T> => {
       try {
         const accessToken = await getAccessToken();
 
@@ -316,7 +321,7 @@ export const useAuth0Provider = (): AuthProvider => {
         if (!apiResponse.ok) {
           await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
-          let errorJson: any = {};
+          let errorJson: { error?: string } = {};
 
           try {
             if (
@@ -340,17 +345,17 @@ export const useAuth0Provider = (): AuthProvider => {
           throw new Error("Invalid response format: Expected JSON");
         }
 
-        return await apiResponse.json();
+        return (await apiResponse.json()) as T;
       } catch (error) {
         console.error("Error posting JSON:", error);
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessToken, handleGlobalError],
   );
 
   const patchJson = useCallback(
-    async (url: string, data: any): Promise<any> => {
+    async <T = unknown,>(url: string, data: unknown): Promise<T> => {
       try {
         const accessToken = await getAccessToken();
 
@@ -366,7 +371,7 @@ export const useAuth0Provider = (): AuthProvider => {
         if (!apiResponse.ok) {
           await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
-          let errorJson: any = {};
+          let errorJson: { error?: string } = {};
 
           try {
             if (
@@ -390,17 +395,17 @@ export const useAuth0Provider = (): AuthProvider => {
           throw new Error("Invalid response format: Expected JSON");
         }
 
-        return await apiResponse.json();
+        return (await apiResponse.json()) as T;
       } catch (error) {
         console.error("Error patching JSON:", error);
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessToken, handleGlobalError],
   );
 
   const deleteJson = useCallback(
-    async (url: string): Promise<any> => {
+    async <T = unknown,>(url: string): Promise<T> => {
       try {
         const accessToken = await getAccessToken();
 
@@ -415,7 +420,7 @@ export const useAuth0Provider = (): AuthProvider => {
         if (!apiResponse.ok) {
           await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
-          let errorJson: any = {};
+          let errorJson: { error?: string } = {};
 
           try {
             if (
@@ -439,17 +444,17 @@ export const useAuth0Provider = (): AuthProvider => {
           throw new Error("Invalid response format: Expected JSON");
         }
 
-        return await apiResponse.json();
+        return (await apiResponse.json()) as T;
       } catch (error) {
         console.error("Error deleting JSON:", error);
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessToken, handleGlobalError],
   );
 
   const putJson = useCallback(
-    async (url: string, data: any): Promise<any> => {
+    async <T = unknown,>(url: string, data: unknown): Promise<T> => {
       try {
         const accessToken = await getAccessToken();
 
@@ -465,7 +470,7 @@ export const useAuth0Provider = (): AuthProvider => {
         if (!apiResponse.ok) {
           await handleGlobalError(apiResponse);
           const errorText = await apiResponse.text().catch(() => "");
-          let errorJson: any = {};
+          let errorJson: { error?: string } = {};
 
           try {
             if (
@@ -489,13 +494,13 @@ export const useAuth0Provider = (): AuthProvider => {
           throw new Error("Invalid response format: Expected JSON");
         }
 
-        return await apiResponse.json();
+        return (await apiResponse.json()) as T;
       } catch (error) {
         console.error("Error putting JSON:", error);
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessToken, handleGlobalError],
   );
 
   // Memoize the returned API surface so consumers receive stable function identities

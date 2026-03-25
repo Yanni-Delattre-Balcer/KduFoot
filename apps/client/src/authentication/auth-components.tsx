@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @copyright Copyright (c) 2024-2026 Ronan LE MEILLAT
  * @license AGPL-3.0-or-later
@@ -25,7 +24,7 @@ import { AccountModal } from "./account-modal";
 
 // Cache for Auth0 Management API calls (5 minutes TTL)
 const AUTH0_CACHE_TTL = 300000;
-const mgmtCache: Record<string, { data: any; timestamp: number }> = {};
+const mgmtCache: Record<string, { data: unknown; timestamp: number }> = {};
 
 const getFromCache = (key: string) => {
   const cached = mgmtCache[key];
@@ -37,7 +36,7 @@ const getFromCache = (key: string) => {
   return null;
 };
 
-const setToCache = (key: string, data: any) => {
+const setToCache = (key: string, data: unknown) => {
   mgmtCache[key] = { data, timestamp: Date.now() };
 };
 
@@ -56,7 +55,7 @@ export const clearUserListCache = () => {
 
 export const updateUserInCache = (
   userId: string,
-  updateFn: (user: any) => any,
+  updateFn: (user: Auth0User) => Auth0User,
 ) => {
   const cached = getFromCache("users_list");
 
@@ -453,7 +452,14 @@ export const AuthenticationGuardWithPermission: FC<{
  * ```
  */
 export const useSecuredApi = () => {
-  const { getJson, postJson, deleteJson, hasPermission, putJson } = useAuth();
+  const {
+    getJson,
+    postJson,
+    deleteJson,
+    hasPermission,
+    putJson,
+    getAccessToken,
+  } = useAuth();
 
   /**
    * Obtient un token Auth0 Management API via le worker (avec cache KV).
@@ -461,21 +467,17 @@ export const useSecuredApi = () => {
    */
   const getAuth0ManagementToken =
     async (): Promise<Auth0ManagementTokenApiResponse> => {
-      const apiBase =
-        typeof import.meta !== "undefined" &&
-        (import.meta as any).env?.API_BASE_URL
-          ? (import.meta as any).env.API_BASE_URL
-          : "";
-      const result = await postJson(`${apiBase}/api/__auth0/token`, {});
+      const apiBase = import.meta.env.API_BASE_URL || "";
+      const result = await postJson<Auth0ManagementTokenApiResponse>(
+        `${apiBase}/api/__auth0/token`,
+        {},
+      );
 
-      return result as Auth0ManagementTokenApiResponse;
+      return result;
     };
 
   const auth0Domain =
-    typeof import.meta !== "undefined" &&
-    (import.meta as any).env?.VITE_AUTH0_DOMAIN
-      ? (import.meta as any).env.VITE_AUTH0_DOMAIN
-      : ((import.meta as any)?.env?.AUTH0_DOMAIN ?? "");
+    import.meta.env.VITE_AUTH0_DOMAIN || import.meta.env.AUTH0_DOMAIN || "";
 
   /**
    * Liste tous les utilisateurs depuis Auth0 Management API.
@@ -483,7 +485,7 @@ export const useSecuredApi = () => {
    */
   const listAuth0Users = async (mgmtToken: string): Promise<Auth0User[]> => {
     const cacheKey = "users_list";
-    const cached = getFromCache(cacheKey);
+    const cached = getFromCache(cacheKey) as Auth0User[] | null;
 
     if (cached) return cached;
 
@@ -509,7 +511,7 @@ export const useSecuredApi = () => {
       throw new Error("Invalid response format from Auth0: Expected JSON");
     }
 
-    const data = await resp.json();
+    const data = (await resp.json()) as Auth0User[];
 
     setToCache(cacheKey, data);
 
@@ -538,7 +540,7 @@ export const useSecuredApi = () => {
 
     if (!resp.ok) throw new Error(await resp.text());
 
-    return resp.json();
+    return (await resp.json()) as Auth0Permission[];
   };
 
   /**
@@ -553,12 +555,8 @@ export const useSecuredApi = () => {
     permissionNames: string[],
   ): Promise<void> => {
     if (permissionNames.length === 0) return;
-    const apiBase =
-      typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.API_BASE_URL
-        ? (import.meta as any).env.API_BASE_URL
-        : "";
-    const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
+    const apiBase = import.meta.env.API_BASE_URL || "";
+    const audience = import.meta.env.AUTH0_AUDIENCE || apiBase;
     const encodedId = encodeURIComponent(userId);
 
     const permissionsPayload = permissionNames.map((name) => ({
@@ -594,12 +592,8 @@ export const useSecuredApi = () => {
     userId: string,
     permissionName: string,
   ): Promise<void> => {
-    const apiBase =
-      typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.API_BASE_URL
-        ? (import.meta as any).env.API_BASE_URL
-        : "";
-    const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
+    const apiBase = import.meta.env.API_BASE_URL || "";
+    const audience = import.meta.env.AUTH0_AUDIENCE || apiBase;
     const encodedId = encodeURIComponent(userId);
     const resp = await fetch(
       `https://${auth0Domain}/api/v2/users/${encodedId}/permissions`,
@@ -635,12 +629,8 @@ export const useSecuredApi = () => {
     permissionNames: string[],
   ): Promise<void> => {
     if (permissionNames.length === 0) return;
-    const apiBase =
-      typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.API_BASE_URL
-        ? (import.meta as any).env.API_BASE_URL
-        : "";
-    const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
+    const apiBase = import.meta.env.API_BASE_URL || "";
+    const audience = import.meta.env.AUTH0_AUDIENCE || apiBase;
     const encodedId = encodeURIComponent(userId);
 
     const permissionsPayload = permissionNames.map((name) => ({
@@ -674,7 +664,7 @@ export const useSecuredApi = () => {
   const updateUserAppMetadata = async (
     mgmtToken: string,
     userId: string,
-    metadata: any,
+    metadata: Record<string, unknown>,
   ): Promise<void> => {
     const encodedId = encodeURIComponent(userId);
     const resp = await fetch(
@@ -705,12 +695,8 @@ export const useSecuredApi = () => {
     userId: string,
     permissionName: string,
   ): Promise<void> => {
-    const apiBase =
-      typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.API_BASE_URL
-        ? (import.meta as any).env.API_BASE_URL
-        : "";
-    const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
+    const apiBase = import.meta.env.API_BASE_URL || "";
+    const audience = import.meta.env.AUTH0_AUDIENCE || apiBase;
     const encodedId = encodeURIComponent(userId);
     const resp = await fetch(
       `https://${auth0Domain}/api/v2/users/${encodedId}/permissions`,
@@ -765,17 +751,16 @@ export const useSecuredApi = () => {
   const getD1BlockedUsers = async (
     skipCache: boolean = false,
   ): Promise<{ auth0_sub: string; block_reason: string | null }[]> => {
-    const apiBase =
-      typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.API_BASE_URL
-        ? (import.meta as any).env.API_BASE_URL
-        : "";
+    const apiBase = import.meta.env.API_BASE_URL || "";
 
     try {
       const url = skipCache
         ? `${apiBase}/api/admin/users/blocked?t=${Date.now()}`
         : `${apiBase}/api/admin/users/blocked`;
-      const data = await getJson(url);
+      const data = await getJson<{
+        success: boolean;
+        blockedSubs: { auth0_sub: string; block_reason: string | null }[];
+      }>(url);
 
       if (data && data.success && Array.isArray(data.blockedSubs)) {
         return data.blockedSubs;
@@ -791,9 +776,13 @@ export const useSecuredApi = () => {
    * Get the list of Resource Servers (APIs) configured in Auth0
    * @param mgmtToken Token Auth0 Management API
    */
-  const getResourceServers = async (mgmtToken: string): Promise<any[]> => {
+  const getResourceServers = async (
+    mgmtToken: string,
+  ): Promise<{ identifier: string; id: string }[]> => {
     const cacheKey = "resource_servers";
-    const cached = getFromCache(cacheKey);
+    const cached = getFromCache(cacheKey) as
+      | { identifier: string; id: string }[]
+      | null;
 
     if (cached) return cached;
 
@@ -806,7 +795,7 @@ export const useSecuredApi = () => {
 
     if (!resp.ok) throw new Error(await resp.text());
 
-    const data = await resp.json();
+    const data = (await resp.json()) as { identifier: string; id: string }[];
 
     setToCache(cacheKey, data);
 
@@ -853,7 +842,9 @@ export const useSecuredApi = () => {
     id: string,
   ): Promise<{ value: string; description: string }[]> => {
     const cacheKey = `resource_server_scopes_${id}`;
-    const cached = getFromCache(cacheKey);
+    const cached = getFromCache(cacheKey) as
+      | { value: string; description: string }[]
+      | null;
 
     if (cached) return cached;
 
@@ -869,7 +860,9 @@ export const useSecuredApi = () => {
     );
 
     if (!resp.ok) throw new Error(await resp.text());
-    const data = await resp.json();
+    const data = (await resp.json()) as {
+      scopes?: { value: string; description: string }[];
+    };
     const scopes = data.scopes ?? [];
 
     setToCache(cacheKey, scopes);
@@ -984,17 +977,29 @@ export const useSecuredApi = () => {
       role: string;
     }[]
   > => {
-    const apiBase =
-      typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.API_BASE_URL
-        ? (import.meta as any).env.API_BASE_URL
-        : "";
+    const apiBase = import.meta.env.API_BASE_URL || "";
 
     try {
       const url = skipCache
         ? `${apiBase}/api/admin/users/metadata?t=${Date.now()}`
         : `${apiBase}/api/admin/users/metadata`;
-      const data = await getJson(url);
+      const data = await getJson<{
+        success: boolean;
+        metadata: {
+          id: string;
+          auth0_sub: string;
+          email: string;
+          name: string;
+          club_id: string | null;
+          is_blocked: boolean;
+          block_reason: string | null;
+          siret: string | null;
+          club_name: string | null;
+          created_at: string;
+          last_login: string | null;
+          role: string;
+        }[];
+      }>(url);
 
       if (data && data.success && Array.isArray(data.metadata)) {
         return data.metadata;
@@ -1012,6 +1017,7 @@ export const useSecuredApi = () => {
     deleteJson,
     hasPermission,
     putJson,
+    getAccessToken,
     // Auth0 Management API
     getAuth0ManagementToken,
     listAuth0Users,
@@ -1147,17 +1153,6 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({
  *
  * This component manages the automatic provisioning of permissions defined in
  * `import.meta.env.AUTH0_AUTOMATIC_PERMISSIONS`.
- *
- * It follows a robust lifecycle to ensure that users get the necessary permissions
- * without manual intervention, while protecting the app from infinite reload loops.
- *
- * Lifecycle:
- * 1. Wait for Auth0 to finish loading and ensure the user is authenticated.
- * 2. Check the user's current permissions (from the JWT) against the target list.
- * 3. If any are missing, check `sessionStorage` for a persistent "attempted" flag.
- * 4. If not attempted, call the worker's `/api/__auth0/autopermissions` endpoint.
- * 5. On success, force a token refresh (`cacheMode: "off"`) and reload the page.
- * 6. The `sessionStorage` flag is cleaned up ONLY once the user is confirmed to have all permissions.
  */
 export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({
   children,
@@ -1181,7 +1176,7 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({
     if (!userId) return;
 
     // 2. Configuration: Retrieve the list of target permissions from environment
-    const autoPerms = (import.meta as any).env.AUTH0_AUTOMATIC_PERMISSIONS;
+    const autoPerms = import.meta.env.AUTH0_AUTOMATIC_PERMISSIONS;
 
     if (!autoPerms || !Array.isArray(autoPerms) || autoPerms.length === 0)
       return;
@@ -1213,15 +1208,14 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({
       setIsProvisioning(true);
       sessionStorage.setItem(storageKey, "true");
       try {
-        const apiBase = (import.meta as any).env.API_BASE_URL || "";
-        const result = await postJson(
+        const apiBase = import.meta.env.API_BASE_URL || "";
+        const result = await postJson<{ success: boolean }>(
           `${apiBase}/api/__auth0/autopermissions`,
           {},
         );
 
         if (result.success) {
-          // 6. Token Refresh: Bypass local cache to get the new JWT from Auth0 servers.
-          // Note: "off" is the correct cacheMode for Auth0 SDK to force a network request.
+          // 6. Token Refresh
           await getAccessToken({ cacheMode: "off" });
 
           // Refresh all data silently

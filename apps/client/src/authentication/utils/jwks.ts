@@ -1,28 +1,27 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @copyright Copyright (c) 2024-2026 Ronan LE MEILLAT
  * @license AGPL-3.0-or-later
  */
 // JWKS cache utility for template
-import { createLocalJWKSet } from "jose";
+import { createLocalJWKSet, JSONWebKeySet } from "jose";
 
 const DEFAULT_TTL_S = Number(import.meta.env.AUTH0_CACHE_DURATION_S ?? 300);
 const STORAGE_KEY = (domain: string) => `jwks:${domain}`;
 
 const inMemoryCache = new Map<string, ReturnType<typeof createLocalJWKSet>>();
-let inFlightFetches = new Map<
+const inFlightFetches = new Map<
   string,
   Promise<ReturnType<typeof createLocalJWKSet>>
 >();
 
-async function fetchJwksJson(domain: string) {
+async function fetchJwksJson(domain: string): Promise<JSONWebKeySet> {
   const resp = await fetch(`https://${domain}/.well-known/jwks.json`, {
     headers: { Accept: "application/json, application/jwk-set+json" },
   });
 
   if (!resp.ok) throw new Error(`Failed to fetch jwks.json: ${resp.status}`);
 
-  return (await resp.json()) as any;
+  return (await resp.json()) as JSONWebKeySet;
 }
 
 export async function getLocalJwkSet(domain: string) {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import useSWR, { useSWRConfig } from "swr";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback } from "react";
@@ -10,15 +9,29 @@ import {
   UpdateMatchDto,
   MatchFilters,
   ContactMatchDto,
+  MatchRequest,
+  MatchParticipation,
 } from "../types/match.types";
 
-const EMPTY_ARRAY: any[] = [];
+const EMPTY_ARRAY: never[] = [];
+
+interface FetchError extends Error {
+  status?: number;
+}
+
+interface MatchesResponse {
+  data?: Match[];
+  matches?: Match[];
+  total?: number;
+  nextCursor?: string | null;
+  hasMore?: boolean;
+}
 
 export function useMatches(filters?: MatchFilters) {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const { mutate: globalMutate } = useSWRConfig();
 
-  const fetcher = async (url: string) => {
+  const fetcher = async (url: string): Promise<MatchesResponse> => {
     let token: string | null = null;
 
     try {
@@ -38,10 +51,12 @@ export function useMatches(filters?: MatchFilters) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
       const error = new Error(
         errorData.error || "Failed to fetch matches",
-      ) as any;
+      ) as FetchError;
 
       error.status = response.status;
       throw error;
@@ -60,7 +75,7 @@ export function useMatches(filters?: MatchFilters) {
 
   const key = `/api/matches?${query.toString()}`;
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR<MatchesResponse>(
     isAuthenticated ? key : null,
     fetcher,
     { keepPreviousData: true },
@@ -74,7 +89,17 @@ export function useMatches(filters?: MatchFilters) {
       const newMatch = await matchService.create(dto, token);
 
       mutate(
-        (currentData: any) => {
+        (
+          currentData:
+            | {
+                data?: Match[];
+                matches?: Match[];
+                total?: number;
+                nextCursor?: string | null;
+                hasMore?: boolean;
+              }
+            | undefined,
+        ) => {
           if (!currentData || (!currentData.data && !currentData.matches))
             return currentData;
 
@@ -92,7 +117,7 @@ export function useMatches(filters?: MatchFilters) {
       // Global invalidation: refresh ALL /api keys
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: any) => currentData,
+        (currentData: unknown) => currentData,
         { revalidate: true },
       );
     },
@@ -107,7 +132,7 @@ export function useMatches(filters?: MatchFilters) {
       mutate();
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: any) => currentData,
+        (currentData: unknown) => currentData,
         { revalidate: true },
       );
     },
@@ -118,7 +143,17 @@ export function useMatches(filters?: MatchFilters) {
     async (id: string) => {
       // Optimistic UI: Remove match from the current cache instantly
       mutate(
-        (currentData: any) => {
+        (
+          currentData:
+            | {
+                data?: Match[];
+                matches?: Match[];
+                total?: number;
+                nextCursor?: string | null;
+                hasMore?: boolean;
+              }
+            | undefined,
+        ) => {
           if (!currentData || (!currentData.data && !currentData.matches))
             return currentData;
 
@@ -139,7 +174,7 @@ export function useMatches(filters?: MatchFilters) {
       // Global invalidation: refresh ALL /api/matches keys across all views
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: any) => currentData,
+        (currentData: unknown) => currentData,
         { revalidate: true },
       );
     },
@@ -160,22 +195,35 @@ export function useMatches(filters?: MatchFilters) {
       const token = await getAccessTokenSilently();
 
       await matchService.closeRegistrations(id, token);
-      mutate((currentData: any) => {
-        if (!currentData || (!currentData.data && !currentData.matches))
-          return currentData;
+      mutate(
+        (
+          currentData:
+            | {
+                data?: Match[];
+                matches?: Match[];
+                total?: number;
+                nextCursor?: string | null;
+                hasMore?: boolean;
+              }
+            | undefined,
+        ) => {
+          if (!currentData || (!currentData.data && !currentData.matches))
+            return currentData;
 
-        const currentList = currentData.data || currentData.matches || [];
+          const currentList = currentData.data || currentData.matches || [];
 
-        return {
-          ...currentData,
-          data: currentList.map((m: Match) =>
-            m.id === id ? { ...m, status: "found" } : m,
-          ),
-        };
-      }, false);
+          return {
+            ...currentData,
+            data: currentList.map((m: Match) =>
+              m.id === id ? { ...m, status: "found" as const } : m,
+            ),
+          };
+        },
+        false,
+      );
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: any) => currentData,
+        (currentData: unknown) => currentData,
         { revalidate: true },
       );
     },
@@ -183,11 +231,10 @@ export function useMatches(filters?: MatchFilters) {
   );
 
   return {
-    matches:
-      (data?.data as Match[]) ?? (data?.matches as Match[]) ?? EMPTY_ARRAY,
-    nextCursor: (data?.nextCursor as string | null) ?? null,
-    hasMore: (data?.hasMore as boolean) ?? false,
-    total: (data?.total as number) ?? 0,
+    matches: data?.data ?? data?.matches ?? EMPTY_ARRAY,
+    nextCursor: data?.nextCursor ?? null,
+    hasMore: data?.hasMore ?? false,
+    total: data?.total ?? 0,
     isLoading,
     isError: error,
     createMatch,
@@ -203,7 +250,7 @@ export function useMatch(id: string | null) {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const { mutate: globalMutate } = useSWRConfig();
 
-  const fetcher = async (url: string) => {
+  const fetcher = async (url: string): Promise<{ match: Match }> => {
     let token: string | null = null;
 
     try {
@@ -223,10 +270,12 @@ export function useMatch(id: string | null) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
       const error = new Error(
         errorData.error || "Failed to fetch match",
-      ) as any;
+      ) as FetchError;
 
       error.status = response.status;
       throw error;
@@ -235,7 +284,7 @@ export function useMatch(id: string | null) {
     return response.json();
   };
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR<{ match: Match }>(
     isAuthenticated && id ? `/api/matches/${id}` : null,
     fetcher,
   );
@@ -256,11 +305,11 @@ export function useMatch(id: string | null) {
     const token = await getAccessTokenSilently();
 
     await matchService.delete(id, token);
-    mutate(null, false);
+    mutate(undefined, false);
     // Global invalidation: refresh all /api/ keys so dashboard cleans up immediately
     globalMutate(
       (key) => typeof key === "string" && key.startsWith("/api/"),
-      (currentData: any) => currentData,
+      (currentData: unknown) => currentData,
       { revalidate: true },
     );
   }, [id, getAccessTokenSilently, mutate, globalMutate]);
@@ -303,10 +352,10 @@ export function useMatch(id: string | null) {
 
       throw new Error(err.error || "Failed to delete match as admin");
     }
-    mutate(null, false);
+    mutate(undefined, false);
     globalMutate(
       (key) => typeof key === "string" && key.startsWith("/api/"),
-      (currentData: any) => currentData,
+      (currentData: unknown) => currentData,
       { revalidate: true },
     );
   }, [id, getAccessTokenSilently, mutate, globalMutate]);
@@ -332,7 +381,7 @@ export function useMatch(id: string | null) {
   return {
     match: data?.match as Match,
     isLoading,
-    isError: error,
+    isError: error as FetchError | undefined,
     updateMatch,
     deleteMatch,
     adminDeleteMatch,
@@ -346,17 +395,21 @@ export function useMatch(id: string | null) {
 export function useIncomingRequests() {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-  const fetcher = async (url: string) => {
+  const fetcher = async (
+    url: string,
+  ): Promise<{ requests: MatchRequest[] }> => {
     const token = await getAccessTokenSilently();
     const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
       const error = new Error(
         errorData.error || "Failed to fetch requests",
-      ) as any;
+      ) as FetchError;
 
       error.status = response.status;
       throw error;
@@ -372,12 +425,12 @@ export function useIncomingRequests() {
   );
 
   return {
-    requests: (data?.requests as any[]) ?? EMPTY_ARRAY,
-    pendingCount: ((data?.requests as any[]) ?? EMPTY_ARRAY).filter(
+    requests: data?.requests ?? (EMPTY_ARRAY as unknown as MatchRequest[]),
+    pendingCount: (data?.requests ?? []).filter(
       (r) => r.request_status === "pending",
     ).length,
     isLoading,
-    isError: error,
+    isError: error as FetchError | undefined,
     mutate,
   };
 }
@@ -385,17 +438,21 @@ export function useIncomingRequests() {
 export function useMyParticipations() {
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-  const fetcher = async (url: string) => {
+  const fetcher = async (
+    url: string,
+  ): Promise<{ participations: MatchParticipation[] }> => {
     const token = await getAccessTokenSilently();
     const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
       const error = new Error(
         errorData.error || "Failed to fetch participations",
-      ) as any;
+      ) as FetchError;
 
       error.status = response.status;
       throw error;
@@ -421,12 +478,13 @@ export function useMyParticipations() {
   );
 
   return {
-    participations: (data?.participations as any[]) ?? EMPTY_ARRAY,
-    modifiedCount: ((data?.participations as any[]) ?? EMPTY_ARRAY).filter(
+    participations:
+      data?.participations ?? (EMPTY_ARRAY as unknown as MatchParticipation[]),
+    modifiedCount: (data?.participations ?? []).filter(
       (p) => p.notification_state === 1,
     ).length,
     isLoading,
-    isError: error,
+    isError: error as FetchError | undefined,
     mutate,
     markAsRead,
   };

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -181,7 +180,10 @@ export default function MatchForm({
     return formatted;
   };
 
-  const handleChange = (field: keyof CreateMatchDto, value: any) => {
+  const handleChange = (
+    field: keyof CreateMatchDto,
+    value: string | Venue | PitchType | Category | Level | undefined,
+  ) => {
     if (errors[field as string]) {
       setErrors((prev) => ({ ...prev, [field as string]: "" }));
     }
@@ -193,7 +195,7 @@ export default function MatchForm({
       setErrors((prev) => ({ ...prev, match_date: "" }));
     }
     if (field === "phone") {
-      const formatted = formatPhoneNumber(value);
+      const formatted = formatPhoneNumber(String(value || ""));
 
       setFormData((prev) => ({ ...prev, [field]: formatted }));
     } else if (field === "venue") {
@@ -207,7 +209,7 @@ export default function MatchForm({
       }
       setFormData((prev) => ({
         ...prev,
-        [field]: value,
+        venue: venue,
         jersey_color: jerseyColor,
       }));
     } else {
@@ -295,14 +297,14 @@ export default function MatchForm({
       };
 
       if (initialData?.id) {
-        await updateMatch(initialData.id, payload as any);
+        await updateMatch(initialData.id, payload as CreateMatchDto);
         addToast({
           title: t("success"),
           description: t("matchForm.alerts.update_success"),
           color: "success",
         });
       } else {
-        await createMatch(payload as any);
+        await createMatch(payload as CreateMatchDto);
         addToast({
           title: t("success"),
           description: t("matchForm.alerts.create_success"),
@@ -311,10 +313,13 @@ export default function MatchForm({
       }
 
       if (onSuccess) onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : t("error.save_failed");
+
       addToast({
         title: t("error.title"),
-        description: error.message || t("error.save_failed"),
+        description: message,
         color: "danger",
       });
     } finally {

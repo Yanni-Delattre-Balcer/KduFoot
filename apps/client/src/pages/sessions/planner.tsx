@@ -1,18 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
+import { Card, CardBody } from "@heroui/card";
 import { addToast } from "@heroui/toast";
 import { Button } from "@heroui/button";
 import { Link } from "react-router-dom";
 import { Chip } from "@heroui/chip";
-import { Image } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
+import { Image as HeroImage } from "@heroui/image";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useSWRConfig } from "swr";
 
 import FootballClock from "../../components/football-clock";
 
+import { SessionCard } from "@/components/session-card";
 import { ErrorView } from "@/components/common/error-views";
 import { matchService } from "@/services/matches";
 import { useMatches, useMyParticipations } from "@/hooks/use-matches";
@@ -22,8 +22,27 @@ import { showVideoAnalysis } from "@/config/site";
 import { useMatchRequests } from "@/hooks/use-match-requests";
 import { useUser } from "@/hooks/use-user";
 import DataWall from "@/components/data-wall";
-import { SessionListSkeleton } from "@/components/skeletons/session-skeleton";
+import { Category } from "@/types/exercise.types";
+import {
+  Match,
+  MatchParticipation,
+  MatchRequest,
+  Level as MatchLevel,
+} from "@/types/match.types";
+
+interface HistoryItem {
+  id: string;
+  type: string;
+  date: string;
+  time: string;
+  category?: Category;
+  level?: MatchLevel;
+  teamA: { name: string; logo_url: string };
+  teamB: { name: string; logo_url: string };
+  isTournament: boolean;
+}
 import { MatchListSkeleton } from "@/components/skeletons/match-skeleton";
+import { SessionListSkeleton } from "@/components/skeletons/session-skeleton";
 
 export default function SessionPlannerPage() {
   const { t, i18n } = useTranslation();
@@ -82,7 +101,7 @@ export default function SessionPlannerPage() {
     .filter((m) => isPassed(m.match_date, m.match_time))
     .map((m) => {
       const acceptedReq = (requests || []).find(
-        (r: any) => r.match_id === m.id && r.request_status === "accepted",
+        (r) => r.match_id === m.id && r.request_status === "accepted",
       );
 
       return {
@@ -92,14 +111,14 @@ export default function SessionPlannerPage() {
         time: m.match_time,
         category: m.category,
         level: m.level,
-        teamA: { name: myClubName, logo: myClubLogo },
+        teamA: { name: myClubName, logo_url: myClubLogo },
         teamB: {
           name:
             acceptedReq?.requester_club_name ||
             (m.type === "tournament"
               ? t("planner.plateau")
               : t("common:unknown")),
-          logo: acceptedReq?.requester_club_logo || "",
+          logo_url: acceptedReq?.requester_club_logo || "",
         },
         isTournament: m.type === "tournament",
       };
@@ -111,32 +130,32 @@ export default function SessionPlannerPage() {
         isPassed(p.match_date, p.match_time) && p.request_status === "accepted",
     )
     .map((p) => ({
-      id: p.id,
-      type: p.type || p.match_type,
+      id: p.match_id,
+      type: p.match_type || p.match_type,
       date: p.match_date,
       time: p.match_time,
       category: p.match_category || p.category,
       level: p.match_level || p.level,
       teamA: {
-        name: p.host_club_name || p.club?.name || "??",
-        logo: p.host_club_logo || p.club?.logo_url || "",
+        name: p.host_club_name || "??",
+        logo_url: p.host_club_logo || "",
       },
-      teamB: { name: myClubName, logo: myClubLogo },
-      isTournament: p.type === "tournament" || p.match_type === "tournament",
+      teamB: { name: myClubName, logo_url: myClubLogo },
+      isTournament: p.match_type === "tournament",
     }));
 
   const allHistory = [...historyMatches, ...historyParticipations]
-    .filter((h: any) => (view === "matches" ? !h.isTournament : h.isTournament))
+    .filter((h) => (view === "matches" ? !h.isTournament : h.isTournament))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const activeMatches = (matches || []).filter(
-    (m: any) => !isPassed(m.match_date, m.match_time),
+    (m) => !isPassed(m.match_date, m.match_time),
   );
   const activeParticipations = (participations || []).filter(
-    (p: any) => !isPassed(p.match_date, p.match_time),
+    (p) => !isPassed(p.match_date, p.match_time),
   );
   const activeRequests = (requests || []).filter(
-    (r: any) => !isPassed(r.match_date, r.match_time),
+    (r) => !isPassed(r.match_date, r.match_time),
   );
 
   return (
@@ -301,7 +320,7 @@ export default function SessionPlannerPage() {
                     status={isErrorSessions.status || 500}
                     onRetry={() =>
                       globalMutate(
-                        (key: any) =>
+                        (key) =>
                           typeof key === "string" &&
                           key.includes("/api/sessions"),
                       )
@@ -344,69 +363,22 @@ export default function SessionPlannerPage() {
                   </Card>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {sessions.map((session) => (
-                    <Card
-                      key={session.id}
-                      className="group hover:shadow-lg hover:shadow-green-500/10 transition-all bg-[#18251e] border border-green-500/20 hover:border-green-500/40"
-                    >
-                      <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
-                        <div className="flex justify-between w-full">
-                          <p className="text-tiny font-bold text-green-600">
-                            {session.category || "Séance"}
-                          </p>
-                          <Chip
-                            className="bg-green-50 text-green-800 dark:bg-green-500/10 dark:text-green-300"
-                            size="sm"
-                            variant="flat"
-                          >
-                            {session.status}
-                          </Chip>
-                        </div>
-                        <h4 className="font-bold text-large mt-1 truncate group-hover:text-green-600 transition-colors">
-                          {session.name || t("common:untitled")}
-                        </h4>
-                        <small className="text-default-500 flex items-center gap-1 mt-1">
-                          <svg
-                            className="w-3 h-3"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={1.5}
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          {session.scheduled_date
-                            ? new Date(
-                                session.scheduled_date,
-                              ).toLocaleDateString(i18n.language)
-                            : ""}
-                        </small>
-                      </CardHeader>
-                      <CardBody className="overflow-visible py-2">
-                        <p className="text-sm text-default-600 line-clamp-2">
-                          {session.category} -{" "}
-                          {session.level || t("sessions.all_levels")}
-                        </p>
-                      </CardBody>
-                      <CardFooter>
-                        <Button
-                          as={Link}
-                          className="bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300 font-bold w-full"
-                          size="sm"
-                          to={`/sessions/${session.id}`}
-                          variant="flat"
-                        >
-                          {t("details")}
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <h2 className="text-xl font-black text-white tracking-tighter">
+                      {t("sessions.available_title")}
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {sessions.map((session) => (
+                      <SessionCard
+                        key={session.id}
+                        i18n={i18n}
+                        session={session}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -434,7 +406,7 @@ export default function SessionPlannerPage() {
                           </h3>
                           <span className="bg-white/10 px-2 py-0.5 rounded text-xs font-bold text-default-400">
                             {
-                              activeMatches.filter((m: any) =>
+                              activeMatches.filter((m) =>
                                 view === "matches"
                                   ? m.type === "match"
                                   : m.type === "tournament",
@@ -445,19 +417,19 @@ export default function SessionPlannerPage() {
 
                         {isLoadingMatches ? (
                           <MatchListSkeleton />
-                        ) : activeMatches.filter((m: any) =>
+                        ) : activeMatches.filter((m) =>
                             view === "matches"
                               ? m.type === "match"
                               : m.type === "tournament",
                           ).length > 0 ? (
                           <div className="flex flex-col gap-4">
                             {activeMatches
-                              .filter((m: any) =>
+                              .filter((m) =>
                                 view === "matches"
                                   ? m.type === "match"
                                   : m.type === "tournament",
                               )
-                              .map((match: any) => (
+                              .map((match: Match) => (
                                 <Card
                                   key={match.id}
                                   className="bg-default-50/5 hover:bg-default-50/10 border border-default-100/10 transition-all group"
@@ -612,12 +584,12 @@ export default function SessionPlannerPage() {
                               {t("planner.demandes_recues")}
                             </h3>
                             {activeRequests.filter(
-                              (r: any) => r.request_status === "pending",
+                              (r) => r.request_status === "pending",
                             ).length > 0 && (
                               <span className="bg-amber-500/20 px-2 py-0.5 rounded text-xs font-bold text-amber-500 animate-pulse">
                                 {
                                   activeRequests.filter(
-                                    (r: any) => r.request_status === "pending",
+                                    (r) => r.request_status === "pending",
                                   ).length
                                 }
                               </span>
@@ -628,19 +600,19 @@ export default function SessionPlannerPage() {
                             <div className="flex justify-center py-6 px-4">
                               <Spinner color="primary" />
                             </div>
-                          ) : activeRequests.filter((r: any) =>
+                          ) : activeRequests.filter((r) =>
                               view === "matches"
-                                ? r.type === "match"
-                                : r.type === "tournament",
+                                ? r.match_type === "match"
+                                : r.match_type === "tournament",
                             ).length > 0 ? (
                             <div className="flex flex-col gap-4">
                               {activeRequests
-                                .filter((r: any) =>
+                                .filter((r) =>
                                   view === "matches"
-                                    ? r.type === "match"
-                                    : r.type === "tournament",
+                                    ? r.match_type === "match"
+                                    : r.match_type === "tournament",
                                 )
-                                .map((request: any, idx: number) => (
+                                .map((request: MatchRequest, idx) => (
                                   <Card
                                     key={idx}
                                     className={`bg-[#1e1e20] border ${request.request_status === "accepted" ? "border-success/30" : "border-default-100/10"}`}
@@ -649,7 +621,7 @@ export default function SessionPlannerPage() {
                                       <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden">
                                           {request.requester_club_logo ? (
-                                            <Image
+                                            <HeroImage
                                               className="object-contain"
                                               src={request.requester_club_logo}
                                             />
@@ -697,20 +669,20 @@ export default function SessionPlannerPage() {
                                             color="success"
                                             isLoading={
                                               actioningId ===
-                                              `${request.match_id}-${request.user_id}-accept`
+                                              `${request.match_id}-${request.requester_user_id}-accept`
                                             }
                                             size="sm"
                                             onPress={async () => {
                                               try {
                                                 setActioningId(
-                                                  `${request.match_id}-${request.user_id}-accept`,
+                                                  `${request.match_id}-${request.requester_user_id}-accept`,
                                                 );
                                                 const token =
                                                   await getAccessTokenSilently();
 
                                                 await matchService.updateRequestStatus(
                                                   request.match_id,
-                                                  request.user_id,
+                                                  request.requester_user_id,
                                                   "accepted",
                                                   token,
                                                 );
@@ -740,20 +712,20 @@ export default function SessionPlannerPage() {
                                             color="danger"
                                             isLoading={
                                               actioningId ===
-                                              `${request.match_id}-${request.user_id}-refuse`
+                                              `${request.match_id}-${request.requester_user_id}-refuse`
                                             }
                                             size="sm"
                                             onPress={async () => {
                                               try {
                                                 setActioningId(
-                                                  `${request.match_id}-${request.user_id}-refuse`,
+                                                  `${request.match_id}-${request.requester_user_id}-refuse`,
                                                 );
                                                 const token =
                                                   await getAccessTokenSilently();
 
                                                 await matchService.updateRequestStatus(
                                                   request.match_id,
-                                                  request.user_id,
+                                                  request.requester_user_id,
                                                   "refused",
                                                   token,
                                                 );
@@ -813,76 +785,83 @@ export default function SessionPlannerPage() {
                             </span>
                           </div>
 
-                          {activeParticipations.filter((p: any) =>
+                          {activeParticipations.filter((p) =>
                             view === "matches"
-                              ? p.type === "match"
-                              : p.type === "tournament",
+                              ? p.match_type === "match"
+                              : p.match_type === "tournament",
                           ).length > 0 ? (
                             <div className="flex flex-col gap-4">
                               {activeParticipations
-                                .filter((p: any) =>
+                                .filter((p) =>
                                   view === "matches"
-                                    ? p.type === "match"
-                                    : p.type === "tournament",
+                                    ? p.match_type === "match"
+                                    : p.match_type === "tournament",
                                 )
-                                .map((participation: any, idx: number) => (
-                                  <Card
-                                    key={idx}
-                                    className="bg-default-50/5 border border-default-100/10"
-                                  >
-                                    <CardBody className="p-4 flex flex-col gap-3">
-                                      <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center overflow-hidden">
-                                          {participation.club?.logo_url ? (
-                                            <Image
-                                              className="object-contain"
-                                              src={participation.club.logo_url}
-                                            />
-                                          ) : (
-                                            <span className="text-violet-500 font-bold">
-                                              {participation.club?.name?.charAt(
-                                                0,
-                                              )}
-                                            </span>
-                                          )}
+                                .map(
+                                  (
+                                    participation: MatchParticipation,
+                                    idx: number,
+                                  ) => (
+                                    <Card
+                                      key={idx}
+                                      className="bg-default-50/5 border border-default-100/10"
+                                    >
+                                      <CardBody className="p-4 flex flex-col gap-3">
+                                        <div className="flex items-center gap-3">
+                                          <div className="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center overflow-hidden">
+                                            {participation.host_club_logo ? (
+                                              <HeroImage
+                                                className="object-contain"
+                                                src={
+                                                  participation.host_club_logo
+                                                }
+                                              />
+                                            ) : (
+                                              <span className="text-violet-500 font-bold">
+                                                {participation.host_club_name?.charAt(
+                                                  0,
+                                                )}
+                                              </span>
+                                            )}
+                                          </div>
+                                          <div className="flex-1 text-left">
+                                            <h3 className="font-bold text-white text-sm truncate">
+                                              {participation.host_club_name}
+                                            </h3>
+                                            <p className="text-xs text-default-400 font-bold tracking-widest">
+                                              {participation.match_date}
+                                            </p>
+                                          </div>
+                                          <Chip
+                                            className="font-black text-[9px]"
+                                            color={
+                                              participation.request_status ===
+                                              "accepted"
+                                                ? "success"
+                                                : "warning"
+                                            }
+                                            size="sm"
+                                            variant="flat"
+                                          >
+                                            {participation.request_status}
+                                          </Chip>
                                         </div>
-                                        <div className="flex-1 text-left">
-                                          <h3 className="font-bold text-white text-sm truncate">
-                                            {participation.club?.name}
-                                          </h3>
-                                          <p className="text-xs text-default-400 font-bold tracking-widest">
-                                            {participation.match_date}
-                                          </p>
-                                        </div>
-                                        <Chip
-                                          className="font-black text-[9px]"
-                                          color={
-                                            participation.request_status ===
-                                            "accepted"
-                                              ? "success"
-                                              : "warning"
-                                          }
+                                        <Button
+                                          as={Link}
+                                          className="w-full text-xs font-bold h-7"
                                           size="sm"
+                                          to={`/matches/${participation.match_id}`}
                                           variant="flat"
                                         >
-                                          {participation.request_status}
-                                        </Chip>
-                                      </div>
-                                      <Button
-                                        as={Link}
-                                        className="w-full text-xs font-bold h-7"
-                                        size="sm"
-                                        to={`/matches/${participation.id}`}
-                                        variant="flat"
-                                      >
-                                        {t(
-                                          "dashboard.controls.view",
-                                          "Détails",
-                                        )}
-                                      </Button>
-                                    </CardBody>
-                                  </Card>
-                                ))}
+                                          {t(
+                                            "dashboard.controls.view",
+                                            "Détails",
+                                          )}
+                                        </Button>
+                                      </CardBody>
+                                    </Card>
+                                  ),
+                                )}
                             </div>
                           ) : (
                             <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl py-6 px-4 text-center text-default-500 font-medium text-sm">
@@ -909,7 +888,7 @@ export default function SessionPlannerPage() {
 
                   {allHistory.length > 0 ? (
                     <div className="flex flex-col gap-3">
-                      {allHistory.map((h: any) => (
+                      {allHistory.map((h: HistoryItem) => (
                         <Card
                           key={h.id}
                           className="bg-[#1e1e20]/50 border border-white/5 hover:border-white/10 transition-all group overflow-hidden"
@@ -919,10 +898,11 @@ export default function SessionPlannerPage() {
                             <div className="flex items-center justify-center gap-6 relative w-full">
                               <div className="relative">
                                 <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 shadow-lg group-hover:scale-105 transition-transform">
-                                  {h.teamA.logo ? (
-                                    <Image
+                                  {h.teamA.logo_url ? (
+                                    <HeroImage
                                       className="object-contain"
-                                      src={h.teamA.logo}
+                                      loading="lazy"
+                                      src={h.teamA.logo_url}
                                     />
                                   ) : (
                                     <span className="text-xl font-bold text-white/20">
@@ -941,10 +921,10 @@ export default function SessionPlannerPage() {
 
                               <div className="relative">
                                 <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 shadow-lg group-hover:scale-105 transition-transform">
-                                  {h.teamB.logo ? (
-                                    <Image
+                                  {h.teamB.logo_url ? (
+                                    <HeroImage
                                       className="object-contain"
-                                      src={h.teamB.logo}
+                                      src={h.teamB.logo_url}
                                     />
                                   ) : (
                                     <span className="text-xl font-bold text-white/20">

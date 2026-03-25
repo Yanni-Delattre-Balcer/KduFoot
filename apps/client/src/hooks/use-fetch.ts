@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback } from "react";
 
@@ -50,10 +49,14 @@ export function useFetch() {
         }
 
         if (!response.ok) {
-          const error = await response.json().catch(() => ({}));
+          const errorData = (await response.json().catch(() => ({}))) as {
+            message?: string;
+            error?: string;
+          };
 
           throw new Error(
-            (error as any).message ||
+            errorData.message ||
+              errorData.error ||
               `Request failed with status ${response.status}`,
           );
         }

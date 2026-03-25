@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @copyright Copyright (c) 2024-2026 Ronan LE MEILLAT
  * @license AGPL-3.0-or-later
@@ -28,23 +27,29 @@ export const useDexProvider = (
   Log.setLevel(Log.DEBUG);
 
   // Merge provided config with defaults
-  const config: AuthProviderConfig = {
-    authority: providedConfig?.authority || import.meta.env.DEX_AUTHORITY,
-    clientId: providedConfig?.clientId || import.meta.env.DEX_CLIENT_ID,
-    redirectUri:
-      providedConfig?.redirectUri ||
+  const config = {
+    authority: (providedConfig?.authority ||
+      import.meta.env.DEX_AUTHORITY ||
+      "") as string,
+    clientId: (providedConfig?.clientId ||
+      import.meta.env.DEX_CLIENT_ID ||
+      "") as string,
+    redirectUri: (providedConfig?.redirectUri ||
       import.meta.env.DEX_REDIRECT_URI ||
-      `${window.location.origin}/`,
-    scope:
-      providedConfig?.scope ||
+      `${window.location.origin}/`) as string,
+    scope: (providedConfig?.scope ||
       import.meta.env.DEX_SCOPE ||
-      "openid profile email",
-    audience: providedConfig?.audience || import.meta.env.DEX_AUDIENCE,
-    tokenIssuer:
-      providedConfig?.tokenIssuer || import.meta.env.DEX_TOKEN_ISSUER,
-    jwksEndpoint:
-      providedConfig?.jwksEndpoint || import.meta.env.DEX_JWKS_ENDPOINT,
-    domain: providedConfig?.domain || import.meta.env.DEX_DOMAIN,
+      "openid profile email") as string,
+    audience: (providedConfig?.audience || import.meta.env.DEX_AUDIENCE) as
+      | string
+      | undefined,
+    tokenIssuer: (providedConfig?.tokenIssuer ||
+      import.meta.env.DEX_TOKEN_ISSUER) as string | undefined,
+    jwksEndpoint: (providedConfig?.jwksEndpoint ||
+      import.meta.env.DEX_JWKS_ENDPOINT) as string | undefined,
+    domain: (providedConfig?.domain || import.meta.env.DEX_DOMAIN) as
+      | string
+      | undefined,
   };
 
   const [user, setUser] = useState<User | null>(null);
@@ -277,7 +282,7 @@ export const useDexProvider = (
 
       const joseResult = await jwtVerify(accessToken, JWKS, {
         issuer: config.tokenIssuer || config.authority,
-        audience: config.audience,
+        audience: config.audience as string | string[] | undefined,
       });
 
       const payload = joseResult.payload as JWTPayload;
@@ -289,9 +294,11 @@ export const useDexProvider = (
         return payload.scope.split(" ").includes(permission);
       } else if (
         payload.realm_access &&
-        Array.isArray((payload.realm_access as any).roles)
+        typeof payload.realm_access === "object" &&
+        "roles" in payload.realm_access &&
+        Array.isArray(payload.realm_access.roles)
       ) {
-        return (payload.realm_access as any).roles.includes(permission);
+        return (payload.realm_access.roles as string[]).includes(permission);
       }
 
       return false;
@@ -303,7 +310,7 @@ export const useDexProvider = (
   };
 
   // Helper methods for working with secured APIs
-  const getJson = async (url: string): Promise<any> => {
+  const getJson = async <T = unknown,>(url: string): Promise<T> => {
     try {
       const accessToken = await getAccessToken();
 
@@ -330,7 +337,10 @@ export const useDexProvider = (
     }
   };
 
-  const postJson = async (url: string, data: any): Promise<any> => {
+  const postJson = async <T = unknown,>(
+    url: string,
+    data: unknown,
+  ): Promise<T> => {
     try {
       const accessToken = await getAccessToken();
 
@@ -360,7 +370,7 @@ export const useDexProvider = (
     }
   };
 
-  const deleteJson = async (url: string): Promise<any> => {
+  const deleteJson = async <T = unknown,>(url: string): Promise<T> => {
     try {
       const accessToken = await getAccessToken();
 
@@ -389,7 +399,10 @@ export const useDexProvider = (
     }
   };
 
-  const putJson = async (url: string, data: any): Promise<any> => {
+  const putJson = async <T = unknown,>(
+    url: string,
+    data: unknown,
+  ): Promise<T> => {
     try {
       const accessToken = await getAccessToken();
 
@@ -419,7 +432,10 @@ export const useDexProvider = (
     }
   };
 
-  const patchJson = async (url: string, data: any): Promise<any> => {
+  const patchJson = async <T = unknown,>(
+    url: string,
+    data: unknown,
+  ): Promise<T> => {
     try {
       const accessToken = await getAccessToken();
 

@@ -1,4 +1,5 @@
 import {
+  TrainingSession,
   CreateSessionDto,
   UpdateSessionDto,
   SessionFilters,
@@ -17,7 +18,10 @@ export const sessionService = {
     return `${BASE_URL}?${query.toString()}`;
   },
 
-  create: async (data: CreateSessionDto, token: string) => {
+  create: async (
+    data: CreateSessionDto,
+    token: string,
+  ): Promise<TrainingSession> => {
     const response = await fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}`, {
       method: "POST",
       headers: {
@@ -42,7 +46,11 @@ export const sessionService = {
     return response.json();
   },
 
-  update: async (id: string, data: UpdateSessionDto, token: string) => {
+  update: async (
+    id: string,
+    data: UpdateSessionDto,
+    token: string,
+  ): Promise<TrainingSession> => {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}${BASE_URL}/${id}`,
       {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export const getAuthHeaders = async (
   getAccessTokenSilently: () => Promise<string>,
 ) => {
@@ -10,7 +9,7 @@ export const getAuthHeaders = async (
   };
 };
 
-const handleResponse = async (response: Response) => {
+const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     const errorText = await response.text().catch(() => "");
 
@@ -26,19 +25,22 @@ const handleResponse = async (response: Response) => {
 };
 
 export const api = {
-  get: async (url: string, getAccessTokenSilently: () => Promise<string>) => {
+  get: async <T>(
+    url: string,
+    getAccessTokenSilently: () => Promise<string>,
+  ): Promise<T> => {
     const headers = await getAuthHeaders(getAccessTokenSilently);
     const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
       headers,
     });
 
-    return handleResponse(response);
+    return handleResponse<T>(response);
   },
-  post: async (
+  post: async <T>(
     url: string,
-    body: any,
+    body: unknown,
     getAccessTokenSilently: () => Promise<string>,
-  ) => {
+  ): Promise<T> => {
     const headers = await getAuthHeaders(getAccessTokenSilently);
     const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
       method: "POST",
@@ -46,13 +48,13 @@ export const api = {
       body: JSON.stringify(body),
     });
 
-    return handleResponse(response);
+    return handleResponse<T>(response);
   },
-  put: async (
+  put: async <T>(
     url: string,
-    body: any,
+    body: unknown,
     getAccessTokenSilently: () => Promise<string>,
-  ) => {
+  ): Promise<T> => {
     const headers = await getAuthHeaders(getAccessTokenSilently);
     const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
       method: "PUT",
@@ -60,18 +62,18 @@ export const api = {
       body: JSON.stringify(body),
     });
 
-    return handleResponse(response);
+    return handleResponse<T>(response);
   },
-  delete: async (
+  delete: async <T>(
     url: string,
     getAccessTokenSilently: () => Promise<string>,
-  ) => {
+  ): Promise<T> => {
     const headers = await getAuthHeaders(getAccessTokenSilently);
     const response = await fetch(`${import.meta.env.API_BASE_URL}${url}`, {
       method: "DELETE",
       headers,
     });
 
-    return handleResponse(response);
+    return handleResponse<T>(response);
   },
 };

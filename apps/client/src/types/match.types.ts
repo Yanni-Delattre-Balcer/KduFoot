@@ -40,6 +40,8 @@ export interface Match {
   pairings?: TournamentPairing[];
 }
 
+export type MatchDiff = Partial<Record<keyof Match, boolean>>;
+
 export interface TournamentPairing {
   id: string;
   match_id: string;
@@ -156,4 +158,91 @@ export interface MatchFilters {
   notes?: string;
   ownerId?: string;
   include_past?: boolean;
+}
+
+export interface MatchRequest {
+  match_id: string;
+  match_type: "match" | "tournament";
+  match_date: string;
+  match_time: string;
+  match_category?: Category;
+  match_max_teams?: number;
+  venue: Venue;
+  location_city?: string;
+  requester_user_id: string;
+  requester_firstname?: string;
+  requester_lastname?: string;
+  requester_club_name?: string;
+  requester_club_logo?: string;
+  requester_city?: string;
+  requester_category?: Category;
+  requester_level?: Level;
+  requester_club_address?: string;
+  requester_phone?: string;
+  requester_email?: string;
+  requester_home_jersey_color?: string;
+  requester_away_jersey_color?: string;
+  request_status: "pending" | "accepted" | "refused" | "withdrawn";
+  message?: string;
+  contacted_at: string;
+  accepted_count?: number;
+  match_format?: Format;
+  match_level?: Level;
+  match_pitch_type?: PitchType;
+  // Normalized/Legacy fields for dashboard mapping
+  format?: Format;
+  category?: Category;
+  level?: Level;
+  pitch_type?: PitchType;
+  notification_state?: number;
+  owner_id?: string;
+  is_organizer?: boolean;
+}
+
+export interface MatchParticipation extends MatchRequest {
+  host_club_name?: string;
+  host_club_logo?: string;
+  host_city?: string;
+  host_category?: Category;
+  host_level?: Level;
+  host_club_colors?: string;
+  host_stadium_address?: string;
+  host_firstname?: string;
+  host_lastname?: string;
+  host_phone?: string;
+  host_email?: string;
+  host_home_jersey_color?: string;
+  host_away_jersey_color?: string;
+  notification_state?: number; // 0: normal, 1: modified
+}
+
+export interface DashboardMatch extends MatchParticipation {
+  _source: "organizer" | "participant";
+  opponent_club_name?: string;
+  opponent_club_logo?: string;
+  opponent_city?: string;
+  opponent_category?: Category;
+  opponent_level?: Level;
+  opponent_club_address?: string;
+  opponent_home_jersey_color?: string;
+  opponent_away_jersey_color?: string;
+  opponent_pitch_type?: PitchType;
+  opponent_stadium_address?: string;
+  opponent_club_colors?: string;
+  isUserHome?: boolean;
+  max_teams?: number;
+  accepted_count: number;
+  accepted_teams?: { name?: string; logo_url?: string }[];
+  name?: string;
+  host_home_jersey_color?: string;
+  host_away_jersey_color?: string;
+  entry_fee?: number;
+  location_address?: string;
+  host_phone?: string;
+  opponent_phone?: string;
+  // Normalized field mapping fallbacks
+  format?: Format;
+  category?: Category;
+  level?: Level;
+  pitch_type?: PitchType;
 }

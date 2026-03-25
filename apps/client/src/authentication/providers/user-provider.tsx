@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createContext,
   useCallback,
@@ -23,10 +22,10 @@ import {
 interface UserContextType {
   user: User | null;
   isLoading: boolean;
-  error: any;
-  linkClub: (siret: string) => Promise<any>;
+  error: Error | { status: number; reason?: string } | null;
+  linkClub: (siret: string) => Promise<unknown>;
   unlinkClub: () => Promise<void>;
-  updateUser: (data: Partial<User>) => Promise<any>;
+  updateUser: (data: Partial<User>) => Promise<unknown>;
   resetCalendarSync: () => Promise<void>;
   blockUser: (
     userId: string,
@@ -45,6 +44,7 @@ interface UserContextType {
     pendingRequests: number;
     modifiedParticipations: number;
   };
+  isAuthenticated: boolean;
   last_calendar_sync_at?: number;
   needsCalendarReSync: boolean;
   isAccountModalOpen: boolean;
@@ -58,9 +58,16 @@ export const UserContext = createContext<UserContextType | undefined>(
 
 const CONTEXT_KEY = "/api/me/context";
 
+interface ContextResponse {
+  user: User;
+  notifications: {
+    pendingRequests: number;
+    modifiedParticipations: number;
+  };
+}
+
 export function UserProvider({ children }: { children: ReactNode }) {
-  const { getJson, postJson, putJson, patchJson, isAuthenticated, logout } =
-    useAuth();
+  const { getJson, postJson, putJson, patchJson, isAuthenticated } = useAuth();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [localBanOverride, setLocalBanOverride] = useState<BanStatus | null>(
     null,
@@ -70,8 +77,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
-    const handleBanSignal = (e: any) => {
-      setLocalBanOverride({ isBanned: true, reason: e.detail?.reason });
+    const handleBanSignal = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+
+      setLocalBanOverride({ isBanned: true, reason: detail?.reason });
     };
 
     window.addEventListener("online", handleOnline);
@@ -90,24 +99,41 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const fetcher = useCallback(async () => {
     if (!isAuthenticated) return null;
     try {
-      return await getJson(`${import.meta.env.API_BASE_URL}${CONTEXT_KEY}`);
-    } catch (error: any) {
+      return await getJson<ContextResponse>(
+        `${import.meta.env.API_BASE_URL}${CONTEXT_KEY}`,
+      );
+    } catch (error: unknown) {
       if (
-        error.status === 403 ||
-        error.isBlocked ||
-        error.message?.includes("403")
+        error &&
+        typeof error === "object" &&
+        ("status" in error || "message" in error)
       ) {
-        const err = new Error("403_FORBIDDEN");
+        const errObj = error as {
+          status?: number;
+          isBlocked?: boolean;
+          message?: string;
+        };
 
-        (err as any).status = 403;
-        const prefix = "Votre compte a été suspendu pour le motif suivant : ";
+        if (
+          errObj.status === 403 ||
+          errObj.isBlocked ||
+          errObj.message?.includes("403")
+        ) {
+          const err = new Error("403_FORBIDDEN") as Error & {
+            status?: number;
+            reason?: string;
+          };
 
-        if (error.message?.startsWith(prefix)) {
-          (err as any).reason = error.message.replace(prefix, "");
-        } else {
-          (err as any).reason = error.message;
+          err.status = 403;
+          const prefix = "Votre compte a été suspendu pour le motif suivant : ";
+
+          if (errObj.message?.startsWith(prefix)) {
+            err.reason = errObj.message.replace(prefix, "");
+          } else {
+            err.reason = errObj.message;
+          }
+          throw err;
         }
-        throw err;
       }
       throw error;
     }
@@ -153,7 +179,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     (localBanOverride?.isBanned !== false &&
       (!!user?.is_blocked ||
         error?.message === "403_FORBIDDEN" ||
-        (error && (error as any).status === 403) ||
+        (error && (error as { status?: number }).status === 403) ||
         (error && error.message?.includes("Permission refusée")) ||
         (error && error.message?.includes("401"))));
 
@@ -172,7 +198,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const blockReason =
     localBanOverride?.reason ||
     user?.block_reason ||
-    (error as any)?.reason ||
+    (error as { reason?: string })?.reason ||
     (error?.message?.includes("Permission refusée")
       ? "Accès refusé par le serveur"
       : undefined);
@@ -218,7 +244,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const resetCalendarSync = async () => {
-    await updateUser({ has_synced_calendar: false } as any);
+    await updateUser({ has_synced_calendar: false });
     // Supprimer aussi les flags de session/local pour forcer l'affichage immédiat
     sessionStorage.removeItem("kdufoot-calendar-suppressed");
     localStorage.removeItem("kdufoot-calendar-never-ask");
@@ -263,6 +289,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       needsCalendarReSync,
       isAccountModalOpen,
       setIsAccountModalOpen,
+      isAuthenticated,
     }),
     [
       user,
@@ -277,8 +304,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       notifications,
       resetCalendarSync,
       needsCalendarReSync,
-      logout,
       isAccountModalOpen,
+      isAuthenticated,
     ],
   );
 

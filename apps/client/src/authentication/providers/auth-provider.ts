@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @copyright Copyright (c) 2024-2026 Ronan LE MEILLAT
  * @license AGPL-3.0-or-later
@@ -14,7 +13,10 @@ export interface AuthUser {
   nickname?: string;
   email?: string;
   sub?: string;
-  [key: string]: any;
+  picture?: string;
+  family_name?: string;
+  given_name?: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -23,7 +25,7 @@ export interface AuthUser {
 export interface TokenOptions {
   audience?: string;
   scope?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -32,16 +34,16 @@ export interface TokenOptions {
 export interface LogoutOptions {
   logoutParams?: {
     returnTo?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
  * Interface for login options
  */
 export interface LoginOptions {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -62,11 +64,11 @@ export interface AuthProvider {
   hasPermission(permission: string): Promise<boolean>;
 
   // API interaction helpers
-  getJson(url: string): Promise<any>;
-  postJson(url: string, data: any): Promise<any>;
-  putJson(url: string, data: any): Promise<any>;
-  patchJson(url: string, data: any): Promise<any>;
-  deleteJson(url: string): Promise<any>;
+  getJson<T = unknown>(url: string): Promise<T>;
+  postJson<T = unknown>(url: string, data: unknown): Promise<T>;
+  putJson<T = unknown>(url: string, data: unknown): Promise<T>;
+  patchJson<T = unknown>(url: string, data: unknown): Promise<T>;
+  deleteJson<T = unknown>(url: string): Promise<T>;
 }
 
 /**
@@ -80,7 +82,7 @@ export interface AuthProviderConfig {
   scope?: string;
   jwksEndpoint?: string;
   tokenIssuer?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
