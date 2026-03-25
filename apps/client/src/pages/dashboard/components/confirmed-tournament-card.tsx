@@ -91,14 +91,17 @@ export const ConfirmedTournamentCard = React.memo(
 
     return (
       <Card
-        className={`w-full overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full ${borderClass} group`}
+        className={`w-full overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full ${borderClass} group relative`}
         id={`card-${part.match_id}`}
       >
-        <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50" />
+        <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50 pointer-events-none" />
         <CardBody className="p-0">
-          <div className="flex flex-col 2xl:flex-row">
-            {/* Left Section: Info & Progress */}
-            <div className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5">
+          <div className="flex flex-col 2xl:flex-row relative">
+            {/* Left Section: Info & Progress (Clickable) */}
+            <Link
+              className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5 hover:bg-white/[0.02] transition-colors"
+              to={`/matches/${part.match_id}`}
+            >
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
@@ -286,9 +289,9 @@ export const ConfirmedTournamentCard = React.memo(
                   }
                 />
               </div>
-            </div>
+            </Link>
 
-            {/* Right Section: Teams & Actions */}
+            {/* Right Section: Teams & Actions (Buttons) */}
             <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
               <div className="mb-6">
                 <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-3">
@@ -302,7 +305,7 @@ export const ConfirmedTournamentCard = React.memo(
                     (team: { logo_url?: string; name?: string }, i: number) => (
                       <div
                         key={i}
-                        className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]"
+                        className="w-10 h-10 rounded-full border-2 border-[#000] bg-default-100 flex items-center justify-center overflow-hidden z-[3]"
                       >
                         {team.logo_url ? (
                           <HeroImage loading="lazy" src={team.logo_url} />
@@ -315,7 +318,7 @@ export const ConfirmedTournamentCard = React.memo(
                     ),
                   )}
                   {remainingTeamsCount > 0 && (
-                    <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-violet-500 flex items-center justify-center z-[1]">
+                    <div className="w-10 h-10 rounded-full border-2 border-[#000] bg-violet-500 flex items-center justify-center z-[1]">
                       <span className="text-xs sm:text-sm font-black text-white">
                         +{remainingTeamsCount}
                       </span>
@@ -350,7 +353,7 @@ export const ConfirmedTournamentCard = React.memo(
                 <div className="flex flex-wrap gap-2">
                   <Button
                     as={Link}
-                    className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 bg-white/5"
+                    className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
                     color="default"
                     size="sm"
                     to={`/matches/${part.match_id}`}

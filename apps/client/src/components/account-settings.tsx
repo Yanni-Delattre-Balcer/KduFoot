@@ -22,7 +22,7 @@ const STORAGE_KEY = "kdufoot_pending_profile";
 
 export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const baseId = useId();
-  const { t } = useTranslation();
+  const { t } = useTranslation("kdufoot");
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();

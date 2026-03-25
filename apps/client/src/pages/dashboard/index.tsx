@@ -189,6 +189,15 @@ export default function DashboardPage() {
   }, [myParticipations]);
 
   useEffect(() => {
+    // Force a global refresh on mount to clear any ghost data from previous sessions or tabs
+    globalMutate(
+      (key) => typeof key === "string" && key.startsWith("/api/"),
+      undefined,
+      { revalidate: true },
+    );
+  }, [globalMutate]);
+
+  useEffect(() => {
     if (isLocked) {
       setSelectedTab("requests"); // Default tab when unlocked later
     } else {
@@ -255,7 +264,7 @@ export default function DashboardPage() {
       mutateRequests();
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
+        undefined,
         { revalidate: true },
       );
     } catch (error: unknown) {

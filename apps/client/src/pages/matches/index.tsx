@@ -52,7 +52,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { ErrorView } from "@/components/common/error-views";
 
 export default function MatchesPage() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation("kdufoot");
 
   useWelcomeGateway();
   const [searchParams, setSearchParams] = useSearchParams();

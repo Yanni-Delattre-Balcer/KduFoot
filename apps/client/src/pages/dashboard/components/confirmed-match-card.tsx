@@ -84,18 +84,21 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
       ? highlighted
         ? "border-danger ring-4 ring-danger/30 shadow-danger/20"
         : "border-danger/50 bg-zinc-900/90 shadow-danger/10"
-      : "border-violet-500/40 bg-zinc-900/90";
+      : "border-violet-500/40 bg-zinc-900/90 shadow-xl hover:shadow-violet-500/20";
 
   return (
     <Card
-      className={`overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full ${borderClass} group`}
+      className={`overflow-hidden border transition-all duration-300 shadow-xl hover:shadow-violet-500/20 col-span-full ${borderClass} group relative`}
       id={`card-${match.match_id}`}
     >
-      <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50" />
+      <div className="absolute inset-0 bg-linear-to-br from-violet-600/10 via-transparent to-transparent opacity-50 pointer-events-none" />
       <CardBody className="p-0">
-        <div className="flex flex-col 2xl:flex-row">
-          {/* Left Section: Info */}
-          <div className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5">
+        <div className="flex flex-col 2xl:flex-row relative">
+          {/* Left Section: Info (Clickable) */}
+          <Link
+            className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5 hover:bg-white/[0.02] transition-colors"
+            to={`/matches/${match.match_id}`}
+          >
             <div className="flex items-start justify-between gap-4 mb-4">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
@@ -248,9 +251,9 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
                 value={100}
               />
             </div>
-          </div>
+          </Link>
 
-          {/* Right Section: VS Visual & Actions */}
+          {/* Right Section: VS Visual & Actions (Buttons) */}
           <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
             <div className="mb-6 flex flex-col items-center">
               <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-4 w-full text-center md:text-left">
@@ -270,7 +273,7 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
                   </span>
                 </div>
 
-                <div className="text-xl font-black text-default-400 italic">
+                <div className="text-xl font-black text-default-400 italic text-center">
                   VS
                 </div>
 
@@ -313,7 +316,7 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
               <div className="flex flex-wrap gap-2">
                 <Button
                   as={Link}
-                  className="flex-1 min-w-[100px] font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10"
+                  className="flex-1 min-w-[100px] font-black text-sm h-12 bg-white/5 active:scale-95 border border-white/10 hover:bg-white/10 transition-colors"
                   size="md"
                   to={`/matches/${match.match_id}`}
                   variant="flat"
