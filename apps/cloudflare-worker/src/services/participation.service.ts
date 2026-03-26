@@ -46,7 +46,7 @@ export class ParticipationService {
             JOIN users u_req ON mc.user_id = u_req.id
             LEFT JOIN clubs c_req ON u_req.club_id = c_req.id
             JOIN clubs c_host ON m.club_id = c_host.id
-            WHERE m.owner_id = ?
+            WHERE m.owner_id = ? AND m.deleted_at IS NULL
             ORDER BY mc.contacted_at DESC
         `).bind(userId).all<ParticipationRequest>();
 
@@ -75,7 +75,7 @@ export class ParticipationService {
             JOIN users u_host ON m.owner_id = u_host.id
             JOIN users u_req ON mc.user_id = u_req.id
             LEFT JOIN clubs c_req ON u_req.club_id = c_req.id
-            WHERE mc.user_id = ?
+            WHERE mc.user_id = ? AND m.deleted_at IS NULL
             ORDER BY m.match_date ASC
         `).bind(userId).all<ParticipationRequest>();
 
@@ -88,9 +88,12 @@ export class ParticipationService {
         if (!match || match.owner_id !== ownerId) throw new Error('Unauthorized');
 
         if (status === ContactStatus.ACCEPTED) {
+            // Tighten capacity logic: Match (non-tournament) is always 1 max.
+            const limit = match.type === MatchType.MATCH ? 1 : (match.max_teams ?? 99999);
+            
             const updateResult = await this.db.prepare(
-                'UPDATE match_contacts SET status = ? WHERE match_id = ? AND user_id = ? AND (SELECT COUNT(*) FROM match_contacts WHERE match_id = ? AND status = ?) < COALESCE((SELECT max_teams FROM matches WHERE id = ?), 99999)'
-            ).bind(ContactStatus.ACCEPTED, matchId, requestUserId, matchId, ContactStatus.ACCEPTED, matchId).run();
+                'UPDATE match_contacts SET status = ? WHERE match_id = ? AND user_id = ? AND (SELECT COUNT(*) FROM match_contacts WHERE match_id = ? AND status = ?) < ?'
+            ).bind(ContactStatus.ACCEPTED, matchId, requestUserId, matchId, ContactStatus.ACCEPTED, limit).run();
 
             if (updateResult.meta.changes === 0) throw new Error('409_CONFLICT');
         } else {
@@ -102,7 +105,8 @@ export class ParticipationService {
         const acceptedCount = acceptedCountRes?.count || 0;
 
         if (status === ContactStatus.ACCEPTED) {
-            if (match.type === MatchType.MATCH || (match.type === MatchType.TOURNAMENT && match.max_teams && acceptedCount >= match.max_teams)) {
+            const limit = match.type === MatchType.MATCH ? 1 : (match.max_teams ?? 99999);
+            if (acceptedCount >= limit) {
                 await this.db.prepare('UPDATE matches SET status = ? WHERE id = ?').bind(MatchStatus.FOUND, matchId).run();
             }
         } else if (status === ContactStatus.REFUSED && acceptedCount === 0) {
