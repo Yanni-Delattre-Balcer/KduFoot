@@ -85,7 +85,9 @@ export const ConfirmedTournamentCard = React.memo(
       ? highlighted
         ? "border-danger ring-4 ring-danger/30 shadow-danger/20"
         : "border-danger/50 bg-zinc-900/90 shadow-danger/10"
-      : "border-violet-500/40 bg-zinc-900/90 shadow-xl hover:shadow-violet-500/20";
+      : highlighted
+        ? "border-violet-500 ring-4 ring-violet-500/30 shadow-violet-500/20"
+        : "border-violet-500/40 bg-zinc-900/90 shadow-xl hover:shadow-violet-500/20";
 
     const isOwner = userId === part.owner_id;
 
@@ -178,40 +180,38 @@ export const ConfirmedTournamentCard = React.memo(
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                 <div
-                  className={`rounded-xl p-3 border transition-colors ${isDateChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
+                  className={`rounded-xl p-3 border transition-colors ${isDateChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-white/10 border-white/20" : "bg-white/5 border-white/5"}`}
                 >
                   <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                     {t("matchForm.labels.date", "Date")}
                   </p>
                   <p
-                    className={`text-sm font-bold ${isDateChanged || highlighted ? "text-danger" : "text-white"}`}
+                    className={`text-sm font-bold ${isDateChanged ? "text-danger" : "text-white"}`}
                   >
                     {formatDate(part.match_date)}
                   </p>
                 </div>
                 <div
-                  className={`rounded-xl p-3 border transition-colors ${highlighted || isNewTimeChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : "bg-white/5 border-white/5"}`}
+                  className={`rounded-xl p-3 border transition-colors ${isNewTimeChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-white/10 border-white/20" : "bg-white/5 border-white/5"}`}
                 >
                   <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                     {t("matchForm.labels.time", "Heure")}
                   </p>
                   <p
-                    className={`text-sm font-bold ${highlighted || isNewTimeChanged ? "text-danger" : "text-white"}`}
+                    className={`text-sm font-bold ${isNewTimeChanged ? "text-danger" : "text-white"}`}
                   >
                     {formatTime(part.match_time)}
                   </p>
                 </div>
                 <div
-                  className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
+                  className={`rounded-xl p-3 border transition-colors ${isFormatChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-white/10 border-white/20" : "bg-white/5 border-white/5"}`}
                 >
                   <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                     {t("matchForm.labels.format", "Format")}
                   </p>
                   <Chip
                     className="font-black text-xs border-none p-0"
-                    color={
-                      isFormatChanged || highlighted ? "danger" : "primary"
-                    }
+                    color={isFormatChanged ? "danger" : "primary"}
                     size="sm"
                     variant="dot"
                   >
@@ -225,27 +225,25 @@ export const ConfirmedTournamentCard = React.memo(
                   </Chip>
                 </div>
                 <div
-                  className={`rounded-xl p-3 border transition-colors ${highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
+                  className={`rounded-xl p-3 border transition-colors ${highlighted ? "bg-white/10 border-white/20" : "bg-white/5 border-white/5"}`}
                 >
                   <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                     {t("tournamentForm.labels.fee", "Frais")}
                   </p>
-                  <p
-                    className={`text-sm font-bold ${highlighted ? "text-danger" : "text-green-400"}`}
-                  >
+                  <p className="text-sm font-bold text-white">
                     {part.entry_fee
                       ? `${part.entry_fee}€`
                       : t("matchForm.labels.free", "Gratuit")}
                   </p>
                 </div>
                 <div
-                  className={`rounded-xl p-3 border transition-colors col-span-2 sm:col-span-1 ${isPitchChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-danger/10 border-danger/40" : "bg-white/5 border-white/5"}`}
+                  className={`rounded-xl p-3 border transition-colors col-span-2 sm:col-span-1 ${isPitchChanged ? "bg-danger/20 border-danger animate-pulse shadow-lg shadow-danger/20 ring-1 ring-danger" : highlighted ? "bg-white/10 border-white/20" : "bg-white/5 border-white/5"}`}
                 >
                   <p className="text-xs sm:text-sm font-black tracking-widest mb-1 text-default-400">
                     {t("matchForm.labels.pitch_type", "Terrain")}
                   </p>
                   <p
-                    className={`text-sm font-bold ${isPitchChanged || highlighted ? "text-danger" : "text-white"}`}
+                    className={`text-sm font-bold ${isPitchChanged ? "text-danger" : "text-white"}`}
                   >
                     {part.match_pitch_type ||
                     part.opponent_pitch_type ||

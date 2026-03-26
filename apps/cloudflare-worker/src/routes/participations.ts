@@ -170,10 +170,14 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
             const isCancellation = dbUser.id === match.owner_id;
 
             if (isWithdrawal) {
+                const message = match.type === 'tournament'
+                    ? `${targetUser.club_name || 'Une équipe'} pour le tournoi ${match.name || 'Sans nom'} ne participe plus`
+                    : `Désistement de ${targetUser.club_name || 'un club'} pour le ${match.match_date}`;
+
                 ctx.waitUntil(broadcastNotification(env, {
                     type: 'NOTIFICATION',
                     notificationType: 'TEAM_WITHDRAWAL',
-                    message: `Désistement de ${targetUser.club_name || 'un club'} pour le ${match.match_date}`,
+                    message,
                     targetUserId: match.owner_sub,
                     data: { 
                         match_id: params.matchId, 

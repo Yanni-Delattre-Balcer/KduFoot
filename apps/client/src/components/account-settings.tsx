@@ -425,6 +425,26 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     setIsExporting(true);
     try {
       const token = await getAccessToken();
+
+      // On mobile (iOS/Android), direct server-side export is much more reliable
+      // than client-side generation which may hit memory/buffer limits.
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // Open the server-side PDF directly in a new tab
+        const url = `${import.meta.env.API_BASE_URL}/api/me/export?token=${token}`;
+
+        window.open(url, "_blank");
+        addToast({
+          title: t("account.export_started", "Préparation de l'export..."),
+          color: "success",
+        });
+        setIsExporting(false);
+
+        return;
+      }
+
+      // Desktop: Fallback to existing client-side generation for offline feel or if preferred
       const res = await fetch(
         `${import.meta.env.API_BASE_URL}/api/me/export/json`,
         {
@@ -671,7 +691,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 max-w-full overflow-x-hidden">
       <input
         ref={fileInputRef}
         accept="image/*"
@@ -1083,9 +1103,9 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         </div>
 
         <div className="w-full flex md:w-auto flex-col gap-3 mt-8 pt-6 border-t border-white/10">
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-stretch sm:items-center">
             <Button
-              className="font-bold px-8 shadow-lg shadow-primary/30 w-full sm:w-auto tracking-wider order-1"
+              className="font-black px-10 shadow-lg shadow-primary/30 w-full sm:w-auto tracking-wider h-14"
               color="primary"
               isDisabled={isDeleting}
               isLoading={isSaving}
@@ -1097,7 +1117,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             </Button>
 
             <Button
-              className="font-bold px-8 w-full sm:w-auto tracking-wider order-2 sm:ml-auto"
+              className="font-black px-6 w-full sm:w-auto tracking-tight h-14 bg-secondary/10 border border-secondary/20"
               color="secondary"
               isDisabled={isSaving || isDeleting}
               isLoading={isExporting}
@@ -1106,16 +1126,16 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             >
               {t(
                 "account.buttons.export_data_pdf",
-                "Télécharger mes données (PDF)",
+                "Téléchargement PDF (RGPD)",
               )}
             </Button>
 
             <Button
-              className="font-bold px-8 w-full sm:w-auto tracking-wider order-3"
+              className="font-bold px-6 w-full sm:w-auto tracking-wider h-14 sm:ml-auto opacity-70 hover:opacity-100 transition-opacity"
               color="danger"
               isDisabled={isSaving || isExporting}
               isLoading={isDeleting}
-              variant="bordered"
+              variant="light"
               onPress={handleDeleteAccount}
             >
               {t("account.buttons.delete_account")}

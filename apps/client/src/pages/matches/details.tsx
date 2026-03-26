@@ -486,9 +486,16 @@ export default function MatchDetailsPage() {
                 </svg>
               }
               variant="light"
-              onPress={() => navigate("/matches")}
+              onPress={() => {
+                // If we have history within the app, go back. Otherwise go to /matches
+                if (window.history.length > 2) {
+                  navigate(-1);
+                } else {
+                  navigate("/matches");
+                }
+              }}
             >
-              {t("back_to_list")}
+              {t("back")}
             </Button>
 
             {user?.id === match.owner_id && (

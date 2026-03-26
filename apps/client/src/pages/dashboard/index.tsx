@@ -216,6 +216,9 @@ export default function DashboardPage() {
 
     setActionLoading((prev) => ({ ...prev, [key]: true }));
 
+    // Add a small delay so the spinner is actually visible (per user request)
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+
     // --- OPTIMISTIC UPDATE ---
     mutateRequests(
       (currentData: { requests: MatchRequest[] } | undefined) => {

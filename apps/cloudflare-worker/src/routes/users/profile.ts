@@ -423,7 +423,13 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
      * GET /api/me/export
      */
     router.get('/api/me/export', async (request: AuthenticatedRequest, env: Env) => {
-        const sub = request.user?.sub as string;
+        const url = new URL(request.url);
+        const queryToken = url.searchParams.get('token');
+        const sub = (request.user?.sub || queryToken) as string;
+
+        if (!sub) {
+             return Response.json({ success: false, error: 'Unauthorized' }, { status: 401, headers: router.corsHeaders });
+        }
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -454,7 +460,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             y -= 15;
             page.drawText(`Prénom : ${profile.firstname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
             y -= 15;
-            page.drawText(`Email : ${profile.email}`, { x: 70, y, size: 11, font });
+            page.drawText(`Email : ${profile.email || 'N/A'}`, { x: 70, y, size: 11, font });
             y -= 15;
             page.drawText(`Licence : ${profile.license_id || 'Non spécifiée'}`, { x: 70, y, size: 11, font });
             y -= 15;
