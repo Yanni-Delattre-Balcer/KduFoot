@@ -78,7 +78,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             }));
         }
 
-        return Response.json({ success: true, user: { ...user, club, additional_clubs } }, { headers: { ...router.corsHeaders, "Cache-Control": "private, max-age=30" } });
+        return Response.json({ success: true, user: { ...user, club, additional_clubs } }, { headers: { ...router.corsHeaders, "Cache-Control": "no-store, no-cache, must-revalidate" } });
     }, Permission.READ_API);
 
     /**
@@ -184,7 +184,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             success: true,
             user: { ...user, club, additional_clubs },
             notifications
-        }, { headers: { ...router.corsHeaders, "Cache-Control": "private, max-age=30" } });
+        }, { headers: { ...router.corsHeaders, "Cache-Control": "no-store, no-cache, must-revalidate" } });
     }, Permission.READ_API);
 
     /**
@@ -522,7 +522,8 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             });
         } catch (e: unknown) {
             console.error('Export PDF Error:', e);
-            return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
+            const errorMessage = e instanceof Error ? e.message : 'Unknown error during PDF generation';
+            return Response.json({ success: false, error: `Erreur Serveur: ${errorMessage}` }, { status: 500, headers: router.corsHeaders });
         }
     }, Permission.READ_API);
 

@@ -84,7 +84,7 @@ export class ParticipationService {
 
     async updateRequestStatus(matchId: string, requestUserId: string, ownerId: string, status: 'accepted' | 'refused'): Promise<boolean> {
         // Fetch all needed match fields in a single query
-        const match = await this.db.prepare('SELECT owner_id, match_date, match_time, type, max_teams FROM matches WHERE id = ?').bind(matchId).first<{ owner_id: string, match_date: string, match_time: string, type: string, max_teams: number }>();
+        const match = await this.db.prepare('SELECT owner_id, match_date, match_time, type, max_teams FROM matches WHERE id = ? AND deleted_at IS NULL').bind(matchId).first<{ owner_id: string, match_date: string, match_time: string, type: string, max_teams: number }>();
         if (!match || match.owner_id !== ownerId) throw new Error('Unauthorized');
 
         if (status === ContactStatus.ACCEPTED) {

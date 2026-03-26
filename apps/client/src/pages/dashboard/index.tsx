@@ -129,16 +129,8 @@ export default function DashboardPage() {
     {},
   );
 
-  // Track last seen data to detect specific changes (Surgical Highlight)
-  const [knownData, setKnownData] = useState<Record<string, unknown>>(() => {
-    try {
-      const saved = localStorage.getItem("kdufoot_known_match_data");
-
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
+  // Track last seen data to detect specific changes (Removed LocalStorage as per Zero Cache requirement)
+  const [knownData, setKnownData] = useState<Record<string, unknown>>({});
 
   const updateKnownData = (participations: MatchParticipation[]) => {
     const newKnown = { ...knownData };
@@ -160,10 +152,6 @@ export default function DashboardPage() {
     });
     if (changed) {
       setKnownData(newKnown);
-      localStorage.setItem(
-        "kdufoot_known_match_data",
-        JSON.stringify(newKnown),
-      );
     }
   };
 
@@ -227,6 +215,24 @@ export default function DashboardPage() {
     const key = `${matchId}-${userId}-${status}`;
 
     setActionLoading((prev) => ({ ...prev, [key]: true }));
+
+    // --- OPTIMISTIC UPDATE ---
+    mutateRequests(
+      (currentData: { requests: MatchRequest[] } | undefined) => {
+        if (!currentData?.requests) return currentData;
+
+        return {
+          ...currentData,
+          requests: currentData.requests.map((r) =>
+            r.match_id === matchId && r.requester_user_id === userId
+              ? { ...r, request_status: status }
+              : r,
+          ),
+        };
+      },
+      false, // Optimistic: don't revalidate immediately
+    );
+
     try {
       const token = await getAccessTokenSilently();
 
@@ -246,16 +252,17 @@ export default function DashboardPage() {
               }),
         color: status === "accepted" ? "success" : "warning",
       });
+
+      // Targeted revalidation
       mutateRequests();
-      globalMutate(
-        (key) => typeof key === "string" && key.startsWith("/api/"),
-        undefined,
-        { revalidate: true },
-      );
+      mutateParticipations();
+      window.dispatchEvent(new CustomEvent("kdufoot_matches_updated"));
     } catch (error: unknown) {
       const err = error as Error;
 
       console.error("Action error:", err);
+      // Rollback on error
+      mutateRequests();
       addToast({
         title: t("error.title"),
         description: err.message || t("error.action_failed"),
@@ -299,11 +306,6 @@ export default function DashboardPage() {
       });
       mutateRequests();
       mutateParticipations(); // Also refresh participations list
-      globalMutate(
-        (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
-        { revalidate: true },
-      );
       window.dispatchEvent(new CustomEvent("kdufoot_matches_updated"));
     } catch (error: unknown) {
       const err = error as Error;
@@ -342,25 +344,16 @@ export default function DashboardPage() {
       const p = (myParticipations || []).find((p) => p.match_id === matchId);
 
       if (p) {
-        setKnownData((prev) => {
-          const next = {
-            ...prev,
-            [matchId]: {
-              date: p.match_date,
-              time: p.match_time,
-              venue: p.venue,
-              format: p.match_format || p.format,
-              pitch: p.match_pitch_type || p.pitch_type,
-            },
-          };
-
-          localStorage.setItem(
-            "kdufoot_known_match_data",
-            JSON.stringify(next),
-          );
-
-          return next;
-        });
+        setKnownData((prev) => ({
+          ...prev,
+          [matchId]: {
+            date: p.match_date,
+            time: p.match_time,
+            venue: p.venue,
+            format: p.match_format || p.format,
+            pitch: p.match_pitch_type || p.pitch_type,
+          },
+        }));
       }
       // Clear highlight if this was the highlighted card
       if (highlightedCardId === matchId) {

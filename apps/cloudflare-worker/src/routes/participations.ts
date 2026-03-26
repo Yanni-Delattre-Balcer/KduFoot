@@ -30,7 +30,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         const requests = await participationService.getIncomingRequests(dbUser.id);
-        return Response.json({ success: true, requests }, { headers: { ...router.corsHeaders, 'Cache-Control': 'private, max-age=30' } });
+        return Response.json({ success: true, requests }, { headers: { ...router.corsHeaders, 'Cache-Control': 'no-store, no-cache, must-revalidate' } });
     }, Permission.MATCHES_CREATE);
 
     /**
@@ -50,7 +50,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
         const participations = await participationService.getMyParticipations(dbUser.id);
-        return Response.json({ success: true, participations }, { headers: { ...router.corsHeaders, 'Cache-Control': 'private, max-age=30' } });
+        return Response.json({ success: true, participations }, { headers: { ...router.corsHeaders, 'Cache-Control': 'no-store, no-cache, must-revalidate' } });
     }, Permission.MATCHES_CONTACT);
 
     router.post('/api/matches/<id>/contact', async (request, env, ctx) => {
@@ -162,7 +162,7 @@ export const setupParticipationRoutes = (router: Router, env: Env, ctx: Executio
         const dbUser = await getDbUser(env.DB, request.user?.sub);
         if (!dbUser) return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
 
-        const match = await env.DB.prepare('SELECT m.*, u.auth0_sub as owner_sub, c.name as host_club_name FROM matches m JOIN users u ON m.owner_id = u.id JOIN clubs c ON m.club_id = c.id WHERE m.id = ?').bind(params.matchId).first<any>();
+        const match = await env.DB.prepare('SELECT m.*, u.auth0_sub as owner_sub, c.name as host_club_name FROM matches m JOIN users u ON m.owner_id = u.id JOIN clubs c ON m.club_id = c.id WHERE m.id = ? AND m.deleted_at IS NULL').bind(params.matchId).first<any>();
         const targetUser = await env.DB.prepare('SELECT u.*, c.name as club_name FROM users u LEFT JOIN clubs c ON u.club_id = c.id WHERE u.id = ?').bind(params.userId).first<any>();
         
         if (match && targetUser) {
