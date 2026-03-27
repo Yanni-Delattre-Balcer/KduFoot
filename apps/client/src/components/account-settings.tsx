@@ -1,8 +1,6 @@
-import { Button } from "@heroui/button";
 import { addToast } from "@heroui/toast";
 import { Image as HeroImage } from "@heroui/image";
 import { Chip } from "@heroui/chip";
-import { Input } from "@heroui/input";
 import React, { useState, useRef, useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { mutate } from "swr";
@@ -10,9 +8,14 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 
 import { IdentitySection } from "./account/identity-section";
 import { SportsProfileSection } from "./account/sports-profile-section";
+import { ClubSection } from "./account/club-section";
+import { SyncSection } from "./account/sync-section";
+import { ActionButtons } from "./account/action-buttons";
 
 import { useUser } from "@/hooks/use-user";
 import { useAuth } from "@/authentication/providers/use-auth";
+import { formatPhoneNumber, formatSiret } from "@/utils/format";
+import { compressImage } from "@/utils/image";
 
 interface AccountSettingsProps {
   onSaveSuccess?: () => void;
@@ -60,46 +63,8 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const [isExporting, setIsExporting] = useState(false);
   const [isResettingCalendar, setIsResettingCalendar] = useState(false);
 
-  const formatPhoneNumber = (value: string) => {
-    let raw = value.replace(/\D/g, "");
-
-    if (raw.length > 0 && !raw.startsWith("33")) {
-      if (raw.startsWith("0")) raw = "33" + raw.substring(1);
-      else raw = "33" + raw;
-    }
-    if (raw.length > 11) raw = raw.substring(0, 11);
-
-    let formatted = "";
-
-    if (raw.length > 0) formatted += "+";
-    if (raw.length > 0) formatted += raw.substring(0, 2);
-    if (raw.length > 2) formatted += " " + raw.substring(2, 3);
-    if (raw.length > 3) formatted += " " + raw.substring(3, 5);
-    if (raw.length > 5) formatted += " " + raw.substring(5, 7);
-    if (raw.length > 7) formatted += " " + raw.substring(7, 9);
-    if (raw.length > 9) formatted += " " + raw.substring(9, 11);
-
-    return formatted;
-  };
-
   const handlePhoneChange = (v: string) => {
     setPhone(formatPhoneNumber(v));
-  };
-
-  const formatSiret = (value: string) => {
-    let raw = value.replace(/\D/g, "");
-
-    if (raw.length > 14) raw = raw.substring(0, 14);
-
-    // Format: XXX XXX XXX XXXXX
-    let formatted = "";
-
-    for (let i = 0; i < raw.length; i++) {
-      if (i === 3 || i === 6 || i === 9) formatted += " ";
-      formatted += raw[i];
-    }
-
-    return formatted;
   };
 
   // Sync properties from dbUser when it loads
@@ -184,53 +149,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
-  };
-
-  const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        const img = new window.Image();
-
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          let width = img.width;
-          let height = img.height;
-
-          // Maximum dimensions
-          const MAX_WIDTH = 400;
-          const MAX_HEIGHT = 400;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-
-          ctx?.drawImage(img, 0, 0, width, height);
-
-          // Compress to JPEG with 0.7 quality
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-
-          resolve(dataUrl);
-        };
-        img.onerror = reject;
-        img.src = e.target?.result as string;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -425,167 +343,15 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     setIsExporting(true);
     try {
       const token = await getAccessToken();
+      const res = await fetch(`${import.meta.env.API_BASE_URL}/api/me/export`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      // On mobile (iOS/Android), direct server-side export is much more reliable
-      // than client-side generation which may hit memory/buffer limits.
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-      if (isMobile) {
-        // Open the server-side PDF directly in a new tab
-        const url = `${import.meta.env.API_BASE_URL}/api/me/export?token=${token}`;
-
-        window.open(url, "_blank");
-        addToast({
-          title: t("account.export_started", "Préparation de l'export..."),
-          color: "success",
-        });
-        setIsExporting(false);
-
-        return;
-      }
-
-      // Desktop: Fallback to existing client-side generation for offline feel or if preferred
-      const res = await fetch(
-        `${import.meta.env.API_BASE_URL}/api/me/export/json`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!res.ok)
+      if (!res.ok) {
         throw new Error(t("account.export_error", "Erreur lors de l'export"));
-
-      const exportData = await res.json();
-
-      // Generate PDF client-side (pdf-lib works reliably in browsers)
-      const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
-      const pdfDoc = await PDFDocument.create();
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-      const pageWidth = 595.28;
-      const pageHeight = 841.89;
-
-      let page = pdfDoc.addPage([pageWidth, pageHeight]);
-      let y = pageHeight - 50;
-
-      const addPage = () => {
-        page = pdfDoc.addPage([pageWidth, pageHeight]);
-        y = pageHeight - 50;
-      };
-
-      page.drawText("KduFoot - Export de Données (RGPD)", {
-        x: 50,
-        y,
-        size: 20,
-        font: fontBold,
-        color: rgb(0, 0, 0.5),
-      });
-      y -= 30;
-      page.drawText(`Date d'export : ${new Date().toLocaleString("fr-FR")}`, {
-        x: 50,
-        y,
-        size: 10,
-        font,
-      });
-      y -= 40;
-
-      const profile = exportData.profile || {};
-
-      page.drawText("1. PROFIL UTILISATEUR", {
-        x: 50,
-        y,
-        size: 14,
-        font: fontBold,
-      });
-      y -= 25;
-      const profileLines = [
-        `Nom : ${profile.lastname || "Non spécifié"}`,
-        `Prénom : ${profile.firstname || "Non spécifié"}`,
-        `Email : ${profile.email || "N/A"}`,
-        `Licence : ${profile.license_id || "Non spécifiée"}`,
-        `Club : ${profile.siret || "Aucun club lié"}`,
-      ];
-
-      for (const line of profileLines) {
-        page.drawText(line, { x: 70, y, size: 11, font });
-        y -= 15;
-      }
-      y -= 25;
-
-      const matches = exportData.matches || [];
-      const applications = exportData.match_applications || [];
-      const sessions = exportData.training_sessions || [];
-      const exercises = exportData.created_exercises || [];
-
-      page.drawText("2. RÉSUMÉ D'ACTIVITÉ", {
-        x: 50,
-        y,
-        size: 14,
-        font: fontBold,
-      });
-      y -= 25;
-      const summaryLines = [
-        `Matchs créés : ${matches.length}`,
-        `Participations : ${applications.length}`,
-        `Séances d'entraînement : ${sessions.length}`,
-        `Exercices créés : ${exercises.length}`,
-      ];
-
-      for (const line of summaryLines) {
-        page.drawText(line, { x: 70, y, size: 11, font });
-        y -= 15;
-      }
-      y -= 25;
-
-      if (matches.length > 0) {
-        page.drawText("3. HISTORIQUE DES MATCHS CRÉÉS", {
-          x: 50,
-          y,
-          size: 14,
-          font: fontBold,
-        });
-        y -= 25;
-        page.drawText("Date", { x: 70, y, size: 10, font: fontBold });
-        page.drawText("Type", { x: 170, y, size: 10, font: fontBold });
-        page.drawText("Lieu", { x: 270, y, size: 10, font: fontBold });
-        y -= 15;
-        page.drawLine({
-          start: { x: 70, y },
-          end: { x: 520, y },
-          thickness: 1,
-          color: rgb(0.8, 0.8, 0.8),
-        });
-        y -= 15;
-
-        for (const m of matches.slice(0, 15)) {
-          if (y < 50) addPage();
-          const d = m.match_date
-            ? new Date(m.match_date).toLocaleDateString("fr-FR")
-            : "N/A";
-          const loc = m.address
-            ? m.address.length > 30
-              ? m.address.substring(0, 27) + "..."
-              : m.address
-            : "N/A";
-
-          page.drawText(d, { x: 70, y, size: 9, font });
-          page.drawText(m.match_type || "Amical", {
-            x: 170,
-            y,
-            size: 9,
-            font,
-          });
-          page.drawText(loc, { x: 270, y, size: 9, font });
-          y -= 15;
-        }
       }
 
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([new Uint8Array(pdfBytes)], {
-        type: "application/pdf",
-      });
+      const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
 
@@ -682,12 +448,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const getDept = (zip?: string | null) => {
-    if (!zip || zip.length < 2) return "";
-
-    return zip.substring(0, 2);
   };
 
   return (
@@ -798,350 +558,38 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
             />{" "}
           </div>
 
-          <div className="space-y-3">
-            <p className="text-sm font-bold text-default-400 ml-1 mt-2">
-              {t("account.sections.club_location")}
-            </p>
-            <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-default-500">
-                  {t("account.fields.current_club")}
-                </span>
-                <span className="font-bold text-primary">
-                  {dbUser?.club?.name || t("account.fields.no_club")}
-                </span>
-              </div>
+          <ClubSection
+            additionalStadiumAddresses={additionalStadiumAddresses}
+            authUser={authUser}
+            baseId={baseId}
+            dbUser={dbUser}
+            errors={errors}
+            handleLinkSiret={handleLinkSiret}
+            isSaving={isSaving}
+            setAdditionalStadiumAddresses={setAdditionalStadiumAddresses}
+            setErrors={setErrors}
+            setIsSaving={setIsSaving}
+            setSiret={setSiret}
+            siret={siret}
+            unlinkClub={unlinkClub}
+          />
 
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-col gap-3">
-                  {!dbUser?.club_id && (
-                    <p className="text-xs sm:text-sm text-default-600 font-medium bg-default-100 p-2 rounded-lg leading-relaxed border border-default-200 order-1">
-                      💡{" "}
-                      {t(
-                        "matchForm.link_club.search_help",
-                        'Pour trouver votre numéro, tapez sur Google : "SIRET + [Nom exact de votre club]". Exemple : "SIRET RC Lens".',
-                      )}
-                    </p>
-                  )}
-                  {!dbUser?.club_id && (
-                    <p className="text-xs text-default-500 leading-relaxed order-1 mt-1">
-                      💼 {t("matchForm.link_club.enterprise_help")}
-                    </p>
-                  )}
-                  <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start order-2">
-                    <div className="flex-1 flex flex-col gap-1">
-                      <Input
-                        aria-label="Siret (14 chiffres) ou Siren (9 chiffres)"
-                        className="w-full max-w-full"
-                        errorMessage={errors.siret}
-                        id={`${baseId}_siret`}
-                        isDisabled={!!dbUser?.club_id}
-                        isInvalid={!!errors.siret}
-                        label={
-                          <span className="font-bold text-danger text-[0.75rem] sm:text-sm leading-tight">
-                            SIRET (14 chiffres) ou SIREN (9 chiffres)
-                          </span>
-                        }
-                        labelPlacement="outside"
-                        name="acc_siret"
-                        placeholder="123 456 789 00012"
-                        size="sm"
-                        value={siret}
-                        variant="bordered"
-                        onValueChange={(v) => {
-                          const cleaned = v.replace(/\s/g, "");
-
-                          if (cleaned.length <= 14) {
-                            setSiret(v);
-                            if (errors.siret)
-                              setErrors((prev: Record<string, string>) => ({
-                                ...prev,
-                                siret: "",
-                              }));
-                          }
-                        }}
-                      />
-                    </div>
-                    {!dbUser?.club_id ? (
-                      <Button
-                        className="h-12 font-bold px-4 w-full sm:w-auto"
-                        color="primary"
-                        isLoading={isSaving}
-                        size="sm"
-                        onPress={handleLinkSiret}
-                      >
-                        {t("account.buttons.validate_club")}
-                      </Button>
-                    ) : (
-                      authUser?.email ===
-                        "yannidelattrebalcer.artois@gmail.com" && (
-                        <Button
-                          className="h-12 font-bold px-4 w-full sm:w-auto"
-                          color="danger"
-                          size="sm"
-                          variant="flat"
-                          onPress={async () => {
-                            if (
-                              confirm(
-                                t(
-                                  "account.admin_unlink_confirm",
-                                  "Détacher le club ? (Admin uniquement)",
-                                ),
-                              )
-                            ) {
-                              setIsSaving(true);
-                              try {
-                                await unlinkClub();
-                                addToast({
-                                  title: t(
-                                    "account.admin_unlink_success",
-                                    "Club détaché",
-                                  ),
-                                  color: "success",
-                                });
-                              } catch (e: unknown) {
-                                addToast({
-                                  title:
-                                    e instanceof Error ? e.message : String(e),
-                                  color: "danger",
-                                });
-                              } finally {
-                                setIsSaving(false);
-                              }
-                            }
-                          }}
-                        >
-                          {t("matchForm.buttons.unlink", "Détacher (Admin)")}
-                        </Button>
-                      )
-                    )}
-                  </div>
-                </div>
-
-                {dbUser?.club_id && (
-                  <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2 mb-2">
-                    <span className="text-default-500">
-                      {t("account.fields.main_club")}
-                    </span>
-                    <span className="font-bold text-primary">
-                      {dbUser?.club?.name}
-                    </span>
-                  </div>
-                )}
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-default-500">
-                    {t("account.fields.city")}
-                  </span>
-                  <span className="font-medium">
-                    {dbUser?.club?.city || dbUser?.location || "Non renseigné"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-default-500">
-                    {t("account.fields.dept")}
-                  </span>
-                  <span className="font-medium">
-                    {getDept(dbUser?.club?.zip) || "--"}
-                  </span>
-                </div>
-
-                {dbUser?.additional_clubs &&
-                  dbUser.additional_clubs.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
-                      <p className="text-[10px] font-bold text-default-400 tracking-widest mb-1">
-                        {t("account.fields.other_clubs")}
-                      </p>
-                      {dbUser.additional_clubs.map(
-                        (
-                          s: {
-                            name?: string;
-                            city?: string;
-                            zip?: string;
-                            siret: string;
-                          },
-                          idx: number,
-                        ) => (
-                          <div
-                            key={idx}
-                            className="bg-white/5 p-4 rounded-xl border border-white/10 flex flex-col gap-3"
-                          >
-                            <div className="flex justify-between items-start gap-2 w-full overflow-hidden">
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-black text-white truncate">
-                                  {s.name || t("account.fields.nameless_club")}
-                                </span>
-                                <div className="flex gap-2 text-[10px] text-default-500 font-bold mt-0.5">
-                                  <span>{s.city}</span>
-                                  <span>•</span>
-                                  <span>{getDept(s.zip)}</span>
-                                </div>
-                              </div>
-                              <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 py-0.5 rounded shrink-0 border border-white/5">
-                                {formatSiret(s.siret)}
-                              </span>
-                            </div>
-
-                            <div className="space-y-1.5">
-                              <Input
-                                aria-label={t(
-                                  "account.fields.stadium_address_for",
-                                  { club: s.name },
-                                )}
-                                autoComplete="street-address"
-                                classNames={{
-                                  label:
-                                    "text-[10px] font-bold text-primary-400 tracking-tight",
-                                  input: "text-xs",
-                                  inputWrapper: "h-9 min-h-9",
-                                }}
-                                id={`${baseId}_stadium_address_${s.siret}`}
-                                label={t("account.fields.stadium_address_for", {
-                                  club: s.name,
-                                })}
-                                name={`acc_stadium_address_${s.siret}`}
-                                placeholder={t(
-                                  "account.fields.stadium_placeholder",
-                                )}
-                                size="sm"
-                                value={
-                                  additionalStadiumAddresses[s.siret] || ""
-                                }
-                                variant="bordered"
-                                onValueChange={(v) => {
-                                  setAdditionalStadiumAddresses((prev) => ({
-                                    ...prev,
-                                    [s.siret]: v,
-                                  }));
-                                }}
-                              />
-                            </div>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                  )}
-
-                {dbUser?.club_id ? (
-                  <div className="mt-6 p-6 bg-red-900/20 border-2 border-red-500/50 rounded-2xl text-center shadow-2xl shadow-red-900/20">
-                    <p className="text-xl font-black text-red-500 tracking-tight mb-2">
-                      {t("support.need_help")}
-                    </p>
-                    <p className="text-base font-bold text-white mb-6">
-                      {t("account.support.description")}
-                    </p>
-
-                    <Button
-                      as="a"
-                      className="w-full font-black text-xs sm:text-sm h-12 sm:h-14 shadow-red-500/40 tracking-wider sm:tracking-widest animate-pulse"
-                      color="danger"
-                      href="mailto:support@kdufoot.com"
-                      size="lg"
-                      variant="shadow"
-                    >
-                      {t("account.buttons.contact_support")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="mt-4 p-3 rounded-xl bg-warning/10 border border-warning/20 space-y-2">
-                    <p className="text-sm leading-tight text-warning-700 font-medium">
-                      ⚠️ <strong>{t("warning")} :</strong>{" "}
-                      {t("account.siret.warning_title")}
-                    </p>
-                    <p className="text-xs sm:text-sm leading-tight text-default-500 italic">
-                      {t(
-                        "account.siret.warning_desc",
-                        "Pour toute modification ultérieure, vous devrez contacter le support technique.",
-                      )}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-sm font-bold text-default-400 ml-1 mt-2">
-              {t("account.sections.sync")}
-            </p>
-            <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="flex-1 flex items-center gap-3">
-                  <div
-                    className={`w-3 h-3 rounded-full shrink-0 ${dbUser?.has_synced_calendar ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-zinc-600"}`}
-                  />
-                  <div>
-                    <p className="text-sm font-bold text-white">
-                      {dbUser?.has_synced_calendar
-                        ? t("account.sync.active", "Calendrier Synchronisé ✅")
-                        : t(
-                            "account.sync.disabled",
-                            "Calendrier non connecté ❌",
-                          )}
-                    </p>
-                    <p className="text-[10px] text-zinc-500 mt-0.5 font-bold tracking-tight">
-                      {t(
-                        "onboarding.calendar.native",
-                        "Calendrier natif Apple / Google / Outlook",
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  className="font-bold text-xs h-10 border border-white/10 w-full sm:w-auto px-6 h-11"
-                  color={dbUser?.has_synced_calendar ? "default" : "secondary"}
-                  isLoading={isResettingCalendar}
-                  variant={dbUser?.has_synced_calendar ? "bordered" : "flat"}
-                  onPress={handleResetCalendar}
-                >
-                  {dbUser?.has_synced_calendar
-                    ? t("account.buttons.reset_calendar", "Désactiver")
-                    : t("account.buttons.sync_now", "Se synchroniser")}
-                </Button>
-              </div>
-            </div>
-          </div>
+          <SyncSection
+            dbUser={dbUser}
+            handleResetCalendar={handleResetCalendar}
+            isResettingCalendar={isResettingCalendar}
+          />
         </div>
 
-        <div className="w-full flex md:w-auto flex-col gap-3 mt-8 pt-6 border-t border-white/10">
-          <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-stretch sm:items-center">
-            <Button
-              className="font-black px-10 shadow-lg shadow-primary/30 w-full sm:w-auto tracking-wider h-14"
-              color="primary"
-              isDisabled={isDeleting}
-              isLoading={isSaving}
-              onPress={handleSave}
-            >
-              {from
-                ? t("account.buttons.save_and_continue")
-                : t("account.buttons.save_changes")}
-            </Button>
-
-            <Button
-              className="font-black px-6 w-full sm:w-auto tracking-tight h-14 bg-secondary/10 border border-secondary/20"
-              color="secondary"
-              isDisabled={isSaving || isDeleting}
-              isLoading={isExporting}
-              variant="flat"
-              onPress={handleExportData}
-            >
-              {t(
-                "account.buttons.export_data_pdf",
-                "Téléchargement PDF (RGPD)",
-              )}
-            </Button>
-
-            <Button
-              className="font-bold px-6 w-full sm:w-auto tracking-wider h-14 sm:ml-auto opacity-70 hover:opacity-100 transition-opacity"
-              color="danger"
-              isDisabled={isSaving || isExporting}
-              isLoading={isDeleting}
-              variant="light"
-              onPress={handleDeleteAccount}
-            >
-              {t("account.buttons.delete_account")}
-            </Button>
-          </div>
-        </div>
+        <ActionButtons
+          from={from}
+          handleDeleteAccount={handleDeleteAccount}
+          handleExportData={handleExportData}
+          handleSave={handleSave}
+          isDeleting={isDeleting}
+          isExporting={isExporting}
+          isSaving={isSaving}
+        />
       </div>
     </div>
   );

@@ -35,6 +35,9 @@ import { JerseyColorDots } from "@/components/jersey-color-dots";
 import DefaultLayout from "@/layouts/default";
 import { MatchRequest, MatchParticipation } from "@/types/match.types";
 
+const HIGHLIGHT_SCROLL_DELAY = 500;
+const ACTION_SPINNER_DELAY = 1200;
+
 const formatDate = (dateStr: string, locale: string = "fr-FR") => {
   try {
     const [year, month, day] = dateStr.split("-");
@@ -198,7 +201,7 @@ export default function DashboardPage() {
         if (element) {
           element.scrollIntoView({ behavior: "smooth", block: "center" });
         }
-      }, 500);
+      }, HIGHLIGHT_SCROLL_DELAY);
     }
   }, [searchParams]);
 
@@ -216,8 +219,7 @@ export default function DashboardPage() {
 
     setActionLoading((prev) => ({ ...prev, [key]: true }));
 
-    // Add a small delay so the spinner is actually visible (per user request)
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    await new Promise((resolve) => setTimeout(resolve, ACTION_SPINNER_DELAY));
 
     // --- OPTIMISTIC UPDATE ---
     mutateRequests(

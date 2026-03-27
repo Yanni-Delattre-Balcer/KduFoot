@@ -291,7 +291,7 @@
     "delete_confirmation": "Es-tu sûr de vouloir supprimer cette annonce ? Cette action est irréversible.",
     "accept_confirm": "Accepter l'équipe de {{clubName}} ?",
     "refuse_confirm": "Es-tu sûr de vouloir refuser cette équipe ?",
-    "confirm_delete_admin": "⚠️ SUPPRIMER CE MATCH ?\n\nCette action est irréversible. Le match et toutes ses participations seront définitivement supprimés.",
+    "confirm_delete_admin": "⚠️ SUPPRIMER {{matchType}} ?\n\nCette action est irréversible. L'annonce et toutes ses participations seront définitivement supprimées.",
     "delete_success_admin": "{{matchType}} supprimé. Les participants ont été notifiés de l'annulation.",
     "confirm_delete_tournament": "Es-tu sûr de vouloir supprimer ce tournoi ?",
     "confirm_delete_match": "Es-tu sûr de vouloir supprimer ce match ?",

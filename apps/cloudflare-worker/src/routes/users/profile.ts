@@ -13,6 +13,15 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 export const setupProfileRoutes = (router: Router, env: Env) => {
     const userService = new UserService(env.DB);
 
+    // ─── PDF Export Constants ────────────────────────────────────────────
+    const PDF_PAGE_WIDTH = 595.28;   // A4 width in points
+    const PDF_PAGE_HEIGHT = 841.89;  // A4 height in points
+    const PDF_MARGIN_X = 50;
+    const PDF_MARGIN_Y = 50;
+    const PDF_INDENT_X = 70;
+    const PDF_MAX_MATCHES = 15;
+    const PDF_MAX_ADDRESS_LENGTH = 30;
+
     /**
      * GET /api/users/me
      */
@@ -423,13 +432,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
      * GET /api/me/export
      */
     router.get('/api/me/export', async (request: AuthenticatedRequest, env: Env) => {
-        const url = new URL(request.url);
-        const queryToken = url.searchParams.get('token');
-        const sub = (request.user?.sub || queryToken) as string;
-
-        if (!sub) {
-             return Response.json({ success: false, error: 'Unauthorized' }, { status: 401, headers: router.corsHeaders });
-        }
+        const sub = request.user?.sub as string;
 
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
@@ -444,65 +447,72 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
             
-            let page = pdfDoc.addPage([595.28, 841.89]);
-            const { width, height } = page.getSize();
-            let y = height - 50;
+            let page = pdfDoc.addPage([PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT]);
+            const { height } = page.getSize();
+            let y = height - PDF_MARGIN_Y;
 
-            page.drawText('KduFoot - Export de Données (RGPD)', { x: 50, y, size: 20, font: fontBold, color: rgb(0, 0, 0.5) });
+            page.drawText('KduFoot - Export de Données (RGPD)', { x: PDF_MARGIN_X, y, size: 20, font: fontBold, color: rgb(0, 0, 0.5) });
             y -= 30;
-            page.drawText(`Date d'export : ${new Date().toLocaleString('fr-FR')}`, { x: 50, y, size: 10, font });
+            page.drawText(`Date d'export : ${new Date().toLocaleString('fr-FR')}`, { x: PDF_MARGIN_X, y, size: 10, font });
             y -= 40;
 
             const profile = (exportData.profile || {}) as Record<string, unknown>;
-            page.drawText('1. PROFIL UTILISATEUR', { x: 50, y, size: 14, font: fontBold });
+            page.drawText('1. PROFIL UTILISATEUR', { x: PDF_MARGIN_X, y, size: 14, font: fontBold });
             y -= 25;
-            page.drawText(`Nom : ${profile.lastname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Nom : ${profile.lastname || 'Non spécifié'}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 15;
-            page.drawText(`Prénom : ${profile.firstname || 'Non spécifié'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Prénom : ${profile.firstname || 'Non spécifié'}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 15;
-            page.drawText(`Email : ${profile.email || 'N/A'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Email : ${profile.email || 'N/A'}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 15;
-            page.drawText(`Licence : ${profile.license_id || 'Non spécifiée'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Licence : ${profile.license_id || 'Non spécifiée'}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 15;
-            page.drawText(`Club : ${profile.siret || 'Aucun club lié'}`, { x: 70, y, size: 11, font });
+            page.drawText(`Club : ${profile.siret || 'Aucun club lié'}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 40;
 
-            const matches = (exportData.matches || []) as any[];
-            const match_applications = (exportData.match_applications || []) as any[];
-            const training_sessions = (exportData.training_sessions || []) as any[];
-            const created_exercises = (exportData.created_exercises || []) as any[];
+            interface ExportMatch {
+                match_date?: string;
+                match_type?: string;
+                address?: string;
+            }
+            const matches = (exportData.matches || []) as ExportMatch[];
+            const match_applications = (exportData.match_applications || []) as Record<string, unknown>[];
+            const training_sessions = (exportData.training_sessions || []) as Record<string, unknown>[];
+            const created_exercises = (exportData.created_exercises || []) as Record<string, unknown>[];
 
-            page.drawText('2. RÉSUMÉ D\'ACTIVITÉ', { x: 50, y, size: 14, font: fontBold });
+            page.drawText('2. RÉSUMÉ D\'ACTIVITÉ', { x: PDF_MARGIN_X, y, size: 14, font: fontBold });
             y -= 25;
-            page.drawText(`Matchs créés : ${matches.length}`, { x: 70, y, size: 11, font });
+            page.drawText(`Matchs créés : ${matches.length}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 15;
-            page.drawText(`Participations : ${match_applications.length}`, { x: 70, y, size: 11, font });
+            page.drawText(`Participations : ${match_applications.length}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 15;
-            page.drawText(`Séances d'entraînement : ${training_sessions.length}`, { x: 70, y, size: 11, font });
+            page.drawText(`Séances d'entraînement : ${training_sessions.length}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 15;
-            page.drawText(`Exercices créés : ${created_exercises.length}`, { x: 70, y, size: 11, font });
+            page.drawText(`Exercices créés : ${created_exercises.length}`, { x: PDF_INDENT_X, y, size: 11, font });
             y -= 40;
 
             if (matches.length > 0) {
-                page.drawText('3. HISTORIQUE DES MATCHS CRÉÉS', { x: 50, y, size: 14, font: fontBold });
+                page.drawText('3. HISTORIQUE DES MATCHS CRÉÉS', { x: PDF_MARGIN_X, y, size: 14, font: fontBold });
                 y -= 25;
                 
-                page.drawText('Date', { x: 70, y, size: 10, font: fontBold });
+                page.drawText('Date', { x: PDF_INDENT_X, y, size: 10, font: fontBold });
                 page.drawText('Type', { x: 170, y, size: 10, font: fontBold });
                 page.drawText('Lieu', { x: 270, y, size: 10, font: fontBold });
                 y -= 15;
-                page.drawLine({ start: { x: 70, y }, end: { x: 520, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
+                page.drawLine({ start: { x: PDF_INDENT_X, y }, end: { x: 520, y }, thickness: 1, color: rgb(0.8, 0.8, 0.8) });
                 y -= 15;
 
-                for (const match of matches.slice(0, 15)) {
-                    if (y < 50) {
-                         page = pdfDoc.addPage([595.28, 841.89]);
-                         y = height - 50;
+                for (const match of matches.slice(0, PDF_MAX_MATCHES)) {
+                    if (y < PDF_MARGIN_Y) {
+                         page = pdfDoc.addPage([PDF_PAGE_WIDTH, PDF_PAGE_HEIGHT]);
+                         y = height - PDF_MARGIN_Y;
                     }
                     const matchDate = match.match_date ? new Date(match.match_date).toLocaleDateString('fr-FR') : 'N/A';
-                    page.drawText(matchDate, { x: 70, y, size: 9, font });
+                    page.drawText(matchDate, { x: PDF_INDENT_X, y, size: 9, font });
                     page.drawText(match.match_type || 'Amical', { x: 170, y, size: 9, font });
-                    const location = match.address ? (match.address.length > 30 ? match.address.substring(0, 27) + '...' : match.address) : 'N/A';
+                    const location = match.address
+                        ? (match.address.length > PDF_MAX_ADDRESS_LENGTH ? match.address.substring(0, PDF_MAX_ADDRESS_LENGTH - 3) + '...' : match.address)
+                        : 'N/A';
                     page.drawText(location, { x: 270, y, size: 9, font });
                     y -= 15;
                 }
