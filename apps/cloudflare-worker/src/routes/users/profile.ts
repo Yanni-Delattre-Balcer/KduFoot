@@ -19,7 +19,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
     const PDF_MARGIN_X = 50;
     const PDF_MARGIN_Y = 50;
     const PDF_INDENT_X = 70;
-    const PDF_MAX_MATCHES = 15;
+    const PDF_MAX_MATCHES = 30;
     const PDF_MAX_ADDRESS_LENGTH = 30;
 
     /**
@@ -522,24 +522,35 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
             // RGPD audit: log data export
             try {
+                const ip = request.headers.get('cf-connecting-ip') || '127.0.0.1';
                 await env.DB.prepare(
-                    'INSERT INTO rgpd_audit_log (id, user_id, action, details) VALUES (?, ?, ?, ?)'
-                ).bind(crypto.randomUUID(), user.id, 'export', 'PDF export').run();
-            } catch { /* audit log should not block export */ }
+                    'INSERT INTO rgpd_audit_log (id, user_id, action, details, performed_at, ip_address) VALUES (?, ?, ?, ?, unixepoch(), ?)'
+                ).bind(crypto.randomUUID(), user.id, 'export', 'PDF export', ip).run();
+            } catch (auditError) { 
+                console.warn('[Export PDF] Audit log failed:', auditError);
+            }
             
-            return new Response(pdfBytes, {
+            return new Response(pdfBytes.buffer as ArrayBuffer, {
                 status: 200,
                 headers: {
                     ...router.corsHeaders,
                     "Content-Type": "application/pdf",
-                    "Content-Disposition": 'attachment; filename="mes-donnees-kdufoot.pdf"',
-                    "Content-Length": pdfBytes.length.toString()
+                    "Content-Disposition": `attachment; filename="mes-donnees-kdufoot.pdf"`,
+                    "Content-Length": pdfBytes.byteLength.toString(),
+                    "Cache-Control": "no-store",
                 }
             });
         } catch (e: unknown) {
-            console.error('Export PDF Error:', e);
-            const errorMessage = e instanceof Error ? e.message : 'Unknown error during PDF generation';
-            return Response.json({ success: false, error: `Erreur Serveur: ${errorMessage}` }, { status: 500, headers: router.corsHeaders });
+            console.error('[Export PDF] Critical Error:', e);
+            const errorMessage = e instanceof Error ? e.stack || e.message : 'Unknown error during PDF generation';
+            return Response.json({ 
+                success: false, 
+                error: `Erreur Serveur: ${e instanceof Error ? e.message : 'Génération PDF échouée'}`,
+                debug: e instanceof Error ? errorMessage : undefined 
+            }, { 
+                status: 500, 
+                headers: router.corsHeaders 
+            });
         }
     }, Permission.READ_API);
 

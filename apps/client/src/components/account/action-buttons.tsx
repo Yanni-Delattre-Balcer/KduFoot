@@ -23,10 +23,10 @@ export const ActionButtons = ({
   const { t } = useTranslation("kdufoot");
 
   return (
-    <div className="w-full flex md:w-auto flex-col gap-3 mt-8 pt-6 border-t border-white/10">
-      <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-stretch sm:items-center">
+    <div className="w-full flex flex-col gap-4 mt-8 pt-6 border-t border-white/10">
+      <div className="flex flex-col gap-3 w-full max-w-md mx-auto">
         <Button
-          className="font-black px-10 shadow-lg shadow-primary/30 w-full sm:w-auto tracking-wider h-14"
+          className="font-black px-8 shadow-lg shadow-primary/30 w-full tracking-wider h-12"
           color="primary"
           isDisabled={isDeleting}
           isLoading={isSaving}
@@ -38,7 +38,7 @@ export const ActionButtons = ({
         </Button>
 
         <Button
-          className="font-black px-6 w-full sm:w-auto tracking-tight h-14 bg-secondary/10 border border-secondary/20"
+          className="font-black px-6 w-full tracking-tight h-12 bg-secondary/10 border border-secondary/20"
           color="secondary"
           isDisabled={isSaving || isDeleting}
           isLoading={isExporting}
@@ -49,11 +49,11 @@ export const ActionButtons = ({
         </Button>
 
         <Button
-          className="font-bold px-6 w-full sm:w-auto tracking-wider h-14 sm:ml-auto opacity-70 hover:opacity-100 transition-opacity"
+          className="font-bold px-6 w-full tracking-wider h-12 border border-danger/20"
           color="danger"
           isDisabled={isSaving || isExporting}
           isLoading={isDeleting}
-          variant="light"
+          variant="flat"
           onPress={handleDeleteAccount}
         >
           {t("account.buttons.delete_account")}

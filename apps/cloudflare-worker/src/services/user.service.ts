@@ -170,10 +170,10 @@ export class UserService {
     async exportUserData(userId: string): Promise<Record<string, unknown>> {
         // Prepare queries for all user-related data
         const profileQuery = this.db.prepare('SELECT * FROM users WHERE id = ?').bind(userId);
-        const matchesQuery = this.db.prepare('SELECT * FROM matches WHERE owner_id = ? AND deleted_at IS NULL').bind(userId);
-        const participationsQuery = this.db.prepare('SELECT * FROM match_contacts WHERE user_id = ?').bind(userId);
-        const sessionsQuery = this.db.prepare('SELECT * FROM training_sessions WHERE user_id = ?').bind(userId);
-        const exercisesQuery = this.db.prepare('SELECT * FROM exercises WHERE user_id = ?').bind(userId);
+        const matchesQuery = this.db.prepare('SELECT * FROM matches WHERE owner_id = ? AND deleted_at IS NULL ORDER BY match_date DESC LIMIT 50').bind(userId);
+        const participationsQuery = this.db.prepare('SELECT * FROM match_contacts WHERE user_id = ? ORDER BY contacted_at DESC LIMIT 50').bind(userId);
+        const sessionsQuery = this.db.prepare('SELECT * FROM training_sessions WHERE user_id = ? ORDER BY created_at DESC LIMIT 50').bind(userId);
+        const exercisesQuery = this.db.prepare('SELECT * FROM exercises WHERE user_id = ? ORDER BY created_at DESC LIMIT 50').bind(userId);
         const auditQuery = this.db.prepare('SELECT * FROM rgpd_audit_log WHERE user_id = ? ORDER BY rowid DESC LIMIT 50').bind(userId);
 
         const results = await this.db.batch([

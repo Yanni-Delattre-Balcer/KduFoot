@@ -460,7 +460,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         onChange={handleFileChange}
       />
 
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col gap-6">
         <p className="text-sm font-extrabold text-danger tracking-widest -mb-4 animate-pulse-red">
           {t("account.avatar.recommendation")}
         </p>
