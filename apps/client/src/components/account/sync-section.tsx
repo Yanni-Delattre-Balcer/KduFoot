@@ -29,8 +29,8 @@ export const SyncSection = ({
             <div>
               <p className="text-sm font-bold text-white">
                 {dbUser?.has_synced_calendar
-                  ? t("account.sync.active", "Calendrier Synchronisé ✅")
-                  : t("account.sync.disabled", "Calendrier non connecté ❌")}
+                  ? t("account.sync.active")
+                  : t("account.sync.disabled")}
               </p>
               <p className="text-[10px] text-zinc-500 mt-0.5 font-bold tracking-tight">
                 {t(
@@ -48,8 +48,8 @@ export const SyncSection = ({
             onPress={handleResetCalendar}
           >
             {dbUser?.has_synced_calendar
-              ? t("account.buttons.reset_calendar", "Désactiver")
-              : t("account.buttons.sync_now", "Se synchroniser")}
+              ? t("account.buttons.reset_calendar")
+              : t("account.buttons.sync_now")}
           </Button>
         </div>
       </div>

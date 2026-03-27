@@ -652,11 +652,15 @@
       "save_changes": "Enregistrer les modifications",
       "save_and_continue": "Enregistrer et continuer",
       "delete_account": "Supprimer mon compte",
-      "reset_calendar": "Réinitialiser ma synchronisation calendrier",
+      "export_data_pdf": "Téléchargement PDF (RGPD)",
+      "sync_now": "Se synchroniser",
+      "reset_calendar": "Désactiver",
       "validate_club": "VALIDER MON CLUB",
       "contact_support": "📩 CONTACTER LE SUPPORT"
     },
     "sync": {
+      "active": "Calendrier Synchronisé ✅",
+      "disabled": "Calendrier non connecté ❌",
       "reset_confirm": "Voulez-vous modifier votre synchronisation ?\n\nVotre page de synchronisation va se réouvrir pour vous permettre de vous connecter.",
       "reset_success": "Action enregistrée. La page de synchronisation va se réouvrir.",
       "reset_error": "Erreur lors de la réinitialisation de la synchronisation."

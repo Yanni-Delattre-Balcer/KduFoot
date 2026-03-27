@@ -45,7 +45,7 @@ export const ActionButtons = ({
           variant="flat"
           onPress={handleExportData}
         >
-          {t("account.buttons.export_data_pdf", "Téléchargement PDF (RGPD)")}
+          {t("account.buttons.export_data_pdf")}
         </Button>
 
         <Button

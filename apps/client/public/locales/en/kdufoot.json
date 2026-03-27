@@ -604,8 +604,18 @@
       "save_changes": "Save changes",
       "save_and_continue": "Save and continue",
       "delete_account": "Delete my account",
+      "export_data_pdf": "Download PDF (GDPR)",
+      "sync_now": "Sync now",
+      "reset_calendar": "Deactivate",
       "validate_club": "VALIDATE MY CLUB",
       "contact_support": "📩 CONTACT SUPPORT"
+    },
+    "sync": {
+      "active": "Calendar Synchronized ✅",
+      "disabled": "Calendar not connected ❌",
+      "reset_confirm": "Do you want to modify your synchronization?\n\nYour synchronization page will reopen to allow you to connect.",
+      "reset_success": "Action saved. The synchronization page will reopen.",
+      "reset_error": "Error resetting synchronization."
     },
     "confirm_delete": "⚠️ WARNING: This action is irreversible.\n\nYour account as well as ALL your matches and tournaments will be permanently deleted.\n\nDo you really want to continue?",
     "delete_success": "Account successfully deleted",
