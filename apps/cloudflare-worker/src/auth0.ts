@@ -113,18 +113,17 @@ export const checkPermissions = async (
 		const amr = (payload.amr as string[]) || [];
 		const isMfa = amr.includes("mfa") || payload.mfa_authenticated === true || payload.amr === "mfa";
 		
-		// If we are in production and it's a sensitive role, we block if MFA is missing.
+		// If MFA is missing on a sensitive request, we log a warning but don't block yet (Hotfix mode)
 		if (!isMfa && env.AUTHENTICATION_PROVIDER_TYPE === "auth0") {
-			const isLocal = env.API_BASE_URL?.includes("localhost") || env.CORS_ORIGIN?.includes("localhost");
+			console.warn(`[MFA WARNING] Sensitive role access without MFA: ${payload.sub} for ${permission}`);
 			
-			if (isLocal) {
-				console.warn(`Sensitive role access without MFA (LOCAL DEV ALLOWED): ${payload.sub}`);
-			} else {
-				console.error(`FORBIDDEN: Sensitive role access without MFA on sensitive request: ${payload.sub} for ${permission}`);
-				const error = new Error(`Sensitive role access without MFA on sensitive request: ${payload.sub}`);
-				Sentry.captureException(error, { user: { id: payload.sub }, extra: { permission } });
-				access = false; // Strict Enforcement in Production
+			// Sentry reporting for visibility without blocking
+			if (!env.API_BASE_URL?.includes("localhost")) {
+				const error = new Error(`Sensitive role access without MFA: ${payload.sub}`);
+				Sentry.captureException(error, { user: { id: payload.sub }, extra: { permission, is_soft_blocked: false } });
 			}
+			
+			// access = false; // [DISABLED] Temporarily allowed for production maintenance
 		}
 	}
 

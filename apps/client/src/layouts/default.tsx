@@ -121,22 +121,6 @@ export default function DefaultLayout({
           </div>
 
           <div className="pt-4 pb-12 sm:pb-0 border-t border-default-100 w-full flex flex-col items-center gap-4 text-center">
-            <div className="flex flex-wrap justify-center gap-4 mb-2">
-              <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] font-bold text-green-500 uppercase tracking-tighter">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                FAANG-Ready Platinum Grade
-              </div>
-              <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 uppercase tracking-tighter">
-                RGPD Compliant & Scrubbed
-              </div>
-              <a
-                className="flex items-center gap-1 px-3 py-1 rounded-full bg-default-100 border border-default-200 text-[10px] font-bold text-default-500 uppercase tracking-tighter hover:bg-default-200 transition-colors"
-                href="/api/status"
-                target="_blank"
-              >
-                System Status: 100% Online
-              </a>
-            </div>
             <Link
               className="text-xs text-default-500 hover:text-primary transition-colors underline-offset-4 hover:underline"
               to="/gdpr"
