@@ -98,17 +98,17 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
       <ModalContent>
         <ModalHeader className="flex justify-center flex-col items-center gap-4 relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-purple-500/10 blur-[80px] -z-10 rounded-full" />
-          <div className="p-4 rounded-[2.5rem] bg-gradient-to-br from-purple-500/30 to-indigo-500/20 text-purple-300 border border-white/10 shadow-[0_0_40px_rgba(168,85,247,0.4)]">
+          <div className="p-4 rounded-[2.5rem] bg-linear-to-br from-purple-500/30 to-indigo-500/20 text-purple-300 border border-white/10 shadow-[0_0_40px_rgba(168,85,247,0.4)]">
             <Calendar size={36} strokeWidth={2} />
           </div>
         </ModalHeader>
         <ModalBody className="text-center px-6 sm:px-10">
-          <h1
-            className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight leading-tight"
+          <h2
+            className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-linear-to-b from-white to-white/60 tracking-tight leading-tight"
             id="auth-modal-title"
           >
             {t("onboarding.calendar.title", "Synchronisez votre calendrier")}
-          </h1>
+          </h2>
           <p className="mt-2 text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed max-w-[280px] sm:max-w-none mx-auto opacity-80">
             {t(
               "onboarding.calendar.description",
@@ -119,7 +119,8 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           <div className="flex justify-center w-full mt-6">
             <div className="relative group">
               <div className="absolute inset-0 bg-purple-500/20 blur-2xl group-hover:bg-purple-500/30 transition-colors rounded-full" />
-              <div className="relative flex flex-col items-center gap-3 p-5 sm:p-7 rounded-[2.5rem] bg-white/[0.03] backdrop-blur-md border border-white/10 w-full min-w-[140px] sm:min-w-[180px] hover:border-white/20 transition-all duration-300">
+              <div className="relative flex flex-col items-center gap-3 p-5 sm:p-7 rounded-[2.5rem] bg-white/3 backdrop-blur-md border border-white/10 w-full min-w-[140px] sm:min-w-[180px] hover:border-white/20 transition-all duration-300">
+                <div className="absolute inset-x-8 -bottom-4 h-20 bg-emerald-500/10 blur-2xl rounded-full" />
                 <Calendar
                   className="text-purple-400 group-hover:scale-110 transition-transform duration-500"
                   size={32}
@@ -135,7 +136,7 @@ export const CombinedAuthModal: React.FC<CombinedAuthModalProps> = ({
           <div className="flex flex-col gap-4 w-full">
             {/* Bouton principal : ouvre le lien webcal:// */}
             <Button
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold tracking-tight w-full rounded-2xl h-14 text-base sm:text-lg shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="bg-linear-to-r from-purple-600 to-indigo-600 text-white font-bold tracking-tight w-full rounded-2xl h-14 text-base sm:text-lg shadow-[0_10px_30px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all"
               endContent={!isSyncing && <ChevronRight size={20} />}
               isLoading={isSyncing}
               size="lg"

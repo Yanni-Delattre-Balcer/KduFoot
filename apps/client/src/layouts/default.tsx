@@ -66,8 +66,13 @@ export default function DefaultLayout({
   return (
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
       {/* Accessibility: Skip-link for keyboard navigation */}
-      {/* Spacer dynamique pour Navbar fixed + Safe Area */}
-      <div className="h-[calc(64px+env(safe-area-inset-top,0px))] lg:h-20 shrink-0" />
+      {/* Spacer dynamique pour Navbar fixed + Safe Area (PWA) */}
+      <div
+        className="shrink-0"
+        style={{
+          height: "calc(5rem + env(safe-area-inset-top, 0px))",
+        }}
+      />
       <main
         className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}
         id="main-content"
@@ -81,7 +86,7 @@ export default function DefaultLayout({
               <div className="flex flex-col gap-2">
                 <Button
                   as="a"
-                  className="w-full font-bold h-12 bg-gradient-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/20 text-blue-400 hover:border-blue-500/40 hover:bg-blue-600/20 transition-all shadow-[0_0_20px_rgba(59,130,246,0.1)] rounded-xl"
+                  className="w-full font-bold h-12 bg-linear-to-br from-blue-600/20 to-indigo-600/10 border border-blue-500/20 text-blue-400 hover:border-blue-500/40 hover:bg-blue-600/20 transition-all shadow-[0_0_20px_rgba(59,130,246,0.1)] rounded-xl"
                   href={`mailto:support@kdufoot.com?subject=${t("support.technical_issue_subject")}`}
                   startContent={<Mail size={18} strokeWidth={2.5} />}
                 >

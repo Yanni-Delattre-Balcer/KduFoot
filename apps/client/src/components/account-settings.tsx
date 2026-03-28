@@ -319,7 +319,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       try {
         const token = await getAccessToken();
         const res = await fetch(
-          `${import.meta.env.API_BASE_URL}/api/me/delete`,
+          `${import.meta.env.API_BASE_URL}/api/users/me`,
           {
             method: "DELETE",
             headers: {
@@ -328,7 +328,14 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
           },
         );
 
-        if (!res.ok) throw new Error(t("account.delete_error"));
+        if (!res.ok) {
+          console.error(
+            "[Account] Delete failed:",
+            res.status,
+            await res.text().catch(() => ""),
+          );
+          throw new Error(t("account.delete_error"));
+        }
         addToast({
           title: t("account.delete_success"),
           color: "success",
@@ -353,6 +360,7 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       });
 
       if (!res.ok) {
+        console.error("[Account] Export failed:", res.status, res.statusText);
         throw new Error(t("account.export_error", "Erreur lors de l'export"));
       }
 

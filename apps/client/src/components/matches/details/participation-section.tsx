@@ -49,7 +49,7 @@ export const ParticipationSection = ({
           {user?.id === match.owner_id ? (
             <div className="text-center space-y-4">
               {match.contacts?.some((c: any) => c.status === "accepted") ? (
-                <div className="bg-emerald-500/20 border-2 border-emerald-500/30 p-5 rounded-[2rem] space-y-4 mb-4 animate-appearance-in">
+                <div className="bg-emerald-500/20 border-2 border-emerald-500/30 p-5 rounded-4xl space-y-4 mb-4 animate-appearance-in">
                   <p className="text-emerald-400 font-black text-center text-sm tracking-widest flex items-center justify-center gap-2">
                     {t("details.status.confirmed")}
                   </p>
@@ -96,7 +96,7 @@ export const ParticipationSection = ({
           ) : (
             <>
               {isModified && (
-                <div className="bg-rose-500/20 border-2 border-rose-500/30 p-5 rounded-[2rem] space-y-4 mb-6 animate-pulse shadow-[0_0_20px_rgba(244,63,94,0.4)]">
+                <div className="bg-rose-500/20 border-2 border-rose-500/30 p-5 rounded-4xl space-y-4 mb-6 animate-pulse shadow-[0_0_20px_rgba(244,63,94,0.4)]">
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-2xl animate-bounce">⚠️</span>
                     <p className="text-rose-400 font-black text-center text-sm tracking-widest leading-tight">
@@ -251,88 +251,106 @@ export const ParticipationSection = ({
                       </div>
                     )}
 
-                    {userContact?.message ===
-                    t("match.contact_tracking_message") ? (
-                      <Button
-                        className="w-full font-black tracking-tighter h-12 shadow-lg shadow-danger/20 border border-danger/20"
-                        color="danger"
-                        variant="shadow"
-                        onPress={onCancelOpen}
-                      >
-                        {t("details.buttons.cancel_request")}
-                      </Button>
-                    ) : (
-                      <Button
-                        className="w-full font-black tracking-tighter h-12 shadow-lg"
-                        color={isProfileIncomplete ? "default" : "primary"}
-                        isDisabled={isProfileIncomplete}
-                        isLoading={isSubmitting}
-                        onPress={async () => {
-                          if (isMasked) {
-                            openGateway(
-                              t(
-                                "error.profile_incomplete_action",
-                                "Veuillez compléter votre profil pour effectuer cette action",
-                              ),
-                            );
+                    {/* min-h prevents layout shift when button state changes */}
+                    <div className="min-h-[48px]">
+                      {userContact?.message ===
+                      t("match.contact_tracking_message") ? (
+                        <Button
+                          className="w-full font-black tracking-tighter h-12 shadow-lg shadow-danger/20 border border-danger/20"
+                          color="danger"
+                          variant="shadow"
+                          onPress={onCancelOpen}
+                        >
+                          {t("details.buttons.cancel_request")}
+                        </Button>
+                      ) : (
+                        <Button
+                          className="w-full font-black tracking-tighter h-12 shadow-lg"
+                          color={isProfileIncomplete ? "default" : "primary"}
+                          isDisabled={isProfileIncomplete}
+                          isLoading={isSubmitting}
+                          onPress={async () => {
+                            if (isMasked) {
+                              openGateway(
+                                t(
+                                  "error.profile_incomplete_action",
+                                  "Veuillez compléter votre profil pour effectuer cette action",
+                                ),
+                              );
 
-                            return;
-                          }
-                          if (!user) {
-                            openGateway(
-                              t(
-                                "error.login_required",
-                                "Veuillez vous connecter pour envoyer une demande.",
-                              ),
-                            );
+                              return;
+                            }
+                            if (!user) {
+                              openGateway(
+                                t(
+                                  "error.login_required",
+                                  "Veuillez vous connecter pour envoyer une demande.",
+                                ),
+                              );
 
-                            return;
-                          }
-                          if (!user.club_id) {
-                            addToast({
-                              title: t(
-                                "profile_incomplete",
-                                "Profil incomplet",
-                              ),
-                              description: t(
-                                "match.club_link_required",
-                                "Veuillez lier votre club pour envoyer une demande.",
-                              ),
-                              color: "warning",
-                              timeout: 5000,
-                            });
+                              return;
+                            }
+                            if (!user.club_id) {
+                              addToast({
+                                title: t(
+                                  "profile_incomplete",
+                                  "Profil incomplet",
+                                ),
+                                description: t(
+                                  "match.club_link_required",
+                                  "Veuillez lier votre club pour envoyer une demande.",
+                                ),
+                                color: "warning",
+                                timeout: 5000,
+                              });
 
-                            return;
-                          }
-                          try {
-                            await contactMatch({
-                              message: t("match.contact_tracking_message"),
-                            });
-                            addToast({
-                              title: t("success"),
-                              description: t(
-                                "matchForm.alerts.contact_success",
-                                { date: match.match_date },
-                              ),
-                              variant: "flat",
-                              color: "success",
-                              timeout: 5000,
-                            });
-                          } catch (e: unknown) {
-                            addToast({
-                              title: t("error.title"),
-                              description:
-                                (e as Error).message || t("error.generic"),
-                              variant: "flat",
-                              color: "danger",
-                              timeout: 5000,
-                            });
-                          }
-                        }}
-                      >
-                        {t("match.send_request")}
-                      </Button>
-                    )}
+                              return;
+                            }
+
+                            // Save scroll position to prevent screen jump
+                            const scrollY = window.scrollY;
+
+                            try {
+                              await contactMatch({
+                                message: t("match.contact_tracking_message"),
+                              });
+
+                              // Restore scroll position after DOM update
+                              requestAnimationFrame(() => {
+                                window.scrollTo(0, scrollY);
+                              });
+
+                              addToast({
+                                title: t("success"),
+                                description: t(
+                                  "matchForm.alerts.contact_success",
+                                  { date: match.match_date },
+                                ),
+                                variant: "flat",
+                                color: "success",
+                                timeout: 5000,
+                              });
+                            } catch (e: unknown) {
+                              // Restore scroll on error too
+                              requestAnimationFrame(() => {
+                                window.scrollTo(0, scrollY);
+                              });
+
+                              addToast({
+                                title: t("error.title"),
+                                description:
+                                  (e as Error).message || t("error.generic"),
+                                variant: "flat",
+                                color: "danger",
+                                timeout: 5000,
+                              });
+                            }
+                          }}
+                        >
+                          {t("match.send_request")}
+                        </Button>
+                      )}
+                    </div>
                   </>
                 );
               })()}

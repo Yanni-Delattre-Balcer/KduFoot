@@ -105,3 +105,46 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* PWA Standalone Mode — Fix navbar + disable iOS rubber-band scroll */
+@media (display-mode: standalone) {
+  html, body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Navbar stays pinned in PWA mode — reinforced */
+  .fixed.top-0 {
+    position: fixed !important;
+    top: 0 !important;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+  }
+
+  /* Safe area background behind the notch/status bar */
+  body::before {
+    content: "";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 0px);
+    background: #000;
+    z-index: 999999;
+    pointer-events: none;
+  }
+}
+
+/* iOS Safari standalone — additional fix */
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    html {
+      height: -webkit-fill-available;
+    }
+    body {
+      min-height: -webkit-fill-available;
+    }
+  }
+}

@@ -432,8 +432,11 @@ export function useMatch(id: string | null) {
         throw err;
       }
 
+      // Targeted invalidation: only revalidate match-related keys (avoids cascade re-renders / layout shifts)
       globalMutate(
-        (key) => typeof key === "string" && key.startsWith("/api/"),
+        (key) =>
+          typeof key === "string" &&
+          (key.startsWith("/api/matches") || key === "/api/me/context"),
         undefined,
         { revalidate: true },
       );

@@ -84,7 +84,16 @@ export const Navbar = () => {
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[99999] pointer-events-none">
+    <div
+      className="fixed top-0 left-0 right-0 z-99999 pointer-events-none"
+      style={{
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        transform: "translate3d(0,0,0)",
+        WebkitTransform: "translate3d(0,0,0)",
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
+      }}
+    >
       <div className="pointer-events-auto">
         <HeroUINavbar
           className={`bg-black transition-all duration-300 border-b border-white/5 ${

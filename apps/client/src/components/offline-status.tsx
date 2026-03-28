@@ -24,7 +24,7 @@ export const OfflineStatus = () => {
       {!isOnline && (
         <motion.div
           animate={{ opacity: 1, y: 0 }}
-          className="fixed top-0 left-0 right-0 z-[9999] flex justify-center p-2"
+          className="fixed top-0 left-0 right-0 z-9999 flex justify-center p-2"
           exit={{ opacity: 0, y: -50 }}
           initial={{ opacity: 0, y: -50 }}
         >
