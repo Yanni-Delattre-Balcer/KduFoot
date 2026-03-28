@@ -441,7 +441,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
         }
 
         // FAANG standard: Quota check BEFORE expensive compute
-        const quotaError = await checkQuota('pdf_export', 1)(request, env);
+        const quotaError = await checkQuota('pdf_export', 1)(request, env, user.id, user.subscription || 'Free');
         if (quotaError) return quotaError;
 
         try {

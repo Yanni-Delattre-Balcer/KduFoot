@@ -90,6 +90,10 @@
       "tournament": "Tournament"
     },
     "description": "AI Video Analysis & friendly matches between clubs — two tools, one platform.",
+    "hero": {
+      "description_ultimate": "Organize your friendly matches and tournaments, find opponents and manage your seasons — all on one platform.",
+      "registered_coaches_suffix": "registered coaches"
+    },
     "about": {
       "title": "👋 About",
       "intro": "<0>Yanni</0>, cybersecurity student, <1>Networks & Telecommunications in Béthune</1> — I created Kdufoot to help football coaches <2>save time</2>.",

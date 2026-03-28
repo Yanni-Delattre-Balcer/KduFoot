@@ -4,22 +4,25 @@ import { Env } from "../types/env";
 export type QuotaMetric = 'ia_analysis' | 'pdf_export';
 
 export const checkQuota = (metric: QuotaMetric, freeLimit: number) => {
-    return async (request: AuthenticatedRequest, env: Env) => {
-        const user = request.user;
-        if (!user) return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    return async (request: AuthenticatedRequest, env: Env, userId?: string, subscription?: string) => {
+        if (!request.user && !userId) return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
-        const subscription = (user.subscription as string) || 'Free';
+        const sub = subscription || (request.user?.subscription as string) || 'Free';
         const isAdmin = request.isAdmin || false;
 
         // Admins and Elite users have no limits
-        if (subscription === 'Elite' || subscription === 'Pro' || isAdmin) {
+        if (sub === 'Elite' || sub === 'Pro' || isAdmin) {
             return; 
         }
+
+        // Use provided userId (D1 id) or fallback to JWT sub (which won't match D1 user_usage)
+        const dbUserId = userId || (request.user?.sub as string);
+        if (!dbUserId) return;
 
         // Check current usage in D1
         const usage = await env.DB.prepare(
             'SELECT usage_count FROM user_usage WHERE user_id = ? AND metric_name = ?'
-        ).bind(user.id, metric).first<{ usage_count: number }>();
+        ).bind(dbUserId, metric).first<{ usage_count: number }>();
 
         const currentCount = usage?.usage_count || 0;
 

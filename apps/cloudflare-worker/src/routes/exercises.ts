@@ -313,7 +313,7 @@ export const setupExerciseRoutes = (router: Router, env: Env) => {
         if (!user) return Response.json({ success: false, error: 'User not found' }, { status: 404 });
 
         // Gatekeeping: Free users cannot use AI analysis (quota = 0)
-        const quotaError = await checkQuota('ia_analysis', 0)(request, env);
+        const quotaError = await checkQuota('ia_analysis', 0)(request, env, user.id, user.subscription || 'Free');
         if (quotaError) return quotaError;
 
         const { videoUrl } = await request.json() as { videoUrl: string };

@@ -11,11 +11,11 @@ import { useTranslation, Trans } from "react-i18next";
 import DefaultLayout from "../layouts/default";
 import FootballClock from "../components/football-clock";
 import { showVideoAnalysis } from "../config/site";
-import { useOnlineCount } from "../hooks/use-online-count";
+import { useCoachCount } from "../hooks/use-coach-count";
 
 export default function IndexPage() {
   const { t } = useTranslation(["kdufoot", "base"]);
-  const onlineCount = useOnlineCount();
+  const coachCount = useCoachCount();
 
   // Auto-redirection to dashboard removed per user request
   // Users should stay on the home page even if authenticated/complete
@@ -54,16 +54,21 @@ export default function IndexPage() {
                 <p className="text-default-500 text-sm sm:text-base leading-relaxed break-words overflow-wrap-anywhere">
                   {t(
                     "homePage.hero.description_ultimate",
-                    "Trouvez un match de foot en 3 touches, n'importe où, maintenant. La plateforme élite pour les passionnés du ballon rond.",
+                    "Organisez vos matchs et tournois amicaux, trouvez des adversaires et gérez vos saisons — le tout sur une seule plateforme.",
                   )}
                 </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs text-green-500 font-bold uppercase tracking-wider">
-                    {onlineCount || 1}{" "}
-                    {t("homePage.hero.live_players_suffix", "joueurs en ligne")}
-                  </span>
-                </div>
+                {coachCount > 0 && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-xs text-green-500 font-bold uppercase tracking-wider">
+                      {coachCount}{" "}
+                      {t(
+                        "homePage.hero.registered_coaches_suffix",
+                        "coachs inscrits",
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                 {showVideoAnalysis && (
