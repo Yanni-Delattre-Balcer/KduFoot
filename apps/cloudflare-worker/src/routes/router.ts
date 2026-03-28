@@ -180,10 +180,10 @@ export class Router {
 		const csp = [
 			"default-src 'self'",
 			"script-src 'self' 'unsafe-inline' https://*.locize.com https://*.auth0.com",
-			"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+			"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.mathpix.com",
 			"img-src 'self' data: https://*.auth0.com https://*.googleusercontent.com https://*.cloudinary.com https://kdufoot.com",
 			"connect-src 'self' https://*.auth0.com https://maps.googleapis.com https://*.locize.com wss://api.kdufoot.com",
-			"font-src 'self' https://fonts.gstatic.com",
+			"font-src 'self' https://fonts.gstatic.com https://cdn.mathpix.com",
 			"worker-src 'self' blob:",
 			"frame-ancestors 'none'",
 			"object-src 'none'",
