@@ -4,6 +4,7 @@ import type { Env } from "../types/env";
 
 export class WebSocketHub extends DurableObject<Env> {
     private sessions: Set<WebSocket>;
+    private broadcastTimeout: ReturnType<typeof setTimeout> | null = null;
 
     constructor(ctx: DurableObjectState, env: Env) {
         super(ctx, env);
@@ -57,10 +58,19 @@ export class WebSocketHub extends DurableObject<Env> {
     }
 
     private broadcastCount() {
-        this.broadcast(JSON.stringify({
-            type: "ONLINE_COUNT",
-            count: this.sessions.size
-        }));
+        // Simple throttle: If a broadcast is already scheduled, don't schedule another.
+        // This batches all connections/disconnections within a 3 second window.
+        if (this.broadcastTimeout) {
+            return;
+        }
+
+        this.broadcastTimeout = setTimeout(() => {
+            this.broadcast(JSON.stringify({
+                type: "ONLINE_COUNT",
+                count: this.sessions.size
+            }));
+            this.broadcastTimeout = null;
+        }, 3000);
     }
 
     private broadcast(message: string) {

@@ -89,7 +89,7 @@
 /* Fix Hero UI Toast container blocking clicks and ensure visibility */
 [role="region"] {
   pointer-events: none !important;
-  z-index: 9999 !important;
+  z-index: 40 !important;
 }
 
 [role="status"], [role="alert"] {
