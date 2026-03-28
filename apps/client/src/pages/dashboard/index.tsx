@@ -190,10 +190,10 @@ export default function DashboardPage() {
   }, [myParticipations]);
 
   useEffect(() => {
-    // Force a global refresh on mount to clear any ghost data from previous sessions or tabs
+    // Refresh data on mount but keep current cache to avoid flickering
     globalMutate(
       (key) => typeof key === "string" && key.startsWith("/api/"),
-      undefined,
+      (current: any) => current,
       { revalidate: true },
     );
   }, [globalMutate]);
@@ -663,7 +663,7 @@ export default function DashboardPage() {
                   variants={containerVariants}
                 >
                   <AnimatePresence mode="popLayout">
-                    {isLoadingIncoming ? (
+                    {isLoadingIncoming && incomingRequests.length === 0 ? (
                       <DashboardListSkeleton count={4} />
                     ) : filteredRequests.length > 0 ? (
                       filteredRequests.map((request) => (
@@ -761,7 +761,9 @@ export default function DashboardPage() {
                   variants={containerVariants}
                 >
                   <AnimatePresence mode="popLayout">
-                    {isLoadingIncoming || isLoadingParticipations ? (
+                    {(isLoadingIncoming && incomingRequests.length === 0) ||
+                    (isLoadingParticipations &&
+                      myParticipations.length === 0) ? (
                       <DashboardListSkeleton count={4} />
                     ) : allConfirmedMatches.length > 0 ? (
                       allConfirmedMatches.map((cm) => (
@@ -863,7 +865,8 @@ export default function DashboardPage() {
                   variants={containerVariants}
                 >
                   <AnimatePresence mode="popLayout">
-                    {isLoadingParticipations ? (
+                    {isLoadingParticipations &&
+                    myParticipations.length === 0 ? (
                       <DashboardListSkeleton count={3} />
                     ) : allConfirmedTournaments.length > 0 ? (
                       allConfirmedTournaments.map((part) => (

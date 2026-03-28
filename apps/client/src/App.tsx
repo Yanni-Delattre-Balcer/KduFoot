@@ -66,6 +66,9 @@ const OfflineStatus = React.lazy(() =>
 
 import { TrainingProvider } from "@/contexts/training-context";
 import { showVideoAnalysis } from "@/config/site";
+import { Navbar } from "@/components/navbar";
+import { ConnectivityBanner } from "@/components/common/connectivity-banner";
+import { SEO } from "@/components/seo";
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => (
   <motion.div
@@ -123,6 +126,9 @@ function App() {
     <ErrorBoundary>
       <Suspense fallback={<SiteLoading />}>
         <TrainingProvider>
+          <SEO />
+          <Navbar />
+          <ConnectivityBanner />
           <OfflineStatus />
           <ScrollToTop />
           <UserSync />

@@ -48,6 +48,7 @@ export default function UsersAndPermissionsPage() {
     savePermissions,
     deleteUser,
     confirmBlock,
+    onUnblockUser,
     handleUpdateUserProfile,
     getIsAdmin,
     currentUserId,
@@ -238,7 +239,7 @@ export default function UsersAndPermissionsPage() {
         }
         onRemoveSiret={handleRemoveSiret}
         onSavePermissions={savePermissions}
-        onUnblockUser={(id) => confirmBlock(id, "")}
+        onUnblockUser={(id) => onUnblockUser(id)}
         onUpdateProfile={handleUpdateUserProfile}
       />
 

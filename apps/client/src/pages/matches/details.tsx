@@ -106,8 +106,9 @@ export default function MatchDetailsPage() {
   const [blockReason, setBlockReason] = useState(
     t("details.admin.block_reason_default", "Suspension administrative"),
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (isLoading) {
+  if (isLoading && !match) {
     return (
       <DefaultLayout>
         <MatchDetailsSkeleton />
@@ -279,6 +280,15 @@ export default function MatchDetailsPage() {
     },
   };
 
+  const handleContactMatchWithLoading = async (dto: any) => {
+    setIsSubmitting(true);
+    try {
+      await contactMatch(dto);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <DefaultLayout>
       <SEO
@@ -380,12 +390,13 @@ export default function MatchDetailsPage() {
 
             <div className="flex flex-col gap-4">
               <ParticipationSection
-                contactMatch={contactMatch}
+                contactMatch={handleContactMatchWithLoading}
                 handleMarkAsRead={handleMarkAsRead}
                 id={id}
                 isMarkingRead={isMarkingRead}
                 isMasked={isMasked}
                 isModified={isModified}
+                isSubmitting={isSubmitting}
                 match={match}
                 openGateway={openGateway}
                 profileComplete={profileComplete}

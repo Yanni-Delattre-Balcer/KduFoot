@@ -25,10 +25,7 @@ import { Mail, Handshake } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
-import { Navbar } from "@/components/navbar";
 import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
-import { ConnectivityBanner } from "@/components/common/connectivity-banner";
-import { SEO } from "@/components/seo";
 
 export default function DefaultLayout({
   children,
@@ -68,16 +65,7 @@ export default function DefaultLayout({
 
   return (
     <div className="relative flex flex-col min-h-screen overflow-x-hidden">
-      <SEO />
       {/* Accessibility: Skip-link for keyboard navigation */}
-      <a
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg focus:text-sm focus:font-bold"
-        href="#main-content"
-      >
-        Aller au contenu principal
-      </a>
-      <Navbar />
-      <ConnectivityBanner />
       {/* Spacer dynamique pour Navbar fixed + Safe Area */}
       <div className="h-[calc(64px+env(safe-area-inset-top,0px))] lg:h-20 shrink-0" />
       <main

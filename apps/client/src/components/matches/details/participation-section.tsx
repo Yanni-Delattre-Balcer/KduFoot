@@ -18,6 +18,7 @@ interface ParticipationSectionProps {
   contactMatch: (data: { message: string }) => Promise<void>;
   openGateway: (msg: string) => void;
   isMasked: boolean;
+  isSubmitting?: boolean;
 }
 
 export const ParticipationSection = ({
@@ -34,6 +35,7 @@ export const ParticipationSection = ({
   contactMatch,
   openGateway,
   isMasked,
+  isSubmitting,
 }: ParticipationSectionProps) => {
   const { t } = useTranslation();
 
@@ -264,6 +266,7 @@ export const ParticipationSection = ({
                         className="w-full font-black tracking-tighter h-12 shadow-lg"
                         color={isProfileIncomplete ? "default" : "primary"}
                         isDisabled={isProfileIncomplete}
+                        isLoading={isSubmitting}
                         onPress={async () => {
                           if (isMasked) {
                             openGateway(

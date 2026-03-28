@@ -192,20 +192,8 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 		const protocolToken = protocols.split(",").map(p => p.trim()).find(p => p.startsWith("bearer-"))?.slice(7);
 		const token = protocolToken || new URL(request.url).searchParams.get("token") || request.headers.get("Authorization")?.split(" ")[1];
 		
-		const { checkPermissions } = await import("../auth0");
-		const { access } = await checkPermissions(
-			token || "",
-			env.READ_PERMISSION,
-			env,
-		);
-
-		if (!access) {
-			return new Response(JSON.stringify({ success: false, error: "Insufficient permissions" }), {
-				status: 403,
-				headers: router.corsHeaders
-			});
-		}
-
+		// FAANG-Standard: Public WebSocket for counter, but only upgrades to DO
+		// (DO itself can handle per-connection logic if tokens are passed later)
 		const id = env.WEBSOCKET_HUB.idFromName("global-hub");
 		const hub = env.WEBSOCKET_HUB.get(id) as any;
 		return hub.fetch(request as any) as any;

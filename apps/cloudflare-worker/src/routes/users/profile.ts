@@ -525,8 +525,12 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
 
             const pdfBytes = await pdfDoc.save();
 
-            // Track usage after successful generation
-            await incrementUsage(env.DB, user.id, 'pdf_export');
+            // Track usage after successful generation - Wrapped in try/catch to ensure PDF is still served
+            try {
+                await incrementUsage(env.DB, user.id, 'pdf_export');
+            } catch (quotaError) {
+                console.warn('[Export PDF] Usage increment failed:', quotaError);
+            }
 
             // RGPD audit: log data export
             try {
@@ -538,7 +542,7 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
                 console.warn('[Export PDF] Audit log failed:', auditError);
             }
             
-            return new Response(pdfBytes.buffer as ArrayBuffer, {
+            return new Response(pdfBytes, {
                 status: 200,
                 headers: {
                     ...router.corsHeaders,

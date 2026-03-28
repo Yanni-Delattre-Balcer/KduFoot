@@ -24,25 +24,20 @@ export const siteConfig = () => {
       href: "/dashboard",
     },
     {
-      label: i18next.t("nav.exercises"),
-      href: "/exercises",
-    },
-    {
-      label: i18next.t("nav.training"),
-      href: "/training",
-    },
-    {
       label: i18next.t("nav.favorites"),
       href: "/favorites",
     },
-
     {
-      label: i18next.t("nav.matches", "Trouver/créer un match / tournoi"),
-      href: "/matches",
+      label: i18next.t("nav.find", "Trouver"),
+      href: "/matches?type=match",
     },
     {
-      label: i18next.t("nav.pricing"),
-      href: "/pricing",
+      label: i18next.t("nav.create", "Créer un match"),
+      href: "/matches/create",
+    },
+    {
+      label: i18next.t("nav.tournament", "Tournoi"),
+      href: "/matches?type=tournament",
     },
     {
       label: i18next.t("nav.remerciements"),
@@ -50,14 +45,7 @@ export const siteConfig = () => {
     },
   ];
 
-  const filteredNavItems = showVideoAnalysis
-    ? allNavItems
-    : allNavItems.filter(
-        (item) =>
-          item.href !== "/exercises" &&
-          item.href !== "/training" &&
-          item.href !== "/pricing",
-      );
+  const filteredNavItems = allNavItems;
 
   return {
     name: "Kdufoot",
