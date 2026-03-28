@@ -6,8 +6,8 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "dev:env": "shx cp ../../.env .dev.vars && wrangler dev",
-    "preview:env": "shx cp ../../.env .dev.vars && wrangler dev --port 8787",
+    "dev:env": "node -e \"const fs=require('fs'); fs.writeFileSync('.dev.vars', fs.readFileSync('../../.env', 'utf-8') + '\\n' + (fs.existsSync('../../.env.local') ? fs.readFileSync('../../.env.local', 'utf-8') : ''))\" && wrangler dev",
+    "preview:env": "node -e \"const fs=require('fs'); fs.writeFileSync('.dev.vars', fs.readFileSync('../../.env', 'utf-8') + '\\n' + (fs.existsSync('../../.env.local') ? fs.readFileSync('../../.env.local', 'utf-8') : ''))\" && wrangler dev --port 8787",
     "start": "wrangler dev",
     "build": "echo 'Cloudflare Worker does not require build step'",
     "test": "vitest run",

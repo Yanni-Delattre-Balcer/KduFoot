@@ -14,7 +14,8 @@ precacheAndRoute(self.__WB_MANIFEST);
 registerRoute(
   ({ url }) =>
     url.origin === "https://fonts.googleapis.com" ||
-    url.origin === "https://fonts.gstatic.com",
+    url.origin === "https://fonts.gstatic.com" ||
+    url.origin === "https://cdn.mathpix.com",
   new CacheFirst({
     cacheName: "google-fonts",
     plugins: [

@@ -7,7 +7,7 @@ import { Permission } from '../../types/permissions';
 import { checkPermissions } from '../../auth0';
 import { validateClubSiret } from '../../utils/siret.validator';
 import { broadcastDataChanged } from '../../utils/broadcast';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib/dist/pdf-lib.esm.js';
 import { checkQuota, incrementUsage } from '../../middleware/quota';
 
 
