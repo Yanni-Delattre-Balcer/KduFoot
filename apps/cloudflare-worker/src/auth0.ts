@@ -101,24 +101,28 @@ export const checkPermissions = async (
 		access = permission.some((p) => permissions.includes(p));
 	}
 
-	// Security: Force MFA for sensitive roles (admin, certified)
+	// Security: Force MFA for sensitive roles AND sensitive requested permissions
 	const isSensitiveRole = permissions.some(p => p.includes("admin") || p.includes("certified"));
-	if (isSensitiveRole && access) {
+	// We only strictly enforce MFA if the permission being requested is itself sensitive (admin/write)
+	const isSensitiveRequest = typeof permission === 'string' 
+		? (permission.includes("admin") || permission.includes("write"))
+		: permission.some(p => p.includes("admin") || p.includes("write"));
+
+	if (isSensitiveRole && isSensitiveRequest && access) {
 		// Auth0 standard claim for AMR is often an array
 		const amr = (payload.amr as string[]) || [];
 		const isMfa = amr.includes("mfa") || payload.mfa_authenticated === true || payload.amr === "mfa";
 		
 		// If we are in production and it's a sensitive role, we block if MFA is missing.
-		// In local dev (localhost), we only log a warning to not block the developer.
 		if (!isMfa && env.AUTHENTICATION_PROVIDER_TYPE === "auth0") {
 			const isLocal = env.API_BASE_URL?.includes("localhost") || env.CORS_ORIGIN?.includes("localhost");
 			
 			if (isLocal) {
 				console.warn(`Sensitive role access without MFA (LOCAL DEV ALLOWED): ${payload.sub}`);
 			} else {
-				console.error(`FORBIDDEN: Sensitive role access without MFA: ${payload.sub}`);
-				const error = new Error(`Sensitive role access without MFA: ${payload.sub}`);
-				Sentry.captureException(error, { user: { id: payload.sub } });
+				console.error(`FORBIDDEN: Sensitive role access without MFA on sensitive request: ${payload.sub} for ${permission}`);
+				const error = new Error(`Sensitive role access without MFA on sensitive request: ${payload.sub}`);
+				Sentry.captureException(error, { user: { id: payload.sub }, extra: { permission } });
 				access = false; // Strict Enforcement in Production
 			}
 		}

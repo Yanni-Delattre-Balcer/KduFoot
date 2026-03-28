@@ -27,59 +27,68 @@ export class ParticipationService {
     }
 
     async getIncomingRequests(userId: string): Promise<ParticipationRequest[]> {
-        const { results } = await this.db.prepare(`
-            SELECT mc.*, mc.user_id as requester_user_id,
-                   m.type as match_type, m.category, m.level, m.match_date, m.match_time, m.venue, m.max_teams as match_max_teams,
-                   COALESCE(ac.accepted_count, 0) as accepted_count,
-                   u_req.firstname as requester_firstname, u_req.lastname as requester_lastname,
-                   u_req.category as requester_category,
-                   u_req.level as requester_level, u_req.pitch_type as requester_pitch_type,
-                   u_req.phone as requester_phone, u_req.email as requester_email, u_req.stadium_address as requester_stadium_address,
-                   c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
-                   c_req.city as requester_city, c_req.address as requester_club_address,
-                   mc.status as request_status,
-                   COALESCE(mc.notification_state, 0) as notification_state,
-                   m.pitch_type as match_pitch_type
-            FROM match_contacts mc
-            JOIN matches m ON mc.match_id = m.id
-            LEFT JOIN (SELECT match_id, COUNT(*) as accepted_count FROM match_contacts WHERE status = 'accepted' GROUP BY match_id) ac ON ac.match_id = m.id
-            JOIN users u_req ON mc.user_id = u_req.id
-            LEFT JOIN clubs c_req ON u_req.club_id = c_req.id
-            JOIN clubs c_host ON m.club_id = c_host.id
-            WHERE m.owner_id = ? AND m.deleted_at IS NULL
-            ORDER BY mc.contacted_at DESC
-        `).bind(userId).all<ParticipationRequest>();
+        try {
+            const { results } = await this.db.prepare(`
+                SELECT mc.*, mc.user_id as requester_user_id,
+                       m.type as match_type, m.category, m.level, m.match_date, m.match_time, m.venue, m.max_teams as match_max_teams,
+                       COALESCE(ac.accepted_count, 0) as accepted_count,
+                       u_req.firstname as requester_firstname, u_req.lastname as requester_lastname,
+                       u_req.category as requester_category,
+                       u_req.level as requester_level, u_req.pitch_type as requester_pitch_type,
+                       u_req.phone as requester_phone, u_req.email as requester_email, u_req.stadium_address as requester_stadium_address,
+                       c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
+                       c_req.city as requester_city, c_req.address as requester_club_address,
+                       mc.status as request_status,
+                       COALESCE(mc.notification_state, 0) as notification_state,
+                       m.pitch_type as match_pitch_type
+                FROM match_contacts mc
+                JOIN matches m ON mc.match_id = m.id
+                LEFT JOIN (SELECT match_id, COUNT(*) as accepted_count FROM match_contacts WHERE status = 'accepted' GROUP BY match_id) ac ON ac.match_id = m.id
+                JOIN users u_req ON mc.user_id = u_req.id
+                LEFT JOIN clubs c_req ON u_req.club_id = c_req.id
+                WHERE m.owner_id = ? AND m.deleted_at IS NULL
+                ORDER BY mc.contacted_at DESC
+            `).bind(userId).all<ParticipationRequest>();
 
-        return results;
+            return results;
+        } catch (e: any) {
+            console.error('[ParticipationService] getIncomingRequests error:', e.message);
+            throw e;
+        }
     }
 
     async getMyParticipations(userId: string): Promise<ParticipationRequest[]> {
-        const { results } = await this.db.prepare(`
-            SELECT mc.*,
-                   m.type as match_type, m.category as match_category, m.level as match_level, m.match_date, m.match_time,
-                   m.venue, m.location_city, m.location_address, m.location_zip, m.max_teams as match_max_teams,
-                   COALESCE(ac.accepted_count, 0) as accepted_count,
-                   c_host.name as host_club_name, c_host.logo_url as host_club_logo, c_host.city as host_city,
-                   u_host.firstname as host_firstname, u_host.lastname as host_lastname, u_host.category as host_category, u_host.level as host_level, u_host.stadium_address as host_stadium_address,
-                   m.email as host_email, m.phone as host_phone,
-                   c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
-                   u_req.phone as requester_phone, u_req.email as requester_email,
-                   u_req.level as requester_level, u_req.category as requester_category, u_req.pitch_type as requester_pitch_type,
-                   mc.status as request_status,
-                   COALESCE(mc.notification_state, 0) as notification_state,
-                   m.pitch_type as match_pitch_type
-            FROM match_contacts mc
-            JOIN matches m ON mc.match_id = m.id
-            LEFT JOIN (SELECT match_id, COUNT(*) as accepted_count FROM match_contacts WHERE status = 'accepted' GROUP BY match_id) ac ON ac.match_id = m.id
-            JOIN clubs c_host ON m.club_id = c_host.id
-            JOIN users u_host ON m.owner_id = u_host.id
-            JOIN users u_req ON mc.user_id = u_req.id
-            LEFT JOIN clubs c_req ON u_req.club_id = c_req.id
-            WHERE mc.user_id = ? AND m.deleted_at IS NULL
-            ORDER BY m.match_date ASC
-        `).bind(userId).all<ParticipationRequest>();
+        try {
+            const { results } = await this.db.prepare(`
+                SELECT mc.*,
+                       m.type as match_type, m.category as match_category, m.level as match_level, m.match_date, m.match_time,
+                       m.venue, m.location_city, m.location_address, m.location_zip, m.max_teams as match_max_teams,
+                       COALESCE(ac.accepted_count, 0) as accepted_count,
+                       c_host.name as host_club_name, c_host.logo_url as host_club_logo, c_host.city as host_city,
+                       u_host.firstname as host_firstname, u_host.lastname as host_lastname, u_host.category as host_category, u_host.level as host_level, u_host.stadium_address as host_stadium_address,
+                       m.email as host_email, m.phone as host_phone,
+                       c_req.name as requester_club_name, c_req.logo_url as requester_club_logo,
+                       u_req.phone as requester_phone, u_req.email as requester_email,
+                       u_req.level as requester_level, u_req.category as requester_category, u_req.pitch_type as requester_pitch_type,
+                       mc.status as request_status,
+                       COALESCE(mc.notification_state, 0) as notification_state,
+                       m.pitch_type as match_pitch_type
+                FROM match_contacts mc
+                JOIN matches m ON mc.match_id = m.id
+                LEFT JOIN (SELECT match_id, COUNT(*) as accepted_count FROM match_contacts WHERE status = 'accepted' GROUP BY match_id) ac ON ac.match_id = m.id
+                JOIN clubs c_host ON m.club_id = c_host.id
+                JOIN users u_host ON m.owner_id = u_host.id
+                JOIN users u_req ON mc.user_id = u_req.id
+                LEFT JOIN clubs c_req ON u_req.club_id = c_req.id
+                WHERE mc.user_id = ? AND m.deleted_at IS NULL
+                ORDER BY m.match_date ASC
+            `).bind(userId).all<ParticipationRequest>();
 
-        return results;
+            return results;
+        } catch (e: any) {
+            console.error('[ParticipationService] getMyParticipations error:', e.message);
+            throw e;
+        }
     }
 
     async updateRequestStatus(matchId: string, requestUserId: string, ownerId: string, status: 'accepted' | 'refused'): Promise<boolean> {
