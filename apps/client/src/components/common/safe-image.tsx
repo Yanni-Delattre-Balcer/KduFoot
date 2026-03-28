@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Skeleton } from "@heroui/skeleton";
 import { motion } from "framer-motion";
+
 import { getCloudflareOptimizedUrl } from "@/utils/image";
 
 interface SafeImageProps {

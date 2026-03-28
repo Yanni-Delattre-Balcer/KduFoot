@@ -24,6 +24,7 @@ import { ToastProvider } from "@heroui/toast";
 import { useHref, useNavigate } from "react-router-dom";
 import { SWRConfig } from "swr";
 import { useEffect, useState } from "react";
+
 import { db } from "./utils/db";
 
 declare module "@react-types/shared" {

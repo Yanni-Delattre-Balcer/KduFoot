@@ -8,6 +8,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { addToast } from "@heroui/toast";
 import { useAuth0 } from "@auth0/auth0-react";
+
 import {
   useSecuredApi,
   updateUserInCache,

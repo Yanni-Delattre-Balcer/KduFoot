@@ -26,7 +26,6 @@ import { SearchHero } from "@/components/matches/list/search-hero";
 import { FilterSection } from "@/components/matches/list/filter-section";
 import { CalendarView } from "@/components/matches/list/calendar-view";
 import { ResultsList } from "@/components/matches/list/results-list";
-
 import { Match } from "@/types/match.types";
 
 export default function MatchesPage() {

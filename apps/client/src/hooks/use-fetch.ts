@@ -1,5 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback } from "react";
+
 import { fetchWithOffline } from "../utils/offline-sync";
 
 interface UseFetchOptions extends RequestInit {

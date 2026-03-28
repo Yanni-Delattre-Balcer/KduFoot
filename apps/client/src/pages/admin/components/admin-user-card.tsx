@@ -1,9 +1,11 @@
 import { Card } from "@heroui/card";
 import { Chip } from "@heroui/chip";
 import { Button } from "@heroui/button";
+
+import { SUPER_ADMIN_EMAIL, SUPREME_MASTER_ID } from "../utils/admin-helpers";
+
 import { Auth0User } from "@/types/auth0.types";
 import { Permission } from "@/types/permissions";
-import { SUPER_ADMIN_EMAIL, SUPREME_MASTER_ID } from "../utils/admin-helpers";
 
 interface AdminUserCardProps {
   u: Auth0User;

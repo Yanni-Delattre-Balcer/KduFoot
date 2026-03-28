@@ -7,10 +7,12 @@ import {
 } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { Auth0User } from "@/types/auth0.types";
+
 import { SiretSection } from "./siret-section";
 import { PermissionSection } from "./permission-section";
 import { SecuritySection } from "./security-section";
+
+import { Auth0User } from "@/types/auth0.types";
 
 interface UserProfileModalProps {
   isOpen: boolean;

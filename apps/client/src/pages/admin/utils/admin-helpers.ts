@@ -1,4 +1,5 @@
 import { TFunction } from "i18next";
+
 import { Permission } from "@/types/permissions";
 
 export const getKdufootPermissions = (t: TFunction) => {

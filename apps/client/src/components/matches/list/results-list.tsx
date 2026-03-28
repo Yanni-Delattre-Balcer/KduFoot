@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
+
 import { MatchCard } from "@/components/matches/match-card";
 import { MatchListSkeleton } from "@/components/skeletons/match-skeleton";
 import { EmptyState } from "@/components/common/empty-state";

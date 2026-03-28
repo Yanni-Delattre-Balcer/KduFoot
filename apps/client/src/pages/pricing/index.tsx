@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Card, CardBody, CardHeader, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { formatPrice } from "../../utils/currency";
 
+import { formatPrice } from "../../utils/currency";
 import DefaultLayout from "../../layouts/default";
 import FootballClock from "../../components/football-clock";
 

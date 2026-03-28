@@ -1,5 +1,4 @@
 import useSWR, { useSWRConfig } from "swr";
-import { trackConversion } from "@/utils/analytics";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback, useEffect } from "react";
 
@@ -13,6 +12,8 @@ import {
   MatchRequest,
   MatchParticipation,
 } from "../types/match.types";
+
+import { trackConversion } from "@/utils/analytics";
 
 const EMPTY_ARRAY: never[] = [];
 

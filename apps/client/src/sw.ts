@@ -3,6 +3,7 @@ import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
 import { NetworkFirst, CacheFirst } from "workbox-strategies";
 import { ExpirationPlugin } from "workbox-expiration";
+
 import { db } from "./utils/db";
 
 declare let self: ServiceWorkerGlobalScope;

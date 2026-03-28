@@ -1,8 +1,10 @@
 import { Checkbox } from "@heroui/checkbox";
 import { Chip } from "@heroui/chip";
 import { Button } from "@heroui/button";
-import { Permission } from "@/types/permissions";
+
 import { groupColor } from "../utils/admin-helpers";
+
+import { Permission } from "@/types/permissions";
 
 interface PermissionSectionProps {
   userId: string;

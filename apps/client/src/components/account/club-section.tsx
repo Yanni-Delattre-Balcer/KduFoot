@@ -2,6 +2,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { useTranslation } from "react-i18next";
 import { addToast } from "@heroui/toast";
+
 import { User } from "@/types/user.types";
 import { getDept, formatSiret } from "@/utils/format";
 

@@ -1,5 +1,6 @@
 import { Button } from "@heroui/button";
 import { useTranslation } from "react-i18next";
+
 import { User } from "@/types/user.types";
 
 interface SyncSectionProps {

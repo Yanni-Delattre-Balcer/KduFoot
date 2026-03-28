@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { addToast } from "@heroui/toast";
+
 import { Match, MatchParticipation } from "@/types/match.types";
 
 interface KnownMatchData {

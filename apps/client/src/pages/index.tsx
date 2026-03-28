@@ -11,7 +11,6 @@ import { useTranslation, Trans } from "react-i18next";
 import DefaultLayout from "../layouts/default";
 import FootballClock from "../components/football-clock";
 import { showVideoAnalysis } from "../config/site";
-
 import { useOnlineCount } from "../hooks/use-online-count";
 
 export default function IndexPage() {

@@ -20,8 +20,6 @@ import {
   useDisclosure,
 } from "@heroui/modal";
 
-import { SafeImage } from "@/components/common/safe-image";
-
 import { DashboardListSkeleton } from "../../components/skeletons/dashboard-skeleton";
 import { matchService } from "../../services/matches";
 import FootballClock from "../../components/football-clock";
@@ -30,6 +28,7 @@ import { ConfirmedTournamentCard } from "./components/confirmed-tournament-card"
 import { ConfirmedMatchCard } from "./components/confirmed-match-card";
 import { DashboardRequestCard } from "./components/dashboard-request-card";
 
+import { SafeImage } from "@/components/common/safe-image";
 import { useUser } from "@/hooks/use-user";
 import { useIncomingRequests, useMyParticipations } from "@/hooks/use-matches";
 import DataWall from "@/components/data-wall";

@@ -1,6 +1,8 @@
 import { Button } from "@heroui/button";
-import { Auth0User } from "@/types/auth0.types";
+
 import { SUPER_ADMIN_EMAIL, SUPREME_MASTER_ID } from "../utils/admin-helpers";
+
+import { Auth0User } from "@/types/auth0.types";
 
 interface SecuritySectionProps {
   u: Auth0User;

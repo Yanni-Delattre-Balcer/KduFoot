@@ -4,6 +4,7 @@ import { Chip } from "@heroui/chip";
 import { Select, SelectItem } from "@heroui/select";
 import { Input } from "@heroui/input";
 import { useTranslation } from "react-i18next";
+
 import { Category } from "@/types/exercise.types";
 import {
   Format,

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { preload } from "swr";
 import { useAuth0 } from "@auth0/auth0-react";
+
 import { MatchRequest } from "@/types/match.types";
 import { SafeImage } from "@/components/common/safe-image";
 

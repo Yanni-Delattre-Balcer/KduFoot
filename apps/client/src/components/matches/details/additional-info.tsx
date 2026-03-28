@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+
 import { JerseyColorDots } from "@/components/jersey-color-dots";
 
 interface AdditionalInfoProps {
