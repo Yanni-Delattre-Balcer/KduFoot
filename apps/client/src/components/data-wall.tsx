@@ -57,7 +57,7 @@ export const DataWall: React.FC<DataWallProps> = ({
   if (!isAuthenticated && (dismissed || isVisitor)) {
     return (
       <div className="relative w-full">
-        <div className="blur-[4px] pointer-events-none select-none opacity-50">
+        <div className="blur-xs pointer-events-none select-none opacity-50">
           {children}
         </div>
         <div className="absolute inset-x-0 bottom-4 z-30 flex justify-center pointer-events-none">
