@@ -300,13 +300,19 @@ describe('UserService', () => {
 
     describe('deleteUser', () => {
         it('deletes user and returns true on success', async () => {
-            mockDb.stmt.run.mockResolvedValue({ success: true, meta: { changes: 1 } });
+            mockDb.db.batch.mockResolvedValue([
+                { success: true }, { success: true }, { success: true },
+                { success: true }, { success: true }, { success: true },
+                { success: true }, { success: true }
+            ]);
             expect(await service.deleteUser('u1')).toBe(true);
             expect(mockDb.db.prepare).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM users'));
         });
 
         it('returns false when DB reports failure', async () => {
-            mockDb.stmt.run.mockResolvedValue({ success: false, meta: { changes: 0 } });
+            mockDb.db.batch.mockResolvedValue([
+                { success: true }, { success: false } // One failure is enough
+            ]);
             expect(await service.deleteUser('u1')).toBe(false);
         });
     });
