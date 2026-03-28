@@ -111,11 +111,11 @@ export const Navbar = () => {
 
   return (
     <HeroUINavbar
-      className={`bg-background/80 backdrop-blur-md z-50 transition-all duration-300 border-b border-white/5 ${
+      className={`fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md z-[100] transition-all duration-300 border-b border-white/5 pt-[env(safe-area-inset-top,0px)] h-[calc(64px+env(safe-area-inset-top,0px))] lg:h-20 lg:pt-0 ${
         isScrolled ? "shadow-lg shadow-black/20" : "shadow-none"
       }`}
       classNames={{
-        wrapper: "h-16 lg:h-20 max-w-7xl mx-auto px-4 sm:px-6",
+        wrapper: "h-full max-w-7xl mx-auto px-4 sm:px-6",
       }}
       isBlurred={false}
       isMenuOpen={isMenuOpen}

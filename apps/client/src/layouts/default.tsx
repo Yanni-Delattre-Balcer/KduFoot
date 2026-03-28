@@ -78,6 +78,8 @@ export default function DefaultLayout({
       </a>
       <Navbar />
       <ConnectivityBanner />
+      {/* Spacer dynamique pour Navbar fixed + Safe Area */}
+      <div className="h-[calc(64px+env(safe-area-inset-top,0px))] lg:h-20 shrink-0" />
       <main
         className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}
         id="main-content"
