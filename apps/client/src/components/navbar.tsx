@@ -120,7 +120,7 @@ export const Navbar = () => {
       isBlurred={false}
       isMenuOpen={isMenuOpen}
       maxWidth="full"
-      position="sticky"
+      position="static"
       onMenuOpenChange={setIsMenuOpen}
     >
       {/* Brand/Logo Section */}

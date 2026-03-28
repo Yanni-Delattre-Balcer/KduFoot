@@ -30,7 +30,7 @@ export default function IndexPage() {
 
   return (
     <DefaultLayout maxWidth="max-w-full">
-      <section className="flex flex-col gap-5 w-full px-4">
+      <section className="flex flex-col gap-5 w-full px-4 pt-2">
         {/* Hero Section with football field background */}
         <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-purple-600/15 via-violet-500/10 to-indigo-500/10 border border-purple-500/20">
           {/* Grass stripes */}

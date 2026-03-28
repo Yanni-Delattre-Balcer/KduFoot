@@ -28,7 +28,7 @@ export const SecuritySection = ({
   return (
     <div className="bg-red-950/10 p-4 rounded-xl border border-red-500/20 space-y-4">
       <h3 className="text-sm font-black uppercase tracking-widest text-red-500">
-        Actions de Sécurité
+        {t("adminUsersPage.securitySectionTitle")}
       </h3>
 
       <div className="flex flex-wrap gap-4">
@@ -42,7 +42,7 @@ export const SecuritySection = ({
                 variant="flat"
                 onPress={() => onUnblock(u.user_id)}
               >
-                🔓 {t("adminUsersPage.btnUnblock")}
+                {t("adminUsersPage.btnUnblock")}
               </Button>
             ) : (
               <Button
@@ -52,7 +52,7 @@ export const SecuritySection = ({
                 variant="flat"
                 onPress={() => onBlock(u.user_id, u.email)}
               >
-                🚫 {t("adminUsersPage.btnBlock")}
+                {t("adminUsersPage.btnBlock")}
               </Button>
             )}
           </>
@@ -72,8 +72,10 @@ export const SecuritySection = ({
 
       {(isSuperAdmin || isSelf) && (
         <p className="text-[10px] text-default-400 italic">
-          Protections système actives : impossible de supprimer ou bannir ce
-          compte.
+          {t(
+            "adminUsersPage.modalProtected",
+            "Protections système actives : impossible de supprimer ou bannir ce compte.",
+          )}
         </p>
       )}
     </div>
