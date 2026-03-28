@@ -1,0 +1,22 @@
+name: Socket Security Scan
+on:
+  push:
+    branches: [ main, master, v2 ]
+  pull_request:
+    branches: [ main, master, v2 ]
+
+jobs:
+  socket_scan:
+    name: Socket Dependency Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Socket CLI
+        run: npm install -g @socketsecurity/sdk
+
+      - name: Run Socket Scan
+        uses: socketsecurity/socket-github-action@v2
+        with:
+          api-key: ${{ secrets.SOCKET_SECURITY_API_KEY }}

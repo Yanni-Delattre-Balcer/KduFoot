@@ -1,6 +1,7 @@
 import useSWR, { useSWRConfig } from "swr";
+import { trackConversion } from "@/utils/analytics";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 import { matchService } from "../services/matches";
 import {
@@ -86,43 +87,78 @@ export function useMatches(filters?: MatchFilters) {
     },
   );
 
+  // Accessibility: Announce result count to screen readers
+  useEffect(() => {
+    if (!isLoading && data) {
+      const count = data.total || 0;
+      const message =
+        count === 0
+          ? "Aucun match trouvé"
+          : `${count} match${count > 1 ? "s" : ""} trouvé${count > 1 ? "s" : ""}`;
+
+      const el = document.getElementById("aria-live-announcer");
+
+      if (el) el.textContent = message;
+    }
+  }, [data, isLoading]);
+
   const createMatch = useCallback(
     async (dto: CreateMatchDto) => {
-      const token = await getAccessTokenSilently();
-
-      // Optimistic UI update: Wait for DB insertion then mutate globally instantly
-      const newMatch = await matchService.create(dto, token);
-
+      // Optimistic UI update: add a temporary match to the list immediately
       mutate(
-        (
-          currentData:
-            | {
-                data?: Match[];
-                matches?: Match[];
-                total?: number;
-                nextCursor?: string | null;
-                hasMore?: boolean;
-              }
-            | undefined,
-        ) => {
-          if (!currentData || (!currentData.data && !currentData.matches))
-            return currentData;
-
+        (currentData: MatchesResponse | undefined) => {
+          if (!currentData) return currentData;
           const currentList = currentData.data || currentData.matches || [];
+
+          const tempMatch = {
+            ...dto,
+            id: `temp-${Date.now()}`,
+            owner_id: "temp",
+            status: "open",
+            created_at: Math.floor(Date.now() / 1000),
+            updated_at: Math.floor(Date.now() / 1000),
+            accepted_count: 0,
+            club: { name: "...", logo_url: "" }, // Placeholder for required club property
+          } as unknown as Match;
 
           return {
             ...currentData,
-            data: [newMatch, ...currentList],
+            data: [tempMatch, ...currentList],
             total: (currentData.total || 0) + 1,
           };
         },
-        false, // Do not immediately send a GET request behind since we just added it
+        { revalidate: false },
       );
 
-      // Global invalidation: refresh ALL /api keys
+      try {
+        const token = await getAccessTokenSilently();
+        const newMatch = await matchService.create(dto, token);
+
+        // Replace temp match with real one and revalidate
+        mutate(
+          (currentData: MatchesResponse | undefined) => {
+            if (!currentData) return currentData;
+            const currentList = currentData.data || currentData.matches || [];
+
+            return {
+              ...currentData,
+              data: currentList.map((m: Match) =>
+                m.id.startsWith("temp-") ? newMatch : m,
+              ),
+            };
+          },
+          { revalidate: true },
+        );
+      } catch (err) {
+        // Rollback on error
+        mutate();
+        throw err;
+      }
+
+      // Global invalidation
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
+        undefined,
         { revalidate: true },
       );
     },
@@ -131,13 +167,34 @@ export function useMatches(filters?: MatchFilters) {
 
   const updateMatch = useCallback(
     async (id: string, dto: UpdateMatchDto) => {
-      const token = await getAccessTokenSilently();
+      mutate(
+        (currentData: MatchesResponse | undefined) => {
+          if (!currentData) return currentData;
+          const currentList = currentData.data || currentData.matches || [];
 
-      await matchService.update(id, dto, token);
-      mutate();
+          return {
+            ...currentData,
+            data: currentList.map((m: Match) =>
+              m.id === id ? { ...m, ...dto } : m,
+            ),
+          };
+        },
+        { revalidate: false },
+      );
+
+      try {
+        const token = await getAccessTokenSilently();
+
+        await matchService.update(id, dto, token);
+        mutate(); // Revalidate
+      } catch (err) {
+        mutate(); // Rollback
+        throw err;
+      }
+
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
+        undefined,
         { revalidate: true },
       );
     },
@@ -191,6 +248,7 @@ export function useMatches(filters?: MatchFilters) {
       const token = await getAccessTokenSilently();
 
       await matchService.contact(id, dto, token);
+      trackConversion("contact");
     },
     [getAccessTokenSilently],
   );
@@ -317,28 +375,66 @@ export function useMatch(id: string | null) {
 
   const deleteMatch = useCallback(async () => {
     if (!id) return;
-    const token = await getAccessTokenSilently();
 
-    await matchService.delete(id, token);
-    mutate(undefined, false);
+    // Optimistic UI: Clear local match data
+    mutate(undefined, { revalidate: false });
+
+    try {
+      const token = await getAccessTokenSilently();
+
+      await matchService.delete(id, token);
+    } catch (err) {
+      mutate(); // Rollback (will re-fetch)
+      throw err;
+    }
+
     // Global invalidation: refresh all /api/ keys so dashboard cleans up immediately
     globalMutate(
       (key) => typeof key === "string" && key.startsWith("/api/"),
-      (currentData: unknown) => currentData,
+      undefined,
       { revalidate: true },
     );
   }, [id, getAccessTokenSilently, mutate, globalMutate]);
 
   const contactMatch = useCallback(
     async (dto: ContactMatchDto) => {
-      if (!id) return;
-      const token = await getAccessTokenSilently();
+      // Optimistic update for single match details
+      mutate(
+        (current: { match: Match } | undefined) => {
+          if (!current || !current.match) return current;
 
-      await matchService.contact(id, dto, token);
-      mutate(); // Re-fetch to see the new contact in the list
+          const optimisticContact = {
+            user_id: "pending_optimistic",
+            status: "pending",
+            created_at: Math.floor(Date.now() / 1000),
+            contacted_at: new Date().toISOString(),
+            message: dto.message || "",
+          };
+
+          return {
+            match: {
+              ...current.match,
+              contacts: [...(current.match.contacts || []), optimisticContact],
+            },
+          } as { match: Match };
+        },
+        { revalidate: false },
+      );
+
+      try {
+        const token = await getAccessTokenSilently();
+
+        await matchService.contact(id!, dto, token);
+        trackConversion("contact");
+        mutate(); // Re-fetch to see real data
+      } catch (err) {
+        mutate(); // Rollback
+        throw err;
+      }
+
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
+        undefined,
         { revalidate: true },
       );
     },
@@ -348,13 +444,36 @@ export function useMatch(id: string | null) {
   const cancelMatchContact = useCallback(
     async (userId: string) => {
       if (!id) return;
-      const token = await getAccessTokenSilently();
 
-      await matchService.cancelRequest(id, userId, token);
-      mutate();
+      mutate(
+        (current: { match: Match } | undefined) => {
+          if (!current || !current.match) return current;
+
+          return {
+            match: {
+              ...current.match,
+              contacts: (current.match.contacts || []).filter(
+                (c: any) => c.user_id !== userId,
+              ),
+            },
+          } as { match: Match };
+        },
+        { revalidate: false },
+      );
+
+      try {
+        const token = await getAccessTokenSilently();
+
+        await matchService.cancelRequest(id, userId, token);
+        mutate();
+      } catch (err) {
+        mutate();
+        throw err;
+      }
+
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
+        undefined,
         { revalidate: true },
       );
     },
@@ -387,13 +506,35 @@ export function useMatch(id: string | null) {
   const updateRequestStatus = useCallback(
     async (userId: string, status: "accepted" | "refused") => {
       if (!id) return;
-      const token = await getAccessTokenSilently();
+      mutate(
+        (current: { match: Match } | undefined) => {
+          if (!current || !current.match) return current;
 
-      await matchService.updateRequestStatus(id, userId, status, token);
-      mutate();
+          return {
+            match: {
+              ...current.match,
+              contacts: (current.match.contacts || []).map((c: any) =>
+                c.user_id === userId ? { ...c, status } : c,
+              ),
+            },
+          } as { match: Match };
+        },
+        { revalidate: false },
+      );
+
+      try {
+        const token = await getAccessTokenSilently();
+
+        await matchService.updateRequestStatus(id, userId, status, token);
+        mutate();
+      } catch (err) {
+        mutate();
+        throw err;
+      }
+
       globalMutate(
         (key) => typeof key === "string" && key.startsWith("/api/"),
-        (currentData: unknown) => currentData,
+        undefined,
         { revalidate: true },
       );
     },
@@ -402,13 +543,34 @@ export function useMatch(id: string | null) {
 
   const closeRegistrations = useCallback(async () => {
     if (!id) return;
-    const token = await getAccessTokenSilently();
 
-    await matchService.closeRegistrations(id, token);
-    mutate();
+    mutate(
+      (current: { match: Match } | undefined) => {
+        if (!current || !current.match) return current;
+
+        return {
+          match: {
+            ...current.match,
+            status: "found",
+          },
+        } as { match: Match };
+      },
+      { revalidate: false },
+    );
+
+    try {
+      const token = await getAccessTokenSilently();
+
+      await matchService.closeRegistrations(id, token);
+      mutate();
+    } catch (err) {
+      mutate();
+      throw err;
+    }
+
     globalMutate(
       (key) => typeof key === "string" && key.startsWith("/api/"),
-      (currentData: unknown) => currentData,
+      undefined,
       { revalidate: true },
     );
   }, [id, getAccessTokenSilently, mutate, globalMutate]);

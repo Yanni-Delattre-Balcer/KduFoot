@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -44,6 +45,29 @@ export default function ExercisesPage() {
       return;
     }
     // TODO: Implement analysis logic
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20,
+      },
+    },
   };
 
   return (
@@ -278,17 +302,30 @@ export default function ExercisesPage() {
               </Card>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {exercises.map((exercise) => (
-                <ExerciseCard
-                  key={exercise.id}
-                  addExercise={addExercise}
-                  exercise={exercise}
-                  isInTraining={isInTraining}
-                  removeExercise={removeExercise}
-                />
-              ))}
-            </div>
+            <motion.div
+              animate="visible"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              initial="hidden"
+              variants={containerVariants}
+            >
+              <AnimatePresence mode="popLayout">
+                {exercises.map((exercise) => (
+                  <motion.div
+                    key={exercise.id}
+                    layout
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    variants={itemVariants}
+                  >
+                    <ExerciseCard
+                      addExercise={addExercise}
+                      exercise={exercise}
+                      isInTraining={isInTraining}
+                      removeExercise={removeExercise}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           </div>
         </DataWall>
       </section>

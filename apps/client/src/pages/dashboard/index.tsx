@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSWRConfig } from "swr";
 import { useTranslation } from "react-i18next";
 import { LayoutDashboard } from "lucide-react";
 import { Card } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Image as HeroImage } from "@heroui/image";
 import { Spinner } from "@heroui/spinner";
 import { Tabs, Tab } from "@heroui/tabs";
 import { Link, useSearchParams } from "react-router-dom";
@@ -19,6 +19,8 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@heroui/modal";
+
+import { SafeImage } from "@/components/common/safe-image";
 
 import { DashboardListSkeleton } from "../../components/skeletons/dashboard-skeleton";
 import { matchService } from "../../services/matches";
@@ -131,6 +133,29 @@ export default function DashboardPage() {
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>(
     {},
   );
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20,
+      },
+    },
+  };
 
   // Track last seen data to detect specific changes (Removed LocalStorage as per Zero Cache requirement)
   const [knownData, setKnownData] = useState<Record<string, unknown>>({});
@@ -631,53 +656,69 @@ export default function DashboardPage() {
               <div aria-live="polite" className="flex flex-col gap-4 pt-2">
                 {renderSubFilters(requestsSubFilter, setRequestsSubFilter)}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {isLoadingIncoming ? (
-                    <DashboardListSkeleton count={4} />
-                  ) : filteredRequests.length > 0 ? (
-                    filteredRequests.map((request, idx) => (
-                      <DashboardRequestCard
-                        key={idx}
-                        actionLoading={actionLoading}
-                        formatDate={formatDate}
-                        formatTime={formatTime}
-                        lang={i18n.language}
-                        request={request}
-                        onAction={handleRequestAction}
-                        onViewProfile={(req) => {
-                          setSelectedClubProfile(req);
-                          onProfileOpen();
-                        }}
-                      />
-                    ))
-                  ) : (
-                    <div className="col-span-full py-8 text-center space-y-4">
-                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-orange-500/20">
-                        <svg
-                          className="w-8 h-8"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
+                <motion.div
+                  animate="visible"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+                  initial="hidden"
+                  variants={containerVariants}
+                >
+                  <AnimatePresence mode="popLayout">
+                    {isLoadingIncoming ? (
+                      <DashboardListSkeleton count={4} />
+                    ) : filteredRequests.length > 0 ? (
+                      filteredRequests.map((request) => (
+                        <motion.div
+                          key={`${request.match_id}-${request.requester_user_id}`}
+                          layout
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          variants={itemVariants}
                         >
-                          <path
-                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
+                          <DashboardRequestCard
+                            actionLoading={actionLoading}
+                            formatDate={formatDate}
+                            formatTime={formatTime}
+                            lang={i18n.language}
+                            request={request}
+                            onAction={handleRequestAction}
+                            onViewProfile={(req) => {
+                              setSelectedClubProfile(req);
+                              onProfileOpen();
+                            }}
                           />
-                        </svg>
-                      </div>
-                      <p className="text-default-400 font-medium whitespace-pre-wrap">
-                        {requestsSubFilter === "all"
-                          ? t("dashboard.empty.no_requests")
-                          : requestsSubFilter === "match"
-                            ? t("dashboard.empty.no_match")
-                            : t("dashboard.empty.no_tournament")}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <motion.div
+                        className="col-span-full py-8 text-center space-y-4"
+                        variants={itemVariants}
+                      >
+                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-orange-500/20">
+                          <svg
+                            className="w-8 h-8"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+                        <p className="text-default-400 font-medium whitespace-pre-wrap">
+                          {requestsSubFilter === "all"
+                            ? t("dashboard.empty.no_requests")
+                            : requestsSubFilter === "match"
+                              ? t("dashboard.empty.no_match")
+                              : t("dashboard.empty.no_tournament")}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </div>
             </Tab>
 
@@ -713,56 +754,72 @@ export default function DashboardPage() {
               }
             >
               <div aria-live="polite" className="flex flex-col gap-4 pt-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {isLoadingIncoming || isLoadingParticipations ? (
-                    <DashboardListSkeleton count={4} />
-                  ) : allConfirmedMatches.length > 0 ? (
-                    allConfirmedMatches.map((cm, idx) => (
-                      <ConfirmedMatchCard
-                        key={idx}
-                        formatDate={formatDate}
-                        formatTime={formatTime}
-                        highlighted={highlightedCardId === cm.match_id}
-                        isWithdrawing={
-                          actionLoading[`${cm.match_id}-${user?.id || ""}`]
-                        }
-                        knownData={
-                          knownData[cm.match_id] as
-                            | {
-                                date?: string;
-                                time?: string;
-                                venue?: string;
-                                format?: string;
-                                pitch?: string;
-                              }
-                            | undefined
-                        }
-                        match={cm}
-                        userId={user?.id}
-                        onMarkAsRead={markAsRead}
-                        onWithdraw={() =>
-                          handleWithdraw(cm.match_id, user?.id || "")
-                        }
-                      />
-                    ))
-                  ) : (
-                    <div className="col-span-full py-8 text-center space-y-6">
-                      <p className="text-default-400 font-medium">
-                        {t("dashboard.labels.no_participation_match")}
-                      </p>
-                      <Button
-                        as={Link}
-                        className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto"
-                        color="secondary"
-                        to="/matches"
-                        variant="flat"
+                <motion.div
+                  animate="visible"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+                  initial="hidden"
+                  variants={containerVariants}
+                >
+                  <AnimatePresence mode="popLayout">
+                    {isLoadingIncoming || isLoadingParticipations ? (
+                      <DashboardListSkeleton count={4} />
+                    ) : allConfirmedMatches.length > 0 ? (
+                      allConfirmedMatches.map((cm) => (
+                        <motion.div
+                          key={cm.match_id}
+                          layout
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          variants={itemVariants}
+                        >
+                          <ConfirmedMatchCard
+                            formatDate={formatDate}
+                            formatTime={formatTime}
+                            highlighted={highlightedCardId === cm.match_id}
+                            isWithdrawing={
+                              actionLoading[`${cm.match_id}-${user?.id || ""}`]
+                            }
+                            knownData={
+                              knownData[cm.match_id] as
+                                | {
+                                    date?: string;
+                                    time?: string;
+                                    venue?: string;
+                                    format?: string;
+                                    pitch?: string;
+                                  }
+                                | undefined
+                            }
+                            match={cm}
+                            userId={user?.id}
+                            onMarkAsRead={markAsRead}
+                            onWithdraw={() =>
+                              handleWithdraw(cm.match_id, user?.id || "")
+                            }
+                          />
+                        </motion.div>
+                      ))
+                    ) : (
+                      <motion.div
+                        className="col-span-full py-8 text-center space-y-6"
+                        variants={itemVariants}
                       >
-                        {t("dashboard.labels.search_match")}
-                        {isLocked && " 🔒"}
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                        <p className="text-default-400 font-medium">
+                          {t("dashboard.labels.no_participation_match")}
+                        </p>
+                        <Button
+                          as={Link}
+                          className="font-bold bg-violet-500/10 text-violet-400 w-full sm:w-auto"
+                          color="secondary"
+                          to="/matches"
+                          variant="flat"
+                        >
+                          {t("dashboard.labels.search_match")}
+                          {isLocked && " 🔒"}
+                        </Button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </div>
             </Tab>
 
@@ -799,55 +856,75 @@ export default function DashboardPage() {
               }
             >
               <div aria-live="polite" className="flex flex-col gap-4 pt-2">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                  {isLoadingParticipations ? (
-                    <DashboardListSkeleton count={3} />
-                  ) : allConfirmedTournaments.length > 0 ? (
-                    allConfirmedTournaments.map((part) => (
-                      <ConfirmedTournamentCard
-                        key={part.match_id}
-                        formatDate={formatDate}
-                        formatTime={formatTime}
-                        highlighted={highlightedCardId === part.match_id}
-                        isTimeChanged={
-                          !!(
-                            part.notification_state === 1 &&
-                            (knownData[part.match_id] as { time?: string }) &&
-                            (knownData[part.match_id] as { time?: string })
-                              .time !== part.match_time
-                          )
-                        }
-                        isWithdrawing={
-                          actionLoading[`${part.match_id}-${user?.id || ""}`]
-                        }
-                        knownData={
-                          knownData as Record<string, { time?: string }>
-                        }
-                        participation={part}
-                        userId={user?.id}
-                        onMarkAsRead={markAsRead}
-                        onWithdraw={() =>
-                          handleWithdraw(part.match_id, user?.id || "")
-                        }
-                      />
-                    ))
-                  ) : (
-                    <div className="col-span-full py-8 text-center space-y-4">
-                      <p className="text-default-400 font-medium">
-                        {t("dashboard.labels.no_participation_tournament")}
-                      </p>
-                      <Button
-                        as={Link}
-                        className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto"
-                        color="default"
-                        to="/matches?type=tournament"
-                        variant="flat"
+                <motion.div
+                  animate="visible"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+                  initial="hidden"
+                  variants={containerVariants}
+                >
+                  <AnimatePresence mode="popLayout">
+                    {isLoadingParticipations ? (
+                      <DashboardListSkeleton count={3} />
+                    ) : allConfirmedTournaments.length > 0 ? (
+                      allConfirmedTournaments.map((part) => (
+                        <motion.div
+                          key={part.match_id}
+                          layout
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          variants={itemVariants}
+                        >
+                          <ConfirmedTournamentCard
+                            formatDate={formatDate}
+                            formatTime={formatTime}
+                            highlighted={highlightedCardId === part.match_id}
+                            isTimeChanged={
+                              !!(
+                                part.notification_state === 1 &&
+                                (knownData[part.match_id] as {
+                                  time?: string;
+                                }) &&
+                                (knownData[part.match_id] as { time?: string })
+                                  .time !== part.match_time
+                              )
+                            }
+                            isWithdrawing={
+                              actionLoading[
+                                `${part.match_id}-${user?.id || ""}`
+                              ]
+                            }
+                            knownData={
+                              knownData as Record<string, { time?: string }>
+                            }
+                            participation={part}
+                            userId={user?.id}
+                            onMarkAsRead={markAsRead}
+                            onWithdraw={() =>
+                              handleWithdraw(part.match_id, user?.id || "")
+                            }
+                          />
+                        </motion.div>
+                      ))
+                    ) : (
+                      <motion.div
+                        className="col-span-full py-8 text-center space-y-4"
+                        variants={itemVariants}
                       >
-                        {t("dashboard.labels.search_tournament")}
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                        <p className="text-default-400 font-medium">
+                          {t("dashboard.labels.no_participation_tournament")}
+                        </p>
+                        <Button
+                          as={Link}
+                          className="font-bold bg-purple-300/20 text-purple-400 w-full sm:w-auto"
+                          color="default"
+                          to="/matches?type=tournament"
+                          variant="flat"
+                        >
+                          {t("dashboard.labels.search_tournament")}
+                        </Button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               </div>
             </Tab>
           </Tabs>
@@ -856,6 +933,8 @@ export default function DashboardPage() {
       <Modal
         backdrop="blur"
         isOpen={isProfileOpen}
+        scrollBehavior="inside"
+        shouldBlockScroll={true}
         onOpenChange={onProfileChange}
       >
         <ModalContent className="bg-[#1a1a1c] border border-white/10">
@@ -879,25 +958,23 @@ export default function DashboardPage() {
                   <div className="flex flex-col gap-6 animate-appearance-in">
                     {/* Header Profil */}
                     <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
-                      <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20">
-                        {selectedClubProfile.requester_club_logo ||
-                        selectedClubProfile.host_club_logo ? (
-                          <HeroImage
-                            alt="Club Logo"
-                            className="object-contain w-14 h-14"
-                            src={
-                              selectedClubProfile.requester_club_logo ||
-                              selectedClubProfile.host_club_logo
-                            }
-                          />
-                        ) : (
-                          <span className="text-orange-400 font-black text-4xl">
-                            {(
-                              selectedClubProfile.requester_club_name ||
-                              selectedClubProfile.host_club_name
-                            )?.charAt(0)}
-                          </span>
-                        )}
+                      <div className="w-20 h-20 shrink-0">
+                        <SafeImage
+                          alt={
+                            selectedClubProfile.requester_club_name ||
+                            selectedClubProfile.host_club_name
+                          }
+                          aspectRatio="1/1"
+                          fallbackText={
+                            selectedClubProfile.requester_club_name ||
+                            selectedClubProfile.host_club_name
+                          }
+                          src={
+                            selectedClubProfile.requester_club_logo ||
+                            selectedClubProfile.host_club_logo
+                          }
+                          width={80}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-xl font-black text-white whitespace-normal break-words leading-tight">

@@ -153,11 +153,50 @@ export class UserService {
     }
 
     async deleteUser(id: string): Promise<boolean> {
-        const result = await this.db
-            .prepare('DELETE FROM users WHERE id = ?')
-            .bind(id)
-            .run();
-        return result.success;
+        // [RGPD] Surgical Anonymization & Purge
+        // 1. Anonymize matches (Keep the content but break the PII link)
+        const anonymizeMatches = this.db.prepare(`
+            UPDATE matches 
+            SET owner_id = NULL, 
+                email = 'deleted-internal@kdufoot.com', 
+                phone = 'DELETED',
+                notes = 'Contenu anonymisé suite à suppression de compte.'
+            WHERE owner_id = ?
+        `).bind(id);
+
+        // 2. Anonymize Exercises
+        const anonymizeExercises = this.db.prepare('UPDATE exercises SET user_id = NULL WHERE user_id = ?').bind(id);
+
+        // 3. Anonymize Match Contacts (Participations)
+        const anonymizeContacts = this.db.prepare('UPDATE match_contacts SET user_id = NULL WHERE user_id = ?').bind(id);
+
+        // 4. Hard Delete Private Data (GDPR Requirement)
+        const deleteSessions = this.db.prepare('DELETE FROM training_sessions WHERE user_id = ?').bind(id);
+        const deleteHistory = this.db.prepare('DELETE FROM history WHERE user_id = ?').bind(id);
+        const deleteFavorites = this.db.prepare('DELETE FROM favorites WHERE user_id = ?').bind(id);
+
+        // 5. Audit the deletion before the user record vanishes
+        const auditDeletion = this.db.prepare(`
+            INSERT INTO rgpd_audit_log (id, user_id, action, details) 
+            VALUES (?, ?, 'delete', 'Purge chirurgicale et anonymisation effectuée')
+        `).bind(crypto.randomUUID(), id);
+
+        // 6. Finally delete the user
+        const deleteUser = this.db.prepare('DELETE FROM users WHERE id = ?').bind(id);
+
+        // Execute as a Batch (Atomic Operation)
+        const results = await this.db.batch([
+            anonymizeMatches,
+            anonymizeExercises,
+            anonymizeContacts,
+            deleteSessions,
+            deleteHistory,
+            deleteFavorites,
+            auditDeletion,
+            deleteUser
+        ]);
+
+        return results.every(res => res.success);
     }
 
     async updateLastCalendarSyncAt(userId: string): Promise<void> {

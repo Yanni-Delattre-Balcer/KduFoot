@@ -23,6 +23,8 @@ import { HeroUIProvider } from "@heroui/system";
 import { ToastProvider } from "@heroui/toast";
 import { useHref, useNavigate } from "react-router-dom";
 import { SWRConfig } from "swr";
+import { useEffect, useState } from "react";
+import { db } from "./utils/db";
 
 declare module "@react-types/shared" {
   interface RouterConfig {
@@ -32,13 +34,35 @@ declare module "@react-types/shared" {
 
 export function Provider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [initialCache, setInitialCache] = useState<any>(new Map());
+
+  // Rehydrate SWR Cache from IndexedDB on mount
+  useEffect(() => {
+    async function hydrate() {
+      const allCache = await db.cache.toArray();
+      const map = new Map();
+
+      allCache.forEach((entry) => map.set(entry.key, entry.value));
+      setInitialCache(map);
+      setIsHydrated(true);
+    }
+    hydrate();
+  }, []);
+
+  if (!isHydrated) return null; // Prevent flicker before cache is ready
 
   return (
     <SWRConfig
       value={{
+        provider: () => initialCache,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
         keepPreviousData: true,
+        // Sync cache back to Dexie on each mutation
+        onSuccess: (data: any, key: any) => {
+          db.cache.put({ key, value: data, timestamp: Date.now() });
+        },
         onError: (error) => {
           if (error?.status === 429) {
             import("@heroui/toast").then(({ addToast }) => {

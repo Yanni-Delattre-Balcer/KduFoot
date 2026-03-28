@@ -2,11 +2,11 @@ import React from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Image as HeroImage } from "@heroui/image";
 import { Progress } from "@heroui/progress";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+import { SafeImage } from "@/components/common/safe-image";
 import { JerseyColorDots } from "@/components/jersey-color-dots";
 import { DashboardMatch } from "@/types/match.types";
 
@@ -101,18 +101,14 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
           >
             <div className="flex items-start justify-between gap-4 mb-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 p-1 shrink-0">
-                  {opponentClubLogo ? (
-                    <HeroImage
-                      className="object-contain"
-                      loading="lazy"
-                      src={opponentClubLogo}
-                    />
-                  ) : (
-                    <span className="text-white font-black text-2xl">
-                      {opponentClubName?.charAt(0)}
-                    </span>
-                  )}
+                <div className="w-16 h-16 shrink-0">
+                  <SafeImage
+                    alt={opponentClubName}
+                    aspectRatio="1/1"
+                    fallbackText={opponentClubName}
+                    src={opponentClubLogo}
+                    width={64}
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
@@ -279,17 +275,14 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
 
                 {/* Opponent Club (Right) */}
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full border-2 border-success-500/30 bg-success-500/10 flex items-center justify-center overflow-hidden">
-                    {opponentClubLogo ? (
-                      <HeroImage
-                        className="w-full h-full object-contain"
-                        src={opponentClubLogo}
-                      />
-                    ) : (
-                      <span className="text-success-500 font-black text-lg">
-                        {opponentClubName?.charAt(0)}
-                      </span>
-                    )}
+                  <div className="w-12 h-12">
+                    <SafeImage
+                      alt={opponentClubName}
+                      aspectRatio="1/1"
+                      fallbackText={opponentClubName}
+                      src={opponentClubLogo}
+                      width={48}
+                    />
                   </div>
                   <span className="text-[9px] font-bold text-default-400 break-words text-center">
                     {opponentClubName}
@@ -315,6 +308,10 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
               )}
               <div className="flex flex-wrap gap-2">
                 <Button
+                  aria-label={t(
+                    "dashboard.labels.view_details",
+                    "Voir les détails du match",
+                  )}
                   as={Link}
                   className="flex-1 min-w-[120px] font-bold text-sm h-12 active:scale-95 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
                   color="default"
@@ -326,6 +323,10 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
                 </Button>
                 {isParticipant && onWithdraw && (
                   <Button
+                    aria-label={t(
+                      "dashboard.controls.withdraw",
+                      "Se désister du match",
+                    )}
                     className="flex-1 min-w-[120px] font-bold text-xs h-12 active:scale-95 border border-danger/20 hover:bg-danger/10 whitespace-normal leading-tight text-center"
                     color="danger"
                     isLoading={isWithdrawing}

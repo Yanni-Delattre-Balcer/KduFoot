@@ -775,8 +775,8 @@
     "plans": {
       "discovery": {
         "name": "Découverte",
-        "price": "1€",
-        "cta": "Essayer pour 1€",
+        "price_cents": 100,
+        "cta": "Essayer pour {{price}}",
         "features": {
           "0": "1 heure d'analyse vidéo",
           "1": "Accès complet aux outils IA",
@@ -786,7 +786,7 @@
       },
       "starter": {
         "name": "Espoir",
-        "price": "19€",
+        "price_cents": 1900,
         "cta": "Choisir Espoir",
         "features": {
           "0": "10 heures d'analyse vidéo",
@@ -797,7 +797,7 @@
       },
       "pro": {
         "name": "Pro",
-        "price": "39€",
+        "price_cents": 3900,
         "cta": "Choisir Pro",
         "popular": "Populaire",
         "features": {
@@ -809,7 +809,7 @@
       },
       "elite": {
         "name": "Élite",
-        "price": "59€",
+        "price_cents": 5900,
         "cta": "Devenir Élite",
         "features": {
           "0": "30 heures d'analyse vidéo",

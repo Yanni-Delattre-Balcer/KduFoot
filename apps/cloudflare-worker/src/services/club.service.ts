@@ -1,6 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 import { D1Database } from '@cloudflare/workers-types';
 import { Env } from '../types/env';
+import { Sentry } from '../utils/sentry';
+import { fetchWithTimeout } from '../utils/fetch-utils';
 
 export interface Club {
     id: string; // RNA or SIRET
@@ -51,10 +53,12 @@ export class ClubService {
             per_page: '20'
         });
 
-        const response = await fetch(`${this.env.SIRET_API_URL}?${params}`);
+        const response = await fetchWithTimeout(`${this.env.SIRET_API_URL}?${params}`);
 
         if (!response.ok) {
-            throw new Error(`API Error: ${response.statusText}`);
+            const error = new Error(`SIRET API Error: ${response.statusText}`);
+            Sentry.captureException(error, { extra: { status: response.status, query } });
+            throw error;
         }
 
         const data = await response.json() as import("../types").SiretApiResponse;
@@ -92,7 +96,7 @@ export class ClubService {
                 per_page: '1'
             });
 
-            const response = await fetch(`${this.env.SIRET_API_URL}?${params}`);
+            const response = await fetchWithTimeout(`${this.env.SIRET_API_URL}?${params}`);
             if (!response.ok) return { isValid: false, error: "Impossible de contacter l'API SIRET." };
 
             const data = await response.json() as import("../types").SiretApiResponse;

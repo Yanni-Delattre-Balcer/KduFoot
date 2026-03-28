@@ -56,6 +56,8 @@ export type AuthenticatedRequest = Request & {
 	user?: JWTPayload;
 	/** Permissions extracted from the JWT, available in every authenticated route handler. */
 	permissions: string[];
+	/** If the user is a super admin */
+	isAdmin?: boolean;
 };
 
 type RouteHandler = (
@@ -166,7 +168,31 @@ export class Router {
 		newHeaders.set("X-Content-Type-Options", "nosniff");
 		newHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
 		newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), bluetooth=(), usb=(), payment=(), interest-cohort=()");
-		newHeaders.set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: https://*.auth0.com https://*.googleusercontent.com; connect-src 'self' https://*.auth0.com https://maps.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; upgrade-insecure-requests;");
+		
+		const reportingEndpoint = "https://kdufoot.report-uri.com/a/d/g"; // Placeholder réaliste GAFA
+		newHeaders.set("Report-To", JSON.stringify({
+			group: "default",
+			max_age: 31536000,
+			endpoints: [{ url: reportingEndpoint }],
+			include_subdomains: true
+		}));
+
+		const csp = [
+			"default-src 'self'",
+			"script-src 'self'",
+			"style-src 'self' https://fonts.googleapis.com",
+			"img-src 'self' data: https://*.auth0.com https://*.googleusercontent.com https://*.cloudinary.com",
+			"connect-src 'self' https://*.auth0.com https://maps.googleapis.com",
+			"font-src 'self' https://fonts.gstatic.com",
+			"frame-ancestors 'none'",
+			"object-src 'none'",
+			"base-uri 'self'",
+			"form-action 'self'",
+			"upgrade-insecure-requests",
+			`report-to default; report-uri ${reportingEndpoint}`
+		].join("; ");
+
+		newHeaders.set("Content-Security-Policy", csp);
 		
 		return new Response(response.body, { 
 			status: response.status,

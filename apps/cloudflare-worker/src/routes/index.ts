@@ -37,6 +37,8 @@ import { setupTournamentRoutes } from "./tournaments";
 import { setupParticipationRoutes } from "./participations";
 import { setupAdminRoutes } from "./admin/routes";
 import { setupCalendarRoutes } from "./calendar";
+import { setupStripeRoutes } from "./subscriptions/stripe";
+import { setupStatusRoutes } from "./status";
 import { Env } from "../types/env";
 
 /**
@@ -218,6 +220,8 @@ export const setupRoutes = (router: Router, env: Env, ctx: ExecutionContext) => 
 	setupTournamentRoutes(router, env, ctx);
 	setupAdminRoutes(router, env, ctx);
 	setupCalendarRoutes(router, env);
+	setupStripeRoutes(router, env);
+	setupStatusRoutes(router, env);
 	// Preserve the original root response for backwards compatibility
 	router.get("/", async () => {
 		return new Response("KduFoot API is running", {

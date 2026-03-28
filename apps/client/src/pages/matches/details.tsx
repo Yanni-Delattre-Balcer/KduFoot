@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
 import { useDisclosure } from "@heroui/modal";
 import { addToast } from "@heroui/toast";
@@ -11,6 +10,8 @@ import { useWelcomeGateway } from "@/contexts/welcome-gateway-context";
 import { useAuth, useUser } from "@/authentication";
 import { useMatch, useMyParticipations } from "@/hooks/use-matches";
 import DefaultLayout from "@/layouts/default";
+import { MatchDetailsSkeleton } from "@/components/skeletons/match-details-skeleton";
+import { SEO } from "@/components/seo";
 
 // New Refactored Components
 import { useMatchHighlights } from "@/hooks/use-match-highlights";
@@ -109,9 +110,7 @@ export default function MatchDetailsPage() {
   if (isLoading) {
     return (
       <DefaultLayout>
-        <div className="flex justify-center items-center h-[50vh]">
-          <Spinner label={t("loading")} />
-        </div>
+        <MatchDetailsSkeleton />
       </DefaultLayout>
     );
   }
@@ -258,8 +257,36 @@ export default function MatchDetailsPage() {
     }
   };
 
+  const matchJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    name: `${match.club?.name || "Match"} vs Participation`,
+    description: match.notes || t("site_description"),
+    startDate: `${match.match_date}T${match.match_time}:00`,
+    location: {
+      "@type": "Place",
+      name: match.location_city,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: match.location_city,
+        addressCountry: "FR",
+      },
+    },
+    organizer: {
+      "@type": "Organization",
+      name: match.club?.name,
+      logo: match.club?.logo_url,
+    },
+  };
+
   return (
     <DefaultLayout>
+      <SEO
+        canonical={`https://kdufoot.com/matches/${id}`}
+        description={`${match.club?.name} cherche un adversaire pour un ${t("enums.type." + match.type).toLowerCase()} le ${match.match_date} à ${match.location_city}.`}
+        jsonLd={matchJsonLd}
+        title={`${match.club?.name} - ${t("enums.type." + match.type)}`}
+      />
       <DataWall>
         <div className="container mx-auto max-w-7xl px-2 sm:px-6 py-8 space-y-8 animate-appearance-in pb-24">
           {/* Top Navigation */}

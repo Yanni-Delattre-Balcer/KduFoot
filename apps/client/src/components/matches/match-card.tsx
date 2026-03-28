@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import { Match, MatchDiff } from "@/types/match.types";
+import { formatPrice } from "@/utils/currency";
 
 interface MatchCardProps {
   match: Match;
@@ -128,7 +129,10 @@ export const MatchCard = React.memo(function MatchCard({
                     variant="flat"
                   >
                     {match.registration_fee > 0
-                      ? `${match.registration_fee} €`
+                      ? formatPrice({
+                          amount: match.registration_fee * 100,
+                          currency: "EUR",
+                        })
                       : t("matchForm.labels.free")}
                   </Chip>
                 )}

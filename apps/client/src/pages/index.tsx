@@ -51,10 +51,16 @@ export default function IndexPage() {
               <div className="max-w-[280px] sm:max-w-md md:max-w-lg">
                 <p className="text-default-500 text-sm sm:text-base leading-relaxed break-words overflow-wrap-anywhere">
                   {t(
-                    "homePage.hero.description",
-                    "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics.",
+                    "homePage.hero.description_ultimate",
+                    "Trouvez un match de foot en 3 touches, n'importe où, maintenant. La plateforme élite pour les passionnés du ballon rond.",
                   )}
                 </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs text-green-500 font-bold uppercase tracking-wider">
+                    {t("homePage.hero.live_players", "742 joueurs en ligne")}
+                  </span>
+                </div>
               </div>
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-2">
                 {showVideoAnalysis && (

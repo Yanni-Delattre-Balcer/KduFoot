@@ -8,6 +8,7 @@ import { checkPermissions } from '../../auth0';
 import { validateClubSiret } from '../../utils/siret.validator';
 import { broadcastDataChanged } from '../../utils/broadcast';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { checkQuota, incrementUsage } from '../../middleware/quota';
 
 
 export const setupProfileRoutes = (router: Router, env: Env) => {
@@ -439,6 +440,10 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
+        // FAANG standard: Quota check BEFORE expensive compute
+        const quotaError = await checkQuota('pdf_export', 1)(request, env);
+        if (quotaError) return quotaError;
+
         try {
             const data = await userService.exportUserData(user.id);
             const exportData = data as Record<string, unknown>;
@@ -519,6 +524,9 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             }
 
             const pdfBytes = await pdfDoc.save();
+
+            // Track usage after successful generation
+            await incrementUsage(env.DB, user.id, 'pdf_export');
 
             // RGPD audit: log data export
             try {

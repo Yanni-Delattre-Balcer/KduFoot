@@ -2,11 +2,12 @@ import React from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Image as HeroImage } from "@heroui/image";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
+import { preload } from "swr";
+import { useAuth0 } from "@auth0/auth0-react";
 import { MatchRequest } from "@/types/match.types";
+import { SafeImage } from "@/components/common/safe-image";
 
 interface DashboardRequestCardProps {
   request: MatchRequest;
@@ -28,6 +29,23 @@ export const DashboardRequestCard = React.memo(function DashboardRequestCard({
   lang,
 }: DashboardRequestCardProps) {
   const { t } = useTranslation("kdufoot");
+  const { getAccessTokenSilently } = useAuth0();
+
+  const handlePrefetch = async () => {
+    const key = `/api/matches/${request.match_id}`;
+    const fetcher = async (url: string) => {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) throw new Error("Failed to prefetch match");
+
+      return response.json();
+    };
+
+    preload(key, fetcher);
+  };
 
   return (
     <Card
@@ -45,18 +63,16 @@ export const DashboardRequestCard = React.memo(function DashboardRequestCard({
             <Link
               className="flex items-center gap-3 w-full sm:w-auto hover:opacity-80 transition-opacity"
               to={`/matches/${request.match_id}`}
+              onMouseEnter={handlePrefetch}
             >
-              <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-orange-500/20 to-amber-500/10 flex items-center justify-center overflow-hidden border border-orange-500/20 shrink-0">
-                {request.requester_club_logo ? (
-                  <HeroImage
-                    className="object-contain w-10 h-10"
-                    src={request.requester_club_logo}
-                  />
-                ) : (
-                  <span className="text-orange-400 font-black text-2xl">
-                    {request.requester_club_name?.charAt(0)}
-                  </span>
-                )}
+              <div className="w-14 h-14 shrink-0">
+                <SafeImage
+                  alt={request.requester_club_name}
+                  aspectRatio="1/1"
+                  fallbackText={request.requester_club_name}
+                  src={request.requester_club_logo}
+                  width={56}
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-black text-white text-base sm:text-lg leading-tight break-words tracking-tight">

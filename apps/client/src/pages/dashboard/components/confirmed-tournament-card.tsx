@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 
 import { JerseyColorDots } from "@/components/jersey-color-dots";
 import { DashboardMatch } from "@/types/match.types";
+import { formatPrice } from "@/utils/currency";
 
 interface ConfirmedTournamentCardProps {
   participation: DashboardMatch;
@@ -232,7 +233,10 @@ export const ConfirmedTournamentCard = React.memo(
                   </p>
                   <p className="text-sm font-bold text-white">
                     {part.entry_fee
-                      ? `${part.entry_fee}€`
+                      ? formatPrice({
+                          amount: part.entry_fee * 100,
+                          currency: "EUR",
+                        })
                       : t("matchForm.labels.free", "Gratuit")}
                   </p>
                 </div>

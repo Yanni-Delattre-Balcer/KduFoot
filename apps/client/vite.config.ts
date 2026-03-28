@@ -140,7 +140,11 @@ export default defineConfig(({ mode }) => {
       tsconfigPaths(),
       tailwindcss(),
       VitePWA({
+        strategies: 'injectManifest',
+        srcDir: 'src',
+        filename: 'sw.ts',
         registerType: 'autoUpdate',
+        injectRegister: 'auto',
         includeAssets: ['index.html', 'favicon.ico', 'apple-touch-icon.png', 'logo.png'],
         manifest: {
           name: 'Kdufoot',
@@ -172,60 +176,9 @@ export default defineConfig(({ mode }) => {
             }
           ]
         },
-        workbox: {
-          globPatterns: ['index.html', '**/*.{js,css,ico,png,svg,woff2}'],
-          // Precache index.html to avoid "non-precached-url" error in Workbox
-          // and ensure offline support for SPA.
-          navigateFallback: 'index.html',
-          navigateFallbackDenylist: [/^\/api\//, /^\/_auth0\//, /code=/, /state=/, /error=/],
-          skipWaiting: true,
-          clientsClaim: true,
-          // Import our custom logic
-          importScripts: [],
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'google-fonts-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            },
-            {
-              // Cache exercises for offline training
-              urlPattern: /\/api\/exercises*/i,
-              handler: 'NetworkFirst',
-              options: {
-                cacheName: 'exercises-api-cache',
-                expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
-            },
-            {
-              // Never cache Auth0 domain requests
-              urlPattern: /^https:\/\/.*\.auth0\.com\/.*/i,
-              handler: 'NetworkOnly',
-            },
-            {
-              // Never cache other API requests
-              urlPattern: /^.*\/api\/.*/i,
-              handler: 'NetworkOnly',
-            }
-          ]
-        },
         devOptions: {
-          enabled: true
+          enabled: true,
+          type: 'module'
         }
       }),
       githubPagesSpa()

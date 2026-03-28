@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { Match, MatchContact } from "@/types/match.types";
+import { formatPrice } from "@/utils/currency";
 
 interface OrganizedTournamentCardProps {
   match: Match;
@@ -143,7 +144,10 @@ export const OrganizedTournamentCard = React.memo(
                   </p>
                   <p className="text-sm font-bold text-green-400">
                     {match.registration_fee
-                      ? `${match.registration_fee}€`
+                      ? formatPrice({
+                          amount: match.registration_fee * 100,
+                          currency: "EUR",
+                        })
                       : t("matchForm.labels.free", "Gratuit")}
                   </p>
                 </div>

@@ -1,12 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 
 import { useSession } from "@/hooks/use-sessions";
 import DefaultLayout from "@/layouts/default";
+import { SessionDetailsSkeleton } from "@/components/skeletons/details-skeleton";
 
 /**
  * This component displays the details of a specific training session.
@@ -35,9 +35,7 @@ export default function SessionDetailsPage() {
   if (isLoading) {
     return (
       <DefaultLayout>
-        <div className="flex justify-center items-center h-[50vh]">
-          <Spinner label={t("loading", "Chargement...")} />
-        </div>
+        <SessionDetailsSkeleton />
       </DefaultLayout>
     );
   }

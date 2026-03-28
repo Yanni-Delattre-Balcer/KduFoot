@@ -69,10 +69,14 @@ import { showVideoAnalysis } from "@/config/site";
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => (
   <motion.div
-    animate={{ opacity: 1, scale: 1, y: 0 }}
-    exit={{ opacity: 0, scale: 0.98, y: -10 }}
-    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+    animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+    exit={{ opacity: 0, scale: 0.96, y: -20, filter: "blur(10px)" }}
+    initial={{ opacity: 0, scale: 1.04, y: 20, filter: "blur(10px)" }}
+    transition={{
+      duration: 0.5,
+      ease: [0.32, 0.72, 0, 1], // Apple-style easing
+      opacity: { duration: 0.3 },
+    }}
   >
     {children}
   </motion.div>

@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardBody, CardHeader, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
+import { formatPrice } from "../../utils/currency";
 
 import DefaultLayout from "../../layouts/default";
 import FootballClock from "../../components/football-clock";
@@ -12,7 +13,10 @@ export default function PricingPage() {
   const plans = [
     {
       key: "discovery",
-      price: t("pricing.plans.discovery.price"),
+      price: formatPrice({
+        amount: Number(t("pricing.plans.discovery.price_cents")),
+        currency: "EUR",
+      }),
       oneTime: true,
       color: "default" as const,
       gradient: "from-blue-500/15 to-cyan-500/5",
@@ -20,14 +24,20 @@ export default function PricingPage() {
     },
     {
       key: "starter",
-      price: t("pricing.plans.starter.price"),
+      price: formatPrice({
+        amount: Number(t("pricing.plans.starter.price_cents")),
+        currency: "EUR",
+      }),
       color: "primary" as const,
       gradient: "from-green-500/15 to-emerald-500/5",
       featuresCount: 4,
     },
     {
       key: "pro",
-      price: t("pricing.plans.pro.price"),
+      price: formatPrice({
+        amount: Number(t("pricing.plans.pro.price_cents")),
+        currency: "EUR",
+      }),
       color: "secondary" as const,
       gradient: "from-orange-500/20 to-red-500/10",
       featuresCount: 4,
@@ -35,7 +45,10 @@ export default function PricingPage() {
     },
     {
       key: "elite",
-      price: t("pricing.plans.elite.price"),
+      price: formatPrice({
+        amount: Number(t("pricing.plans.elite.price_cents")),
+        currency: "EUR",
+      }),
       color: "default" as const,
       gradient: "from-purple-400/25 to-fuchsia-500/15",
       featuresCount: 4,
@@ -159,7 +172,7 @@ export default function PricingPage() {
                     color={plan.color}
                     variant={plan.popular ? "shadow" : "solid"}
                   >
-                    {t(`pricing.plans.${plan.key}.cta`)}
+                    {t(`pricing.plans.${plan.key}.cta`, { price: plan.price })}
                   </Button>
                 </CardFooter>
               </Card>

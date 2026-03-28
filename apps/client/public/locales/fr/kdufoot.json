@@ -178,8 +178,8 @@
     "find_matches": "Trouver un match / tournoi",
     "find_tournaments": "Trouver des tournois",
     "remove": "Retirer des favoris",
-    "withdraw_match": "Se désister du match",
-    "cancel_request": "Annuler ma demande"
+    "withdraw_match": "Annuler ma candidature",
+    "cancel_request": "Retirer ma demande"
   },
   "support": {
     "technical_issue": "Problème Technique",
@@ -280,7 +280,7 @@
     "venue": "Lieu",
     "date": "Date",
     "time": "Heure",
-    "send_request": "Envoyer une demande",
+    "send_request": "Postuler pour ce match",
     "create_warning": "Pour créer une annonce, votre profil doit être complété à 100% (Nom, Club, Téléphone, etc.).",
     "search_warning": "L'accès aux recherches détaillées est réservée aux profils complets.",
     "delete_confirmation": "Es-tu sûr de vouloir supprimer cette annonce ? Cette action est irréversible.",
@@ -293,8 +293,8 @@
     "filters": {
       "explanation": "Aucun filtre n'est obligatoire. Vous pouvez par exemple laisser la ville vide pour voir les matchs sur toute la région, ou préciser vos critères (catégorie, niveau...) pour affiner selon vos besoins."
     },
-    "withdraw_match": "Se désister du match",
-    "withdraw_tournament": "Se désister du tournoi",
+    "withdraw_match": "Annuler ma participation",
+    "withdraw_tournament": "Quitter le tournoi",
     "contact_tracking": "Suivi des Contacts",
     "interest_count_zero": "0 Intérêt",
     "interest_count_one": "{{count}} Intérêt",
@@ -847,8 +847,8 @@
       "close": "Fermer"
     },
     "controls": {
-      "accept": "Accepter",
-      "refuse": "Refuser",
+      "accept": "Valider l'adversaire",
+      "refuse": "Décliner la proposition",
       "view": "Détails",
       "view_ad": "Voir l'annonce",
       "manage_registrations": "Gérer les demandes",

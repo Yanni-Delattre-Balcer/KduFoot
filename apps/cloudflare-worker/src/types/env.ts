@@ -13,6 +13,7 @@ export interface Env {
     KV_CACHE: KVNamespace; // Fast global Key-Value storage
     WEBSOCKET_HUB: DurableObjectNamespace; // WebSockets tracking & broadcasting
     RATE_LIMITER: { limit: (options: { key: string }) => Promise<{ success: boolean }> }; // Limits the number of requests to prevent abuse
+    PDF_QUEUE: { send: (message: any) => Promise<void> }; // Async queue for heavy tasks
 
     // Environment variables
     AUTH0_DOMAIN: string;
@@ -62,7 +63,14 @@ export interface Env {
     VAPID_PUBLIC_KEY: string;
     VAPID_PRIVATE_KEY: string;
 
-    // Super Admin (set via environment variables, never hardcode in source)
     SUPER_ADMIN_EMAIL?: string;
     SUPER_ADMIN_ID?: string;
+
+    // SaaS & Monetization
+    STRIPE_SECRET_KEY: string;
+    STRIPE_WEBHOOK_SECRET: string;
+    FRONTEND_URL: string;
+
+    // Monitoring
+    SENTRY_DSN?: string;
 }

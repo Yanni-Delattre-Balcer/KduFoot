@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
 import { MatchCard } from "@/components/matches/match-card";
 import { MatchListSkeleton } from "@/components/skeletons/match-skeleton";
 import { EmptyState } from "@/components/common/empty-state";
@@ -41,6 +42,29 @@ export const ResultsList = ({
 }: ResultsListProps) => {
   const { t, i18n } = useTranslation();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20,
+      },
+    },
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {isError && (
@@ -70,32 +94,43 @@ export const ResultsList = ({
 
       {isLoading && filteredMatches.length === 0 && <MatchListSkeleton />}
 
-      <div
+      <motion.div
+        animate="visible"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         id="results-list"
+        initial="hidden"
+        variants={containerVariants}
       >
-        {filteredMatches.map((match) => {
-          const diff = getDiff(match);
-          const hasChanges = Object.keys(diff).length > 0;
+        <AnimatePresence mode="popLayout">
+          {filteredMatches.map((match) => {
+            const diff = getDiff(match);
+            const hasChanges = Object.keys(diff).length > 0;
 
-          return (
-            <MatchCard
-              key={match.id}
-              diff={diff}
-              hasChanges={hasChanges}
-              i18n={i18n}
-              isAdmin={isAdmin}
-              isFavorite={isFavorite}
-              isMasked={isMasked}
-              match={match}
-              user={user || undefined}
-              onAcceptChanges={handleAcceptChanges}
-              onDelete={adminDeleteMatch}
-              onToggleFavorite={toggleFavorite}
-            />
-          );
-        })}
-      </div>
+            return (
+              <motion.div
+                key={match.id}
+                layout
+                exit={{ opacity: 0, scale: 0.95 }}
+                variants={itemVariants}
+              >
+                <MatchCard
+                  diff={diff}
+                  hasChanges={hasChanges}
+                  i18n={i18n}
+                  isAdmin={isAdmin}
+                  isFavorite={isFavorite}
+                  isMasked={isMasked}
+                  match={match}
+                  user={user || undefined}
+                  onAcceptChanges={handleAcceptChanges}
+                  onDelete={adminDeleteMatch}
+                  onToggleFavorite={toggleFavorite}
+                />
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </motion.div>
 
       {!isLoading && filteredMatches.length === 0 && !isError && (
         <EmptyState

@@ -1,6 +1,5 @@
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
 import { Image } from "@heroui/image";
 import { Chip } from "@heroui/chip";
@@ -8,6 +7,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 
 import { useExercise } from "@/hooks/use-exercises";
 import DefaultLayout from "@/layouts/default";
+import { ExerciseDetailsSkeleton } from "@/components/skeletons/details-skeleton";
 import { sanitizeSvg } from "@/utils/sanitize";
 
 export default function ExerciseDetailsPage() {
@@ -18,9 +18,7 @@ export default function ExerciseDetailsPage() {
   if (isLoading) {
     return (
       <DefaultLayout>
-        <div className="flexjustify-center items-center h-[50vh]">
-          <Spinner label={t("loading", "Chargement...")} />
-        </div>
+        <ExerciseDetailsSkeleton />
       </DefaultLayout>
     );
   }

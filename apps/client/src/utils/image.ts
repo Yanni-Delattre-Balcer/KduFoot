@@ -41,3 +41,44 @@ export const compressImage = (
     reader.onerror = reject;
   });
 };
+
+/**
+ * Optimizes an image URL via Cloudflare Image Resizing.
+ *
+ * This uses the /cdn-cgi/image/ endpoint which automatically
+ * converts images to AVIF or WebP based on browser support.
+ */
+export const getCloudflareOptimizedUrl = (
+  url: string | undefined,
+  options: { width?: number; quality?: number; format?: string } = {},
+): string => {
+  if (!url || url.startsWith("data:")) return url || "";
+
+  // Bypass Cloudflare optimization in local development as /cdn-cgi/image/ only works on production domains
+  const isLocal =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+
+  if (isLocal) return url;
+
+  // If already a Cloudflare transformation URL, return as is
+  if (url.includes("/cdn-cgi/image/")) return url;
+
+  const { width, quality = 80, format = "auto" } = options;
+  const params = [];
+
+  if (width) params.push(`width=${width}`);
+  params.push(`quality=${quality}`);
+  params.push(`format=${format}`);
+
+  const prefix = `/cdn-cgi/image/${params.join(",")}`;
+
+  // If it's a relative path, prefix it
+  if (url.startsWith("/")) {
+    return `${prefix}${url}`;
+  }
+
+  // For external URLs, we assume they are proxied or on a domain
+  // where /cdn-cgi/image/ is active.
+  return `${prefix}/${url}`;
+};

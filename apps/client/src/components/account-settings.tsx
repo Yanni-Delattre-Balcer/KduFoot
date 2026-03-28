@@ -11,6 +11,7 @@ import { SportsProfileSection } from "./account/sports-profile-section";
 import { ClubSection } from "./account/club-section";
 import { SyncSection } from "./account/sync-section";
 import { ActionButtons } from "./account/action-buttons";
+import { ProfileSkeleton } from "./skeletons/profile-skeleton";
 
 import { useUser } from "@/hooks/use-user";
 import { useAuth } from "@/authentication/providers/use-auth";
@@ -146,6 +147,10 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   ]);
 
   if (!authUser) return null;
+
+  if (!isInitialized || !dbUser) {
+    return <ProfileSkeleton />;
+  }
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();

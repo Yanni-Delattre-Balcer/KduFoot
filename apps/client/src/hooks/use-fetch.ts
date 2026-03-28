@@ -1,5 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback } from "react";
+import { fetchWithOffline } from "../utils/offline-sync";
 
 interface UseFetchOptions extends RequestInit {
   skip?: boolean;
@@ -18,7 +19,7 @@ export function useFetch() {
           ...options.headers,
         };
 
-        const response = await fetch(
+        const response = await fetchWithOffline(
           `${import.meta.env.API_BASE_URL}${endpoint}`,
           {
             ...options,
@@ -26,12 +27,17 @@ export function useFetch() {
           },
         );
 
+        if (!response) {
+          // Offline sync case (fetchWithOffline returns null if it queued the request)
+          return { success: true, offline: true } as any;
+        }
+
         if (response.status === 401) {
           try {
             const freshToken = await getAccessTokenSilently({
               cacheMode: "off",
             });
-            const retryResponse = await fetch(
+            const retryResponse = await fetchWithOffline(
               `${import.meta.env.API_BASE_URL}${endpoint}`,
               {
                 ...options,
@@ -42,7 +48,7 @@ export function useFetch() {
               },
             );
 
-            if (retryResponse.ok) return retryResponse.json();
+            if (retryResponse && retryResponse.ok) return retryResponse.json();
           } catch {
             // Refresh failed — fall through to error
           }

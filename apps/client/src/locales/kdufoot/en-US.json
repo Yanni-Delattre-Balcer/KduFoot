@@ -717,24 +717,6 @@
       "warning_title": "Warning: Once the SIRET is validated and the club is linked to your account, this action is irreversible.",
       "warning_desc": "For any subsequent changes, you will need to contact technical support."
     },
-    "buttons": {
-      "save_changes": "Save changes",
-      "save_and_continue": "Save and continue",
-      "export_data": "Export my data (JSON)",
-      "export_data_pdf": "Download my data (PDF)",
-      "delete_account": "Delete my account",
-      "reset_calendar": "Disable",
-      "sync_now": "Sync now",
-      "validate_club": "VALIDATE MY CLUB",
-      "contact_support": "📩 CONTACT SUPPORT"
-    },
-    "sync": {
-      "active": "Calendar Synchronized ✅",
-      "disabled": "Calendar not connected ❌",
-      "reset_confirm": "Do you really want to disable calendar synchronization?",
-      "reset_success": "Synchronization disabled.",
-      "reset_error": "Error during deactivation."
-    },
     "confirm_delete": "⚠️ WARNING: This action is irreversible.\n\nYour account as well as ALL your matches and tournaments will be permanently deleted.\n\nDo you really want to continue?",
     "delete_success": "Account successfully deleted",
     "delete_error": "Error deleting account",
@@ -782,8 +764,8 @@
     "plans": {
       "discovery": {
         "name": "Discovery",
-        "price": "1€",
-        "cta": "Try for 1€",
+        "price_cents": 100,
+        "cta": "Try for {{price}}",
         "features": {
           "0": "1 hour of video analysis",
           "1": "Full access to AI tools",
@@ -793,7 +775,7 @@
       },
       "starter": {
         "name": "Rising Star",
-        "price": "19€",
+        "price_cents": 1900,
         "cta": "Choose Rising Star",
         "features": {
           "0": "10 hours of video analysis",
@@ -804,7 +786,7 @@
       },
       "pro": {
         "name": "Pro",
-        "price": "39€",
+        "price_cents": 3900,
         "cta": "Choose Pro",
         "popular": "Popular",
         "features": {
@@ -816,7 +798,7 @@
       },
       "elite": {
         "name": "Elite",
-        "price": "59€",
+        "price_cents": 5900,
         "cta": "Become Elite",
         "features": {
           "0": "30 hours of video analysis",

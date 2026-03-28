@@ -2,10 +2,21 @@
 	"name": "kdufoot-api",
 	"compatibility_date": "2024-01-01",
 	"compatibility_flags": ["nodejs_compat"],
-	"main": "src/index.ts"
-	// "vars": { "ENVIRONMENT": "production" }
-	// "routes": { "pattern": "api.kdufoot.com", "custom_domain": true }
-	,
+	"main": "src/index.ts",
+	"vars": {
+		"ENVIRONMENT": "production",
+		"API_BASE_URL": "https://api.kdufoot.com",
+		"CORS_ORIGIN": "https://kdufoot.com",
+		"AUTH0_DOMAIN": "dev-vagn7ta27qabl45d.us.auth0.com",
+		"AUTH0_AUDIENCE": "https://api.kdufoot.com",
+		"AUTHENTICATION_PROVIDER_TYPE": "auth0",
+		"READ_PERMISSION": "read:api",
+		"WRITE_PERMISSION": "write:api",
+		"ADMIN_PERMISSION": "admin:api",
+		"BACKUP_PERMISSION": "backup:api",
+		"ADMIN_AUTH0_PERMISSION": "auth0:admin:api",
+		"SIRET_API_URL": "https://recherche-entreprises.api.gouv.fr/search"
+	},
 	"observability": {
 		"logs": {
 			"enabled": true,
@@ -59,5 +70,9 @@
 			"id": "your-kv-namespace-id"
 		}
 	]
-	*/
+	]
+	*/,
+	"smart_placement": {
+		"enabled": true
+	}
 }

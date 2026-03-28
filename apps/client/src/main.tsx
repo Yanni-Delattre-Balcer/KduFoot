@@ -19,6 +19,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 
 import App from "./App.tsx";
 import "./i18n";
@@ -29,6 +30,14 @@ import { CookieConsent } from "./components/cookie-consent.tsx";
 import { AuthenticationProvider } from "./authentication";
 import { UserProvider } from "./authentication/providers/user-provider";
 import { WelcomeGatewayProvider } from "./contexts/welcome-gateway-context.tsx";
+import { reportWebVitals } from "./utils/vitals";
+import { initSentry } from "./utils/sentry";
+
+// Initialize Sentry Monitoring (with PII scrubbing)
+initSentry();
+
+// Initialize Real User Monitoring (RUM)
+reportWebVitals();
 
 // Request persistent storage to prevent browsers from clearing PWA data
 if (navigator.storage && navigator.storage.persist) {
@@ -37,25 +46,29 @@ if (navigator.storage && navigator.storage.persist) {
   });
 }
 
+const HelmetProviderAny = HelmetProvider as any;
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <Provider>
-        <CookieConsentProvider>
-          <AuthenticationProvider
-            providerType={
-              import.meta.env.AUTHENTICATION_PROVIDER_TYPE || "auth0"
-            }
-          >
-            <WelcomeGatewayProvider>
-              <UserProvider>
-                <CookieConsent />
-                <App />
-              </UserProvider>
-            </WelcomeGatewayProvider>
-          </AuthenticationProvider>
-        </CookieConsentProvider>
-      </Provider>
+      <HelmetProviderAny>
+        <Provider>
+          <CookieConsentProvider>
+            <AuthenticationProvider
+              providerType={
+                import.meta.env.AUTHENTICATION_PROVIDER_TYPE || "auth0"
+              }
+            >
+              <WelcomeGatewayProvider>
+                <UserProvider>
+                  <CookieConsent />
+                  <App />
+                </UserProvider>
+              </WelcomeGatewayProvider>
+            </AuthenticationProvider>
+          </CookieConsentProvider>
+        </Provider>
+      </HelmetProviderAny>
     </BrowserRouter>
   </React.StrictMode>,
 );
