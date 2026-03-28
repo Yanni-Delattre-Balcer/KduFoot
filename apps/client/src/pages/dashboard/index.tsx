@@ -155,7 +155,7 @@ export default function DashboardPage() {
         damping: 20,
       },
     },
-  };
+  } as const;
 
   // Track last seen data to detect specific changes (Removed LocalStorage as per Zero Cache requirement)
   const [knownData, setKnownData] = useState<Record<string, unknown>>({});

@@ -68,7 +68,7 @@ export default function ExercisesPage() {
         damping: 20,
       },
     },
-  };
+  } as const;
 
   return (
     <DefaultLayout maxWidth="max-w-full">

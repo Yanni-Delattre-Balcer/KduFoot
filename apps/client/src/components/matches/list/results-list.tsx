@@ -63,7 +63,7 @@ export const ResultsList = ({
         damping: 20,
       },
     },
-  };
+  } as const;
 
   return (
     <div className="flex flex-col gap-4">
