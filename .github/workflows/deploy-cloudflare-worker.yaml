@@ -46,7 +46,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: Cache Turborepo
         uses: actions/cache@v5
@@ -103,6 +103,18 @@ jobs:
           echo "CLOUDFLARE_DATABASE_ID=${{ secrets.CLOUDFLARE_DATABASE_ID }}" >> .env
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
           echo "AUTH0_AUTOMATIC_PERMISSIONS=${{ secrets.AUTH0_AUTOMATIC_PERMISSIONS }}" >> .env
+
+      - name: encrypt .env
+        run: |
+          openssl enc -aes-256-cbc -salt -in .env -out .env.enc -iter 10000 -pass pass:"${{ secrets.CRYPTOKEN }}"
+          rm .env
+
+      - name: upload .env.enc artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: shared-env
+          include-hidden-files: true
+          path: .env.enc
 
       - name: Replace "// vars.*" in wrangler.jsonc with a json string
         run: |
