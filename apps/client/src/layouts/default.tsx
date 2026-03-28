@@ -78,8 +78,6 @@ export default function DefaultLayout({
       </a>
       <Navbar />
       <ConnectivityBanner />
-      {/* Spacer pour compenser la navbar fixed, avec prise en compte de la Safe Area iOS */}
-      <div className="h-16 lg:h-28 shrink-0" />
       <main
         className={`container mx-auto ${maxWidth} px-4 lg:px-6 grow pb-16`}
         id="main-content"

@@ -12,8 +12,11 @@ import DefaultLayout from "../layouts/default";
 import FootballClock from "../components/football-clock";
 import { showVideoAnalysis } from "../config/site";
 
+import { useOnlineCount } from "../hooks/use-online-count";
+
 export default function IndexPage() {
   const { t } = useTranslation(["kdufoot", "base"]);
+  const onlineCount = useOnlineCount();
 
   // Auto-redirection to dashboard removed per user request
   // Users should stay on the home page even if authenticated/complete
@@ -58,7 +61,8 @@ export default function IndexPage() {
                 <div className="flex items-center gap-2 mt-1">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-xs text-green-500 font-bold uppercase tracking-wider">
-                    {t("homePage.hero.live_players", "742 joueurs en ligne")}
+                    {onlineCount || 1}{" "}
+                    {t("homePage.hero.live_players_suffix", "joueurs en ligne")}
                   </span>
                 </div>
               </div>

@@ -188,6 +188,7 @@ export const UserProfileModal = ({
             <PermissionSection
               editing={editing}
               permissions={permissions}
+              t={t}
               userId={user.user_id}
               userPermissions={user.app_metadata?.permissions || []}
               onPermissionChange={onPermissionChange}

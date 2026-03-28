@@ -28,6 +28,7 @@ export class WebSocketHub extends DurableObject<Env> {
 
         server.accept();
         this.sessions.add(server);
+        this.broadcastCount();
 
         server.addEventListener("message", (event) => {
             // Keep-alive pings can be sent by the client
@@ -38,10 +39,12 @@ export class WebSocketHub extends DurableObject<Env> {
 
         server.addEventListener("close", () => {
             this.sessions.delete(server);
+            this.broadcastCount();
         });
 
         server.addEventListener("error", () => {
             this.sessions.delete(server);
+            this.broadcastCount();
         });
 
         const requestedProtocol = request.headers.get("Sec-WebSocket-Protocol");
@@ -53,11 +56,22 @@ export class WebSocketHub extends DurableObject<Env> {
         });
     }
 
+    private broadcastCount() {
+        this.broadcast(JSON.stringify({
+            type: "ONLINE_COUNT",
+            count: this.sessions.size
+        }));
+    }
+
     private broadcast(message: string) {
         // Send message to all connected clients
         for (const session of this.sessions) {
             try {
-                session.send(message);
+                if (session.readyState === 1) { // 1 = OPEN
+                    session.send(message);
+                } else {
+                    this.sessions.delete(session);
+                }
             } catch (_error) {
                 // If a connection is broken, quietly remove it
                 this.sessions.delete(session);

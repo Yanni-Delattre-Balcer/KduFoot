@@ -42,7 +42,7 @@ export const SecuritySection = ({
                 variant="flat"
                 onPress={() => onUnblock(u.user_id)}
               >
-                🔓 Débloquer l'utilisateur
+                🔓 {t("adminUsersPage.btnUnblock")}
               </Button>
             ) : (
               <Button
@@ -52,7 +52,7 @@ export const SecuritySection = ({
                 variant="flat"
                 onPress={() => onBlock(u.user_id, u.email)}
               >
-                🚫 Bannir du système
+                🚫 {t("adminUsersPage.btnBlock")}
               </Button>
             )}
           </>

@@ -1,5 +1,7 @@
 import { Checkbox } from "@heroui/checkbox";
 import { Chip } from "@heroui/chip";
+import { Button } from "@heroui/button";
+import { Permission } from "@/types/permissions";
 import { groupColor } from "../utils/admin-helpers";
 
 interface PermissionSectionProps {
@@ -18,6 +20,7 @@ interface PermissionSectionProps {
     isSelected: boolean,
   ) => void;
   userPermissions: string[];
+  t: any;
 }
 
 export const PermissionSection = ({
@@ -26,7 +29,57 @@ export const PermissionSection = ({
   editing,
   onPermissionChange,
   userPermissions,
+  t,
 }: PermissionSectionProps) => {
+  const applyPreset = (role: "free" | "premium" | "admin" | "super") => {
+    let targetPerms: string[] = [];
+
+    if (role === "free") {
+      targetPerms = [Permission.READ_API, Permission.MATCHES_CONTACT];
+    } else if (role === "premium") {
+      targetPerms = [
+        Permission.READ_API,
+        Permission.WRITE_API,
+        Permission.EXERCISES_READ,
+        Permission.EXERCISES_CREATE,
+        Permission.SESSIONS_CREATE,
+        Permission.MATCHES_PREMIUM,
+        Permission.EXPORT_PDF,
+        Permission.MATCHES_CONTACT,
+      ];
+    } else if (role === "admin") {
+      targetPerms = [
+        Permission.READ_API,
+        Permission.WRITE_API,
+        Permission.EXERCISES_READ,
+        Permission.EXERCISES_CREATE,
+        Permission.SESSIONS_CREATE,
+        Permission.MATCHES_PREMIUM,
+        Permission.EXPORT_PDF,
+        Permission.MATCHES_CONTACT,
+        Permission.ADMIN_USERS,
+        Permission.ADMIN_EXERCISES,
+        Permission.ADMIN_MATCHES,
+        Permission.ADMIN_ANALYTICS,
+        Permission.ADMIN_BILLING,
+        Permission.ADMIN_AUTH0,
+      ];
+    } else if (role === "super") {
+      targetPerms = Object.values(Permission).filter(
+        (p) => p !== Permission.ROLE_BLOCKED,
+      );
+    }
+
+    // Reset current edits and apply preset
+    permissions.forEach((p) => {
+      onPermissionChange(
+        userId,
+        p.key,
+        targetPerms.includes(p.value as Permission),
+      );
+    });
+  };
+
   // Grouper les permissions
   const groups = permissions.reduce(
     (acc, p) => {
@@ -40,6 +93,43 @@ export const PermissionSection = ({
 
   return (
     <div className="space-y-6">
+      {/* Attribution Rapide */}
+      <div className="bg-zinc-900 p-4 rounded-xl border border-white/10 space-y-3">
+        <p className="text-[10px] font-black uppercase tracking-widest text-default-400">
+          {t("adminUsersPage.quickAssignLabel")}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="flat" onPress={() => applyPreset("free")}>
+            {t("adminUsersPage.roleFree")}
+          </Button>
+          <Button
+            color="primary"
+            size="sm"
+            variant="flat"
+            onPress={() => applyPreset("premium")}
+          >
+            {t("adminUsersPage.rolePremium")}
+          </Button>
+          <Button
+            color="secondary"
+            size="sm"
+            variant="flat"
+            onPress={() => applyPreset("admin")}
+          >
+            {t("adminUsersPage.roleAdmin")}
+          </Button>
+          <Button
+            className="font-bold"
+            color="warning"
+            size="sm"
+            variant="solid"
+            onPress={() => applyPreset("super")}
+          >
+            {t("adminUsersPage.roleSuperAdmin")}
+          </Button>
+        </div>
+      </div>
+
       {Object.entries(groups).map(([groupKey, group]) => (
         <div
           key={groupKey}

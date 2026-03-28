@@ -23,7 +23,7 @@ export type RoleFilter = "all" | "subscribers" | "admins" | "blocked";
 export function useAdminUsers() {
   const { user: currentUser, getAccessTokenSilently } = useAuth0();
   const currentUserId = (currentUser?.sub ?? "").toString().trim();
-  const { t } = useTranslation();
+  const { t } = useTranslation("kdufoot");
   const { blockUser } = useUser();
 
   const {
@@ -349,6 +349,7 @@ export function useAdminUsers() {
     try {
       const finalReason = reason || "Suspension administrative";
 
+      // UPDATE STATE IMMEDIATELY (ZERO CACHE)
       setUsers((prev) =>
         prev.map((u) => {
           if (u.user_id !== d1UserId) return u;
@@ -359,12 +360,52 @@ export function useAdminUsers() {
             block_reason: finalReason,
             app_metadata: {
               ...u.app_metadata,
-              permissions: [Permission.ROLE_BLOCKED],
+              permissions: [
+                ...(u.app_metadata?.permissions || []),
+                Permission.ROLE_BLOCKED,
+              ],
             },
           };
         }),
       );
+
+      // Perform background reach-out
       await blockUser(d1UserId, true, finalReason);
+
+      // Force cache clear for next manual refresh
+      updateUserInCache(d1UserId, (u) => ({ ...u, blocked: true }));
+    } catch (err: unknown) {
+      addToast({
+        title: t("error.title"),
+        description: String(err),
+        color: "danger",
+      });
+    }
+  };
+
+  const onUnblockUser = async (d1UserId: string) => {
+    try {
+      // UPDATE STATE IMMEDIATELY (ZERO CACHE)
+      setUsers((prev) =>
+        prev.map((u) => {
+          if (u.user_id !== d1UserId) return u;
+
+          return {
+            ...u,
+            blocked: false,
+            block_reason: null,
+            app_metadata: {
+              ...u.app_metadata,
+              permissions: (u.app_metadata?.permissions || []).filter(
+                (p) => p !== Permission.ROLE_BLOCKED,
+              ),
+            },
+          };
+        }),
+      );
+
+      await blockUser(d1UserId, false);
+      updateUserInCache(d1UserId, (u) => ({ ...u, blocked: false }));
     } catch (err: unknown) {
       addToast({
         title: t("error.title"),
@@ -525,6 +566,7 @@ export function useAdminUsers() {
     deleteUser,
     getIsAdmin,
     confirmBlock,
+    onUnblockUser,
     handleUpdateUserProfile,
     currentUserId,
     t,

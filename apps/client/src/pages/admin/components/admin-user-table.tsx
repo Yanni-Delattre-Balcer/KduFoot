@@ -41,11 +41,19 @@ export const AdminUserTable = ({
       <TableHeader>
         <TableColumn>{t("adminUsersPage.colUser")}</TableColumn>
         <TableColumn>{t("adminUsersPage.colEmail")}</TableColumn>
-        <TableColumn>Club</TableColumn>
-        <TableColumn>{t("adminUsersPage.colRole")}</TableColumn>
-        <TableColumn>{t("adminUsersPage.colSubscription")}</TableColumn>
-        <TableColumn>{t("adminUsersPage.colLogins")}</TableColumn>
-        <TableColumn>{t("adminUsersPage.colActions")}</TableColumn>
+        <TableColumn className="text-center">Club</TableColumn>
+        <TableColumn className="text-center">
+          {t("adminUsersPage.colRole")}
+        </TableColumn>
+        <TableColumn className="text-center">
+          {t("adminUsersPage.colSubscription")}
+        </TableColumn>
+        <TableColumn className="text-center">
+          {t("adminUsersPage.colLogins")}
+        </TableColumn>
+        <TableColumn className="text-center">
+          {t("adminUsersPage.colActions")}
+        </TableColumn>
       </TableHeader>
       <TableBody emptyContent={t("adminUsersPage.emptyUsers")}>
         {users.map((u) => {
@@ -94,10 +102,10 @@ export const AdminUserTable = ({
                   )}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-center">
                 {u.club_name && !isSupremeMaster ? (
                   <Chip
-                    className="h-5 text-[10px] sm:text-xs font-bold max-w-[100px] lg:max-w-[200px] truncate"
+                    className="h-5 text-[10px] sm:text-xs font-bold w-full truncate"
                     color="success"
                     size="sm"
                     title={u.club_name}
@@ -107,12 +115,12 @@ export const AdminUserTable = ({
                   </Chip>
                 ) : (
                   <span className="text-[10px] text-default-400 italic">
-                    Non lié
+                    {t("adminUsersPage.noPrimaryClub")}
                   </span>
                 )}
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap justify-center gap-1">
                   {isSuperAdmin && (
                     <Chip
                       className="h-5 text-xs font-bold px-2"
@@ -140,13 +148,14 @@ export const AdminUserTable = ({
                       size="sm"
                       variant="solid"
                     >
-                      🚫 Banni
+                      🚫 {t("adminUsersPage.statusBanned")}
                     </Chip>
                   )}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-center">
                 <Chip
+                  className="font-bold"
                   color={
                     u.app_metadata?.subscription === "Ultime"
                       ? "warning"
@@ -160,8 +169,8 @@ export const AdminUserTable = ({
                   {u.app_metadata?.subscription || "Free"}
                 </Chip>
               </TableCell>
-              <TableCell>
-                <span className="text-sm">{u.logins_count ?? 0}</span>
+              <TableCell className="text-center">
+                <span className="text-sm font-mono">{u.logins_count ?? 0}</span>
               </TableCell>
               <TableCell>
                 <div className="flex justify-center w-full">

@@ -111,14 +111,11 @@ export const Navbar = () => {
 
   return (
     <HeroUINavbar
-      className={`fixed top-0 left-0 right-0 m-0! p-0! bg-background/80 backdrop-blur-sm z-50 transition-all duration-500 pt-[env(safe-area-inset-top,20px)] lg:pt-0 h-[calc(70px+env(safe-area-inset-top,20px))] lg:h-[70px] ${
-        isScrolled
-          ? "shadow-lg shadow-black/30 border-b border-default-200/50"
-          : "border-none shadow-none"
+      className={`bg-background/80 backdrop-blur-md z-50 transition-all duration-300 border-b border-white/5 ${
+        isScrolled ? "shadow-lg shadow-black/20" : "shadow-none"
       }`}
       classNames={{
-        wrapper: "h-full items-end pb-2 lg:items-center lg:pb-0 px-0",
-        content: "h-full items-end pb-2 lg:items-center lg:pb-0",
+        wrapper: "h-16 lg:h-20 max-w-7xl mx-auto px-4 sm:px-6",
       }}
       isBlurred={false}
       isMenuOpen={isMenuOpen}
@@ -126,8 +123,8 @@ export const Navbar = () => {
       position="sticky"
       onMenuOpenChange={setIsMenuOpen}
     >
-      {/* Absolute Logo - Stays on the same line as nav items but far left */}
-      <div className="absolute left-1 h-full flex items-end pb-2 lg:items-center lg:pb-0 z-[60]">
+      {/* Brand/Logo Section */}
+      <div className="flex items-center gap-2">
         <a
           aria-label={t("common:home", "Accueil")}
           className="flex items-center active:scale-95 transition-transform"
@@ -135,18 +132,21 @@ export const Navbar = () => {
         >
           <img
             alt="KduFoot Logo"
-            className="h-14 lg:h-16 w-auto object-contain"
+            className="h-10 lg:h-12 w-auto object-contain"
             src="/logo.png"
           />
+          <span className="ml-2 text-xl font-bold bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent hidden sm:block">
+            Kdufoot
+          </span>
         </a>
       </div>
 
       <NavbarContent
-        className="hidden lg:flex gap-6 w-full justify-center h-full items-center"
+        className="hidden lg:flex gap-8 justify-center"
         justify="center"
       >
         {siteConfig().navItems.map((item) => (
-          <NavbarItem key={item.href} className="h-full flex items-center">
+          <NavbarItem key={item.href}>
             <LinkUniversal
               className={clsx(
                 linkStyles({ color: "foreground" }),
@@ -160,7 +160,7 @@ export const Navbar = () => {
                 {item.label}
                 {item.href === "/dashboard" && totalCount > 0 && (
                   <Chip
-                    className="h-4 min-w-[18px] px-1 text-xs sm:text-sm font-extrabold animate-bounce shadow-lg shadow-danger/40 border border-white/20"
+                    className="h-4 min-w-[18px] px-1 text-xs font-extrabold animate-bounce shadow-lg shadow-danger/40 border border-white/20"
                     color="danger"
                     size="sm"
                     variant="solid"
@@ -174,45 +174,37 @@ export const Navbar = () => {
         ))}
       </NavbarContent>
 
-      <NavbarContent
-        className="hidden sm:flex basis-0 h-full items-end pb-6 lg:items-center lg:pb-0"
-        justify="end"
-      >
-        <NavbarItem className="hidden sm:flex flex items-end pb-1 lg:items-center lg:pb-0 gap-2 h-full">
+      <NavbarContent justify="end">
+        <NavbarItem className="hidden sm:flex gap-3">
           <LanguageSwitch
             availableLanguages={availableLanguages}
             icon={I18nIcon}
           />
           <LoginLogoutButton />
         </NavbarItem>
-      </NavbarContent>
 
-      <NavbarContent
-        className="flex basis-1 items-end justify-end pr-1 h-full pb-2"
-        justify="end"
-      >
-        <NavbarItem className="sm:hidden flex items-end pb-1">
+        <NavbarItem className="sm:hidden flex items-center pr-2">
           <LanguageSwitch
             availableLanguages={availableLanguages}
             icon={I18nIcon}
           />
         </NavbarItem>
+
         <NavbarMenuToggle
-          className="w-12 h-12 rounded-xl bg-default-100 border border-default-200/60 flex items-center justify-center tap-highlight-transparent active:scale-90 transition-transform"
+          className="sm:hidden w-10 h-10 rounded-lg bg-default-100 flex items-center justify-center"
           icon={(isOpen) => (
-            <div className="flex flex-col items-center justify-center gap-[5px] w-6 h-6">
+            <div className="flex flex-col items-center justify-center gap-1.5 w-6 h-6">
               <span
-                className={`block h-[3px] w-6 rounded-full bg-foreground transition-all duration-300 ${isOpen ? "rotate-45 translate-y-[8px]" : ""}`}
+                className={`block h-0.5 w-5 rounded-full bg-foreground transition-all ${isOpen ? "rotate-45 translate-y-2" : ""}`}
               />
               <span
-                className={`block h-[3px] w-6 rounded-full bg-foreground transition-all duration-300 ${isOpen ? "opacity-0 scale-0" : ""}`}
+                className={`block h-0.5 w-5 rounded-full bg-foreground transition-all ${isOpen ? "opacity-0" : ""}`}
               />
               <span
-                className={`block h-[3px] w-6 rounded-full bg-foreground transition-all duration-300 ${isOpen ? "-rotate-45 -translate-y-[8px]" : ""}`}
+                className={`block h-0.5 w-5 rounded-full bg-foreground transition-all ${isOpen ? "-rotate-45 -translate-y-2" : ""}`}
               />
             </div>
           )}
-          srOnlyText="Menu"
         />
       </NavbarContent>
 

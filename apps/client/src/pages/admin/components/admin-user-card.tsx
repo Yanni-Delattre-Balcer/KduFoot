@@ -76,7 +76,7 @@ export const AdminUserCard = ({
               size="sm"
               variant="solid"
             >
-              🚫 Banni
+              🚫 {t("adminUsersPage.statusBanned")}
             </Chip>
           )}
           {u.club_name && !isSuperAdmin && (
