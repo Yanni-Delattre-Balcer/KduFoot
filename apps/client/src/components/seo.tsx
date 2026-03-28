@@ -22,7 +22,7 @@ export const SEO = ({
 }: SEOProps) => {
   const { t } = useTranslation("common");
 
-  const siteName = "KduFoot V2";
+  const siteName = "Kdufoot";
   const fullTitle = title ? `${title} | ${siteName}` : siteName;
   const defaultDesc = t(
     "site_description",

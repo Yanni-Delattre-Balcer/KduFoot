@@ -60,7 +60,7 @@ export const siteConfig = () => {
       );
 
   return {
-    name: "KduFoot",
+    name: "Kdufoot",
     needCookieConsent: true,
     description: i18next.t("site.description"),
     navItems: filteredNavItems,
