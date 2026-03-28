@@ -107,7 +107,6 @@ jobs:
       - name: encrypt .env
         run: |
           openssl enc -aes-256-cbc -salt -in .env -out .env.enc -iter 10000 -pass pass:"${{ secrets.CRYPTOKEN }}"
-          rm .env
 
       - name: upload .env.enc artifact
         uses: actions/upload-artifact@v6
