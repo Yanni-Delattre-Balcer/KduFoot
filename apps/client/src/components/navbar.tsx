@@ -36,7 +36,6 @@ import { Chip } from "@heroui/chip";
 
 import { I18nIcon, LanguageSwitch } from "./language-switch";
 import { LinkUniversal } from "./link-universal";
-import { getCloudflareOptimizedUrl } from "@/utils/image";
 
 import {
   LoginLogoutButton,
@@ -137,7 +136,7 @@ export const Navbar = () => {
           <img
             alt="KduFoot Logo"
             className="h-14 lg:h-16 w-auto object-contain"
-            src={getCloudflareOptimizedUrl("/logo.png", { width: 120 })}
+            src="/logo.png"
           />
         </a>
       </div>
