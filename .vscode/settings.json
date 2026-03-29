@@ -18,5 +18,27 @@
   ],
   "i18n-ally.pathMatcher": "{namespace}/{locale}.{ext}",
   "i18n-ally.namespace": true,
-  "i18n-ally.keystyle": "nested"
+  "i18n-ally.keystyle": "nested",
+  "files.exclude": {
+    "**/.venv": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.turbo": true,
+    "**/.yarn": true,
+    "**/dist": true,
+    "**/dist-ssr": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.turbo": true,
+    "**/.yarn": true,
+    "**/dist": true,
+    "**/dist-ssr": true,
+    "**/temp_audio": true,
+    "**/temp_data": true,
+    "**/tmp": true,
+    "**/package-lock.json": true
+  }
 }

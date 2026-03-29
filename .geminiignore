@@ -1,0 +1,57 @@
+# Environnement virtuel Python (~1.4 Go, ~90k fichiers)
+.venv/
+
+# Dependances Node.js (~700 Mo)
+node_modules/
+
+# Git
+.git/
+
+# Build outputs
+dist/
+dist-ssr/
+
+# Turbo cache
+.turbo/
+
+# Yarn cache
+.yarn/
+
+# Fichiers temporaires
+temp_audio/
+temp_data/
+tmp/
+
+# Donnees sensibles
+_sensitive_datas/
+
+# Fichiers volumineux
+*.log
+package-lock.json
+ANALYSE_TECHNIQUE.md
+README-template.md
+tmp_matches.ts
+
+# Binaires et images (inutiles pour l'IA)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.webp
+*.pdf
+*.map
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Python app (proton-python)
+proton-python/
+
+# Build dev
+apps/client/dev-dist/
+
+# Template reference
+.template_ref/
