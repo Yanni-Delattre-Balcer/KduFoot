@@ -90,6 +90,7 @@
 [role="region"] {
   pointer-events: none !important;
   z-index: 1000000 !important;
+  padding-top: calc(105px + env(safe-area-inset-top, 0px)) !important;
 }
 
 [role="status"], [role="alert"] {

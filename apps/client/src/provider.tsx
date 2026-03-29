@@ -85,7 +85,7 @@ export function Provider({ children }: { children: React.ReactNode }) {
           placement="top-center"
           toastProps={{
             classNames: {
-              base: "mt-[calc(80px+env(safe-area-inset-top,0px))] w-auto max-w-lg min-w-fit",
+              base: "w-auto max-w-lg min-w-fit",
               title: "line-clamp-none whitespace-normal text-sm font-bold",
               description:
                 "line-clamp-none whitespace-normal text-xs font-medium",
