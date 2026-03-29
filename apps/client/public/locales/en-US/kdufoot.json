@@ -75,7 +75,9 @@
       "suffix": "assistant for amateur football"
     },
     "hero": {
-      "description": "Kdufoot helps you find or publish friendly matches and tournaments around you in just a few clicks."
+      "description": "Kdufoot helps you find or publish friendly matches and tournaments around you in just a few clicks.",
+      "description_ultimate": "Organize your friendly matches and tournaments, find opponents and manage your seasons — all on a single platform.",
+      "registered_coaches_suffix": "registered coaches"
     },
     "buttons": {
       "exercises": "Analyze a video",

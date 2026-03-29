@@ -91,6 +91,10 @@
       "highlight": "Intelligent",
       "suffix": "pour le football amateur"
     },
+    "hero": {
+      "description_ultimate": "Organisez vos matchs et tournois amicaux, trouvez des adversaires et gérez vos saisons — le tout sur une seule plateforme.",
+      "registered_coaches_suffix": "coachs inscrits"
+    },
     "buttons": {
       "exercises": "Analyser une vidéo",
       "sessions": "Trouver/créer un match / tournoi",

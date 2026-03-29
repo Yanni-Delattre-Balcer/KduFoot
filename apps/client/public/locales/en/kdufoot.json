@@ -80,6 +80,10 @@
       "highlight": "Intelligent",
       "suffix": "assistant for amateur football"
     },
+    "hero": {
+      "description_ultimate": "Organize your friendly matches and tournaments, find opponents and manage your seasons — all on a single platform.",
+      "registered_coaches_suffix": "registered coaches"
+    },
     "buttons": {
       "exercises": "Analyze a video",
       "sessions": "Find a match / tournament",

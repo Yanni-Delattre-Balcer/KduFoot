@@ -87,7 +87,9 @@
       "suffix": "pour le football amateur"
     },
     "hero": {
-      "description": "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics."
+      "description": "Kdufoot vous aide à trouver ou publier des matchs et tournois amicaux autour de chez vous en quelques clics.",
+      "description_ultimate": "Organisez vos matchs et tournois amicaux, trouvez des adversaires et gérez vos saisons — le tout sur une seule plateforme.",
+      "registered_coaches_suffix": "coachs inscrits"
     },
     "buttons": {
       "exercises": "Analyser une vidéo",
