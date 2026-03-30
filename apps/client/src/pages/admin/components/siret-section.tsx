@@ -15,7 +15,7 @@ interface SiretSectionProps {
   setNewSiret: (val: string) => void;
   forceSiret: boolean;
   setForceSiret: (val: boolean) => void;
-  onAddSiret: () => void;
+  onAddSiret: (isPrimary: boolean) => void;
   onRemoveSiret: (siret: string) => void;
   t: any;
 }
@@ -57,15 +57,26 @@ export const SiretSection = ({
             {t("adminUsersPage.forceSiret")}
           </Checkbox>
         </div>
-        <Button
-          className="font-bold"
-          color="success"
-          size="sm"
-          variant="flat"
-          onPress={onAddSiret}
-        >
-          {t("adminUsersPage.btnAddClub")}
-        </Button>
+        <div className="flex flex-col gap-2 min-w-[200px]">
+          <Button
+            className="font-bold w-full"
+            color="success"
+            size="sm"
+            variant="flat"
+            onPress={() => onAddSiret(true)}
+          >
+            Ajouter un club (principal)
+          </Button>
+          <Button
+            className="font-bold w-full"
+            color="success"
+            size="sm"
+            variant="flat"
+            onPress={() => onAddSiret(false)}
+          >
+            Ajouter un club (secondaire)
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2 pt-2 border-t border-white/5">

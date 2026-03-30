@@ -34,7 +34,7 @@ interface UserProfileModalProps {
   setNewSiret: (v: string) => void;
   forceSiret: boolean;
   setForceSiret: (v: boolean) => void;
-  onAddSiret: () => void;
+  onAddSiret: (isPrimary: boolean) => void;
   onRemoveSiret: (s: string) => void;
 
   // Profile metadata

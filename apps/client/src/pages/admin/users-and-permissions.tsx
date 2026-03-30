@@ -65,12 +65,13 @@ export default function UsersAndPermissionsPage() {
     loadSirets(userId);
   };
 
-  const handleAddSiret = async () => {
+  const handleAddSiret = async (isPrimary: boolean = false) => {
     if (!selectedUserId || !newSiret) return;
     try {
       const token = await getAccessTokenSilently();
+      const endpoint = isPrimary ? "primary-siret" : "additional-sirets";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/sirets`,
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/${endpoint}`,
         {
           method: "POST",
           headers: {
