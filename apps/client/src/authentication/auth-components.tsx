@@ -263,12 +263,13 @@ export const LogoutLink: FC<LogoutLinkProps> = ({
     });
   }
 
-  const mobileClass =
-    "w-full flex items-center justify-between px-5 py-4 rounded-2xl border font-black text-lg transition-all active:scale-95 border-pink-500/30 bg-pink-500/10 text-pink-400 mb-2";
-
   return isAuthenticated || showButtonIfNotAuthenticated ? (
     <Link
-      className={isMobileView ? mobileClass : ""}
+      className={
+        isMobileView
+          ? "w-full flex items-center justify-between px-5 py-4 rounded-2xl border font-black text-lg transition-all active:scale-95 border-pink-500/30 bg-pink-500/10 text-pink-400 mb-2"
+          : ""
+      }
       color={isMobileView ? undefined : color}
       size="lg"
       onPress={() => {
@@ -358,14 +359,13 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
 
   if (isLoading) return null;
 
-  const accountMobileClass =
-    "w-full flex items-center justify-between px-5 py-4 rounded-2xl border font-black text-lg transition-all active:scale-95 border-white/20 bg-white/5 text-white mb-2";
-
   return isAuthenticated ? (
     <div className="flex flex-col">
       <Link
         className={
-          isMobileView ? accountMobileClass : "font-bold cursor-pointer"
+          isMobileView
+            ? "w-full flex items-center justify-between px-5 py-4 rounded-2xl border font-black text-lg transition-all active:scale-95 border-white/20 bg-white/5 text-white mb-2"
+            : "font-bold cursor-pointer"
         }
         color={isMobileView ? undefined : "foreground"}
         size="lg"

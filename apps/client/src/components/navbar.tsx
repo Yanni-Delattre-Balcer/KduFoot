@@ -83,26 +83,23 @@ export const Navbar = () => {
     { label: t("nav.remerciements"), href: "/remerciements" },
   ];
 
+  const mobileStyles: Record<string, string> = {
+    "/": "border-red-500/30 bg-red-500/10 text-red-400",
+    "/dashboard": "border-orange-500/30 bg-orange-500/10 text-orange-400",
+    "/favorites": "border-cyan-500/30 bg-cyan-500/10 text-cyan-400",
+    "/matches": "border-purple-500/30 bg-purple-500/10 text-purple-400",
+    "/remerciements": "border-teal-500/30 bg-teal-500/10 text-teal-400",
+  };
+
   const getMobileButtonStyle = (href: string) => {
-    const base = "border font-black text-lg transition-all active:scale-95";
+    const style = mobileStyles[href] || "border-white/10 bg-white/5 text-white";
 
-    if (href === "/")
-      return `${base} border-red-500/30 bg-red-500/10 text-red-400`;
-    if (href === "/dashboard")
-      return `${base} border-orange-500/30 bg-orange-500/10 text-orange-400`;
-    if (href === "/favorites")
-      return `${base} border-cyan-500/30 bg-cyan-500/10 text-cyan-400`;
-    if (href.startsWith("/matches"))
-      return `${base} border-purple-500/30 bg-purple-500/10 text-purple-400`;
-    if (href === "/remerciements")
-      return `${base} border-teal-500/30 bg-teal-500/10 text-teal-400`;
-
-    return `${base} border-white/10 bg-white/5 text-white`;
+    return `w-full flex items-center justify-between px-5 py-4 rounded-2xl border font-black text-lg transition-all active:scale-95 ${style}`;
   };
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-99999 pointer-events-none"
+      className="fixed top-0 left-0 right-0 z-9999 pointer-events-none"
       style={{
         paddingTop: "env(safe-area-inset-top, 0px)",
         transform: "translate3d(0,0,0)",
