@@ -20,7 +20,7 @@ import { SiteLoading } from "../components/site-loading";
 
 import { useAuth, withAuthentication } from "./providers/use-auth";
 import { useUser } from "./providers/user-provider";
-import { AccountModal } from "./account-modal";
+export { AccountModal } from "./account-modal";
 
 // Cache for Auth0 Management API calls (5 minutes TTL)
 const AUTH0_CACHE_TTL = 300000;
@@ -131,7 +131,8 @@ export const LoginLink: FC<{
     | "success"
     | "warning"
     | "danger";
-}> = ({ text, color }) => {
+  isMobileView?: boolean;
+}> = ({ text, color, isMobileView }) => {
   const { isAuthenticated, login } = useAuth();
   const { t } = useTranslation();
 
@@ -142,13 +143,36 @@ export const LoginLink: FC<{
   return (
     !isAuthenticated && (
       <Link
-        color={color}
+        className={
+          isMobileView
+            ? "w-full flex items-center justify-between px-5 py-4 rounded-2xl border font-black text-lg transition-all active:scale-95 border-red-500/30 bg-red-500/10 text-red-500 hover:text-red-400"
+            : ""
+        }
+        color={isMobileView ? undefined : color}
         size="lg"
         onPress={() => {
           login();
         }}
       >
-        {text}
+        <div className="flex items-center justify-between w-full">
+          {text}
+          {isMobileView && (
+            <svg
+              className="w-5 h-5 opacity-40 ml-2"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+        </div>
       </Link>
     )
   );
@@ -312,7 +336,7 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
   showButtonIfNotAuthenticated = false,
 }) => {
   const { isAuthenticated } = useAuth();
-  const { isLoading, isAccountModalOpen, setIsAccountModalOpen } = useUser();
+  const { isLoading, setIsAccountModalOpen } = useUser();
   const { t } = useTranslation();
 
   if (isLoading) return null;
@@ -332,10 +356,6 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
         showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
         text={t("auth.logout")}
       />
-      <AccountModal
-        isOpen={isAccountModalOpen}
-        onOpenChange={setIsAccountModalOpen}
-      />
     </div>
   ) : (
     <LoginButton />
@@ -354,7 +374,7 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
   isMobileView,
 }) => {
   const { isAuthenticated } = useAuth();
-  const { isLoading, isAccountModalOpen, setIsAccountModalOpen } = useUser();
+  const { isLoading, setIsAccountModalOpen } = useUser();
   const { t } = useTranslation();
 
   if (isLoading) return null;
@@ -397,13 +417,9 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
         showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
         text={text}
       />
-      <AccountModal
-        isOpen={isAccountModalOpen}
-        onOpenChange={setIsAccountModalOpen}
-      />
     </div>
   ) : (
-    <LoginLink />
+    <LoginLink isMobileView={isMobileView} />
   );
 };
 

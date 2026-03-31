@@ -142,7 +142,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const {
     data,
     error,
-    isLoading,
     mutate: boundMutate,
   } = useSWR(isAuthenticated ? CONTEXT_KEY : null, fetcher, {
     revalidateOnFocus: false,
@@ -150,6 +149,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     revalidateIfStale: true,
     shouldRetryOnError: false,
   });
+
+  // Utilisation d'une détection plus robuste pour éviter les flashs d'hydratation
+  const isLoading = isAuthenticated && !data && !error;
 
   const user = data?.user || null;
   const notifications = useMemo(
@@ -240,8 +242,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     );
 
     if (resData?.success && resData?.user) {
-      // Force direct local cache update without revalidation
-      await boundMutate(resData, { revalidate: false });
+      // Optimistic update: preserve current notifications while updating user
+      await boundMutate(
+        (current: any) => ({
+          ...current,
+          user: resData.user,
+        }),
+        { revalidate: false },
+      );
     } else {
       await boundMutate();
     }

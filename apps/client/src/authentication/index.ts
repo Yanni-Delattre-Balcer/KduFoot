@@ -44,6 +44,7 @@ export {
   BlockedPage,
   clearUserListCache,
   updateUserInCache,
+  AccountModal,
 } from "./auth-components";
 
 export { UserSync } from "./user-sync";

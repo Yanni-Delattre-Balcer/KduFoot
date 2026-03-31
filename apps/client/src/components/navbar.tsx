@@ -16,9 +16,11 @@ import { I18nIcon, LanguageSwitch } from "./language-switch";
 import { LinkUniversal } from "./link-universal";
 
 import {
+  useUser,
   LoginLogoutButton,
   LoginLogoutLink,
-} from "@/authentication/auth-components";
+  AccountModal,
+} from "@/authentication";
 import { availableLanguages } from "@/i18n";
 import { useIncomingRequests, useMyParticipations } from "@/hooks/use-matches";
 
@@ -30,6 +32,7 @@ export const Navbar = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAccountModalOpen, setIsAccountModalOpen } = useUser();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -204,7 +207,7 @@ export const Navbar = () => {
               {navLinks.map((item, index) => (
                 <NavbarMenuItem key={`${item.href}-${index}`}>
                   <LinkUniversal
-                    className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl ${getMobileButtonStyle(item.href)}`}
+                    className={getMobileButtonStyle(item.href)}
                     href={item.href}
                     onClick={(e) => handleNavClick(e, item.href)}
                   >
@@ -244,6 +247,11 @@ export const Navbar = () => {
           </NavbarMenu>
         </HeroUINavbar>
       </div>
+
+      <AccountModal
+        isOpen={isAccountModalOpen}
+        onOpenChange={setIsAccountModalOpen}
+      />
     </div>
   );
 };
