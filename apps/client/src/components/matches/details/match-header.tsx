@@ -64,7 +64,7 @@ export const MatchHeader = ({ match, isMasked }: MatchHeaderProps) => {
             </div>
 
             <div className="w-full">
-              <h1 className="text-xl md:text-3xl font-black text-white leading-tight tracking-tighter mb-2 break-words overflow-wrap-anywhere">
+              <h1 className="text-xl md:text-3xl font-black text-white leading-tight tracking-tighter mb-2 wrap-break-word overflow-wrap-anywhere">
                 {isMasked
                   ? t("details.status.masked")
                   : match.type === "tournament"
@@ -98,7 +98,7 @@ export const MatchHeader = ({ match, isMasked }: MatchHeaderProps) => {
                   <p className="text-[10px] text-default-400 font-black tracking-widest mb-1">
                     {t("details.labels.precised_location")}
                   </p>
-                  <p className="text-white font-bold text-sm break-words overflow-wrap-anywhere">
+                  <p className="text-white font-bold text-sm wrap-break-word overflow-wrap-anywhere">
                     {match.location_address || match.club?.address}
                   </p>
                 </div>
@@ -106,14 +106,14 @@ export const MatchHeader = ({ match, isMasked }: MatchHeaderProps) => {
                   as="a"
                   className="font-black tracking-tighter h-auto py-3 px-6 rounded-2xl"
                   color="primary"
-                  href={
-                    match.club?.latitude &&
-                    match.club?.longitude &&
-                    (!match.location_address ||
-                      match.location_address === match.club.address)
-                      ? `https://www.google.com/maps/search/?api=1&query=${match.club.latitude},${match.club.longitude}`
-                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${match.location_address || match.club?.address || ""}, ${match.location_zip || match.club?.zip || ""} ${match.location_city || match.club?.city || ""}`.trim().replace(/^,/, "").trim())}`
-                  }
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    `${match.location_address || match.club?.address || ""}, ${
+                      match.location_zip || match.club?.zip || ""
+                    } ${match.location_city || match.club?.city || ""}`
+                      .trim()
+                      .replace(/^,/, "")
+                      .trim(),
+                  )}`}
                   rel="noopener noreferrer"
                   startContent={<span className="text-xl">📍</span>}
                   target="_blank"

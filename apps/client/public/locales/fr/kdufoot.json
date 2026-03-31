@@ -605,7 +605,8 @@
     },
     "sections": {
       "identity": "Identité & Contact",
-      "sports_profile": "Profil Sportif (Requis pour créer des annonces)",
+      "sports_profile": "Profil Sportif - Club Principal",
+      "sports_profile_secondary": "Profil Sportif - Club Secondaire",
       "club_location": "Club & Localisation",
       "sync": "Synchronisation"
     },
@@ -616,8 +617,9 @@
       "license": "Numéro de licence",
       "license_placeholder": "Saisir votre numéro",
       "hq_address": "Adresse du Siège (Officielle)",
-      "stadium_address": "Adresse du Stade (Obligatoire)",
-      "stadium_address_for": "Adresse du Stade ({{club}})",
+      "stadium_address": "Adresse du Stade",
+      "stadium_address_principal": "Adresse du Stade (Principale)",
+      "stadium_address_secondary": "Adresse du Stade (Secondaire)",
       "stadium_placeholder": "Ex : Complexe Sportif, 12 rue des Fleurs",
       "stadium_locked": "L'adresse du stade est verrouillée. Contactez le support pour toute modification.",
       "stadium_warning": "Attention : cette adresse est indispensable pour guider les joueurs lors des matchs.",

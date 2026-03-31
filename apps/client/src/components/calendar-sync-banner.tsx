@@ -149,10 +149,10 @@ export const CalendarSyncBanner: React.FC = () => {
 
   return (
     <Card
-      className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-[400px] z-[100] border-none bg-black/60 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-500"
+      className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-[400px] z-100 border-none bg-black/60 backdrop-blur-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-500"
       radius="lg"
     >
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-500" />
+      <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-purple-500 to-indigo-500" />
 
       <CardBody className="p-5 flex flex-col gap-4">
         <div className="flex justify-between items-start">
@@ -189,7 +189,7 @@ export const CalendarSyncBanner: React.FC = () => {
         <div className="flex flex-col gap-3 mt-2">
           <div className="flex gap-2.5">
             <Button
-              className="flex-[2] font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
+              className="flex-2 font-black tracking-tight h-12 bg-purple-600 hover:bg-purple-500 shadow-lg shadow-purple-500/20 group"
               color="secondary"
               isLoading={isSyncing}
               onPress={() =>

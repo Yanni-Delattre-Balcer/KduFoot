@@ -90,7 +90,7 @@ export const PwaInstallBanner = () => {
     <>
       {/* Standard Install Banner (Android/PC) */}
       {!showIOSHint && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-appearance-in sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[420px]">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-appearance-in sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[420px]">
           <div
             className="absolute inset-0 sm:hidden"
             role="button"
@@ -104,10 +104,10 @@ export const PwaInstallBanner = () => {
             }}
           />
           <Card className="bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-0 overflow-hidden relative w-full">
-            <div className="h-1.5 w-full bg-gradient-to-r from-primary via-primary/50 to-primary" />
+            <div className="h-1.5 w-full bg-linear-to-r from-primary via-primary/50 to-primary" />
 
             <div className="p-6 sm:p-8 flex flex-col items-center text-center gap-6">
-              <div className="bg-black rounded-[2rem] p-4 border border-white/10 shadow-2xl relative group">
+              <div className="bg-black rounded-4xl p-4 border border-white/10 shadow-2xl relative group">
                 <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-75 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <img
                   alt="Kdufoot"
@@ -162,7 +162,7 @@ export const PwaInstallBanner = () => {
       {/* iOS Specific Hint Popup */}
       {showIOSHint && (
         <div
-          className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in overflow-y-auto overscroll-contain"
+          className="fixed inset-0 z-10000 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in overflow-y-auto overscroll-contain"
           role="button"
           tabIndex={0}
           onClick={() => {
@@ -182,7 +182,7 @@ export const PwaInstallBanner = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col items-center text-center gap-4">
-              <div className="w-20 h-20 rounded-3xl bg-black border-2 border-primary/40 p-2 shadow-2xl shadow-primary/20 shadow-inner">
+              <div className="w-20 h-20 rounded-3xl bg-black border-2 border-primary/40 p-2 shadow-2xl shadow-primary/20">
                 <img
                   alt="Kdufoot"
                   className="w-full h-full object-contain"
@@ -314,7 +314,7 @@ export const PwaInstallBanner = () => {
       {/* PC/Android General Hint Popup (If native prompt is blocked) */}
       {showPCHint && (
         <div
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in"
+          className="fixed inset-0 z-10000 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-appearance-in"
           role="button"
           tabIndex={0}
           onClick={() => {

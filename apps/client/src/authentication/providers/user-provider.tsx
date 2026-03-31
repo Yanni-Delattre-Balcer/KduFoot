@@ -139,16 +139,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, getJson]);
 
-  const { data, error, isLoading } = useSWR(
-    isAuthenticated ? CONTEXT_KEY : null,
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnMount: true,
-      revalidateIfStale: true,
-      shouldRetryOnError: false,
-    },
-  );
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: boundMutate,
+  } = useSWR(isAuthenticated ? CONTEXT_KEY : null, fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnMount: true,
+    revalidateIfStale: true,
+    shouldRetryOnError: false,
+  });
 
   const user = data?.user || null;
   const notifications = useMemo(
@@ -222,23 +223,28 @@ export function UserProvider({ children }: { children: ReactNode }) {
       { siret },
     );
 
-    await mutate(CONTEXT_KEY);
+    await boundMutate();
 
     return resData;
   };
 
   const unlinkClub = async () => {
     await postJson(`${import.meta.env.API_BASE_URL}/api/users/unlink-club`, {});
-    await mutate(CONTEXT_KEY);
+    await boundMutate();
   };
 
   const updateUser = async (data: Partial<User>) => {
-    const resData = await putJson(
+    const resData = await putJson<any>(
       `${import.meta.env.API_BASE_URL}/api/users/me`,
       data,
     );
 
-    await mutate(CONTEXT_KEY);
+    if (resData?.success && resData?.user) {
+      // Force direct local cache update without revalidation
+      await boundMutate(resData, { revalidate: false });
+    } else {
+      await boundMutate();
+    }
 
     return resData;
   };
@@ -274,7 +280,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       updateUser,
       blockUser,
       refetch: async () => {
-        await mutate(CONTEXT_KEY);
+        await boundMutate();
       },
       profileComplete,
       isLocked,
@@ -312,7 +318,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   if (isLoading && isAuthenticated && !isBlocked && !user) {
     return (
       <UserContext.Provider value={value}>
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black">
+        <div className="fixed inset-0 z-10000 flex items-center justify-center bg-black">
           <div className="w-10 h-10 border-4 border-zinc-800 border-t-red-600 rounded-full animate-spin" />
         </div>
       </UserContext.Provider>

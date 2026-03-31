@@ -51,7 +51,7 @@ export default function IndexPage() {
                 <span className="text-white">Kdufoot</span>
               </h1>
               <div className="max-w-[280px] sm:max-w-md md:max-w-lg">
-                <p className="text-default-500 text-sm sm:text-base leading-relaxed break-words overflow-wrap-anywhere">
+                <p className="text-default-500 text-sm sm:text-base leading-relaxed wrap-break-word overflow-wrap-anywhere">
                   {t(
                     "homePage.hero.description_ultimate",
                     "Organisez vos matchs et tournois amicaux, trouvez des adversaires et gérez vos saisons — le tout sur une seule plateforme.",

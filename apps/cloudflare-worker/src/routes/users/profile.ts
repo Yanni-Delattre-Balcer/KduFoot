@@ -23,96 +23,13 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
     const PDF_MAX_MATCHES = 30;
     const PDF_MAX_ADDRESS_LENGTH = 30;
 
-    /**
-     * GET /api/users/me
-     */
-    router.get('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
-        const sub = request.user?.sub as string;
-
-        const user = await userService.getUserByAuth0Sub(sub);
-        if (!user) {
-            return Response.json({ success: false, error: 'User not found in D1. Call sync first.' }, { status: 404, headers: router.corsHeaders });
-        }
-
+    const getHydratedUser = async (user: any, env: Env) => {
         let club = null;
         if (user.club_id) {
             club = await env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id).first();
         }
 
-        let additional_clubs: import("../../types").Club[] = [];
-        if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
-            // Extract siret info from items
-            const siretItems = user.additional_sirets.map((item: unknown) => {
-                const itemObj = item as { siret?: string; stadium_address?: string };
-                return {
-                    siret: typeof item === 'string' ? item : (itemObj.siret || ''),
-                    stadium_address: typeof item === 'object' && item !== null ? itemObj.stadium_address : undefined
-                };
-            });
-
-            // Batch DB lookup: one query per siret using D1 batch
-            const batchQueries = siretItems.map(s =>
-                env.DB.prepare('SELECT id, siret, name, city, zip, address, latitude, longitude FROM clubs WHERE siret = ?').bind(s.siret)
-            );
-            const batchResults = await env.DB.batch(batchQueries);
-
-            additional_clubs = await Promise.all(siretItems.map(async (item, idx) => {
-                const dbClub = batchResults[idx].results[0] as { id: string, siret: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number } | undefined;
-                if (dbClub) return { ...dbClub, siret: item.siret, stadium_address: item.stadium_address } as import("../../types").Club;
-
-                try {
-                    const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
-                    const r = await fetch(`${SIRET_API_URL}?q=${item.siret}&page=1&per_page=1`);
-                    if (r.ok) {
-                        const d = await r.json() as import("../../types").SiretApiResponse;
-                        if (d.results && d.results.length > 0) {
-                            const rData = d.results[0];
-                            const newId = crypto.randomUUID();
-                            const name = rData.nom_complet || item.siret;
-                            const city = rData.siege?.libelle_commune || '';
-                            const zip = rData.siege?.code_postal || '';
-                            const address = rData.siege?.adresse || '';
-                            const lat = rData.siege?.latitude ? parseFloat(rData.siege.latitude) : 0;
-                            const lng = rData.siege?.longitude ? parseFloat(rData.siege.longitude) : 0;
-
-                            await env.DB.prepare(
-                                'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())'
-                            ).bind(newId, item.siret, name, city, address, zip, lat, lng).run();
-
-                            return { id: newId, siret: item.siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address: item.stadium_address } as import("../../types").Club;
-                        }
-                    }
-                } catch (_e) { console.warn('[Profile] SIRET API lookup failed for', item.siret, _e); }
-
-                return { id: crypto.randomUUID(), siret: item.siret, name: item.siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address: item.stadium_address } as import("../../types").Club;
-            }));
-        }
-
-        return Response.json({ success: true, user: { ...user, club, additional_clubs } }, { headers: { ...router.corsHeaders, "Cache-Control": "no-store, no-cache, must-revalidate" } });
-    }, Permission.READ_API);
-
-    /**
-     * GET /api/me/context
-     */
-    router.get('/api/me/context', async (request: AuthenticatedRequest, env: Env) => {
-        const sub = request.user?.sub as string;
-
-        // 1. Prepare all queries for batch execution
-        const userQuery = env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(sub);
-        
-        const [userRes] = await Promise.all([userQuery.first<any>()]);
-        if (!userRes) {
-            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
-        }
-        const user = userService.parseUser(userRes)!;
-
-        // 2. Prepare second batch (Club + Notifications)
-        const queries = [];
-        if (user.club_id) {
-            queries.push(env.DB.prepare('SELECT id, siret, name, city, address, zip, latitude, longitude FROM clubs WHERE id = ?').bind(user.club_id));
-        }
-        
-        // Notifications queries
+        let notifications = { pendingRequests: 0, modifiedParticipations: 0 };
         const incomingReqsQuery = env.DB.prepare(`
             SELECT COUNT(*) as count FROM match_contacts mc 
             JOIN matches m ON mc.match_id = m.id 
@@ -124,32 +41,24 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             WHERE mc.user_id = ? AND mc.status IN ('accepted', 'refused') AND COALESCE(mc.notification_state, 0) = 1
         `).bind(user.id);
 
-        queries.push(incomingReqsQuery);
-        queries.push(updatesQuery);
+        const notifResults = await env.DB.batch([incomingReqsQuery, updatesQuery]);
+        notifications.pendingRequests = (notifResults[0].results[0] as any).count || 0;
+        notifications.modifiedParticipations = (notifResults[1].results[0] as any).count || 0;
 
-        const results = await env.DB.batch(queries);
-        
-        let club = null;
-        let notifications = { incoming_requests: 0, updates: 0, total: 0 };
-        
-        if (user.club_id) {
-            club = results[0].results[0];
-            notifications.incoming_requests = (results[1].results[0] as any).count;
-            notifications.updates = (results[2].results[0] as any).count;
-        } else {
-            notifications.incoming_requests = (results[0].results[0] as any).count;
-            notifications.updates = (results[1].results[0] as any).count;
-        }
-        notifications.total = notifications.incoming_requests + notifications.updates;
-
-        // Handle additional clubs separately — batched DB lookup
-        let additional_clubs: import("../../types").Club[] = [];
+        let additional_clubs: any[] = [];
         if (Array.isArray(user.additional_sirets) && user.additional_sirets.length > 0) {
-            const siretItems = user.additional_sirets.map((item: unknown) => {
-                const itemObj = item as { siret?: string; stadium_address?: string };
+            const siretItems = (user.additional_sirets as any[]).map((item: unknown) => {
+                const i = item as any;
+                const isObj = typeof item === 'object' && item !== null;
                 return {
-                    siret: typeof item === 'string' ? item : (itemObj.siret || ''),
-                    stadium_address: typeof item === 'object' && item !== null ? itemObj.stadium_address : undefined
+                    siret: typeof item === 'string' ? item : (i.siret || ''),
+                    stadium_address: isObj ? i.stadium_address : undefined,
+                    hq_address: isObj ? i.hq_address : undefined,
+                    category: isObj ? i.category : undefined,
+                    level: isObj ? i.level : undefined,
+                    home_jersey_color: isObj ? i.home_jersey_color : undefined,
+                    away_jersey_color: isObj ? i.away_jersey_color : undefined,
+                    pitch_type: isObj ? i.pitch_type : undefined,
                 };
             });
 
@@ -159,42 +68,65 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
             const batchResults = await env.DB.batch(batchQueries);
 
             additional_clubs = await Promise.all(siretItems.map(async (item, idx) => {
-                const dbClub = batchResults[idx].results[0] as { id: string, siret: string, name: string, city: string, zip: string, address: string, latitude: number, longitude: number } | undefined;
-                if (dbClub) return { ...dbClub, siret: item.siret, stadium_address: item.stadium_address } as import("../../types").Club;
+                const dbClub = batchResults[idx].results[0] as any;
+                if (dbClub) return { ...dbClub, ...item };
 
                 try {
                     const SIRET_API_URL = env.SIRET_API_URL || 'https://recherche-entreprises.api.gouv.fr/search';
                     const r = await fetch(`${SIRET_API_URL}?q=${item.siret}&page=1&per_page=1`);
                     if (r.ok) {
-                        const d = await r.json() as import("../../types").SiretApiResponse;
+                        const d = await r.json() as any;
                         if (d.results && d.results.length > 0) {
                             const rData = d.results[0];
                             const newId = crypto.randomUUID();
-                            const name = rData.nom_complet || item.siret;
-                            const city = rData.siege?.libelle_commune || '';
+                            const name = rData.nom_complet || rData.nom_raison_sociale || item.siret;
+                            const city = rData.siege?.libelle_commune || rData.siege?.commune || '';
                             const zip = rData.siege?.code_postal || '';
                             const address = rData.siege?.adresse || '';
                             const lat = rData.siege?.latitude ? parseFloat(rData.siege.latitude) : 0;
                             const lng = rData.siege?.longitude ? parseFloat(rData.siege.longitude) : 0;
 
                             await env.DB.prepare(
-                                'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, unixepoch(), unixepoch())'
+                                'INSERT INTO clubs (id, siret, name, city, address, zip, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
                             ).bind(newId, item.siret, name, city, address, zip, lat, lng).run();
 
-                            return { id: newId, siret: item.siret, name, city, zip, address, latitude: lat, longitude: lng, stadium_address: item.stadium_address } as import("../../types").Club;
+                            return { ...item, id: newId, siret: item.siret, name, city, zip, address, latitude: lat, longitude: lng };
                         }
                     }
-                } catch (_e) { console.warn('[Context] SIRET API lookup failed for', item.siret, _e); }
-
-                return { id: crypto.randomUUID(), siret: item.siret, name: item.siret, city: '', zip: '', address: '', latitude: 0, longitude: 0, stadium_address: item.stadium_address } as import("../../types").Club;
+                } catch (_e) { console.warn('[Profile] SIRET API lookup failed for', item.siret, _e); }
+                return { ...item, id: crypto.randomUUID(), siret: item.siret, name: item.siret, city: '', zip: '', address: '', latitude: 0, longitude: 0 };
             }));
         }
 
-        return Response.json({
-            success: true,
-            user: { ...user, club, additional_clubs },
-            notifications
-        }, { headers: { ...router.corsHeaders, "Cache-Control": "no-store, no-cache, must-revalidate" } });
+        return { user: { ...user, club, additional_clubs }, notifications };
+    };
+
+    /**
+     * GET /api/users/me
+     */
+    router.get('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
+        const user = await userService.getUserByAuth0Sub(sub);
+        if (!user) {
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
+        }
+
+        const hydrated = await getHydratedUser(user, env);
+        return Response.json({ success: true, ...hydrated }, { headers: { ...router.corsHeaders, "Cache-Control": "no-store, no-cache, must-revalidate" } });
+    }, Permission.READ_API);
+
+    /**
+     * GET /api/me/context
+     */
+    router.get('/api/me/context', async (request: AuthenticatedRequest, env: Env) => {
+        const sub = request.user?.sub as string;
+        const userRes = await env.DB.prepare('SELECT * FROM users WHERE auth0_sub = ?').bind(sub).first<any>();
+        if (!userRes) {
+            return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
+        }
+        const user = userService.parseUser(userRes)!;
+        const hydrated = await getHydratedUser(user, env);
+        return Response.json({ success: true, ...hydrated }, { headers: { ...router.corsHeaders, "Cache-Control": "no-store, no-cache, must-revalidate" } });
     }, Permission.READ_API);
 
     /**
@@ -202,28 +134,21 @@ export const setupProfileRoutes = (router: Router, env: Env) => {
      */
     router.put('/api/users/me', async (request: AuthenticatedRequest, env: Env) => {
         const sub = request.user?.sub as string;
-
         const user = await userService.getUserByAuth0Sub(sub);
         if (!user) {
             return Response.json({ success: false, error: 'User not found' }, { status: 404, headers: router.corsHeaders });
         }
 
         const body: UpdateUserDto = await request.json();
-
-        // Safety: regular users cannot change their critical fields
-        const forbiddenKeys = [
-            'id', 'auth0_sub', 'email', 'subscription', 'is_blocked', 
-            'block_count', 'siret_change_count', 'calendar_token', 
-            'block_reason', 'created_at', 'updated_at'
-        ];
-        
-        for (const key of forbiddenKeys) {
-            delete (body as any)[key];
-        }
+        const forbiddenKeys = ['id', 'auth0_sub', 'email', 'subscription', 'is_blocked', 'block_count', 'siret_change_count', 'calendar_token', 'block_reason', 'created_at', 'updated_at'];
+        for (const key of forbiddenKeys) delete (body as any)[key];
 
         try {
-            const updated = await userService.updateUser(user.id, body);
-            return Response.json({ success: true, user: updated }, { headers: router.corsHeaders });
+            const updatedRaw = await userService.updateUser(user.id, body);
+            if (!updatedRaw) throw new Error('Update failed');
+            
+            const hydrated = await getHydratedUser(updatedRaw, env);
+            return Response.json({ success: true, ...hydrated }, { headers: router.corsHeaders });
         } catch (_e: unknown) {
             return Response.json({ success: false, error: 'Internal server error' }, { status: 500, headers: router.corsHeaders });
         }

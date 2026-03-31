@@ -63,7 +63,7 @@ export const InfoItem = ({
 
   return (
     <div
-      className={`p-4 rounded-[1.5rem] border ${colorClasses[color]} flex flex-col justify-between gap-3 transition-all hover:scale-[1.02] cursor-default h-full bg-linear-to-b from-transparent to-black/5`}
+      className={`p-4 rounded-3xl border ${colorClasses[color]} flex flex-col justify-between gap-3 transition-all hover:scale-[1.02] cursor-default h-full bg-linear-to-b from-transparent to-black/5`}
     >
       <div className="flex items-center justify-between">
         <div className="w-10 h-10 rounded-xl bg-black/20 border border-white/5 flex items-center justify-center text-xl shadow-inner">
@@ -73,7 +73,7 @@ export const InfoItem = ({
           {label}
         </span>
       </div>
-      <p className="text-white font-black text-xs sm:text-sm leading-tight break-words">
+      <p className="text-white font-black text-xs sm:text-sm leading-tight wrap-break-word">
         {cleanedValue}
       </p>
     </div>

@@ -1,55 +1,56 @@
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { useTranslation } from "react-i18next";
-import { addToast } from "@heroui/toast";
 
 import { User } from "@/types/user.types";
-import { getDept, formatSiret } from "@/utils/format";
+import { getDept } from "@/utils/format";
 
 interface ClubSectionProps {
   baseId: string;
   dbUser: User | null;
-  authUser: any;
   isSaving: boolean;
-  setIsSaving: (v: boolean) => void;
   siret: string;
   setSiret: (v: string) => void;
   errors: Record<string, string>;
   setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   handleLinkSiret: () => Promise<void>;
-  unlinkClub: () => Promise<void>;
   additionalStadiumAddresses: Record<string, string>;
   setAdditionalStadiumAddresses: React.Dispatch<
     React.SetStateAction<Record<string, string>>
   >;
+  additionalHqAddresses: Record<string, string>;
+  hqAddress: string | null;
+  stadiumAddress: string;
+  setStadiumAddress: (v: string) => void;
 }
 
 export const ClubSection = ({
   baseId,
   dbUser,
-  authUser,
   isSaving,
-  setIsSaving,
   siret,
   setSiret,
   errors,
   setErrors,
   handleLinkSiret,
-  unlinkClub,
   additionalStadiumAddresses,
   setAdditionalStadiumAddresses,
+  additionalHqAddresses,
+  hqAddress,
+  stadiumAddress,
+  setStadiumAddress,
 }: ClubSectionProps) => {
   const { t } = useTranslation("kdufoot");
 
   return (
     <div className="space-y-3">
-      <p className="text-sm font-bold text-default-400 ml-1 mt-2">
+      <p className="text-[10px] font-black text-danger tracking-widest uppercase ml-1 mt-2">
         {t("account.sections.club_location")}
       </p>
       <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 space-y-3">
         <div className="flex justify-between items-center text-sm">
-          <span className="text-default-500">
-            {t("account.fields.current_club")}
+          <span className="text-danger font-black uppercase text-[10px] tracking-widest px-2 py-0.5 bg-danger/10 rounded-full">
+            {t("account.fields.main_club", "Club Principal")}
           </span>
           <span className="font-bold text-primary">
             {dbUser?.club?.name || t("account.fields.no_club")}
@@ -106,7 +107,7 @@ export const ClubSection = ({
                   }}
                 />
               </div>
-              {!dbUser?.club_id ? (
+              {!dbUser?.club_id && (
                 <Button
                   className="h-12 font-bold px-4 w-full sm:w-auto"
                   color="primary"
@@ -116,60 +117,10 @@ export const ClubSection = ({
                 >
                   {t("account.buttons.validate_club")}
                 </Button>
-              ) : (
-                authUser?.email === "yannidelattrebalcer.artois@gmail.com" && (
-                  <Button
-                    className="h-12 font-bold px-4 w-full sm:w-auto"
-                    color="danger"
-                    size="sm"
-                    variant="flat"
-                    onPress={async () => {
-                      if (
-                        confirm(
-                          t(
-                            "account.admin_unlink_confirm",
-                            "Détacher le club ? (Admin uniquement)",
-                          ),
-                        )
-                      ) {
-                        setIsSaving(true);
-                        try {
-                          await unlinkClub();
-                          addToast({
-                            title: t(
-                              "account.admin_unlink_success",
-                              "Club détaché",
-                            ),
-                            color: "success",
-                          });
-                        } catch (e: unknown) {
-                          addToast({
-                            title: e instanceof Error ? e.message : String(e),
-                            color: "danger",
-                          });
-                        } finally {
-                          setIsSaving(false);
-                        }
-                      }
-                    }}
-                  >
-                    {t("matchForm.buttons.unlink", "Détacher (Admin)")}
-                  </Button>
-                )
               )}
             </div>
           </div>
 
-          {dbUser?.club_id && (
-            <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2 mb-2">
-              <span className="text-default-500">
-                {t("account.fields.main_club")}
-              </span>
-              <span className="font-bold text-primary">
-                {dbUser?.club?.name}
-              </span>
-            </div>
-          )}
           <div className="flex justify-between items-center text-sm">
             <span className="text-default-500">{t("account.fields.city")}</span>
             <span className="font-medium">
@@ -183,9 +134,61 @@ export const ClubSection = ({
             </span>
           </div>
 
+          <div className="space-y-6 mt-6">
+            <Input
+              isDisabled
+              aria-label={t("account.fields.hq_address")}
+              classNames={{
+                inputWrapper: "bg-default-200/30",
+              }}
+              id={`${baseId}_hq_address`}
+              label={
+                <span className="font-bold text-default-500 text-[0.75rem] sm:text-sm leading-tight">
+                  {t("account.fields.hq_address")}
+                </span>
+              }
+              labelPlacement="outside"
+              name="acc_hq_address"
+              size="sm"
+              value={hqAddress || "--"}
+              variant="flat"
+            />
+            <Input
+              isRequired
+              aria-label={t("account.fields.stadium_address")}
+              autoComplete="street-address"
+              classNames={{
+                description: "text-xs text-primary-500 font-medium",
+              }}
+              description={t("account.fields.stadium_warning")}
+              errorMessage={errors.stadiumAddress}
+              id={`${baseId}_stadium_address`}
+              isInvalid={!!errors.stadiumAddress}
+              label={
+                <span className="font-black text-primary text-[0.75rem] sm:text-sm leading-tight">
+                  {t(
+                    "account.fields.stadium_address_principal",
+                    "Adresse du Stade (Principale)",
+                  )}
+                </span>
+              }
+              labelPlacement="outside"
+              name="acc_stadium_address"
+              placeholder={t("account.fields.stadium_placeholder")}
+              size="sm"
+              value={stadiumAddress}
+              variant="bordered"
+              onValueChange={(v) => {
+                setStadiumAddress(v);
+                if (errors.stadiumAddress)
+                  setErrors((prev) => ({ ...prev, stadiumAddress: "" }));
+              }}
+            />
+          </div>
+
           {dbUser?.additional_clubs && dbUser.additional_clubs.length > 0 && (
             <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
-              <p className="text-[10px] font-bold text-default-400 tracking-widest mb-1">
+              <p className="text-[10px] font-black text-danger tracking-widest uppercase mb-1">
                 {t("account.fields.other_clubs")}
               </p>
               {dbUser.additional_clubs.map(
@@ -200,40 +203,98 @@ export const ClubSection = ({
                 ) => (
                   <div
                     key={idx}
-                    className="bg-white/5 p-4 rounded-xl border border-white/10 flex flex-col gap-3"
+                    className="bg-default-100/5 p-4 rounded-2xl border border-white/5 flex flex-col gap-3"
                   >
-                    <div className="flex justify-between items-start gap-2 w-full overflow-hidden">
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-black text-white truncate">
-                          {s.name || t("account.fields.nameless_club")}
-                        </span>
-                        <div className="flex gap-2 text-[10px] text-default-500 font-bold mt-0.5">
-                          <span>{s.city}</span>
-                          <span>•</span>
-                          <span>{getDept(s.zip)}</span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-mono text-default-400 bg-black/30 px-1.5 py-0.5 rounded shrink-0 border border-white/5">
-                        {formatSiret(s.siret)}
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-danger font-black uppercase text-[10px] tracking-widest px-2 py-0.5 bg-danger/10 rounded-full">
+                        {t("account.fields.secondary_club", "Club Secondaire")}
+                      </span>
+                      <span className="font-bold text-primary">
+                        {s.name && s.name !== s.siret
+                          ? s.name
+                          : t("account.fields.nameless_club")}
                       </span>
                     </div>
 
-                    <div className="space-y-1.5">
+                    <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-start">
+                      <div className="flex-1 flex flex-col gap-1 mt-2 mb-2">
+                        <Input
+                          isDisabled
+                          aria-label="Siret (14 chiffres) ou Siren (9 chiffres)"
+                          className="w-full max-w-full"
+                          id={`${baseId}_siret_${s.siret}`}
+                          label={
+                            <span className="font-bold text-danger text-[0.75rem] sm:text-sm leading-tight">
+                              SIRET (14 chiffres) ou SIREN (9 chiffres)
+                            </span>
+                          }
+                          labelPlacement="outside"
+                          name={`acc_siret_${s.siret}`}
+                          size="sm"
+                          value={s.siret}
+                          variant="bordered"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-default-500">
+                        {t("account.fields.city")}
+                      </span>
+                      <span className="font-medium">
+                        {s.city || "Non renseigné"}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-default-500">
+                        {t("account.fields.dept")}
+                      </span>
+                      <span className="font-medium">
+                        {getDept(s.zip) || "--"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-6 mt-6">
                       <Input
-                        aria-label={t("account.fields.stadium_address_for", {
-                          club: s.name,
-                        })}
+                        isDisabled
+                        aria-label={t("account.fields.hq_address")}
                         autoComplete="street-address"
                         classNames={{
-                          label:
-                            "text-[10px] font-bold text-primary-400 tracking-tight",
-                          input: "text-xs",
-                          inputWrapper: "h-9 min-h-9",
+                          inputWrapper: "bg-default-200/30",
                         }}
+                        id={`${baseId}_hq_address_${s.siret}`}
+                        label={
+                          <span className="font-bold text-default-500 text-[0.75rem] sm:text-sm leading-tight">
+                            {t("account.fields.hq_address")}
+                          </span>
+                        }
+                        labelPlacement="outside"
+                        name={`acc_hq_address_${s.siret}`}
+                        placeholder={t("account.fields.hq_address")}
+                        size="sm"
+                        value={additionalHqAddresses[s.siret] || ""}
+                        variant="flat"
+                      />
+                      <Input
+                        isRequired
+                        aria-label={t(
+                          "account.fields.stadium_address_secondary",
+                        )}
+                        autoComplete="street-address"
+                        classNames={{
+                          description: "text-xs text-primary-500 font-medium",
+                        }}
+                        description={t("account.fields.stadium_warning")}
+                        errorMessage={errors[`stadium_address_${s.siret}`]}
                         id={`${baseId}_stadium_address_${s.siret}`}
-                        label={t("account.fields.stadium_address_for", {
-                          club: s.name,
-                        })}
+                        isInvalid={!!errors[`stadium_address_${s.siret}`]}
+                        label={
+                          <span className="font-black text-primary text-[0.75rem] sm:text-sm leading-tight">
+                            {t("account.fields.stadium_address_secondary")}
+                          </span>
+                        }
+                        labelPlacement="outside"
                         name={`acc_stadium_address_${s.siret}`}
                         placeholder={t("account.fields.stadium_placeholder")}
                         size="sm"

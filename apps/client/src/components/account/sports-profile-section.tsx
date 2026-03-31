@@ -22,6 +22,7 @@ interface SportsProfileSectionProps {
   setAwayJerseyColor: (v: string) => void;
   errors: Record<string, string>;
   setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  title?: string;
 }
 
 export const SportsProfileSection = ({
@@ -36,13 +37,14 @@ export const SportsProfileSection = ({
   setAwayJerseyColor,
   errors,
   setErrors,
+  title,
 }: SportsProfileSectionProps) => {
   const { t } = useTranslation();
 
   return (
     <div className="space-y-3">
-      <p className="text-sm font-bold text-default-400 ml-1 mt-2">
-        {t("account.sections.sports_profile")}
+      <p className="text-[10px] font-black text-danger tracking-widest uppercase ml-1 mt-2">
+        {title || t("account.sections.sports_profile")}
       </p>
       <div className="bg-default-100/5 p-4 rounded-2xl border border-white/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Select

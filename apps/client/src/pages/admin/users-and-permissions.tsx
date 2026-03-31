@@ -135,17 +135,39 @@ export default function UsersAndPermissionsPage() {
     if (!selectedUserId) return;
     try {
       const token = await getAccessTokenSilently();
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/sirets/${encodeURIComponent(siret)}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const isPrimary = siretData?.primary_siret === siret;
+      const endpoint = isPrimary
+        ? `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/primary-siret`
+        : `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/additional-sirets/${encodeURIComponent(siret)}`;
 
-      if (res.ok) loadSirets(selectedUserId);
+      const res = await fetch(endpoint, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        loadSirets(selectedUserId);
+        addToast({
+          title: "Succès",
+          description: "Le club a été retiré.",
+          color: "success",
+        });
+      } else {
+        const errorData = await res.json().catch(() => null);
+
+        addToast({
+          title: "Erreur",
+          description: errorData?.error || "Erreur lors de la suppression",
+          color: "danger",
+        });
+      }
     } catch (err) {
       console.error(err);
+      addToast({
+        title: "Erreur",
+        description: "Problème de connexion",
+        color: "danger",
+      });
     }
   };
 

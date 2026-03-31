@@ -16,7 +16,7 @@ export const ContactTracking = ({ match, user }: ContactTrackingProps) => {
 
   return (
     <div className="lg:col-span-3 mt-12">
-      <div className="bg-linear-to-br from-[#1c1c1f] to-[#141416] rounded-[2.5rem] p-8 border border-white/5 relative overflow-hidden">
+      <div className="bg-linear-to-br from-[#1c1c1f] to-[#141416] rounded-5xl p-8 border border-white/5 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary via-secondary to-primary opacity-50" />
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
@@ -99,7 +99,7 @@ export const ContactTracking = ({ match, user }: ContactTrackingProps) => {
                   <CardBody className="p-6 gap-4">
                     <div className="flex items-center gap-4">
                       <div
-                        className={`w-14 h-14 rounded-2xl bg-[#000] border border-white/10 flex items-center justify-center text-2xl shadow-inner relative`}
+                        className={`w-14 h-14 rounded-2xl bg-black border border-white/10 flex items-center justify-center text-2xl shadow-inner relative`}
                       >
                         {contact.club_logo ? (
                           <HeroImage
@@ -114,7 +114,7 @@ export const ContactTracking = ({ match, user }: ContactTrackingProps) => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0 overflow-hidden">
-                        <p className="font-black text-white tracking-tighter leading-tight mb-1 break-words overflow-wrap-anywhere">
+                        <p className="font-black text-white tracking-tighter leading-tight mb-1 wrap-break-word overflow-wrap-anywhere">
                           {contact.club_name || "Club intéressé"}
                         </p>
                         <div className="flex flex-col gap-0.5">
@@ -124,7 +124,7 @@ export const ContactTracking = ({ match, user }: ContactTrackingProps) => {
                             ).toLocaleDateString()}
                           </p>
                           {contact.message && (
-                            <p className="text-[10px] text-primary font-black tracking-tighter italic opacity-80 break-words overflow-wrap-anywhere">
+                            <p className="text-[10px] text-primary font-black tracking-tighter italic opacity-80 wrap-break-word overflow-wrap-anywhere">
                               {contact.message}
                             </p>
                           )}
@@ -160,7 +160,7 @@ export const ContactTracking = ({ match, user }: ContactTrackingProps) => {
               );
             })
           ) : (
-            <div className="col-span-full min-h-[300px] flex flex-col items-center justify-center bg-white/5 rounded-[2rem] border border-dashed border-white/10 opacity-60 p-8 text-center">
+            <div className="col-span-full min-h-[300px] flex flex-col items-center justify-center bg-white/5 rounded-4xl border border-dashed border-white/10 opacity-60 p-8 text-center">
               <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-3xl mb-4">
                 🌑
               </div>

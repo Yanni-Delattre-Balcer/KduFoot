@@ -23,7 +23,20 @@ export interface User {
     subscription: 'Free' | 'Pro' | 'Ultime';
     is_blocked?: boolean;
     block_reason?: string | null;
-    additional_sirets?: (string | { siret: string; stadium_address?: string | null })[] | null;
+    additional_sirets?: (
+        | string
+        | {
+            siret: string;
+            name?: string;
+            category?: string;
+            level?: string;
+            home_jersey_color?: string;
+            away_jersey_color?: string;
+            stadium_address?: string | null;
+            hq_address?: string | null;
+            pitch_type?: string | null;
+          }
+    )[] | null;
     calendar_token?: string | null;
     push_subscription?: string | null;
     has_synced_calendar: boolean;
@@ -63,7 +76,20 @@ export interface UpdateUserDto {
     longitude?: number;
     picture?: string;
     subscription?: 'Free' | 'Pro' | 'Ultime';
-    additional_sirets?: (string | { siret: string; stadium_address?: string | null })[];
+    additional_sirets?: (
+        | string
+        | {
+            siret: string;
+            name?: string;
+            category?: string;
+            level?: string;
+            home_jersey_color?: string;
+            away_jersey_color?: string;
+            stadium_address?: string | null;
+            hq_address?: string | null;
+            pitch_type?: string | null;
+          }
+    )[];
     calendar_token?: string;
     push_subscription?: string | null;
     has_synced_calendar?: boolean;

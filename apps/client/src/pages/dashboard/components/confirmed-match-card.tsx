@@ -96,7 +96,7 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
         <div className="flex flex-col 2xl:flex-row relative">
           {/* Left Section: Info (Clickable) */}
           <Link
-            className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5 hover:bg-white/[0.02] transition-colors"
+            className="flex-1 p-6 border-b 2xl:border-b-0 2xl:border-r border-white/5 hover:bg-white/2 transition-colors"
             to={`/matches/${match.match_id}`}
           >
             <div className="flex items-start justify-between gap-4 mb-4">
@@ -111,7 +111,7 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
+                  <h3 className="font-black text-white text-lg sm:text-xl leading-tight wrap-break-word">
                     {opponentClubName}
                   </h3>
                   <div className="flex flex-wrap items-center gap-3 mt-2">
@@ -218,7 +218,7 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
                   {t("details.labels.pitch", "Terrain")}
                 </p>
                 <p
-                  className={`text-sm font-bold break-words ${isPitchChanged ? "text-danger" : "text-white"}`}
+                  className={`text-sm font-bold wrap-break-word ${isPitchChanged ? "text-danger" : "text-white"}`}
                 >
                   {match.opponent_pitch_type || match.pitch_type
                     ? t(
@@ -250,7 +250,7 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
           </Link>
 
           {/* Right Section: VS Visual & Actions (Buttons) */}
-          <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
+          <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/2">
             <div className="mb-6 flex flex-col items-center">
               <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-4 w-full text-center md:text-left">
                 {t("dashboard.labels.match_opposition")}
@@ -284,7 +284,7 @@ export const ConfirmedMatchCard = React.memo(function ConfirmedMatchCard({
                       width={48}
                     />
                   </div>
-                  <span className="text-[9px] font-bold text-default-400 break-words text-center">
+                  <span className="text-[9px] font-bold text-default-400 wrap-break-word text-center">
                     {opponentClubName}
                   </span>
                 </div>

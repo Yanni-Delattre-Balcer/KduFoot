@@ -83,6 +83,23 @@ export const Navbar = () => {
     { label: t("nav.remerciements"), href: "/remerciements" },
   ];
 
+  const getMobileButtonStyle = (href: string) => {
+    const base = "border font-black text-lg transition-all active:scale-95";
+
+    if (href === "/")
+      return `${base} border-red-500/30 bg-red-500/10 text-red-400`;
+    if (href === "/dashboard")
+      return `${base} border-orange-500/30 bg-orange-500/10 text-orange-400`;
+    if (href === "/favorites")
+      return `${base} border-cyan-500/30 bg-cyan-500/10 text-cyan-400`;
+    if (href.startsWith("/matches"))
+      return `${base} border-purple-500/30 bg-purple-500/10 text-purple-400`;
+    if (href === "/remerciements")
+      return `${base} border-teal-500/30 bg-teal-500/10 text-teal-400`;
+
+    return `${base} border-white/10 bg-white/5 text-white`;
+  };
+
   return (
     <div
       className="fixed top-0 left-0 right-0 z-99999 pointer-events-none"
@@ -185,33 +202,46 @@ export const Navbar = () => {
             />
           </NavbarContent>
 
-          <NavbarMenu className="bg-black/95 backdrop-blur-md pt-24">
-            <div className="mx-4 flex flex-col gap-2">
+          <NavbarMenu className="bg-black/95 backdrop-blur-md pt-24 px-6">
+            <div className="flex flex-col gap-3">
               {navLinks.map((item, index) => (
                 <NavbarMenuItem key={`${item.href}-${index}`}>
                   <LinkUniversal
-                    className={getNavItemClass(item.href)}
+                    className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl ${getMobileButtonStyle(item.href)}`}
                     href={item.href}
                     onClick={(e) => handleNavClick(e, item.href)}
                   >
-                    <div className="flex items-center gap-2">
-                      {item.label}
-                      {item.href === "/dashboard" && totalCount > 0 && (
-                        <Chip
-                          className="h-5 font-black animate-bounce"
-                          color="danger"
-                          size="sm"
-                          variant="solid"
-                        >
-                          {totalCount}
-                        </Chip>
-                      )}
-                    </div>
+                    {item.label}
+                    {item.href === "/dashboard" && totalCount > 0 && (
+                      <Chip
+                        className="h-6 font-black animate-bounce px-2"
+                        color="danger"
+                        size="sm"
+                        variant="solid"
+                      >
+                        {totalCount}
+                      </Chip>
+                    )}
+                    <svg
+                      className="w-5 h-5 opacity-40 ml-2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </LinkUniversal>
                 </NavbarMenuItem>
               ))}
+              <div className="h-px bg-white/10 my-2" />
               <NavbarMenuItem key="login-logout">
-                <LoginLogoutLink color="danger" />
+                <LoginLogoutLink isMobileView={true} />
               </NavbarMenuItem>
             </div>
           </NavbarMenu>

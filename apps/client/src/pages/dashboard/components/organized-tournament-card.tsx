@@ -60,7 +60,7 @@ export const OrganizedTournamentCard = React.memo(
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-black text-white text-lg sm:text-xl leading-tight break-words">
+                    <h3 className="font-black text-white text-lg sm:text-xl leading-tight wrap-break-word">
                       {match.name || match.club?.name}
                     </h3>
                     <p className="text-[10px] sm:text-xs font-bold text-default-400 mt-1 uppercase tracking-wider">
@@ -187,7 +187,7 @@ export const OrganizedTournamentCard = React.memo(
             </div>
 
             {/* Right Section: Teams & Actions */}
-            <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/[0.02]">
+            <div className="w-full 2xl:w-80 p-6 flex flex-col justify-between bg-white/2">
               <div className="mb-6">
                 <p className="text-xs sm:text-sm font-black text-default-400 tracking-widest mb-3">
                   {t(
@@ -199,7 +199,7 @@ export const OrganizedTournamentCard = React.memo(
                   {displayTeams.map((contact: MatchContact, i: number) => (
                     <div
                       key={i}
-                      className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-[3]"
+                      className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-default-100 flex items-center justify-center overflow-hidden z-3"
                     >
                       {contact.club_logo ? (
                         <HeroImage loading="lazy" src={contact.club_logo} />
@@ -211,7 +211,7 @@ export const OrganizedTournamentCard = React.memo(
                     </div>
                   ))}
                   {remainingTeamsCount > 0 && (
-                    <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-violet-500 flex items-center justify-center z-[1]">
+                    <div className="w-10 h-10 rounded-full border-2 border-[#0f0f0f] bg-violet-500 flex items-center justify-center z-1">
                       <span className="text-xs sm:text-sm font-black text-white">
                         +{remainingTeamsCount}
                       </span>

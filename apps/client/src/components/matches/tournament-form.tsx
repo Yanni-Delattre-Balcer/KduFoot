@@ -4,12 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@heroui/dropdown";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Progress } from "@heroui/progress";
 import { addToast } from "@heroui/toast";
@@ -48,7 +42,7 @@ export default function TournamentForm({
 }: TournamentFormProps) {
   const { t } = useTranslation();
   const { createMatch, updateMatch } = useMatches();
-  const { user } = useUser();
+  const { user, isAdmin } = useUser();
   const navigate = useNavigate();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -118,51 +112,69 @@ export default function TournamentForm({
         type: "tournament" as const,
       });
     } else if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        club_id: prev.club_id || user.club?.id || "",
-        email: user.email || prev.email || "",
-        phone: user.phone || prev.phone || "",
-        location_address:
-          prev.club_id === user.club?.id
+      setFormData((prev) => {
+        const clubId = prev.club_id || user.club?.id || "";
+        const isMainClub = clubId === user.club?.id;
+        const addClub = !isMainClub
+          ? user.additional_clubs?.find((c) => c.id === clubId)
+          : null;
+
+        return {
+          ...prev,
+          club_id: clubId,
+          email: user.email || prev.email || "",
+          phone: user.phone || prev.phone || "",
+          location_address: isMainClub
             ? user.stadium_address || user.club?.address || ""
-            : prev.location_address || "",
-        location_zip:
-          prev.club_id === user.club?.id
-            ? user.club?.zip || ""
-            : prev.location_zip || "",
-        location_city:
-          prev.club_id === user.club?.id
+            : addClub?.stadium_address || addClub?.address || "",
+          location_zip: isMainClub ? user.club?.zip || "" : addClub?.zip || "",
+          location_city: isMainClub
             ? user.club?.city || ""
-            : prev.location_city || "",
-        category: (user.category as Category) || prev.category,
-        level: (user.level as Level) || prev.level,
-        pitch_type: (user.pitch_type as PitchType) || prev.pitch_type,
-        jersey_color: user.home_jersey_color || prev.jersey_color || "",
-        type: "tournament" as const,
-      }));
+            : addClub?.city || "",
+          category: isMainClub
+            ? (user.category as Category) || prev.category
+            : (addClub?.category as Category) || prev.category,
+          level: isMainClub
+            ? (user.level as Level) || prev.level
+            : (addClub?.level as Level) || prev.level,
+          pitch_type: isMainClub
+            ? (user.pitch_type as PitchType) || prev.pitch_type
+            : (addClub?.pitch_type as PitchType) || prev.pitch_type,
+          jersey_color: isMainClub
+            ? user.home_jersey_color || prev.jersey_color || ""
+            : addClub?.home_jersey_color || prev.jersey_color || "",
+          type: "tournament" as const,
+        };
+      });
     }
   }, [user, initialData]);
 
   useEffect(() => {
     if (!initialData && user && formData.club_id) {
-      if (formData.club_id === user.club?.id) {
+      const isMainClub = formData.club_id === user.club?.id;
+      const addClub = !isMainClub
+        ? user.additional_clubs?.find((c) => c.id === formData.club_id)
+        : null;
+
+      if (isMainClub) {
         setFormData((prev) => ({
           ...prev,
           location_address: user.stadium_address || user.club?.address || "",
           location_city: user.club?.city || "",
           location_zip: user.club?.zip || "",
+          category: (user.category as Category) || prev.category,
+          level: (user.level as Level) || prev.level,
+          jersey_color: user.home_jersey_color || prev.jersey_color || "",
         }));
-      } else {
-        const addClub = user.additional_clubs?.find(
-          (c) => c.id === formData.club_id,
-        );
-
+      } else if (addClub) {
         setFormData((prev) => ({
           ...prev,
-          location_address: addClub?.stadium_address || addClub?.address || "",
-          location_city: addClub?.city || "",
-          location_zip: addClub?.zip || "",
+          location_address: addClub.stadium_address || addClub.address || "",
+          location_city: addClub.city || "",
+          location_zip: addClub.zip || "",
+          category: (addClub.category as Category) || prev.category,
+          level: (addClub.level as Level) || prev.level,
+          jersey_color: addClub.home_jersey_color || prev.jersey_color || "",
         }));
       }
     }
@@ -381,27 +393,6 @@ export default function TournamentForm({
     }
   };
 
-  const availableClubs: { id: string; name: string; description: string }[] =
-    user
-      ? [
-          {
-            id: user.club?.id || "primary",
-            name: user.club?.name || "Club Principal",
-            description: "Club Principal",
-          },
-          ...(user.additional_sirets || []).map((item) => {
-            const s = typeof item === "string" ? item : item.siret;
-            const clubInfo = user.additional_clubs?.find((c) => c.siret === s);
-
-            return {
-              id: clubInfo?.id || s,
-              name: clubInfo?.name || s,
-              description: "Club Secondaire",
-            };
-          }),
-        ]
-      : [];
-
   return (
     <form
       className="flex flex-col gap-6 animate-appearance-in pb-12"
@@ -453,77 +444,78 @@ export default function TournamentForm({
                   <span className="text-[10px] font-black text-emerald-500/70 tracking-tighter">
                     {t("matchForm.labels.linked_club")}
                   </span>
-                  {Array.isArray(user?.additional_sirets) &&
-                  user.additional_sirets.length > 0 ? (
-                    <Dropdown>
-                      <DropdownTrigger>
-                        <Button
-                          className="h-auto p-0 min-w-0 bg-transparent text-left justify-start"
-                          endContent={
-                            <svg
-                              className="w-3 h-3 text-emerald-400/50"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clipRule="evenodd"
-                                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-                                fillRule="evenodd"
-                              />
-                            </svg>
-                          }
-                          size="sm"
+                  {user?.additional_clubs &&
+                  user.additional_clubs.length > 0 ? (
+                    <Select
+                      aria-label={t("matchForm.labels.linked_club")}
+                      className="max-w-full mt-1"
+                      classNames={{
+                        trigger:
+                          "bg-emerald-950/50 hover:bg-emerald-950/80 border border-emerald-500/50 shadow-md px-4 py-3 rounded-xl min-h-[48px] transition-all",
+                        value:
+                          "text-base font-black text-emerald-100 whitespace-normal wrap-break-word leading-tight drop-shadow-sm",
+                        innerWrapper: "gap-2",
+                      }}
+                      renderValue={() => (
+                        <span className="text-base font-black text-emerald-100 tracking-tighter">
+                          {formData.club_id === user.club?.id
+                            ? user.club?.name || "Club Principal"
+                            : user.additional_clubs?.find(
+                                (c) => c.id === formData.club_id,
+                              )?.name || formData.club_id}
+                        </span>
+                      )}
+                      selectedKeys={[
+                        formData.club_id || user.club?.id || "primary",
+                      ]}
+                      size="sm"
+                      variant="flat"
+                      onChange={(e) => handleChange("club_id", e.target.value)}
+                    >
+                      {[
+                        {
+                          id: user.club?.id || "primary",
+                          name: user.club?.name || "Club Principal",
+                          type: "Principal",
+                        },
+                        ...(user.additional_clubs || []).map((c) => ({
+                          id: c.id,
+                          name: c.name,
+                          type: "Secondaire",
+                        })),
+                      ].map((club) => (
+                        <SelectItem
+                          key={club.id}
+                          className="data-[hover=true]:bg-emerald-500/10 data-[selected=true]:text-emerald-400"
+                          textValue={club.name}
                         >
-                          <span className="text-sm font-black text-emerald-100 whitespace-normal break-words leading-tight">
-                            {formData.club_id === user.club?.id ||
-                            !formData.club_id
-                              ? user.club?.name || "Club Principal"
-                              : user.additional_clubs?.find(
-                                  (c) => c.id === formData.club_id,
-                                )?.name || formData.club_id}
-                          </span>
-                        </Button>
-                      </DropdownTrigger>
-                      <DropdownMenu
-                        items={availableClubs}
-                        selectedKeys={[
-                          formData.club_id || user.club?.id || "primary",
-                        ]}
-                        selectionMode="single"
-                        onAction={(key) =>
-                          handleChange("club_id", key as string)
-                        }
-                      >
-                        {(item: {
-                          id: string;
-                          name: string;
-                          description: string;
-                        }) => (
-                          <DropdownItem
-                            key={item.id}
-                            className="text-emerald-900"
-                            description={item.description}
-                          >
-                            <span className="font-bold">{item.name}</span>
-                          </DropdownItem>
-                        )}
-                      </DropdownMenu>
-                    </Dropdown>
+                          <div className="flex flex-col py-0.5">
+                            <span className="font-bold text-sm">
+                              {club.name}
+                            </span>
+                            <span className="text-xs opacity-70">
+                              {club.type}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </Select>
                   ) : (
-                    <span className="text-sm font-black text-emerald-100 whitespace-normal break-words leading-tight">
+                    <span className="text-sm font-black text-emerald-100 wrap-break-word whitespace-normal leading-tight">
                       {user?.club?.name}
                     </span>
                   )}
                 </div>
               </div>
-              <Button
-                className="bg-red-950/30 text-red-400/80 font-bold border border-red-900/20 py-4"
-                size="sm"
-                variant="flat"
-              >
-                {t("matchForm.buttons.unlink")}
-              </Button>
+              {isAdmin && (
+                <Button
+                  className="bg-red-950/30 text-red-400/80 font-bold border border-red-900/20 py-4"
+                  size="sm"
+                  variant="flat"
+                >
+                  {t("matchForm.buttons.unlink")}
+                </Button>
+              )}
             </div>
 
             {/* stadium Block */}
@@ -547,7 +539,7 @@ export default function TournamentForm({
                     <div className="flex items-center h-full">
                       <div className="bg-emerald-500 text-[#0f0717] text-[10px] sm:text-[11px] font-black px-2 py-1 rounded-full flex items-center gap-1 leading-none shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                         <span>🏟️</span>
-                        <span className="mb-[1px]">
+                        <span className="mb-px">
                           {t("matchForm.labels.stadium")}
                         </span>
                       </div>
@@ -794,7 +786,7 @@ export default function TournamentForm({
               </div>
               <div className="flex items-center gap-2 bg-purple-500/10 text-purple-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-purple-500/20 group-hover:bg-purple-500/20 transition-all">
                 <span>🔒</span>
-                <span className="mb-[1px]">
+                <span className="mb-px">
                   {t("matchForm.labels.edit_in_account")}
                 </span>
               </div>
@@ -834,7 +826,7 @@ export default function TournamentForm({
               className="h-2"
               classNames={{
                 indicator:
-                  "bg-gradient-to-r from-purple-600 to-purple-400 rounded-full", // Corrected classNames
+                  "bg-linear-to-r from-purple-600 to-purple-400 rounded-full", // Corrected classNames
                 base: "bg-purple-900/20 rounded-full overflow-hidden", // Added base classNames
               }}
               value={(() => {

@@ -76,7 +76,7 @@ export const DashboardRequestCard = React.memo(function DashboardRequestCard({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-black text-white text-base sm:text-lg leading-tight break-words tracking-tight">
+                <h3 className="font-black text-white text-base sm:text-lg leading-tight wrap-break-word tracking-tight">
                   {request.requester_club_name}
                 </h3>
                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
@@ -179,7 +179,7 @@ export const DashboardRequestCard = React.memo(function DashboardRequestCard({
           </div>
 
           {/* Match info banner */}
-          <div className="bg-white/[0.03] rounded-xl p-3 border border-white/5">
+          <div className="bg-white/3 rounded-xl p-3 border border-white/5">
             <div className="flex justify-between items-center">
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold text-default-400 tracking-widest">
@@ -216,7 +216,7 @@ export const DashboardRequestCard = React.memo(function DashboardRequestCard({
 
           <div className="flex flex-col sm:flex-row gap-4 relative z-20">
             <Button
-              className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-emerald-500/20 w-full sm:w-auto text-lg"
+              className="flex-1 font-black h-16 sm:h-12 shadow-lg shadow-emerald-500/20 w-full sm:w-auto text-lg"
               color="success"
               isLoading={
                 actionLoading[
@@ -230,7 +230,7 @@ export const DashboardRequestCard = React.memo(function DashboardRequestCard({
               {t("dashboard.controls.accept", "Accepter")}
             </Button>
             <Button
-              className="flex-1 font-black text-sm h-16 sm:h-12 shadow-lg shadow-rose-500/20 w-full sm:w-auto text-lg"
+              className="flex-1 font-black h-16 sm:h-12 shadow-lg shadow-rose-500/20 w-full sm:w-auto text-lg"
               color="danger"
               isLoading={
                 actionLoading[

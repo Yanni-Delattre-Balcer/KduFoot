@@ -41,7 +41,7 @@ export default function MatchForm({
 }: MatchFormProps) {
   const { t } = useTranslation();
   const { createMatch, updateMatch } = useMatches();
-  const { user } = useUser();
+  const { user, isAdmin } = useUser();
   const navigate = useNavigate();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -104,34 +104,49 @@ export default function MatchForm({
         type: "match" as const,
       });
     } else if (user) {
-      setFormData((prev) => ({
-        ...prev,
-        club_id: prev.club_id || user.club?.id,
-        location_address:
-          prev.club_id === user.club?.id
+      setFormData((prev) => {
+        const clubId = prev.club_id || user.club?.id || "";
+        const isMainClub = clubId === user.club?.id;
+        const addClub = !isMainClub
+          ? user.additional_clubs?.find((c) => c.id === clubId)
+          : null;
+
+        return {
+          ...prev,
+          club_id: clubId,
+          location_address: isMainClub
             ? user.stadium_address || prev.location_address || ""
-            : prev.location_address,
-        location_city:
-          prev.club_id === user.club?.id
+            : addClub?.stadium_address || prev.location_address || "",
+          location_city: isMainClub
             ? user.club?.city || prev.location_city || ""
-            : prev.location_city,
-        location_zip:
-          prev.club_id === user.club?.id
+            : addClub?.city || prev.location_city || "",
+          location_zip: isMainClub
             ? user.club?.zip || prev.location_zip || ""
-            : prev.location_zip,
-        email: user.email || prev.email || "",
-        phone: user.phone || prev.phone || "",
-        category: (user.category as Category) || prev.category,
-        level: (user.level as Level) || prev.level,
-        pitch_type: (user.pitch_type as PitchType) || prev.pitch_type,
-        jersey_color:
-          prev.venue === "Domicile"
-            ? user.home_jersey_color || ""
-            : prev.venue === "Extérieur"
-              ? user.away_jersey_color || ""
-              : "",
-        type: "match" as const,
-      }));
+            : addClub?.zip || prev.location_zip || "",
+          email: user.email || prev.email || "",
+          phone: user.phone || prev.phone || "",
+          category: isMainClub
+            ? (user.category as Category) || prev.category
+            : (addClub?.category as Category) || prev.category,
+          level: isMainClub
+            ? (user.level as Level) || prev.level
+            : (addClub?.level as Level) || prev.level,
+          pitch_type: isMainClub
+            ? (user.pitch_type as PitchType) || prev.pitch_type
+            : (addClub?.pitch_type as PitchType) || prev.pitch_type,
+          jersey_color:
+            prev.venue === "Domicile"
+              ? (isMainClub
+                  ? user.home_jersey_color
+                  : addClub?.home_jersey_color) || ""
+              : prev.venue === "Extérieur"
+                ? (isMainClub
+                    ? user.away_jersey_color
+                    : addClub?.away_jersey_color) || ""
+                : "",
+          type: "match" as const,
+        };
+      });
     }
   }, [initialData, user]);
 
@@ -400,22 +415,82 @@ export default function MatchForm({
                     />
                   </svg>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col w-full min-w-0">
                   <span className="text-[10px] font-black text-emerald-500/70 tracking-tighter">
                     {t("matchForm.labels.linked_club")}
                   </span>
-                  <span className="text-sm font-black text-emerald-100 whitespace-normal break-words leading-tight">
-                    {user?.club?.name || t("matchForm.labels.not_linked")}
-                  </span>
+                  {user?.additional_clubs &&
+                  user.additional_clubs.length > 0 ? (
+                    <Select
+                      aria-label={t("matchForm.labels.linked_club")}
+                      className="max-w-full mt-1"
+                      classNames={{
+                        trigger:
+                          "bg-emerald-950/50 hover:bg-emerald-950/80 border border-emerald-500/50 shadow-md px-4 py-3 rounded-xl min-h-[48px] transition-all",
+                        value:
+                          "text-base font-black text-emerald-100 whitespace-normal wrap-break-word leading-tight drop-shadow-sm",
+                        innerWrapper: "gap-2",
+                      }}
+                      renderValue={() => (
+                        <span className="text-base font-black text-emerald-100 tracking-tighter">
+                          {formData.club_id === user.club?.id
+                            ? user.club?.name || "Club Principal"
+                            : user.additional_clubs?.find(
+                                (c) => c.id === formData.club_id,
+                              )?.name || formData.club_id}
+                        </span>
+                      )}
+                      selectedKeys={[
+                        formData.club_id || user.club?.id || "primary",
+                      ]}
+                      size="sm"
+                      variant="flat"
+                      onChange={(e) => handleChange("club_id", e.target.value)}
+                    >
+                      {[
+                        {
+                          id: user.club?.id || "primary",
+                          name: user.club?.name || "Club Principal",
+                          type: "Principal",
+                        },
+                        ...(user.additional_clubs || []).map((c) => ({
+                          id: c.id,
+                          name: c.name,
+                          type: "Secondaire",
+                        })),
+                      ].map((club) => (
+                        <SelectItem
+                          key={club.id}
+                          className="data-[hover=true]:bg-emerald-500/10 data-[selected=true]:text-emerald-400"
+                          textValue={club.name}
+                        >
+                          <div className="flex flex-col py-0.5">
+                            <span className="font-bold text-sm">
+                              {club.name}
+                            </span>
+                            <span className="text-xs opacity-70">
+                              {club.type}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    <span className="text-sm font-black text-emerald-100 whitespace-normal wrap-break-word leading-tight">
+                      {user?.club?.name || t("matchForm.labels.not_linked")}
+                    </span>
+                  )}
                 </div>
               </div>
-              <Button
-                className="bg-red-950/30 text-red-400/80 font-bold border border-red-900/20 py-4"
-                size="sm"
-                variant="flat"
-              >
-                {t("matchForm.buttons.unlink")}
-              </Button>
+              {isAdmin && (
+                <Button
+                  className="bg-red-950/30 text-red-400/80 font-bold border border-red-900/20 py-4"
+                  size="sm"
+                  variant="flat"
+                >
+                  {t("matchForm.buttons.unlink")}
+                </Button>
+              )}
             </div>
 
             {/* stadium Block */}
@@ -439,7 +514,7 @@ export default function MatchForm({
                     <div className="flex items-center h-full">
                       <div className="bg-emerald-500 text-[#0f0717] text-[10px] sm:text-[11px] font-black px-2 py-1 rounded-full flex items-center gap-1 leading-none shadow-lg shadow-emerald-500/20 whitespace-nowrap">
                         <span>🏟️</span>
-                        <span className="mb-[1px]">
+                        <span className="mb-px">
                           {t("matchForm.labels.stadium")}
                         </span>
                       </div>
@@ -655,7 +730,7 @@ export default function MatchForm({
               </div>
               <div className="flex items-center gap-2 bg-violet-500/10 text-violet-400 text-[9px] font-black px-3 py-1.5 rounded-full border border-violet-500/20 group-hover:bg-violet-500/20 transition-all">
                 <span>🔒</span>
-                <span className="mb-[1px]">
+                <span className="mb-px">
                   {t(
                     "matchForm.labels.edit_in_account",
                     "Modifier dans mon compte",
@@ -676,9 +751,8 @@ export default function MatchForm({
               aria-label="Preparation"
               className="h-2"
               classNames={{
-                base: "bg-violet-900/20 rounded-full overflow-hidden",
                 indicator:
-                  "bg-gradient-to-r from-violet-600 to-violet-400 rounded-full",
+                  "bg-linear-to-r from-violet-600 to-violet-400 rounded-full",
               }}
               value={100}
             />

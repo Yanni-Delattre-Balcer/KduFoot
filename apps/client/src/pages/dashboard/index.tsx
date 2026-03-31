@@ -979,7 +979,7 @@ export default function DashboardPage() {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xl font-black text-white whitespace-normal break-words leading-tight">
+                        <h4 className="text-xl font-black text-white whitespace-normal wrap-break-word leading-tight">
                           {selectedClubProfile.requester_club_name ||
                             selectedClubProfile.host_club_name}
                         </h4>

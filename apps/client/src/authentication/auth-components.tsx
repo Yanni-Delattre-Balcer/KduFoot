@@ -232,6 +232,7 @@ interface LogoutLinkProps extends LogoutButtonProps {
     | "success"
     | "warning"
     | "danger";
+  isMobileView?: boolean;
 }
 
 /**
@@ -245,6 +246,7 @@ export const LogoutLink: FC<LogoutLinkProps> = ({
   showButtonIfNotAuthenticated = false,
   text,
   color,
+  isMobileView,
 }) => {
   const { isAuthenticated, logout, user: authUser } = useAuth();
   const { user: dbUser } = useUser();
@@ -261,22 +263,42 @@ export const LogoutLink: FC<LogoutLinkProps> = ({
     });
   }
 
+  const mobileClass =
+    "w-full flex items-center justify-between px-5 py-4 rounded-2xl border font-black text-lg transition-all active:scale-95 border-pink-500/30 bg-pink-500/10 text-pink-400 mb-2";
+
   return isAuthenticated || showButtonIfNotAuthenticated ? (
-    <>
-      <Link
-        color={color}
-        size="lg"
-        onPress={() => {
-          logout({
-            logoutParams: {
-              returnTo: window.location.origin,
-            },
-          });
-        }}
-      >
+    <Link
+      className={isMobileView ? mobileClass : ""}
+      color={isMobileView ? undefined : color}
+      size="lg"
+      onPress={() => {
+        logout({
+          logoutParams: {
+            returnTo: window.location.origin,
+          },
+        });
+      }}
+    >
+      <div className="flex items-center justify-between w-full">
         {text}
-      </Link>
-    </>
+        {isMobileView && (
+          <svg
+            className="w-5 h-5 opacity-40 ml-2"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m8.25 4.5 7.5 7.5-7.5 7.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        )}
+      </div>
+    </Link>
   ) : null;
 };
 
@@ -328,6 +350,7 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
   showButtonIfNotAuthenticated = false,
   text,
   color,
+  isMobileView,
 }) => {
   const { isAuthenticated } = useAuth();
   const { isLoading, isAccountModalOpen, setIsAccountModalOpen } = useUser();
@@ -335,18 +358,42 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
 
   if (isLoading) return null;
 
+  const accountMobileClass =
+    "w-full flex items-center justify-between px-5 py-4 rounded-2xl border font-black text-lg transition-all active:scale-95 border-white/20 bg-white/5 text-white mb-2";
+
   return isAuthenticated ? (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       <Link
-        className="font-bold cursor-pointer"
-        color="foreground"
+        className={
+          isMobileView ? accountMobileClass : "font-bold cursor-pointer"
+        }
+        color={isMobileView ? undefined : "foreground"}
         size="lg"
         onPress={() => setIsAccountModalOpen(true)}
       >
-        {t("auth.account")}
+        <div className="flex items-center justify-between w-full">
+          {t("auth.account")}
+          {isMobileView && (
+            <svg
+              className="w-5 h-5 opacity-40 ml-2"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+        </div>
       </Link>
       <LogoutLink
         color={color}
+        isMobileView={isMobileView}
         showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
         text={text}
       />
@@ -1053,7 +1100,7 @@ export const BlockedPage: FC<{ isBlocked: boolean; reason?: string }> = ({
   if (!isBlocked) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black p-4 sm:p-6">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black p-4 sm:p-6">
       <div className="max-w-lg w-full bg-zinc-900 border-2 border-red-600 shadow-2xl shadow-red-900/40 rounded-3xl p-6 sm:p-10 text-center flex flex-col items-center gap-5 animate-appearance-in">
         {/* Icon */}
         <div className="p-4 rounded-full bg-red-600/20 border-2 border-red-600/40">

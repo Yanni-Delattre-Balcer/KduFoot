@@ -38,7 +38,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
     user: dbUser,
     updateUser,
     linkClub,
-    unlinkClub,
     refetch,
     resetCalendarSync,
   } = useUser();
@@ -56,6 +55,23 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
   const [stadiumAddress, setStadiumAddress] = useState("");
   const [additionalStadiumAddresses, setAdditionalStadiumAddresses] = useState<
     Record<string, string>
+  >({});
+  const [additionalHqAddresses, setAdditionalHqAddresses] = useState<
+    Record<string, string>
+  >({});
+  const [additionalNames, setAdditionalNames] = useState<
+    Record<string, string>
+  >({});
+  const [additionalSportsProfiles, setAdditionalSportsProfiles] = useState<
+    Record<
+      string,
+      {
+        category?: string;
+        level?: string;
+        home_jersey_color?: string;
+        away_jersey_color?: string;
+      }
+    >
   >({});
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -99,20 +115,120 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         localData.stadiumAddress || dbUser.stadium_address || "",
       );
 
-      // Initialize additional stadium addresses
-      const addAddr: Record<string, string> = {};
+      // Initialize additional stadium, hq addresses and sports profiles
+      const addStadiumAddr: Record<string, string> = {};
+      const addHqAddr: Record<string, string> = {};
+      const addNames: Record<string, string> = {};
+      const addSports: Record<
+        string,
+        {
+          category?: string;
+          level?: string;
+          home_jersey_color?: string;
+          away_jersey_color?: string;
+        }
+      > = {};
 
       (dbUser.additional_sirets || []).forEach((item) => {
         const siret = typeof item === "string" ? item : item.siret;
-        const addr = typeof item === "object" ? item.stadium_address : "";
+        const stadiumAddr =
+          typeof item === "object" ? item.stadium_address : "";
+        const hqAddr = typeof item === "object" ? item.hq_address : "";
 
-        addAddr[siret] = addr || "";
+        addStadiumAddr[siret] = stadiumAddr || "";
+        addHqAddr[siret] = hqAddr || "";
+        addNames[siret] = (item as any).name || "";
+        addSports[siret] = {
+          category: (item as any).category || "",
+          level: (item as any).level || "",
+          home_jersey_color: (item as any).home_jersey_color || "",
+          away_jersey_color: (item as any).away_jersey_color || "",
+        };
       });
-      setAdditionalStadiumAddresses(addAddr);
+      setAdditionalStadiumAddresses(addStadiumAddr);
+      setAdditionalHqAddresses(addHqAddr);
+      setAdditionalNames(addNames);
+      setAdditionalSportsProfiles(addSports);
 
       setIsInitialized(true);
     }
   }, [dbUser, isInitialized]);
+
+  // Sync back from dbUser even after initialization if the server has more up-to-date data
+  // (e.g. after a Save & refetch)
+  useEffect(() => {
+    if (isInitialized && dbUser && !isSaving) {
+      // Identity
+      if (dbUser.firstname && dbUser.firstname !== firstname)
+        setFirstname(dbUser.firstname);
+      if (dbUser.lastname && dbUser.lastname !== lastname)
+        setLastname(dbUser.lastname);
+
+      // Sports Profile
+      if (dbUser.license_id && dbUser.license_id !== licenseId)
+        setLicenseId(dbUser.license_id);
+      if (dbUser.category && dbUser.category !== category)
+        setCategory(dbUser.category);
+      if (dbUser.level && dbUser.level !== level) setLevel(dbUser.level);
+      if (
+        dbUser.home_jersey_color &&
+        dbUser.home_jersey_color !== homeJerseyColor
+      )
+        setHomeJerseyColor(dbUser.home_jersey_color); // Sync maillot domicile
+      if (
+        dbUser.away_jersey_color &&
+        dbUser.away_jersey_color !== awayJerseyColor
+      )
+        setAwayJerseyColor(dbUser.away_jersey_color); // Sync maillot extérieur
+
+      // Main Club
+      if (dbUser.phone && dbUser.phone !== phone) setPhone(dbUser.phone);
+      if (dbUser.stadium_address && dbUser.stadium_address !== stadiumAddress)
+        setStadiumAddress(dbUser.stadium_address);
+
+      // Additional Clubs
+      (dbUser.additional_sirets || []).forEach((item) => {
+        const itemObj = item as any;
+        const siret = typeof item === "string" ? item : itemObj.siret;
+
+        if (typeof item === "object" && item !== null) {
+          if (itemObj.stadium_address) {
+            setAdditionalStadiumAddresses((prev) => ({
+              ...prev,
+              [siret]: String(itemObj.stadium_address),
+            }));
+          }
+          if (itemObj.hq_address) {
+            setAdditionalHqAddresses((prev) => ({
+              ...prev,
+              [siret]: String(itemObj.hq_address),
+            }));
+          }
+          if (itemObj.name) {
+            setAdditionalNames((prev) => ({
+              ...prev,
+              [siret]: String(itemObj.name),
+            }));
+          }
+          setAdditionalSportsProfiles((prev) => ({
+            ...prev,
+            [siret]: {
+              category: itemObj.category || prev[siret]?.category || "",
+              level: itemObj.level || prev[siret]?.level || "",
+              home_jersey_color:
+                itemObj.home_jersey_color ||
+                prev[siret]?.home_jersey_color ||
+                "",
+              away_jersey_color:
+                itemObj.away_jersey_color ||
+                prev[siret]?.away_jersey_color ||
+                "",
+            },
+          }));
+        }
+      });
+    }
+  }, [dbUser, isSaving, isInitialized]);
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -218,6 +334,47 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
       newErrors.siret = t("account.errors.siret_required");
     }
 
+    // Validation des clubs secondaires
+    if (dbUser?.additional_clubs && dbUser.additional_clubs.length > 0) {
+      dbUser.additional_clubs.forEach((club) => {
+        const s = club.siret;
+
+        if (
+          !additionalStadiumAddresses[s] ||
+          additionalStadiumAddresses[s].trim() === ""
+        ) {
+          newErrors[`stadium_address_${s}`] = t(
+            "account.errors.stadium_required",
+          );
+        }
+
+        const profile = additionalSportsProfiles[s];
+
+        if (!profile?.category) {
+          newErrors[`category_${s}`] = t("account.errors.category_required");
+        }
+        if (!profile?.level) {
+          newErrors[`level_${s}`] = t("account.errors.level_required");
+        }
+        if (
+          !profile?.home_jersey_color ||
+          profile.home_jersey_color.trim() === ""
+        ) {
+          newErrors[`home_jersey_color_${s}`] = t(
+            "account.errors.home_jersey_required",
+          );
+        }
+        if (
+          !profile?.away_jersey_color ||
+          profile.away_jersey_color.trim() === ""
+        ) {
+          newErrors[`away_jersey_color_${s}`] = t(
+            "account.errors.away_jersey_required",
+          );
+        }
+      });
+    }
+
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
@@ -263,9 +420,22 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
         additional_sirets: (dbUser?.additional_sirets || []).map((item) => {
           const siret = typeof item === "string" ? item : item.siret;
 
+          // Merge existing data with new addresses and profile info
+          // Note: In a real app we'd also manage category/level/jerseys here
+          const existingObj = typeof item === "object" ? item : {};
+
           return {
+            ...existingObj,
             siret,
             stadium_address: additionalStadiumAddresses[siret] || "",
+            hq_address: additionalHqAddresses[siret] || "",
+            name: additionalNames[siret] || "",
+            category: additionalSportsProfiles[siret]?.category || "",
+            level: additionalSportsProfiles[siret]?.level || "",
+            home_jersey_color:
+              additionalSportsProfiles[siret]?.home_jersey_color || "",
+            away_jersey_color:
+              additionalSportsProfiles[siret]?.away_jersey_color || "",
           };
         }),
         picture: previewUrl || dbUser?.picture || authUser.picture,
@@ -273,10 +443,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
 
       // Clear local storage after successful save
       localStorage.removeItem(STORAGE_KEY);
-
-      // Refresh data immediately
-      await refetch();
-      await mutate("/api/me/context");
 
       addToast({
         title: t("accountModal.alerts.update_success", "Profil mis à jour"),
@@ -545,7 +711,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
               errors={errors}
               firstname={firstname}
               handlePhoneChange={handlePhoneChange}
-              hqAddress={dbUser?.club?.address || ""}
               lastname={lastname}
               licenseId={licenseId}
               phone={phone}
@@ -553,8 +718,6 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
               setFirstname={setFirstname}
               setLastname={setLastname}
               setLicenseId={setLicenseId}
-              setStadiumAddress={setStadiumAddress}
-              stadiumAddress={stadiumAddress}
             />
             <SportsProfileSection
               awayJerseyColor={awayJerseyColor}
@@ -568,23 +731,69 @@ export const AccountSettings = ({ onSaveSuccess }: AccountSettingsProps) => {
               setErrors={setErrors}
               setHomeJerseyColor={setHomeJerseyColor}
               setLevel={setLevel}
+              title={t(
+                "account.fields.main_club_profile",
+                "Profil Sportif - Club Principal",
+              )}
             />{" "}
+            {dbUser?.additional_clubs?.map((club) => (
+              <SportsProfileSection
+                key={club.id}
+                awayJerseyColor={
+                  additionalSportsProfiles[club.siret]?.away_jersey_color || ""
+                }
+                baseId={`${baseId}_${club.siret}`}
+                category={additionalSportsProfiles[club.siret]?.category || ""}
+                errors={errors}
+                homeJerseyColor={
+                  additionalSportsProfiles[club.siret]?.home_jersey_color || ""
+                }
+                level={additionalSportsProfiles[club.siret]?.level || ""}
+                setAwayJerseyColor={(v) =>
+                  setAdditionalSportsProfiles((prev) => ({
+                    ...prev,
+                    [club.siret]: { ...prev[club.siret], away_jersey_color: v },
+                  }))
+                }
+                setCategory={(v) =>
+                  setAdditionalSportsProfiles((prev) => ({
+                    ...prev,
+                    [club.siret]: { ...prev[club.siret], category: v },
+                  }))
+                }
+                setErrors={setErrors}
+                setHomeJerseyColor={(v) =>
+                  setAdditionalSportsProfiles((prev) => ({
+                    ...prev,
+                    [club.siret]: { ...prev[club.siret], home_jersey_color: v },
+                  }))
+                }
+                setLevel={(v) =>
+                  setAdditionalSportsProfiles((prev) => ({
+                    ...prev,
+                    [club.siret]: { ...prev[club.siret], level: v },
+                  }))
+                }
+                title={t("account.sections.sports_profile_secondary")}
+              />
+            ))}
           </div>
 
           <ClubSection
+            additionalHqAddresses={additionalHqAddresses}
             additionalStadiumAddresses={additionalStadiumAddresses}
-            authUser={authUser}
             baseId={baseId}
             dbUser={dbUser}
             errors={errors}
             handleLinkSiret={handleLinkSiret}
+            hqAddress={dbUser?.club?.address || ""}
             isSaving={isSaving}
             setAdditionalStadiumAddresses={setAdditionalStadiumAddresses}
             setErrors={setErrors}
-            setIsSaving={setIsSaving}
             setSiret={setSiret}
+            setStadiumAddress={setStadiumAddress}
             siret={siret}
-            unlinkClub={unlinkClub}
+            stadiumAddress={stadiumAddress}
           />
 
           <SyncSection

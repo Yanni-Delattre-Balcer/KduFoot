@@ -23,7 +23,20 @@ export interface User {
   block_reason?: string | null;
   calendar_token?: string | null;
   additional_sirets?:
-    | (string | { siret: string; stadium_address?: string | null })[]
+    | (
+        | string
+        | {
+            siret: string;
+            name?: string;
+            category?: string;
+            level?: string;
+            home_jersey_color?: string;
+            away_jersey_color?: string;
+            stadium_address?: string | null;
+            hq_address?: string | null;
+            pitch_type?: string | null;
+          }
+      )[]
     | null;
   additional_clubs?:
     | {
@@ -36,6 +49,12 @@ export interface User {
         latitude?: number | null;
         longitude?: number | null;
         stadium_address?: string | null;
+        hq_address?: string | null;
+        category?: string | null;
+        level?: string | null;
+        home_jersey_color?: string | null;
+        away_jersey_color?: string | null;
+        pitch_type?: string | null;
       }[]
     | null;
   created_at: number;

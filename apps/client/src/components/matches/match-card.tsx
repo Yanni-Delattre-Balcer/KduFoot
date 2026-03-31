@@ -94,7 +94,7 @@ export const MatchCard = React.memo(function MatchCard({
             <h4
               className={`font-bold text-xl ${
                 diff.name ? "text-red-500" : "text-default-900"
-              } group-hover:text-violet-200 transition-colors tracking-tight break-words whitespace-normal w-full pr-8`}
+              } group-hover:text-violet-200 transition-colors tracking-tight wrap-break-word whitespace-normal w-full pr-8`}
             >
               {isMasked
                 ? t("matchesPage.masked_club")
@@ -104,7 +104,7 @@ export const MatchCard = React.memo(function MatchCard({
               <h5
                 className={`font-bold text-sm ${
                   diff.name ? "text-red-400" : "text-fuchsia-400"
-                } group-hover:text-fuchsia-300 transition-colors break-words whitespace-normal w-full pb-1 pr-8`}
+                } group-hover:text-fuchsia-300 transition-colors wrap-break-word whitespace-normal w-full pb-1 pr-8`}
               >
                 {match.name}
               </h5>

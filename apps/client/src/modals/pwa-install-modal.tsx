@@ -56,7 +56,7 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
       backdrop="blur"
       classNames={{
         base: "bg-transparent shadow-none border-none",
-        wrapper: "z-[10000]",
+        wrapper: "z-10000",
       }}
       isDismissable={false}
       isKeyboardDismissDisabled={true}
@@ -69,9 +69,9 @@ export const PwaInstallModal = ({ isOpen, onClose }: PwaInstallModalProps) => {
           {/* Standard Install Content */}
           {!showIOSHint && !showPCHint && (
             <Card className="bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-0 overflow-hidden relative w-full">
-              <div className="h-1.5 w-full bg-gradient-to-r from-primary via-primary/50 to-primary" />
+              <div className="h-1.5 w-full bg-linear-to-r from-primary via-primary/50 to-primary" />
               <div className="p-6 sm:p-8 flex flex-col items-center text-center gap-6">
-                <div className="bg-black rounded-[2rem] p-4 border border-white/10 shadow-2xl relative group">
+                <div className="bg-black rounded-4xl p-4 border border-white/10 shadow-2xl relative group">
                   <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-75 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <img
                     alt="Kdufoot"
