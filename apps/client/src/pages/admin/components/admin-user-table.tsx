@@ -36,8 +36,8 @@ export const AdminUserTable = ({
       isHeaderSticky
       aria-label={t("adminUsersPage.pageTitle")}
       classNames={{
-        base: "max-h-[700px] overflow-x-auto",
-        table: "min-w-[800px]",
+        base: "max-h-[700px] overflow-x-hidden",
+        table: "min-w-full",
       }}
     >
       <TableHeader>

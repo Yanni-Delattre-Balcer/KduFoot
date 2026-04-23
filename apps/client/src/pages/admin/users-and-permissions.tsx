@@ -176,7 +176,7 @@ export default function UsersAndPermissionsPage() {
   };
 
   return (
-    <DefaultLayout maxWidth="max-w-7xl">
+    <DefaultLayout maxWidth="max-w-full">
       <div className="py-8 animate-in fade-in duration-700">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
           <div>
