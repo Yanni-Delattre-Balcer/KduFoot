@@ -3,13 +3,14 @@ import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
 
+import DefaultLayout from "../../layouts/default";
+
 import { useAdminUsers } from "./hooks/use-admin-users";
 import { AdminUserTable } from "./components/admin-user-table";
 import { AdminUserCard } from "./components/admin-user-card";
 import { UserProfileModal } from "./components/user-profile-modal";
 import { BanReasonModal } from "./components/ban-reason-modal";
 import { getKdufootPermissions } from "./utils/admin-helpers";
-import DefaultLayout from "../../layouts/default";
 
 export default function UsersAndPermissionsPage() {
   const {
