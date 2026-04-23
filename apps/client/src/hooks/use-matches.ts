@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback, useEffect } from "react";
 
 import { matchService } from "../services/matches";
+import { getApiUrl } from "../config/api";
 import {
   Match,
   CreateMatchDto,
@@ -48,20 +49,35 @@ export function useMatches(filters?: MatchFilters) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
+    const response = await fetch(getApiUrl(url), {
       headers,
     });
 
+    const contentType = response.headers.get("Content-Type");
+
     if (!response.ok) {
-      const errorData = (await response.json().catch(() => ({}))) as {
-        error?: string;
-      };
-      const error = new Error(
-        errorData.error || "Failed to fetch matches",
-      ) as FetchError;
+      let errorMessage = "Failed to fetch matches";
+
+      if (contentType?.includes("application/json")) {
+        const errorData = await response.json().catch(() => ({}));
+
+        errorMessage = errorData.error || errorMessage;
+      } else {
+        // Handle HTML responses (e.g. SPA fallback)
+        errorMessage = `Server Error: ${response.status} ${response.statusText}`;
+      }
+
+      const error = new Error(errorMessage) as FetchError;
 
       error.status = response.status;
       throw error;
+    }
+
+    if (!contentType?.includes("application/json")) {
+      throw new Error(
+        "Invalid response format: Expected JSON but received " +
+          (contentType || "unknown"),
+      );
     }
 
     return response.json();
@@ -329,20 +345,34 @@ export function useMatch(id: string | null) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
+    const response = await fetch(getApiUrl(url), {
       headers,
     });
 
+    const contentType = response.headers.get("Content-Type");
+
     if (!response.ok) {
-      const errorData = (await response.json().catch(() => ({}))) as {
-        error?: string;
-      };
-      const error = new Error(
-        errorData.error || "Failed to fetch match",
-      ) as FetchError;
+      let errorMessage = "Failed to fetch match";
+
+      if (contentType?.includes("application/json")) {
+        const errorData = await response.json().catch(() => ({}));
+
+        errorMessage = errorData.error || errorMessage;
+      } else {
+        errorMessage = `Server Error: ${response.status} ${response.statusText}`;
+      }
+
+      const error = new Error(errorMessage) as FetchError;
 
       error.status = response.status;
       throw error;
+    }
+
+    if (!contentType?.includes("application/json")) {
+      throw new Error(
+        "Invalid response format: Expected JSON but received " +
+          (contentType || "unknown"),
+      );
     }
 
     return response.json();
@@ -487,13 +517,10 @@ export function useMatch(id: string | null) {
   const adminDeleteMatch = useCallback(async () => {
     if (!id) return;
     const token = await getAccessTokenSilently();
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/admin/matches/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    );
+    const res = await fetch(getApiUrl(`/api/admin/matches/${id}`), {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

@@ -114,8 +114,8 @@ export default defineConfig(({ mode }) => {
         env.AUTH0_AUDIENCE,
       ),
       "import.meta.env.AUTH0_SCOPE": JSON.stringify(env.AUTH0_SCOPE),
-      "import.meta.env.API_BASE_URL": JSON.stringify(env.API_BASE_URL),
-      "import.meta.env.VITE_API_URL": JSON.stringify(env.VITE_API_URL || ""),
+      "import.meta.env.API_BASE_URL": JSON.stringify(env.VITE_API_URL || env.API_BASE_URL || ""),
+      "import.meta.env.VITE_API_URL": JSON.stringify(env.VITE_API_URL || env.API_BASE_URL || ""),
       // Dex environment variables
       "import.meta.env.DEX_AUTHORITY": JSON.stringify(env.DEX_AUTHORITY),
       "import.meta.env.DEX_CLIENT_ID": JSON.stringify(env.DEX_CLIENT_ID),

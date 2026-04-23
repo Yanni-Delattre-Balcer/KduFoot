@@ -15,6 +15,7 @@ import { Button } from "@heroui/button";
 import { Tooltip } from "@heroui/tooltip";
 import { Link } from "@heroui/link";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "@/config/api";
 
 import { SiteLoading } from "../components/site-loading";
 
@@ -530,9 +531,8 @@ export const useSecuredApi = () => {
    */
   const getAuth0ManagementToken =
     async (): Promise<Auth0ManagementTokenApiResponse> => {
-      const apiBase = import.meta.env.API_BASE_URL || "";
       const result = await postJson<Auth0ManagementTokenApiResponse>(
-        `${apiBase}/api/__auth0/token`,
+        getApiUrl("/api/__auth0/token"),
         {},
       );
 
@@ -618,8 +618,8 @@ export const useSecuredApi = () => {
     permissionNames: string[],
   ): Promise<void> => {
     if (permissionNames.length === 0) return;
-    const apiBase = import.meta.env.API_BASE_URL || "";
-    const audience = import.meta.env.AUTH0_AUDIENCE || apiBase;
+    const audience =
+      import.meta.env.AUTH0_AUDIENCE || import.meta.env.API_BASE_URL;
     const encodedId = encodeURIComponent(userId);
 
     const permissionsPayload = permissionNames.map((name) => ({

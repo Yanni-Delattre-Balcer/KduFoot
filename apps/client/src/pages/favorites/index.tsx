@@ -35,19 +35,19 @@ export default function FavoritesPage() {
   const favExercises = useMemo(() => {
     if (!isAuthenticated || !exercises || !favorites?.exercises) return [];
 
-    return exercises.filter((e) => favorites.exercises.includes(e.id));
+    return exercises.filter((e) => e && favorites.exercises.includes(e.id));
   }, [exercises, favorites?.exercises, isAuthenticated]);
 
   const favMatches = useMemo(() => {
     if (!isAuthenticated || !matches || !favorites?.matches) return [];
 
-    return matches.filter((m) => favorites.matches.includes(m.id));
+    return matches.filter((m) => m && favorites.matches.includes(m.id));
   }, [matches, favorites?.matches, isAuthenticated]);
 
   const favTournaments = useMemo(() => {
     if (!isAuthenticated || !matches || !favorites?.tournaments) return [];
 
-    return matches.filter((m) => favorites.tournaments.includes(m.id));
+    return matches.filter((m) => m && favorites.tournaments.includes(m.id));
   }, [matches, favorites?.tournaments, isAuthenticated]);
 
   return (

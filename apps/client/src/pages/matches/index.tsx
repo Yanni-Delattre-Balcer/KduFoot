@@ -21,7 +21,7 @@ import { useMatchesNavigation } from "@/hooks/use-matches-navigation";
 import { useMatchesCalendar } from "@/hooks/use-matches-calendar";
 import { useMatchesFilters } from "@/hooks/use-matches-filters";
 
-// New Components
+import { getApiUrl } from "@/config/api";
 import { SearchHero } from "@/components/matches/list/search-hero";
 import { FilterSection } from "@/components/matches/list/filter-section";
 import { CalendarView } from "@/components/matches/list/calendar-view";
@@ -174,13 +174,10 @@ export default function MatchesPage() {
         const token = await getAccessToken({
           authorizationParams: { audience: import.meta.env.AUTH0_AUDIENCE },
         });
-        const res = await fetch(
-          `${import.meta.env.API_BASE_URL}/api/admin/matches/${matchId}`,
-          {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        const res = await fetch(getApiUrl(`/api/admin/matches/${matchId}`), {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         if (!res.ok) throw new Error("Erreur lors de la suppression");
         addToast({
@@ -305,10 +302,16 @@ export default function MatchesPage() {
                       onPress={() => handleDayClick(selectedDate)}
                     >
                       ✕{" "}
-                      {new Date(selectedDate + "T00:00:00").toLocaleDateString(
-                        i18n.language,
-                        { day: "numeric", month: "short" },
-                      )}
+                      {(() => {
+                        const d = new Date(selectedDate + "T00:00:00");
+
+                        return isNaN(d.getTime())
+                          ? selectedDate
+                          : d.toLocaleDateString(i18n.language, {
+                              day: "numeric",
+                              month: "short",
+                            });
+                      })()}
                     </Button>
                   )}
                 </div>
