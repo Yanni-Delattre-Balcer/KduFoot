@@ -534,14 +534,29 @@ export const setupAdminUserRoutes = (router: Router, env: Env, ctx: ExecutionCon
 
         let primary_name = null;
         if (user.siret) {
-            const validation = await clubService.validateSiret(user.siret);
-            primary_name = validation.clubName || user.siret;
+            const dbClub = await env.DB.prepare('SELECT name FROM clubs WHERE siret = ?').bind(user.siret).first<{ name: string }>();
+            if (dbClub) {
+                primary_name = dbClub.name;
+            } else {
+                const validation = await clubService.validateSiret(user.siret);
+                primary_name = validation.clubName || user.siret;
+            }
         }
 
         const additionalWithNames = await Promise.all(additional_sirets_raw.map(async (s: unknown) => {
             const sObj = s as { siret?: string; stadium_address?: string };
             const currentSiret = typeof s === 'string' ? s : (sObj.siret || '');
             const currentStadium = typeof s === 'object' && s !== null ? sObj.stadium_address : null;
+
+            const dbClub = await env.DB.prepare('SELECT name FROM clubs WHERE siret = ?').bind(currentSiret).first<{ name: string }>();
+            if (dbClub) {
+                return {
+                    siret: currentSiret,
+                    name: dbClub.name,
+                    stadium_address: currentStadium
+                };
+            }
+
             const validation = await clubService.validateSiret(currentSiret);
             return {
                 siret: currentSiret,

@@ -12,6 +12,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import {
   useSecuredApi,
   updateUserInCache,
+  clearUserListCache,
 } from "@/authentication/auth-components";
 import { useUser } from "@/hooks/use-user";
 import { Permission } from "@/types/permissions";
@@ -331,6 +332,8 @@ export function useAdminUsers() {
         variant: "solid",
       });
 
+      clearUserListCache();
+
       setUsers((prev) =>
         prev.map((u) => {
           if (u.user_id !== userId) return u;
@@ -391,6 +394,7 @@ export function useAdminUsers() {
       }
 
       await deleteAuth0User(mgmtToken, userId);
+      clearUserListCache();
       setUsers((prev) => prev.filter((u) => u.user_id !== userId));
       addToast({
         title: t("success"),
