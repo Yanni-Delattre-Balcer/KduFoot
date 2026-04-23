@@ -15,7 +15,6 @@ import {
 } from "@/authentication/auth-components";
 import { useUser } from "@/hooks/use-user";
 import { Permission } from "@/types/permissions";
-import { getApiUrl } from "@/config/api";
 
 const SUPER_ADMIN_EMAIL = "yannidelattrebalcer.artois@gmail.com";
 const SUPREME_MASTER_ID = "6f62d717-2136-49d7-8c51-fee07eaeebce";
@@ -171,7 +170,7 @@ export function useAdminUsers() {
     try {
       const token = await getAccessTokenSilently();
       const res = await fetch(
-        getApiUrl(`/api/admin/users/${encodeURIComponent(userId)}/sirets`),
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(userId)}/sirets`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -377,7 +376,7 @@ export function useAdminUsers() {
     try {
       const token = await getAccessTokenSilently();
       const res = await fetch(
-        getApiUrl(`/api/admin/users/${encodeURIComponent(userId)}`),
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(userId)}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -473,7 +472,7 @@ export function useAdminUsers() {
     try {
       const token = await getAccessTokenSilently();
       const res = await fetch(
-        getApiUrl(`/api/admin/users/${encodeURIComponent(selectedUserId)}`),
+        `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}`,
         {
           method: "PATCH",
           headers: {

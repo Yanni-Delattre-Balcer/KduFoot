@@ -18,7 +18,6 @@ import {
   WebSocketStatus,
   BanStatus,
 } from "@/hooks/use-websocket";
-import { getApiUrl } from "@/config/api";
 
 interface UserContextType {
   user: User | null;
@@ -100,7 +99,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const fetcher = useCallback(async () => {
     if (!isAuthenticated) return null;
     try {
-      return await getJson<ContextResponse>(getApiUrl(CONTEXT_KEY));
+      return await getJson<ContextResponse>(
+        `${import.meta.env.API_BASE_URL}${CONTEXT_KEY}`,
+      );
     } catch (error: unknown) {
       if (
         error &&
@@ -219,9 +220,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const isAdmin = user?.email === "yannidelattrebalcer.artois@gmail.com";
 
   const linkClub = async (siret: string) => {
-    const resData = await postJson(getApiUrl("/api/users/link-club"), {
-      siret,
-    });
+    const resData = await postJson(
+      `${import.meta.env.API_BASE_URL}/api/users/link-club`,
+      { siret },
+    );
 
     await boundMutate();
 
@@ -229,12 +231,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const unlinkClub = async () => {
-    await postJson(getApiUrl("/api/users/unlink-club"), {});
+    await postJson(`${import.meta.env.API_BASE_URL}/api/users/unlink-club`, {});
     await boundMutate();
   };
 
   const updateUser = async (data: Partial<User>) => {
-    const resData = await putJson<any>(getApiUrl("/api/users/me"), data);
+    const resData = await putJson<any>(
+      `${import.meta.env.API_BASE_URL}/api/users/me`,
+      data,
+    );
 
     if (resData?.success && resData?.user) {
       // Optimistic update: preserve current notifications while updating user
@@ -267,7 +272,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     reason?: string,
   ) => {
     await patchJson(
-      getApiUrl(`/api/admin/users/${encodeURIComponent(userId)}/block`),
+      `${import.meta.env.API_BASE_URL}/api/admin/users/${encodeURIComponent(userId)}/block`,
       { is_blocked: isBlocked, block_reason: reason },
     );
     await mutate(CONTEXT_KEY);

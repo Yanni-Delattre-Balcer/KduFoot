@@ -1,326 +1,73 @@
 /**
  * Copyright (c) 2024-2026 Ronan LE MEILLAT
  * License: AGPL-3.0-or-later
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Button } from "@heroui/button";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+
 export const PageNotFound = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
   return (
-    <>
-      <meta charSet="utf-8" />
-      <meta content="width=device-width, initial-scale=1" name="viewport" />
-      <html lang="en">
-        <head>
-          <title>404 - Not Found</title>
-          <style>{`
-            body {
-                background-color: black;
-                margin: 0;
-                height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-    
-            #svg404 {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-            }
-        `}</style>
-        </head>
-
-        <body>
-          <svg
-            id="svg404"
-            viewBox="0 0 400 400"
-            xmlns="http://www.w3.org/2000/svg"
+    <div className="min-h-[80vh] flex flex-col items-center justify-center p-6 text-center">
+      <div className="relative mb-12 animate-appearance-in">
+        <svg
+          className="w-64 h-64 sm:w-80 sm:h-80 opacity-20"
+          viewBox="0 0 400 400"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect height="100%" style={{ fill: "transparent" }} width="100%" />
+          <text
+            dominantBaseline="middle"
+            fill="currentColor"
+            fontFamily="Arial"
+            fontSize="120"
+            fontWeight="bold"
+            textAnchor="middle"
+            x="50%"
+            y="55%"
           >
-            <style type="text/css">
-              {`text {
-                    font-family: Arial, Helvetica, sans-serif;
-                }`}
-            </style>
-            <rect height="100%" style={{ fill: "black" }} width="100%" />
+            404
+          </text>
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <h1 className="text-4xl sm:text-6xl font-black text-white">LOST</h1>
+          <p className="text-default-500 font-medium tracking-widest uppercase">
+            Perdu • Perdido • Verloren
+          </p>
+        </div>
+      </div>
 
-            <text
-              fill="rgb(255,255,255)"
-              font-family="Arial"
-              font-size="60"
-              x="165"
-              y="210"
-            >
-              lost
-            </text>
-            <text
-              fill="rgb(211,211,211)"
-              font-family="Arial"
-              font-size="14"
-              x="20"
-              y="40"
-            >
-              perdu
-            </text>
-            <text
-              fill="rgb(169,169,169)"
-              font-family="Arial"
-              font-size="18"
-              x="60"
-              y="74"
-            >
-              kadonnut
-            </text>
-            <text
-              fill="rgb(192,192,192)"
-              font-family="Arial"
-              font-size="24"
-              x="30"
-              y="380"
-            >
-              verloren
-            </text>
-            <text
-              fill="rgb(128,128,128)"
-              font-family="Arial"
-              font-size="20"
-              x="288"
-              y="350"
-            >
-              потерянный
-            </text>
-            <text
-              fill="rgb(105,105,105)"
-              font-family="Arial"
-              font-size="12"
-              x="220"
-              y="80"
-            >
-              失われた
-            </text>
-            <text
-              fill="rgb(169,169,169)"
-              font-family="Arial"
-              font-size="8"
-              x="220"
-              y="320"
-            >
-              สูญหาย
-            </text>
-            <text
-              fill="rgb(211,211,211)"
-              font-family="Arial"
-              font-size="22"
-              x="180"
-              y="143"
-            >
-              丢失
-            </text>
-            <text
-              fill="rgb(105,105,105)"
-              font-family="Arial"
-              font-size="10"
-              x="260"
-              y="270"
-            >
-              잃어버린
-            </text>
-            <text
-              fill="rgb(192,192,192)"
-              font-family="Arial"
-              font-size="16"
-              x="150"
-              y="30"
-            >
-              فقد
-            </text>
-            <text
-              fill="rgb(169,169,169)"
-              font-family="Arial"
-              font-size="18"
-              x="30"
-              y="230"
-            >
-              אבד
-            </text>
-            <text
-              fill="rgb(128,128,128)"
-              font-family="Arial"
-              font-size="20"
-              x="312"
-              y="180"
-            >
-              χαμένος
-            </text>
-            <text
-              fill="rgb(105,105,105)"
-              font-family="Arial"
-              font-size="24"
-              x="40"
-              y="170"
-            >
-              förlorade
-            </text>
-            <text
-              fill="rgb(192,192,192)"
-              font-family="Arial"
-              font-size="18"
-              x="140"
-              y="340"
-            >
-              tapt
-            </text>
-            <text
-              fill="rgb(128,128,128)"
-              font-family="Arial"
-              font-size="14"
-              x="310"
-              y="100"
-            >
-              tabt
-            </text>
-            <text
-              fill="rgb(211,211,211)"
-              font-family="Arial"
-              font-size="18"
-              x="330"
-              y="40"
-            >
-              galduta
-            </text>
-            <text
-              fill="rgb(169,169,169)"
-              font-family="Arial"
-              font-size="12"
-              x="40"
-              y="90"
-            >
-              elveszett
-            </text>
-            <text
-              fill="rgb(192,192,192)"
-              font-family="Arial"
-              font-size="20"
-              x="80"
-              y="310"
-            >
-              missed
-            </text>
-            <text
-              fill="rgb(128,128,128)"
-              font-family="Arial"
-              font-size="10"
-              x="240"
-              y="370"
-            >
-              изгубен
-            </text>
-            <text
-              fill="rgb(105,105,105)"
-              font-family="Arial"
-              font-size="14"
-              x="130"
-              y="110"
-            >
-              खो गया
-            </text>
-            <text
-              fill="rgb(169,169,169)"
-              font-family="Arial"
-              font-size="22"
-              x="240"
-              y="250"
-            >
-              शेर हो गया
-            </text>
-            <text
-              fill="rgb(211,211,211)"
-              font-family="Arial"
-              font-size="18"
-              x="80"
-              y="195"
-            >
-              stracony
-            </text>
-            <text
-              fill="rgb(105,105,105)"
-              font-family="Arial"
-              font-size="10"
-              x="270"
-              y="220"
-            >
-              borta
-            </text>
-            <text
-              fill="rgb(192,192,192)"
-              font-family="Arial"
-              font-size="16"
-              x="130"
-              y="50"
-            >
-              kayboldu
-            </text>
-            <text
-              fill="rgb(169,169,169)"
-              font-family="Arial"
-              font-size="24"
-              x="80"
-              y="270"
-            >
-              tévedt
-            </text>
-            <text
-              fill="rgb(128,128,128)"
-              font-family="Arial"
-              font-size="20"
-              x="270"
-              y="150"
-            >
-              vermisst
-            </text>
-            <text
-              fill="rgb(105,105,105)"
-              font-family="Arial"
-              font-size="24"
-              x="80"
-              y="130"
-            >
-              perdido
-            </text>
-            <text
-              fill="rgb(192,192,192)"
-              font-family="Arial"
-              font-size="10"
-              x="340"
-              y="290"
-            >
-              felizg
-            </text>
-            <text
-              fill="rgb(128,128,128)"
-              font-family="Arial"
-              font-size="14"
-              x="240"
-              y="130"
-            >
-              verloren
-            </text>
-          </svg>
-          ();
-        </body>
-      </html>
-    </>
+      <div className="max-w-md space-y-6">
+        <h2 className="text-xl sm:text-2xl font-bold">
+          {t("error.404_title", "Cette page n'existe pas ou a été déplacée.")}
+        </h2>
+        <p className="text-default-400">
+          {t(
+            "error.404_desc",
+            "Il semblerait que vous ayez dribblé un peu trop loin du terrain.",
+          )}
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          <Button
+            className="font-bold h-12 px-8 rounded-2xl bg-white text-black hover:bg-default-100 transition-all"
+            onPress={() => navigate("/")}
+          >
+            {t("error_boundary.go_home", "Retour à l'accueil")}
+          </Button>
+          <Button
+            className="font-bold h-12 px-8 rounded-2xl border-white/20 hover:bg-white/5 transition-all"
+            variant="bordered"
+            onPress={() => navigate(-1)}
+          >
+            {t("common.back", "Page précédente")}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };

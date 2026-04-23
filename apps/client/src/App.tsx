@@ -191,14 +191,7 @@ function App() {
                 }
                 path="/gdpr"
               />
-              <Route
-                element={
-                  <PageWrapper>
-                    <PageNotFound />
-                  </PageWrapper>
-                }
-                path="*"
-              />
+
               {showVideoAnalysis && (
                 <>
                   <Route
@@ -342,6 +335,14 @@ function App() {
                   </PageWrapper>
                 }
                 path="/admin/users"
+              />
+              <Route
+                element={
+                  <PageWrapper>
+                    <PageNotFound />
+                  </PageWrapper>
+                }
+                path="*"
               />
             </Routes>
           </AnimatePresence>
