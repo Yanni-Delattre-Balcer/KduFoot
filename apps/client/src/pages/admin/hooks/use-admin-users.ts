@@ -75,6 +75,7 @@ export function useAdminUsers() {
   const [adminBlockCount, setAdminBlockCount] = useState<number>(0);
   const [adminSiretChangeCount, setAdminSiretChangeCount] = useState<number>(0);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [loadingPermissions, setLoadingPermissions] = useState(false);
 
   const lastRequestTimestamp = useRef<number>(0);
   const lastLoadUsersCall = useRef<number>(0);
@@ -192,6 +193,55 @@ export function useAdminUsers() {
       console.error(err);
     } finally {
       setSiretLoading(false);
+    }
+  };
+
+  const loadUserPermissions = async (userId: string) => {
+    if (!mgmtToken) return;
+    setLoadingPermissions(true);
+    try {
+      const perms = await getUserPermissions(mgmtToken, userId);
+      const audience = import.meta.env.AUTH0_AUDIENCE ?? "";
+      const currentNames = perms
+        .filter((p) => {
+          const rs = p.resource_server_identifier ?? "";
+
+          return (
+            !audience ||
+            rs === audience ||
+            rs.includes(audience) ||
+            audience.includes(rs)
+          );
+        })
+        .map((p) => p.permission_name);
+
+      setUsers((prev) =>
+        prev.map((u) => {
+          if (u.user_id !== userId) return u;
+          // Maintain ROLE_BLOCKED if it was present
+          const hasBlocked = u.app_metadata?.permissions?.includes(
+            Permission.ROLE_BLOCKED,
+          );
+          const finalPerms = [
+            ...new Set([
+              ...currentNames,
+              ...(hasBlocked ? [Permission.ROLE_BLOCKED] : []),
+            ]),
+          ];
+
+          return {
+            ...u,
+            app_metadata: {
+              ...u.app_metadata,
+              permissions: finalPerms,
+            },
+          };
+        }),
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingPermissions(false);
     }
   };
 
@@ -560,8 +610,10 @@ export function useAdminUsers() {
     adminSiretChangeCount,
     setAdminSiretChangeCount,
     isSavingProfile,
+    loadingPermissions,
     loadUsers,
     loadSirets,
+    loadUserPermissions,
     syncAuth0Permissions,
     savePermissions,
     deleteUser,

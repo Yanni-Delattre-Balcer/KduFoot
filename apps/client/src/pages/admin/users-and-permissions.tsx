@@ -47,6 +47,8 @@ export default function UsersAndPermissionsPage() {
     isSavingProfile,
     loadUsers,
     loadSirets,
+    loadUserPermissions,
+    loadingPermissions,
     syncAuth0Permissions,
     savePermissions,
     deleteUser,
@@ -65,6 +67,7 @@ export default function UsersAndPermissionsPage() {
   const handleOpenEditing = (userId: string) => {
     setSelectedUserId(userId);
     loadSirets(userId);
+    loadUserPermissions(userId);
   };
 
   const handleAddSiret = async (isPrimary: boolean = false) => {
@@ -279,6 +282,7 @@ export default function UsersAndPermissionsPage() {
           forceSiret={forceSiret}
           isOpen={!!selectedUserId}
           isSavingProfile={isSavingProfile}
+          loadingPermissions={loadingPermissions}
           mgmtToken={mgmtToken}
           newSiret={newSiret}
           permissions={permissions}
