@@ -126,20 +126,10 @@ export function useAdminUsers() {
 
         const isBlockedInD1 = metadata?.is_blocked === true;
         const currentPerms = user.app_metadata?.permissions || [];
-        const isSuperAdmin =
-          user.email === SUPER_ADMIN_EMAIL ||
-          user.user_id === SUPREME_MASTER_ID;
 
         let updatedPerms = [...currentPerms];
 
-        if (isSuperAdmin) {
-          updatedPerms = Object.values(Permission).filter(
-            (p) => p !== Permission.ROLE_BLOCKED,
-          );
-        } else if (
-          isBlockedInD1 &&
-          !currentPerms.includes(Permission.ROLE_BLOCKED)
-        ) {
+        if (isBlockedInD1 && !currentPerms.includes(Permission.ROLE_BLOCKED)) {
           updatedPerms = [...currentPerms, Permission.ROLE_BLOCKED];
         } else if (
           !isBlockedInD1 &&
@@ -149,6 +139,10 @@ export function useAdminUsers() {
             (p) => p !== Permission.ROLE_BLOCKED,
           );
         }
+
+        const isSuperAdmin =
+          user.email === SUPER_ADMIN_EMAIL ||
+          user.user_id === SUPREME_MASTER_ID;
 
         return {
           ...user,
