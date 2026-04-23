@@ -172,7 +172,6 @@ export class UserService {
 
         // 4. Hard Delete Private Data (GDPR Requirement)
         const deleteSessions = this.db.prepare('DELETE FROM training_sessions WHERE user_id = ?').bind(id);
-        const deleteHistory = this.db.prepare('DELETE FROM history WHERE user_id = ?').bind(id);
         const deleteFavorites = this.db.prepare('DELETE FROM favorites WHERE user_id = ?').bind(id);
 
         // 5. Audit the deletion before the user record vanishes
@@ -190,7 +189,6 @@ export class UserService {
             anonymizeExercises,
             anonymizeContacts,
             deleteSessions,
-            deleteHistory,
             deleteFavorites,
             auditDeletion,
             deleteUser
