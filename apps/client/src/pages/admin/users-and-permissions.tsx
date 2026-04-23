@@ -6,6 +6,7 @@ import { addToast } from "@heroui/toast";
 import DefaultLayout from "../../layouts/default";
 
 import { useAdminUsers } from "./hooks/use-admin-users";
+import { getApiUrl } from "@/config/api";
 import { AdminUserTable } from "./components/admin-user-table";
 import { AdminUserCard } from "./components/admin-user-card";
 import { UserProfileModal } from "./components/user-profile-modal";
@@ -97,7 +98,9 @@ export default function UsersAndPermissionsPage() {
       const token = await getAccessTokenSilently();
       const endpoint = isPrimary ? "primary-siret" : "additional-sirets";
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/${endpoint}`,
+        getApiUrl(
+          `/api/admin/users/${encodeURIComponent(selectedUserId)}/${endpoint}`,
+        ),
         {
           method: "POST",
           headers: {
@@ -141,8 +144,12 @@ export default function UsersAndPermissionsPage() {
       const token = await getAccessTokenSilently();
       const isPrimary = siretData?.primary_siret === siret;
       const endpoint = isPrimary
-        ? `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/primary-siret`
-        : `${import.meta.env.VITE_API_URL}/api/admin/users/${encodeURIComponent(selectedUserId)}/additional-sirets/${encodeURIComponent(siret)}`;
+        ? getApiUrl(
+            `/api/admin/users/${encodeURIComponent(selectedUserId)}/primary-siret`,
+          )
+        : getApiUrl(
+            `/api/admin/users/${encodeURIComponent(selectedUserId)}/additional-sirets/${encodeURIComponent(siret)}`,
+          );
 
       const res = await fetch(endpoint, {
         method: "DELETE",
